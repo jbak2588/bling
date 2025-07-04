@@ -1,0 +1,50 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub-cache/
+.melos_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Flutter build output
+build/
+**/build/
+
+# iOS
+ios/Flutter/.last_build_id
+ios/Pods/
+ios/Runner.xcworkspace/
+ios/build/
+ios/.symlinks/
+ios/Flutter/ephemeral/
+
+# Android
+android/.gradle/
+android/.idea/
+android/local.properties
+android/build/
+
+# Firebase
+.firebase/
+
+# VS Code & IntelliJ/Android Studio
+.vscode/
+.idea/
+*.iml
+
+# 기타 캐시/임시 파일
+*.log
+*.tmp
+*.lock
+.DS_Store
+
+# Node dependencies (if exists)
+node_modules/
+
+# Google Service Account Key
+serviceAccountKey.json
+*.key.json
+
+# Secret API keys
+lib/api_keys.dart
+

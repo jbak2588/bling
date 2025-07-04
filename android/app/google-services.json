@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "1075298230474",
+    "project_id": "blingbling-app",
+    "storage_bucket": "blingbling-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1075298230474:android:a2d59738deb2548022d433",
+        "android_client_info": {
+          "package_name": "com.example.bling_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1075298230474-j9kgg12l3d1pdknj37j4e7jl4numuf8o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bling_app",
+            "certificate_hash": "9ca6cf2357019fc2b3e15d4bb0e211cb46796981"
+          }
+        },
+        {
+          "client_id": "1075298230474-2nrlm2q4bb8a0nu0f6ergard4988u5gb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARlsgDRQkl_ZubwMfi5sftWn2r8Uo8ulc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1075298230474-2nrlm2q4bb8a0nu0f6ergard4988u5gb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1075298230474-r8c9o68f6al2ak4f1825njq7ontq3c5n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.company.blingbling-app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,236 @@
+diff --git a/lib/features/home/presentation/screens/home_tab_screen.dart b/lib/features/home/presentation/screens/home_tab_screen.dart
+index f386774c4d6208a7eee998cf51f444021d62610f..05e1fc8f8ed27bafc90822a8e4d96c2cc8f62b47 100644
+--- a/lib/features/home/presentation/screens/home_tab_screen.dart
++++ b/lib/features/home/presentation/screens/home_tab_screen.dart
+@@ -61,51 +61,53 @@ class HomeTabScreen extends StatelessWidget {
+       MenuItem(
+         icon: Icons.business,
+         titleKey: 'menuLocalStores',
+         screen: const LocalStoresScreen(),
+       ),
+       MenuItem(
+         icon: Icons.gavel,
+         titleKey: 'menuAuction',
+         screen: const AuctionScreen(),
+       ),
+       MenuItem(
+         icon: Icons.star_purple500_sharp,
+         titleKey: 'menuPom',
+         screen: const PomScreen(),
+       ),
+     ];
+ 
+     return SingleChildScrollView(
+       child: Column(
+         children: [
+           // AI 추천 배너 UI
+           Padding(
+             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+             child: InkWell(
+               onTap: () {
+-                print('AI 추천 배너 클릭됨!');
++                ScaffoldMessenger.of(context).showSnackBar(
++                  const SnackBar(content: Text('AI 추천 배너 클릭됨!')),
++                );
+               },
+               borderRadius: BorderRadius.circular(12.0),
+               child: Container(
+                 padding: const EdgeInsets.all(20.0),
+                 decoration: BoxDecoration(
+                   borderRadius: BorderRadius.circular(12.0),
+                   gradient: LinearGradient(
+                     colors: [
+                       Colors.deepPurple.shade300,
+                       Colors.indigo.shade400,
+                     ],
+                     begin: Alignment.topLeft,
+                     end: Alignment.bottomRight,
+                   ),
+                 ),
+                 child: Row(
+                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                   children: [
+                     Flexible(
+                       child: Column(
+                         crossAxisAlignment: CrossAxisAlignment.start,
+                         children: [
+                           Text(
+                             'aiBannerTitle'.tr(),
+                             style: const TextStyle(
+diff --git a/lib/features/location/presentation/screens/location_search_screen.dart b/lib/features/location/presentation/screens/location_search_screen.dart
+index 4aef37e7a0517cf106de616841ac4aa055c324a7..4683fb1035374b9d526bfbdfeaddf09c45ad7eb9 100644
+--- a/lib/features/location/presentation/screens/location_search_screen.dart
++++ b/lib/features/location/presentation/screens/location_search_screen.dart
+@@ -24,66 +24,79 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
+   List<Prediction> _predictions = [];
+   bool _isLoading = false;
+ 
+   @override
+   void dispose() {
+     _searchController.dispose();
+     super.dispose();
+   }
+ 
+   Future<void> _onSearchChanged(String value) async {
+     if (value.trim().length < 2) {
+       if (_predictions.isNotEmpty) {
+         setState(() {
+           _predictions = [];
+         });
+       }
+       return;
+     }
+     try {
+       final response = await _places.autocomplete(
+         value,
+         language: context.locale.languageCode,
+         components: [Component(Component.country, 'id')], // 검색 결과를 인도네시아로 제한
+       );
+ 
++      if (mounted) {
++        ScaffoldMessenger.of(context).showSnackBar(
++          SnackBar(
++            content: Text(
++              response.isOkay
++                  ? 'API 응답 성공: ${response.predictions.length}개의 예측 결과 받음'
++                  : '!!! API 응답 에러: ${response.errorMessage}',
++            ),
++          ),
++        );
++      }
+       if (response.isOkay) {
+-        print('API 응답 성공: ${response.predictions.length}개의 예측 결과 받음');
+         setState(() {
+           _predictions = response.predictions;
+         });
+       } else {
+-        print('!!! API 응답 에러: ${response.errorMessage}');
+         setState(() {
+           _predictions = [];
+         });
+       }
+     } catch (e) {
+-      print('!!! API 통신 실패: $e');
+-      setState(() {
+-        _predictions = [];
+-      });
++      if (mounted) {
++        ScaffoldMessenger.of(context).showSnackBar(
++          SnackBar(content: Text('!!! API 통신 실패: $e')),
++        );
++        setState(() {
++          _predictions = [];
++        });
++      }
+     }
+   }
+ 
+   Future<void> _onPlaceSelected(Prediction prediction) async {
+     if (prediction.placeId == null) return;
+ 
+     setState(() {
+       _isLoading = true;
+     });
+ 
+     try {
+       final detail = await _places.getDetailsByPlaceId(prediction.placeId!);
+       if (detail.isOkay && detail.result.geometry != null) {
+         final location = detail.result.geometry!.location;
+         final address = prediction.description ?? '';
+ 
+         final user = FirebaseAuth.instance.currentUser;
+         if (user == null) return;
+ 
+         await FirebaseFirestore.instance
+             .collection('users')
+             .doc(user.uid)
+             .update({
+           'location': address,
+           // TODO: 지오해시를 위한 좌표도 함께 저장해야 함
+diff --git a/lib/features/location/presentation/screens/location_setting_screen.dart b/lib/features/location/presentation/screens/location_setting_screen.dart
+index 9b68057e7f5b3c4b5c188a4c06e065aa2537e352..55c5193071a6f696c197e57218c900bccab13bb9 100644
+--- a/lib/features/location/presentation/screens/location_setting_screen.dart
++++ b/lib/features/location/presentation/screens/location_setting_screen.dart
+@@ -18,61 +18,76 @@ class _LocationSettingScreenState extends State<LocationSettingScreen> {
+   final GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: googleApiKey);
+   List<Prediction> _predictions = [];
+   bool _isLoading = false;
+ 
+   @override
+   void dispose() {
+     _searchController.dispose();
+     super.dispose();
+   }
+ 
+   Future<void> _onSearchChanged(String value) async {
+     if (value.trim().length < 2) {
+       if (_predictions.isNotEmpty && mounted) {
+         setState(() {
+           _predictions = [];
+         });
+       }
+       return;
+     }
+     try {
+       final response = await _places.autocomplete(
+         value,
+         language: context.locale.languageCode,
+         components: [Component(Component.country, 'id')],
+       );
+-      print(
+-          'API 응답: ${response.isOkay ? '성공' : '실패'}, 결과: ${response.predictions.length}개');
++      if (mounted) {
++        ScaffoldMessenger.of(context).showSnackBar(
++          SnackBar(
++            content: Text(
++              'API 응답: ${response.isOkay ? '성공' : '실패'}, 결과: ${response.predictions.length}개',
++            ),
++          ),
++        );
++      }
+       if (response.isOkay && mounted) {
+         setState(() => _predictions = response.predictions);
+       } else {
+-        print('API 에러: ${response.errorMessage}');
+-        if (mounted) setState(() => _predictions = []);
++        if (mounted) {
++          ScaffoldMessenger.of(context).showSnackBar(
++            SnackBar(content: Text('API 에러: ${response.errorMessage}')),
++          );
++          setState(() => _predictions = []);
++        }
+       }
+     } catch (e) {
+-      print('API 통신 실패: $e');
+-      if (mounted) setState(() => _predictions = []);
++      if (mounted) {
++        ScaffoldMessenger.of(context).showSnackBar(
++          SnackBar(content: Text('API 통신 실패: $e')),
++        );
++        setState(() => _predictions = []);
++      }
+     }
+   }
+ 
+   Future<void> _onPlaceSelected(Prediction prediction) async {
+     final placeId = prediction.placeId;
+     if (placeId == null) return;
+ 
+     setState(() {
+       _isLoading = true;
+     });
+ 
+     try {
+       final detail = await _places.getDetailsByPlaceId(placeId);
+       if (detail.isOkay && detail.result.geometry != null && mounted) {
+         final location = detail.result.geometry!.location;
+         final address = prediction.description ?? '';
+         final user = FirebaseAuth.instance.currentUser;
+         if (user == null) return;
+ 
+         await FirebaseFirestore.instance
+             .collection('users')
+             .doc(user.uid)
+             .update({
+           'location': address,
+           'latitude': location.lat,

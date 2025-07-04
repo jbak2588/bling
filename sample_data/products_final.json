@@ -1,0 +1,481 @@
+[
+  {
+    "id": "product_1",
+    "userId": "실제_Auth_UID_1",
+    "title": "iPhone 13 Pro 256GB Second Mulus",
+    "description": "Kondisi 98% mulus, batre health 95%, fullset original. Dijual karena sudah upgrade. Nego tipis.",
+    "imageUrls": [
+      "https://picsum.photos/seed/iphone1/400/300",
+      "https://picsum.photos/seed/iphone2/400/300"
+    ],
+    "categoryId": "Elektronik",
+    "price": 12500000,
+    "negotiable": true,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Lengkong Gudang, Kec. Serpong, Kab. Tangerang Selatan",
+    "locationParts": {
+      "prov": "Banten",
+      "kab": "Tangerang Selatan",
+      "kec": "Serpong",
+      "kel": "Lengkong Gudang"
+    },
+    "geoPoint": {
+      "latitude": -6.3025,
+      "longitude": 106.6701
+    },
+    "isAiVerified": true,
+    "likesCount": 25,
+    "chatsCount": 5,
+    "viewsCount": 250,
+    "createdAt": "2025-07-02T11:00:00Z",
+    "updatedAt": "2025-07-02T11:00:00Z"
+  },
+  {
+    "id": "product_2",
+    "userId": "실제_Auth_UID_2",
+    "title": "Sepeda Lipat Bekas Polygon",
+    "description": "Jarang dipakai, ban masih tebal, siap gowes. Lokasi di deket stasiun Bogor.",
+    "imageUrls": [
+      "https://picsum.photos/seed/sepeda1/400/300",
+      "https://picsum.photos/seed/sepeda2/400/300"
+    ],
+    "categoryId": "Hobi",
+    "price": 1500000,
+    "negotiable": false,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Babakan, Kec. Bogor Tengah, Kab. Bogor",
+    "locationParts": {
+      "prov": "Jawa Barat",
+      "kab": "Bogor",
+      "kec": "Bogor Tengah",
+      "kel": "Babakan"
+    },
+    "geoPoint": {
+      "latitude": -6.5917,
+      "longitude": 106.7892
+    },
+    "isAiVerified": false,
+    "likesCount": 5,
+    "chatsCount": 1,
+    "viewsCount": 88,
+    "createdAt": "2025-07-02T11:05:00Z",
+    "updatedAt": "2025-07-02T11:05:00Z"
+  },
+  {
+    "id": "product_3",
+    "userId": "실제_Auth_UID_3",
+    "title": "Jaket Kulit Pria Asli Garut",
+    "description": "Ukuran L, kondisi 90% seperti baru. Jarang dipakai karena salah ukuran. Kulit asli, dijamin.",
+    "imageUrls": [
+      "https://picsum.photos/seed/jaket1/400/300"
+    ],
+    "categoryId": "Fashion",
+    "price": 450000,
+    "negotiable": true,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Dago, Kec. Coblong, Kab. Bandung",
+    "locationParts": {
+      "prov": "Jawa Barat",
+      "kab": "Bandung",
+      "kec": "Coblong",
+      "kel": "Dago"
+    },
+    "geoPoint": {
+      "latitude": -6.8883,
+      "longitude": 107.6107
+    },
+    "isAiVerified": true,
+    "likesCount": 38,
+    "chatsCount": 10,
+    "viewsCount": 735,
+    "createdAt": "2025-07-02T11:10:00Z",
+    "updatedAt": "2025-07-02T11:10:00Z"
+  },
+  {
+    "id": "product_4",
+    "userId": "실제_Auth_UID_4",
+    "title": "Rak Buku Minimalis Kayu Jati",
+    "description": "Kondisi bagus, tidak ada goresan. Dijual karena pindahan. Ukuran 120x80x30 cm.",
+    "imageUrls": [
+      "https://picsum.photos/seed/rak1/400/300",
+      "https://picsum.photos/seed/rak2/400/300"
+    ],
+    "categoryId": "Rumah Tangga",
+    "price": 750000,
+    "negotiable": false,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Pandeyan, Kec. Umbulharjo, Kab. Yogyakarta",
+    "locationParts": {
+      "prov": "Yogyakarta",
+      "kab": "Yogyakarta",
+      "kec": "Umbulharjo",
+      "kel": "Pandeyan"
+    },
+    "geoPoint": {
+      "latitude": -7.7956,
+      "longitude": 110.3695
+    },
+    "isAiVerified": false,
+    "likesCount": 27,
+    "chatsCount": 6,
+    "viewsCount": 321,
+    "createdAt": "2025-07-02T11:15:00Z",
+    "updatedAt": "2025-07-02T11:15:00Z"
+  },
+  {
+    "id": "product_5",
+    "userId": "실제_Auth_UID_5",
+    "title": "PS5 Bekas Fullset",
+    "description": "Dapat 2 stik, kondisi normal, jarang dimainkan. Bonus kaset game 3 biji. COD Surabaya pusat.",
+    "imageUrls": [
+      "https://picsum.photos/seed/ps5_1/400/300",
+      "https://picsum.photos/seed/ps5_2/400/300"
+    ],
+    "categoryId": "Elektronik",
+    "price": 7000000,
+    "negotiable": false,
+    "condition": "used",
+    "status": "reserved",
+    "locationName": "Kel. Tegalsari, Kec. Tegalsari, Kab. Surabaya",
+    "locationParts": {
+      "prov": "Jawa Timur",
+      "kab": "Surabaya",
+      "kec": "Tegalsari",
+      "kel": "Tegalsari"
+    },
+    "geoPoint": {
+      "latitude": -7.2665,
+      "longitude": 112.7381
+    },
+    "isAiVerified": false,
+    "likesCount": 97,
+    "chatsCount": 3,
+    "viewsCount": 943,
+    "createdAt": "2025-07-02T11:20:00Z",
+    "updatedAt": "2025-07-02T11:20:00Z"
+  },
+  {
+    "id": "product_6",
+    "userId": "실제_Auth_UID_6",
+    "title": "Tas Branded Second Original",
+    "description": "Merek C&K, kondisi masih sangat bagus. Dijual karena bosan. Dustbag lengkap.",
+    "imageUrls": [
+      "https://picsum.photos/seed/tas1/400/300",
+      "https://picsum.photos/seed/tas2/400/300"
+    ],
+    "categoryId": "Fashion",
+    "price": 350000,
+    "negotiable": false,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Sanur, Kec. Denpasar Selatan, Kab. Denpasar",
+    "locationParts": {
+      "prov": "Bali",
+      "kab": "Denpasar",
+      "kec": "Denpasar Selatan",
+      "kel": "Sanur"
+    },
+    "geoPoint": {
+      "latitude": -8.7093,
+      "longitude": 115.2528
+    },
+    "isAiVerified": true,
+    "likesCount": 75,
+    "chatsCount": 7,
+    "viewsCount": 274,
+    "createdAt": "2025-07-02T11:25:00Z",
+    "updatedAt": "2025-07-02T11:25:00Z"
+  },
+  {
+    "id": "product_7",
+    "userId": "실제_Auth_UID_7",
+    "title": "Kompor Gas 2 Tungku Bagus",
+    "description": "Merek Rinnai, api biru, masih berfungsi normal. Dijual karena mau ganti kompor tanam.",
+    "imageUrls": [
+      "https://picsum.photos/seed/kompor1/400/300",
+      "https://picsum.photos/seed/kompor2/400/300"
+    ],
+    "categoryId": "Rumah Tangga",
+    "price": 150000,
+    "negotiable": true,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Muja Muju, Kec. Umbulharjo, Kab. Yogyakarta",
+    "locationParts": {
+      "prov": "Jawa Tengah",
+      "kab": "Yogyakarta",
+      "kec": "Umbulharjo",
+      "kel": "Muja Muju"
+    },
+    "geoPoint": {
+      "latitude": -7.8014,
+      "longitude": 110.3831
+    },
+    "isAiVerified": true,
+    "likesCount": 36,
+    "chatsCount": 8,
+    "viewsCount": 396,
+    "createdAt": "2025-07-02T11:30:00Z",
+    "updatedAt": "2025-07-02T11:30:00Z"
+  },
+  {
+    "id": "product_8",
+    "userId": "실제_Auth_UID_8",
+    "title": "Kamera Mirrorless Bekas",
+    "description": "Sony A6000 kit, SC rendah, lengkap dengan box dan charger. Bonus tas kamera.",
+    "imageUrls": [
+      "https://picsum.photos/seed/kamera1/400/300",
+      "https://picsum.photos/seed/kamera2/400/300"
+    ],
+    "categoryId": "Elektronik",
+    "price": 5500000,
+    "negotiable": true,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Petisah Hulu, Kec. Medan Baru, Kab. Medan",
+    "locationParts": {
+      "prov": "Sumatera Utara",
+      "kab": "Medan",
+      "kec": "Medan Baru",
+      "kel": "Petisah Hulu"
+    },
+    "geoPoint": {
+      "latitude": 3.5833,
+      "longitude": 98.6756
+    },
+    "isAiVerified": true,
+    "likesCount": 4,
+    "chatsCount": 7,
+    "viewsCount": 426,
+    "createdAt": "2025-07-02T11:35:00Z",
+    "updatedAt": "2025-07-02T11:35:00Z"
+  },
+  {
+    "id": "product_9",
+    "userId": "실제_Auth_UID_9",
+    "title": "Meja Belajar Kayu",
+    "description": "Meja belajar anak, ada sedikit coretan tapi masih kokoh. Cocok untuk anak SD.",
+    "imageUrls": [
+      "https://picsum.photos/seed/meja1/400/300",
+      "https://picsum.photos/seed/meja2/400/300"
+    ],
+    "categoryId": "Rumah Tangga",
+    "price": 200000,
+    "negotiable": false,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Karawaci Baru, Kec. Karawaci, Kab. Tangerang",
+    "locationParts": {
+      "prov": "Banten",
+      "kab": "Tangerang",
+      "kec": "Karawaci",
+      "kel": "Karawaci Baru"
+    },
+    "geoPoint": {
+      "latitude": -6.1896,
+      "longitude": 106.6348
+    },
+    "isAiVerified": true,
+    "likesCount": 49,
+    "chatsCount": 8,
+    "viewsCount": 687,
+    "createdAt": "2025-07-02T11:40:00Z",
+    "updatedAt": "2025-07-02T11:40:00Z"
+  },
+  {
+    "id": "product_10",
+    "userId": "실제_Auth_UID_10",
+    "title": "Jam Tangan Original Casio",
+    "description": "Tipe G-Shock, original, tahan air. Baterai baru ganti. Ada sedikit lecet pemakaian.",
+    "imageUrls": [
+      "https://picsum.photos/seed/jam1/400/300",
+      "https://picsum.photos/seed/jam2/400/300"
+    ],
+    "categoryId": "Fashion",
+    "price": 800000,
+    "negotiable": false,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Beji Timur, Kec. Beji, Kab. Depok",
+    "locationParts": {
+      "prov": "Jawa Barat",
+      "kab": "Depok",
+      "kec": "Beji",
+      "kel": "Beji Timur"
+    },
+    "geoPoint": {
+      "latitude": -6.3688,
+      "longitude": 106.8322
+    },
+    "isAiVerified": false,
+    "likesCount": 72,
+    "chatsCount": 1,
+    "viewsCount": 139,
+    "createdAt": "2025-07-02T11:45:00Z",
+    "updatedAt": "2025-07-02T11:45:00Z"
+  },
+  {
+    "id": "product_11",
+    "userId": "실제_Auth_UID_1",
+    "title": "Sneakers Adidas Second",
+    "description": "Ukuran 42, original. Jarang dipakai, kondisi 95%. COD sekitaran AEON Mall.",
+    "imageUrls": [
+      "https://picsum.photos/seed/sneakers1/400/300",
+      "https://picsum.photos/seed/sneakers2/400/300"
+    ],
+    "categoryId": "Fashion",
+    "price": 600000,
+    "negotiable": true,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Lengkong Gudang, Kec. Serpong, Kab. Tangerang Selatan",
+    "locationParts": {
+      "prov": "Banten",
+      "kab": "Tangerang Selatan",
+      "kec": "Serpong",
+      "kel": "Lengkong Gudang"
+    },
+    "geoPoint": {
+      "latitude": -6.3025,
+      "longitude": 106.6701
+    },
+    "isAiVerified": true,
+    "likesCount": 60,
+    "chatsCount": 9,
+    "viewsCount": 620,
+    "createdAt": "2025-07-02T11:50:00Z",
+    "updatedAt": "2025-07-02T11:50:00Z"
+  },
+  {
+    "id": "product_12",
+    "userId": "실제_Auth_UID_2",
+    "title": "Sepeda Gunung Bekas",
+    "description": "Merek Thrill, ban 27.5 inch. Siap untuk main di gunung atau CFD.",
+    "imageUrls": [
+      "https://picsum.photos/seed/sepeda3/400/300",
+      "https://picsum.photos/seed/sepeda4/400/300"
+    ],
+    "categoryId": "Hobi",
+    "price": 2500000,
+    "negotiable": true,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Babakan, Kec. Bogor Tengah, Kab. Bogor",
+    "locationParts": {
+      "prov": "Jawa Barat",
+      "kab": "Bogor",
+      "kec": "Bogor Tengah",
+      "kel": "Babakan"
+    },
+    "geoPoint": {
+      "latitude": -6.5917,
+      "longitude": 106.7892
+    },
+    "isAiVerified": false,
+    "likesCount": 32,
+    "chatsCount": 0,
+    "viewsCount": 643,
+    "createdAt": "2025-07-02T11:55:00Z",
+    "updatedAt": "2025-07-02T11:55:00Z"
+  },
+  {
+    "id": "product_13",
+    "userId": "실제_Auth_UID_3",
+    "title": "Headset Gaming RGB",
+    "description": "Merek Rexus, suara jernih, mic berfungsi baik. RGB nyala. COD Bandung kota.",
+    "imageUrls": [
+      "https://picsum.photos/seed/headset1/400/300",
+      "https://picsum.photos/seed/headset2/400/300"
+    ],
+    "categoryId": "Elektronik",
+    "price": 250000,
+    "negotiable": false,
+    "condition": "used",
+    "status": "sold",
+    "locationName": "Kel. Dago, Kec. Coblong, Kab. Bandung",
+    "locationParts": {
+      "prov": "Jawa Barat",
+      "kab": "Bandung",
+      "kec": "Coblong",
+      "kel": "Dago"
+    },
+    "geoPoint": {
+      "latitude": -6.8883,
+      "longitude": 107.6107
+    },
+    "isAiVerified": false,
+    "likesCount": 77,
+    "chatsCount": 1,
+    "viewsCount": 155,
+    "createdAt": "2025-07-02T12:00:00Z",
+    "updatedAt": "2025-07-03T10:00:00Z"
+  },
+  {
+    "id": "product_14",
+    "userId": "실제_Auth_UID_4",
+    "title": "Helm Fullface Bekas",
+    "description": "Ukuran L, merek KYT. Busa masih tebal, jarang dipakai. Visor bening.",
+    "imageUrls": [
+      "https://picsum.photos/seed/helm1/400/300",
+      "https://picsum.photos/seed/helm2/400/300"
+    ],
+    "categoryId": "Hobi",
+    "price": 300000,
+    "negotiable": false,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Pandeyan, Kec. Umbulharjo, Kab. Yogyakarta",
+    "locationParts": {
+      "prov": "Yogyakarta",
+      "kab": "Yogyakarta",
+      "kec": "Umbulharjo",
+      "kel": "Pandeyan"
+    },
+    "geoPoint": {
+      "latitude": -7.7956,
+      "longitude": 110.3695
+    },
+    "isAiVerified": false,
+    "likesCount": 58,
+    "chatsCount": 0,
+    "viewsCount": 376,
+    "createdAt": "2025-07-02T12:05:00Z",
+    "updatedAt": "2025-07-02T12:05:00Z"
+  },
+  {
+    "id": "product_15",
+    "userId": "실제_Auth_UID_5",
+    "title": "Drone Bekas Kondisi Bagus",
+    "description": "DJI Mavic Mini, terbang stabil, baterai masih awet. Lengkap dengan tas dan remote.",
+    "imageUrls": [
+      "https://picsum.photos/seed/drone1/400/300",
+      "https://picsum.photos/seed/drone2/400/300"
+    ],
+    "categoryId": "Hobi",
+    "price": 3500000,
+    "negotiable": true,
+    "condition": "used",
+    "status": "selling",
+    "locationName": "Kel. Tegalsari, Kec. Tegalsari, Kab. Surabaya",
+    "locationParts": {
+      "prov": "Jawa Timur",
+      "kab": "Surabaya",
+      "kec": "Tegalsari",
+      "kel": "Tegalsari"
+    },
+    "geoPoint": {
+      "latitude": -7.2665,
+      "longitude": 112.7381
+    },
+    "isAiVerified": true,
+    "likesCount": 33,
+    "chatsCount": 4,
+    "viewsCount": 110,
+    "createdAt": "2025-07-02T12:10:00Z",
+    "updatedAt": "2025-07-02T12:10:00Z"
+  }
+]

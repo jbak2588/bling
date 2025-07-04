@@ -1,0 +1,342 @@
+[
+  {
+    "userId": null,
+    "title": "Ada Kucing Hilang di RT 05",
+    "body": "Teman-teman, siapa pun yang melihat kucing putih belang hitam di sekitar RT 05 harap hubungi saya. Terima kasih atas bantuannya.",
+    "category": "incident_report",
+    "tags": [
+      "kucing",
+      "hilang",
+      "hewan"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1592194996308-7b438b1d2050",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Butuh Bantuan Donasi Buku Bekas",
+    "body": "Halo warga, kami sedang mengumpulkan buku bacaan bekas untuk perpustakaan kecil di pos RW. Siapa pun yang mau menyumbang sangat diharapkan.",
+    "category": "help_share",
+    "tags": [
+      "donasi",
+      "buku",
+      "pendidikan"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Promo Ayam Goreng Pak RT",
+    "body": "Restoran Ayam Goreng Pak RT ada promo diskon 20% untuk semua menu hingga akhir minggu ini. Yuk mampir!",
+    "category": "store_promo",
+    "tags": [
+      "promo",
+      "makan",
+      "diskon"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1604908554036-948aca6f3041",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Jalan Rusak di Depan Mushola",
+    "body": "Mohon perhatian warga, jalan paving depan Mushola Al-Ikhlas banyak yang rusak dan licin saat hujan. Mohon waspada.",
+    "category": "incident_report",
+    "tags": [
+      "jalan",
+      "rusak",
+      "mushola"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1581320542858-b5c24f8b7500",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Tips Hemat Listrik di Rumah",
+    "body": "Berbagi tips cara hemat listrik: matikan lampu siang hari, gunakan lampu LED, cabut colokan jika tidak digunakan.",
+    "category": "daily_question",
+    "tags": [
+      "hemat",
+      "listrik",
+      "tips"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1581091012184-5c5a7992f6bb",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Lowongan Kerja di Warung Kopi",
+    "body": "Warung Kopi Mawar membuka lowongan kasir paruh waktu. Silakan DM jika berminat.",
+    "category": "local_news",
+    "tags": [
+      "lowongan",
+      "kerja",
+      "kasir"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1570129477492-45c003edd2be",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Siapa Punya Kursi Roda Bekas?",
+    "body": "Apakah ada warga yang memiliki kursi roda bekas untuk pinjam sementara? Keluarga saya sangat butuh.",
+    "category": "help_share",
+    "tags": [
+      "pinjam",
+      "kursi roda",
+      "bantuan"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Info Vaksinasi Gratis Minggu Ini",
+    "body": "Puskesmas akan mengadakan vaksinasi gratis di balai RW minggu ini. Jangan lupa bawa KTP.",
+    "category": "local_news",
+    "tags": [
+      "vaksinasi",
+      "gratis",
+      "puskesmas"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1564866657310-6ba76856a18c",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Butuh Pinjaman Tangga Lipat",
+    "body": "Ada yang bisa pinjamkan tangga lipat? Saya mau perbaiki atap rumah bocor.",
+    "category": "help_share",
+    "tags": [
+      "pinjam",
+      "tangga",
+      "atap"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1522202222628-3c72b4df9be9",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Hujan Deras, Mohon Waspada Banjir",
+    "body": "Hujan deras diperkirakan malam ini. Mohon warga waspada kemungkinan banjir kecil.",
+    "category": "incident_report",
+    "tags": [
+      "hujan",
+      "banjir",
+      "waspada"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1579202673506-ca3ce28943ef",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Iuran Kebersihan Bulan Ini",
+    "body": "Jangan lupa bayar iuran kebersihan sebelum tanggal 10 bulan ini. Terima kasih atas kerjasamanya.",
+    "category": "local_news",
+    "tags": [
+      "iuran",
+      "kebersihan",
+      "rt"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1592194996308-7b438b1d2050",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Ajakan Gotong Royong Bersama",
+    "body": "Mari bersama membersihkan selokan RT 03 hari Minggu jam 7 pagi. Bawa peralatan masing-masing ya.",
+    "category": "help_share",
+    "tags": [
+      "gotong royong",
+      "selokan",
+      "bersih"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Promo Diskon Laundry RT 02",
+    "body": "Laundry RT 02 sedang ada diskon 30% untuk warga. Berlaku sampai akhir bulan.",
+    "category": "store_promo",
+    "tags": [
+      "promo",
+      "laundry",
+      "diskon"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1604908554036-948aca6f3041",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Laporan Lampu Jalan Mati",
+    "body": "Lampu jalan di gang RT 06 mati sudah 3 hari. Mohon pihak terkait segera memperbaiki.",
+    "category": "incident_report",
+    "tags": [
+      "lampu",
+      "jalan",
+      "mati"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1581320542858-b5c24f8b7500",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Tips Berkebun di Pekarangan",
+    "body": "Berbagi cara berkebun di pekarangan sempit. Gunakan pot vertikal untuk hemat ruang.",
+    "category": "daily_question",
+    "tags": [
+      "berkebun",
+      "pekarangan",
+      "tips"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1581091012184-5c5a7992f6bb",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Info Pembuangan Sampah Terbaru",
+    "body": "Jadwal baru pembuangan sampah: Senin, Rabu, Jumat jam 6 pagi. Harap diperhatikan.",
+    "category": "local_news",
+    "tags": [
+      "sampah",
+      "jadwal",
+      "rt"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1570129477492-45c003edd2be",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Lelang Barang Bekas Elektronik",
+    "body": "Saya mau lelang barang bekas elektronik, kondisi masih bagus. Silakan cek foto di sini.",
+    "category": "etc",
+    "tags": [
+      "lelang",
+      "barang",
+      "elektronik"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Diskusi RT, Ayo Hadir",
+    "body": "RT akan mengadakan diskusi warga terkait keamanan lingkungan. Yuk hadir minggu depan.",
+    "category": "local_news",
+    "tags": [
+      "diskusi",
+      "warga",
+      "keamanan"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1564866657310-6ba76856a18c",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Hati-hati Penipuan Online",
+    "body": "Banyak laporan penipuan online belakangan ini. Mohon berhati-hati dan lapor jika ada yang mencurigakan.",
+    "category": "incident_report",
+    "tags": [
+      "penipuan",
+      "online",
+      "hati-hati"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1522202222628-3c72b4df9be9",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  },
+  {
+    "userId": null,
+    "title": "Siapa Mau Adopsi Anak Kucing?",
+    "body": "Ada anak kucing liar di sekitar rumah saya. Siapa pun yang mau adopsi boleh DM saya.",
+    "category": "help_share",
+    "tags": [
+      "adopsi",
+      "kucing",
+      "hewan"
+    ],
+    "mediaUrl": "https://images.unsplash.com/photo-1579202673506-ca3ce28943ef",
+    "mediaType": "image",
+    "createdAt": "2025-06-27T00:00:00Z",
+    "likesCount": 0,
+    "commentsCount": 0,
+    "viewsCount": 0
+  }
+]

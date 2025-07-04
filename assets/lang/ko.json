@@ -1,0 +1,128 @@
+{
+    "login": {
+        "title": "로그인",
+        "subtitle": "가볍게 사고 팔자, 블링!",
+        "emailHint": "이메일 주소",
+        "passwordHint": "비밀번호",
+        "buttons": {
+            "login": "로그인",
+            "google": "Google 계정으로 로그인",
+            "apple": "Apple로 계속하기"
+        },
+        "links": {
+            "findPassword": "비밀번호를 잊으셨나요?",
+            "askForAccount": "계정이 없으신가요?",
+            "signUp": "가입하기"
+        },
+        "alerts": {
+            "invalidEmail": "유효하지 않은 이메일 형식입니다.",
+            "userNotFound": "사용자를 찾을 수 없거나 비밀번호가 틀렸습니다.",
+            "wrongPassword": "비밀번호가 틀렸습니다.",
+            "unknownError": "알 수 없는 오류가 발생했습니다. 다시 시도해주세요."
+        }
+    },
+    "signup": {
+        "title": "회원가입",
+        "emailHint": "이메일 주소",
+        "passwordHint": "비밀번호 (6자 이상)",
+        "passwordConfirmHint": "비밀번호 확인",
+        "nicknameHint": "닉네임",
+        "subtitle": "블링과 함께 시작해봐요! 정보를 입력해주세요.",
+        "locationHint": "내 동네 (동네 서비스 이용을 위함)",
+        "locationNotice": "입력하신 동네 정보는 동네 게시물을 보는데 사용되며, 다른 사람에게 공개되지 않습니다.",
+        "buttons": {
+            "signup": "가입하기",
+            "checkDuplicate": "중복확인"
+        },
+        "links": {
+            "askForLogin": "이미 계정이 있으신가요?",
+            "login": "로그인"
+        },
+        "alerts": {
+            "passwordMismatch": "비밀번호가 일치하지 않습니다.",
+            "passwordTooShort": "비밀번호는 6자 이상이어야 합니다.",
+            "emailInUse": "이미 사용 중인 이메일입니다.",
+            "nicknameInUse": "이미 사용 중인 닉네임입니다.",
+            "nicknameAvailable": "사용 가능한 닉네임입니다.",
+            "nicknameNotChecked": "닉네임 중복 확인을 해주세요.",
+            "unknownError": "알 수 없는 오류가 발생했습니다. 다시 시도해주세요."
+        },
+        "policy": {
+            "title": "가입 정책 안내",
+            "description": "Bling은 안전한 커뮤니티를 위해 가입 시 최소한의 정보를 받고 있습니다. 모든 정보는 안전하게 보관되며, 동의 없이는 절대 외부에 공개되지 않습니다.",
+            "agree": "위 내용에 동의하며 가입을 계속합니다."
+        }
+    },
+    "main": {
+        "appBar": {
+            "locationNotSet": "위치 미설정",
+            "locationError": "위치 오류",
+            "locationLoading": "불러오는 중..."
+        },
+        "tabs": {
+            "newFeed": "새 소식",
+            "localNews": "동네 소식",
+            "marketplace": "중고거래",
+            "findFriends": "친구찾기",
+            "clubs": "모임",
+            "jobs": "구인구직",
+            "localStores": "동네업체",
+            "auction": "경매",
+            "pom": "POM"
+        },
+        "bottomNav": {
+            "home": "홈",
+            "search": "검색",
+            "chat": "채팅",
+            "myBling": "나의 Bling"
+        },
+        "errors": {
+            "loginRequired": "로그인이 필요합니다.",
+            "userNotFound": "사용자를 찾을 수 없습니다."
+        }
+    },
+    "drawer": {
+        "editProfile": "프로필 수정",
+        "bookmarks": "관심목록",
+        "uploadSampleData": "샘플 데이터 올리기",
+        "logout": "로그아웃"
+    },
+    
+    "marketplace": {
+        "error": "오류가 발생했습니다: {error}",
+        "empty": "등록된 상품이 없습니다.\n아래 + 버튼을 눌러 첫 상품을 등록해보세요!"
+    },
+
+    "myBling": {
+        "title": "나의 Bling",
+        "editProfile": "프로필 수정",
+        "settings": "설정",
+        "stats": {
+            "posts": "게시물",
+            "followers": "팔로워",
+            "neighbors": "이웃",
+            "friends": "친구"
+        },
+        "tabs": {
+            "posts": "내 게시물",
+            "products": "내 판매상품",
+            "bookmarks": "관심목록"
+        }
+    },
+
+    "prompt": {
+        "title": "블링에 오신 것을 환영합니다!",
+        "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
+        "button": "내 동네 설정하기"
+    },
+    "location": {
+        "title": "동네 설정",
+        "searchHint": "동네 이름으로 검색 (예: 세르퐁)",
+        "gpsButton": "현재 위치로 찾기",
+        "success": "동네가 설정되었습니다.",
+        "error": "동네 설정에 실패했습니다: {error}",
+        "empty": "동네 이름을 입력해주세요.",
+        "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
+    }
+   
+}

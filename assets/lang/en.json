@@ -1,0 +1,130 @@
+{
+    "login": {
+        "title": "Login",
+        "subtitle": "Let's buy easily",
+        "emailHint": "Email Address",
+        "passwordHint": "Password",
+        "buttons": {
+            "login": "LOGIN",
+            "google": "Login with Google",
+            "apple": "Continue with Apple"
+        },
+        "links": {
+            "findPassword": "Forgot your password?",
+            "askForAccount": "Don't have an account?",
+            "signUp": "Sign Up"
+        },
+        "alerts": {
+            "invalidEmail": "Invalid email format.",
+            "userNotFound": "User not found or wrong password.",
+            "wrongPassword": "Wrong password.",
+            "unknownError": "An unknown error occurred. Please try again."
+        }
+    },
+    "signup": {
+        "title": "Sign Up",
+        "emailHint": "Email Address",
+        "passwordHint": "Password (at least 6 characters)",
+        "passwordConfirmHint": "Confirm Password",
+        "nicknameHint": "Nickname",
+        "subtitle": "Let's start with Bling! Please enter your information.",
+        "locationHint": "Your location (for local services)",
+        "locationNotice": "Your location is used to show neighborhood posts and is not disclosed to others.",
+        "buttons": {
+            "signup": "Sign Up",
+            "checkDuplicate": "Check"
+        },
+        "links": {
+            "askForLogin": "Already have an account?",
+            "login": "Login"
+        },
+        "alerts": {
+            "passwordMismatch": "Passwords do not match.",
+            "passwordTooShort": "Password must be at least 6 characters long.",
+            "emailInUse": "This email is already in use.",
+            "nicknameInUse": "This nickname is already in use.",
+            "nicknameAvailable": "This nickname is available.",
+            "nicknameNotChecked": "Please check for nickname duplication.",
+            "unknownError": "An unknown error occurred. Please try again."
+        },
+        "policy": {
+            "title": "Registration Policy",
+            "description": "Bling collects minimal information for a safe community. All information is stored securely and will not be disclosed without consent.",
+            "agree": "I agree to the terms and wish to continue."
+        }
+    },
+
+    "main": {
+        "appBar": {
+            "locationNotSet": "Set Location",
+            "locationError": "Location Error",
+            "locationLoading": "Loading..."
+        },
+        "tabs": {
+            "newFeed": "New Feed",
+            "localNews": "Local Stories",
+            "marketplace": "Marketplace",
+            "findFriends": "Find Friends",
+            "clubs": "Clubs",
+            "jobs": "Jobs",
+            "localStores": "Local Stores",
+            "auction": "Auction",
+            "pom": "POM"
+        },
+        "bottomNav": {
+            "home": "Home",
+            "search": "Search",
+            "chat": "Chat",
+            "myBling": "My Bling"
+        },
+        "errors": {
+            "loginRequired": "Login is required.",
+            "userNotFound": "User not found."
+        }
+    },
+    "drawer": {
+        "editProfile": "Edit Profile",
+        "bookmarks": "Bookmarks",
+        "uploadSampleData": "Upload Sample Data",
+        "logout": "Logout"
+    },
+
+    "marketplace": {
+        "error": "An error has occurred: {error}",
+        "empty": "No items registered yet.\nPress the + button to add the first item!"
+    },
+    "myBling": {
+        "title": "My Bling",
+        "editProfile": "Edit Profile",
+        "settings": "Settings",
+        "stats": {
+            "posts": "Posts",
+            "followers": "Followers",
+            "neighbors": "Neighbors",
+            "friends": "Friends"
+        },
+        "tabs": {
+            "posts": "My Posts",
+            "products": "My Products",
+            "bookmarks": "Bookmarks"
+        }
+    },
+
+    "prompt": {
+        "title": "Welcome to Bling!",
+        "subtitle": "To see interesting news and items around you, please set your neighborhood first.",
+        "button": "Set My Neighborhood"
+    },
+    "location": {
+        "title": "Set Neighborhood",
+        "searchHint": "Search by neighborhood, e.g., Serpong",
+        "gpsButton": "Find with current location",
+        "success": "Neighborhood has been set.",
+        "error": "Failed to set neighborhood: {error}",
+        "empty": "Please enter a neighborhood name.",
+        "permissionDenied": "Location permission is required to find your neighborhood."
+    }
+
+
+    
+}

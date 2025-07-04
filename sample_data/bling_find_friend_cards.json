@@ -1,0 +1,68 @@
+[
+  {
+    "uid": "uid_2",
+    "nickname": "Putri",
+    "age": 27,
+    "locationName": "Kel. Babakan, Kec. Bogor Tengah",
+    "photoUrl": "https://i.pravatar.cc/150?u=putri",
+    "bio": "Suka jalan-jalan dan cari kopi enak.",
+    "distance": 950,
+    "lastSeen": "online",
+    "commonInterests": [
+      "kopi",
+      "traveling"
+    ]
+  },
+  {
+    "uid": "uid_3",
+    "nickname": "Agus",
+    "age": 30,
+    "locationName": "Kel. Cibaduyut, Kec. Bojongloa Kidul",
+    "photoUrl": "https://i.pravatar.cc/150?u=agus",
+    "bio": "Main futsal tiap akhir pekan.",
+    "distance": 800,
+    "lastSeen": "5\ubd84 \uc804",
+    "commonInterests": [
+      "futsal"
+    ]
+  },
+  {
+    "uid": "uid_4",
+    "nickname": "Sari",
+    "age": 25,
+    "locationName": "Kel. Gunung, Kec. Kebayoran Baru",
+    "photoUrl": "https://i.pravatar.cc/150?u=sari",
+    "bio": "Traveler sejati, suka eksplor tempat baru.",
+    "distance": 1200,
+    "lastSeen": "\uc624\ub298",
+    "commonInterests": [
+      "traveling"
+    ]
+  },
+  {
+    "uid": "uid_5",
+    "nickname": "Bagus",
+    "age": 29,
+    "locationName": "Kel. Tegalsari, Kec. Tegalsari",
+    "photoUrl": "https://i.pravatar.cc/150?u=bagus",
+    "bio": "Pecinta kopi dan penikmat senja.",
+    "distance": 1500,
+    "lastSeen": "5\ubd84 \uc804",
+    "commonInterests": [
+      "kopi"
+    ]
+  },
+  {
+    "uid": "uid_6",
+    "nickname": "Rina",
+    "age": 26,
+    "locationName": "Kel. Sanur, Kec. Denpasar Selatan",
+    "photoUrl": "https://i.pravatar.cc/150?u=rina",
+    "bio": "Suka traveling bareng teman-teman.",
+    "distance": 2000,
+    "lastSeen": "online",
+    "commonInterests": [
+      "traveling"
+    ]
+  }
+]

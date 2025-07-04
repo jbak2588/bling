@@ -1,0 +1,126 @@
+{
+    "login": {
+        "title": "Masuk",
+        "subtitle": "Ayo, Beli Ringan",
+        "emailHint": "Alamat Email",
+        "passwordHint": "Kata Sandi",
+        "buttons": {
+            "login": "MASUK",
+            "google": "Masuk dengan Google",
+            "apple": "Lanjutkan dengan Apple"
+        },
+        "links": {
+            "findPassword": "Lupa kata sandi?",
+            "askForAccount": "Belum punya akun?",
+            "signUp": "Daftar"
+        },
+        "alerts": {
+            "invalidEmail": "Format email tidak valid.",
+            "userNotFound": "Pengguna tidak ditemukan atau kata sandi salah.",
+            "wrongPassword": "Kata sandi salah.",
+            "unknownError": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
+        }
+    },
+    "signup": {
+        "title": "Daftar",
+        "emailHint": "Alamat Email",
+        "passwordHint": "Kata Sandi (minimal 6 karakter)",
+        "passwordConfirmHint": "Konfirmasi Kata Sandi",
+        "nicknameHint": "Nama Panggilan",
+        "subtitle": "Ayo mulai dengan Bling! Silakan masukkan informasi Anda.",
+        "locationHint": "Lokasi Anda (untuk layanan lokal)",
+        "locationNotice": "Lokasi Anda digunakan untuk menampilkan postingan lingkungan dan tidak diungkapkan kepada orang lain.",
+        "buttons": {
+            "signup": "Daftar",
+            "checkDuplicate": "Cek"
+        },
+        "links": {
+            "askForLogin": "Sudah punya akun?",
+            "login": "Masuk"
+        },
+        "alerts": {
+            "passwordMismatch": "Kata sandi tidak cocok.",
+            "passwordTooShort": "Kata sandi harus minimal 6 karakter.",
+            "emailInUse": "Email ini sudah digunakan.",
+            "nicknameInUse": "Nama panggilan ini sudah digunakan.",
+            "nicknameAvailable": "Nama panggilan ini tersedia.",
+            "nicknameNotChecked": "Silakan periksa duplikasi nama panggilan.",
+            "unknownError": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
+        },
+        "policy": {
+            "title": "Kebijakan Pendaftaran",
+            "description": "Bling mengumpulkan informasi minimum untuk komunitas yang aman. Semua informasi disimpan dengan aman dan tidak akan diungkapkan tanpa persetujuan.",
+            "agree": "Saya setuju dengan ketentuan dan ingin melanjutkan."
+        }
+    },
+    "main": {
+        "appBar": {
+            "locationNotSet": "Atur Lokasi",
+            "locationError": "Kesalahan Lokasi",
+            "locationLoading": "Memuat..."
+        },
+        "tabs": {
+            "newFeed": "Berita Baru",
+            "localNews": "Cerita Lokal",
+            "marketplace": "Marketplace",
+            "findFriends": "Cari Teman",
+            "clubs": "Klub",
+            "jobs": "Lowongan",
+            "localStores": "Toko Lokal",
+            "auction": "Lelang",
+            "pom": "POM"
+        },
+        "bottomNav": {
+            "home": "Beranda",
+            "search": "Cari",
+            "chat": "Obrolan",
+            "myBling": "Bling Saya"
+        },
+        "errors": {
+            "loginRequired": "Diperlukan login.",
+            "userNotFound": "Pengguna tidak ditemukan."
+        }
+    },
+    "drawer": {
+        "editProfile": "Ubah Profil",
+        "bookmarks": "Markah",
+        "uploadSampleData": "Unggah Data Sampel",
+        "logout": "Keluar"
+    },
+    "marketplace": {
+        "error": "Terjadi kesalahan: {error}",
+        "empty": "Belum ada produk yang terdaftar.\nTekan tombol + untuk menambahkan produk pertama!"
+    },
+
+    "myBling": {
+        "title": "Bling Saya",
+        "editProfile": "Ubah Profil",
+        "settings": "Pengaturan",
+        "stats": {
+            "posts": "Postingan",
+            "followers": "Pengikut",
+            "neighbors": "Tetangga",
+            "friends": "Teman"
+        },
+        "tabs": {
+            "posts": "Postingan Saya",
+            "products": "Produk Saya",
+            "bookmarks": "Markah"
+        }
+    },
+
+    "prompt": {
+        "title": "Selamat datang di Bling!",
+        "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
+        "button": "Atur Lingkungan Saya"
+    },
+    "location": {
+        "title": "Atur Lingkungan",
+        "searchHint": "Cari berdasarkan lingkungan, cth., Serpong",
+        "gpsButton": "Cari dengan lokasi saat ini",
+        "success": "Lingkungan telah diatur.",
+        "error": "Gagal mengatur lingkungan: {error}",
+        "empty": "Silakan masukkan nama lingkungan.",
+        "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
+    }
+}

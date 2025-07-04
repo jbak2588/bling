@@ -1,0 +1,582 @@
+[
+  {
+    "id": "post_001",
+    "userId": "실제_Auth_UID_1",
+    "title": "Kucing Hilang di Sekitar Lengkong Wetan",
+    "body": "Telah hilang kucing persia putih, jantan, umur 2 tahun. Terakhir terlihat di dekat taman RT.01. Mohon bantuannya warga sekitar.",
+    "category": "incident_report",
+    "tags": [
+      "kucinghilang",
+      "serpong",
+      "infotangsel"
+    ],
+    "mediaUrl": "https://picsum.photos/seed/kucing1/400/300",
+    "mediaType": "image",
+    "locationName": "Kel. Lengkong Wetan, Kec. Serpong, Kab. Tangerang Selatan",
+    "locationParts": {
+      "prov": "Banten",
+      "kab": "Tangerang Selatan",
+      "kec": "Serpong",
+      "kel": "Lengkong Wetan"
+    },
+    "geoPoint": {
+      "latitude": -6.305,
+      "longitude": 106.655
+    },
+    "likesCount": 15,
+    "commentsCount": 4,
+    "viewsCount": 120,
+    "createdAt": "2025-07-03T09:00:00Z"
+  },
+  {
+    "id": "post_002",
+    "userId": "실제_Auth_UID_1",
+    "title": "Promo Kopi Kenangan Beli 1 Gratis 1",
+    "body": "Info promo Kopi Kenangan khusus hari ini, jangan sampai ketinggalan!",
+    "category": "store_promo",
+    "tags": [
+      "promo",
+      "kopi",
+      "bsd"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Lengkong Wetan, Kec. Serpong, Kab. Tangerang Selatan",
+    "locationParts": {
+      "prov": "Banten",
+      "kab": "Tangerang Selatan",
+      "kec": "Serpong",
+      "kel": "Lengkong Wetan"
+    },
+    "geoPoint": {
+      "latitude": -6.305,
+      "longitude": 106.656
+    },
+    "likesCount": 2,
+    "commentsCount": 2,
+    "viewsCount": 17,
+    "createdAt": "2025-07-01T10:00:00Z"
+  },
+  {
+    "id": "post_003",
+    "userId": "실제_Auth_UID_2",
+    "title": "Ada yang punya rekomendasi tempat cuci mobil?",
+    "body": "Baru pindah ke Bogor, butuh rekomendasi tempat cuci mobil yang bersih dan terpercaya. Terima kasih!",
+    "category": "daily_question",
+    "tags": [
+      "cucimobil",
+      "bogor",
+      "rekomendasi"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Babakan, Kec. Bogor Tengah, Kab. Bogor",
+    "locationParts": {
+      "prov": "Jawa Barat",
+      "kab": "Bogor",
+      "kec": "Bogor Tengah",
+      "kel": "Babakan"
+    },
+    "geoPoint": {
+      "latitude": -6.5917,
+      "longitude": 106.7892
+    },
+    "likesCount": 8,
+    "commentsCount": 4,
+    "viewsCount": 10,
+    "createdAt": "2025-07-01T11:00:00Z"
+  },
+  {
+    "id": "post_004",
+    "userId": "실제_Auth_UID_2",
+    "title": "Dicari kontrakan 3 kamar di area Babakan",
+    "body": "Budget di bawah 20jt/tahun, diutamakan dekat dengan stasiun. Info dong!",
+    "category": "help_share",
+    "tags": [
+      "kontrakan",
+      "bogor",
+      "carirumah"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Babakan, Kec. Bogor Tengah, Kab. Bogor",
+    "locationParts": {
+      "prov": "Jawa Barat",
+      "kab": "Bogor",
+      "kec": "Bogor Tengah",
+      "kel": "Babakan"
+    },
+    "geoPoint": {
+      "latitude": -6.5917,
+      "longitude": 106.7892
+    },
+    "likesCount": 1,
+    "commentsCount": 4,
+    "viewsCount": 77,
+    "createdAt": "2025-07-01T12:00:00Z"
+  },
+  {
+    "id": "post_005",
+    "userId": "실제_Auth_UID_3",
+    "title": "Jasa titip oleh-oleh Bandung",
+    "body": "Besok mau ke Jakarta, ada yang mau titip oleh-oleh khas Bandung? Kartika Sari, Brownies Amanda, dll. DM ya!",
+    "category": "etc",
+    "tags": [
+      "jastip",
+      "bandung",
+      "oleholeh"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Dago, Kec. Coblong, Kab. Bandung",
+    "locationParts": {
+      "prov": "Jawa Barat",
+      "kab": "Bandung",
+      "kec": "Coblong",
+      "kel": "Dago"
+    },
+    "geoPoint": {
+      "latitude": -6.8883,
+      "longitude": 107.6107
+    },
+    "likesCount": 8,
+    "commentsCount": 0,
+    "viewsCount": 97,
+    "createdAt": "2025-07-01T13:00:00Z"
+  },
+  {
+    "id": "post_006",
+    "userId": "실제_Auth_UID_3",
+    "title": "Warung Nasi Ibu Imas Dago sekarang ada diskon!",
+    "body": "Makan siang hemat, paket nasi ayam cuma 15rb. Berlaku sampai akhir minggu.",
+    "category": "store_promo",
+    "tags": [
+      "kuliner",
+      "bandung",
+      "diskon"
+    ],
+    "mediaUrl": "https://picsum.photos/seed/warung1/400/300",
+    "mediaType": "image",
+    "locationName": "Kel. Dago, Kec. Coblong, Kab. Bandung",
+    "locationParts": {
+      "prov": "Jawa Barat",
+      "kab": "Bandung",
+      "kec": "Coblong",
+      "kel": "Dago"
+    },
+    "geoPoint": {
+      "latitude": -6.8883,
+      "longitude": 107.6107
+    },
+    "likesCount": 9,
+    "commentsCount": 0,
+    "viewsCount": 12,
+    "createdAt": "2025-07-01T14:00:00Z"
+  },
+  {
+    "id": "post_007",
+    "userId": "실제_Auth_UID_4",
+    "title": "Gotong royong bersih-bersih lingkungan hari Minggu",
+    "body": "Warga Pandeyan, jangan lupa hari Minggu pagi kita kerja bakti membersihkan selokan. Kumpul di depan pos RW jam 7.",
+    "category": "local_news",
+    "tags": [
+      "kerjabakti",
+      "gotongroyong",
+      "lingkungan"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Pandeyan, Kec. Umbulharjo, Kab. Yogyakarta",
+    "locationParts": {
+      "prov": "Yogyakarta",
+      "kab": "Yogyakarta",
+      "kec": "Umbulharjo",
+      "kel": "Pandeyan"
+    },
+    "geoPoint": {
+      "latitude": -7.7956,
+      "longitude": 110.3695
+    },
+    "likesCount": 6,
+    "commentsCount": 3,
+    "viewsCount": 78,
+    "createdAt": "2025-07-01T15:00:00Z"
+  },
+  {
+    "id": "post_008",
+    "userId": "실제_Auth_UID_4",
+    "title": "Butuh pinjaman tangga",
+    "body": "Ada yang punya tangga lipat yang bisa dipinjam untuk benerin genteng? Cuma sebentar saja. Terima kasih.",
+    "category": "help_share",
+    "tags": [
+      "pinjam",
+      "bantuan",
+      "tetangga"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Pandeyan, Kec. Umbulharjo, Kab. Yogyakarta",
+    "locationParts": {
+      "prov": "Yogyakarta",
+      "kab": "Yogyakarta",
+      "kec": "Umbulharjo",
+      "kel": "Pandeyan"
+    },
+    "geoPoint": {
+      "latitude": -7.7956,
+      "longitude": 110.3695
+    },
+    "likesCount": 2,
+    "commentsCount": 2,
+    "viewsCount": 76,
+    "createdAt": "2025-07-01T16:00:00Z"
+  },
+  {
+    "id": "post_009",
+    "userId": "실제_Auth_UID_5",
+    "title": "Hati-hati modus penipuan baru",
+    "body": "Ada yang telepon ngaku dari bank minta kode OTP. Jangan pernah dikasih ya! Tolong sebarkan ke keluarga.",
+    "category": "incident_report",
+    "tags": [
+      "penipuan",
+      "waspada",
+      "infoaman"
+    ],
+    "mediaUrl": "https://picsum.photos/seed/penipuan/400/300",
+    "mediaType": "image",
+    "locationName": "Kel. Tegalsari, Kec. Tegalsari, Kab. Surabaya",
+    "locationParts": {
+      "prov": "Jawa Timur",
+      "kab": "Surabaya",
+      "kec": "Tegalsari",
+      "kel": "Tegalsari"
+    },
+    "geoPoint": {
+      "latitude": -7.2665,
+      "longitude": 112.7381
+    },
+    "likesCount": 10,
+    "commentsCount": 3,
+    "viewsCount": 37,
+    "createdAt": "2025-07-01T17:00:00Z"
+  },
+  {
+    "id": "post_010",
+    "userId": "실제_Auth_UID_5",
+    "title": "Tanya dong, toko ATK lengkap di Surabaya di mana?",
+    "body": "Butuh beli banyak perlengkapan kantor, ada rekomendasi toko alat tulis kantor yang lengkap dan murah?",
+    "category": "daily_question",
+    "tags": [
+      "tanya",
+      "rekomendasi",
+      "surabaya"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Tegalsari, Kec. Tegalsari, Kab. Surabaya",
+    "locationParts": {
+      "prov": "Jawa Timur",
+      "kab": "Surabaya",
+      "kec": "Tegalsari",
+      "kel": "Tegalsari"
+    },
+    "geoPoint": {
+      "latitude": -7.2665,
+      "longitude": 112.7381
+    },
+    "likesCount": 1,
+    "commentsCount": 5,
+    "viewsCount": 64,
+    "createdAt": "2025-07-01T18:00:00Z"
+  },
+  {
+    "id": "post_011",
+    "userId": "실제_Auth_UID_6",
+    "title": "Info jadwal SIM keliling Denpasar",
+    "body": "Warga Denpasar, ada yang tau jadwal SIM keliling minggu ini? Mau perpanjang SIM A.",
+    "category": "daily_question",
+    "tags": [
+      "sim",
+      "denpasar",
+      "info"
+    ],
+    "mediaUrl": "https://picsum.photos/seed/simkeliling/400/300",
+    "mediaType": "image",
+    "locationName": "Kel. Sanur, Kec. Denpasar Selatan, Kab. Denpasar",
+    "locationParts": {
+      "prov": "Bali",
+      "kab": "Denpasar",
+      "kec": "Denpasar Selatan",
+      "kel": "Sanur"
+    },
+    "geoPoint": {
+      "latitude": -8.7093,
+      "longitude": 115.2528
+    },
+    "likesCount": 5,
+    "commentsCount": 5,
+    "viewsCount": 53,
+    "createdAt": "2025-07-01T19:00:00Z"
+  },
+  {
+    "id": "post_012",
+    "userId": "실제_Auth_UID_6",
+    "title": "Adopsi anak kucing gratis",
+    "body": "Ada 3 ekor anak kucing lucu di depan rumah, siapa yang mau adopsi? Gratis, yang penting sayang sama kucing.",
+    "category": "help_share",
+    "tags": [
+      "adopsi",
+      "kucing",
+      "gratis"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Sanur, Kec. Denpasar Selatan, Kab. Denpasar",
+    "locationParts": {
+      "prov": "Bali",
+      "kab": "Denpasar",
+      "kec": "Denpasar Selatan",
+      "kel": "Sanur"
+    },
+    "geoPoint": {
+      "latitude": -8.7093,
+      "longitude": 115.2528
+    },
+    "likesCount": 9,
+    "commentsCount": 4,
+    "viewsCount": 27,
+    "createdAt": "2025-07-01T20:00:00Z"
+  },
+  {
+    "id": "post_013",
+    "userId": "실제_Auth_UID_7",
+    "title": "Ada yang lihat dompet saya?",
+    "body": "Dompet warna coklat, isinya KTP dan SIM A atas nama Putri Lestari. Jatuh di sekitaran XT Square.",
+    "category": "incident_report",
+    "tags": [
+      "dompethilang",
+      "jogja",
+      "xtsquare"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Muja Muju, Kec. Umbulharjo, Kab. Yogyakarta",
+    "locationParts": {
+      "prov": "Jawa Tengah",
+      "kab": "Yogyakarta",
+      "kec": "Umbulharjo",
+      "kel": "Muja Muju"
+    },
+    "geoPoint": {
+      "latitude": -7.8014,
+      "longitude": 110.3831
+    },
+    "likesCount": 6,
+    "commentsCount": 4,
+    "viewsCount": 89,
+    "createdAt": "2025-07-01T21:00:00Z"
+  },
+  {
+    "id": "post_014",
+    "userId": "실제_Auth_UID_7",
+    "title": "Pengumuman: Jalan ditutup untuk acara 17an",
+    "body": "Jalan utama Muja Muju akan ditutup hari Sabtu untuk persiapan lomba 17 Agustus. Mohon cari jalan alternatif.",
+    "category": "local_news",
+    "tags": [
+      "17agustus",
+      "pengumuman",
+      "jogja"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Muja Muju, Kec. Umbulharjo, Kab. Yogyakarta",
+    "locationParts": {
+      "prov": "Jawa Tengah",
+      "kab": "Yogyakarta",
+      "kec": "Umbulharjo",
+      "kel": "Muja Muju"
+    },
+    "geoPoint": {
+      "latitude": -7.8014,
+      "longitude": 110.3831
+    },
+    "likesCount": 9,
+    "commentsCount": 4,
+    "viewsCount": 62,
+    "createdAt": "2025-07-01T22:00:00Z"
+  },
+  {
+    "id": "post_015",
+    "userId": "실제_Auth_UID_8",
+    "title": "Cari teman main futsal di Medan",
+    "body": "Anak Medan, ayo main futsal bareng hari Jumat malam. Lapangan sudah ada, kurang orang. Hubungi saya!",
+    "category": "etc",
+    "tags": [
+      "futsal",
+      "medan",
+      "olahraga"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Petisah Hulu, Kec. Medan Baru, Kab. Medan",
+    "locationParts": {
+      "prov": "Sumatera Utara",
+      "kab": "Medan",
+      "kec": "Medan Baru",
+      "kel": "Petisah Hulu"
+    },
+    "geoPoint": {
+      "latitude": 3.5833,
+      "longitude": 98.6756
+    },
+    "likesCount": 10,
+    "commentsCount": 4,
+    "viewsCount": 26,
+    "createdAt": "2025-07-01T23:00:00Z"
+  },
+  {
+    "id": "post_016",
+    "userId": "실제_Auth_UID_8",
+    "title": "Rekomendasi soto medan terenak?",
+    "body": "Warga Medan, soto medan yang paling juara di mana ya? Butuh pencerahan.",
+    "category": "daily_question",
+    "tags": [
+      "kuliner",
+      "medan",
+      "soto"
+    ],
+    "mediaUrl": "https://picsum.photos/seed/soto1/400/300",
+    "mediaType": "image",
+    "locationName": "Kel. Petisah Hulu, Kec. Medan Baru, Kab. Medan",
+    "locationParts": {
+      "prov": "Sumatera Utara",
+      "kab": "Medan",
+      "kec": "Medan Baru",
+      "kel": "Petisah Hulu"
+    },
+    "geoPoint": {
+      "latitude": 3.5833,
+      "longitude": 98.6756
+    },
+    "likesCount": 0,
+    "commentsCount": 1,
+    "viewsCount": 35,
+    "createdAt": "2025-07-02T00:00:00Z"
+  },
+  {
+    "id": "post_017",
+    "userId": "실제_Auth_UID_9",
+    "title": "Donasi buku bekas untuk taman baca",
+    "body": "Sedang mengumpulkan buku anak-anak dan remaja untuk taman bacaan di Karawaci. Yang mau donasi, bisa antar ke pos RW.",
+    "category": "help_share",
+    "tags": [
+      "donasi",
+      "buku",
+      "tamanbaca"
+    ],
+    "mediaUrl": "https://picsum.photos/seed/buku1/400/300",
+    "mediaType": "image",
+    "locationName": "Kel. Karawaci Baru, Kec. Karawaci, Kab. Tangerang",
+    "locationParts": {
+      "prov": "Banten",
+      "kab": "Tangerang",
+      "kec": "Karawaci",
+      "kel": "Karawaci Baru"
+    },
+    "geoPoint": {
+      "latitude": -6.1896,
+      "longitude": 106.6348
+    },
+    "likesCount": 5,
+    "commentsCount": 5,
+    "viewsCount": 28,
+    "createdAt": "2025-07-02T01:00:00Z"
+  },
+  {
+    "id": "post_018",
+    "userId": "실제_Auth_UID_9",
+    "title": "Jalan berlubang di depan Indomaret Karawaci",
+    "body": "Hati-hati lewat jalan depan Indomaret Karawaci, banyak lubang besar. Semoga cepat diperbaiki.",
+    "category": "incident_report",
+    "tags": [
+      "jalanrusak",
+      "karawaci",
+      "lapor"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Karawaci Baru, Kec. Karawaci, Kab. Tangerang",
+    "locationParts": {
+      "prov": "Banten",
+      "kab": "Tangerang",
+      "kec": "Karawaci",
+      "kel": "Karawaci Baru"
+    },
+    "geoPoint": {
+      "latitude": -6.1896,
+      "longitude": 106.6348
+    },
+    "likesCount": 1,
+    "commentsCount": 5,
+    "viewsCount": 13,
+    "createdAt": "2025-07-02T02:00:00Z"
+  },
+  {
+    "id": "post_019",
+    "userId": "실제_Auth_UID_10",
+    "title": "Ada yang tau cara mengurus IMB?",
+    "body": "Mau renovasi rumah tapi bingung cara urus Izin Mendirikan Bangunan. Ada yang punya pengalaman? Mohon pencerahannya.",
+    "category": "daily_question",
+    "tags": [
+      "tanya",
+      "imb",
+      "renovasi"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Beji Timur, Kec. Beji, Kab. Depok",
+    "locationParts": {
+      "prov": "Jawa Barat",
+      "kab": "Depok",
+      "kec": "Beji",
+      "kel": "Beji Timur"
+    },
+    "geoPoint": {
+      "latitude": -6.3688,
+      "longitude": 106.8322
+    },
+    "likesCount": 4,
+    "commentsCount": 3,
+    "viewsCount": 66,
+    "createdAt": "2025-07-02T03:00:00Z"
+  },
+  {
+    "id": "post_020",
+    "userId": "실제_Auth_UID_10",
+    "title": "Bagi-bagi mangga gratis!",
+    "body": "Pohon mangga di depan rumah buahnya banyak banget. Siapa mau boleh ambil, gratis. Bawa kantong sendiri ya.",
+    "category": "help_share",
+    "tags": [
+      "gratis",
+      "mangga",
+      "berbagi"
+    ],
+    "mediaUrl": null,
+    "mediaType": null,
+    "locationName": "Kel. Beji Timur, Kec. Beji, Kab. Depok",
+    "locationParts": {
+      "prov": "Jawa Barat",
+      "kab": "Depok",
+      "kec": "Beji",
+      "kel": "Beji Timur"
+    },
+    "geoPoint": {
+      "latitude": -6.3688,
+      "longitude": 106.8322
+    },
+    "likesCount": 5,
+    "commentsCount": 2,
+    "viewsCount": 35,
+    "createdAt": "2025-07-02T04:00:00Z"
+  }
+]
