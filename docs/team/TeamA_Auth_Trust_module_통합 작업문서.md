@@ -18,6 +18,17 @@ Bling 앱 사용자 인증, 지역 기반 신뢰 등급(TrustLevel), 신고/차�
 ---
 
 ## 기존 Ver. 0.3 에 대한 이해
+> Ver. 01~ 03. 까지 진행된 Bling_Auth_Trust_Module 관련 내용 파악. 
+
+- lib/main.dart 확인 및 아래 user 가입 로그인 관련 파일들
+- lib/core/models/user_model.dart 
+- lib/features/auth/screens/auth.gate.dart 
+- lib/features/auth/screens/login_screen.dart
+- lib/features/auth/screens/signup_screen.dart
+- lib/features/auth/screens/profile_edit_screen.dart 
+- 위 파일들을 파악하고 현재까지의 가입 및 로그인 관련 정책에 대한 이해와 파악(개선점 점검보고)
+
+
 
 > Ver. 01~ 03. 까지 진행된 Bling_Auth_Trust_Module 관련 내용 파악. 
 
