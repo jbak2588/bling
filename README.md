@@ -21,7 +21,7 @@ Gojek 스타일 런처 UX를 결합한 **하이브리드 로컬 앱**입니다.
 
 ## ✅ 폴더 구조    2025년 7월 4일 Ver 0.4 기준
 
-llib
+lib
 ├── api_keys.dart
 ├── core
 │   ├── constants
