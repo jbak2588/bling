@@ -1,7 +1,6 @@
 // lib/features/auth/screens/login_screen.dart
 // bling_app Version 0.4
 
-import 'package:bling_app/features/main_screen/home_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import 'profile_edit_screen.dart';
+// import 'profile_edit_screen.dart'; // 삭제됨
 import 'signup_screen.dart';
 import '../../../core/models/user_model.dart';
 
@@ -33,43 +32,16 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // 로그인 성공 후 프로필 완성 여부 체크 로직 (변경 없음)
-  Future<void> _afterLogin(User user) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
-
-    if (!doc.exists ||
-        (doc.data()?['nickname'] == null || doc.data()!['nickname'].isEmpty)) {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const ProfileEditScreen()),
-        );
-      }
-    } else {
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-          (Route<dynamic> route) => false,
-        );
-      }
-    }
-  }
-
   // 이메일 로그인 로직
   Future<void> _loginWithEmail() async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
 
     try {
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      if (credential.user != null) {
-        await _afterLogin(credential.user!);
-      }
     } on FirebaseAuthException catch (e) {
       // ▼▼▼▼▼ 새로운 다국어 키를 사용하여 에러 메시지 처리 ▼▼▼▼▼
       String errorMessage;
@@ -118,17 +90,15 @@ class _LoginScreenState extends State<LoginScreen> {
       final result =
           await FirebaseAuth.instance.signInWithCredential(credential);
       if (result.user != null) {
-        // ▼▼▼▼▼ 핵심 수정: Google 신규 가입자일 경우 UserModel 생성 ▼▼▼▼▼
+        // 신규 가입자일 경우 UserModel 생성
         final userDocRef = FirebaseFirestore.instance
             .collection('users')
             .doc(result.user!.uid);
         final userDoc = await userDocRef.get();
 
         if (!userDoc.exists) {
-          // DB에 사용자 문서가 없으면, 신규 가입자로 판단하고 문서를 생성합니다.
           final newUser = UserModel(
             uid: result.user!.uid,
-            // Google 계정의 이름과 이메일, 사진 URL을 자동으로 가져옵니다.
             nickname: result.user!.displayName ?? 'Bling User',
             email: result.user!.email ?? '',
             photoUrl: result.user!.photoURL,
@@ -136,9 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
           await userDocRef.set(newUser.toJson());
         }
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
-        await _afterLogin(result.user!);
+        // 로그인 성공 후 별도 라우팅 없이 AuthGate에 위임
       }
     } catch (e) {
       if (mounted) {

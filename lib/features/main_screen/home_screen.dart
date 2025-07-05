@@ -21,7 +21,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/utils/address_formatter.dart';
 // import '../admin/screens/data_uploader_screen.dart';
-// import '../auth/screens/profile_edit_screen.dart';
+import '../auth/screens/profile_edit_screen.dart';
 import '../feed/screens/local_feed_screen.dart';
 import '../location/screens/location_setting_screen.dart';
 import '../marketplace/screens/marketplace_screen.dart';
@@ -411,7 +411,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                );
              },
            ),
-         ListTile(leading: const Icon(Icons.edit_outlined), title: Text('drawer.editProfile'.tr()), onTap: () { /* ... */ }),
+         ListTile(leading: const Icon(Icons.edit_outlined), title: Text('drawer.editProfile'.tr()), onTap: () {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const ProfileEditScreen()),
+    );
+  }),
          ListTile(leading: const Icon(Icons.bookmark_border), title: Text('drawer.bookmarks'.tr()), onTap: () => Navigator.pop(context)),
          const Divider(),
          ListTile(

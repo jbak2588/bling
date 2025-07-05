@@ -123,6 +123,27 @@
         "error": "동네 설정에 실패했습니다: {error}",
         "empty": "동네 이름을 입력해주세요.",
         "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
+    },
+
+    "profileEdit": {
+        "title": "프로필 설정",
+        "nicknameHint": "닉네임",
+        "bioHint": "소개 (Bio)",
+        "interests": {
+            "title": "관심사",
+            "hint": "쉼표와 Enter로 여러개 동시 추가"
+        },
+        "privacy": {
+            "title": "개인정보 설정",
+            "showLocation": "지도에 내 위치 표시",
+            "allowRequests": "친구 추가 요청 허용"
+        },
+        "saveButton": "변경사항 저장",
+        "successMessage": "프로필이 성공적으로 업데이트되었습니다.",
+        "errors": {
+            "noUser": "로그인된 사용자가 없습니다.",
+            "updateFailed": "프로필 업데이트에 실패했습니다: {error}"
+        }
     }
    
 }
