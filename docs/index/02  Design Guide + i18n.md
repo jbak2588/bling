@@ -75,6 +75,8 @@ Bling은 Keluharan(Kel.) 기반 지역 슈퍼앱으로,
     - Disabled → 40% 투명도
         
     - Floating Action Button → Secondary Color (#FF6B00)
+
+    - 모든 Form 화면의 저장/확인 버튼은 Fixed Bottom Button 스타일을 따른다.
         
 
 ---

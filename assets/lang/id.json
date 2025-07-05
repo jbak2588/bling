@@ -122,5 +122,26 @@
         "error": "Gagal mengatur lingkungan: {error}",
         "empty": "Silakan masukkan nama lingkungan.",
         "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
+    },
+
+    "profileEdit": {
+        "title": "Pengaturan Profil",
+        "nicknameHint": "Nama Panggilan",
+        "bioHint": "Bio (Perkenalan Diri)",
+        "interests": {
+            "title": "Minat",
+            "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
+        },
+        "privacy": {
+            "title": "Pengaturan Privasi",
+            "showLocation": "Tampilkan lokasi saya di peta",
+            "allowRequests": "Izinkan permintaan pertemanan"
+        },
+        "saveButton": "Simpan Perubahan",
+        "successMessage": "Profil berhasil diperbarui.",
+        "errors": {
+            "noUser": "Pengguna belum login.",
+            "updateFailed": "Gagal memperbarui profil: {error}"
+        }
     }
 }

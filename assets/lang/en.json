@@ -123,6 +123,27 @@
         "error": "Failed to set neighborhood: {error}",
         "empty": "Please enter a neighborhood name.",
         "permissionDenied": "Location permission is required to find your neighborhood."
+    },
+
+    "profileEdit": {
+        "title": "Edit Profile",
+        "nicknameHint": "Nickname",
+        "bioHint": "Bio (Introduction)",
+        "interests": {
+            "title": "Interests",
+            "hint": "Use comma and Enter to add multiple"
+        },
+        "privacy": {
+            "title": "Privacy Settings",
+            "showLocation": "Show my location on map",
+            "allowRequests": "Allow friend requests"
+        },
+        "saveButton": "Save Changes",
+        "successMessage": "Profile updated successfully.",
+        "errors": {
+            "noUser": "User not logged in.",
+            "updateFailed": "Failed to update profile: {error}"
+        }
     }
 
 
