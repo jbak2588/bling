@@ -36,6 +36,11 @@ class BlingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 앱 실행 시 항상 인도네시아어로 locale을 강제 지정
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.setLocale(const Locale('id'));
+    });
+
     return MaterialApp(
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,

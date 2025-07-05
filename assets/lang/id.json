@@ -26,7 +26,7 @@
         "emailHint": "Alamat Email",
         "passwordHint": "Kata Sandi (minimal 6 karakter)",
         "passwordConfirmHint": "Konfirmasi Kata Sandi",
-        "nicknameHint": "Nama Panggilan",
+        "nicknameHint": "Nama Panggilan (Wajib)",
         "subtitle": "Ayo mulai dengan Bling! Silakan masukkan informasi Anda.",
         "locationHint": "Lokasi Anda (untuk layanan lokal)",
         "locationNotice": "Lokasi Anda digunakan untuk menampilkan postingan lingkungan dan tidak diungkapkan kepada orang lain.",

@@ -19,7 +19,18 @@ Bling 앱 사용자 인증, 지역 기반 신뢰 등급(TrustLevel), 신고/차�
 
 ## 기존 Ver. 0.3 에 대한 이해
 
-아래 DB 스키마를 Ver. 0.4인 lib/core/models/user_model.dart 를 읽고 업데이트 할 부분을 확인. 
+> Ver. 01~ 03. 까지 진행된 Bling_Auth_Trust_Module 관련 내용 파악. 
+
+- lib/main.dart 확인 및 아래 user 가입 로그인 관련 파일들
+- lib/core/models/user_model.dart 
+- lib/features/auth/screens/auth.gate.dart 
+- lib/features/auth/screens/login_screen.dart
+- lib/features/auth/screens/signup_screen.dart
+- lib/features/auth/screens/profile_edit_screen.dart 
+- 위 파일들을 파악하고 현재까지의 가입 및 로그인 관련 정책에 대한 이해와 파악(개선점 점검보고)
+
+
+> 아래 DB 스키마를 Ver. 0.4인 lib/core/models/user_model.dart 를 읽고 업데이트 할 부분을 확인. 
 
 
 ✅ Firestore DB 스키마 (Ver.0.3 )
@@ -101,9 +112,9 @@ users/{uid} {
 
 
 
-
-
 1️⃣ **Firestore Rules**
+
+- 기존 버전의 
 
 - `users/{uid}`는 `uid`당 Self-Write Only
     
@@ -114,9 +125,9 @@ users/{uid} {
 
 2️⃣ **로컬 테스트 데이터**
 
-- `mock_users.json` 샘플로 가입 시나리오 Proof
+- `users_final.json` 샘플 참조  (sample_data/user_final.jsong) 
     
-- 가입 후 `trustLevel`이 `normal` → `verified` 승급 흐름 QA
+- `trustLevel`이 `normal` → `verified` 승급 흐름 QA
     
 - `reportCount` Mock 증가 → 자동 하향 로직 시뮬레이션
     

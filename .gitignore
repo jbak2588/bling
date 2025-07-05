@@ -48,3 +48,5 @@ serviceAccountKey.json
 # Secret API keys
 lib/api_keys.dart
 
+# Android Manifest 파일 제외 (API 키 노출 방지용 임시 조치)
+android/app/src/main/AndroidManifest.xml

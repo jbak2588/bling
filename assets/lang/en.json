@@ -26,7 +26,7 @@
         "emailHint": "Email Address",
         "passwordHint": "Password (at least 6 characters)",
         "passwordConfirmHint": "Confirm Password",
-        "nicknameHint": "Nickname",
+        "nicknameHint": "Nickname (Required)",
         "subtitle": "Let's start with Bling! Please enter your information.",
         "locationHint": "Your location (for local services)",
         "locationNotice": "Your location is used to show neighborhood posts and is not disclosed to others.",

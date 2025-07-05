@@ -5,9 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:flutter_google_maps_webservices/places.dart';
-import 'package:bling_app/api_keys.dart';
+// import 'package:geolocator/geolocator.dart';
+// import 'package:flutter_google_maps_webservices/places.dart';
+// import 'package:bling_app/api_keys.dart';
 // ignore: unused_import
 import '../../../core/models/user_model.dart'; // UserModel import
 
@@ -23,11 +23,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _locationController = TextEditingController();
-  Map<String, dynamic>? _gpsLocationCache;
-  final GoogleMapsPlaces _places =
-      GoogleMapsPlaces(apiKey: ApiKeys.googleApiKey);
-  bool _isGettingLocation = false;
+  // final _locationController = TextEditingController(); // Delayed Profile Activation 정책에 따라 위치 입력 제거
+  // Map<String, dynamic>? _gpsLocationCache; // Delayed Profile Activation 정책에 따라 위치 입력 제거
+  // final GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: ApiKeys.googleApiKey); // Delayed Profile Activation 정책에 따라 위치 입력 제거
+  // bool _isGettingLocation = false; // Delayed Profile Activation 정책에 따라 위치 입력 제거
   bool _isLoading = false;
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
@@ -38,95 +37,95 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _locationController.dispose();
+    // _locationController.dispose(); // Delayed Profile Activation 정책에 따라 위치 입력 제거
     super.dispose();
   }
 
-  Future<void> _handleGpsLocation() async {
-    try {
-      setState(() => _isGettingLocation = true);
+  // Future<void> _handleGpsLocation() async {
+  //   try {
+  //     setState(() => _isGettingLocation = true);
 
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) throw Exception('GPS service is disabled');
+  //     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  //     if (!serviceEnabled) throw Exception('GPS service is disabled');
 
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        permission = await Geolocator.requestPermission();
-        if (permission != LocationPermission.whileInUse &&
-            permission != LocationPermission.always) {
-          throw Exception('Location permission denied');
-        }
-      }
+  //     LocationPermission permission = await Geolocator.checkPermission();
+  //     if (permission == LocationPermission.denied ||
+  //         permission == LocationPermission.deniedForever) {
+  //       permission = await Geolocator.requestPermission();
+  //       if (permission != LocationPermission.whileInUse &&
+  //           permission != LocationPermission.always) {
+  //         throw Exception('Location permission denied');
+  //       }
+  //     }
 
-      final position = await Geolocator.getCurrentPosition();
-      final lat = position.latitude;
-      final lng = position.longitude;
+  //     final position = await Geolocator.getCurrentPosition();
+  //     final lat = position.latitude;
+  //     final lng = position.longitude;
 
-      final response = await _places.searchByText(
-        '$lat,$lng',
-        location: Location(lat: lat, lng: lng),
-        radius: 100,
-      );
-      if (!response.isOkay || response.results.isEmpty) {
-        throw Exception('No reverse geocode result');
-      }
+  //     final response = await _places.searchByText(
+  //       '$lat,$lng',
+  //       location: Location(lat: lat, lng: lng),
+  //       radius: 100,
+  //     );
+  //     if (!response.isOkay || response.results.isEmpty) {
+  //       throw Exception('No reverse geocode result');
+  //     }
 
-      final detail =
-          await _places.getDetailsByPlaceId(response.results.first.placeId);
-      if (!detail.isOkay || detail.result.geometry == null) {
-        throw Exception('No geometry');
-      }
+  //     final detail =
+  //         await _places.getDetailsByPlaceId(response.results.first.placeId);
+  //     if (!detail.isOkay || detail.result.geometry == null) {
+  //       throw Exception('No geometry');
+  //     }
 
-      final location = detail.result.geometry!.location;
-      final components = detail.result.addressComponents;
+  //     final location = detail.result.geometry!.location;
+  //     final components = detail.result.addressComponents;
 
-      String formatted = detail.result.formattedAddress ?? '';
-      final fullAddress =
-          formatted.replaceAll(RegExp(r'^[A-Z0-9+]{6,},?\s*'), '');
+  //     String formatted = detail.result.formattedAddress ?? '';
+  //     final fullAddress =
+  //         formatted.replaceAll(RegExp(r'^[A-Z0-9+]{6,},?\s*'), '');
 
-      String district = '';
-      for (final type in [
-        'neighborhood',
-        'sublocality',
-        'locality',
-        'administrative_area_level_2',
-      ]) {
-        final match = components.firstWhere(
-          (c) => c.types.contains(type),
-          orElse: () => AddressComponent(
-            longName: '',
-            shortName: '',
-            types: [],
-          ),
-        );
-        if (match.longName.isNotEmpty) {
-          district = match.longName;
-          break;
-        }
-      }
+  //     String district = '';
+  //     for (final type in [
+  //       'neighborhood',
+  //       'sublocality',
+  //       'locality',
+  //       'administrative_area_level_2',
+  //     ]) {
+  //       final match = components.firstWhere(
+  //         (c) => c.types.contains(type),
+  //         orElse: () => AddressComponent(
+  //           longName: '',
+  //           shortName: '',
+  //           types: [],
+  //         ),
+  //       );
+  //       if (match.longName.isNotEmpty) {
+  //         district = match.longName;
+  //         break;
+  //       }
+  //     }
 
-      if (!mounted) return;
-      setState(() {
-        _locationController.text = fullAddress;
-        _gpsLocationCache = {
-          'location': fullAddress,
-          'district': district,
-          'latitude': location.lat,
-          'longitude': location.lng,
-          'neighborhoodVerified': true,
-        };
-      });
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('location_setting_error'.tr(args: [e.toString()]))),
-      );
-    } finally {
-      if (mounted) setState(() => _isGettingLocation = false);
-    }
-  }
+  //     if (!mounted) return;
+  //     setState(() {
+  //       _locationController.text = fullAddress;
+  //       _gpsLocationCache = {
+  //         'location': fullAddress,
+  //         'district': district,
+  //         'latitude': location.lat,
+  //         'longitude': location.lng,
+  //         'neighborhoodVerified': true,
+  //       };
+  //     });
+  //   } catch (e) {
+  //     if (!mounted) return;
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //           content: Text('location_setting_error'.tr(args: [e.toString()]))),
+  //     );
+  //   } finally {
+  //     if (mounted) setState(() => _isGettingLocation = false);
+  //   }
+  // }
 
   Future<void> _signUp() async {
     if (_isLoading) return;
@@ -301,37 +300,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   _confirmPasswordVisible =
                                       !_confirmPasswordVisible)))),
                   const SizedBox(height: 18),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _locationController,
-                          decoration: InputDecoration(
-                            // ▼▼▼▼▼ 위치 입력창 힌트 텍스트 키 적용 ▼▼▼▼▼
-                            labelText: 'signup.locationHint'.tr(),
-                            prefixIcon: const Icon(Icons.location_on_outlined),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.my_location, color: Colors.teal),
-                        onPressed:
-                            _isGettingLocation ? null : _handleGpsLocation,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    // ▼▼▼▼▼ 누락되었던 위치 정보 안내 문구 키 적용 ▼▼▼▼▼
-                    child: Text(
-                      'signup.locationNotice'.tr(),
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: Colors.grey[600]),
-                    ),
-                  ),
+                  // ▼▼▼▼▼ 위치 입력 UI 및 안내문구 제거 (Delayed Profile Activation) ▼▼▼▼▼
+                  // Row(
+                  //   children: [
+                  //     Expanded(
+                  //       child: TextField(
+                  //         controller: _locationController,
+                  //         decoration: InputDecoration(
+                  //           labelText: 'signup.locationHint'.tr(),
+                  //           prefixIcon: const Icon(Icons.location_on_outlined),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //     IconButton(
+                  //       icon: const Icon(Icons.my_location, color: Colors.teal),
+                  //       onPressed:
+                  //           _isGettingLocation ? null : _handleGpsLocation,
+                  //     ),
+                  //   ],
+                  // ),
+                  // const SizedBox(height: 8),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  //   child: Text(
+                  //     'signup.locationNotice'.tr(),
+                  //     style: Theme.of(context)
+                  //         .textTheme
+                  //         .bodySmall
+                  //         ?.copyWith(color: Colors.grey[600]),
+                  //   ),
+                  // ),
+                  // ▲▲▲▲▲ 위치 입력 UI 및 안내문구 제거 (Delayed Profile Activation) ▲▲▲▲▲
                   const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
@@ -352,7 +351,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   color: Colors.white, strokeWidth: 3))
                           : Text(
                               'signup.buttons.signup'.tr(),
-                              // ▼▼▼▼▼ Inter 폰트로 변경 ▼▼▼▼▼
                               style: GoogleFonts.inter(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
