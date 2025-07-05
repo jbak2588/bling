@@ -17,7 +17,7 @@
 예시:  
 Kel. Panunggangan Barat, Kec. Cibodas, Kab. Tangerang, Prov. Banten
 
-원칙 : ** 화면에 표시되는 피드 작성자 및 다른 사용자 주소는 "Kel.", "Kec."만 **
+원칙 : ** 화면에 표시되는 피드 작성자 및 다른 사용자 주소는 "Kel."만 **
 
 ---
 

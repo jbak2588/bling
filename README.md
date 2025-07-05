@@ -21,7 +21,7 @@ Gojek 스타일 런처 UX를 결합한 **하이브리드 로컬 앱**입니다.
 
 ## ✅ 폴더 구조    2025년 7월 4일 Ver 0.4 기준
 
-lib
+llib
 ├── api_keys.dart
 ├── core
 │   ├── constants
@@ -133,21 +133,65 @@ lib
 │       └── controllers
 │           └── locale_controller.dart
 ├── firebase_options.dart
-└── main.dart
-assets
-├── data
-│   └── sample_posts.json
-├── icons
-│   └── google_logo.png
-├── lang
-│   ├── en.json
-│   ├── en_old.json
-│   ├── id.json
-│   ├── id_old.json
-│   ├── ko.json
-│   └── ko_old.json
-└── sounds
-    └── send_sound.mp3
+├── main.dart
+├── pubspec.yaml
+├── README.md
+├── docs
+│   ├── index
+│   │   ├── 00  Mainscreen & 런처 & Tab & Drawer QA.md
+│   │   ├── 01  프로젝트 개요 & 폴더트리.md
+│   │   ├── 010  Feed(Post) 모듈.md
+│   │   ├── 011  Marketplace 모듈.md
+│   ├── 012  Find Friend & Club & Jobs & etc 모듈.md
+│   ├── 013 참조용 자료
+│   │   │   ├── 0. 작업 지침!.md
+│   │   │   ├── 1  디자인 UX 가이드 n i18n.md
+│   │   │   ├── 10  개발 로드맵 & 체크리스트.md
+│   │   │   ├── 12. 약관 & 법적 정책.md
+│   │   │   ├── 2  프로젝트 개요 & 메인 구조.md
+│   │   │   ├── 3  사용자 DB & 신뢰 등급.md
+│   │   │   ├── 4  사용자 화면 & 마이페이지.md
+│   │   │   ├── 5  지역-위치-개인정보.md
+│   │   │   ├── 6  피드 (Local News).md
+│   │   │   ├── 7  Marketplace.md
+│   │   │   ├── 8  Frind-Club-Jobs-Shops-Auciton-POM.md
+│   │   │   ├── 9  Notification - 신고 - 커뮤니티.md
+│   │   │   └── Pasted image 20250701221455.png
+│   │   ├── 02  Design Guide + i18n.md
+│   │   ├── 03  User 필드 & TrustLever & 프로필정책.md
+│   │   ├── 04  주소 DropDwon & Singkatan.md
+│   │   ├── 05  공통 Helper & Service & Validator.md
+│   │   ├── 06  MyProfile & 활동 히스토리 Scaffold.md
+│   │   ├── 07  Chat 모듈 Core.md
+│   │   ├── 08  Notification 모듈 Core.md
+│   │   ├── 09  신고 & 차단 & Privacy Guard.md
+│   │   ├── Bling App 개발 일지 (2025년 7월 4일).md
+│   │   ├── Bling_Location_GeoQuery_Structure.md
+│   │   ├── 전체_프로젝트_팀별_공통_공지문.md
+│   │   ├── 피드 관련 위치 검색 규칙과 예시.md
+│   │   └── 📌 Bling_Team_ToDo_QA_Index.md
+│   ├── team
+│   │   ├── TeamA__Auth_Trust_module_통합 작업문서.md
+│   │   ├── teamB_Feed_CRUD_Module_통합 작업문서.md
+│   │   ├── teamC_Chat & Notification 모듈_통합 작업문서.md
+│   │   ├── teamD_GeoQuery_Location_Module_통합_작업문서.md
+│   │   ├── teamF_Design_Privacy_Module_통합_작업문.md
+│   │   └── temE_AI_Moderation_Module_통합_작업문서.md
+│   └── templates 
+└── assets
+    ├── data
+    │   └── sample_posts.json
+    ├── icons
+    │   └── google_logo.png
+    ├── lang
+    │   ├── en.json
+    │   ├── en_old.json
+    │   ├── id.json
+    │   ├── id_old.json
+    │   ├── ko.json
+    │   └── ko_old.json
+    └── sounds
+        └── send_sound.mp3
 
 
 
