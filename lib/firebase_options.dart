@@ -29,7 +29,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     // ▼▼▼ 1단계에서 열어 둔 Firebase 웹페이지의 값을 여기에 붙여넣으세요 ▼▼▼
-    apiKey: "AIzaSyDsNv3O1F1j7fq3lzn_vjWtZFE1W0gyifY",
+    apiKey: "AIzaSyARlsgDRQkl_ZubwMfi5sftWn2r8Uo8ulc",
     // Firebase 페이지의 apiKey 값
     appId: "1:1075298230474:web:b4cdcb3cf539e90722d433",
     // Firebase 페이지의 appId 값

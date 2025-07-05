@@ -1,17 +1,17 @@
-# 🚀 Bling- RT/RW 기반 슈퍼앱 프로젝트
+# 🚀 Bling- Keluharan 기반 슈퍼앱 프로젝트
 
 ---
 
 ## ✅ 프로젝트 개요
 
-Ayo는 인도네시아의 RT/RW 기반 Nextdoor형 커뮤니티와  
-Gojek 스타일 런처 UX를 결합한 **하이브리드 로컬 슈퍼앱**입니다.
+bling는 인도네시아의 Kuluhara 기반 Nextdoor형 커뮤니티와  
+Gojek 스타일 런처 UX를 결합한 **하이브리드 로컬 앱**입니다.
 
 ---
 
 ## ✅ 핵심 컨셉
 
-- RT/RW 기반 신뢰등급 (TrustLevel)
+- Keluhara 기반 신뢰등급 (TrustLevel)
 - 지역 피드(Warga Feed)
 - 중고/신상품 마켓플레이스 + AI 검수
 - 친구찾기/데이팅 (Cari Teman)
@@ -19,22 +19,24 @@ Gojek 스타일 런처 UX를 결합한 **하이브리드 로컬 슈퍼앱**입�
 - Lelang(경매), POM(지역 쇼츠)
 - 다국어(Localization) + AppBar GEO 범위 설정
 
-## ✅ 폴더 구조    2025년 7월 1일 Ver 0.4 기준
+## ✅ 폴더 구조    2025년 7월 4일 Ver 0.4 기준
 
 lib
 ├── api_keys.dart
 ├── core
 │   ├── constants
 │   │   └── app_categories.dart
-│   └── models
-│       ├── comment_model.dart
-│       ├── feed_item_model.dart
-│       ├── page_data.dart
-│       ├── post_category_model.dart
-│       ├── post_model.dart
-│       ├── product_model.dart
-│       ├── reply_model.dart
-│       └── user_model.dart
+│   ├── models
+│   │   ├── comment_model.dart
+│   │   ├── feed_item_model.dart
+│   │   ├── page_data.dart
+│   │   ├── post_category_model.dart
+│   │   ├── post_model.dart
+│   │   ├── product_model.dart
+│   │   ├── reply_model.dart
+│   │   └── user_model.dart
+│   └── utils
+│       └── address_formatter.dart
 ├── features
 │   ├── admin
 │   │   └── screens
@@ -75,11 +77,7 @@ lib
 │   │   │   ├── feed_screen.dart
 │   │   │   └── local_feed_screen.dart
 │   │   └── widgets
-│   │       ├── comment_input_field.dart
-│   │       ├── comment_list_view.dart
-│   │       ├── post_card.dart
-│   │       ├── reply_input_field.dart
-│   │       └── reply_list_view.dart
+│   │       └── post_card.dart
 │   ├── find_friends
 │   │   └── screens
 │   │       └── find_friends_screen.dart
@@ -96,8 +94,7 @@ lib
 │   │   └── screens
 │   │       ├── location_search_screen.dart
 │   │       ├── location_setting_screen.dart
-│   │       ├── neighborhood_prompt_screen.dart
-│   │       └── neighborhood_prompt_screen_old.dart
+│   │       └── neighborhood_prompt_screen.dart
 │   ├── main_screen
 │   │   └── home_screen.dart
 │   ├── marketplace
@@ -111,15 +108,24 @@ lib
 │   │   └── widgets
 │   │       └── product_card.dart
 │   ├── my_bling
-│   │   └── screens
-│   │       └── my_bling_screen.dart
+│   │   ├── screens
+│   │   │   └── my_bling_screen.dart
+│   │   └── widgets
+│   │       ├── user_bookmark_list.dart
+│   │       ├── user_post_list.dart
+│   │       └── user_product_list.dart
 │   ├── pom
 │   │   └── screens
 │   │       └── pom_screen.dart
 │   ├── post
-│   │   └── screens
-│   │       ├── create_post_screen.dart
-│   │       └── post_detail_screen.dart
+│   │   ├── screens
+│   │   │   ├── create_post_screen.dart
+│   │   │   └── post_detail_screen.dart
+│   │   └── widgets
+│   │       ├── comment_input_field.dart
+│   │       ├── comment_list_view.dart
+│   │       ├── reply_input_field.dart
+│   │       └── reply_list_view.dart
 │   ├── real_estate
 │   │   └── screens
 │   │       └── real_estate_screen.dart
@@ -127,8 +133,7 @@ lib
 │       └── controllers
 │           └── locale_controller.dart
 ├── firebase_options.dart
-├── main.dart
-│ 
+└── main.dart
 assets
 ├── data
 │   └── sample_posts.json
@@ -136,12 +141,13 @@ assets
 │   └── google_logo.png
 ├── lang
 │   ├── en.json
+│   ├── en_old.json
 │   ├── id.json
-│   └── ko.json
-├──  sounds
-│   └── send_sound.mp3
-pubspec.yaml
-
+│   ├── id_old.json
+│   ├── ko.json
+│   └── ko_old.json
+└── sounds
+    └── send_sound.mp3
 
 
 
@@ -174,10 +180,8 @@ pubspec.yaml
 - 📄 7. Marketplace.md
 - 📄 8. Frind-Club-Jobs-Shops-Auciton-POM.md
 - 📄 9. Notification - 신고 - 커뮤니티.md
-- 📄 10. 개발 로드맵 & 체크리스트.md
-- 📄 11. 분석 및 수익화.md
-- 📄 12. 약관 및 법적 정책.md
-
+- 📄 Bling_Location_GeoQuery_Structure
+- 📄 피드 관련 위치 검색 규칙과 예시
 ---
 
 ## ✅ 다국어
@@ -195,8 +199,8 @@ lib
 
 ## ✅ DevOps & AI 협업
 
-- **GPT**: 구조 설계 및 표준화
-- **Gemini**: 코드 Diff 및 대안 검증
+- **GPT**:  문서제작
+- **Gemini**: 코드 밎 구조 설계
 - **Copilot**: Dart 자동완성, VSCode 연동
 - 모든 `.md` 정책은 GitHub Repo에서 버전 관리
 
@@ -215,3 +219,4 @@ lib
 
 Bling 은 Ver.09에서 구조 통합을 마치고  
 Ver.1.0에서는 실 서비스 론칭을 목표로 합니다.
+
