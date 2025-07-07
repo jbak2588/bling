@@ -10,6 +10,7 @@ import '../../../core/models/user_model.dart';
 import '../widgets/user_post_list.dart';
 import '../widgets/user_product_list.dart';
 import '../widgets/user_bookmark_list.dart';
+import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 
 class MyBlingScreen extends StatefulWidget {
   const MyBlingScreen({super.key});
@@ -140,7 +141,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
                           fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                     const SizedBox(width: 6),
-                    _buildTrustLevelBadge(user.trustLevel),
+                    TrustLevelBadge(trustLevel: user.trustLevel),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -217,24 +218,5 @@ class _MyBlingScreenState extends State<MyBlingScreen>
             style: GoogleFonts.inter(color: Colors.grey, fontSize: 12)),
       ],
     );
-  }
-
-  /// TrustLevel 뱃지 위젯
-  Widget _buildTrustLevelBadge(String trustLevel) {
-    IconData icon;
-    Color color;
-    switch (trustLevel) {
-      case 'verified':
-        icon = Icons.verified;
-        color = Colors.blue;
-        break;
-      case 'trusted':
-        icon = Icons.shield;
-        color = const Color(0xFF00A66C); // Primary Color
-        break;
-      default: // normal
-        return const SizedBox.shrink(); // 일반 등급은 표시 안 함
-    }
-    return Icon(icon, color: color, size: 18);
   }
 }

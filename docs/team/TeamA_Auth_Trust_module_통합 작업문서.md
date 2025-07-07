@@ -30,16 +30,6 @@ Bling 앱 사용자 인증, 지역 기반 신뢰 등급(TrustLevel), 신고/차�
 
 
 
-> Ver. 01~ 03. 까지 진행된 Bling_Auth_Trust_Module 관련 내용 파악. 
-
-- lib/main.dart 확인 및 아래 user 가입 로그인 관련 파일들
-- lib/core/models/user_model.dart 
-- lib/features/auth/screens/auth.gate.dart 
-- lib/features/auth/screens/login_screen.dart
-- lib/features/auth/screens/signup_screen.dart
-- lib/features/auth/screens/profile_edit_screen.dart 
-- 위 파일들을 파악하고 현재까지의 가입 및 로그인 관련 정책에 대한 이해와 파악(개선점 점검보고)
-
 
 > 아래 DB 스키마를 Ver. 0.4인 lib/core/models/user_model.dart 를 읽고 업데이트 할 부분을 확인. 
 
@@ -186,17 +176,46 @@ users/{uid} {
 - Pull Request + Vault 업데이트 완료
     
 
+# 📌 TrustLevel\_Badge\_UI\_Guide
+
 ---
 
-## ✅ 🔗 연계 링크
+## ✅ 목적
 
-- [[📌 Bling_User_Field_Standard]]
-    
-- [[📌 Bling_TrustLevel_Policy]]
-    
-- [[📌 Bling_Report_Block_Policy]]
-    
-    
+Bling Ver.3 신뢰등급(TrustLevel) 배지를 일관되게 표시하기 위한 공통 UI 가이드입니다.
+
+---
+
+## ✅ 배지 상태 정의
+
+| TrustLevel | 조건          | Feed/댓글 | 프로필/Drawer  |
+| ---------- | ----------- | ------- | ----------- |
+| `normal`   | 기본 가입       | 표시 없음   | 표시 없음       |
+| `verified` | 닉네임 + 위치 인증 | ✔️ 아이콘만 | ✔️ 박스 + 텍스트 |
+| `trusted`  | 감사 수치 기준 상위 | ⭐️ 아이콘만 | ⭐️ 박스 + 텍스트 |
+
+---
+
+## ✅ 위젯 사용 규칙
+
+* Feed/댓글 → `useIconOnly = true`
+* 프로필/Drawer → 기본 박스형 출력
+* 모든 색상/텍스트는 정책 표준에 맞춰 사용:
+
+  * Verified: 파랑 (#2196F3)
+  * Trusted: 골드 (#FFC107)
+
+---
+
+## ✅ 예시
+
+```dart
+TrustLevelBadge(trustLevel: 'verified'); // 박스형
+TrustLevelBadge(trustLevel: 'verified', useIconOnly: true); // 아이콘형
+```
+
+
+
 
 ---
 
@@ -208,7 +227,129 @@ users/{uid} {
 
 ---
 
-Planner님.  
-이게 **실제 팀 A 전달용 실전 레벨 Auth & Trust 마스터 작업문서**입니다.  
-원하시면 바로 **팀 B, C, D, E, F**도 동일한 깊이로 만들어 드릴까요?  
-OK 주시면 바로 연결 시작하겠습니다! 🚀✨
+
+---
+
+## ✅ 목적
+
+지역 기반 Bling 사용자 신뢰를 보다 현실적이고 공정하게 측정하기 위해  
+기존의 기본 인증 요소(프로필, RT/RW, Kelurahan, 전화번호) 외에  
+**Marketplace 거래 신뢰 지표**를 핵심 가산점으로 포함한다.
+
+---
+
+## ✅ TrustScore 구성 항목 (v3)
+
+|항목|설명|가산/감산|
+|---|---|---|
+|Kelurahan 인증|RT Peer Review 포함|+50|
+|RT/RW 입력|자가 입력|+50|
+|전화번호 인증|OTP 인증 완료|+100|
+|프로필 완성도|사진/닉네임/Bio 100%|+50|
+|받은 감사|Feed 감사 1회당|+10|
+|거래 완료|실거래 1건당|+5|
+|거래 5건 달성 추가 보너스||+30|
+|평균 별점 유지|4.5 이상|+20|
+|후기 중 감사 포함|1건당|+5|
+|노쇼 신고|1회당|-30|
+|거래 취소율 30% 이상||-20|
+|악성 후기|1회당|-20|
+|관리자 강제 분쟁 처리|케이스별|-20 ~|
+
+---
+
+## ✅ DB 스키마 예시
+
+```json
+users/{uid} {
+...
+  "trustScore": 265,
+  "trustLevel": "verified",
+  "thanksReceived": 4,
+  "marketplaceStats": {
+    "completedDeals": 12,
+    "cancelledDeals": 3,
+    "noShowReports": 1,
+    "averageRating": 4.7,
+    "reviewThanksCount": 3
+  },
+  "locationParts": {...},
+  "privacySettings": {...},
+  ...
+}
+```
+
+
+
+## ✅ Cloud Function 계산 개념
+
+### Trigger
+
+- `onWrite` → 거래 상태 `completed` → `marketplaceStats` 업데이트
+    
+- 리뷰 작성 → `reviewThanksCount` +1
+    
+- 신고/분쟁 접수 → `noShowReports` +1
+    
+
+### 계산 흐름 (개념)
+
+
+```ts
+trustScore =  
+기본 프로필 점수
+
+- Kelurahan 인증
+    
+- RT/RW 인증
+    
+- 전화번호 인증
+    
+- 프로필 완성도
+    
+- 감사 수
+    
+- 거래 완료 수 * 5
+    
+- 거래 보너스
+    
+- 별점 보너스
+    
+- 리뷰 감사
+    
+
+- 노쇼 신고 * 30
+    
+- 거래 취소율 >= 30% ? 20 : 0
+    
+- 악성 후기 * 20
+
+```
+
+
+
+---
+
+## ✅ 표시 정책
+
+|화면|표시 방법|
+|---|---|
+|Feed/댓글|기존 TrustLevel 뱃지 (Verified/Trusted)|
+|Drawer|닉네임 + TrustLevel 뱃지 + TrustScore|
+|MyProfile|TrustScore Badge + Breakdown Modal|
+|Breakdown Modal|거래 신뢰도 세부 항목 포함|
+|Breakdown UI|`거래 완료: 12건 (+60)`, `평점: 4.7 (+20)`, `노쇼: 1회 (-30)`|
+
+---
+
+## ✅ 운영 정책
+
+- 노쇼/취소율이 일정 기준 초과 → 자동 강등 → 관리자 승인 전까지 거래 제한
+    
+- 신뢰 점수 조작 방지: 동일 UID 반복 거래 감시
+    
+- 관리자 수동 신뢰등급 강등/승격 가능
+
+
+
+

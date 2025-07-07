@@ -137,7 +137,7 @@ TrustLevel은  Keluharan(Kel.) 인증, 위치, 활동 지표로 자동 계산되
 | 등급 | 조건                          |
 | ------ | --------------------------- |
 | 🟢 일반 | 닉네임만 등록                     |
-| 🟡 인증 |  Keluharan(Kel.)  인증, 실명 등록 |
+| 🟡 인증 |  Keluharan(Kel.)  인증, 전화번호 인증 |
 | 🔵 고신뢰 | 인증 + 활동점수 + 신고 없음           
 
 - 신고/활동내역으로 자동 하향/상향
@@ -169,7 +169,8 @@ Bling은  Keluharan(Kel.)  기반 슈퍼앱으로, 사용자 정보(User Info)�
 
 ---
 
-## ✅ 사용자(User) 필드 표준 구조
+## ✅ 사용자(User) 필드 표준 구조 - 최종 user 필드 스키마는 /lib/core/models/user_model.dart 가 최신이므로 이를 참조 할것 (아래는 초기버전 구성 예시임). 
+
 
 | 필드명              | 타입        | 설명                                             |
 | ---------------- | --------- | ---------------------------------------------- |
@@ -198,7 +199,7 @@ Bling은  Keluharan(Kel.)  기반 슈퍼앱으로, 사용자 정보(User Info)�
 |등급| 조건                         |주요 특징|
 | ----------- | -------------------------- | --------------------- |
 |🟢 normal| 닉네임만 등록                    |기본 기능 사용|
-|🟡 verified| Keluharan(Kec.) 인증 + 실명 등록 |댓글/이웃 탐색 활성화|
+|🟡 verified| Keluharan(Kec.) 인증 + 전화번호 인증 |댓글/이웃 탐색 활성화|
 |🔵 trusted| 일정 활동점수 + 감사 + 무신고 상태      |Feed/Market 상단 노출 우선권|
 
 - TrustLevel은 `trustScore`, `thanksReceived`, `reportCount` 등으로 자동 계산됩니다.
@@ -268,6 +269,132 @@ Feed, Marketplace, Club 등 모든 모듈과 연결됩니다.
 ---
 
 
+---
+
+## ✅ 목적
+
+지역 기반 Bling 사용자 신뢰를 보다 현실적이고 공정하게 측정하기 위해  
+기존의 기본 인증 요소(프로필, RT/RW, Kelurahan, 전화번호) 외에  
+**Marketplace 거래 신뢰 지표**를 핵심 가산점으로 포함한다.
+
+---
+
+## ✅ TrustScore 구성 항목 (v3)
+
+|항목|설명|가산/감산|
+|---|---|---|
+|Kelurahan 인증|RT Peer Review 포함|+50|
+|RT/RW 입력|자가 입력|+50|
+|전화번호 인증|OTP 인증 완료|+100|
+|프로필 완성도|사진/닉네임/Bio 100%|+50|
+|받은 감사|Feed 감사 1회당|+10|
+|거래 완료|실거래 1건당|+5|
+|거래 5건 달성 추가 보너스||+30|
+|평균 별점 유지|4.5 이상|+20|
+|후기 중 감사 포함|1건당|+5|
+|노쇼 신고|1회당|-30|
+|거래 취소율 30% 이상||-20|
+|악성 후기|1회당|-20|
+|관리자 강제 분쟁 처리|케이스별|-20 ~|
+
+---
+
+## ✅ DB 스키마 예시
+
+```json
+users/{uid} {
+...
+  "trustScore": 265,
+  "trustLevel": "verified",
+  "thanksReceived": 4,
+  "marketplaceStats": {
+    "completedDeals": 12,
+    "cancelledDeals": 3,
+    "noShowReports": 1,
+    "averageRating": 4.7,
+    "reviewThanksCount": 3
+  },
+  "locationParts": {...},
+  "privacySettings": {...},
+  ...
+}
+```
+
+
+
+## ✅ Cloud Function 계산 개념
+
+### Trigger
+
+- `onWrite` → 거래 상태 `completed` → `marketplaceStats` 업데이트
+    
+- 리뷰 작성 → `reviewThanksCount` +1
+    
+- 신고/분쟁 접수 → `noShowReports` +1
+    
+
+### 계산 흐름 (개념)
+
+
+```ts
+trustScore =  
+기본 프로필 점수
+
+- Kelurahan 인증
+    
+- RT/RW 인증
+    
+- 전화번호 인증
+    
+- 프로필 완성도
+    
+- 감사 수
+    
+- 거래 완료 수 * 5
+    
+- 거래 보너스
+    
+- 별점 보너스
+    
+- 리뷰 감사
+    
+
+- 노쇼 신고 * 30
+    
+- 거래 취소율 >= 30% ? 20 : 0
+    
+- 악성 후기 * 20
+
+```
+
+
+
+---
+
+## ✅ 표시 정책
+
+|화면|표시 방법|
+|---|---|
+|Feed/댓글|기존 TrustLevel 뱃지 (Verified/Trusted)|
+|Drawer|닉네임 + TrustLevel 뱃지 + TrustScore|
+|MyProfile|TrustScore Badge + Breakdown Modal|
+|Breakdown Modal|거래 신뢰도 세부 항목 포함|
+|Breakdown UI|`거래 완료: 12건 (+60)`, `평점: 4.7 (+20)`, `노쇼: 1회 (-30)`|
+
+---
+
+## ✅ 운영 정책
+
+- 노쇼/취소율이 일정 기준 초과 → 자동 강등 → 관리자 승인 전까지 거래 제한
+    
+- 신뢰 점수 조작 방지: 동일 UID 반복 거래 감시
+    
+- 관리자 수동 신뢰등급 강등/승격 가능
+
+
+
+
+---
 
 
 # 3_20.  user_Field_컬렉션_구조_제안
@@ -317,7 +444,7 @@ Ayo 프로젝트는 Nextdoor 구조를 현지화하여
 ## 🔄 상위-하위 흐름 구조
 
 ```mermaid
-flowchart TD
+flowchart LR
  A["users/{uid}"]
   A --> B["profile 필드"]
   A --> C["settings"]
@@ -473,7 +600,7 @@ Bling은 Keluharan 기반 지역 슈퍼앱으로, 사용자(User) 정보는
 
 
 
-## ✅ 하위 컬렉션 구조
+## ✅ 기타 컬렉션 구조
 
 |컬렉션|내용|
 |---|---|
@@ -538,13 +665,14 @@ Bling User 필드 표준은 Keluharan 기반 지역성, 신뢰성, 개인화 추
 - TrustLevel 자동화 흐름 포함
 
 
+
 // lib/core/models/user_model.dart
 // Bling App v0.4
 // 새로운 구조의 작동 방식
 // 초기 상태: 모든 사용자는 matchProfile 필드 없이 가입합니다.
 // 기능 활성화: 사용자가 'Find Friend' 탭에서 데이팅 기능을 사용하기로 **동의(Opt-in)**하면, 앱은 성별, 연령대 등을 입력받아 matchProfile 맵을 생성하고, privacySettings에 { 'isDatingProfileActive': true } 와 같은 플래그를 저장합니다.
 // 공개/비공개 제어: privacySettings의 플래그 값에 따라 데이팅 프로필의 노출 여부를 완벽하게 제어할 수 있습니다.
-// 이처럼 UserModel을 수정하면, 보스께서 기획하신 유연한 프로필 공개/비공개 정책을 완벽하게 구현할 수 있습니다. 
+
 
 // lib/core/models/user_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -671,3 +799,6 @@ class UserModel {
     };
   }
 }
+
+
+
