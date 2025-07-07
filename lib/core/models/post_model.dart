@@ -19,6 +19,7 @@ class PostModel {
   final int likesCount;
   final int commentsCount;
   final int viewsCount;
+  final int thanksCount; // 추가된 필드
 
   PostModel({
     required this.id,
@@ -36,6 +37,7 @@ class PostModel {
     this.likesCount = 0,
     this.commentsCount = 0,
     this.viewsCount = 0,
+    this.thanksCount = 0, // 생성자에 추가
   });
 
   /// Firestore 문서로부터 PostModel 객체를 생성합니다.
@@ -59,6 +61,7 @@ class PostModel {
       likesCount: data['likesCount'] ?? 0,
       commentsCount: data['commentsCount'] ?? 0,
       viewsCount: data['viewsCount'] ?? 0,
+      thanksCount: data['thanksCount'] ?? 0, // Firestore에서 데이터 읽기
     );
   }
 
@@ -79,6 +82,7 @@ class PostModel {
       'likesCount': likesCount,
       'commentsCount': commentsCount,
       'viewsCount': viewsCount,
+      'thanksCount': thanksCount, // Firestore에 데이터 쓰기
     };
   }
 }

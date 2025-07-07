@@ -173,8 +173,13 @@ class PostCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 2),
+              // Text(
+              //   '${user.locationName ?? "지역 미설정"} • ${_formatTime(post.createdAt.toDate())}',
+              //   style: const TextStyle(color: Colors.grey, fontSize: 12),
+              // ),
               Text(
-                '${user.locationName ?? "지역 미설정"} • ${_formatTime(post.createdAt.toDate())}',
+                // locationParts 맵에서 'kel' 값을 가져오고, 없으면 '지역 미설정'을 표시합니다.
+                '${user.locationParts?['kel']?.replaceFirst('Kel. ', '') ?? '지역 미설정'}(Kel.) • ${_formatTime(post.createdAt.toDate())}',
                 style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
             ],
@@ -185,7 +190,6 @@ class PostCard extends StatelessWidget {
     );
   }
 
-
   Widget _buildActionButtons() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -194,6 +198,16 @@ class PostCard extends StatelessWidget {
             icon: Icons.thumb_up_alt_outlined, label: '${post.likesCount}'),
         _buildActionButton(
             icon: Icons.chat_bubble_outline, label: '${post.commentsCount}'),
+        const SizedBox(width: 8),
+        TextButton.icon(
+          onPressed: () {},
+          icon: Icon(Icons.redeem_outlined, size: 20, color: Colors.grey[600]),
+          label: Text('${post.thanksCount}',
+              style: TextStyle(color: Colors.grey[800])),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+          ),
+        ),
         _buildActionButton(icon: Icons.share_outlined, label: 'Share'),
       ],
     );

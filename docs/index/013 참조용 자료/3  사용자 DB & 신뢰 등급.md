@@ -137,7 +137,7 @@ TrustLevel은  Keluharan(Kel.) 인증, 위치, 활동 지표로 자동 계산되
 | 등급 | 조건                          |
 | ------ | --------------------------- |
 | 🟢 일반 | 닉네임만 등록                     |
-| 🟡 인증 |  Keluharan(Kel.)  인증, 실명 등록 |
+| 🟡 인증 |  Keluharan(Kel.)  인증, 전화번호 인증 |
 | 🔵 고신뢰 | 인증 + 활동점수 + 신고 없음           
 
 - 신고/활동내역으로 자동 하향/상향
@@ -198,7 +198,7 @@ Bling은  Keluharan(Kel.)  기반 슈퍼앱으로, 사용자 정보(User Info)�
 |등급| 조건                         |주요 특징|
 | ----------- | -------------------------- | --------------------- |
 |🟢 normal| 닉네임만 등록                    |기본 기능 사용|
-|🟡 verified| Keluharan(Kec.) 인증 + 실명 등록 |댓글/이웃 탐색 활성화|
+|🟡 verified| Keluharan(Kec.) 인증 + 전화번호 인증 |댓글/이웃 탐색 활성화|
 |🔵 trusted| 일정 활동점수 + 감사 + 무신고 상태      |Feed/Market 상단 노출 우선권|
 
 - TrustLevel은 `trustScore`, `thanksReceived`, `reportCount` 등으로 자동 계산됩니다.
