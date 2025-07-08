@@ -16,6 +16,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/models/user_model.dart';
@@ -378,63 +379,227 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildAppDrawer(User? user) {
-    // if (user == null) return const Drawer();
-    // return Drawer(
-    //   child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-    //     stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
-    //     builder: (context, snapshot) {
-    //       if (!snapshot.hasData) {
-    //         return const Center(child: CircularProgressIndicator());
-    //       }
-    //       final userModel = UserModel.fromFirestore(snapshot.data!);
-
     return Drawer(
-     child: ListView(
-       padding: EdgeInsets.zero,
-       children: [
-         // user가 null이면 UserAccountsDrawerHeader를 그리지 않습니다.
-         if (user != null)
-           StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-             stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
-             builder: (context, snapshot) {
-               if (!snapshot.hasData || snapshot.data?.data() == null) {
-                 return UserAccountsDrawerHeader(accountName: Text("..."), accountEmail: Text("..."));
-               }
-               final userModel = UserModel.fromFirestore(snapshot.data!);
-               return UserAccountsDrawerHeader(
-                 accountName: Text(userModel.nickname, style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                 accountEmail: Text(userModel.email, style: GoogleFonts.inter()),
-                 currentAccountPicture: CircleAvatar(
-                   backgroundImage: (userModel.photoUrl != null && userModel.photoUrl!.startsWith('http')) ? NetworkImage(userModel.photoUrl!) : null,
-                   child: (userModel.photoUrl == null || !userModel.photoUrl!.startsWith('http')) ? const Icon(Icons.person, size: 40) : null,
-                 ),
-               );
-             },
-           ),
-         ListTile(leading: const Icon(Icons.edit_outlined), title: Text('drawer.editProfile'.tr()), onTap: () {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const ProfileEditScreen()),
+      child: user == null
+          ? const SizedBox.shrink()
+          : StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user.uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || snapshot.data?.data() == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final userModel = UserModel.fromFirestore(snapshot.data!);
+
+                return ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    DrawerHeader(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF6A1B9A), // 원하는 보라색
+                      ),
+                      margin: EdgeInsets.zero,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min, // ✅ Overflow 방지 핵심
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            radius: 30,
+                            backgroundImage: (userModel.photoUrl != null &&
+                                    userModel.photoUrl!.startsWith('http'))
+                                ? NetworkImage(userModel.photoUrl!)
+                                : null,
+                            child: (userModel.photoUrl == null ||
+                                    !userModel.photoUrl!.startsWith('http'))
+                                ? const Icon(Icons.person, size: 30)
+                                : null,
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              // ✅ Flexible 제거, 대신 TextOverflow만 유지
+                              Text(
+                                userModel.nickname,
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(width: 8),
+                              TrustLevelBadge(
+                                trustLevel: userModel.trustLevel,
+                                showText: true,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '(${userModel.trustScore})',
+                                style: GoogleFonts.inter(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            userModel.email,
+                            style: GoogleFonts.inter(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // --- Trust Score Dashboard Section ---
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.military_tech, color: Colors.brown),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'drawer.trustDashboard.title'.tr(),
+                              style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              minimumSize: Size(0, 0), // 최소 크기 제한 해제
+                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => const TrustScoreBreakdownModal(),
+                              );
+                            },
+                            child: Text(
+                              'drawer.trustDashboard.breakdownButton'.tr(),
+                              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildTrustInfoTile(
+                      icon: Icons.location_city,
+                      titleKey: 'drawer.trustDashboard.kelurahanAuth',
+                      isCompleted: userModel.locationParts?['kel'] != null,
+                    ),
+                    _buildTrustInfoTile(
+                      icon: Icons.home_work_outlined,
+                      titleKey: 'drawer.trustDashboard.rtRwAuth',
+                      isCompleted: userModel.locationParts?['rt'] != null,
+                    ),
+                    _buildTrustInfoTile(
+                      icon: Icons.phone_android,
+                      titleKey: 'drawer.trustDashboard.phoneAuth',
+                      isCompleted: userModel.phoneNumber != null && userModel.phoneNumber!.isNotEmpty,
+                    ),
+                    _buildTrustInfoTile(
+                      icon: Icons.verified_user,
+                      titleKey: 'drawer.trustDashboard.profileComplete',
+                      isCompleted: userModel.profileCompleted == true,
+                    ),
+                    const Divider(),
+                    ListTile(
+                      leading: const Icon(Icons.edit_outlined),
+                      title: Text('drawer.editProfile'.tr()),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const ProfileEditScreen()),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: Text('drawer.logout'.tr()),
+                      onTap: () async {
+                        if (mounted) Navigator.pop(context);
+                        await FirebaseAuth.instance.signOut();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
     );
-  }),
-         ListTile(leading: const Icon(Icons.bookmark_border), title: Text('drawer.bookmarks'.tr()), onTap: () => Navigator.pop(context)),
-         const Divider(),
-         ListTile(
-           leading: const Icon(Icons.cloud_upload_outlined),
-           title: Text('drawer.uploadSampleData'.tr()),
-           onTap: () { /* ... */ },
-         ),
-         const Divider(),
-         ListTile(
-           leading: const Icon(Icons.logout),
-           title: Text('drawer.logout'.tr()),
-           onTap: () async {
-             // 로그아웃 전에 모든 리스너가 정리될 시간을 주기 위해 pop을 먼저 호출할 수 있습니다.
-             if(mounted) Navigator.pop(context); 
-             await FirebaseAuth.instance.signOut();
-           },
-         ),
-       ],
-     ),
-   );
- }
+  }
+
+  Widget _buildTrustInfoTile({
+    required IconData icon,
+    required String titleKey,
+    required bool isCompleted,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: isCompleted ? Colors.teal : Colors.grey),
+      title: Text(titleKey.tr(), style: GoogleFonts.inter(fontSize: 15)),
+      trailing: Icon(
+        isCompleted ? Icons.check_circle : Icons.cancel,
+        color: isCompleted ? Colors.green : Colors.grey,
+        size: 22,
+      ),
+    );
+  }
+}
+
+// --- TrustScoreBreakdownModal Widget ---
+class TrustScoreBreakdownModal extends StatelessWidget {
+  const TrustScoreBreakdownModal({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('drawer.trustDashboard.breakdownModalTitle'.tr(),
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _breakdownRow('drawer.trustDashboard.kelurahanAuth', 'drawer.trustDashboard.breakdown.kelurahanAuth'),
+          _breakdownRow('drawer.trustDashboard.rtRwAuth', 'drawer.trustDashboard.breakdown.rtRwAuth'),
+          _breakdownRow('drawer.trustDashboard.phoneAuth', 'drawer.trustDashboard.breakdown.phoneAuth'),
+          _breakdownRow('drawer.trustDashboard.profileComplete', 'drawer.trustDashboard.breakdown.profileComplete'),
+          const Divider(),
+          _breakdownRow('drawer.trustDashboard.feedThanks', 'drawer.trustDashboard.breakdown.feedThanks'),
+          _breakdownRow('drawer.trustDashboard.marketThanks', 'drawer.trustDashboard.breakdown.marketThanks'),
+          _breakdownRow('drawer.trustDashboard.reports', 'drawer.trustDashboard.breakdown.reports'),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text('drawer.trustDashboard.breakdownClose'.tr()),
+        ),
+      ],
+    );
+  }
+
+  Widget _breakdownRow(String labelKey, String valueKey) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Expanded(child: Text(labelKey.tr(), style: GoogleFonts.inter())),
+          Text(valueKey.tr(), style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
 }

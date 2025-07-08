@@ -85,7 +85,29 @@
         "editProfile": "프로필 수정",
         "bookmarks": "관심목록",
         "uploadSampleData": "샘플 데이터 올리기",
-        "logout": "로그아웃"
+        "logout": "로그아웃",
+        "trustDashboard": {
+            "title": "나의 신뢰 인증 현황",
+            "kelurahanAuth": "동네 인증 (Kelurahan)",
+            "rtRwAuth": "상세 주소 인증 (RT/RW)",
+            "phoneAuth": "전화번호 인증",
+            "profileComplete": "프로필 완성",
+            "feedThanks": "피드 감사",
+            "reports": "신고",
+            "marketThanks": "마켓 감사",
+            "breakdownButton": "상세보기",
+            "breakdownModalTitle": "신뢰 점수 산정 기준",
+            "breakdownClose": "확인",
+            "breakdown": {
+                "kelurahanAuth": "+50",
+                "rtRwAuth": "+50",
+                "phoneAuth": "+100",
+                "profileComplete": "+50",
+                "feedThanks": "+10 per",
+                "marketThanks": "+20 per",
+                "reports": "-50 per"
+            }
+        }
     },
     
     "marketplace": {
