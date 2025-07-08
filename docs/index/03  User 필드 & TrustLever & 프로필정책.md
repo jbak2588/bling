@@ -134,11 +134,11 @@ TrustLevel은  Keluharan(Kel.) 인증, 위치, 활동 지표로 자동 계산되
 
 ## ✅ 자동 등급 정책
 
-| 등급 | 조건                          |
-| ------ | --------------------------- |
-| 🟢 일반 | 닉네임만 등록                     |
-| 🟡 인증 |  Keluharan(Kel.)  인증, 전화번호 인증 |
-| 🔵 고신뢰 | 인증 + 활동점수 + 신고 없음           
+| 등급     | 조건                           |
+| ------ | ---------------------------- |
+| 🟢 일반  | 닉네임만 등록                      |
+| 🟡 인증  | Keluharan(Kel.)  인증, 전화번호 인증 |
+| 🔵 고신뢰 | 인증 + 활동점수 + 신고 없음            |
 
 - 신고/활동내역으로 자동 하향/상향
 - Dart 모델: `trustLevel` 필드 + `calculateTrustScore()` 로직 적용
@@ -169,8 +169,7 @@ Bling은  Keluharan(Kel.)  기반 슈퍼앱으로, 사용자 정보(User Info)�
 
 ---
 
-## ✅ 사용자(User) 필드 표준 구조 - 최종 user 필드 스키마는 /lib/core/models/user_model.dart 가 최신이므로 이를 참조 할것 (아래는 초기버전 구성 예시임). 
-
+## ✅ 사용자(User) 필드 표준 구조
 
 | 필드명              | 타입        | 설명                                             |
 | ---------------- | --------- | ---------------------------------------------- |
@@ -199,7 +198,7 @@ Bling은  Keluharan(Kel.)  기반 슈퍼앱으로, 사용자 정보(User Info)�
 |등급| 조건                         |주요 특징|
 | ----------- | -------------------------- | --------------------- |
 |🟢 normal| 닉네임만 등록                    |기본 기능 사용|
-|🟡 verified| Keluharan(Kec.) 인증 + 전화번호 인증 |댓글/이웃 탐색 활성화|
+|🟡 verified| Keluharan(Kec.) 인증 + 실명 등록 |댓글/이웃 탐색 활성화|
 |🔵 trusted| 일정 활동점수 + 감사 + 무신고 상태      |Feed/Market 상단 노출 우선권|
 
 - TrustLevel은 `trustScore`, `thanksReceived`, `reportCount` 등으로 자동 계산됩니다.
@@ -211,16 +210,71 @@ Bling은  Keluharan(Kel.)  기반 슈퍼앱으로, 사용자 정보(User Info)�
 
 ## ✅ 등급 계산 예시 로직
 
-```dart
-String getTrustLevel(User user) {
-  if (user.trustScore >= 70 && user.thanksReceived >= 5 && user.reportCount <= 1) {
-    return 'trusted';
-  } else if (user.realName != null && user.verifiedNeighborhood == true) {
-    return 'verified';
-  } else {
-    return 'normal';
-  }
-}
+
+functions-v2/index.js
+```js
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+admin.initializeApp();
+
+exports.calculateTrustScore = functions.firestore
+    .document("users/{userId}")
+    .onUpdate(async (change, context) => {
+      const userData = change.after.data();
+      const previousUserData = change.before.data();
+
+      const mainFieldsUnchanged =
+        userData.thanksReceived === previousUserData.thanksReceived &&
+        userData.reportCount === previousUserData.reportCount &&
+        userData.profileCompleted === previousUserData.profileCompleted &&
+        userData.phoneNumber === previousUserData.phoneNumber &&
+        JSON.stringify(userData.locationParts) ===
+          JSON.stringify(previousUserData.locationParts);
+
+      if (mainFieldsUnchanged) {
+        functions.logger.info("No score-related changes, exiting.");
+        return null;
+      }
+
+      let score = 0;
+      if (userData.locationParts && userData.locationParts.kel) score += 50;
+      if (userData.locationParts && userData.locationParts.rt) score += 50;
+      if (userData.phoneNumber && userData.phoneNumber.length > 0) score += 100;
+      if (userData.profileCompleted === true) score += 50;
+
+      const thanksCount = userData.thanksReceived || 0;
+      score += thanksCount * 10;
+
+      const reportCount = userData.reportCount || 0;
+      score -= reportCount * 50;
+
+      const finalScore = Math.max(0, score);
+
+      let level = "normal";
+      if (finalScore > 500) {
+        level = "trusted";
+      } else if (finalScore > 100) {
+        level = "verified";
+      }
+
+      if (
+        finalScore !== userData.trustScore ||
+        level !== userData.trustLevel
+      ) {
+        functions.logger.info(
+            // eslint-disable-next-line max-len
+            `Updating user ${context.params.userId}: New Score = ${finalScore}, New Level = ${level}`,
+        );
+        return change.after.ref.update({
+          trustScore: finalScore,
+          trustLevel: level,
+        });
+      }
+
+      functions.logger.info("No score or level change needed.");
+      return null;
+    });
+
 ```
 
 
@@ -269,132 +323,6 @@ Feed, Marketplace, Club 등 모든 모듈과 연결됩니다.
 ---
 
 
----
-
-## ✅ 목적
-
-지역 기반 Bling 사용자 신뢰를 보다 현실적이고 공정하게 측정하기 위해  
-기존의 기본 인증 요소(프로필, RT/RW, Kelurahan, 전화번호) 외에  
-**Marketplace 거래 신뢰 지표**를 핵심 가산점으로 포함한다.
-
----
-
-## ✅ TrustScore 구성 항목 (v3)
-
-|항목|설명|가산/감산|
-|---|---|---|
-|Kelurahan 인증|RT Peer Review 포함|+50|
-|RT/RW 입력|자가 입력|+50|
-|전화번호 인증|OTP 인증 완료|+100|
-|프로필 완성도|사진/닉네임/Bio 100%|+50|
-|받은 감사|Feed 감사 1회당|+10|
-|거래 완료|실거래 1건당|+5|
-|거래 5건 달성 추가 보너스||+30|
-|평균 별점 유지|4.5 이상|+20|
-|후기 중 감사 포함|1건당|+5|
-|노쇼 신고|1회당|-30|
-|거래 취소율 30% 이상||-20|
-|악성 후기|1회당|-20|
-|관리자 강제 분쟁 처리|케이스별|-20 ~|
-
----
-
-## ✅ DB 스키마 예시
-
-```json
-users/{uid} {
-...
-  "trustScore": 265,
-  "trustLevel": "verified",
-  "thanksReceived": 4,
-  "marketplaceStats": {
-    "completedDeals": 12,
-    "cancelledDeals": 3,
-    "noShowReports": 1,
-    "averageRating": 4.7,
-    "reviewThanksCount": 3
-  },
-  "locationParts": {...},
-  "privacySettings": {...},
-  ...
-}
-```
-
-
-
-## ✅ Cloud Function 계산 개념
-
-### Trigger
-
-- `onWrite` → 거래 상태 `completed` → `marketplaceStats` 업데이트
-    
-- 리뷰 작성 → `reviewThanksCount` +1
-    
-- 신고/분쟁 접수 → `noShowReports` +1
-    
-
-### 계산 흐름 (개념)
-
-
-```ts
-trustScore =  
-기본 프로필 점수
-
-- Kelurahan 인증
-    
-- RT/RW 인증
-    
-- 전화번호 인증
-    
-- 프로필 완성도
-    
-- 감사 수
-    
-- 거래 완료 수 * 5
-    
-- 거래 보너스
-    
-- 별점 보너스
-    
-- 리뷰 감사
-    
-
-- 노쇼 신고 * 30
-    
-- 거래 취소율 >= 30% ? 20 : 0
-    
-- 악성 후기 * 20
-
-```
-
-
-
----
-
-## ✅ 표시 정책
-
-|화면|표시 방법|
-|---|---|
-|Feed/댓글|기존 TrustLevel 뱃지 (Verified/Trusted)|
-|Drawer|닉네임 + TrustLevel 뱃지 + TrustScore|
-|MyProfile|TrustScore Badge + Breakdown Modal|
-|Breakdown Modal|거래 신뢰도 세부 항목 포함|
-|Breakdown UI|`거래 완료: 12건 (+60)`, `평점: 4.7 (+20)`, `노쇼: 1회 (-30)`|
-
----
-
-## ✅ 운영 정책
-
-- 노쇼/취소율이 일정 기준 초과 → 자동 강등 → 관리자 승인 전까지 거래 제한
-    
-- 신뢰 점수 조작 방지: 동일 UID 반복 거래 감시
-    
-- 관리자 수동 신뢰등급 강등/승격 가능
-
-
-
-
----
 
 
 # 3_20.  user_Field_컬렉션_구조_제안
@@ -411,19 +339,36 @@ Ayo 프로젝트는 Nextdoor 구조를 현지화하여
 
 ## 🔑 최상위 필드 (users/{uid})
 
-| 필드명 | 설명                                     |
-|--------|------|
-| uid | 고유 Firebase Auth UID                   |
-| nickname | 닉네임                                    |
-| trustLevel | regular / verified / trusted / flagged |
-| createdAt | 가입 시각                                  |
-| lastActive | 마지막 활동 시각                              |
-| locationName | Keluharan(Kel.) + Kecamatan            |
-| photoUrl | 프로필 사진                                 |
-| bio | 한 줄 소개                                 |
-| interests | 관심사                                    |
-| isProfilePublic | 프로필 공개 여부                              |
-| isMapVisible | 지도 공개 여부                               |
+## ✅ 사용자 필드 목록
+
+| 필드명                    | 타입                      | 예시                                      | 설명                                                                  |
+| ---------------------- | ----------------------- | --------------------------------------- | ------------------------------------------------------------------- |
+| `uid`                  | `String`                | `"xyz123"`                              | Firebase Auth UID                                                   |
+| `nickname`             | `String`                | `"Planner님"`                            | 사용자 닉네임                                                             |
+| `email`                | `String`                | `"user@example.com"`                    | 사용자 이메일                                                             |
+| `phoneNumber`          | `String?`               | `"0812-3456-7890"`                      | 전화번호 (인증 시 높은 신뢰 점수 획득)                                             |
+| `photoUrl`             | `String?`               | `"https://..."`                         | 프로필 사진 URL                                                          |
+| `bio`                  | `String?`               | `"간단한 소개"`                              | 자기소개                                                                |
+| `trustLevel`           | `String`                | `"normal"` / `"verified"` / `"trusted"` | 신뢰 단계                                                               |
+| `trustScore`           | `int`                   | `200`                                   | 신뢰 점수                                                               |
+| `feedThanksReceived`   | `int`                   | `5`                                     | 피드 활동으로 받은 '감사' 횟수                                                  |
+| `marketThanksReceived` | `int`                   | `3`                                     | 마켓 거래로 받은 '감사' 횟수                                                   |
+| `locationName`         | `String?`               | `"Jakarta Selatan"`                     | 사용자 지역 이름                                                           |
+| `locationParts`        | `Map<String, dynamic>?` | `{ "prov": "DKI", "kab": "Jakarta" }`   | 지역 단계별 파트                                                           |
+| `geoPoint`             | `GeoPoint?`             | `{ "lat": -6.2, "lng": 106.8 }`         | 위도/경도                                                               |
+| `interests`            | `List<String>?`         | `["음식", "여행"]`                          | 관심사                                                                 |
+| `privacySettings`      | `Map<String, dynamic>?` | `{ "isMapVisible": true }`              | 공개 설정                                                               |
+| `postIds`              | `List<String>?`         | `["post123"]`                           | 내가 작성한 글 ID 리스트                                                     |
+| `productIds`           | `List<String>?`         | `["product123"]`                        | 내가 등록한 상품 ID 리스트                                                    |
+| `bookmarkedPostIds`    | `List<String>?`         | `["post123"]`                           | 북마크한 글 ID                                                           |
+| `bookmarkedProductIds` | `List<String>?`         | `["product123"]`                        | 북마크한 상품 ID                                                          |
+| `thanksReceived`       | `int`                   | `4`                                     | 감사 횟수 (deprecated: feedThanksReceived, marketThanksReceived로 대체 권장) |
+| `reportCount`          | `int`                   | `1`                                     | 신고 횟수                                                               |
+| `isBanned`             | `bool`                  | `false`                                 | 계정 정지 여부                                                            |
+| `blockedUsers`         | `List<String>?`         | `["uid123"]`                            | 차단한 사용자 리스트                                                         |
+| `profileCompleted`     | `bool`                  | `true`                                  | 프로필 완성 여부                                                           |
+| `matchProfile`         | `Map<String, dynamic>?` | `{ "gender": "M", "age": 33 }`          | 매칭용 프로필                                                             |
+| `createdAt`            | `Timestamp`             | `"2025-07-08T14:00:00Z"`                | 생성일                                                                 |
 
 ---
 
@@ -542,24 +487,36 @@ Bling은 Keluharan 기반 지역 슈퍼앱으로, 사용자(User) 정보는
 
 ## ✅ 사용자 기본 필드 구조
 
-| 필드명              | 타입        | 설명                                               |     |     |
-| ---------------- | --------- | ------------------------------------------------ | --- | --- |
-| uid              | String    | Firebase UID                                     |     |     |
-| nickname         | String    | 닉네임                                              |     |     |
-| trustLevel       | String    | normal, verified, trusted                        |     |     |
-| locationName     | String    | Singkatan 포함 전체 주소 표시 (예: Kel., Kec., Kab.)      |     |     |
-| locationParts    | Map       | 단계별 주소 구조 (Kabupaten → Kec. → Kel. → 옵션: RT/RW ) |     |     |
-| geoPoint         | GeoPoint  | 좌표                                               |     |     |
-| photoUrl         | String    | 프로필 이미지                                          |     |     |
-| bio              | String    | 자기소개                                             |     |     |
-| interests        | List      | 관심사                                              |     |     |
-| privacySettings  | Map       | 개인정보 공개 설정                                       |     |     |
-| thanksReceived   | int       | 감사 수                                             |     |     |
-| reportCount      | int       | 신고 수                                             |     |     |
-| isBanned         | Boolean   | 정지 여부                                            |     |     |
-| blockedUsers     | List      | 차단 목록                                            |     |     |
-| profileCompleted | Boolean   | 지연 활성화 여부                                        |     |     |
-| createdAt        | Timestamp | 가입일                                              |     |     |
+## ✅ 사용자 필드 목록
+
+| 필드명                    | 타입                      | 예시                                      | 설명                                                                  |
+| ---------------------- | ----------------------- | --------------------------------------- | ------------------------------------------------------------------- |
+| `uid`                  | `String`                | `"xyz123"`                              | Firebase Auth UID                                                   |
+| `nickname`             | `String`                | `"Planner님"`                            | 사용자 닉네임                                                             |
+| `email`                | `String`                | `"user@example.com"`                    | 사용자 이메일                                                             |
+| `phoneNumber`          | `String?`               | `"0812-3456-7890"`                      | 전화번호 (인증 시 높은 신뢰 점수 획득)                                             |
+| `photoUrl`             | `String?`               | `"https://..."`                         | 프로필 사진 URL                                                          |
+| `bio`                  | `String?`               | `"간단한 소개"`                              | 자기소개                                                                |
+| `trustLevel`           | `String`                | `"normal"` / `"verified"` / `"trusted"` | 신뢰 단계                                                               |
+| `trustScore`           | `int`                   | `200`                                   | 신뢰 점수                                                               |
+| `feedThanksReceived`   | `int`                   | `5`                                     | 피드 활동으로 받은 '감사' 횟수                                                  |
+| `marketThanksReceived` | `int`                   | `3`                                     | 마켓 거래로 받은 '감사' 횟수                                                   |
+| `locationName`         | `String?`               | `"Jakarta Selatan"`                     | 사용자 지역 이름                                                           |
+| `locationParts`        | `Map<String, dynamic>?` | `{ "prov": "DKI", "kab": "Jakarta" }`   | 지역 단계별 파트                                                           |
+| `geoPoint`             | `GeoPoint?`             | `{ "lat": -6.2, "lng": 106.8 }`         | 위도/경도                                                               |
+| `interests`            | `List<String>?`         | `["음식", "여행"]`                          | 관심사                                                                 |
+| `privacySettings`      | `Map<String, dynamic>?` | `{ "isMapVisible": true }`              | 공개 설정                                                               |
+| `postIds`              | `List<String>?`         | `["post123"]`                           | 내가 작성한 글 ID 리스트                                                     |
+| `productIds`           | `List<String>?`         | `["product123"]`                        | 내가 등록한 상품 ID 리스트                                                    |
+| `bookmarkedPostIds`    | `List<String>?`         | `["post123"]`                           | 북마크한 글 ID                                                           |
+| `bookmarkedProductIds` | `List<String>?`         | `["product123"]`                        | 북마크한 상품 ID                                                          |
+| `thanksReceived`       | `int`                   | `4`                                     | 감사 횟수 (deprecated: feedThanksReceived, marketThanksReceived로 대체 권장) |
+| `reportCount`          | `int`                   | `1`                                     | 신고 횟수                                                               |
+| `isBanned`             | `bool`                  | `false`                                 | 계정 정지 여부                                                            |
+| `blockedUsers`         | `List<String>?`         | `["uid123"]`                            | 차단한 사용자 리스트                                                         |
+| `profileCompleted`     | `bool`                  | `true`                                  | 프로필 완성 여부                                                           |
+| `matchProfile`         | `Map<String, dynamic>?` | `{ "gender": "M", "age": 33 }`          | 매칭용 프로필                                                             |
+| `createdAt`            | `Timestamp`             | `"2025-07-08T14:00:00Z"`                | 생성일                                                                 |
 
 ## ✅ locationParts 저장 예시
 
@@ -600,7 +557,7 @@ Bling은 Keluharan 기반 지역 슈퍼앱으로, 사용자(User) 정보는
 
 
 
-## ✅ 기타 컬렉션 구조
+## ✅ 하위 컬렉션 구조
 
 |컬렉션|내용|
 |---|---|
@@ -665,14 +622,13 @@ Bling User 필드 표준은 Keluharan 기반 지역성, 신뢰성, 개인화 추
 - TrustLevel 자동화 흐름 포함
 
 
-
 // lib/core/models/user_model.dart
 // Bling App v0.4
 // 새로운 구조의 작동 방식
 // 초기 상태: 모든 사용자는 matchProfile 필드 없이 가입합니다.
 // 기능 활성화: 사용자가 'Find Friend' 탭에서 데이팅 기능을 사용하기로 **동의(Opt-in)**하면, 앱은 성별, 연령대 등을 입력받아 matchProfile 맵을 생성하고, privacySettings에 { 'isDatingProfileActive': true } 와 같은 플래그를 저장합니다.
 // 공개/비공개 제어: privacySettings의 플래그 값에 따라 데이팅 프로필의 노출 여부를 완벽하게 제어할 수 있습니다.
-
+// 이처럼 UserModel을 수정하면, 보스께서 기획하신 유연한 프로필 공개/비공개 정책을 완벽하게 구현할 수 있습니다. 
 
 // lib/core/models/user_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -692,9 +648,25 @@ class UserModel {
   final List<String>? postIds;
   final List<String>? productIds;
   final List<String>? bookmarkedPostIds;
-  // ▼▼▼▼▼ 찜한 상품 ID 목록을 저장할 필드 추가 ▼▼▼▼▼
   final List<String>? bookmarkedProductIds;
+
+  // --- Trust System Fields ---
+
+  /// 최종 신뢰 점수 (Cloud Function에 의해 자동 계산됨)
+  final int trustScore;
+
+  /// 전화번호 (인증 시 높은 신뢰 점수 획득)
+  final String? phoneNumber;
+
+  /// 피드 활동으로 받은 '감사' 수
+  final int feedThanksReceived;
+
+  /// 마켓 거래로 받은 '감사' 수
+  final int marketThanksReceived;
+
+  /// 전체 '감사' 수 (feed + market, UI 표시용)
   final int thanksReceived;
+
   final int reportCount;
   final bool isBanned;
   final List<String>? blockedUsers;
@@ -717,7 +689,11 @@ class UserModel {
     this.postIds,
     this.productIds,
     this.bookmarkedPostIds,
-    this.bookmarkedProductIds, // 생성자에 추가
+    this.bookmarkedProductIds,
+    this.trustScore = 0,
+    this.phoneNumber,
+    this.feedThanksReceived = 0,
+    this.marketThanksReceived = 0,
     this.thanksReceived = 0,
     this.reportCount = 0,
     this.isBanned = false,
@@ -728,7 +704,7 @@ class UserModel {
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data()!;
+    final data = doc.data() ?? {};
     return UserModel(
       uid: data['uid'] ?? '',
       nickname: data['nickname'] ?? '',
@@ -757,7 +733,11 @@ class UserModel {
           : null,
       bookmarkedProductIds: data['bookmarkedProductIds'] != null
           ? List<String>.from(data['bookmarkedProductIds'])
-          : null, // 데이터 변환 로직 추가
+          : null,
+      trustScore: data['trustScore'] ?? 0,
+      phoneNumber: data['phoneNumber'],
+      feedThanksReceived: data['feedThanksReceived'] ?? 0,
+      marketThanksReceived: data['marketThanksReceived'] ?? 0,
       thanksReceived: data['thanksReceived'] ?? 0,
       reportCount: data['reportCount'] ?? 0,
       isBanned: data['isBanned'] ?? false,
@@ -765,7 +745,9 @@ class UserModel {
           ? List<String>.from(data['blockedUsers'])
           : null,
       profileCompleted: data['profileCompleted'] ?? false,
-      createdAt: data['createdAt'] ?? Timestamp.now(),
+      createdAt: data['createdAt'] is Timestamp
+          ? data['createdAt']
+          : (data['createdAt'] != null ? Timestamp.fromMillisecondsSinceEpoch(data['createdAt']) : Timestamp.now()),
       matchProfile: data['matchProfile'] != null
           ? Map<String, dynamic>.from(data['matchProfile'])
           : null,
@@ -788,7 +770,11 @@ class UserModel {
       'postIds': postIds,
       'productIds': productIds,
       'bookmarkedPostIds': bookmarkedPostIds,
-      'bookmarkedProductIds': bookmarkedProductIds, // 직렬화에 추가
+      'bookmarkedProductIds': bookmarkedProductIds,
+      'trustScore': trustScore,
+      'phoneNumber': phoneNumber,
+      'feedThanksReceived': feedThanksReceived,
+      'marketThanksReceived': marketThanksReceived,
       'thanksReceived': thanksReceived,
       'reportCount': reportCount,
       'isBanned': isBanned,
@@ -802,3 +788,102 @@ class UserModel {
 
 
 
+
+
+---
+
+### ## 📝 신뢰 점수 시스템 최종 수정안 (v2)
+
+#### **반영된 주요 결정사항**
+
+- **동네 인증 점수 세분화**:
+    
+    - **Kelurahan (마을) 인증 (+50점)**: 모든 커뮤니티 활동의 필수 조건으로, 기본 점수를 부여합니다.
+        
+    - **RT/RW (상세 주소) 인증 (+50점)**: 더 깊은 신뢰 관계 형성을 장려하기 위한 추가 보너스 점수를 부여합니다.
+        
+- **RT/RW 인증의 한계점 인지**: 보스 말씀대로, 현재 시스템에서 사용자가 입력한 RT/RW를 행정적으로 검증할 방법은 없습니다. 따라서, 초기에는 **'사용자의 자가 입력(self-declaration)에 기반한 신뢰 점수'**로 부여하고, 추후 '이웃들의 교차 인증' 같은 고도화된 기능으로 보완할 수 있습니다.
+    
+
+#### **수정된 신뢰 점수(`trustScore`) 계산 로직**
+
+|항목|점수|설명|
+|---|---|---|
+|**(필수) 동네 인증 (Kelurahan)**|**+50**|커뮤니티 활동의 기본 조건.|
+|**(선택) 상세 주소 인증 (RT/RW)**|**+50**|**[수정]** 더 깊은 신뢰도. 현재는 사용자 자가 입력을 기준으로 부여.|
+|**(선택) 전화번호 인증**|**+100**|계정의 신뢰도를 대폭 향상시키는 핵심 인증.|
+|**(필수) 프로필 완성**|**+50**|사진, 자기소개 등 기본 정보 입력 완료 시.|
+|**(활동) 피드 감사 획득**|**+10**|유용한 정보 공유에 대한 보상.|
+|**(활동) 마켓 감사 획득**|**+20**|신뢰도 높은 거래에 대한 강력한 보상.|
+|**(페널티) 신고 받음**|**-50**|신뢰도를 깎는 가장 직접적인 요인.|
+
+---
+
+
+firebase functions 서버 index.js
+
+```js
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+admin.initializeApp();
+
+exports.calculateTrustScore = functions.firestore
+    .document("users/{userId}")
+    .onUpdate(async (change, context) => {
+      const userData = change.after.data();
+      const previousUserData = change.before.data();
+
+      const mainFieldsUnchanged =
+        userData.thanksReceived === previousUserData.thanksReceived &&
+        userData.reportCount === previousUserData.reportCount &&
+        userData.profileCompleted === previousUserData.profileCompleted &&
+        userData.phoneNumber === previousUserData.phoneNumber &&
+        JSON.stringify(userData.locationParts) ===
+          JSON.stringify(previousUserData.locationParts);
+
+      if (mainFieldsUnchanged) {
+        functions.logger.info("No score-related changes, exiting.");
+        return null;
+      }
+
+      let score = 0;
+      if (userData.locationParts && userData.locationParts.kel) score += 50;
+      if (userData.locationParts && userData.locationParts.rt) score += 50;
+      if (userData.phoneNumber && userData.phoneNumber.length > 0) score += 100;
+      if (userData.profileCompleted === true) score += 50;
+
+      const thanksCount = userData.thanksReceived || 0;
+      score += thanksCount * 10;
+
+      const reportCount = userData.reportCount || 0;
+      score -= reportCount * 50;
+
+      const finalScore = Math.max(0, score);
+
+      let level = "normal";
+      if (finalScore > 500) {
+        level = "trusted";
+      } else if (finalScore > 100) {
+        level = "verified";
+      }
+
+      if (
+        finalScore !== userData.trustScore ||
+        level !== userData.trustLevel
+      ) {
+        functions.logger.info(
+            // eslint-disable-next-line max-len
+            `Updating user ${context.params.userId}: New Score = ${finalScore}, New Level = ${level}`,
+        );
+        return change.after.ref.update({
+          trustScore: finalScore,
+          trustLevel: level,
+        });
+      }
+
+      functions.logger.info("No score or level change needed.");
+      return null;
+    });
+
+
+```
