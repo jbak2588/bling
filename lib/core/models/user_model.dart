@@ -24,9 +24,25 @@ class UserModel {
   final List<String>? postIds;
   final List<String>? productIds;
   final List<String>? bookmarkedPostIds;
-  // ▼▼▼▼▼ 찜한 상품 ID 목록을 저장할 필드 추가 ▼▼▼▼▼
   final List<String>? bookmarkedProductIds;
+
+  // --- Trust System Fields ---
+
+  /// 최종 신뢰 점수 (Cloud Function에 의해 자동 계산됨)
+  final int trustScore;
+
+  /// 전화번호 (인증 시 높은 신뢰 점수 획득)
+  final String? phoneNumber;
+
+  /// 피드 활동으로 받은 '감사' 수
+  final int feedThanksReceived;
+
+  /// 마켓 거래로 받은 '감사' 수
+  final int marketThanksReceived;
+
+  /// 전체 '감사' 수 (feed + market, UI 표시용)
   final int thanksReceived;
+
   final int reportCount;
   final bool isBanned;
   final List<String>? blockedUsers;
@@ -49,7 +65,11 @@ class UserModel {
     this.postIds,
     this.productIds,
     this.bookmarkedPostIds,
-    this.bookmarkedProductIds, // 생성자에 추가
+    this.bookmarkedProductIds,
+    this.trustScore = 0,
+    this.phoneNumber,
+    this.feedThanksReceived = 0,
+    this.marketThanksReceived = 0,
     this.thanksReceived = 0,
     this.reportCount = 0,
     this.isBanned = false,
@@ -60,7 +80,7 @@ class UserModel {
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data()!;
+    final data = doc.data() ?? {};
     return UserModel(
       uid: data['uid'] ?? '',
       nickname: data['nickname'] ?? '',
@@ -89,7 +109,11 @@ class UserModel {
           : null,
       bookmarkedProductIds: data['bookmarkedProductIds'] != null
           ? List<String>.from(data['bookmarkedProductIds'])
-          : null, // 데이터 변환 로직 추가
+          : null,
+      trustScore: data['trustScore'] ?? 0,
+      phoneNumber: data['phoneNumber'],
+      feedThanksReceived: data['feedThanksReceived'] ?? 0,
+      marketThanksReceived: data['marketThanksReceived'] ?? 0,
       thanksReceived: data['thanksReceived'] ?? 0,
       reportCount: data['reportCount'] ?? 0,
       isBanned: data['isBanned'] ?? false,
@@ -97,7 +121,9 @@ class UserModel {
           ? List<String>.from(data['blockedUsers'])
           : null,
       profileCompleted: data['profileCompleted'] ?? false,
-      createdAt: data['createdAt'] ?? Timestamp.now(),
+      createdAt: data['createdAt'] is Timestamp
+          ? data['createdAt']
+          : (data['createdAt'] != null ? Timestamp.fromMillisecondsSinceEpoch(data['createdAt']) : Timestamp.now()),
       matchProfile: data['matchProfile'] != null
           ? Map<String, dynamic>.from(data['matchProfile'])
           : null,
@@ -120,7 +146,11 @@ class UserModel {
       'postIds': postIds,
       'productIds': productIds,
       'bookmarkedPostIds': bookmarkedPostIds,
-      'bookmarkedProductIds': bookmarkedProductIds, // 직렬화에 추가
+      'bookmarkedProductIds': bookmarkedProductIds,
+      'trustScore': trustScore,
+      'phoneNumber': phoneNumber,
+      'feedThanksReceived': feedThanksReceived,
+      'marketThanksReceived': marketThanksReceived,
       'thanksReceived': thanksReceived,
       'reportCount': reportCount,
       'isBanned': isBanned,

@@ -142,6 +142,15 @@ class _MyBlingScreenState extends State<MyBlingScreen>
                     ),
                     const SizedBox(width: 6),
                     TrustLevelBadge(trustLevel: user.trustLevel),
+                    const SizedBox(width: 4),
+                    Text(
+                      '(${user.trustScore})',
+                      style: GoogleFonts.inter(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 6),

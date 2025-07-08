@@ -86,7 +86,29 @@
         "editProfile": "Edit Profile",
         "bookmarks": "Bookmarks",
         "uploadSampleData": "Upload Sample Data",
-        "logout": "Logout"
+        "logout": "Logout",
+        "trustDashboard": {
+            "title": "My Trust Verification",
+            "kelurahanAuth": "Neighborhood Verified (Kelurahan)",
+            "rtRwAuth": "Detailed Address Verified (RT/RW)",
+            "phoneAuth": "Phone Number Verified",
+            "profileComplete": "Profile Complete",
+            "feedThanks": "Feed Thanks",
+            "marketThanks": " Market Thanks",
+            "reports": "Reports",
+            "breakdownButton": "Details",
+            "breakdownModalTitle": "Trust Score Breakdown",
+            "breakdownClose": "OK",
+            "breakdown": {
+                "kelurahanAuth": "+50",
+                "rtRwAuth": "+50",
+                "phoneAuth": "+100",
+                "profileComplete": "+50",
+                "feedThanks": "+10 per",
+                "marketThanks": "+20 per",
+                "reports": "-50 per"
+            }
+        }
     },
 
     "marketplace": {

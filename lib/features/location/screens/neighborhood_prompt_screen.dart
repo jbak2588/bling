@@ -107,11 +107,11 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
                 .collection('users')
                 .doc(user.uid)
                 .set({
-              'locationName': fullAddress,
-              'locationParts': locationMap,
-              'geoPoint': geoPoint,
-              'neighborhoodVerified': true,
-            }, SetOptions(merge: true));
+                  'locationName': fullAddress,
+                  'locationParts': locationMap,
+                  'geoPoint': geoPoint,
+                  'neighborhoodVerified': true,
+                }, SetOptions(merge: true));
 
             // 6. AuthGate가 화면을 전환하도록 기다립니다 (pop 호출 없음)
             if (mounted) {

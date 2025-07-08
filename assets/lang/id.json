@@ -85,7 +85,29 @@
         "editProfile": "Ubah Profil",
         "bookmarks": "Markah",
         "uploadSampleData": "Unggah Data Sampel",
-        "logout": "Keluar"
+        "logout": "Keluar",
+        "trustDashboard": {
+            "title": "Status Verifikasi Kepercayaan Saya",
+            "kelurahanAuth": "Verifikasi Kelurahan",
+            "rtRwAuth": "Verifikasi Alamat Detail (RT/RW)",
+            "phoneAuth": "Verifikasi Nomor Telepon",
+            "profileComplete": "Profil Lengkap",
+            "feedThanks": "Feed Thanks",
+            "marketThanks": " Market Thanks",
+            "reports": "Reports",
+            "breakdownButton": "Detail",
+            "breakdownModalTitle": "Rincian Skor Kepercayaan",
+            "breakdownClose": "OK",
+            "breakdown": {
+                "kelurahanAuth": "+50",
+                "rtRwAuth": "+50",
+                "phoneAuth": "+100",
+                "profileComplete": "+50",
+                "feedThanks": "+10 per",
+                "marketThanks": "+20 per",
+                "reports": "-50 per"
+            }
+        }
     },
     "marketplace": {
         "error": "Terjadi kesalahan: {error}",

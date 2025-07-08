@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
+
 import '../../../core/constants/app_categories.dart';
 import '../../../core/models/post_model.dart';
 import '../../../core/models/user_model.dart';
@@ -19,18 +21,23 @@ class PostDetailScreen extends StatefulWidget {
   State<PostDetailScreen> createState() => _PostDetailScreenState();
 }
 class _PostDetailScreenState extends State<PostDetailScreen> {
-  // ... (initState 및 다른 모든 함수는 이전과 동일)
+  // ...existing state...
   bool _isLiked = false;
   late int _likesCount;
   bool _likeLoading = false;
   String? _activeReplyCommentId;
   late int _commentCount;
 
+  // Thanks state
+  late int _thanksCount;
+  bool _isThanksProcessing = false;
+
   @override
   void initState() {
     super.initState();
     _likesCount = widget.post.likesCount;
     _commentCount = widget.post.commentsCount;
+    _thanksCount = widget.post.thanksCount;
     _checkLiked();
     _increaseViewsCount();
   }
@@ -129,6 +136,108 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     });
   }
 
+  // Step 1: Add the 'Thanks' button to the UI
+  Widget _buildPostStats() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        TextButton.icon(
+          onPressed: _likeLoading ? null : _toggleLike,
+          icon: Icon(
+            _isLiked ? Icons.favorite : Icons.favorite_border,
+            color: _isLiked ? Colors.red : Colors.grey,
+            size: 20,
+          ),
+          label: Text('$_likesCount', style: const TextStyle(color: Colors.black)),
+        ),
+        // Thanks Button
+        TextButton.icon(
+          onPressed: _isThanksProcessing ? null : _toggleThanks,
+          icon: const Icon(Icons.redeem_outlined, size: 20, color: Colors.orange),
+          label: Text('$_thanksCount', style: const TextStyle(color: Colors.black)),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.remove_red_eye_outlined, size: 20, color: Colors.grey),
+            const SizedBox(width: 4),
+            Text('${widget.post.viewsCount + 1}'),
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.chat_bubble_outline, size: 20, color: Colors.grey),
+            const SizedBox(width: 4),
+            Text('$_commentCount'),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Step 2: Implement the logic for the Thanks button
+  Future<void> _toggleThanks() async {
+    if (_isThanksProcessing) return;
+    setState(() => _isThanksProcessing = true);
+
+    final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserUid == null) {
+      setState(() => _isThanksProcessing = false);
+      return;
+    }
+
+    // Prevent users from thanking their own posts
+    if (currentUserUid == widget.post.userId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You cannot thank your own post.')),
+      );
+      setState(() => _isThanksProcessing = false);
+      return;
+    }
+
+    final postRef = FirebaseFirestore.instance.collection('posts').doc(widget.post.id);
+    final authorRef = FirebaseFirestore.instance.collection('users').doc(widget.post.userId);
+    final thanksRef = postRef.collection('thanks').doc(currentUserUid);
+
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final postSnap = await transaction.get(postRef);
+        final authorSnap = await transaction.get(authorRef);
+        final thanksDoc = await transaction.get(thanksRef);
+
+        if (!postSnap.exists || !authorSnap.exists) {
+          throw Exception('Post or author not found');
+        }
+
+        final currentThanks = (postSnap.data()?['thanksCount'] ?? 0) as int;
+        final currentReceived = (authorSnap.data()?['thanksReceived'] ?? 0) as int;
+
+        if (thanksDoc.exists) {
+          // Un-thank: decrement counts and remove thanks record
+          transaction.update(postRef, {'thanksCount': currentThanks > 0 ? currentThanks - 1 : 0});
+          transaction.update(authorRef, {'thanksReceived': currentReceived > 0 ? currentReceived - 1 : 0});
+          transaction.delete(thanksRef);
+          setState(() {
+            if (_thanksCount > 0) _thanksCount -= 1;
+          });
+        } else {
+          // Thank: increment counts and add thanks record
+          transaction.update(postRef, {'thanksCount': currentThanks + 1});
+          transaction.update(authorRef, {'thanksReceived': currentReceived + 1});
+          transaction.set(thanksRef, {'thankedAt': FieldValue.serverTimestamp()});
+          setState(() {
+            _thanksCount += 1;
+          });
+        }
+      });
+    } catch (e) {
+      // Optionally show a snackbar or error
+    } finally {
+      if (mounted) setState(() => _isThanksProcessing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // [추가] 게시물 카테고리 정보를 찾습니다.
@@ -220,8 +329,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user.nickname,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Row(
+                    children: [
+                      Text(user.nickname,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 4),
+                      TrustLevelBadge(
+                        trustLevel: user.trustLevel,
+                        showText: true,
+                      ),
+                    ],
+                  ),
                   Text(user.locationName ?? '지역 미설정',
                       style: const TextStyle(color: Colors.grey, fontSize: 12)),
                 ],
@@ -229,40 +347,5 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             ],
           );
         });
-  }
-
-  Widget _buildPostStats() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        TextButton.icon(
-          onPressed: _likeLoading ? null : _toggleLike,
-          icon: Icon(
-            _isLiked ? Icons.favorite : Icons.favorite_border,
-            color: _isLiked ? Colors.red : Colors.grey,
-            size: 20,
-          ),
-          label:
-              Text('$_likesCount', style: const TextStyle(color: Colors.black)),
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.remove_red_eye_outlined,
-                size: 20, color: Colors.grey),
-            const SizedBox(width: 4),
-            Text('${widget.post.viewsCount + 1}'),
-          ],
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.chat_bubble_outline, size: 20, color: Colors.grey),
-            const SizedBox(width: 4),
-            Text('$_commentCount'),
-          ],
-        ),
-      ],
-    );
   }
 }

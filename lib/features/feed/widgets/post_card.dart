@@ -1,5 +1,6 @@
 // lib/features/feed/widgets/post_card.dart
 // Bling App v0.4
+import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -149,7 +150,6 @@ class PostCard extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 22,
-          // ▼▼▼▼▼ URL 유효성 검사 추가 ▼▼▼▼▼
           backgroundImage:
               (user.photoUrl != null && user.photoUrl!.startsWith('http'))
                   ? NetworkImage(user.photoUrl!)
@@ -169,16 +169,14 @@ class PostCard extends StatelessWidget {
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 15)),
                   const SizedBox(width: 4),
-                  _buildTrustLevelBadge(user.trustLevel),
+                  TrustLevelBadge(
+                    trustLevel: user.trustLevel,
+                    showText: false,
+                  ),
                 ],
               ),
               const SizedBox(height: 2),
-              // Text(
-              //   '${user.locationName ?? "지역 미설정"} • ${_formatTime(post.createdAt.toDate())}',
-              //   style: const TextStyle(color: Colors.grey, fontSize: 12),
-              // ),
               Text(
-                // locationParts 맵에서 'kel' 값을 가져오고, 없으면 '지역 미설정'을 표시합니다.
                 '${user.locationParts?['kel']?.replaceFirst('Kel. ', '') ?? '지역 미설정'}(Kel.) • ${_formatTime(post.createdAt.toDate())}',
                 style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
@@ -221,24 +219,6 @@ class PostCard extends StatelessWidget {
       style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 12)),
     );
-  }
-
-  Widget _buildTrustLevelBadge(String trustLevel) {
-    IconData icon;
-    Color color;
-    switch (trustLevel) {
-      case 'verified':
-        icon = Icons.verified;
-        color = Colors.blue;
-        break;
-      case 'trusted':
-        icon = Icons.shield;
-        color = Colors.green;
-        break;
-      default:
-        return const SizedBox.shrink();
-    }
-    return Icon(icon, color: color, size: 16);
   }
 
   String _formatTime(DateTime time) {
