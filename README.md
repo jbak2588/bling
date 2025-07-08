@@ -92,7 +92,6 @@ lib
 │   │       └── local_stores_screen.dart
 │   ├── location
 │   │   └── screens
-│   │       ├── location_search_screen.dart
 │   │       ├── location_setting_screen.dart
 │   │       └── neighborhood_prompt_screen.dart
 │   ├── main_screen
@@ -130,10 +129,20 @@ lib
 │   │   └── screens
 │   │       └── real_estate_screen.dart
 │   └── shared
-│       └── controllers
-│           └── locale_controller.dart
+│       ├── controllers
+│       │   └── locale_controller.dart
+│       └── widgets
+│           └── trust_level_badge.dart
 ├── firebase_options.dart
-├── main.dart
+└── main.dart
+
+pubspec.yaml
+functions-v2
+├── index.js
+├── node_modules
+├── package-lock.json
+├── package.json
+└── pglite-debug.log
 ├── pubspec.yaml
 ├── README.md
 ├── docs
