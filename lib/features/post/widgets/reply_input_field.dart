@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart'; 
 
 class ReplyInputField extends StatefulWidget {
   final String postId;
@@ -41,7 +42,7 @@ class _ReplyInputFieldState extends State<ReplyInputField> {
 
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception('로그인이 필요합니다.');
+      if (user == null) throw Exception('main.errors.loginRequired'.tr());
 
       // [수정] userName 저장 로직 제거
       await FirebaseFirestore.instance
@@ -62,8 +63,9 @@ class _ReplyInputFieldState extends State<ReplyInputField> {
       FocusScope.of(context).unfocus();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('답글 등록 실패: $e')));
+ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('replyInputField.failure'
+              .tr(namedArgs: {'error': e.toString()}))));
     }
     if (mounted) setState(() => _isSubmitting = false);
   }
@@ -87,12 +89,13 @@ class _ReplyInputFieldState extends State<ReplyInputField> {
             autofocus: true,
             minLines: 1,
             maxLines: 3,
-            decoration: const InputDecoration(
-              hintText: '답글을 입력하세요',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              // ✅ [다국어 수정]
+              hintText: 'replyInputField.hintText'.tr(),
+              border: const OutlineInputBorder(),
               isDense: true,
               contentPadding:
-                  EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             enabled: !_isSubmitting,
             onSubmitted: (_) => _submitReply(),

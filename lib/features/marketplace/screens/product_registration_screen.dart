@@ -3,7 +3,7 @@
 import 'dart:io';
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:bling_app/features/categories/screens/parent_category_screen.dart';
-import 'package:bling_app/features/marketplace/domain/product_model.dart';
+import 'package:bling_app/features/marketplace/domain/product_model_old.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,6 +15,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
+
+// ✅ [추가] UserModel을 사용하기 위해 import 합니다.
+import '../../../../core/models/user_model.dart';
 
 class ProductRegistrationScreen extends StatefulWidget {
   const ProductRegistrationScreen({super.key});
@@ -39,9 +42,14 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   Category? _selectedCategory;
   Position? _currentPosition;
 
+  // ✅ [수정] ProductModel에 있던 Geo 관련 클래스를 여기로 다시 가져옵니다.
+  // 이 클래스들은 독립적으로 존재해야 합니다.
+  late GeoFlutterFire geo;
+
   @override
   void initState() {
     super.initState();
+    geo = GeoFlutterFire(); // GeoFlutterFire 인스턴스 초기화
     _checkLocationAndPermission();
   }
 
@@ -129,38 +137,40 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
       return;
     }
 
     try {
+      // ✅ [핵심 수정] 현재 사용자의 프로필 정보를 가져와서 위치 데이터를 확보합니다.
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
+      final userModel = UserModel.fromFirestore(userDoc);
+
       List<String> imageUrls = [];
       for (var image in _images) {
         final fileName = const Uuid().v4();
-        final ref = FirebaseStorage.instance.ref().child(
-              'product_images/$fileName',
-            );
-        final uploadTask = ref.putFile(File(image.path));
-        final snapshot = await uploadTask;
-        imageUrls.add(await snapshot.ref.getDownloadURL());
+        final ref =
+            FirebaseStorage.instance.ref().child('product_images/$fileName');
+        await ref.putFile(File(image.path));
+        imageUrls.add(await ref.getDownloadURL());
       }
 
-      final geo = GeoFlutterFire();
-      final point = geo.point(
-        latitude: _currentPosition?.latitude ?? 0.0,
-        longitude: _currentPosition?.longitude ?? 0.0,
-      );
+      final geoPoint = userModel.geoPoint ?? GeoPoint(0, 0);
+      final point =
+          geo.point(latitude: geoPoint.latitude, longitude: geoPoint.longitude);
 
       final newProductId =
           FirebaseFirestore.instance.collection('products').doc().id;
+
+      // ✅ [핵심 수정] Product 모델을 생성할 때, 컨트롤러의 텍스트 대신 userModel의 데이터를 사용합니다.
       final newProduct = Product(
         id: newProductId,
         imageUrls: imageUrls,
@@ -169,13 +179,13 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         categoryId: _selectedCategory!.id,
         price: int.tryParse(_priceController.text) ?? 0,
         negotiable: _isNegotiable,
-        address: _addressController.text,
+        address: userModel.locationName ?? '', // UserModel에서 가져온 주소 이름
         transactionPlace: _transactionPlaceController.text,
-        geo: point,
+        geo: point, // UserModel의 geoPoint로 생성
         status: 'selling',
         isAiVerified: false,
         userId: user.uid,
-        userName: user.displayName ?? "Bling User",
+        userName: userModel.nickname, // UserModel에서 가져온 닉네임
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       );
@@ -194,14 +204,12 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('상품 등록 실패: $e')), // 개발자용 에러
+          SnackBar(content: Text('상품 등록 실패: $e')),
         );
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -210,7 +218,6 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
     if (category == null) {
       return 'selectCategory'.tr();
     }
-    // easy_localization의 현재 로케일을 가져옵니다.
     final langCode = context.locale.languageCode;
     switch (langCode) {
       case 'ko':
@@ -313,18 +320,12 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _addressController,
-                readOnly: true,
+                readOnly: true, // 사용자가 직접 수정하지 못하도록 설정
                 decoration: InputDecoration(
                   labelText: 'address_neighborhood'.tr(),
                   prefixIcon: const Icon(Icons.location_on_outlined),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.my_location),
-                    onPressed: _getCurrentLocation,
-                  ),
                 ),
-                validator: (value) => (value == null || value.isEmpty)
-                    ? 'err_required_field'.tr()
-                    : null,
+                // validator 제거 (자동으로 가져오므로)
               ),
               const SizedBox(height: 16),
               TextFormField(

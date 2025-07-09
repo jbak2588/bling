@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../core/models/user_model.dart';
 
 class FindFriendsScreen extends StatelessWidget {
-  const FindFriendsScreen({super.key});
-
+  final UserModel? userModel;
+  const FindFriendsScreen({this.userModel, super.key});
   @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('친구/애인찾기 화면'));
-  }
+  Widget build(BuildContext context) =>
+      const Center(child: Text('Find Friends Screen'));
 }

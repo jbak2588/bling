@@ -1,19 +1,21 @@
 // lib/features/feed/screens/feed_screen.dart
-// Bling App v0.4
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // [추가] Firestore 관련 타입 사용을 위해 import
 
-// 새로운 모델과 리포지토리를 import 합니다.
+import 'package:bling_app/core/models/user_model.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
+
 import '../../../core/models/feed_item_model.dart';
 import '../../../core/models/post_model.dart';
 import '../../../core/models/product_model.dart';
 import '../data/feed_repository.dart';
 import '../widgets/post_card.dart';
-import '../../marketplace/widgets/product_card.dart'; // [수정] 이제 실제로 사용됩니다.
+import '../../marketplace/widgets/product_card.dart';
 
 /// 'New Feed' 탭에 표시될 통합 피드 화면입니다.
 class FeedScreen extends StatefulWidget {
-  const FeedScreen({super.key});
+  final UserModel? userModel;
+  const FeedScreen({this.userModel, super.key});
 
   @override
   State<FeedScreen> createState() => _FeedScreenState();
@@ -45,10 +47,14 @@ class _FeedScreenState extends State<FeedScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('오류가 발생했습니다: ${snapshot.error}'));
+          // ✅ [다국어 수정] 'feed.error' 키를 사용하여 에러 메시지를 표시합니다.
+          return Center(
+              child: Text('feed.error'
+                  .tr(namedArgs: {'error': snapshot.error.toString()})));
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('새로운 소식이 없습니다.'));
+          // ✅ [다국어 수정] 'feed.empty' 키를 사용하여 안내 메시지를 표시합니다.
+          return Center(child: Text('feed.empty'.tr()));
         }
 
         final feedItems = snapshot.data!;
@@ -67,7 +73,6 @@ class _FeedScreenState extends State<FeedScreen> {
                       as DocumentSnapshot<Map<String, dynamic>>);
                   return PostCard(post: post);
                 case FeedItemType.product:
-                  // [수정] 임시 Text 위젯 대신, ProductCard를 사용하여 상품을 표시합니다.
                   final product = ProductModel.fromFirestore(item.originalDoc
                       as DocumentSnapshot<Map<String, dynamic>>);
                   return ProductCard(product: product);

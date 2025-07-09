@@ -109,12 +109,10 @@
             }
         }
     },
-    
     "marketplace": {
         "error": "오류가 발생했습니다: {error}",
         "empty": "등록된 상품이 없습니다.\n아래 + 버튼을 눌러 첫 상품을 등록해보세요!"
     },
-
     "myBling": {
         "title": "나의 Bling",
         "editProfile": "프로필 수정",
@@ -131,7 +129,6 @@
             "bookmarks": "관심목록"
         }
     },
-
     "prompt": {
         "title": "블링에 오신 것을 환영합니다!",
         "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
@@ -146,7 +143,6 @@
         "empty": "동네 이름을 입력해주세요.",
         "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
     },
-
     "profileEdit": {
         "title": "프로필 설정",
         "nicknameHint": "닉네임",
@@ -166,6 +162,142 @@
             "noUser": "로그인된 사용자가 없습니다.",
             "updateFailed": "프로필 업데이트에 실패했습니다: {error}"
         }
+    },
+    "feed": {
+        "error": "오류가 발생했습니다: {error}",
+        "empty": "새로운 소식이 없습니다."
+    },
+    "postCard": {
+        "locationNotSet": "지역 미설정"
+    },
+    "time": {
+        "now": "방금 전",
+        "minutesAgo": "{minutes}분 전",
+        "hoursAgo": "{hours}시간 전",
+        "daysAgo": "{days}일 전",
+        "dateFormat": "yy.MM.dd",
+        "dateFormatLong": "M월 d일"
+    },
+    "productCard": {
+        "currency": "$"
+    },
+    "localFeed": {
+        "setLoactionPrompt": "동네 소식을 보려면 먼저 내 동네를 설정해주세요!",
+        "allCategory": "전체",
+        "empty": "표시할 게시물이 없습니다."
+    },
+    "categories": {
+        "post": {
+            "daily_life": {
+                "name": "일상/궁금",
+                "description": "소소한 일상 이야기나 궁금한 점을 나눠보세요."
+            },
+            "help_share": {
+                "name": "도움/나눔",
+                "description": "도움이 필요하거나 나눌 물건이 있나요?"
+            },
+            "incident_report": {
+                "name": "사건/사고",
+                "description": "동네의 사건, 사고 소식을 공유해주세요."
+            },
+            "local_news": {
+                "name": "동네소식",
+                "description": "우리 동네의 새로운 소식이나 정보를 알려주세요."
+            },
+            "daily_question": {
+                "name": "질문있어요",
+                "description": "이웃에게 무엇이든 물어보세요."
+            },
+            "store_promo": {
+                "name": "가게홍보",
+                "description": "가게의 할인 정보나 이벤트를 홍보해보세요."
+            },
+            "etc": {
+                "name": "기타",
+                "description": "어디에도 속하지 않는 자유로운 이야기를 나눠요."
+            }
+        }
+    },
+    "createPost": {
+        "appBarTitle": "새 게시물 작성",
+        "form": {
+            "categoryLabel": "카테고리",
+            "titleLabel": "제목",
+            "contentLabel": "내용을 입력하세요",
+            "tagsLabel": "태그 (쉼표로 구분)",
+            "tagsHint": "예: 강아지, 무료나눔"
+        },
+        "buttons": {
+            "addImage": "이미지 추가",
+            "submit": "등록하기"
+        },
+        "alerts": {
+            "contentRequired": "내용을 입력해주세요.",
+            "categoryRequired": "카테고리를 선택해주세요.",
+            "success": "게시글이 등록되었습니다.",
+            "failure": "업로드 실패: {error}"
+        }
+    },
+    "postDetail": {
+        "appBarTitle": "게시물",
+        "menu": {
+            "edit": "수정하기",
+            "report": "신고하기",
+            "share": "공유하기"
+        },
+        "stats": {
+            "views": "조회",
+            "comments": "댓글",
+            "likes": "좋아요",
+            "thanks": "감사"
+        },
+        "buttons": {
+            "comment": "댓글 달기"
+        }
+    },
+    "editPost": {
+        "appBarTitle": "게시물 수정",
+        "buttons": {
+            "submit": "수정하기"
+        },
+        "alerts": {
+            "success": "게시물이 수정되었습니다.",
+            "failure": "수정 실패: {error}"
+        }
+    },
+    "commentInputField": {
+        "secretCommentLabel": "비밀댓글",
+        "hintText": "댓글을 입력하세요...",
+        "replyHintText": "{nickname}님에게 답글 남기기...",
+        "button": {
+            "send": "전송"
+        }
+    },
+
+    "commentListView": {
+        "empty": "아직 댓글이 없습니다. 첫 댓글을 남겨보세요!",
+        "reply": "답글",
+        "delete": "삭제",
+        "deleted": "[삭제된 댓글입니다]",
+        "secret": "작성자와 게시물 주인만 볼 수 있는 비밀 댓글입니다."
+    },
+
+    "common": {
+        "cancel": "취소",
+        "delete": "삭제"
+    },
+    "deleteConfirm": {
+        "title": "댓글 삭제",
+        "content": "정말 이 댓글을 삭제하시겠습니까?",
+        "failure": "댓글 삭제 실패: {error}"
+    },
+
+    "replyInputField": {
+        "hintText": "답글을 입력하세요",
+        "button": {
+            "send": "전송"
+        },
+        "failure": "답글 등록 실패: {error}"
     }
-   
+
 }

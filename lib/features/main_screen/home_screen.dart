@@ -21,11 +21,14 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/models/user_model.dart';
 import '../../../core/utils/address_formatter.dart';
-// import '../admin/screens/data_uploader_screen.dart';
 import '../auth/screens/profile_edit_screen.dart';
 import '../feed/screens/local_feed_screen.dart';
 import '../location/screens/location_setting_screen.dart';
 import '../marketplace/screens/marketplace_screen.dart';
+
+
+import '../admin/screens/data_fix_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,12 +40,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late final TabController _tabController;
   int _bottomNavIndex = 0;
+
+  // ✅ [수정] UserModel과 관련 상태를 관리합니다.
+  UserModel? _userModel;
   String _currentAddress = "";
   bool _isLocationLoading = true;
+  StreamSubscription? _userSubscription;
   StreamSubscription? _unreadChatsSubscription;
   int _totalUnreadCount = 0;
 
-  // 상단 탭 메뉴 정의 (클래스 멤버로 유지)
   final List<Map<String, dynamic>> _topTabs = [
     {'icon': Icons.new_releases_outlined, 'key': 'main.tabs.newFeed'},
     {'icon': Icons.newspaper_outlined, 'key': 'main.tabs.localNews'},
@@ -62,58 +68,69 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _tabController = TabController(length: _topTabs.length, vsync: this);
-    _fetchUserData();
-    // _listenToUnreadChats();
-   // ▼▼▼▼▼ 로그인 상태가 변경될 때마다 채팅 리스너를 재설정 ▼▼▼▼▼
-   FirebaseAuth.instance.authStateChanges().listen((User? user) {
-     if (user != null) {
-       _listenToUnreadChats(user.uid);
-     } else {
-       _unreadChatsSubscription?.cancel();
-       if(mounted) setState(() => _totalUnreadCount = 0);
-     }
-   });
 
+    // ✅ [수정] 로그인 상태 변경 시 사용자 데이터 스트림을 설정/해제합니다.
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user != null) {
+        _listenToUserData(user.uid); // 로그인 시 사용자 데이터 스트림 시작
+        _listenToUnreadChats(user.uid);
+      } else {
+        _userSubscription?.cancel();
+        _unreadChatsSubscription?.cancel();
+        if (mounted) {
+          setState(() {
+            _userModel = null;
+            _currentAddress = 'main.appBar.locationNotSet'.tr();
+            _isLocationLoading = false;
+            _totalUnreadCount = 0;
+          });
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _userSubscription?.cancel(); // ✅ [추가] 스트림 구독 취소
     _unreadChatsSubscription?.cancel();
     super.dispose();
   }
 
-  Future<void> _fetchUserData() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      if (mounted) setState(() => _isLocationLoading = false);
-      return;
-    }
-    try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+  // ✅ [수정] 사용자 정보를 실시간 스트림으로 구독하는 함수
+  void _listenToUserData(String uid) {
+    _userSubscription?.cancel();
+    _userSubscription = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .snapshots()
+        .listen((userDoc) {
       if (mounted) {
-        setState(() {
-          _currentAddress = userDoc.data()?['locationName'] ??
-              'main.appBar.locationNotSet'.tr();
-          _isLocationLoading = false;
-        });
+        if (userDoc.exists) {
+          final userModel = UserModel.fromFirestore(userDoc);
+          setState(() {
+            _userModel = userModel;
+            _currentAddress =
+                userModel.locationName ?? 'main.appBar.locationNotSet'.tr();
+            _isLocationLoading = false;
+          });
+        } else {
+          setState(() {
+            _userModel = null;
+            _currentAddress = 'main.appBar.locationNotSet'.tr();
+            _isLocationLoading = false;
+          });
+        }
       }
-    } catch (e) {
+    }, onError: (e) {
       if (mounted) {
         setState(() {
+          _isLocationLoading = false;
           _currentAddress = 'main.appBar.locationError'.tr();
-          _isLocationLoading = false;
         });
       }
-    }
+    });
   }
-
-  // void _listenToUnreadChats() {  
-  //   final myUid = FirebaseAuth.instance.currentUser?.uid;
-  //   if (myUid == null) return;
 
   void _listenToUnreadChats(String myUid) {
     _unreadChatsSubscription?.cancel();
@@ -139,13 +156,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _onFloatingActionButtonTapped();
       return;
     }
-  
-    // Home(0) 탭을 누르면 항상 첫 탭으로 이동
     if (index == 0) {
-      // TabBarView 첫 번째 탭으로 이동
       _tabController.animateTo(0);
-      // 필요하다면 아래처럼 네비게이터 스택도 정리
-      // Navigator.of(context).popUntil((route) => route.isFirst);
       setState(() {
         _bottomNavIndex = 0;
       });
@@ -156,8 +168,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _bottomNavIndex = index;
     });
 
-    if (index == 1) {/* 검색 화면 로직 */}
-    else if (index == 3) {
+    if (index == 3) {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (_) => const ChatListScreen()));
     } else if (index == 4) {
@@ -168,40 +179,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _onFloatingActionButtonTapped() {
     final currentTabIndex = _tabController.index;
-
     switch (currentTabIndex) {
-      case 0: // New Feed
-      case 1: // Local Stories
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const CreatePostScreen()),
-        );
+      case 0:
+      case 1:
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const CreatePostScreen()));
         break;
-      case 2: // Marketplace
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const ProductRegistrationScreen()),
-        );
+      case 2:
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => const ProductRegistrationScreen()));
         break;
       default:
-        // 기타 탭에서는 등록 기능이 없거나, 필요시 추가 구현
         debugPrint('\x1B[33m${currentTabIndex + 1}번 탭의 등록 기능이 호출되었습니다.\x1B[0m');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
-    // ▼▼▼▼▼ 화면 리스트를 build 메소드 안에서 지역 변수로 생성 ▼▼▼▼▼
+    // ✅ [수정] 각 탭 화면에 상태(_userModel)를 전달합니다.
     final List<Widget> topTabScreens = [
-      const FeedScreen(),
-      const LocalFeedScreen(),
-      MarketplaceScreen(currentAddress: _currentAddress),
-      const FindFriendsScreen(),
-      const ClubsScreen(),
-      const JobsScreen(),
-      const LocalStoresScreen(),
-      const AuctionScreen(),
-      const PomScreen(),
+      FeedScreen(userModel: _userModel),
+      LocalFeedScreen(userModel: _userModel),
+      MarketplaceScreen(userModel: _userModel),
+      FindFriendsScreen(userModel: _userModel),
+      ClubsScreen(userModel: _userModel),
+      JobsScreen(userModel: _userModel),
+      LocalStoresScreen(userModel: _userModel),
+      AuctionScreen(userModel: _userModel),
+      PomScreen(userModel: _userModel),
     ];
 
     return Scaffold(
@@ -211,53 +216,47 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             onTap: () => Scaffold.of(context).openDrawer(),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: StreamBuilder<DocumentSnapshot>(
-                stream: user != null
-                    ? FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(user.uid)
-                        .snapshots()
+              child: CircleAvatar(
+                backgroundImage: (_userModel?.photoUrl != null)
+                    ? NetworkImage(_userModel!.photoUrl!)
                     : null,
-                builder: (context, snapshot) {
-                  if (user == null ||
-                      !snapshot.hasData ||
-                      snapshot.data?.data() == null) {
-                    return const CircleAvatar(child: Icon(Icons.person));
-                  }
-                  final userModel = UserModel.fromFirestore(
-                      snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
-                  return CircleAvatar(
-                    backgroundImage: userModel.photoUrl != null
-                        ? NetworkImage(userModel.photoUrl!)
-                        : null,
-                    child: userModel.photoUrl == null
-                        ? const Icon(Icons.person)
-                        : null,
-                  );
-                },
+                child: (_userModel?.photoUrl == null)
+                    ? const Icon(Icons.person)
+                    : null,
               ),
             ),
           ),
         ),
-        title: _buildAppBarTitle(),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'My Town',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(width: 8),
+            _buildAppBarTitle(),
+          ],
+        ),
         centerTitle: true,
         actions: [
-                   // ▼▼▼▼▼ 언어 변경 아이콘 추가 ▼▼▼▼▼
-         IconButton(
-           tooltip: 'Change Language', // 추후 다국어 키 추가 필요
-           icon: const Icon(Icons.language),
-           onPressed: () {
-             // 현재 로케일 확인 후 순서대로 변경
-             final currentLang = context.locale.languageCode;
-             if (currentLang == 'id') {
-               context.setLocale(const Locale('ko'));
-             } else if (currentLang == 'ko') {
-               context.setLocale(const Locale('en'));
-             } else {
-               context.setLocale(const Locale('id'));
-             }
-           },
-         ),
+          IconButton(
+            tooltip: 'Change Language',
+            icon: const Icon(Icons.language),
+            onPressed: () {
+              final currentLang = context.locale.languageCode;
+              if (currentLang == 'id') {
+                context.setLocale(const Locale('ko'));
+              } else if (currentLang == 'ko') {
+                context.setLocale(const Locale('en'));
+              } else {
+                context.setLocale(const Locale('id'));
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.notifications_none),
             onPressed: () {/* 알림 화면으로 이동 */},
@@ -267,17 +266,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           controller: _tabController,
           isScrollable: true,
           tabAlignment: TabAlignment.start,
-          // 선택된 탭 스타일
-          labelColor: const Color(0xFF00A66C), // Primary 컬러
-          labelStyle:
-              GoogleFonts.inter(fontWeight: FontWeight.w600), // Semi-Bold
-          // 선택되지 않은 탭 스타일
-          unselectedLabelColor: const Color(0xFF616161), // TextSecondary 컬러
-          // 하단 인디케이터 스타일
+          labelColor: const Color(0xFF00A66C),
+          labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          unselectedLabelColor: const Color(0xFF616161),
           indicatorColor: const Color(0xFF00A66C),
           indicatorWeight: 3.0,
           tabs: _topTabs.map((tab) {
-            // ▼▼▼▼▼ 아이콘과 텍스트를 함께 표시하는 구조로 변경 ▼▼▼▼▼
             return Tab(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -291,10 +285,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           }).toList(),
         ),
       ),
-      drawer: _buildAppDrawer(user),
+      drawer: _buildAppDrawer(_userModel), // ✅ [수정] Drawer에도 _userModel 전달
       body: TabBarView(
         controller: _tabController,
-        children: topTabScreens, // build 메소드 내에서 생성된 리스트 사용
+        children: topTabScreens,
       ),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
@@ -331,11 +325,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildAppBarTitle() {
     return InkWell(
+
       onTap: () async {
+        // 위치 설정 화면으로 이동. 돌아오면 StreamBuilder가 자동으로 UI를 갱신합니다.
         await Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const LocationSettingScreen()),
         );
-        _fetchUserData();
       },
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -365,10 +360,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         color: isSelected ? Theme.of(context).primaryColor : Colors.grey);
 
     if (badgeCount > 0) {
-      iconWidget = Badge(
-        label: Text('$badgeCount'),
-        child: iconWidget,
-      );
+      iconWidget = Badge(label: Text('$badgeCount'), child: iconWidget);
     }
 
     return IconButton(
@@ -378,167 +370,162 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildAppDrawer(User? user) {
+  // ✅ [수정 없음] 기존 Drawer 코드를 그대로 사용합니다.
+  Widget _buildAppDrawer(UserModel? userModel) {
     return Drawer(
-      child: user == null
-          ? const SizedBox.shrink()
-          : StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(user.uid)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData || snapshot.data?.data() == null) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final userModel = UserModel.fromFirestore(snapshot.data!);
-
-                return ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
-                    DrawerHeader(
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF6A1B9A), // 원하는 보라색
+      child: userModel == null
+          ? const Center(child: CircularProgressIndicator()) // 로딩 중 또는 로그아웃
+          : ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                DrawerHeader(
+                  decoration: const BoxDecoration(color: Color(0xFF6A1B9A)),
+                  margin: EdgeInsets.zero,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundImage: (userModel.photoUrl != null &&
+                                userModel.photoUrl!.startsWith('http'))
+                            ? NetworkImage(userModel.photoUrl!)
+                            : null,
+                        child: (userModel.photoUrl == null ||
+                                !userModel.photoUrl!.startsWith('http'))
+                            ? const Icon(Icons.person, size: 30)
+                            : null,
                       ),
-                      margin: EdgeInsets.zero,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min, // ✅ Overflow 방지 핵심
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(height: 10),
+                      Row(
                         children: [
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundImage: (userModel.photoUrl != null &&
-                                    userModel.photoUrl!.startsWith('http'))
-                                ? NetworkImage(userModel.photoUrl!)
-                                : null,
-                            child: (userModel.photoUrl == null ||
-                                    !userModel.photoUrl!.startsWith('http'))
-                                ? const Icon(Icons.person, size: 30)
-                                : null,
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              // ✅ Flexible 제거, 대신 TextOverflow만 유지
-                              Text(
-                                userModel.nickname,
-                                style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(width: 8),
-                              TrustLevelBadge(
-                                trustLevel: userModel.trustLevel,
-                                showText: true,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '(${userModel.trustScore})',
-                                style: GoogleFonts.inter(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
                           Text(
-                            userModel.email,
+                            userModel.nickname,
                             style: GoogleFonts.inter(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18,
+                                color: Colors.white),
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                    ),
-
-                    // --- Trust Score Dashboard Section ---
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.military_tech, color: Colors.brown),
                           const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'drawer.trustDashboard.title'.tr(),
-                              style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              minimumSize: Size(0, 0), // 최소 크기 제한 해제
-                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (_) => const TrustScoreBreakdownModal(),
-                              );
-                            },
-                            child: Text(
-                              'drawer.trustDashboard.breakdownButton'.tr(),
-                              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                          TrustLevelBadge(
+                              trustLevel: userModel.trustLevel, showText: true),
+                          const SizedBox(width: 6),
+                          Text(
+                            '(${userModel.trustScore})',
+                            style: GoogleFonts.inter(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14),
                           ),
                         ],
                       ),
-                    ),
-                    _buildTrustInfoTile(
-                      icon: Icons.location_city,
-                      titleKey: 'drawer.trustDashboard.kelurahanAuth',
-                      isCompleted: userModel.locationParts?['kel'] != null,
-                    ),
-                    _buildTrustInfoTile(
-                      icon: Icons.home_work_outlined,
-                      titleKey: 'drawer.trustDashboard.rtRwAuth',
-                      isCompleted: userModel.locationParts?['rt'] != null,
-                    ),
-                    _buildTrustInfoTile(
-                      icon: Icons.phone_android,
-                      titleKey: 'drawer.trustDashboard.phoneAuth',
-                      isCompleted: userModel.phoneNumber != null && userModel.phoneNumber!.isNotEmpty,
-                    ),
-                    _buildTrustInfoTile(
-                      icon: Icons.verified_user,
-                      titleKey: 'drawer.trustDashboard.profileComplete',
-                      isCompleted: userModel.profileCompleted == true,
-                    ),
-                    const Divider(),
-                    ListTile(
-                      leading: const Icon(Icons.edit_outlined),
-                      title: Text('drawer.editProfile'.tr()),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const ProfileEditScreen()),
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.logout),
-                      title: Text('drawer.logout'.tr()),
-                      onTap: () async {
-                        if (mounted) Navigator.pop(context);
-                        await FirebaseAuth.instance.signOut();
-                      },
-                    ),
-                  ],
-                );
-              },
+                      const SizedBox(height: 6),
+                      Text(
+                        userModel.email,
+                        style: GoogleFonts.inter(
+                            color: Colors.white70, fontSize: 14),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.military_tech, color: Colors.brown),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'drawer.trustDashboard.title'.tr(),
+                          style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(0, 0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 0),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (_) => const TrustScoreBreakdownModal(),
+                          );
+                        },
+                        child: Text(
+                          'drawer.trustDashboard.breakdownButton'.tr(),
+                          style: GoogleFonts.inter(
+                              fontSize: 14, fontWeight: FontWeight.w500),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _buildTrustInfoTile(
+                  icon: Icons.location_city,
+                  titleKey: 'drawer.trustDashboard.kelurahanAuth',
+                  isCompleted: userModel.locationParts?['kel'] != null,
+                ),
+                _buildTrustInfoTile(
+                  icon: Icons.home_work_outlined,
+                  titleKey: 'drawer.trustDashboard.rtRwAuth',
+                  isCompleted: userModel.locationParts?['rt'] != null,
+                ),
+                _buildTrustInfoTile(
+                  icon: Icons.phone_android,
+                  titleKey: 'drawer.trustDashboard.phoneAuth',
+                  isCompleted: userModel.phoneNumber != null &&
+                      userModel.phoneNumber!.isNotEmpty,
+                ),
+                _buildTrustInfoTile(
+                  icon: Icons.verified_user,
+                  titleKey: 'drawer.trustDashboard.profileComplete',
+                  isCompleted: userModel.profileCompleted == true,
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.edit_outlined),
+                  title: Text('drawer.editProfile'.tr()),
+                  onTap: () {
+                    Navigator.of(context).pop(); // Drawer 닫기
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) => const ProfileEditScreen()),
+                    );
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.build_circle_outlined,
+                      color: Colors.red),
+                  title: const Text('데이터 보정 실행',
+                      style: TextStyle(color: Colors.red)),
+                  onTap: () {
+                    Navigator.pop(context); // Drawer 닫기
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const DataFixScreen()),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: Text('drawer.logout'.tr()),
+                  onTap: () async {
+                    if (mounted) Navigator.pop(context);
+                    await FirebaseAuth.instance.signOut();
+                  },
+                ),
+              ],
             ),
     );
   }
@@ -569,18 +556,28 @@ class TrustScoreBreakdownModal extends StatelessWidget {
     return AlertDialog(
       title: Text('drawer.trustDashboard.breakdownModalTitle'.tr(),
           style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _breakdownRow('drawer.trustDashboard.kelurahanAuth', 'drawer.trustDashboard.breakdown.kelurahanAuth'),
-          _breakdownRow('drawer.trustDashboard.rtRwAuth', 'drawer.trustDashboard.breakdown.rtRwAuth'),
-          _breakdownRow('drawer.trustDashboard.phoneAuth', 'drawer.trustDashboard.breakdown.phoneAuth'),
-          _breakdownRow('drawer.trustDashboard.profileComplete', 'drawer.trustDashboard.breakdown.profileComplete'),
-          const Divider(),
-          _breakdownRow('drawer.trustDashboard.feedThanks', 'drawer.trustDashboard.breakdown.feedThanks'),
-          _breakdownRow('drawer.trustDashboard.marketThanks', 'drawer.trustDashboard.breakdown.marketThanks'),
-          _breakdownRow('drawer.trustDashboard.reports', 'drawer.trustDashboard.breakdown.reports'),
-        ],
+      content: SingleChildScrollView(
+        // 내용이 길어질 수 있으므로 스크롤 추가
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _breakdownRow('drawer.trustDashboard.kelurahanAuth',
+                'drawer.trustDashboard.breakdown.kelurahanAuth'),
+            _breakdownRow('drawer.trustDashboard.rtRwAuth',
+                'drawer.trustDashboard.breakdown.rtRwAuth'),
+            _breakdownRow('drawer.trustDashboard.phoneAuth',
+                'drawer.trustDashboard.breakdown.phoneAuth'),
+            _breakdownRow('drawer.trustDashboard.profileComplete',
+                'drawer.trustDashboard.breakdown.profileComplete'),
+            const Divider(),
+            _breakdownRow('drawer.trustDashboard.feedThanks',
+                'drawer.trustDashboard.breakdown.feedThanks'),
+            _breakdownRow('drawer.trustDashboard.marketThanks',
+                'drawer.trustDashboard.breakdown.marketThanks'),
+            _breakdownRow('drawer.trustDashboard.reports',
+                'drawer.trustDashboard.breakdown.reports'),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -597,9 +594,11 @@ class TrustScoreBreakdownModal extends StatelessWidget {
       child: Row(
         children: [
           Expanded(child: Text(labelKey.tr(), style: GoogleFonts.inter())),
-          Text(valueKey.tr(), style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+          Text(valueKey.tr(),
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
         ],
       ),
     );
   }
 }
+

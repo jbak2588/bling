@@ -1,17 +1,18 @@
 // lib/features/feed/screens/local_feed_screen.dart
-// Bling App v0.4
+
+import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/app_categories.dart';
 import '../../../core/models/post_model.dart';
 import '../widgets/post_card.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-/// 'Local Stories' 탭에 표시될 화면입니다.
-/// 카테고리 필터링과 탭별 무한 스크롤 기능이 통합된 최종 버전입니다.
 class LocalFeedScreen extends StatefulWidget {
-  const LocalFeedScreen({super.key});
+  final UserModel? userModel;
+  const LocalFeedScreen({this.userModel, super.key});
 
   @override
   State<LocalFeedScreen> createState() => _LocalFeedScreenState();
@@ -21,10 +22,9 @@ class _LocalFeedScreenState extends State<LocalFeedScreen>
     with TickerProviderStateMixin {
   late final TabController _tabController;
 
-  final List<String> _tabs = [
-    '전체',
-    ...AppCategories.postCategories.map((c) => c.name)
-  ];
+  // ✅ [다국어 수정] '전체' 탭 이름을 다국어 키로 변경합니다.
+  // late final List<String> _tabs;
+
   final List<String> _categoryIds = [
     'all',
     ...AppCategories.postCategories.map((c) => c.categoryId)
@@ -33,7 +33,7 @@ class _LocalFeedScreenState extends State<LocalFeedScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController = TabController(length: _categoryIds.length, vsync: this);
   }
 
   @override
@@ -44,32 +44,45 @@ class _LocalFeedScreenState extends State<LocalFeedScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.userModel == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          // ✅ [다국어 수정] 위치 미설정 안내 메시지를 다국어 키로 변경합니다.
+          child: Text('localFeed.setLoactionPrompt'.tr(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Colors.grey)),
+        ),
+      );
+    }
+
+    final List<String> tabs = [
+      'localFeed.allCategory'.tr(),
+      ...AppCategories.postCategories.map((c) => c.nameKey.tr())
+    ];
+
     return Column(
       children: [
         TabBar(
           controller: _tabController,
           isScrollable: true,
           tabAlignment: TabAlignment.start,
-          // labelPadding: const EdgeInsets.symmetric(horizontal: 20.0),
- // ▼▼▼▼▼ 디자인 가이드 적용 ▼▼▼▼▼
-         labelColor: const Color(0xFF00A66C), // Primary 컬러
-         unselectedLabelColor: const Color(0xFF616161), // TextSecondary 컬러
-         indicatorColor: const Color(0xFF00A66C),
-         indicatorWeight: 2.0,
-         labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
-         unselectedLabelStyle: GoogleFonts.inter(),
-
-          tabs: _tabs.map((label) => Tab(text: label)).toList(),
+          labelColor: const Color(0xFF00A66C),
+          unselectedLabelColor: const Color(0xFF616161),
+          indicatorColor: const Color(0xFF00A66C),
+          indicatorWeight: 2.0,
+          labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          unselectedLabelStyle: GoogleFonts.inter(),
+          tabs: tabs.map((label) => Tab(text: label)).toList(),
         ),
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            // [수정] 각 탭에 해당하는 위젯을 명시적으로 생성하여 가독성을 높입니다.
             children: _categoryIds.map((categoryId) {
               return _FeedCategoryList(
-                // 각 탭의 스크롤 위치를 기억하기 위해 고유한 키를 부여합니다.
                 key: PageStorageKey('feed_category_$categoryId'),
                 category: categoryId,
+                userModel: widget.userModel,
               );
             }).toList(),
           ),
@@ -79,10 +92,10 @@ class _LocalFeedScreenState extends State<LocalFeedScreen>
   }
 }
 
-/// 특정 카테고리의 게시물 목록을 무한 스크롤로 보여주는 위젯
 class _FeedCategoryList extends StatefulWidget {
   final String category;
-  const _FeedCategoryList({super.key, required this.category});
+  final UserModel? userModel;
+  const _FeedCategoryList({super.key, required this.category, this.userModel});
 
   @override
   State<_FeedCategoryList> createState() => __FeedCategoryListState();
@@ -105,23 +118,60 @@ class __FeedCategoryListState extends State<_FeedCategoryList>
   }
 
   @override
-  bool get wantKeepAlive => true; // 탭 이동 후에도 데이터와 스크롤 위치를 유지합니다.
+  bool get wantKeepAlive => true;
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
+      _fetchMorePosts();
+    }
+  }
+
+  Query _buildQuery({DocumentSnapshot? startAfter}) {
+    final userKabupaten = widget.userModel?.locationParts?['kab'];
+
+    Query query = FirebaseFirestore.instance.collection('posts');
+
+    List<String> targetLocations = [];
+
+    if (userKabupaten == 'Tangerang' ||
+        userKabupaten == 'Tangerang City' ||
+        userKabupaten == 'Tangerang Selatan') {
+      targetLocations = ['Tangerang', 'Tangerang City', 'Tangerang Selatan'];
+    } else if (userKabupaten != null && userKabupaten.isNotEmpty) {
+      targetLocations = [userKabupaten];
+    }
+
+    if (targetLocations.isNotEmpty) {
+      query = query.where('locationParts.kab', whereIn: targetLocations);
+    }
+
+    if (widget.category != 'all') {
+      query = query.where('category', isEqualTo: widget.category);
+    }
+
+    query = query.orderBy('createdAt', descending: true);
+
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+
+    return query.limit(_limit);
+  }
 
   Future<void> _fetchFirstPosts() async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
 
     try {
-      Query query = FirebaseFirestore.instance.collection('posts');
-      // '전체' 탭이 아니면, 선택된 카테고리로 데이터를 필터링합니다.
-      if (widget.category != 'all') {
-        query = query.where('category', isEqualTo: widget.category);
-      }
-      final querySnapshot = await query
-          .orderBy('createdAt', descending: true)
-          .limit(_limit)
-          .get();
-
+      final querySnapshot = await _buildQuery().get();
       if (mounted) {
         setState(() {
           _posts.clear();
@@ -142,16 +192,7 @@ class __FeedCategoryListState extends State<_FeedCategoryList>
     setState(() => _isLoading = true);
 
     try {
-      Query query = FirebaseFirestore.instance.collection('posts');
-      if (widget.category != 'all') {
-        query = query.where('category', isEqualTo: widget.category);
-      }
-      final querySnapshot = await query
-          .orderBy('createdAt', descending: true)
-          .startAfterDocument(_lastDocument!)
-          .limit(_limit)
-          .get();
-
+      final querySnapshot = await _buildQuery(startAfter: _lastDocument).get();
       if (mounted) {
         setState(() {
           _posts.addAll(querySnapshot.docs);
@@ -166,20 +207,6 @@ class __FeedCategoryListState extends State<_FeedCategoryList>
     }
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 300) {
-      _fetchMorePosts();
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -188,7 +215,17 @@ class __FeedCategoryListState extends State<_FeedCategoryList>
       return const Center(child: CircularProgressIndicator());
     }
     if (_posts.isEmpty && !_isLoading) {
-      return const Center(child: Text('해당 카테고리에 게시물이 없습니다.'));
+      return Center(
+        child: RefreshIndicator(
+          onRefresh: _fetchFirstPosts,
+          child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  // ✅ [다국어 수정] 게시물 없음 안내 메시지를 다국어 키로 변경합니다.
+                  child: Center(child: Text('localFeed.empty'.tr())))),
+        ),
+      );
     }
 
     return RefreshIndicator(

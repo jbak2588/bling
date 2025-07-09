@@ -1,8 +1,7 @@
 // lib/core/models/product_model.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Bling 앱의 Marketplace 상품에 대한 표준 데이터 모델 클래스입니다.
-/// Firestore의 'products' 컬렉션 문서 구조와 1:1로 대응됩니다.
 class ProductModel {
   final String id;
   final String userId;
@@ -11,18 +10,25 @@ class ProductModel {
   final List<String> imageUrls;
   final String categoryId;
   final int price;
-  final bool negotiable; // 가격 협상 가능 여부
-  final String? condition; // 'new', 'used' 등 상품 상태
-  final String status; // 'selling', 'reserved', 'sold' 등 거래 상태
+  final bool negotiable;
 
+  // ✅ [통합] 신규 모델의 정교한 위치 정보 필드를 사용합니다.
   final String? locationName;
   final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
 
-  final bool isAiVerified; // AI 검수 여부
+  // ✅ [통합] 구버전 모델의 상태 관리 필드를 가져옵니다.
+  final String status; // 'selling', 'reserved', 'sold'
+  final bool isAiVerified;
+  final String condition; // 'new' or 'used'
+  // ✅ [추가] 거래 희망 장소 필드를 추가합니다.
+  final String? transactionPlace;
+
+  // 카운트 필드
   final int likesCount;
   final int chatsCount;
   final int viewsCount;
+
   final Timestamp createdAt;
   final Timestamp updatedAt;
 
@@ -34,13 +40,15 @@ class ProductModel {
     required this.imageUrls,
     required this.categoryId,
     required this.price,
-    this.negotiable = false,
-    this.condition,
-    this.status = 'selling',
+    required this.negotiable,
     this.locationName,
     this.locationParts,
     this.geoPoint,
+    this.status = 'selling',
     this.isAiVerified = false,
+    this.condition = 'used',
+      // ✅ [추가] 생성자에 transactionPlace를 추가합니다.
+    this.transactionPlace,
     this.likesCount = 0,
     this.chatsCount = 0,
     this.viewsCount = 0,
@@ -48,7 +56,6 @@ class ProductModel {
     required this.updatedAt,
   });
 
-  /// Firestore 문서로부터 ProductModel 객체를 생성합니다.
   factory ProductModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
@@ -62,14 +69,16 @@ class ProductModel {
       categoryId: data['categoryId'] ?? '',
       price: data['price'] ?? 0,
       negotiable: data['negotiable'] ?? false,
-      condition: data['condition'],
-      status: data['status'] ?? 'selling',
       locationName: data['locationName'],
       locationParts: data['locationParts'] != null
           ? Map<String, dynamic>.from(data['locationParts'])
           : null,
       geoPoint: data['geoPoint'],
+      status: data['status'] ?? 'selling',
       isAiVerified: data['isAiVerified'] ?? false,
+      condition: data['condition'] ?? 'used',
+      // ✅ [추가] Firestore에서 transactionPlace 필드를 가져옵니다.
+      transactionPlace: data['transactionPlace'],
       likesCount: data['likesCount'] ?? 0,
       chatsCount: data['chatsCount'] ?? 0,
       viewsCount: data['viewsCount'] ?? 0,
@@ -78,7 +87,6 @@ class ProductModel {
     );
   }
 
-  /// ProductModel 객체를 Firestore에 저장하기 위한 Map 형태로 변환합니다.
   Map<String, dynamic> toJson() {
     return {
       'userId': userId,
@@ -88,12 +96,14 @@ class ProductModel {
       'categoryId': categoryId,
       'price': price,
       'negotiable': negotiable,
-      'condition': condition,
-      'status': status,
       'locationName': locationName,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
+      'status': status,
       'isAiVerified': isAiVerified,
+      'condition': condition,
+       // ✅ [추가] toJson 맵에 transactionPlace를 추가합니다.
+      'transactionPlace': transactionPlace,
       'likesCount': likesCount,
       'chatsCount': chatsCount,
       'viewsCount': viewsCount,

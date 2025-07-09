@@ -3,13 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CommentInputField extends StatefulWidget {
   final String postId;
   final void Function(Map<String, dynamic> newComment)? onCommentAdded;
 
   const CommentInputField(
-      {super.key, required this.postId, this.onCommentAdded});
+      {super.key, required this.postId, this.onCommentAdded, required String hintText});
 
   @override
   State<CommentInputField> createState() => _CommentInputFieldState();
@@ -84,15 +85,15 @@ class _CommentInputFieldState extends State<CommentInputField> {
             },
             visualDensity: VisualDensity.compact,
           ),
-          const Text('비밀댓글'),
-          const Spacer(),
+         Text('commentInputField.secretCommentLabel'.tr()),
           Expanded(
             flex: 5,
             child: TextField(
               controller: _controller,
-              decoration: const InputDecoration(
-                hintText: '댓글을 입력하세요...',
-                border: OutlineInputBorder(),
+             decoration: InputDecoration(
+                // ✅ [다국어 수정] 힌트 텍스트
+                hintText: 'commentInputField.hintText'.tr(),
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
               minLines: 1,
