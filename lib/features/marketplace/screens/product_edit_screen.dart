@@ -1,13 +1,17 @@
 import 'dart:io';
-import 'package:bling_app/features/marketplace/domain/product_model.dart';
+// import 'package:bling_app/features/marketplace/domain/product_model_old.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import '../../../core/models/product_model.dart';
+import '../../../core/models/user_model.dart';
+
 class ProductEditScreen extends StatefulWidget {
-  final Product product;
+final ProductModel product;
   const ProductEditScreen({super.key, required this.product});
 
   @override
@@ -33,7 +37,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     _titleController.text = widget.product.title;
     _priceController.text = widget.product.price.toString();
     _descriptionController.text = widget.product.description;
-    _addressController.text = widget.product.address;
+  _addressController.text = widget.product.locationName ?? '';
     _transactionPlaceController.text = widget.product.transactionPlace ?? '';
     _isNegotiable = widget.product.negotiable;
     _existingImageUrls = List<String>.from(widget.product.imageUrls);
@@ -101,21 +105,52 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       // 기존 이미지 + 새로 업로드된 이미지 합치기
       final allImageUrls = [..._existingImageUrls, ...uploadedUrls];
 
-      final updatedProduct = widget.product.copyWith(
-        title: _titleController.text,
-        price: int.tryParse(_priceController.text) ?? 0,
-        description: _descriptionController.text,
-        address: _addressController.text,
-        transactionPlace: _transactionPlaceController.text,
-        negotiable: _isNegotiable,
-        imageUrls: allImageUrls,
-        updatedAt: Timestamp.fromDate(DateTime.now()),
-      );
+      // final updatedProduct = widget.product.copyWith(
+      //   title: _titleController.text,
+      //   price: int.tryParse(_priceController.text) ?? 0,
+      //   description: _descriptionController.text,
+      //   address: _addressController.text,
+      //   transactionPlace: _transactionPlaceController.text,
+      //   negotiable: _isNegotiable,
+      //   imageUrls: allImageUrls,
+      //   updatedAt: Timestamp.fromDate(DateTime.now()),
+      // );
 
+      // await FirebaseFirestore.instance
+      //     .collection('products')
+      //     .doc(widget.product.id)
+      //     .update(updatedProduct.toJson());
+// ✅ [핵심 수정] 사용자의 최신 정보를 가져와서 위치 정보를 업데이트합니다.
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception("로그인이 필요합니다.");
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
+      final userModel = UserModel.fromFirestore(userDoc);
+
+
+      // ✅ [핵심 수정] copyWith 대신, Map을 직접 만들어 업데이트합니다.
+      final updatedData = {
+        'title': _titleController.text,
+        'price': int.tryParse(_priceController.text) ?? 0,
+        'description': _descriptionController.text,
+        'transactionPlace': _transactionPlaceController.text,
+        'negotiable': _isNegotiable,
+        'imageUrls': allImageUrls,
+        'updatedAt': Timestamp.now(),
+        // ✅ 구버전 address 대신, 사용자의 최신 위치 정보로 덮어씁니다.
+        'locationName': userModel.locationName,
+        'locationParts': userModel.locationParts,
+        'geoPoint': userModel.geoPoint,
+      };
+
+// ✅ [핵심 수정] toJson() 대신 생성한 Map을 사용하여 update합니다.
       await FirebaseFirestore.instance
           .collection('products')
           .doc(widget.product.id)
-          .update(updatedProduct.toJson());
+          .update(updatedData);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

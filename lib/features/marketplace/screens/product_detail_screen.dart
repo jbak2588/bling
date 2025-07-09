@@ -2,7 +2,7 @@
 
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
-import 'package:bling_app/features/marketplace/domain/product_model.dart';
+// import 'package:bling_app/features/marketplace/domain/product_model_old.dart';
 import 'package:bling_app/features/marketplace/screens/product_edit_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -10,6 +10,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:photo_view/photo_view.dart';
+
+import 'package:bling_app/core/models/product_model.dart';
+import 'package:bling_app/core/models/user_model.dart';
+
+
 
 // 카테고리 이름 표시를 위한 별도 위젯
 class CategoryNameWidget extends StatelessWidget {
@@ -30,6 +35,13 @@ class CategoryNameWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    if (categoryId.isEmpty) {
+      return Text('detail_category_none'.tr(),
+          style: const TextStyle(fontSize: 12, color: Colors.grey));
+    }
+
+
     return FutureBuilder<DocumentSnapshot>(
       future: FirebaseFirestore.instance
           .collection('categories')
@@ -57,7 +69,7 @@ class CategoryNameWidget extends StatelessWidget {
 }
 
 class ProductDetailScreen extends StatefulWidget {
-  final Product product;
+  final ProductModel product;
   const ProductDetailScreen({super.key, required this.product});
 
   @override
@@ -243,6 +255,46 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
+  // 판매자 정보와 위치를 UserModel에서 가져와서 표시
+  Widget _buildSellerInfo() {
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.product.userId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data?.data() == null) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('판매자 정보 없음', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 4),
+              Text('지역 정보 없음', style: const TextStyle(color: Colors.grey)),
+            ],
+          );
+        }
+        final user = UserModel.fromFirestore(snapshot.data!);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(user.nickname, style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 4),
+            Text(user.locationName ?? '지역 정보 없음',
+                style: const TextStyle(color: Colors.grey)),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<String> _fetchUserNickname(String userId) async {
+    final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    if (doc.exists && doc.data() != null) {
+      return doc.data()!['nickname'] ?? '판매자';
+    }
+    return '판매자';
+  }
+
   @override
   Widget build(BuildContext context) {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
@@ -290,11 +342,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             'lastTimestamp': FieldValue.serverTimestamp(),
                           }, SetOptions(merge: true));
                           if (context.mounted) {
+                            final otherUserName = await _fetchUserNickname(widget.product.userId);
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) => ChatRoomScreen(
                                   chatId: chatId,
-                                  otherUserName: widget.product.userName,
+                                  // 🔽 userId로 Firestore에서 닉네임을 조회해서 전달
+                                  otherUserName: otherUserName,
                                   otherUserId: widget.product.userId,
                                   productTitle: widget.product.title,
                                 ),
@@ -414,14 +468,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(widget.product.userName,
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 4),
-                    Text(widget.product.address,
-                        style: const TextStyle(color: Colors.grey)),
+                    // 기존 userName, address → UserModel에서 가져온 정보로 대체
+                    _buildSellerInfo(),
                     const Divider(height: 32),
-                    CategoryNameWidget(categoryId: widget.product.categoryId),
-                    const SizedBox(height: 8),
+
+
+                    if (widget.product.categoryId.isNotEmpty) ...[
+                      CategoryNameWidget(categoryId: widget.product.categoryId),
+                      const SizedBox(height: 8),
+                    ],
                     Text(widget.product.title,
                         style: Theme.of(context)
                             .textTheme

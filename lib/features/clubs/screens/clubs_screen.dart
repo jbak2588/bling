@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../core/models/user_model.dart';
 
 class ClubsScreen extends StatelessWidget {
-  const ClubsScreen({super.key});
-
+  final UserModel? userModel;
+  const ClubsScreen({this.userModel, super.key});
   @override
-  Widget build(BuildContext context) {
-    return  const Center(child: Text('모임/클럽활동 화면'));
-  }
+  Widget build(BuildContext context) =>
+      const Center(child: Text('Clubs Screen'));
 }
+

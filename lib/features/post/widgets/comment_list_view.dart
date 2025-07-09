@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart'; 
 
 import '../../../core/models/comment_model.dart';
 import '../../../core/models/user_model.dart';
@@ -93,15 +94,17 @@ class _CommentListViewState extends State<CommentListView> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('댓글 삭제'),
-        content: const Text('정말 이 댓글을 삭제하시겠습니까?'),
+        // ✅ [다국어 수정]
+        title: Text('deleteConfirm.title'.tr()),
+        content: Text('deleteConfirm.content'.tr()),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('취소')),
+              child: Text('common.cancel'.tr())),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+            child: Text('common.delete'.tr(),
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -123,8 +126,12 @@ class _CommentListViewState extends State<CommentListView> {
       widget.onCommentDeleted?.call();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('댓글 삭제 실패: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          // ✅ [다국어 수정]
+          SnackBar(
+              content: Text('deleteConfirm.failure'
+                  .tr(namedArgs: {'error': e.toString()}))),
+        );
       }
     }
   }
@@ -142,13 +149,14 @@ class _CommentListViewState extends State<CommentListView> {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          // ✅ [다국어 수정] 댓글 없음 안내
+          return Center(
+              child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Text('commentListView.empty'.tr(),
+                style: const TextStyle(color: Colors.grey)),
+          ));
         }
-        if (snapshot.data!.docs.isEmpty) {
-          return const Padding(
-              padding: EdgeInsets.all(16.0), child: Text('아직 댓글이 없습니다.'));
-        }
-
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -217,7 +225,8 @@ class _CommentListViewState extends State<CommentListView> {
                 (comment.isSecret &&
                         comment.userId != currentUserId &&
                         widget.postOwnerId != currentUserId)
-                    ? '비밀 댓글입니다.'
+                    // ✅ [다국어 수정]
+                    ? 'commentListView.secret'.tr()
                     : comment.content,
               ),
               ReplyListView(postId: widget.postId, commentId: comment.id),
@@ -238,7 +247,9 @@ class _CommentListViewState extends State<CommentListView> {
                     onPressed: () => widget.onReplyTap(comment.id),
                     icon: const Icon(Icons.reply, size: 18, color: Colors.grey),
                     label:
-                        const Text('답글', style: TextStyle(color: Colors.grey)),
+                        // ✅ [다국어 수정]
+                        Text('commentListView.reply'.tr(),
+                            style: const TextStyle(color: Colors.grey)),
                   ),
                 ],
               ),
@@ -261,9 +272,17 @@ class _CommentListViewState extends State<CommentListView> {
   String _formatTime(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    if (difference.inSeconds < 60) return '방금 전';
-    if (difference.inMinutes < 60) return '${difference.inMinutes}분 전';
-    if (difference.inHours < 24) return '${difference.inHours}시간 전';
-    return DateFormat('M월 d일').format(dateTime);
+    if (difference.inSeconds < 60) return 'time.now'.tr();
+    if (difference.inMinutes < 60) {
+      return 'time.minutesAgo'
+          .tr(namedArgs: {'minutes': difference.inMinutes.toString()});
+    }
+    if (difference.inHours < 24) {
+      return 'time.hoursAgo'
+          .tr(namedArgs: {'hours': difference.inHours.toString()});
+    }
+
+    // ✅ [다국어 수정] 날짜 포맷도 JSON 파일에서 가져오도록 변경
+    return DateFormat('time.dateFormatLong'.tr()).format(dateTime);
   }
 }

@@ -1,15 +1,17 @@
 // lib/features/marketplace/screens/marketplace_screen.dart
 // Bling App v0.4
+import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../domain/product_model.dart';
+import '../../../core/models/product_model.dart';
 import 'product_detail_screen.dart';
 
 class MarketplaceScreen extends StatefulWidget {
-  final String currentAddress;
-  const MarketplaceScreen({super.key, required this.currentAddress});
+  // ✅ [수정] UserModel을 받도록 수정
+  final UserModel? userModel;
+  const MarketplaceScreen({super.key, this.userModel});
 
   @override
   State<MarketplaceScreen> createState() => _MarketplaceScreenState();
@@ -37,23 +39,49 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Query<Map<String, dynamic>> query;
-    if (widget.currentAddress.isNotEmpty &&
-        !widget.currentAddress.startsWith('main.appBar')) {
-      query = FirebaseFirestore.instance
-          .collection('products')
-          .where('address', isEqualTo: widget.currentAddress)
-          .orderBy('createdAt', descending: true);
-    } else {
-      query = FirebaseFirestore.instance
-          .collection('products')
-          .orderBy('createdAt', descending: true)
-          .limit(20);
+    // ✅ [수정] 쿼리 생성 로직을 build 메소드 안으로 이동하고, Tangerang 권역을 모두 포함하도록 수정
+    Query<Map<String, dynamic>> buildQuery() {
+      final userKabupaten = widget.userModel?.locationParts?['kab'];
+
+      Query<Map<String, dynamic>> query =
+          FirebaseFirestore.instance.collection('products');
+
+      List<String> targetLocations = [];
+
+      // ✅ 사용자의 위치가 'Tangerang', 'Tangerang City', 'Tangerang Selatan' 중 하나이면 모두 조회
+      if (userKabupaten == 'Tangerang' ||
+          userKabupaten == 'Tangerang City' ||
+          userKabupaten == 'Tangerang Selatan') {
+        targetLocations = ['Tangerang', 'Tangerang City', 'Tangerang Selatan'];
+      } else if (userKabupaten != null && userKabupaten.isNotEmpty) {
+        targetLocations = [userKabupaten];
+      }
+
+      if (targetLocations.isNotEmpty) {
+        query = query.where('locationParts.kab', whereIn: targetLocations);
+      }
+
+      return query.orderBy('createdAt', descending: true);
+    }
+
+    // ✅ [수정] 위치 정보가 없는 경우를 위한 UI 처리
+    if (widget.userModel?.locationParts?['kab'] == null) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Text(
+            '중고거래 상품을 보려면 먼저 내 동네를 설정해주세요!',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: query.snapshots(),
+        // ✅ [수정] 수정된 쿼리 빌더 함수를 사용
+        stream: buildQuery().snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -80,7 +108,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
               endIndent: 16,
             ),
             itemBuilder: (context, index) {
-              final product = Product.fromFirestore(productsDocs[index]);
+             final product = ProductModel.fromFirestore(productsDocs[index]);
               final String registeredAt = _formatTimestamp(product.createdAt);
 
               return InkWell(
@@ -141,7 +169,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                             ),
                             const SizedBox(height: 4.0),
                             Text(
-                              '${product.address} • $registeredAt',
+                              '${product.locationParts?['kel'] ?? 'postCard.locationNotSet'.tr()} • $registeredAt',
                               style: TextStyle(
                                   fontSize: 12.0, color: Colors.grey[600]),
                               maxLines: 1,

@@ -8,18 +8,20 @@ class PostModel {
   final String userId;
   final String? title;
   final String body;
-  final String category; // 'daily_question', 'help_share' 등 고정 카테고리
-  final List<String> tags; // '#강아지', '#무료나눔' 등 자유 태그
-  final String? mediaUrl;
-  final String? mediaType; // 'image' or 'video'
-  final String? locationName; // 'Kel. Panunggangan, Kec. Cibodas' 등 전체 주소
-  final Map<String, dynamic>? locationParts; // { 'kab': 'Kab. Tangerang', ... }
+  final String category;
+  final List<String> tags;
+  // ✅ [수정] mediaUrl의 타입을 List<String>? 로 변경하여 여러 이미지를 지원합니다.
+  final List<String>? mediaUrl;
+  final String? mediaType;
+  final String? locationName;
+  final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
   final Timestamp createdAt;
+  final Timestamp? updatedAt; // ✅ [추가] 수정 시간을 위해 nullable로 추가
   final int likesCount;
   final int commentsCount;
   final int viewsCount;
-  final int thanksCount; // 추가된 필드
+  final int thanksCount;
 
   PostModel({
     required this.id,
@@ -28,21 +30,32 @@ class PostModel {
     required this.body,
     required this.category,
     required this.tags,
-    this.mediaUrl,
+    this.mediaUrl, // ✅ 수정
     this.mediaType,
     this.locationName,
     this.locationParts,
     this.geoPoint,
     required this.createdAt,
+    this.updatedAt, // ✅ 추가
     this.likesCount = 0,
     this.commentsCount = 0,
     this.viewsCount = 0,
-    this.thanksCount = 0, // 생성자에 추가
+    this.thanksCount = 0,
   });
 
   /// Firestore 문서로부터 PostModel 객체를 생성합니다.
   factory PostModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
+
+    // ✅ [핵심 수정] mediaUrl 필드를 안전하게 처리하는 로직
+    dynamic mediaUrlData = data['mediaUrl'];
+    List<String>? mediaUrls;
+    if (mediaUrlData is List) {
+      mediaUrls = List<String>.from(mediaUrlData);
+    } else if (mediaUrlData is String) {
+      mediaUrls = [mediaUrlData]; // 단일 String이면 List로 감싸줍니다.
+    }
+
     return PostModel(
       id: doc.id,
       userId: data['userId'] ?? '',
@@ -50,7 +63,7 @@ class PostModel {
       body: data['body'] ?? '',
       category: data['category'] ?? 'etc',
       tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
-      mediaUrl: data['mediaUrl'],
+      mediaUrl: mediaUrls, // ✅ 수정된 변수를 사용
       mediaType: data['mediaType'],
       locationName: data['locationName'],
       locationParts: data['locationParts'] != null
@@ -58,10 +71,11 @@ class PostModel {
           : null,
       geoPoint: data['geoPoint'],
       createdAt: data['createdAt'] ?? Timestamp.now(),
+      updatedAt: data['updatedAt'], // ✅ 추가
       likesCount: data['likesCount'] ?? 0,
       commentsCount: data['commentsCount'] ?? 0,
       viewsCount: data['viewsCount'] ?? 0,
-      thanksCount: data['thanksCount'] ?? 0, // Firestore에서 데이터 읽기
+      thanksCount: data['thanksCount'] ?? 0,
     );
   }
 
@@ -73,16 +87,17 @@ class PostModel {
       'body': body,
       'category': category,
       'tags': tags,
-      'mediaUrl': mediaUrl,
+      'mediaUrl': mediaUrl, // ✅ 수정
       'mediaType': mediaType,
       'locationName': locationName,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
       'createdAt': createdAt,
+      'updatedAt': updatedAt, // ✅ 추가
       'likesCount': likesCount,
       'commentsCount': commentsCount,
       'viewsCount': viewsCount,
-      'thanksCount': thanksCount, // Firestore에 데이터 쓰기
+      'thanksCount': thanksCount,
     };
   }
 }

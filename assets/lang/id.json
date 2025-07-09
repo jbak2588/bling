@@ -165,5 +165,153 @@
             "noUser": "Pengguna belum login.",
             "updateFailed": "Gagal memperbarui profil: {error}"
         }
+    },
+
+    "feed": {
+        "error": "Terjadi kesalahan: {error}",
+        "empty": "Tidak ada berita baru."
     }
+    ,
+
+    "postCard": {
+        "locationNotSet": "Lokasi belum diatur"
+    },
+    "time": {
+        "now": "Baru saja",
+        "minutesAgo": "{minutes} menit lalu",
+        "hoursAgo": "{hours} jam lalu",
+        "daysAgo": "{days} hari lalu",
+        "dateFormat": "dd/MM/yy",
+        "dateFormatLong": "d MMM"
+    },
+
+    "productCard": {
+        "currency": "$"
+    },
+
+    "localFeed": {
+        "setLoactionPrompt": "Silakan atur lingkungan Anda terlebih dahulu untuk melihat cerita lokal!",
+        "allCategory": "Semua",
+        "empty": "Tidak ada postingan untuk ditampilkan."
+    },
+
+    "categories": {
+        "post": {
+            "daily_life": {
+                "name": "Harian/Tanya",
+                "description": "Bagikan kehidupan sehari-hari atau ajukan pertanyaan."
+            },
+            "help_share": {
+                "name": "Bantuan/Berbagi",
+                "description": "Butuh bantuan atau punya sesuatu untuk dibagikan?"
+            },
+            "incident_report": {
+                "name": "Insiden",
+                "description": "Bagikan berita tentang insiden di lingkungan sekitar."
+            },
+            "local_news": {
+                "name": "Berita Lokal",
+                "description": "Bagikan berita dan informasi tentang lingkungan kita."
+            },
+            "daily_question": {
+                "name": "Ada Pertanyaan",
+                "description": "Tanyakan apa saja kepada tetangga Anda."
+            },
+            "store_promo": {
+                "name": "Promo Toko",
+                "description": "Promosikan diskon atau acara di toko Anda."
+            },
+            "etc": {
+                "name": "Lain-lain",
+                "description": "Bagikan cerita lain dengan bebas."
+            }
+        }
+    },
+
+    "createPost": {
+        "appBarTitle": "Buat Postingan Baru",
+        "form": {
+            "categoryLabel": "Kategori",
+            "titleLabel": "Judul",
+            "contentLabel": "Masukkan konten",
+            "tagsLabel": "Tag (pisahkan dengan koma)",
+            "tagsHint": "cth. anjing, gratisan"
+        },
+        "buttons": {
+            "addImage": "Tambah Gambar",
+            "submit": "Kirim"
+        },
+        "alerts": {
+            "contentRequired": "Harap masukkan konten.",
+            "categoryRequired": "Harap pilih kategori.",
+            "success": "Postingan berhasil dibuat.",
+            "failure": "Gagal mengunggah: {error}"
+        }
+    },
+
+    "postDetail": {
+        "appBarTitle": "Postingan",
+        "menu": {
+            "edit": "Ubah",
+            "report": "Lapor",
+            "share": "Bagikan"
+        },
+        "stats": {
+            "views": "Dilihat",
+            "comments": "Komentar",
+            "likes": "Suka",
+            "thanks": "Terima Kasih"
+        },
+        "buttons": {
+            "comment": "Tambahkan komentar"
+        }
+    },
+
+    "editPost": {
+        "appBarTitle": "Ubah Postingan",
+        "buttons": {
+            "submit": "Perbarui"
+        },
+        "alerts": {
+            "success": "Postingan berhasil diperbarui.",
+            "failure": "Gagal memperbarui: {error}"
+        }
+    },
+
+    "commentInputField": {
+        "secretCommentLabel": "Rahasia",
+        "hintText": "Masukkan komentar...",
+        "replyHintText": "Membalas {nickname}...",
+        "button": {
+            "send": "Kirim"
+        }
+    },
+
+    "commentListView": {
+        "empty": "Belum ada komentar. Jadilah yang pertama berkomentar!",
+        "reply": "Balas",
+        "delete": "Hapus",
+        "deleted": "[Komentar ini telah dihapus]",
+        "secret": "Ini adalah komentar rahasia yang hanya dapat dilihat oleh penulis dan pemilik postingan."
+    },
+
+    "common": {
+        "cancel": "Batal",
+        "delete": "Hapus"
+    },
+    "deleteConfirm": {
+        "title": "Hapus Komentar",
+        "content": "Apakah Anda yakin ingin menghapus komentar ini?",
+        "failure": "Gagal menghapus komentar: {error}"
+    },
+
+    "replyInputField": {
+        "hintText": "Masukkan balasan",
+        "button": {
+            "send": "Kirim"
+        },
+        "failure": "Gagal menambahkan balasan: {error}"
+    }
+
+
 }
