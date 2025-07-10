@@ -37,7 +37,7 @@ class ParentCategoryScreen extends StatelessWidget {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                  'marketplace_error'.tr(args: [snapshot.error.toString()])),
+                  'marketplace.error'.tr(namedArgs: {'error': snapshot.error.toString()})),
             );
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {

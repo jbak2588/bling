@@ -25,15 +25,18 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     final diff = now.difference(dt);
 
     if (diff.inMinutes < 1) {
-      return 'time_ago_now'.tr();
+      return 'time.now'.tr();
     } else if (diff.inHours < 1) {
-      return 'time_ago_min'.tr(args: [diff.inMinutes.toString()]);
+      return 'time.minutesAgo'
+          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
     } else if (diff.inDays < 1) {
-      return 'time_ago_hour'.tr(args: [diff.inHours.toString()]);
+      return 'time.hoursAgo'
+          .tr(namedArgs: {'hours': diff.inHours.toString()});
     } else if (diff.inDays < 7) {
-      return 'time_ago_day'.tr(args: [diff.inDays.toString()]);
+      return 'time.daysAgo'
+          .tr(namedArgs: {'days': diff.inDays.toString()});
     } else {
-      return DateFormat('yy.MM.dd').format(dt);
+      return DateFormat('time.dateFormat'.tr()).format(dt);
     }
   }
 

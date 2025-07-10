@@ -113,7 +113,59 @@
 
     "marketplace": {
         "error": "An error has occurred: {error}",
-        "empty": "No items registered yet.\nPress the + button to add the first item!"
+        "empty": "No items registered yet.\nPress the + button to add the first item!",
+        "registration": {
+            "title": "New Post",
+            "done": "Done",
+            "titleHint": "Title",
+            "priceHint": "Price (Rp)",
+            "negotiable": "Allow Offers",
+            "descriptionHint": "Detailed Description",
+            "success": "Product has been successfully listed!"
+        },
+        "edit": {
+            "title": "Edit Product",
+            "done": "Edit Completed",
+            "titleHint": "Edit Product Name",
+            "addressHint": "Edit Location",
+            "priceHint": "Edit Price (Rp)",
+            "negotiable": "Edit Price Negotiable",
+            "descriptionHint": "Edit Description",
+            "success": "Product successfully updated!",
+            "fail": "Failed to update product: {error}"
+        },
+        "detail": {
+            "description": "Product Description",
+            "sellerInfo": "Seller Information",
+            "chat": "Chat",
+            "favorite": "Favorite",
+            "unfavorite": "Favorited",
+            "share": "Share",
+            "edit": "Edit",
+            "delete": "Delete",
+            "category": "Category",
+            "categoryError": "Category: -",
+            "categoryNone": "No category",
+            "views": "Views",
+            "likes": "Likes",
+            "chats": "Chats",
+            "noSeller": "Seller info unavailable",
+            "noLocation": "Location info unavailable",
+            "seller": "Seller"
+        },
+        "dialog": {
+            "deleteTitle": "Delete Post",
+            "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
+            "cancel": "Cancel",
+            "deleteConfirm": "Delete",
+            "deleteSuccess": "Post deleted successfully."
+        },
+        "errors": {
+            "deleteError": "Failed to delete post: {error}",
+            "requiredField": "This field is required.",
+            "noPhoto": "Please add at least one photo.",
+            "noCategory": "Please select a category."
+        }
     },
     "myBling": {
         "title": "My Bling",

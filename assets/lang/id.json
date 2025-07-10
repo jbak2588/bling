@@ -111,7 +111,59 @@
     },
     "marketplace": {
         "error": "Terjadi kesalahan: {error}",
-        "empty": "Belum ada produk yang terdaftar.\nTekan tombol + untuk menambahkan produk pertama!"
+        "empty": "Belum ada produk yang terdaftar.\nTekan tombol + untuk menambahkan produk pertama!",
+        "registration": {
+            "title": "Postingan Baru",
+            "done": "Selesai",
+            "titleHint": "Judul",
+            "priceHint": "Harga (Rp)",
+            "negotiable": "Izinkan Penawaran",
+            "descriptionHint": "Deskripsi Lengkap",
+            "success": "Produk berhasil didaftarkan!"
+        },
+        "edit": {
+            "title": "Edit Produk",
+            "done": "Edit Selesai",
+            "titleHint": "Ubah Nama Produk",
+            "addressHint": "Ubah Lokasi",
+            "priceHint": "Ubah Harga (Rp)",
+            "negotiable": "Ubah Tawaran Harga",
+            "descriptionHint": "Ubah Deskripsi Lengkap",
+            "success": "Produk berhasil diedit!",
+            "fail": "Gagal memperbarui produk: {error}"
+        },
+        "detail": {
+            "description": "Deskripsi Produk",
+            "sellerInfo": "Informasi Penjual",
+            "chat": "Chat",
+            "favorite": "Favorit",
+            "unfavorite": "Batal Favorit",
+            "share": "Share",
+            "edit": "Eidt",
+            "delete": "Hapus",
+            "category": "Kategori",
+            "categoryError": "Kategori: -",
+            "categoryNone": "Tidak ada kategori",
+            "views": "Dilihat",
+            "likes": "Suka",
+            "chats": "Chat",
+            "noSeller": "Info penjual tidak tersedia",
+            "noLocation": "Info lokasi tidak tersedia",
+            "seller": "Penjual"
+        },
+        "dialog": {
+            "deleteTitle": "Hapus Postingan",
+            "deleteContent": "Apakah Anda yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.",
+            "cancel": "Batal",
+            "deleteConfirm": "Hapus",
+            "deleteSuccess": "Postingan berhasil dihapus."
+        },
+        "errors": {
+            "deleteError": "Gagal menghapus postingan: {error}",
+            "requiredField": "Kolom ini wajib diisi.",
+            "noPhoto": "Silakan tambahkan minimal 1 foto.",
+            "noCategory": "Silakan pilih kategori."
+        }
     },
 
     "myBling": {

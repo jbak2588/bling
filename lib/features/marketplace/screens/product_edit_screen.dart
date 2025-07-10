@@ -79,7 +79,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     if (_isLoading) return;
     if (_existingImageUrls.isEmpty && _images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('err_no_photo'.tr())),
+        SnackBar(content: Text('marketplace.errors.noPhoto'.tr())),
       );
       return;
     }
@@ -154,14 +154,15 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('product_edit_success'.tr())),
+        SnackBar(content: Text('marketplace.edit.success'.tr())),
         );
         Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('product_edit_fail'.tr(args: [e.toString()]))),
+        SnackBar(
+            content: Text('marketplace.edit.fail'.tr(args: [e.toString()]))),
         );
       }
     } finally {
@@ -175,7 +176,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('product_edit_title'.tr()),
+        title: Text('marketplace.edit.title'.tr()),
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _saveProduct,
@@ -186,7 +187,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Text(
-                    'product_edit_done'.tr(),
+                    'marketplace.edit.done'.tr(),
                     style: TextStyle(
                       color: Colors.blue,
                       fontSize: 16,
@@ -294,30 +295,40 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: 'product_edit_title_hint'.tr()),
+                decoration: InputDecoration(
+                    labelText: 'marketplace.edit.titleHint'.tr()),
                 validator: (value) =>
-                    value == null || value.isEmpty ? 'err_required_field'.tr() : null,
+                    value == null || value.isEmpty
+                        ? 'marketplace.errors.requiredField'.tr()
+                        : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _priceController,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'product_edit_price_hint'.tr()),
+                decoration: InputDecoration(
+                    labelText: 'marketplace.edit.priceHint'.tr()),
                 validator: (value) =>
-                    value == null || value.isEmpty ? 'err_required_field'.tr() : null,
+                    value == null || value.isEmpty
+                        ? 'marketplace.errors.requiredField'.tr()
+                        : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 5,
-                decoration: InputDecoration(labelText: 'product_edit_description_hint'.tr()),
+                decoration: InputDecoration(
+                    labelText: 'marketplace.edit.descriptionHint'.tr()),
                 validator: (value) =>
-                    value == null || value.isEmpty ? 'err_required_field'.tr() : null,
+                    value == null || value.isEmpty
+                        ? 'marketplace.errors.requiredField'.tr()
+                        : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _addressController,
-                decoration: InputDecoration(labelText: 'product_edit_address_hint'.tr()),
+                decoration: InputDecoration(
+                    labelText: 'marketplace.edit.addressHint'.tr()),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -327,7 +338,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Text('product_edit_negotiable'.tr()),
+                  Text('marketplace.edit.negotiable'.tr()),
                   Switch(
                     value: _isNegotiable,
                     onChanged: (value) {

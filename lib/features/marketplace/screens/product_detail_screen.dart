@@ -37,7 +37,7 @@ class CategoryNameWidget extends StatelessWidget {
   Widget build(BuildContext context) {
 
     if (categoryId.isEmpty) {
-      return Text('detail_category_none'.tr(),
+      return Text('marketplace.detail.categoryNone'.tr(),
           style: const TextStyle(fontSize: 12, color: Colors.grey));
     }
 
@@ -49,7 +49,7 @@ class CategoryNameWidget extends StatelessWidget {
           .get(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Text('detail_category_error'.tr(),
+          return Text('marketplace.detail.categoryError'.tr(),
               style: const TextStyle(fontSize: 12, color: Colors.grey));
         }
         try {
@@ -57,10 +57,10 @@ class CategoryNameWidget extends StatelessWidget {
             snapshot.data as DocumentSnapshot<Map<String, dynamic>>,
           );
           return Text(
-              "${'detail_category'.tr()}: ${_getCategoryName(context, category)}",
+              "${'marketplace.detail.category'.tr()}: ${_getCategoryName(context, category)}",
               style: const TextStyle(fontSize: 12, color: Colors.grey));
         } catch (e) {
-          return Text('detail_category_error'.tr(),
+          return Text('marketplace.detail.categoryError'.tr(),
               style: const TextStyle(fontSize: 12, color: Colors.grey));
         }
       },
@@ -148,15 +148,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final diff = now.difference(dt);
 
     if (diff.inMinutes < 1) {
-      return 'time_ago_now'.tr();
+      return 'time.now'.tr();
     } else if (diff.inHours < 1) {
-      return 'time_ago_min'.tr(args: [diff.inMinutes.toString()]);
+      return 'time.minutesAgo'
+          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
     } else if (diff.inDays < 1) {
-      return 'time_ago_hour'.tr(args: [diff.inHours.toString()]);
+      return 'time.hoursAgo'
+          .tr(namedArgs: {'hours': diff.inHours.toString()});
     } else if (diff.inDays < 7) {
-      return 'time_ago_day'.tr(args: [diff.inDays.toString()]);
+      return 'time.daysAgo'
+          .tr(namedArgs: {'days': diff.inDays.toString()});
     } else {
-      return DateFormat('yy.MM.dd').format(dt);
+      return DateFormat('time.dateFormat'.tr()).format(dt);
     }
   }
 
@@ -164,16 +167,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('dialog_delete_title'.tr()),
-        content: Text('dialog_delete_content'.tr()),
+        title: Text('marketplace.dialog.deleteTitle'.tr()),
+        content: Text('marketplace.dialog.deleteContent'.tr()),
         actions: [
           TextButton(
-            child: Text('dialog_cancel'.tr()),
+            child: Text('marketplace.dialog.cancel'.tr()),
             onPressed: () => Navigator.of(ctx).pop(),
           ),
           TextButton(
             child: Text(
-              'dialog_delete_confirm'.tr(),
+              'marketplace.dialog.deleteConfirm'.tr(),
               style: const TextStyle(color: Colors.red),
             ),
             onPressed: () {
@@ -194,13 +197,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           .delete();
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('delete_success'.tr())));
+            .showSnackBar(
+                SnackBar(content: Text('marketplace.dialog.deleteSuccess'.tr())));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('delete_error'.tr(args: [e.toString()]))));
+            SnackBar(
+                content: Text('marketplace.errors.deleteError'
+                    .tr(args: [e.toString()]))));
       }
     }
   }
@@ -267,9 +273,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('판매자 정보 없음', style: Theme.of(context).textTheme.titleLarge),
+              Text('marketplace.detail.noSeller'.tr(),
+                  style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 4),
-              Text('지역 정보 없음', style: const TextStyle(color: Colors.grey)),
+             Text('marketplace.detail.noLocation'.tr(),
+                  style: const TextStyle(color: Colors.grey)),
             ],
           );
         }
@@ -279,7 +287,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           children: [
             Text(user.nickname, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 4),
-            Text(user.locationName ?? '지역 정보 없음',
+           Text(user.locationName ?? 'marketplace.detail.noLocation'.tr(),
                 style: const TextStyle(color: Colors.grey)),
           ],
         );
@@ -290,9 +298,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Future<String> _fetchUserNickname(String userId) async {
     final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
     if (doc.exists && doc.data() != null) {
-      return doc.data()!['nickname'] ?? '판매자';
+      return doc.data()!['nickname'] ?? 'marketplace.detail.seller'.tr();
     }
-    return '판매자';
+     return 'marketplace.detail.seller'.tr();
   }
 
   @override
@@ -320,7 +328,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
-                        child: Text('detail_chat'.tr()),
+                        child: Text('marketplace.detail.chat'.tr()),
                         onPressed: () async {
                           final myUid = FirebaseAuth.instance.currentUser?.uid;
                           if (myUid == null) return;
@@ -507,7 +515,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                     const Divider(height: 32),
                     Text(
-                      '${'detail_likes'.tr()} ${widget.product.likesCount} ∙ ${'detail_chats'.tr()} ${widget.product.chatsCount} ∙ ${'detail_views'.tr()} ${widget.product.viewsCount + 1}',
+                      '${'marketplace.detail.likes'.tr()} ${widget.product.likesCount} ∙ ${'marketplace.detail.chats'.tr()} ${widget.product.chatsCount} ∙ ${'marketplace.detail.views'.tr()} ${widget.product.viewsCount + 1}',
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ],
