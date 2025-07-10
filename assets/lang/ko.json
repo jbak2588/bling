@@ -353,6 +353,14 @@
             "send": "전송"
         },
         "failure": "답글 등록 실패: {error}"
+    },
+
+    "chat_list": {
+        "appBarTitle": "채팅",
+        "empty": "진행중인 대화가 없습니다."
+    },
+    "chat_room": {
+        "placeholder": "메시지를 입력하세요..."
     }
 
 }

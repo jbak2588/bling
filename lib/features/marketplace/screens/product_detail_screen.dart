@@ -13,6 +13,8 @@ import 'package:photo_view/photo_view.dart';
 
 import 'package:bling_app/core/models/product_model.dart';
 import 'package:bling_app/features/marketplace/screens/product_edit_screen.dart';
+import 'package:bling_app/features/chat/data/chat_service.dart';
+
 
 // 카테고리 이름 표시를 위한 별도 위젯
 class CategoryNameWidget extends StatelessWidget {
@@ -351,39 +353,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 const VerticalDivider(
                                     width: 1.0, thickness: 1.0),
                                 const SizedBox(width: 16),
-                                // Flexible(
-                                //   child: Column(
-                                //     crossAxisAlignment: CrossAxisAlignment.start,
-                                //     mainAxisSize: MainAxisSize.min,
-                                //     mainAxisAlignment: MainAxisAlignment.center, // 세로 중앙 정렬
-                                //     children: [
-                                //       Text(
-                                //         // [다국어 수정] 인도네시아 화폐(Rp) 형식으로 복원
-                                //         NumberFormat.currency(
-                                //                 locale: 'id_ID',
-                                //                 symbol: 'Rp ',
-                                //                 decimalDigits: 0)
-                                //             .format(product.price),
-                                //         style: const TextStyle(
-                                //             fontWeight: FontWeight.bold,
-                                //             fontSize: 16),
-                                //         overflow: TextOverflow.ellipsis,
-                                //       ),
-                                //       Text(
-                                //         // [다국어 수정] 새로 추가한 키 사용
-                                //         product.negotiable
-                                //             ? 'marketplace.detail.makeOffer'.tr()
-                                //             : 'marketplace.detail.fixedPrice'.tr(),
-                                //         style: TextStyle(
-                                //             color: product.negotiable
-                                //                 ? Colors.green
-                                //                 : Colors.grey,
-                                //             fontSize: 12),
-                                //         overflow: TextOverflow.ellipsis,
-                                //       ),
-                                //     ],
-                                //   ),
-                                // ),
+                              
                                 // RichText를 사용하여 두 텍스트를 하나의 위젯으로 통합
                                 Flexible(
                                   child: RichText(
@@ -421,43 +391,46 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                           ),
                           // 오른쪽: 채팅 버튼
-                          ElevatedButton(
+                       ElevatedButton(
+                            // ⭐️ [수정] 여기가 핵심 수정 부분입니다.
                             onPressed: () async {
                               if (myUid == null) return;
                               if (!context.mounted) return;
-                              final uids = [myUid, product.userId];
-                              uids.sort();
-                              final chatId = '${product.id}_${uids.join('_')}';
-                              final chatRoomRef = FirebaseFirestore.instance
-                                  .collection('chats')
-                                  .doc(chatId);
-                              final sellerDoc = await FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(product.userId)
-                                  .get();
-                              final otherUserName =
-                                  sellerDoc.data()?['nickname'] ??
-                                      'marketplace.detail.seller'.tr();
-                              await chatRoomRef.set({
-                                'participants': [myUid, product.userId],
-                                'productId': product.id,
-                                'productTitle': product.title,
-                                'productImage': product.imageUrls.isNotEmpty
-                                    ? product.imageUrls.first
-                                    : '',
-                                'lastTimestamp': FieldValue.serverTimestamp(),
-                              }, SetOptions(merge: true));
-                              if (context.mounted) {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => ChatRoomScreen(
-                                      chatId: chatId,
-                                      otherUserName: otherUserName,
-                                      otherUserId: product.userId,
-                                      productTitle: product.title,
-                                    ),
-                                  ),
+
+                              final ChatService chatService = ChatService();
+                              try {
+                                final chatId =
+                                    await chatService.createOrGetChatRoom(
+                                  product.userId,
+                                  product.id,
+                                  product.title,
+                                  product.imageUrls.isNotEmpty
+                                      ? product.imageUrls.first
+                                      : '',
                                 );
+
+                                final otherUser = await chatService
+                                    .getOtherUserInfo(product.userId);
+
+                                if (context.mounted) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatRoomScreen(
+                                        chatId: chatId,
+                                        otherUserName: otherUser.nickname,
+                                        otherUserId: otherUser.uid,
+                                        productTitle: product.title,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              "Failed to start chat: $e")));
+                                }
                               }
                             },
                             style: ElevatedButton.styleFrom(

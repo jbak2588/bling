@@ -1,16 +1,15 @@
-// lib/features/chat/domain/chat_message.dart
+// lib/core/models/chat_message_model.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ChatMessage {
+class ChatMessageModel {
   final String id;
   final String senderId;
   final String text;
   final Timestamp timestamp;
-  // 'isRead' -> 'readBy'로 변경. 여러 참여자의 읽음 상태를 기록할 수 있음.
   final List<String> readBy;
 
-  ChatMessage({
+  ChatMessageModel({
     required this.id,
     required this.senderId,
     required this.text,
@@ -18,21 +17,18 @@ class ChatMessage {
     required this.readBy,
   });
 
-  factory ChatMessage.fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
+  factory ChatMessageModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
-    return ChatMessage(
+    return ChatMessageModel(
       id: doc.id,
       senderId: data['senderId'] ?? '',
       text: (data['text'] ?? '').toString(),
       timestamp: data['timestamp'] ?? Timestamp.now(),
-      // Firestore에서 List<String> 타입으로 데이터를 가져옴
       readBy: List<String>.from(data['readBy'] ?? []),
     );
   }
 
-  // ⭐️ [추가] 이 toJson() 함수를 클래스 내부에 추가해주세요.
   Map<String, dynamic> toJson() {
     return {
       'senderId': senderId,
