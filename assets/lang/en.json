@@ -135,6 +135,9 @@
             "fail": "Failed to update product: {error}"
         },
         "detail": {
+            "makeOffer": "Make an offer",
+            "fixedPrice": "Fixed price",
+         
             "description": "Product Description",
             "sellerInfo": "Seller Information",
             "chat": "Chat",

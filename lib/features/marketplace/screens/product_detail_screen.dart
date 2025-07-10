@@ -1,9 +1,9 @@
 // lib/features/marketplace/presentation/screens/product_detail_screen.dart
 
+import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
-// import 'package:bling_app/features/marketplace/domain/product_model_old.dart';
-import 'package:bling_app/features/marketplace/screens/product_edit_screen.dart';
+import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,9 +12,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:bling_app/core/models/product_model.dart';
-import 'package:bling_app/core/models/user_model.dart';
-
-
+import 'package:bling_app/features/marketplace/screens/product_edit_screen.dart';
 
 // 카테고리 이름 표시를 위한 별도 위젯
 class CategoryNameWidget extends StatelessWidget {
@@ -35,13 +33,9 @@ class CategoryNameWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     if (categoryId.isEmpty) {
-      return Text('marketplace.detail.categoryNone'.tr(),
-          style: const TextStyle(fontSize: 12, color: Colors.grey));
+      return const SizedBox.shrink();
     }
-
-
     return FutureBuilder<DocumentSnapshot>(
       future: FirebaseFirestore.instance
           .collection('categories')
@@ -49,19 +43,16 @@ class CategoryNameWidget extends StatelessWidget {
           .get(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Text('marketplace.detail.categoryError'.tr(),
-              style: const TextStyle(fontSize: 12, color: Colors.grey));
+          return const Text('');
         }
         try {
           final category = Category.fromFirestore(
             snapshot.data as DocumentSnapshot<Map<String, dynamic>>,
           );
-          return Text(
-              "${'marketplace.detail.category'.tr()}: ${_getCategoryName(context, category)}",
-              style: const TextStyle(fontSize: 12, color: Colors.grey));
+          return Text(_getCategoryName(context, category),
+              style: const TextStyle(fontSize: 13, color: Colors.grey));
         } catch (e) {
-          return Text('marketplace.detail.categoryError'.tr(),
-              style: const TextStyle(fontSize: 12, color: Colors.grey));
+          return const SizedBox.shrink();
         }
       },
     );
@@ -77,16 +68,14 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  // --- 상태 변수 및 로직 함수들 (기존과 동일) ---
   bool _isFavorite = false;
-  int _likeCount = 0;
-
-  int _currentIndex = 0; // 도트 인디케이터용
+  int _currentIndex = 0;
   late final PageController _pageController = PageController(initialPage: 0);
 
   @override
   void initState() {
     super.initState();
-    _likeCount = widget.product.likesCount;
     _checkIfFavorite();
     _increaseViewCount();
   }
@@ -119,7 +108,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Future<void> _toggleFavorite() async {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
     if (myUid == null) return;
-
+    setState(() => _isFavorite = !_isFavorite);
     final favRef = FirebaseFirestore.instance
         .collection('users')
         .doc(myUid)
@@ -128,38 +117,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final prodRef = FirebaseFirestore.instance
         .collection('products')
         .doc(widget.product.id);
-    setState(() {
-      if (_isFavorite) {
-        _likeCount--;
-        favRef.delete();
-        prodRef.update({'likesCount': FieldValue.increment(-1)});
-      } else {
-        _likeCount++;
-        favRef.set({'createdAt': FieldValue.serverTimestamp()});
-        prodRef.update({'likesCount': FieldValue.increment(1)});
-      }
-      _isFavorite = !_isFavorite;
-    });
-  }
-
-  String _formatTimestamp(Timestamp timestamp) {
-    final now = DateTime.now();
-    final dt = timestamp.toDate();
-    final diff = now.difference(dt);
-
-    if (diff.inMinutes < 1) {
-      return 'time.now'.tr();
-    } else if (diff.inHours < 1) {
-      return 'time.minutesAgo'
-          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
-    } else if (diff.inDays < 1) {
-      return 'time.hoursAgo'
-          .tr(namedArgs: {'hours': diff.inHours.toString()});
-    } else if (diff.inDays < 7) {
-      return 'time.daysAgo'
-          .tr(namedArgs: {'days': diff.inDays.toString()});
+    if (_isFavorite) {
+      await favRef.set({'createdAt': FieldValue.serverTimestamp()});
+      await prodRef.update({'likesCount': FieldValue.increment(1)});
     } else {
-      return DateFormat('time.dateFormat'.tr()).format(dt);
+      await favRef.delete();
+      await prodRef.update({'likesCount': FieldValue.increment(-1)});
     }
   }
 
@@ -175,10 +138,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             onPressed: () => Navigator.of(ctx).pop(),
           ),
           TextButton(
-            child: Text(
-              'marketplace.dialog.deleteConfirm'.tr(),
-              style: const TextStyle(color: Colors.red),
-            ),
+            child: Text('marketplace.dialog.deleteConfirm'.tr(),
+                style: const TextStyle(color: Colors.red)),
             onPressed: () {
               Navigator.of(ctx).pop();
               _deleteProduct();
@@ -196,17 +157,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           .doc(widget.product.id)
           .delete();
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
-                SnackBar(content: Text('marketplace.dialog.deleteSuccess'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('marketplace.dialog.deleteSuccess'.tr())));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('marketplace.errors.deleteError'
-                    .tr(args: [e.toString()]))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'marketplace.errors.deleteError'.tr(args: [e.toString()]))));
       }
     }
   }
@@ -214,8 +173,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void _showFullPhotoView(List<String> imageUrls, int initialIndex) {
     showGeneralDialog(
       context: context,
-      // ignore: deprecated_member_use
-      barrierColor: Colors.black.withOpacity(0.98),
+      barrierColor: Colors.black.withAlpha(250),
       barrierDismissible: true,
       barrierLabel: '',
       transitionDuration: const Duration(milliseconds: 180),
@@ -223,8 +181,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         return GestureDetector(
           onTap: () => Navigator.of(context).pop(),
           child: Scaffold(
-            // ignore: deprecated_member_use
-            backgroundColor: Colors.black.withOpacity(0.98),
+            backgroundColor: Colors.black.withAlpha(250),
             body: SafeArea(
               child: Stack(
                 children: [
@@ -233,22 +190,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     itemCount: imageUrls.length,
                     itemBuilder: (context, idx) => PhotoView(
                       imageProvider: NetworkImage(imageUrls[idx]),
-                      backgroundDecoration: const BoxDecoration(
-                        color: Colors.transparent,
-                      ),
+                      backgroundDecoration:
+                          const BoxDecoration(color: Colors.transparent),
                       minScale: PhotoViewComputedScale.contained,
                       maxScale: PhotoViewComputedScale.covered * 2.5,
                       initialScale: PhotoViewComputedScale.contained,
-                      heroAttributes: PhotoViewHeroAttributes(
-                        tag: 'product_image_$idx',
-                      ),
+                      heroAttributes:
+                          PhotoViewHeroAttributes(tag: 'product_image_$idx'),
                     ),
                   ),
                   Positioned(
                     top: 28,
                     right: 18,
                     child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white, size: 36),
+                      icon: const Icon(Icons.close,
+                          color: Colors.white, size: 36),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -261,270 +217,399 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // 판매자 정보와 위치를 UserModel에서 가져와서 표시
-  Widget _buildSellerInfo() {
+  // --- 위젯 빌더 (디자인 및 다국어 수정) ---
+
+  // [다국어 수정] 시간 포맷 함수
+  String _formatTimestamp(Timestamp timestamp) {
+    final now = DateTime.now();
+    final dt = timestamp.toDate();
+    final diff = now.difference(dt);
+
+    if (diff.inMinutes < 1) return 'time.now'.tr();
+    if (diff.inHours < 1) {
+      return 'time.minutesAgo'
+          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+    }
+    if (diff.inDays < 1) {
+      return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
+    }
+    if (diff.inDays < 7) {
+      return 'time.daysAgo'.tr(namedArgs: {'days': diff.inDays.toString()});
+    }
+    return DateFormat('time.dateFormat'.tr()).format(dt);
+  }
+
+  // [다국어 수정] 판매자 정보 위젯
+  Widget _buildSellerInfo(String userId) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('users')
-          .doc(widget.product.userId)
+          .doc(userId)
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data?.data() == null) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('marketplace.detail.noSeller'.tr(),
-                  style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 4),
-             Text('marketplace.detail.noLocation'.tr(),
-                  style: const TextStyle(color: Colors.grey)),
-            ],
-          );
+          return const SizedBox(height: 50); // 로딩 중 높이 유지
         }
+
         final user = UserModel.fromFirestore(snapshot.data!);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        final kelurahan =
+            user.locationParts?['kel'] ?? 'marketplace.detail.noLocation'.tr();
+
+        return Row(
           children: [
-            Text(user.nickname, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 4),
-           Text(user.locationName ?? 'marketplace.detail.noLocation'.tr(),
-                style: const TextStyle(color: Colors.grey)),
+            Expanded(
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: Colors.grey.shade300,
+                    backgroundImage:
+                        user.photoUrl != null && user.photoUrl!.isNotEmpty
+                            ? NetworkImage(user.photoUrl!)
+                            : null,
+                    child: (user.photoUrl == null || user.photoUrl!.isEmpty)
+                        ? const Icon(Icons.person,
+                            color: Colors.white, size: 28)
+                        : null,
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          user.nickname.isNotEmpty
+                              ? user.nickname
+                              : 'marketplace.detail.seller'.tr(),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 15)),
+                      const SizedBox(height: 2),
+                      Text(kelurahan,
+                          style: TextStyle(
+                              color: Colors.grey.shade600, fontSize: 13)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            TrustLevelBadge(trustLevel: user.trustLevel),
           ],
         );
       },
     );
   }
 
-  Future<String> _fetchUserNickname(String userId) async {
-    final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    if (doc.exists && doc.data() != null) {
-      return doc.data()!['nickname'] ?? 'marketplace.detail.seller'.tr();
-    }
-     return 'marketplace.detail.seller'.tr();
-  }
-
+  // --- 메인 빌드 함수 ---
   @override
   Widget build(BuildContext context) {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
-    final isMyProduct = myUid == widget.product.userId;
-    final imageUrls = widget.product.imageUrls;
 
-    return Scaffold(
-      bottomNavigationBar: isMyProduct
-          ? null
-          : BottomAppBar(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        _isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: Colors.pink,
-                      ),
-                      onPressed: _toggleFavorite,
-                    ),
-                    Text('$_likeCount'),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        child: Text('marketplace.detail.chat'.tr()),
-                        onPressed: () async {
-                          final myUid = FirebaseAuth.instance.currentUser?.uid;
-                          if (myUid == null) return;
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('products')
+          .doc(widget.product.id)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return Scaffold(
+              appBar: AppBar(),
+              body: const Center(child: CircularProgressIndicator()));
+        }
 
-                          final uids = [myUid, widget.product.userId];
-                          uids.sort();
-                          final chatId =
-                              '${widget.product.id}_${uids.join('_')}';
-                          final chatRoomRef = FirebaseFirestore.instance
-                              .collection('chats')
-                              .doc(chatId);
-                          await chatRoomRef.set({
-                            'participants': [myUid, widget.product.userId],
-                            'productId': widget.product.id,
-                            'productTitle': widget.product.title,
-                            'productImage': widget.product.imageUrls.isNotEmpty
-                                ? widget.product.imageUrls.first
-                                : '',
-                            'lastTimestamp': FieldValue.serverTimestamp(),
-                          }, SetOptions(merge: true));
-                          if (context.mounted) {
-                            final otherUserName = await _fetchUserNickname(widget.product.userId);
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => ChatRoomScreen(
-                                  chatId: chatId,
-                                  // 🔽 userId로 Firestore에서 닉네임을 조회해서 전달
-                                  otherUserName: otherUserName,
-                                  otherUserId: widget.product.userId,
-                                  productTitle: widget.product.title,
+        final product = ProductModel.fromFirestore(snapshot.data!);
+        final isMyProduct = myUid == product.userId;
+        final imageUrls = product.imageUrls;
+
+        return Scaffold(
+          // [다국어 수정] 하단 바
+          bottomNavigationBar: isMyProduct
+              ? null
+              : BottomAppBar(
+                  surfaceTintColor: Colors.white,
+                  elevation: 10,
+                  child: SizedBox(
+                    height: 80,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
+                      child: Row(
+                        children: [
+                          // 왼쪽 영역: 좋아요, 가격, 네고여부 등
+                          Expanded(
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  padding: const EdgeInsets.only(right: 16),
+                                  icon: Icon(
+                                    _isFavorite
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color:
+                                        _isFavorite ? Colors.pink : Colors.grey,
+                                  ),
+                                  onPressed: _toggleFavorite,
                                 ),
-                              ),
-                            );
-                          }
-                        },
+                                const VerticalDivider(
+                                    width: 1.0, thickness: 1.0),
+                                const SizedBox(width: 16),
+                                // Flexible(
+                                //   child: Column(
+                                //     crossAxisAlignment: CrossAxisAlignment.start,
+                                //     mainAxisSize: MainAxisSize.min,
+                                //     mainAxisAlignment: MainAxisAlignment.center, // 세로 중앙 정렬
+                                //     children: [
+                                //       Text(
+                                //         // [다국어 수정] 인도네시아 화폐(Rp) 형식으로 복원
+                                //         NumberFormat.currency(
+                                //                 locale: 'id_ID',
+                                //                 symbol: 'Rp ',
+                                //                 decimalDigits: 0)
+                                //             .format(product.price),
+                                //         style: const TextStyle(
+                                //             fontWeight: FontWeight.bold,
+                                //             fontSize: 16),
+                                //         overflow: TextOverflow.ellipsis,
+                                //       ),
+                                //       Text(
+                                //         // [다국어 수정] 새로 추가한 키 사용
+                                //         product.negotiable
+                                //             ? 'marketplace.detail.makeOffer'.tr()
+                                //             : 'marketplace.detail.fixedPrice'.tr(),
+                                //         style: TextStyle(
+                                //             color: product.negotiable
+                                //                 ? Colors.green
+                                //                 : Colors.grey,
+                                //             fontSize: 12),
+                                //         overflow: TextOverflow.ellipsis,
+                                //       ),
+                                //     ],
+                                //   ),
+                                // ),
+                                // RichText를 사용하여 두 텍스트를 하나의 위젯으로 통합
+                                Flexible(
+                                  child: RichText(
+                                    text: TextSpan(
+                                      // 기본 텍스트 스타일은 검은색으로 설정
+                                      style:
+                                          const TextStyle(color: Colors.black),
+                                      children: [
+                                        TextSpan(
+                                          text: NumberFormat.currency(
+                                                  locale: 'id_ID',
+                                                  symbol: 'Rp ',
+                                                  decimalDigits: 0)
+                                              .format(product.price),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16),
+                                        ),
+                                        TextSpan(
+                                          text:
+                                              '\n${product.negotiable ? 'marketplace.detail.makeOffer'.tr() : 'marketplace.detail.fixedPrice'.tr()}',
+                                          style: TextStyle(
+                                            color: product.negotiable
+                                                ? Colors.green
+                                                : Colors.grey,
+                                            fontSize: 12,
+                                            height: 1.5, // 줄 간격 추가로 가독성 확보
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          // 오른쪽: 채팅 버튼
+                          ElevatedButton(
+                            onPressed: () async {
+                              if (myUid == null) return;
+                              if (!context.mounted) return;
+                              final uids = [myUid, product.userId];
+                              uids.sort();
+                              final chatId = '${product.id}_${uids.join('_')}';
+                              final chatRoomRef = FirebaseFirestore.instance
+                                  .collection('chats')
+                                  .doc(chatId);
+                              final sellerDoc = await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(product.userId)
+                                  .get();
+                              final otherUserName =
+                                  sellerDoc.data()?['nickname'] ??
+                                      'marketplace.detail.seller'.tr();
+                              await chatRoomRef.set({
+                                'participants': [myUid, product.userId],
+                                'productId': product.id,
+                                'productTitle': product.title,
+                                'productImage': product.imageUrls.isNotEmpty
+                                    ? product.imageUrls.first
+                                    : '',
+                                'lastTimestamp': FieldValue.serverTimestamp(),
+                              }, SetOptions(merge: true));
+                              if (context.mounted) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatRoomScreen(
+                                      chatId: chatId,
+                                      otherUserName: otherUserName,
+                                      otherUserId: product.userId,
+                                      productTitle: product.title,
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  const Color(0xFFE8803C), // 당근마켓 주황색
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: Text("marketplace.detail.chat".tr(),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 300,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: GestureDetector(
-                onTap: () {
-                  if (imageUrls.isNotEmpty) {
-                    _showFullPhotoView(
-                      imageUrls,
-                      _currentIndex,
-                    );
-                  }
-                },
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    if (imageUrls.isEmpty)
-                      Container(
-                        color: Colors.grey[200],
-                        child: const Icon(Icons.image_not_supported,
-                            size: 60, color: Colors.grey),
-                      )
-                    else
-                      PageView.builder(
-                        controller: _pageController,
-                        itemCount: imageUrls.length,
-                        onPageChanged: (index) {
-                          setState(() => _currentIndex = index);
-                        },
-                        itemBuilder: (context, index) {
-                          return Hero(
-                            tag: 'product_image_$index',
-                            child: Image.network(
-                              imageUrls[index],
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                              loadingBuilder: (context, child, progress) =>
-                                  progress == null
-                                      ? child
-                                      : const Center(child: CircularProgressIndicator()),
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 300,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: GestureDetector(
+                    onTap: () {
+                      if (imageUrls.isNotEmpty) {
+                        _showFullPhotoView(imageUrls, _currentIndex);
+                      }
+                    },
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        if (imageUrls.isEmpty)
+                          Container(
+                              color: Colors.grey[200],
+                              child: const Icon(Icons.image_not_supported,
+                                  size: 60, color: Colors.grey))
+                        else
+                          PageView.builder(
+                            controller: _pageController,
+                            itemCount: imageUrls.length,
+                            onPageChanged: (index) =>
+                                setState(() => _currentIndex = index),
+                            itemBuilder: (context, index) {
+                              return Hero(
+                                tag: 'product_image_$index',
+                                child: InteractiveViewer(
+                                  minScale: 1.0,
+                                  maxScale: 4.0,
+                                  child: Image.network(
+                                    imageUrls[index],
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    loadingBuilder: (context, child, progress) =>
+                                        progress == null
+                                            ? child
+                                            : const Center(
+                                                child:
+                                                    CircularProgressIndicator()),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        if (imageUrls.length > 1)
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 18,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(imageUrls.length, (idx) {
+                                return Container(
+                                  margin:
+                                      const EdgeInsets.symmetric(horizontal: 2),
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    color: _currentIndex == idx
+                                        ? Colors.white
+                                        : Colors.white.withAlpha(115),
+                                    shape: BoxShape.circle,
+                                  ),
+                                );
+                              }),
                             ),
-                          );
-                        },
-                      ),
-                    // 도트 인디케이터
-                    if (imageUrls.length > 1)
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 18,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(imageUrls.length, (idx) {
-                            return Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 2),
-                              width: 7,
-                              height: 7,
-                              decoration: BoxDecoration(
-                                color: _currentIndex == idx
-                                    ? Colors.white
-                                    // ignore: deprecated_member_use
-                                    : Colors.white.withOpacity(0.45),
-                                shape: BoxShape.circle,
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                  ],
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
+                actions: [
+                  IconButton(
+                      icon: const Icon(Icons.share),
+                      onPressed: () => Share.share(
+                          'Check out this product: ${product.title}')),
+                  if (isMyProduct)
+                    IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ProductEditScreen(product: product)))),
+                  if (isMyProduct)
+                    IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: _showDeleteDialog),
+                ],
               ),
-            ),
-            actions: [
-              IconButton(
-                  icon: const Icon(Icons.share),
-                  onPressed: () {
-                    Share.share(
-                        'Check out this product: ${widget.product.title}');
-                  }),
-              if (isMyProduct)
-                IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ProductEditScreen(product: widget.product),
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSellerInfo(product.userId),
+                        const Divider(height: 32),
+                        Text(product.title,
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            CategoryNameWidget(categoryId: product.categoryId),
+                            Text(" ∙ ${_formatTimestamp(product.createdAt)}",
+                                style: const TextStyle(
+                                    fontSize: 13, color: Colors.grey)),
+                          ],
                         ),
-                      );
-                    }),
-              if (isMyProduct)
-                IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: _showDeleteDialog),
+                        const SizedBox(height: 16),
+                        Text(product.description,
+                            style: const TextStyle(fontSize: 16, height: 1.6)),
+                        const SizedBox(height: 16),
+                        const Divider(height: 32),
+                        // [다국어 수정] 통계 라인
+                        Text(
+                          '${'marketplace.detail.likes'.tr()} ${product.likesCount} ∙ ${'marketplace.detail.chats'.tr()} ${product.chatsCount} ∙ ${'marketplace.detail.views'.tr()} ${product.viewsCount}',
+                          style:
+                              const TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ]),
+              )
             ],
           ),
-          SliverList(
-            delegate: SliverChildListDelegate([
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 기존 userName, address → UserModel에서 가져온 정보로 대체
-                    _buildSellerInfo(),
-                    const Divider(height: 32),
-
-
-                    if (widget.product.categoryId.isNotEmpty) ...[
-                      CategoryNameWidget(categoryId: widget.product.categoryId),
-                      const SizedBox(height: 8),
-                    ],
-                    Text(widget.product.title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Text(
-                      _formatTimestamp(widget.product.createdAt),
-                      style: const TextStyle(color: Colors.grey, fontSize: 12),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      NumberFormat.currency(
-                              locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0)
-                          .format(widget.product.price),
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      widget.product.description,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge
-                          ?.copyWith(height: 1.5),
-                    ),
-                    const Divider(height: 32),
-                    Text(
-                      '${'marketplace.detail.likes'.tr()} ${widget.product.likesCount} ∙ ${'marketplace.detail.chats'.tr()} ${widget.product.chatsCount} ∙ ${'marketplace.detail.views'.tr()} ${widget.product.viewsCount + 1}',
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            ]),
-          )
-        ],
-      ),
+        );
+      },
     );
   }
 }

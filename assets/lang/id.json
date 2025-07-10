@@ -133,6 +133,8 @@
             "fail": "Gagal memperbarui produk: {error}"
         },
         "detail": {
+            "makeOffer": "Tawarkan harga",
+            "fixedPrice": "Harga tetap",
             "description": "Deskripsi Produk",
             "sellerInfo": "Informasi Penjual",
             "chat": "Chat",
