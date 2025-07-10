@@ -1,0 +1,260 @@
+{
+  "main": {
+    "id": "0717bb096af00a10",
+    "type": "split",
+    "children": [
+      {
+        "id": "aadae725a26beaa9",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "dee972446b85cfba",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "index/01  프로젝트 개요 & 폴더트리.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "01  프로젝트 개요 & 폴더트리"
+            }
+          },
+          {
+            "id": "1682a57ff8669f0c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "home_screen.dart 백업파일 7월10일 오후11시11분.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "home_screen.dart 백업파일 7월10일 오후11시11분"
+            }
+          },
+          {
+            "id": "455656e4fc014204",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "하단메뉴바 유지 home_screen.dart 7월10일 23시41분 버전.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "하단메뉴바 유지 home_screen.dart 7월10일 23시41분 버전"
+            }
+          },
+          {
+            "id": "bb17615ac1319faf",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "chat_list_screen.dart 백업 7월 11일 오전 00시 7분 버전.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "chat_list_screen.dart 백업 7월 11일 오전 00시 7분 버전"
+            }
+          },
+          {
+            "id": "24a6b5b6c0080e83",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "터미널 로그 에러 메시지3.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "터미널 로그 에러 메시지3"
+            }
+          },
+          {
+            "id": "b1fbaabc0603dc3b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "터미널 로그.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "터미널 로그"
+            }
+          }
+        ],
+        "currentTab": 5
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "3b3a0245a0a34e6a",
+    "type": "split",
+    "children": [
+      {
+        "id": "c4dbedabb4eaf81f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "95bb295f059fcc54",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "파일 탐색기"
+            }
+          },
+          {
+            "id": "baeb5ba7221283ab",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "검색"
+            }
+          },
+          {
+            "id": "6652f8148818164a",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "북마크"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "9d3cad55a5970a23",
+    "type": "split",
+    "children": [
+      {
+        "id": "5f100ca14cdc2331",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9887a7e3685f92b7",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "환영합니다!.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "환영합니다! 의 백링크"
+            }
+          },
+          {
+            "id": "32bbfd273a9dfb62",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "환영합니다!.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "환영합니다! 의 나가는 링크"
+            }
+          },
+          {
+            "id": "6d37fa8e4e69fd10",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "태그"
+            }
+          },
+          {
+            "id": "d2371503edc4440e",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "환영합니다!.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "환영합니다! 의 개요"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:빠른 전환기 열기": false,
+      "graph:그래프 뷰 열기": false,
+      "canvas:새 캔버스 만들기": false,
+      "daily-notes:오늘의 일일 노트 열기": false,
+      "templates:템플릿 삽입": false,
+      "command-palette:명령어 팔레트 열기": false
+    }
+  },
+  "active": "b1fbaabc0603dc3b",
+  "lastOpenFiles": [
+    "터미널 로그.md",
+    "터미널 로그 에러 메시지3.md",
+    "chat_list_screen.dart 백업 7월 11일 오전 00시 7분 버전.md",
+    "하단메뉴바 유지 home_screen.dart 7월10일 23시41분 버전.md",
+    "home_screen.dart 백업파일 7월10일 오후11시11분.md",
+    "index/01  프로젝트 개요 & 폴더트리.md",
+    "team/TeamA_Auth_Trust_module_통합 작업문서.md",
+    "index/00  Mainscreen & 런처 & Tab & Drawer QA.md",
+    "index/010  Post 모듈.md",
+    "index/011  Marketplace 모듈.md",
+    "index/09  신고 & 차단 & Privacy Guard.md",
+    "index/08  Notification 모듈 Core.md",
+    "index/07  Chat 모듈 Core.md",
+    "index/03  User 필드 & TrustLever & 프로필정책.md",
+    "환영합니다!.md"
+  ]
+}

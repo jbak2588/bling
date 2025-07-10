@@ -366,6 +366,14 @@
             "send": "Send"
         },
         "failure": "Failed to add reply: {error}"
+    },
+
+    "chat_list": {
+        "appBarTitle": "Chat",
+        "empty": "There are no ongoing conversations."
+    },
+    "chat_room": {
+        "placeholder": "Enter a message..."
     }
     
 }

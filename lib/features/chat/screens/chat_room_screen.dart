@@ -1,13 +1,12 @@
-// lib/features/chat/presentation/screens/chat_room_screen.dart
+// lib/features/chat/screens/chat_room_screen.dart
 
-// ignore_for_file: unnecessary_brace_in_string_interps
-
-import 'package:bling_app/features/chat/domain/chat_message.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:bling_app/core/models/chat_message_model.dart';
+import 'package:bling_app/core/models/user_model.dart';
+import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final String chatId;
@@ -32,14 +31,16 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final _myUid = FirebaseAuth.instance.currentUser!.uid;
   final _audioPlayer = AudioPlayer();
 
-  String? _otherUserProfileImage;
+  // ⭐️ [수정] ChatService 인스턴스 생성
+  final ChatService _chatService = ChatService();
+  UserModel? _otherUser;
 
   @override
   void initState() {
     super.initState();
+    // AudioPlayer.global.setLogLevel(LogLevel.error); // 불필요한 로그 숨기기
     _fetchOtherUserData();
-    _resetMyUnreadCount();
-    _markMessagesAsRead();
+    _chatService.markMessagesAsRead(widget.chatId, widget.otherUserId);
   }
 
   @override
@@ -50,78 +51,30 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   Future<void> _fetchOtherUserData() async {
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.otherUserId)
-        .get();
-    if (mounted && userDoc.exists) {
-      setState(() {
-        _otherUserProfileImage = userDoc.data()?['profileImage'];
-      });
-    }
+    final user = await _chatService.getOtherUserInfo(widget.otherUserId);
+    if (mounted) setState(() => _otherUser = user);
   }
 
-  Future<void> _resetMyUnreadCount() async {
-    await FirebaseFirestore.instance
-        .collection('chats')
-        .doc(widget.chatId)
-        .update({'unreadCounts.${_myUid}': 0});
-  }
-
-  Future<void> _markMessagesAsRead() async {
-    final messageQuery = FirebaseFirestore.instance
-        .collection('chats')
-        .doc(widget.chatId)
-        .collection('messages')
-        .where('senderId', isEqualTo: widget.otherUserId);
-
-    final snapshot = await messageQuery.get();
-
-    final batch = FirebaseFirestore.instance.batch();
-
-    for (var doc in snapshot.docs) {
-      final message = ChatMessage.fromFirestore(doc);
-      if (!message.readBy.contains(_myUid)) {
-        batch.update(doc.reference, {
-          'readBy': FieldValue.arrayUnion([_myUid]),
-        });
-      }
-    }
-    await batch.commit();
-  }
-
+  // ⭐️ [수정] 모든 로직을 ChatService에 위임
   Future<void> _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
-
     final messageText = _messageController.text.trim();
     _messageController.clear();
 
-    _audioPlayer.play(AssetSource('sounds/send_sound.mp3'));
+    // await _audioPlayer.setAudioContext(const AudioContext(
+    //     android: AudioContextAndroid(
+    //         contentType: AndroidContentType.sonification,
+    //         usageType: AndroidUsageType.assistanceSonification),
+    //     ios: AudioContextIOS(category: AVAudioSessionCategory.playback)));
+    await _audioPlayer.play(AssetSource('sounds/send_sound.mp3'));
 
-    final message = {
-      'senderId': _myUid,
-      'text': messageText,
-      'timestamp': Timestamp.now(),
-      'readBy': [_myUid],
-    };
-
-    final chatDocRef =
-        FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
-
-    await chatDocRef.collection('messages').add(message);
-
-    await chatDocRef.update({
-      'lastMessage': messageText,
-      'lastTimestamp': message['timestamp'],
-      'unreadCounts.${widget.otherUserId}': FieldValue.increment(1),
-    });
+    await _chatService.sendMessage(
+        widget.chatId, messageText, widget.otherUserId);
   }
 
-  Widget _buildReadReceipt(ChatMessage message) {
+  Widget _buildReadReceipt(ChatMessageModel message) {
+    if (message.senderId != _myUid) return const SizedBox.shrink();
     final bool isReadByOther = message.readBy.contains(widget.otherUserId);
-    if (message.senderId != _myUid) {
-      return const SizedBox.shrink();
-    }
     return Padding(
       padding: const EdgeInsets.only(left: 4.0),
       child: Icon(
@@ -139,31 +92,22 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       body: Column(
         children: [
           Expanded(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: FirebaseFirestore.instance
-                  .collection('chats')
-                  .doc(widget.chatId)
-                  .collection('messages')
-                  .orderBy('timestamp', descending: true)
-                  .snapshots(),
+            // ⭐️ [수정] StreamBuilder가 ChatService를 사용
+            child: StreamBuilder<List<ChatMessageModel>>(
+              stream: _chatService.getMessagesStream(widget.chatId),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text('chat_placeholder'.tr()));
+                if (snapshot.data!.isEmpty) {
+                  return Center(child: Text('chat_room.placeholder'.tr()));
                 }
 
-                final messages = snapshot.data!.docs
-                    .map((doc) => ChatMessage.fromFirestore(doc))
-                    .toList();
-
+                final messages = snapshot.data!;
                 return ListView.builder(
                   reverse: true,
                   padding: const EdgeInsets.symmetric(
-                    vertical: 8.0,
-                    horizontal: 8.0,
-                  ),
+                      vertical: 8.0, horizontal: 8.0),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index];
@@ -178,10 +122,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         if (!isMe)
                           CircleAvatar(
                             radius: 18,
-                            backgroundImage: _otherUserProfileImage != null
-                                ? NetworkImage(_otherUserProfileImage!)
+                            backgroundImage: _otherUser?.photoUrl != null
+                                ? NetworkImage(_otherUser!.photoUrl!)
                                 : null,
-                            child: _otherUserProfileImage == null
+                            child: _otherUser?.photoUrl == null
                                 ? const Icon(Icons.person)
                                 : null,
                           ),
@@ -189,9 +133,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                           child: Container(
                             margin: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                             padding: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 14,
-                            ),
+                                vertical: 10, horizontal: 14),
                             decoration: BoxDecoration(
                               color:
                                   isMe ? Colors.indigo[50] : Colors.grey[200],
@@ -216,11 +158,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   child: TextField(
                     controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: 'chat_placeholder'.tr(),
+                      hintText: 'chat_room.placeholder'.tr(),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                          borderRadius: BorderRadius.circular(20)),
                     ),
+                    onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
                 IconButton(

@@ -365,6 +365,14 @@
             "send": "Kirim"
         },
         "failure": "Gagal menambahkan balasan: {error}"
+    },
+
+    "chat_list": {
+        "appBarTitle": "Obrolan",
+        "empty": "Belum ada percakapan."
+    },
+    "chat_room": {
+        "placeholder": "Ketik pesan..."
     }
 
 
