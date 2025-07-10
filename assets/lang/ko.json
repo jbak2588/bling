@@ -133,6 +133,8 @@
             "fail": "상품 수정 실패: {error}"
         },
         "detail": {
+            "makeOffer": "가격 제안하기",
+            "fixedPrice": "고정 가격",
             "description": "제품 설명",
             "sellerInfo": "판매자 정보",
             "chat": "채팅",
