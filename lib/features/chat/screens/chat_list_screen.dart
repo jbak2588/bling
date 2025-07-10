@@ -53,8 +53,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
           }
           if (snapshot.hasError) {
             return Center(
-                child: Text(
-                    'marketplace_error'.tr(args: [snapshot.error.toString()])));
+                child: Text('marketplace.error'
+                    .tr(namedArgs: {'error': snapshot.error.toString()})));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(child: Text('chat_list_empty'.tr()));

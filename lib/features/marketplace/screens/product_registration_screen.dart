@@ -125,12 +125,14 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   Future<void> _submitProduct() async {
     if (_images.isEmpty) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('err_no_photo'.tr())));
+          .showSnackBar(
+              SnackBar(content: Text('marketplace.errors.noPhoto'.tr())));
       return;
     }
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('err_no_category'.tr())));
+          .showSnackBar(
+              SnackBar(content: Text('marketplace.errors.noCategory'.tr())));
       return;
     }
     if (!_formKey.currentState!.validate()) {
@@ -197,7 +199,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('product_reg_success'.tr())),
+          SnackBar(content: Text('marketplace.registration.success'.tr())),
         );
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
@@ -235,14 +237,14 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('product_reg_title'.tr()),
+        title: Text('marketplace.registration.title'.tr()),
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _submitProduct,
             child: _isLoading
                 ? const CircularProgressIndicator(color: Colors.white)
                 : Text(
-                    'product_reg_done'.tr(),
+                    'marketplace.registration.done'.tr(),
                     style: TextStyle(
                       color: theme.colorScheme.onPrimary,
                       fontSize: 16,
@@ -300,9 +302,10 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               TextFormField(
                 controller: _titleController,
                 decoration:
-                    InputDecoration(labelText: 'product_reg_title_hint'.tr()),
+                    InputDecoration(
+                        labelText: 'marketplace.registration.titleHint'.tr()),
                 validator: (value) => (value == null || value.isEmpty)
-                    ? 'err_required_field'.tr()
+                    ? 'marketplace.errors.requiredField'.tr()
                     : null,
               ),
               const SizedBox(height: 16),
@@ -337,14 +340,15 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               TextFormField(
                 controller: _priceController,
                 decoration:
-                    InputDecoration(labelText: 'product_reg_price_hint'.tr()),
+                    InputDecoration(
+                        labelText: 'marketplace.registration.priceHint'.tr()),
                 keyboardType: TextInputType.number,
                 validator: (value) => (value == null || value.isEmpty)
-                    ? 'err_required_field'.tr()
+                    ? 'marketplace.errors.requiredField'.tr()
                     : null,
               ),
               SwitchListTile(
-                title: Text('product_reg_negotiable'.tr()),
+                title: Text('marketplace.registration.negotiable'.tr()),
                 value: _isNegotiable,
                 onChanged: (value) => setState(() => _isNegotiable = value),
                 contentPadding: EdgeInsets.zero,
@@ -353,13 +357,14 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
-                  labelText: 'product_reg_description_hint'.tr(),
+                  labelText:
+                      'marketplace.registration.descriptionHint'.tr(),
                   alignLabelWithHint: true,
                   border: const OutlineInputBorder(),
                 ),
                 maxLines: 5,
                 validator: (value) => (value == null || value.isEmpty)
-                    ? 'err_required_field'.tr()
+                    ? 'marketplace.errors.requiredField'.tr()
                     : null,
               ),
             ],

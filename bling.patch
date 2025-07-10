@@ -1,0 +1,274 @@
+diff --git a/assets/lang/en.json b/assets/lang/en.json
+index 9917acbb2f97b9b1f9ba0a6932563598910187c9..6618627396a44410d7f1675b967fdc40d4b3ca60 100644
+--- a/assets/lang/en.json
++++ b/assets/lang/en.json
+@@ -91,51 +91,56 @@
+             "title": "My Trust Verification",
+             "kelurahanAuth": "Neighborhood Verified (Kelurahan)",
+             "rtRwAuth": "Detailed Address Verified (RT/RW)",
+             "phoneAuth": "Phone Number Verified",
+             "profileComplete": "Profile Complete",
+             "feedThanks": "Feed Thanks",
+             "marketThanks": " Market Thanks",
+             "reports": "Reports",
+             "breakdownButton": "Details",
+             "breakdownModalTitle": "Trust Score Breakdown",
+             "breakdownClose": "OK",
+             "breakdown": {
+                 "kelurahanAuth": "+50",
+                 "rtRwAuth": "+50",
+                 "phoneAuth": "+100",
+                 "profileComplete": "+50",
+                 "feedThanks": "+10 per",
+                 "marketThanks": "+20 per",
+                 "reports": "-50 per"
+             }
+         }
+     },
+ 
+     "marketplace": {
+         "error": "An error has occurred: {error}",
+-        "empty": "No items registered yet.\nPress the + button to add the first item!"
++        "empty": "No items registered yet.\nPress the + button to add the first item!",
++        "detail": {
++            "noSeller": "Seller info unavailable",
++            "noLocation": "Location info unavailable",
++            "seller": "Seller"
++        }
+     },
+     "myBling": {
+         "title": "My Bling",
+         "editProfile": "Edit Profile",
+         "settings": "Settings",
+         "stats": {
+             "posts": "Posts",
+             "followers": "Followers",
+             "neighbors": "Neighbors",
+             "friends": "Friends"
+         },
+         "tabs": {
+             "posts": "My Posts",
+             "products": "My Products",
+             "bookmarks": "Bookmarks"
+         }
+     },
+ 
+     "prompt": {
+         "title": "Welcome to Bling!",
+         "subtitle": "To see interesting news and items around you, please set your neighborhood first.",
+         "button": "Set My Neighborhood"
+     },
+     "location": {
+         "title": "Set Neighborhood",
+diff --git a/assets/lang/id.json b/assets/lang/id.json
+index 260e4aa2a50b69aba722aa39d2948e3ab3791e46..81a3e47590587364a4cdf1093deddb4206328efc 100644
+--- a/assets/lang/id.json
++++ b/assets/lang/id.json
+@@ -89,51 +89,56 @@
+         "trustDashboard": {
+             "title": "Status Verifikasi Kepercayaan Saya",
+             "kelurahanAuth": "Verifikasi Kelurahan",
+             "rtRwAuth": "Verifikasi Alamat Detail (RT/RW)",
+             "phoneAuth": "Verifikasi Nomor Telepon",
+             "profileComplete": "Profil Lengkap",
+             "feedThanks": "Feed Thanks",
+             "marketThanks": " Market Thanks",
+             "reports": "Reports",
+             "breakdownButton": "Detail",
+             "breakdownModalTitle": "Rincian Skor Kepercayaan",
+             "breakdownClose": "OK",
+             "breakdown": {
+                 "kelurahanAuth": "+50",
+                 "rtRwAuth": "+50",
+                 "phoneAuth": "+100",
+                 "profileComplete": "+50",
+                 "feedThanks": "+10 per",
+                 "marketThanks": "+20 per",
+                 "reports": "-50 per"
+             }
+         }
+     },
+     "marketplace": {
+         "error": "Terjadi kesalahan: {error}",
+-        "empty": "Belum ada produk yang terdaftar.\nTekan tombol + untuk menambahkan produk pertama!"
++        "empty": "Belum ada produk yang terdaftar.\nTekan tombol + untuk menambahkan produk pertama!",
++        "detail": {
++            "noSeller": "Info penjual tidak tersedia",
++            "noLocation": "Info lokasi tidak tersedia",
++            "seller": "Penjual"
++        }
+     },
+ 
+     "myBling": {
+         "title": "Bling Saya",
+         "editProfile": "Ubah Profil",
+         "settings": "Pengaturan",
+         "stats": {
+             "posts": "Postingan",
+             "followers": "Pengikut",
+             "neighbors": "Tetangga",
+             "friends": "Teman"
+         },
+         "tabs": {
+             "posts": "Postingan Saya",
+             "products": "Produk Saya",
+             "bookmarks": "Markah"
+         }
+     },
+ 
+     "prompt": {
+         "title": "Selamat datang di Bling!",
+         "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
+         "button": "Atur Lingkungan Saya"
+     },
+     "location": {
+diff --git a/assets/lang/ko.json b/assets/lang/ko.json
+index 4faf38aba2cdebf25357d275dbf6b8d68565576b..7e292947467a5a35acf5bd0737eaccd1590171b8 100644
+--- a/assets/lang/ko.json
++++ b/assets/lang/ko.json
+@@ -89,51 +89,56 @@
+         "trustDashboard": {
+             "title": "나의 신뢰 인증 현황",
+             "kelurahanAuth": "동네 인증 (Kelurahan)",
+             "rtRwAuth": "상세 주소 인증 (RT/RW)",
+             "phoneAuth": "전화번호 인증",
+             "profileComplete": "프로필 완성",
+             "feedThanks": "피드 감사",
+             "reports": "신고",
+             "marketThanks": "마켓 감사",
+             "breakdownButton": "상세보기",
+             "breakdownModalTitle": "신뢰 점수 산정 기준",
+             "breakdownClose": "확인",
+             "breakdown": {
+                 "kelurahanAuth": "+50",
+                 "rtRwAuth": "+50",
+                 "phoneAuth": "+100",
+                 "profileComplete": "+50",
+                 "feedThanks": "+10 per",
+                 "marketThanks": "+20 per",
+                 "reports": "-50 per"
+             }
+         }
+     },
+     "marketplace": {
+         "error": "오류가 발생했습니다: {error}",
+-        "empty": "등록된 상품이 없습니다.\n아래 + 버튼을 눌러 첫 상품을 등록해보세요!"
++        "empty": "등록된 상품이 없습니다.\n아래 + 버튼을 눌러 첫 상품을 등록해보세요!",
++        "detail": {
++            "noSeller": "판매자 정보 없음",
++            "noLocation": "지역 정보 없음",
++            "seller": "판매자"
++        }
+     },
+     "myBling": {
+         "title": "나의 Bling",
+         "editProfile": "프로필 수정",
+         "settings": "설정",
+         "stats": {
+             "posts": "게시물",
+             "followers": "팔로워",
+             "neighbors": "이웃",
+             "friends": "친구"
+         },
+         "tabs": {
+             "posts": "내 게시물",
+             "products": "내 판매상품",
+             "bookmarks": "관심목록"
+         }
+     },
+     "prompt": {
+         "title": "블링에 오신 것을 환영합니다!",
+         "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
+         "button": "내 동네 설정하기"
+     },
+     "location": {
+         "title": "동네 설정",
+         "searchHint": "동네 이름으로 검색 (예: 세르퐁)",
+diff --git a/lib/features/marketplace/screens/product_detail_screen.dart b/lib/features/marketplace/screens/product_detail_screen.dart
+index 7860407b173bcfc30ef9b3271c2cbf9cdc495ea7..c01583fab512070a5d033d4b9442917284f6e1c8 100644
+--- a/lib/features/marketplace/screens/product_detail_screen.dart
++++ b/lib/features/marketplace/screens/product_detail_screen.dart
+@@ -245,76 +245,78 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
+                       icon: const Icon(Icons.close, color: Colors.white, size: 36),
+                       onPressed: () => Navigator.of(context).pop(),
+                     ),
+                   ),
+                 ],
+               ),
+             ),
+           ),
+         );
+       },
+     );
+   }
+ 
+   // 판매자 정보와 위치를 UserModel에서 가져와서 표시
+   Widget _buildSellerInfo() {
+     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+       stream: FirebaseFirestore.instance
+           .collection('users')
+           .doc(widget.product.userId)
+           .snapshots(),
+       builder: (context, snapshot) {
+         if (!snapshot.hasData || snapshot.data?.data() == null) {
+           return Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
+-              Text('판매자 정보 없음', style: Theme.of(context).textTheme.titleLarge),
++              Text('marketplace.detail.noSeller'.tr(),
++                  style: Theme.of(context).textTheme.titleLarge),
+               const SizedBox(height: 4),
+-              Text('지역 정보 없음', style: const TextStyle(color: Colors.grey)),
++              Text('marketplace.detail.noLocation'.tr(),
++                  style: const TextStyle(color: Colors.grey)),
+             ],
+           );
+         }
+         final user = UserModel.fromFirestore(snapshot.data!);
+         return Column(
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+             Text(user.nickname, style: Theme.of(context).textTheme.titleLarge),
+             const SizedBox(height: 4),
+-            Text(user.locationName ?? '지역 정보 없음',
++            Text(user.locationName ?? 'marketplace.detail.noLocation'.tr(),
+                 style: const TextStyle(color: Colors.grey)),
+           ],
+         );
+       },
+     );
+   }
+ 
+   Future<String> _fetchUserNickname(String userId) async {
+     final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+     if (doc.exists && doc.data() != null) {
+-      return doc.data()!['nickname'] ?? '판매자';
++      return doc.data()!['nickname'] ?? 'marketplace.detail.seller'.tr();
+     }
+-    return '판매자';
++    return 'marketplace.detail.seller'.tr();
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     final myUid = FirebaseAuth.instance.currentUser?.uid;
+     final isMyProduct = myUid == widget.product.userId;
+     final imageUrls = widget.product.imageUrls;
+ 
+     return Scaffold(
+       bottomNavigationBar: isMyProduct
+           ? null
+           : BottomAppBar(
+               child: Padding(
+                 padding: const EdgeInsets.all(12.0),
+                 child: Row(
+                   children: [
+                     IconButton(
+                       icon: Icon(
+                         _isFavorite ? Icons.favorite : Icons.favorite_border,
+                         color: Colors.pink,
+                       ),
+                       onPressed: _toggleFavorite,
+                     ),
+                     Text('$_likeCount'),
+                     const SizedBox(width: 16),

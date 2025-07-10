@@ -111,7 +111,60 @@
     },
     "marketplace": {
         "error": "오류가 발생했습니다: {error}",
-        "empty": "등록된 상품이 없습니다.\n아래 + 버튼을 눌러 첫 상품을 등록해보세요!"
+        "empty": "등록된 상품이 없습니다.\n아래 + 버튼을 눌러 첫 상품을 등록해보세요!",
+        "registration": {
+            "title": "새 게시물",
+            "done": "완료",
+            "titleHint": "상품명",
+            "priceHint": "가격 (Rp)",
+            "negotiable": "가격 제안 가능",
+            "descriptionHint": "상세 설명",
+            "success": "상품이 성공적으로 등록되었습니다!"
+        },
+        "edit": {
+            "title": "게시물 수정",
+            "done": "수정 완료",
+            "titleHint": "상품명 수정",
+            "addressHint": "위치 수정",
+            "priceHint": "가격 수정 (Rp)",
+            "negotiable": "가격 제안 수정",
+            "descriptionHint": "상세 설명 수정",
+            "success": "상품이 성공적으로 수정되었습니다!",
+            "fail": "상품 수정 실패: {error}"
+        },
+        "detail": {
+            "description": "제품 설명",
+            "sellerInfo": "판매자 정보",
+            "chat": "채팅",
+            "favorite": "관심",
+            "unfavorite": "관심해제",
+            "share": "공유",
+            "edit": "편집",
+            "delete": "삭제",
+            "category": "카테고리",
+            "categoryError": "카테고리: -",
+            "categoryNone": "카테고리 없음",
+            "views": "조회",
+            "likes": "관심",
+            "chats": "채팅",
+            "noSeller": "판매자 정보 없음",
+            "noLocation": "지역 정보 없음",
+            "seller": "판매자"
+
+        },
+        "dialog": {
+            "deleteTitle": "게시물 삭제",
+            "deleteContent": "이 게시물을 정말 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+            "cancel": "취소",
+            "deleteConfirm": "삭제",
+            "deleteSuccess": "게시물이 성공적으로 삭제되었습니다."
+        },
+        "errors": {
+            "deleteError": "게시물을 삭제하지 못했습니다: {error}",
+            "requiredField": "필수 입력 항목입니다.",
+            "noPhoto": "사진을 1장 이상 등록해주세요.",
+            "noCategory": "카테고리를 선택해주세요."
+        }
     },
     "myBling": {
         "title": "나의 Bling",
