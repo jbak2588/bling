@@ -1,4 +1,4 @@
-// lib/features/feed/data/feed_repository.dart
+// lib/features/main_feed/data/feed_repository.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/models/feed_item_model.dart';

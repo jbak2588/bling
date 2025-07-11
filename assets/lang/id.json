@@ -246,8 +246,8 @@
         "currency": "$"
     },
 
-    "localFeed": {
-        "setLoactionPrompt": "Silakan atur lingkungan Anda terlebih dahulu untuk melihat cerita lokal!",
+    "localNewsFeed": {
+        "setLocationPrompt": "Silakan atur lingkungan Anda terlebih dahulu untuk melihat cerita lokal!",
         "allCategory": "Semua",
         "empty": "Tidak ada postingan untuk ditampilkan."
     },

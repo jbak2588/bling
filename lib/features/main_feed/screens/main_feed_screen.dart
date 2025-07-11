@@ -8,8 +8,8 @@ import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localizat
 import '../../../core/models/feed_item_model.dart';
 import '../../../core/models/post_model.dart';
 import '../../../core/models/product_model.dart';
-import '../../feed/data/feed_repository.dart';
-import '../../feed/widgets/post_card.dart';
+import '../data/feed_repository.dart';
+import '../../local_news/widgets/post_card.dart';
 import '../../marketplace/widgets/product_card.dart';
 
 /// 'New Feed' 탭에 표시될 통합 피드 화면입니다.

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/models/post_model.dart';
 import '../../../core/models/user_model.dart';
-import '../../feed/widgets/post_card.dart';
+import '../../local_news/widgets/post_card.dart';
 
 /// MyBling 화면의 '내 게시물' 탭에 표시될 위젯입니다.
 /// 사용자의 postIds를 기반으로 게시물을 가져옵니다.

@@ -239,8 +239,8 @@
     "productCard": {
         "currency": "$"
     },
-    "localFeed": {
-        "setLoactionPrompt": "동네 소식을 보려면 먼저 내 동네를 설정해주세요!",
+    "localNewsFeed": {
+        "setLocationPrompt": "동네 소식을 보려면 먼저 내 동네를 설정해주세요!",
         "allCategory": "전체",
         "empty": "표시할 게시물이 없습니다."
     },

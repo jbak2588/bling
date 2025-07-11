@@ -1,4 +1,4 @@
-// lib/features/feed/widgets/post_card.dart
+// lib/features/local_news/widgets/post_card.dart
 
 import 'package:bling_app/core/models/post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';

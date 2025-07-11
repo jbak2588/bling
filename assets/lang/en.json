@@ -247,8 +247,8 @@
     "currency": "$"
     },
 
-    "localFeed": {
-        "setLoactionPrompt": "Please set your neighborhood first to see local stories!",
+    "localNewsFeed": {
+        "setLocationPrompt": "Please set your neighborhood first to see local stories!",
         "allCategory": "All",
         "empty": "There are no posts to display."
     },
