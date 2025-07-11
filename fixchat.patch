@@ -1,0 +1,60 @@
+diff --git a/lib/features/chat/screens/chat_room_screen.dart b/lib/features/chat/screens/chat_room_screen.dart
+index 090df467fcc81ea60e180d17e21cc2466017f458..22fc23595a4ac853e951d005673a72c0ae98beea 100644
+--- a/lib/features/chat/screens/chat_room_screen.dart
++++ b/lib/features/chat/screens/chat_room_screen.dart
+@@ -77,50 +77,55 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
+     final bool isReadByOther = message.readBy.contains(widget.otherUserId);
+     return Padding(
+       padding: const EdgeInsets.only(left: 4.0),
+       child: Icon(
+         isReadByOther ? Icons.done_all : Icons.done,
+         size: 16,
+         color: isReadByOther ? Colors.blueAccent : Colors.grey,
+       ),
+     );
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(title: Text(widget.productTitle ?? widget.otherUserName)),
+       body: Column(
+         children: [
+           Expanded(
+             // ⭐️ [수정] StreamBuilder가 ChatService를 사용
+             child: StreamBuilder<List<ChatMessageModel>>(
+               stream: _chatService.getMessagesStream(widget.chatId),
+               builder: (context, snapshot) {
+                 if (!snapshot.hasData) {
+                   return const Center(child: CircularProgressIndicator());
+                 }
++
++                // Mark all retrieved messages as read once data is available
++                _chatService.markMessagesAsRead(
++                    widget.chatId, widget.otherUserId);
++
+                 if (snapshot.data!.isEmpty) {
+                   return Center(child: Text('chat_room.placeholder'.tr()));
+                 }
+ 
+                 final messages = snapshot.data!;
+                 return ListView.builder(
+                   reverse: true,
+                   padding: const EdgeInsets.symmetric(
+                       vertical: 8.0, horizontal: 8.0),
+                   itemCount: messages.length,
+                   itemBuilder: (context, index) {
+                     final message = messages[index];
+                     final isMe = message.senderId == _myUid;
+ 
+                     return Row(
+                       mainAxisAlignment: isMe
+                           ? MainAxisAlignment.end
+                           : MainAxisAlignment.start,
+                       crossAxisAlignment: CrossAxisAlignment.end,
+                       children: [
+                         if (!isMe)
+                           CircleAvatar(
+                             radius: 18,
+                             backgroundImage: _otherUser?.photoUrl != null
+                                 ? NetworkImage(_otherUser!.photoUrl!)

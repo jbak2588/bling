@@ -1,0 +1,632 @@
+diff --git a/assets/lang/en.json b/assets/lang/en.json
+index e51fe2d2941884a9cb3fe0d7c40a57fe04883da7..2412bcaccdecdfffcd2e3a613a3f122d7ae046d4 100644
+--- a/assets/lang/en.json
++++ b/assets/lang/en.json
+@@ -183,51 +183,54 @@
+         "tabs": {
+             "posts": "My Posts",
+             "products": "My Products",
+             "bookmarks": "Bookmarks"
+         }
+     },
+ 
+     "prompt": {
+         "title": "Welcome to Bling!",
+         "subtitle": "To see interesting news and items around you, please set your neighborhood first.",
+         "button": "Set My Neighborhood"
+     },
+     "location": {
+         "title": "Set Neighborhood",
+         "searchHint": "Search by neighborhood, e.g., Serpong",
+         "gpsButton": "Find with current location",
+         "success": "Neighborhood has been set.",
+         "error": "Failed to set neighborhood: {error}",
+         "empty": "Please enter a neighborhood name.",
+         "permissionDenied": "Location permission is required to find your neighborhood."
+     },
+ 
+     "profileEdit": {
+         "title": "Edit Profile",
+         "nicknameHint": "Nickname",
++        "phoneHint": "Phone Number",
+         "bioHint": "Bio (Introduction)",
++        "locationTitle": "Location",
++        "changeLocation": "Change",
+         "interests": {
+             "title": "Interests",
+             "hint": "Use comma and Enter to add multiple"
+         },
+         "privacy": {
+             "title": "Privacy Settings",
+             "showLocation": "Show my location on map",
+             "allowRequests": "Allow friend requests"
+         },
+         "saveButton": "Save Changes",
+         "successMessage": "Profile updated successfully.",
+         "errors": {
+             "noUser": "User not logged in.",
+             "updateFailed": "Failed to update profile: {error}"
+         }
+     },
+ 
+     "feed": {
+         "error": "An error occurred: {error}",
+         "empty": "No new posts."
+     },
+ 
+     "postCard": {
+         "locationNotSet": "Location not set"
+     },
+diff --git a/assets/lang/id.json b/assets/lang/id.json
+index 0ab72da048a86c183d0896efaac0f59513283708..655078d343e639e842a9acee89b864ba4feffafd 100644
+--- a/assets/lang/id.json
++++ b/assets/lang/id.json
+@@ -181,51 +181,54 @@
+         "tabs": {
+             "posts": "Postingan Saya",
+             "products": "Produk Saya",
+             "bookmarks": "Markah"
+         }
+     },
+ 
+     "prompt": {
+         "title": "Selamat datang di Bling!",
+         "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
+         "button": "Atur Lingkungan Saya"
+     },
+     "location": {
+         "title": "Atur Lingkungan",
+         "searchHint": "Cari berdasarkan lingkungan, cth., Serpong",
+         "gpsButton": "Cari dengan lokasi saat ini",
+         "success": "Lingkungan telah diatur.",
+         "error": "Gagal mengatur lingkungan: {error}",
+         "empty": "Silakan masukkan nama lingkungan.",
+         "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
+     },
+ 
+     "profileEdit": {
+         "title": "Pengaturan Profil",
+         "nicknameHint": "Nama Panggilan",
++        "phoneHint": "Nomor Telepon",
+         "bioHint": "Bio (Perkenalan Diri)",
++        "locationTitle": "Lokasi",
++        "changeLocation": "Ubah",
+         "interests": {
+             "title": "Minat",
+             "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
+         },
+         "privacy": {
+             "title": "Pengaturan Privasi",
+             "showLocation": "Tampilkan lokasi saya di peta",
+             "allowRequests": "Izinkan permintaan pertemanan"
+         },
+         "saveButton": "Simpan Perubahan",
+         "successMessage": "Profil berhasil diperbarui.",
+         "errors": {
+             "noUser": "Pengguna belum login.",
+             "updateFailed": "Gagal memperbarui profil: {error}"
+         }
+     },
+ 
+     "feed": {
+         "error": "Terjadi kesalahan: {error}",
+         "empty": "Tidak ada berita baru."
+     }
+     ,
+ 
+     "postCard": {
+         "locationNotSet": "Lokasi belum diatur"
+diff --git a/assets/lang/ko.json b/assets/lang/ko.json
+index 6a44e60864b789d72fc6564e06a4578729a30612..224514550cc60d889f636b7928e4bf02200209be 100644
+--- a/assets/lang/ko.json
++++ b/assets/lang/ko.json
+@@ -179,51 +179,54 @@
+             "friends": "친구"
+         },
+         "tabs": {
+             "posts": "내 게시물",
+             "products": "내 판매상품",
+             "bookmarks": "관심목록"
+         }
+     },
+     "prompt": {
+         "title": "블링에 오신 것을 환영합니다!",
+         "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
+         "button": "내 동네 설정하기"
+     },
+     "location": {
+         "title": "동네 설정",
+         "searchHint": "동네 이름으로 검색 (예: 세르퐁)",
+         "gpsButton": "현재 위치로 찾기",
+         "success": "동네가 설정되었습니다.",
+         "error": "동네 설정에 실패했습니다: {error}",
+         "empty": "동네 이름을 입력해주세요.",
+         "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
+     },
+     "profileEdit": {
+         "title": "프로필 설정",
+         "nicknameHint": "닉네임",
++        "phoneHint": "전화번호",
+         "bioHint": "소개 (Bio)",
++        "locationTitle": "지역",
++        "changeLocation": "변경",
+         "interests": {
+             "title": "관심사",
+             "hint": "쉼표와 Enter로 여러개 동시 추가"
+         },
+         "privacy": {
+             "title": "개인정보 설정",
+             "showLocation": "지도에 내 위치 표시",
+             "allowRequests": "친구 추가 요청 허용"
+         },
+         "saveButton": "변경사항 저장",
+         "successMessage": "프로필이 성공적으로 업데이트되었습니다.",
+         "errors": {
+             "noUser": "로그인된 사용자가 없습니다.",
+             "updateFailed": "프로필 업데이트에 실패했습니다: {error}"
+         }
+     },
+     "feed": {
+         "error": "오류가 발생했습니다: {error}",
+         "empty": "새로운 소식이 없습니다."
+     },
+     "postCard": {
+         "locationNotSet": "지역 미설정"
+     },
+     "time": {
+         "now": "방금 전",
+diff --git a/lib/features/my_bling/screens/my_bling_screen.dart b/lib/features/my_bling/screens/my_bling_screen.dart
+index 4db21d9a9185a9708480ccd05a143cd43cab6348..f2e6ea250fb3f22b6f49cb16a89fe1b970bf2aff 100644
+--- a/lib/features/my_bling/screens/my_bling_screen.dart
++++ b/lib/features/my_bling/screens/my_bling_screen.dart
+@@ -1,78 +1,84 @@
+ // lib/features/my_bling/screens/my_bling_screen.dart
+ 
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:flutter/material.dart';
+ import 'package:google_fonts/google_fonts.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ 
+ import '../../../core/models/user_model.dart';
+ import '../widgets/user_post_list.dart';
+ import '../widgets/user_product_list.dart';
+ import '../widgets/user_bookmark_list.dart';
+ import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
++import 'profile_edit_screen.dart';
+ 
+ class MyBlingScreen extends StatefulWidget {
+   const MyBlingScreen({super.key});
+ 
+   @override
+   State<MyBlingScreen> createState() => _MyBlingScreenState();
+ }
+ 
+ class _MyBlingScreenState extends State<MyBlingScreen>
+     with SingleTickerProviderStateMixin {
+   late final TabController _tabController;
+ 
+   @override
+   void initState() {
+     super.initState();
+     _tabController = TabController(length: 3, vsync: this);
+   }
+ 
+   @override
+   void dispose() {
+     _tabController.dispose();
+     super.dispose();
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     final myUid = FirebaseAuth.instance.currentUser?.uid;
+ 
+     if (myUid == null) {
+       return Scaffold(
+           body: Center(child: Text('main.errors.loginRequired'.tr())));
+     }
+ 
+     return Scaffold(
+       appBar: AppBar(
+         title: Text('myBling.title'.tr()),
+         actions: [
+           IconButton(
+             icon: const Icon(Icons.edit_outlined),
+-            onPressed: () {/* 프로필 수정 화면으로 이동 */},
++            onPressed: () {
++              Navigator.of(context).push(
++                MaterialPageRoute(
++                    builder: (_) => const MyProfileEditScreen()),
++              );
++            },
+             tooltip: 'myBling.editProfile'.tr(),
+           ),
+           IconButton(
+             icon: const Icon(Icons.settings_outlined),
+             onPressed: () {/* 설정 화면으로 이동 */},
+             tooltip: 'myBling.settings'.tr(),
+           ),
+         ],
+       ),
+       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+         stream: FirebaseFirestore.instance
+             .collection('users')
+             .doc(myUid)
+             .snapshots(),
+         builder: (context, snapshot) {
+           if (snapshot.connectionState == ConnectionState.waiting) {
+             return const Center(child: CircularProgressIndicator());
+           }
+           if (!snapshot.hasData || !snapshot.data!.exists) {
+             return Center(child: Text('main.errors.userNotFound'.tr()));
+           }
+ 
+           final user = UserModel.fromFirestore(snapshot.data!);
+ 
+           return NestedScrollView(
+diff --git a/lib/features/my_bling/screens/profile_edit_screen.dart b/lib/features/my_bling/screens/profile_edit_screen.dart
+new file mode 100644
+index 0000000000000000000000000000000000000000..e4603fb5158af34d848320dc727d7ea30d72e56c
+--- /dev/null
++++ b/lib/features/my_bling/screens/profile_edit_screen.dart
+@@ -0,0 +1,359 @@
++// lib/features/my_bling/screens/profile_edit_screen.dart
++import 'dart:io';
++
++import 'package:bling_app/core/models/user_model.dart';
++import 'package:cloud_firestore/cloud_firestore.dart';
++import 'package:easy_localization/easy_localization.dart';
++import 'package:firebase_auth/firebase_auth.dart';
++import 'package:firebase_storage/firebase_storage.dart';
++import 'package:flutter/material.dart';
++import 'package:google_fonts/google_fonts.dart';
++import 'package:image_picker/image_picker.dart';
++import '../../location/screens/location_setting_screen.dart';
++
++class MyProfileEditScreen extends StatefulWidget {
++  const MyProfileEditScreen({super.key});
++
++  @override
++  State<MyProfileEditScreen> createState() => _MyProfileEditScreenState();
++}
++
++class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
++  final _nicknameController = TextEditingController();
++  final _bioController = TextEditingController();
++  final _interestController = TextEditingController();
++  final _phoneController = TextEditingController();
++
++  String? _locationName;
++
++  File? _selectedImage;
++  String? _initialPhotoUrl;
++  List<String> _interests = [];
++  bool _showLocationOnMap = true;
++  bool _allowFriendRequests = true;
++
++  bool _isLoading = true;
++  bool _isSaving = false;
++
++  @override
++  void initState() {
++    super.initState();
++    _loadUserData();
++  }
++
++  @override
++  void dispose() {
++    _nicknameController.dispose();
++    _bioController.dispose();
++    _interestController.dispose();
++    _phoneController.dispose();
++    super.dispose();
++  }
++
++  Future<void> _loadUserData() async {
++    final user = FirebaseAuth.instance.currentUser;
++    if (user == null) {
++      if (mounted) setState(() => _isLoading = false);
++      return;
++    }
++    final doc = await FirebaseFirestore.instance
++        .collection('users')
++        .doc(user.uid)
++        .get();
++    if (doc.exists && mounted) {
++      final userModel = UserModel.fromFirestore(doc);
++      setState(() {
++        _nicknameController.text = userModel.nickname;
++        _bioController.text = userModel.bio ?? '';
++        _initialPhotoUrl = userModel.photoUrl;
++        _interests = List<String>.from(userModel.interests ?? []);
++        _phoneController.text = userModel.phoneNumber ?? '';
++        _locationName = userModel.locationName;
++        _showLocationOnMap =
++            userModel.privacySettings?['showLocationOnMap'] ?? true;
++        _allowFriendRequests =
++            userModel.privacySettings?['allowFriendRequests'] ?? true;
++        _isLoading = false;
++      });
++    } else {
++      if (mounted) setState(() => _isLoading = false);
++    }
++  }
++
++  Future<void> _pickImage() async {
++    final picker = ImagePicker();
++    final pickedFile =
++        await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
++    if (pickedFile != null) {
++      setState(() {
++        _selectedImage = File(pickedFile.path);
++      });
++    }
++  }
++
++  void _addInterest() {
++    final input = _interestController.text;
++    final newItems = input.split(',');
++    setState(() {
++      for (var item in newItems) {
++        final normalized = item.trim().toLowerCase();
++        if (normalized.isNotEmpty && !_interests.contains(normalized)) {
++          _interests.add(normalized);
++        }
++      }
++      _interestController.clear();
++    });
++  }
++
++  void _removeInterest(String interest) {
++    setState(() {
++      _interests.remove(interest);
++    });
++  }
++
++  Future<void> _openLocationSetting() async {
++    await Navigator.of(context).push(
++      MaterialPageRoute(builder: (_) => const LocationSettingScreen()),
++    );
++    await _loadUserData();
++  }
++
++  Future<void> _saveChanges() async {
++    if (_isSaving) return;
++    setState(() => _isSaving = true);
++
++    final user = FirebaseAuth.instance.currentUser;
++    if (user == null) {
++      if (mounted) {
++        ScaffoldMessenger.of(context).showSnackBar(
++            SnackBar(content: Text('profileEdit.errors.noUser'.tr())));
++        setState(() => _isSaving = false);
++      }
++      return;
++    }
++
++    try {
++      String? newPhotoUrl = _initialPhotoUrl;
++      if (_selectedImage != null) {
++        final ref = FirebaseStorage.instance
++            .ref()
++            .child('profile_pictures')
++            .child(user.uid);
++        await ref.putFile(_selectedImage!);
++        newPhotoUrl = await ref.getDownloadURL();
++      }
++
++      final Map<String, dynamic> dataToUpdate = {
++        'nickname': _nicknameController.text.trim(),
++        'bio': _bioController.text.trim(),
++        'photoUrl': newPhotoUrl,
++        'phoneNumber': _phoneController.text.trim(),
++        'interests': _interests,
++        'privacySettings': {
++          'showLocationOnMap': _showLocationOnMap,
++          'allowFriendRequests': _allowFriendRequests,
++        },
++        'profileCompleted': true,
++        'updatedAt': FieldValue.serverTimestamp(),
++      };
++
++      await FirebaseFirestore.instance
++          .collection('users')
++          .doc(user.uid)
++          .update(dataToUpdate);
++
++      if (mounted) {
++        ScaffoldMessenger.of(context).showSnackBar(
++            SnackBar(content: Text('profileEdit.successMessage'.tr())));
++        Navigator.of(context).pop();
++      }
++    } catch (e) {
++      if (mounted) {
++        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
++            content: Text(
++                'profileEdit.errors.updateFailed'.tr(args: [e.toString()]))));
++      }
++    } finally {
++      if (mounted) setState(() => _isSaving = false);
++    }
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    final theme = Theme.of(context);
++
++    return Scaffold(
++      appBar: AppBar(
++        title: Text('profileEdit.title'.tr()),
++        titleTextStyle: GoogleFonts.inter(
++            fontSize: 20,
++            fontWeight: FontWeight.bold,
++            color: theme.textTheme.titleLarge?.color),
++      ),
++      body: _isLoading
++          ? const Center(child: CircularProgressIndicator())
++          : Column(
++              children: [
++                Expanded(
++                  child: SingleChildScrollView(
++                    padding: const EdgeInsets.all(24.0),
++                    child: Column(
++                      crossAxisAlignment: CrossAxisAlignment.start,
++                      children: [
++                        Center(
++                          child: Stack(
++                            children: [
++                              CircleAvatar(
++                                radius: 50,
++                                backgroundColor: Colors.grey[200],
++                                backgroundImage: _selectedImage != null
++                                    ? FileImage(_selectedImage!)
++                                    : (_initialPhotoUrl != null &&
++                                            _initialPhotoUrl!.isNotEmpty
++                                        ? NetworkImage(_initialPhotoUrl!)
++                                        : null) as ImageProvider<Object>?,
++                                child: (_selectedImage == null &&
++                                        (_initialPhotoUrl == null ||
++                                            _initialPhotoUrl!.isEmpty))
++                                    ? const Icon(Icons.person,
++                                        size: 50, color: Colors.grey)
++                                    : null,
++                              ),
++                              Positioned(
++                                bottom: 0,
++                                right: 0,
++                                child: CircleAvatar(
++                                  radius: 20,
++                                  backgroundColor: Colors.white,
++                                  child: IconButton(
++                                    icon:
++                                        const Icon(Icons.camera_alt, size: 20),
++                                    onPressed: _pickImage,
++                                  ),
++                                ),
++                              ),
++                            ],
++                          ),
++                        ),
++                        const SizedBox(height: 24),
++                        TextField(
++                          controller: _nicknameController,
++                          decoration: InputDecoration(
++                              labelText: 'profileEdit.nicknameHint'.tr()),
++                        ),
++                        const SizedBox(height: 16),
++                        TextField(
++                          controller: _phoneController,
++                          keyboardType: TextInputType.phone,
++                          decoration: InputDecoration(
++                              labelText: 'profileEdit.phoneHint'.tr()),
++                        ),
++                        const SizedBox(height: 16),
++                        TextField(
++                          controller: _bioController,
++                          decoration: InputDecoration(
++                              labelText: 'profileEdit.bioHint'.tr()),
++                          maxLines: 3,
++                        ),
++                        const SizedBox(height: 24),
++                        Row(
++                          children: [
++                            Expanded(
++                              child: Text(
++                                'profileEdit.locationTitle'.tr(),
++                                style: theme.textTheme.titleMedium,
++                              ),
++                            ),
++                            TextButton(
++                              onPressed: _openLocationSetting,
++                              child: Text('profileEdit.changeLocation'.tr()),
++                            ),
++                          ],
++                        ),
++                        const SizedBox(height: 8),
++                        Text(_locationName ?? 'location.locationNotSet'.tr()),
++                        const SizedBox(height: 24),
++                        // const Divider(),
++                        const SizedBox(height: 16),
++                        Text('profileEdit.interests.title'.tr(),
++                            style: theme.textTheme.titleMedium),
++                        const SizedBox(height: 8),
++                        Row(
++                          children: [
++                            Expanded(
++                              child: TextField(
++                                controller: _interestController,
++                                decoration: InputDecoration(
++                                    hintText:
++                                        'profileEdit.interests.hint'.tr(),
++                                        hintStyle: const TextStyle(color: Colors.grey),),
++                                onSubmitted: (_) => _addInterest(),
++                              ),
++                            ),
++                            IconButton(
++                              icon: const Icon(Icons.add),
++                              onPressed: _addInterest,
++                            ),
++                          ],
++                        ),
++                        const SizedBox(height: 8),
++                        Wrap(
++                          spacing: 8.0,
++                          runSpacing: 4.0,
++                          children: _interests
++                              .map((interest) => Chip(
++                                    label: Text(interest),
++                                    onDeleted: () => _removeInterest(interest),
++                                  ))
++                              .toList(),
++                        ),
++                        const SizedBox(height: 24),
++                        const Divider(),
++                        const SizedBox(height: 16),
++                        Text('profileEdit.privacy.title'.tr(),
++                            style: theme.textTheme.titleMedium),
++                        SwitchListTile(
++                          title: Text('profileEdit.privacy.showLocation'.tr()),
++                          value: _showLocationOnMap,
++                          onChanged: (val) =>
++                              setState(() => _showLocationOnMap = val),
++                        ),
++                        SwitchListTile(
++                          title: Text('profileEdit.privacy.allowRequests'.tr()),
++                          value: _allowFriendRequests,
++                          onChanged: (val) {
++                            setState(() {
++                              _allowFriendRequests = val;
++                            });
++                          },
++                        ),
++                      ],
++                    ),
++                  ),
++                ),
++                Padding(
++                  padding: const EdgeInsets.all(24.0),
++                  child: SizedBox(
++                    width: double.infinity,
++                    height: 50,
++                    child: ElevatedButton(
++                      onPressed: _isSaving ? null : _saveChanges,
++                      style: ElevatedButton.styleFrom(
++                        backgroundColor: theme.primaryColor,
++                        foregroundColor: Colors.white,
++                      ),
++                      child: _isSaving
++                          ? const SizedBox(
++                              width: 20,
++                              height: 20,
++                              child: CircularProgressIndicator(
++                                  strokeWidth: 2, color: Colors.white))
++                          : Text('profileEdit.saveButton'.tr()),
++                    ),
++                  ),
++                ),
++              ],
++            ),
++    );
++  }
++}

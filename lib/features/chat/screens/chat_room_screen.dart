@@ -39,8 +39,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   void initState() {
     super.initState();
     // AudioPlayer.global.setLogLevel(LogLevel.error); // 불필요한 로그 숨기기
-    _fetchOtherUserData();
-    _chatService.markMessagesAsRead(widget.chatId, widget.otherUserId);
+    if (widget.otherUserId.isNotEmpty) {
+      _fetchOtherUserData();
+      _chatService.markMessagesAsRead(widget.chatId, widget.otherUserId);
+    }
   }
 
   @override
@@ -51,13 +53,17 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   Future<void> _fetchOtherUserData() async {
+    if (widget.otherUserId.isEmpty) return;
     final user = await _chatService.getOtherUserInfo(widget.otherUserId);
     if (mounted) setState(() => _otherUser = user);
   }
 
   // ⭐️ [수정] 모든 로직을 ChatService에 위임
   Future<void> _sendMessage() async {
-    if (_messageController.text.trim().isEmpty) return;
+    if (_messageController.text.trim().isEmpty ||
+        widget.otherUserId.isEmpty) {
+      return;
+    }
     final messageText = _messageController.text.trim();
     _messageController.clear();
 
@@ -99,6 +105,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
+
+                // Mark all retrieved messages as read once data is available
+                _chatService.markMessagesAsRead(
+                    widget.chatId, widget.otherUserId);
+
                 if (snapshot.data!.isEmpty) {
                   return Center(child: Text('chat_room.placeholder'.tr()));
                 }
