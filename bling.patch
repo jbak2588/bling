@@ -1,211 +1,222 @@
-diff --git a/lib/core/models/shop_model.dart b/lib/core/models/shop_model.dart
+diff --git a/docs/auction_model.md b/docs/auction_model.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..200125b1293fe26625888eba0cd13e4b6b5ec30d
+index 0000000000000000000000000000000000000000..892ba1dcce2804b6c75e1ba9215e2d47e3d34168
 --- /dev/null
-+++ b/lib/core/models/shop_model.dart
-@@ -0,0 +1,71 @@
-+// lib/core/models/shop_model.dart
++++ b/docs/auction_model.md
+@@ -0,0 +1,18 @@
++# AuctionModel Overview
++
++`AuctionModel` represents a premium auction listing stored in Firestore.
++It mirrors the schema defined in the project documentation for the `auctions`
++collection.
++
++Fields:
++- `title` and `description` describe the item
++- `images` holds photo URLs
++- `startPrice` is the initial amount
++- `currentBid` tracks the highest bid
++- `bidHistory` stores bid snapshots
++- `location` and `geoPoint` mark where the item is located
++- `startAt` and `endAt` define the auction window
++- `ownerId` references the seller
++- `trustLevelVerified` and `isAiVerified` flag vetted auctions
++
++See `lib/core/models/auction_model.dart` for implementation.
+diff --git a/lib/core/models/auction_model.dart b/lib/core/models/auction_model.dart
+new file mode 100644
+index 0000000000000000000000000000000000000000..29ffdd15e6922e311d44d6682ecfe03d56b25186
+--- /dev/null
++++ b/lib/core/models/auction_model.dart
+@@ -0,0 +1,86 @@
++// lib/core/models/auction_model.dart
 +
 +import 'package:cloud_firestore/cloud_firestore.dart';
 +
-+/// Data model representing a local shop listed in the Local Shops module.
-+class ShopModel {
++/// Data model representing a local premium auction item.
++///
++/// The Bling app stores auctions under the `auctions` collection as shown in
++/// the project documentation. Each document includes basic item information,
++/// pricing details and verification flags, while individual bids live in the
++/// `bids` subcollection of that auction. This model mirrors that schema so that
++/// premium auctions can easily be managed locally and synced with Firestore.
++class AuctionModel {
 +  final String id;
-+  final String name;
-+  final String ownerId;
++  final String title;
++  final String description;
++  final List<String> images;
++  final int startPrice;
++  final int currentBid;
++  final List<Map<String, dynamic>> bidHistory;
 +  final String location;
 +  final GeoPoint? geoPoint;
-+  final List<String> products;
-+  final String contactNumber;
-+  final String openHours;
++  final Timestamp startAt;
++  final Timestamp endAt;
++  final String ownerId;
 +  final bool trustLevelVerified;
-+  final Timestamp createdAt;
-+  final int viewsCount;
-+  final int likesCount;
++  final bool isAiVerified;
 +
-+  ShopModel({
++  AuctionModel({
 +    required this.id,
-+    required this.name,
-+    required this.ownerId,
++    required this.title,
++    required this.description,
++    required this.images,
++    required this.startPrice,
++    required this.currentBid,
++    required this.bidHistory,
 +    required this.location,
 +    this.geoPoint,
-+    this.products = const [],
-+    required this.contactNumber,
-+    required this.openHours,
++    required this.startAt,
++    required this.endAt,
++    required this.ownerId,
 +    this.trustLevelVerified = false,
-+    required this.createdAt,
-+    this.viewsCount = 0,
-+    this.likesCount = 0,
++    this.isAiVerified = false,
 +  });
 +
-+  factory ShopModel.fromFirestore(
++  factory AuctionModel.fromFirestore(
 +      DocumentSnapshot<Map<String, dynamic>> doc) {
 +    final data = doc.data() ?? {};
-+    return ShopModel(
++    return AuctionModel(
 +      id: doc.id,
-+      name: data['name'] ?? '',
-+      ownerId: data['ownerId'] ?? '',
++      title: data['title'] ?? '',
++      description: data['description'] ?? '',
++      images:
++          data['images'] != null ? List<String>.from(data['images']) : [],
++      startPrice: data['startPrice'] ?? 0,
++      currentBid: data['currentBid'] ?? 0,
++      bidHistory: data['bidHistory'] != null
++          ? List<Map<String, dynamic>>.from(data['bidHistory'])
++          : [],
 +      location: data['location'] ?? '',
 +      geoPoint: data['geoPoint'],
-+      products:
-+          data['products'] != null ? List<String>.from(data['products']) : [],
-+      contactNumber: data['contactNumber'] ?? '',
-+      openHours: data['openHours'] ?? '',
++      startAt: data['startAt'] ?? Timestamp.now(),
++      endAt: data['endAt'] ?? Timestamp.now(),
++      ownerId: data['ownerId'] ?? '',
 +      trustLevelVerified: data['trustLevelVerified'] ?? false,
-+      createdAt: data['createdAt'] ?? Timestamp.now(),
-+      viewsCount: data['viewsCount'] ?? 0,
-+      likesCount: data['likesCount'] ?? 0,
++      isAiVerified: data['isAiVerified'] ?? false,
 +    );
 +  }
 +
 +  Map<String, dynamic> toJson() {
 +    return {
-+      'name': name,
-+      'ownerId': ownerId,
++      'title': title,
++      'description': description,
++      'images': images,
++      'startPrice': startPrice,
++      'currentBid': currentBid,
++      'bidHistory': bidHistory,
 +      'location': location,
 +      'geoPoint': geoPoint,
-+      'products': products,
-+      'contactNumber': contactNumber,
-+      'openHours': openHours,
++      'startAt': startAt,
++      'endAt': endAt,
++      'ownerId': ownerId,
 +      'trustLevelVerified': trustLevelVerified,
-+      'createdAt': createdAt,
-+      'viewsCount': viewsCount,
-+      'likesCount': likesCount,
++      'isAiVerified': isAiVerified,
 +    };
 +  }
 +}
-+
-diff --git a/lib/core/models/shop_review_model.dart b/lib/core/models/shop_review_model.dart
+diff --git a/lib/core/models/bid_model.dart b/lib/core/models/bid_model.dart
 new file mode 100644
-index 0000000000000000000000000000000000000000..9fb1c0fbd5e4f56cb3902e18b7351f30078e2bdd
+index 0000000000000000000000000000000000000000..b1ffdf798fbbd7d8abc9690978f1621b3c89739b
 --- /dev/null
-+++ b/lib/core/models/shop_review_model.dart
-@@ -0,0 +1,46 @@
-+// lib/core/models/shop_review_model.dart
++++ b/lib/core/models/bid_model.dart
+@@ -0,0 +1,37 @@
++// lib/core/models/bid_model.dart
 +
 +import 'package:cloud_firestore/cloud_firestore.dart';
 +
-+/// Review model stored under `shops/{shopId}/reviews`.
-+class ShopReviewModel {
++/// Model for bids stored under `auctions/{auctionId}/bids`.
++class BidModel {
 +  final String id;
-+  final String shopId;
 +  final String userId;
-+  final int rating;
-+  final String comment;
-+  final Timestamp createdAt;
++  final int bidAmount;
++  final Timestamp bidTime;
 +
-+  ShopReviewModel({
++  BidModel({
 +    required this.id,
-+    required this.shopId,
 +    required this.userId,
-+    required this.rating,
-+    required this.comment,
-+    required this.createdAt,
++    required this.bidAmount,
++    required this.bidTime,
 +  });
 +
-+  factory ShopReviewModel.fromFirestore(
++  factory BidModel.fromFirestore(
 +      DocumentSnapshot<Map<String, dynamic>> doc) {
 +    final data = doc.data() ?? {};
-+    return ShopReviewModel(
++    return BidModel(
 +      id: doc.id,
-+      shopId: data['shopId'] ?? '',
 +      userId: data['userId'] ?? '',
-+      rating: data['rating'] ?? 0,
-+      comment: data['comment'] ?? '',
-+      createdAt: data['createdAt'] ?? Timestamp.now(),
++      bidAmount: data['bidAmount'] ?? 0,
++      bidTime: data['bidTime'] ?? Timestamp.now(),
 +    );
 +  }
 +
 +  Map<String, dynamic> toJson() {
 +    return {
-+      'shopId': shopId,
 +      'userId': userId,
-+      'rating': rating,
-+      'comment': comment,
-+      'createdAt': createdAt,
++      'bidAmount': bidAmount,
++      'bidTime': bidTime,
 +    };
 +  }
 +}
-+
-diff --git a/lib/features/local_stores/data/shop_repository.dart b/lib/features/local_stores/data/shop_repository.dart
+diff --git a/lib/features/auction/data/auction_repository.dart b/lib/features/auction/data/auction_repository.dart
 new file mode 100644
-index 0000000000000000000000000000000000000000..c07954780ba6eccf929f3683d3648be72a75adc3
+index 0000000000000000000000000000000000000000..ee1ac69e8d4a29700c9d64adccf7495ce6cf9580
 --- /dev/null
-+++ b/lib/features/local_stores/data/shop_repository.dart
-@@ -0,0 +1,76 @@
-+// lib/features/local_stores/data/shop_repository.dart
++++ b/lib/features/auction/data/auction_repository.dart
+@@ -0,0 +1,57 @@
++// lib/features/auction/data/auction_repository.dart
 +
 +import 'package:cloud_firestore/cloud_firestore.dart';
 +
-+import '../../../core/models/shop_model.dart';
-+import '../../../core/models/shop_review_model.dart';
++import '../../../core/models/auction_model.dart';
++import '../../../core/models/bid_model.dart';
 +
-+/// Handles CRUD operations for shops and reviews in the Local Shops module.
-+class ShopRepository {
++/// Provides CRUD operations for auctions and bidding functionality.
++class AuctionRepository {
 +  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 +
-+  CollectionReference<Map<String, dynamic>> get _shopsCollection =>
-+      _firestore.collection('shops');
++  CollectionReference<Map<String, dynamic>> get _auctionsCollection =>
++      _firestore.collection('auctions');
 +
-+  Future<String> createShop(ShopModel shop) async {
-+    final doc = await _shopsCollection.add(shop.toJson());
++  Future<String> createAuction(AuctionModel auction) async {
++    final doc = await _auctionsCollection.add(auction.toJson());
 +    return doc.id;
 +  }
 +
-+  Future<void> updateShop(ShopModel shop) async {
-+    await _shopsCollection.doc(shop.id).update(shop.toJson());
++  Future<void> updateAuction(AuctionModel auction) async {
++    await _auctionsCollection.doc(auction.id).update(auction.toJson());
 +  }
 +
-+  Future<void> deleteShop(String shopId) async {
-+    await _shopsCollection.doc(shopId).delete();
++  Future<void> deleteAuction(String auctionId) async {
++    await _auctionsCollection.doc(auctionId).delete();
 +  }
 +
-+  Future<ShopModel> fetchShop(String shopId) async {
-+    final doc = await _shopsCollection.doc(shopId).get();
-+    return ShopModel.fromFirestore(doc);
++  Future<AuctionModel> fetchAuction(String auctionId) async {
++    final doc = await _auctionsCollection.doc(auctionId).get();
++    return AuctionModel.fromFirestore(doc);
 +  }
 +
-+  Stream<List<ShopModel>> fetchShops() {
-+    return _shopsCollection
-+        .orderBy('createdAt', descending: true)
++  Stream<List<AuctionModel>> fetchAuctions() {
++    return _auctionsCollection
++        .orderBy('startAt', descending: true)
 +        .snapshots()
 +        .map((snapshot) =>
-+            snapshot.docs.map(ShopModel.fromFirestore).toList());
++            snapshot.docs.map(AuctionModel.fromFirestore).toList());
 +  }
 +
-+  Future<String> addReview(String shopId, ShopReviewModel review) async {
-+    final doc = await _shopsCollection
-+        .doc(shopId)
-+        .collection('reviews')
-+        .add(review.toJson());
++  Future<String> placeBid(String auctionId, BidModel bid) async {
++    final doc = await _auctionsCollection
++        .doc(auctionId)
++        .collection('bids')
++        .add(bid.toJson());
 +    return doc.id;
 +  }
 +
-+  Future<void> updateReview(String shopId, ShopReviewModel review) async {
-+    await _shopsCollection
-+        .doc(shopId)
-+        .collection('reviews')
-+        .doc(review.id)
-+        .update(review.toJson());
-+  }
-+
-+  Future<void> deleteReview(String shopId, String reviewId) async {
-+    await _shopsCollection
-+        .doc(shopId)
-+        .collection('reviews')
-+        .doc(reviewId)
-+        .delete();
-+  }
-+
-+  Stream<List<ShopReviewModel>> fetchReviews(String shopId) {
-+    return _shopsCollection
-+        .doc(shopId)
-+        .collection('reviews')
-+        .orderBy('createdAt', descending: true)
++  Stream<List<BidModel>> fetchBids(String auctionId) {
++    return _auctionsCollection
++        .doc(auctionId)
++        .collection('bids')
++        .orderBy('bidTime', descending: true)
 +        .snapshots()
-+        .map((snapshot) => snapshot.docs
-+            .map(ShopReviewModel.fromFirestore)
-+            .toList());
++        .map((snapshot) => snapshot.docs.map(BidModel.fromFirestore).toList());
 +  }
 +}
-+
