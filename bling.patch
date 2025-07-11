@@ -1,330 +1,528 @@
-diff --git a/lib/features/location/screens/location_setting_screen.dart b/lib/features/location/screens/location_setting_screen.dart
-index 506e22202b4695c2ae0a88e2ba79ff25ccda3f77..976333dc4feda3baf3ce4c4c15e9dec60473f2f9 100644
---- a/lib/features/location/screens/location_setting_screen.dart
-+++ b/lib/features/location/screens/location_setting_screen.dart
-@@ -1,256 +1,193 @@
- // lib/features/location/screens/location_setting_screen.dart
+diff --git a/lib/features/marketplace/screens/product_edit_screen.dart b/lib/features/marketplace/screens/product_edit_screen.dart
+index 74b49a6468a5f02060af151c272a97c057e555d2..c51acd62be4477f158b1c1fd3b685bb298f49380 100644
+--- a/lib/features/marketplace/screens/product_edit_screen.dart
++++ b/lib/features/marketplace/screens/product_edit_screen.dart
+@@ -1,102 +1,144 @@
+ import 'dart:io';
+ // import 'package:bling_app/features/marketplace/domain/product_model_old.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_storage/firebase_storage.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:flutter/material.dart';
+ import 'package:image_picker/image_picker.dart';
+ import 'package:easy_localization/easy_localization.dart';
  
- import 'package:bling_app/api_keys.dart';
- // import 'package:bling_app/features/main_screen/home_screen.dart';
+ import '../../../core/models/product_model.dart';
+ import '../../../core/models/user_model.dart';
++import '../../categories/domain/category.dart';
++import '../../categories/screens/parent_category_screen.dart';
+ 
+ class ProductEditScreen extends StatefulWidget {
+ final ProductModel product;
+   const ProductEditScreen({super.key, required this.product});
+ 
+   @override
+   State<ProductEditScreen> createState() => _ProductEditScreenState();
+ }
+ 
+ class _ProductEditScreenState extends State<ProductEditScreen> {
+   final _formKey = GlobalKey<FormState>();
+   final _titleController = TextEditingController();
+   final _priceController = TextEditingController();
+   final _descriptionController = TextEditingController();
+   final _addressController = TextEditingController();
+   final _transactionPlaceController = TextEditingController();
+ 
+   bool _isNegotiable = false;
+   List<String> _existingImageUrls = [];
+   final List<XFile> _images = [];
+   bool _isLoading = false;
++  Category? _selectedCategory;
++  String _condition = 'used';
+ 
+   @override
+   void initState() {
+     super.initState();
+     _titleController.text = widget.product.title;
+     _priceController.text = widget.product.price.toString();
+     _descriptionController.text = widget.product.description;
+   _addressController.text = widget.product.locationName ?? '';
+     _transactionPlaceController.text = widget.product.transactionPlace ?? '';
+     _isNegotiable = widget.product.negotiable;
+     _existingImageUrls = List<String>.from(widget.product.imageUrls);
++    _condition = widget.product.condition;
++    _loadInitialCategory();
+   }
+ 
+   @override
+   void dispose() {
+     _titleController.dispose();
+     _priceController.dispose();
+     _descriptionController.dispose();
+     _addressController.dispose();
+     _transactionPlaceController.dispose();
+     super.dispose();
+   }
+ 
+   Future<void> _pickImages() async {
+     final ImagePicker picker = ImagePicker();
+     final List<XFile> picked = await picker.pickMultiImage();
+     if (picked.isNotEmpty) {
+       setState(() {
+         _images.addAll(picked);
+       });
+     }
+   }
+ 
+   void _removeExistingImage(int index) {
+     setState(() {
+       _existingImageUrls.removeAt(index);
+     });
+   }
+ 
+   void _removeNewImage(int index) {
+     setState(() {
+       _images.removeAt(index);
+     });
+   }
+ 
++  Future<void> _loadInitialCategory() async {
++    final doc = await FirebaseFirestore.instance
++        .collection('categories')
++        .doc(widget.product.categoryId)
++        .get();
++    if (doc.exists) {
++      setState(() {
++        _selectedCategory = Category.fromFirestore(doc);
++      });
++    }
++  }
++
++  void _selectCategory() async {
++    final result = await Navigator.of(context).push<Category>(
++      MaterialPageRoute(builder: (context) => const ParentCategoryScreen()),
++    );
++    if (result != null && mounted) {
++      setState(() {
++        _selectedCategory = result;
++      });
++    }
++  }
++
++  String _getCategoryName(BuildContext context, Category? category) {
++    if (category == null) return 'selectCategory'.tr();
++    final langCode = context.locale.languageCode;
++    switch (langCode) {
++      case 'ko':
++        return category.nameKo;
++      case 'id':
++        return category.nameId;
++      default:
++        return category.nameEn;
++    }
++  }
++
+   Future<void> _saveProduct() async {
+     if (_isLoading) return;
+     if (_existingImageUrls.isEmpty && _images.isEmpty) {
+       ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(content: Text('marketplace.errors.noPhoto'.tr())),
+       );
+       return;
+     }
+     if (!_formKey.currentState!.validate()) {
+       return;
+     }
+ 
+     setState(() {
+       _isLoading = true;
+     });
+ 
+     try {
+       // 새로 추가된 이미지 업로드
+       List<String> uploadedUrls = [];
+       for (var image in _images) {
+         final fileName = DateTime.now().millisecondsSinceEpoch.toString();
+         final ref = FirebaseStorage.instance.ref().child('product_images/$fileName');
+         final uploadTask = ref.putFile(File(image.path));
+         final snapshot = await uploadTask;
+         uploadedUrls.add(await snapshot.ref.getDownloadURL());
+@@ -117,50 +159,52 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
+       // );
+ 
+       // await FirebaseFirestore.instance
+       //     .collection('products')
+       //     .doc(widget.product.id)
+       //     .update(updatedProduct.toJson());
+ // ✅ [핵심 수정] 사용자의 최신 정보를 가져와서 위치 정보를 업데이트합니다.
+       final user = FirebaseAuth.instance.currentUser;
+       if (user == null) throw Exception("로그인이 필요합니다.");
+       final userDoc = await FirebaseFirestore.instance
+           .collection('users')
+           .doc(user.uid)
+           .get();
+       if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
+       final userModel = UserModel.fromFirestore(userDoc);
+ 
+ 
+       // ✅ [핵심 수정] copyWith 대신, Map을 직접 만들어 업데이트합니다.
+       final updatedData = {
+         'title': _titleController.text,
+         'price': int.tryParse(_priceController.text) ?? 0,
+         'description': _descriptionController.text,
+         'transactionPlace': _transactionPlaceController.text,
+         'negotiable': _isNegotiable,
+         'imageUrls': allImageUrls,
++        'categoryId': _selectedCategory?.id ?? widget.product.categoryId,
++        'condition': _condition,
+         'updatedAt': Timestamp.now(),
+         // ✅ 구버전 address 대신, 사용자의 최신 위치 정보로 덮어씁니다.
+         'locationName': userModel.locationName,
+         'locationParts': userModel.locationParts,
+         'geoPoint': userModel.geoPoint,
+       };
+ 
+ // ✅ [핵심 수정] toJson() 대신 생성한 Map을 사용하여 update합니다.
+       await FirebaseFirestore.instance
+           .collection('products')
+           .doc(widget.product.id)
+           .update(updatedData);
+ 
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(content: Text('marketplace.edit.success'.tr())),
+         );
+         Navigator.of(context).pop(true);
+       }
+     } catch (e) {
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(
+             content: Text('marketplace.edit.fail'.tr(args: [e.toString()]))),
+         );
+@@ -281,79 +325,101 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
+                           width: 100,
+                           height: 100,
+                           decoration: BoxDecoration(
+                             color: Colors.grey[200],
+                             borderRadius: BorderRadius.circular(8),
+                             border: Border.all(color: Colors.grey[400]!),
+                           ),
+                           child: const Icon(Icons.add_a_photo, size: 32, color: Colors.grey),
+                         ),
+                       ),
+                     ),
+                   ],
+                 ),
+               ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _titleController,
+                 decoration: InputDecoration(
+                     labelText: 'marketplace.edit.titleHint'.tr()),
+                 validator: (value) =>
+                     value == null || value.isEmpty
+                         ? 'marketplace.errors.requiredField'.tr()
+                         : null,
+               ),
+               const SizedBox(height: 16),
++              ListTile(
++                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
++                onTap: _selectCategory,
++                title: Text(_getCategoryName(context, _selectedCategory)),
++                leading: const Icon(Icons.category_outlined),
++                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
++                shape: RoundedRectangleBorder(
++                  side: BorderSide(color: Colors.grey.shade400),
++                  borderRadius: BorderRadius.circular(4),
++                ),
++              ),
++              const SizedBox(height: 16),
+               TextFormField(
+                 controller: _priceController,
+                 keyboardType: TextInputType.number,
+                 decoration: InputDecoration(
+                     labelText: 'marketplace.edit.priceHint'.tr()),
+                 validator: (value) =>
+                     value == null || value.isEmpty
+                         ? 'marketplace.errors.requiredField'.tr()
+                         : null,
+               ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _descriptionController,
+                 maxLines: 5,
+                 decoration: InputDecoration(
+                     labelText: 'marketplace.edit.descriptionHint'.tr()),
+                 validator: (value) =>
+                     value == null || value.isEmpty
+                         ? 'marketplace.errors.requiredField'.tr()
+                         : null,
+               ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _addressController,
+                 decoration: InputDecoration(
+                     labelText: 'marketplace.edit.addressHint'.tr()),
+               ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _transactionPlaceController,
+                 decoration: InputDecoration(labelText: 'address_detail_hint'.tr()),
+               ),
+               const SizedBox(height: 16),
+               Row(
+                 children: [
+                   Text('marketplace.edit.negotiable'.tr()),
+                   Switch(
+                     value: _isNegotiable,
+                     onChanged: (value) {
+                       setState(() {
+                         _isNegotiable = value;
+                       });
+                     },
+                   ),
+                 ],
+               ),
+-              // 카테고리 선택 등 나머지 UI는 product_registration_screen.dart와 동일하게 복사해서 사용
++              const SizedBox(height: 16),
++              DropdownButtonFormField<String>(
++                value: _condition,
++                decoration: const InputDecoration(labelText: 'Condition'),
++                items: const [
++                  DropdownMenuItem(value: 'new', child: Text('New')),
++                  DropdownMenuItem(value: 'used', child: Text('Used')),
++                ],
++                onChanged: (value) =>
++                    setState(() => _condition = value ?? 'used'),
++              ),
+             ],
+           ),
+         ),
+       ),
+     );
+   }
+ }
+diff --git a/lib/features/marketplace/screens/product_registration_screen.dart b/lib/features/marketplace/screens/product_registration_screen.dart
+index f1c30f078ca430202a35a2287b10b561dace666b..dffb163aad79badade935d8a72ec2ba6ac69abe0 100644
+--- a/lib/features/marketplace/screens/product_registration_screen.dart
++++ b/lib/features/marketplace/screens/product_registration_screen.dart
+@@ -1,77 +1,76 @@
+ // lib/features/marketplace/presentation/screens/product_registration_screen.dart
+ 
+ import 'dart:io';
+ import 'package:bling_app/features/categories/domain/category.dart';
+ import 'package:bling_app/features/categories/screens/parent_category_screen.dart';
+-import 'package:bling_app/features/marketplace/domain/product_model_old.dart';
++// import old model is replaced with ProductModel
++import '../../../core/models/product_model.dart';
  import 'package:cloud_firestore/cloud_firestore.dart';
  import 'package:easy_localization/easy_localization.dart';
  import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:firebase_storage/firebase_storage.dart';
  import 'package:flutter/material.dart';
- import 'package:flutter_google_maps_webservices/places.dart';
+ import 'package:geocoding/geocoding.dart';
+ // import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
  import 'package:geolocator/geolocator.dart';
-+import 'package:google_fonts/google_fonts.dart';
+ import 'package:image_picker/image_picker.dart';
  import 'package:permission_handler/permission_handler.dart';
+ import 'package:uuid/uuid.dart';
  
- class LocationSettingScreen extends StatefulWidget {
-   const LocationSettingScreen({super.key});
+ // ✅ [추가] UserModel을 사용하기 위해 import 합니다.
+ import '../../../../core/models/user_model.dart';
+ 
+ class ProductRegistrationScreen extends StatefulWidget {
+   const ProductRegistrationScreen({super.key});
  
    @override
-   State<LocationSettingScreen> createState() => _LocationSettingScreenState();
+   State<ProductRegistrationScreen> createState() =>
+       _ProductRegistrationScreenState();
  }
  
- class _LocationSettingScreenState extends State<LocationSettingScreen> {
--  final _searchController = TextEditingController();
-   final GoogleMapsPlaces _places =
-       GoogleMapsPlaces(apiKey: ApiKeys.googleApiKey);
--  List<Prediction> _predictions = [];
+ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
+   final _formKey = GlobalKey<FormState>();
+   final _titleController = TextEditingController();
+   final _priceController = TextEditingController();
+   final _descriptionController = TextEditingController();
+   final _addressController = TextEditingController();
+   final _transactionPlaceController = TextEditingController();
+ 
+   List<XFile> _images = [];
+   bool _isNegotiable = false;
    bool _isLoading = false;
  
--  @override
--  void dispose() {
--    _searchController.dispose();
--    super.dispose();
--  }
--
-   // 주소 정보를 locationParts 맵으로 변환하는 Helper 함수
-   Map<String, String> _createLocationParts(List<AddressComponent> components) {
-     final parts = <String, String>{};
-     for (var component in components) {
-       final types = component.types;
-       if (types.contains('administrative_area_level_1')) {
-         parts['prov'] = component.longName;
-       } else if (types.contains('administrative_area_level_2')) {
-         parts['kab'] = component.longName;
-       } else if (types.contains('locality') ||
-           types.contains('sublocality_level_1')) {
-         parts['kec'] = component.longName;
-       } else if (types.contains('administrative_area_level_4') ||
-           types.contains('sublocality_level_2')) {
-         parts['kel'] = component.longName;
-       }
-     }
-     return parts;
-   }
+   Category? _selectedCategory;
+   Position? _currentPosition;
  
-   // Firestore에 사용자 위치 정보를 생성 또는 업데이트하는 통합 함수
-   Future<void> _updateUserLocation(String locationName,
-       Map<String, String> locationParts, GeoPoint geoPoint) async {
-     final user = FirebaseAuth.instance.currentUser;
-     if (user == null) return;
- 
-     // .set(..., merge: true)를 사용하여, 문서가 없으면 생성하고 있으면 필드를 업데이트합니다.
-     await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-       'locationName': locationName,
-       'locationParts': locationParts,
-       'geoPoint': geoPoint,
-       'neighborhoodVerified': true,
-     }, SetOptions(merge: true));
- 
-     if (mounted) {
-       ScaffoldMessenger.of(context)
-           .showSnackBar(SnackBar(content: Text('location.success'.tr())));
-       // 성공 후, 모든 이전 화면을 지우고 HomeScreen으로 이동합니다.
-       // Navigator.of(context).pushAndRemoveUntil(
-       //   MaterialPageRoute(builder: (context) => const HomeScreen()),
-       //   (Route<dynamic> route) => false,
-       // );
-     }
-   }
- 
--  // 장소 검색 결과로 주소 업데이트
--  Future<void> _onPlaceSelected(Prediction prediction) async {
--    final placeId = prediction.placeId;
--    if (placeId == null) return;
--
-+  // 현재 GPS 위치로 주소 업데이트
-+  Future<void> _setNeighborhoodWithGPS() async {
-     setState(() => _isLoading = true);
- 
-     try {
--      final detailResult = await _places.getDetailsByPlaceId(placeId);
--      if (mounted &&
--          detailResult.isOkay &&
--          detailResult.result.geometry != null) {
--        final location = detailResult.result.geometry!.location;
--        final components = detailResult.result.addressComponents;
--        final locationMap = _createLocationParts(components);
--        final fullAddress = prediction.description ?? '';
--        final geoPoint = GeoPoint(location.lat, location.lng);
--
--        await _updateUserLocation(fullAddress, locationMap, geoPoint);
--      }
--    } catch (e) {
--      if (mounted) {
-+      // 1. 위치 서비스 활성화 여부 확인
-+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-+      if (!serviceEnabled && mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
--            content:
--                Text('location.error'.tr(namedArgs: {'error': e.toString()}))));
-+            content: Text('location.error'
-+                .tr(namedArgs: {'error': 'GPS service is disabled'}))));
-+        setState(() => _isLoading = false);
-+        return;
-       }
--    } finally {
--      if (mounted) setState(() => _isLoading = false);
--    }
--  }
- 
--  // 현재 GPS 위치로 주소 업데이트
--  Future<void> _useCurrentLocation() async {
--    setState(() => _isLoading = true);
--
--    var status = await Permission.location.status;
--    if (status.isDenied) {
--      status = await Permission.location.request();
--    }
--
--    if (status.isPermanentlyDenied) {
--      if (mounted) {
--        ScaffoldMessenger.of(context).showSnackBar(
--            SnackBar(content: Text('location.permissionDenied'.tr())));
--        openAppSettings(); // 사용자가 직접 설정에서 권한을 켜도록 유도
-+      // 2. 위치 권한 요청
-+      LocationPermission permission = await Geolocator.checkPermission();
-+      if (permission == LocationPermission.denied) {
-+        permission = await Geolocator.requestPermission();
-+      }
-+      if (permission == LocationPermission.deniedForever) {
-+        if (mounted) {
-+          ScaffoldMessenger.of(context).showSnackBar(
-+              SnackBar(content: Text('location.permissionDenied'.tr())));
-+        }
-+        openAppSettings();
-+        setState(() => _isLoading = false);
-+        return;
-       }
--      setState(() => _isLoading = false);
--      return;
--    }
- 
--    if (status.isGranted) {
--      try {
-+      if (permission == LocationPermission.whileInUse ||
-+          permission == LocationPermission.always) {
-+        // 3. 현재 위치 가져오기
-         final position = await Geolocator.getCurrentPosition(
-             desiredAccuracy: LocationAccuracy.high);
--        // final response = await _places.searchByText('${position.latitude},${position.longitude}');
--           final response = await _places.searchNearbyWithRadius(
--          Location(lat: position.latitude, lng: position.longitude),
--         100, // 100미터 반경
--         language: context.locale.languageCode, // 언어 코드 명시
--       );
-+
-+        // 4. 좌표를 주소로 변환
-+        final response = await _places.searchNearbyWithRadius(
-+            Location(lat: position.latitude, lng: position.longitude), 100,
-+            language: context.locale.languageCode);
- 
-         if (mounted && response.isOkay && response.results.isNotEmpty) {
-+          final place = response.results.first;
-           final detailResult =
--              await _places.getDetailsByPlaceId(response.results.first.placeId);
--                final firstResult = response.results.first;
-+              await _places.getDetailsByPlaceId(place.placeId);
-+
-           if (mounted &&
-               detailResult.isOkay &&
-               detailResult.result.geometry != null) {
-             final location = detailResult.result.geometry!.location;
-             final components = detailResult.result.addressComponents;
-             final locationMap = _createLocationParts(components);
--            // final fullAddress = detailResult.result.formattedAddress ??
--            //     response.results.first.formattedAddress ??
--            //     '';
--            final fullAddress = firstResult.formattedAddress ??
--                firstResult.vicinity ??
--                firstResult.name;
-+            final fullAddress = detailResult.result.formattedAddress ??
-+                place.formattedAddress ??
-+                place.name;
-             final geoPoint = GeoPoint(location.lat, location.lng);
- 
-             await _updateUserLocation(fullAddress, locationMap, geoPoint);
-           }
-+        } else {
-+          throw Exception("Could not find address for current location.");
-         }
--      } catch (e) {
--        if (mounted) {
--          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
--              content: Text(
--                  'location.error'.tr(namedArgs: {'error': e.toString()}))));
--        }
--      } finally {
--        if (mounted) setState(() => _isLoading = false);
-       }
--    } else {
-+    } catch (e) {
-       if (mounted) {
--        ScaffoldMessenger.of(context).showSnackBar(
--            SnackBar(content: Text('location.permissionDenied'.tr())));
--        setState(() => _isLoading = false);
-+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-+            content:
-+                Text('location.error'.tr(namedArgs: {'error': e.toString()}))));
-       }
-+    } finally {
-+      if (mounted) setState(() => _isLoading = false);
-     }
--    
-   }
- 
-   // 검색어 입력 시 자동완성 목록을 가져오는 함수
--  Future<void> _onSearchChanged(String value) async {
--    if (value.trim().length < 2) {
--      if (_predictions.isNotEmpty && mounted) setState(() => _predictions = []);
--      return;
--    }
--    final response = await _places.autocomplete(value,
--        language: context.locale.languageCode,
--        components: [Component(Component.country, 'id')]);
--    if (response.isOkay && mounted) {
--      setState(() => _predictions = response.predictions);
--    }
--  }
-+
+-  // ✅ [수정] ProductModel에 있던 Geo 관련 클래스를 여기로 다시 가져옵니다.
+-  // 이 클래스들은 독립적으로 존재해야 합니다.
+-  late GeoFlutterFire geo;
++  // 현재 상품 상태 및 추가 입력값
++  String _condition = 'used';
  
    @override
-   Widget build(BuildContext context) {
-     return Scaffold(
-       appBar: AppBar(title: Text('location.title'.tr())),
-       body: Column(
-         children: [
-           Padding(
--            padding: const EdgeInsets.all(16.0),
-+            padding: const EdgeInsets.all(24.0),
-             child: Column(
-+              mainAxisAlignment: MainAxisAlignment.center,
-+              crossAxisAlignment: CrossAxisAlignment.stretch,
-               children: [
--                TextField(
--                  controller: _searchController,
--                  autofocus: true,
--                  onChanged: _onSearchChanged,
--                  decoration: InputDecoration(
--                    hintText: 'location.searchHint'.tr(),
--                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
--                    border: OutlineInputBorder(
--                        borderRadius: BorderRadius.circular(12),
--                        borderSide: BorderSide(color: Colors.grey.shade300)),
--                    focusedBorder: OutlineInputBorder(
--                        borderRadius: BorderRadius.circular(12),
--                        borderSide: const BorderSide(
--                            color: Color(0xFF00A66C), width: 2)),
--                  ),
--                ),
-+                const Icon(Icons.location_on_rounded,
-+                    size: 80, color: Color(0xFF00A66C)),
-+                const SizedBox(height: 24),
-+                Text('prompt.title'.tr(),
-+                    style: GoogleFonts.inter(
-+                        fontSize: 22, fontWeight: FontWeight.bold),
-+                    textAlign: TextAlign.center),
-                 const SizedBox(height: 16),
--                ElevatedButton.icon(
--                  onPressed: _isLoading ? null : _useCurrentLocation,
--                  icon: const Icon(Icons.my_location, color: Colors.white),
--                  label: Text('location.gpsButton'.tr(),
--                      style: const TextStyle(color: Colors.white)),
-+                Text('prompt.subtitle'.tr(),
-+                    style: GoogleFonts.inter(
-+                        fontSize: 16, color: Colors.grey[700]),
-+                    textAlign: TextAlign.center),
-+                const SizedBox(height: 48),
-+                ElevatedButton(
-+                  onPressed: _isLoading ? null : _setNeighborhoodWithGPS,
-                   style: ElevatedButton.styleFrom(
--                    minimumSize: const Size(double.infinity, 48),
-+                    padding: const EdgeInsets.symmetric(vertical: 16),
-                     backgroundColor: const Color(0xFF00A66C),
--                    shape: RoundedRectangleBorder(
--                        borderRadius: BorderRadius.circular(12)),
-+                    foregroundColor: Colors.white,
-                   ),
-+                  child: _isLoading
-+                      ? const CircularProgressIndicator(color: Colors.white)
-+                      : Text('prompt.button'.tr(),
-+                          style: GoogleFonts.inter(
-+                              fontSize: 16, fontWeight: FontWeight.bold)),
+   void initState() {
+     super.initState();
+-    geo = GeoFlutterFire(); // GeoFlutterFire 인스턴스 초기화
+     _checkLocationAndPermission();
+   }
+ 
+   @override
+   void dispose() {
+     _titleController.dispose();
+     _priceController.dispose();
+     _descriptionController.dispose();
+     _addressController.dispose();
+     _transactionPlaceController.dispose();
+     super.dispose();
+   }
+ 
+   Future<void> _checkLocationAndPermission() async {
+     final status = await Permission.location.status;
+     if (status.isGranted) {
+       await _getCurrentLocation();
+     } else {
+       final requestedStatus = await Permission.location.request();
+       if (requestedStatus.isGranted) {
+         await _getCurrentLocation();
+       }
+     }
+   }
+ 
+@@ -143,73 +142,69 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
+ 
+     final user = FirebaseAuth.instance.currentUser;
+     if (user == null) {
+       setState(() => _isLoading = false);
+       return;
+     }
+ 
+     try {
+       // ✅ [핵심 수정] 현재 사용자의 프로필 정보를 가져와서 위치 데이터를 확보합니다.
+       final userDoc = await FirebaseFirestore.instance
+           .collection('users')
+           .doc(user.uid)
+           .get();
+       if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
+       final userModel = UserModel.fromFirestore(userDoc);
+ 
+       List<String> imageUrls = [];
+       for (var image in _images) {
+         final fileName = const Uuid().v4();
+         final ref =
+             FirebaseStorage.instance.ref().child('product_images/$fileName');
+         await ref.putFile(File(image.path));
+         imageUrls.add(await ref.getDownloadURL());
+       }
+ 
+-      final geoPoint = userModel.geoPoint ?? GeoPoint(0, 0);
+-      final point =
+-          geo.point(latitude: geoPoint.latitude, longitude: geoPoint.longitude);
+-
+       final newProductId =
+           FirebaseFirestore.instance.collection('products').doc().id;
+ 
+-      // ✅ [핵심 수정] Product 모델을 생성할 때, 컨트롤러의 텍스트 대신 userModel의 데이터를 사용합니다.
+-      final newProduct = Product(
++      final newProduct = ProductModel(
+         id: newProductId,
+-        imageUrls: imageUrls,
++        userId: user.uid,
+         title: _titleController.text,
+         description: _descriptionController.text,
++        imageUrls: imageUrls,
+         categoryId: _selectedCategory!.id,
+         price: int.tryParse(_priceController.text) ?? 0,
+         negotiable: _isNegotiable,
+-        address: userModel.locationName ?? '', // UserModel에서 가져온 주소 이름
++        locationName: userModel.locationName,
++        locationParts: userModel.locationParts,
++        geoPoint: userModel.geoPoint,
+         transactionPlace: _transactionPlaceController.text,
+-        geo: point, // UserModel의 geoPoint로 생성
++        condition: _condition,
+         status: 'selling',
+         isAiVerified: false,
+-        userId: user.uid,
+-        userName: userModel.nickname, // UserModel에서 가져온 닉네임
+         createdAt: Timestamp.now(),
+         updatedAt: Timestamp.now(),
+       );
+ 
+       await FirebaseFirestore.instance
+           .collection('products')
+           .doc(newProductId)
+           .set(newProduct.toJson());
+ 
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('marketplace.registration.success'.tr())),
+         );
+         Navigator.of(context).popUntil((route) => route.isFirst);
+       }
+     } catch (e) {
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('상품 등록 실패: $e')),
+         );
+       }
+     } finally {
+       if (mounted) {
+         setState(() => _isLoading = false);
+       }
+@@ -332,45 +327,56 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
+               ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _transactionPlaceController,
+                 decoration:
+                     InputDecoration(labelText: 'address_detail_hint'.tr()),
+               ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _priceController,
+                 decoration:
+                     InputDecoration(
+                         labelText: 'marketplace.registration.priceHint'.tr()),
+                 keyboardType: TextInputType.number,
+                 validator: (value) => (value == null || value.isEmpty)
+                     ? 'marketplace.errors.requiredField'.tr()
+                     : null,
+               ),
+               SwitchListTile(
+                 title: Text('marketplace.registration.negotiable'.tr()),
+                 value: _isNegotiable,
+                 onChanged: (value) => setState(() => _isNegotiable = value),
+                 contentPadding: EdgeInsets.zero,
+               ),
+               const SizedBox(height: 16),
++              DropdownButtonFormField<String>(
++                value: _condition,
++                decoration: const InputDecoration(labelText: 'Condition'),
++                items: const [
++                  DropdownMenuItem(value: 'new', child: Text('New')),
++                  DropdownMenuItem(value: 'used', child: Text('Used')),
++                ],
++                onChanged: (value) =>
++                    setState(() => _condition = value ?? 'used'),
++              ),
++              const SizedBox(height: 16),
+               TextFormField(
+                 controller: _descriptionController,
+                 decoration: InputDecoration(
+                   labelText:
+                       'marketplace.registration.descriptionHint'.tr(),
+                   alignLabelWithHint: true,
+                   border: const OutlineInputBorder(),
                  ),
-               ],
-             ),
+                 maxLines: 5,
+                 validator: (value) => (value == null || value.isEmpty)
+                     ? 'marketplace.errors.requiredField'.tr()
+                     : null,
+               ),
+             ],
            ),
--          if (_isLoading) const LinearProgressIndicator(),
--          Expanded(
--            child: ListView.builder(
--              itemCount: _predictions.length,
--              itemBuilder: (context, index) {
--                final prediction = _predictions[index];
--                return ListTile(
--                  leading: const Icon(Icons.location_on_outlined,
--                      color: Color(0xFF616161)),
--                  title: Text(prediction.description ?? ''),
--                  subtitle: Text(
--                      prediction.structuredFormatting?.secondaryText ?? ''),
--                  onTap: () => _onPlaceSelected(prediction),
--                );
--              },
--            ),
--          ),
-         ],
+         ),
        ),
      );
    }

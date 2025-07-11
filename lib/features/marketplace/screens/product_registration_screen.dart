@@ -3,7 +3,8 @@
 import 'dart:io';
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:bling_app/features/categories/screens/parent_category_screen.dart';
-import 'package:bling_app/features/marketplace/domain/product_model_old.dart';
+// import old model is replaced with ProductModel
+import '../../../core/models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -42,14 +43,12 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   Category? _selectedCategory;
   Position? _currentPosition;
 
-  // ✅ [수정] ProductModel에 있던 Geo 관련 클래스를 여기로 다시 가져옵니다.
-  // 이 클래스들은 독립적으로 존재해야 합니다.
-  late GeoFlutterFire geo;
+  // 현재 상품 상태 및 추가 입력값
+  String _condition = 'used';
 
   @override
   void initState() {
     super.initState();
-    geo = GeoFlutterFire(); // GeoFlutterFire 인스턴스 초기화
     _checkLocationAndPermission();
   }
 
@@ -165,29 +164,25 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         imageUrls.add(await ref.getDownloadURL());
       }
 
-      final geoPoint = userModel.geoPoint ?? GeoPoint(0, 0);
-      final point =
-          geo.point(latitude: geoPoint.latitude, longitude: geoPoint.longitude);
-
       final newProductId =
           FirebaseFirestore.instance.collection('products').doc().id;
 
-      // ✅ [핵심 수정] Product 모델을 생성할 때, 컨트롤러의 텍스트 대신 userModel의 데이터를 사용합니다.
-      final newProduct = Product(
+      final newProduct = ProductModel(
         id: newProductId,
-        imageUrls: imageUrls,
+        userId: user.uid,
         title: _titleController.text,
         description: _descriptionController.text,
+        imageUrls: imageUrls,
         categoryId: _selectedCategory!.id,
         price: int.tryParse(_priceController.text) ?? 0,
         negotiable: _isNegotiable,
-        address: userModel.locationName ?? '', // UserModel에서 가져온 주소 이름
+        locationName: userModel.locationName,
+        locationParts: userModel.locationParts,
+        geoPoint: userModel.geoPoint,
         transactionPlace: _transactionPlaceController.text,
-        geo: point, // UserModel의 geoPoint로 생성
+        condition: _condition,
         status: 'selling',
         isAiVerified: false,
-        userId: user.uid,
-        userName: userModel.nickname, // UserModel에서 가져온 닉네임
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       );
@@ -352,6 +347,17 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                 value: _isNegotiable,
                 onChanged: (value) => setState(() => _isNegotiable = value),
                 contentPadding: EdgeInsets.zero,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _condition,
+                decoration: const InputDecoration(labelText: 'Condition'),
+                items: const [
+                  DropdownMenuItem(value: 'new', child: Text('New')),
+                  DropdownMenuItem(value: 'used', child: Text('Used')),
+                ],
+                onChanged: (value) =>
+                    setState(() => _condition = value ?? 'used'),
               ),
               const SizedBox(height: 16),
               TextFormField(
