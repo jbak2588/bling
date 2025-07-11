@@ -19,7 +19,7 @@ Gojek 스타일 런처 UX를 결합한 **하이브리드 로컬 앱**입니다.
 - Lelang(경매), POM(지역 쇼츠)
 - 다국어(Localization) + AppBar GEO 범위 설정
 
-## ✅ 폴더 구조    2025년 7월 4일 Ver 0.4 기준
+## ✅ 폴더 구조    2025년 7월 11일 Ver 0.4 기준
 
 lib
 ├── api_keys.dart
@@ -272,3 +272,4 @@ lib
 Bling 은 Ver.09에서 구조 통합을 마치고  
 Ver.1.0에서는 실 서비스 론칭을 목표로 합니다.
 
+See [docs/progress_status.md](docs/progress_status.md) for module completion status.
