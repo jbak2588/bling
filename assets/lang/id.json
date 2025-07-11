@@ -376,7 +376,15 @@
     },
     "chat_room": {
         "placeholder": "Ketik pesan..."
+    },
+    "jobs": {
+        "form": {
+            "titleHint": "Judul pekerjaan",
+            "descriptionHint": "Deskripsikan posisi",
+            "categoryHint": "Kategori",
+            "locationHint": "Lokasi",
+            "submit": "Pasang Lowongan"
+        }
     }
-
 
 }

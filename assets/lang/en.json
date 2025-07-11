@@ -377,6 +377,15 @@
     },
     "chat_room": {
         "placeholder": "Enter a message..."
+    },
+    "jobs": {
+        "form": {
+            "titleHint": "Job title",
+            "descriptionHint": "Describe the position",
+            "categoryHint": "Category",
+            "locationHint": "Location",
+            "submit": "Post Job"
+        }
     }
-    
+
 }
