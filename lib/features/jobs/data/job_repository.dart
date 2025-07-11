@@ -1,37 +1,46 @@
 // lib/features/jobs/data/job_repository.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../../core/models/job_model.dart';
 
-/// Repository for managing local job listings.
-/// All CRUD operations here operate on an in-memory list
-/// rather than a remote database.
+/// Repository for managing job posts in the Jobs module.
+///
+/// This class was originally an in-memory placeholder. It now
+/// uses Firestore so that job listings are shared across devices.
 class JobRepository {
-  final List<JobModel> _jobs = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> createJob(JobModel job) async {
-    _jobs.add(job);
+  CollectionReference<Map<String, dynamic>> get _jobsCollection =>
+      _firestore.collection('jobs');
+
+  /// Creates a new job document and returns its ID.
+  Future<String> createJob(JobModel job) async {
+    final doc = await _jobsCollection.add(job.toJson());
+    return doc.id;
   }
 
-  Future<List<JobModel>> readJobs() async {
-    return _jobs;
+  /// Fetches all jobs ordered by creation date.
+  Stream<List<JobModel>> readJobs() {
+    return _jobsCollection
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map(JobModel.fromFirestore).toList());
   }
 
-  Future<JobModel?> readJob(String id) async {
-    try {
-      return _jobs.firstWhere((j) => j.id == id);
-    } catch (_) {
-      return null;
-    }
+  /// Fetches a single job by document ID.
+  Future<JobModel> readJob(String id) async {
+    final doc = await _jobsCollection.doc(id).get();
+    return JobModel.fromFirestore(doc);
   }
 
+  /// Updates an existing job document.
   Future<void> updateJob(JobModel job) async {
-    final index = _jobs.indexWhere((j) => j.id == job.id);
-    if (index != -1) {
-      _jobs[index] = job;
-    }
+    await _jobsCollection.doc(job.id).update(job.toJson());
   }
 
+  /// Deletes a job document by ID.
   Future<void> deleteJob(String id) async {
-    _jobs.removeWhere((j) => j.id == id);
+    await _jobsCollection.doc(id).delete();
   }
 }

@@ -364,6 +364,15 @@
     },
     "chat_room": {
         "placeholder": "메시지를 입력하세요..."
+    },
+    "jobs": {
+        "form": {
+            "titleHint": "공고 제목",
+            "descriptionHint": "업무 내용을 입력",
+            "categoryHint": "직종 카테고리",
+            "locationHint": "근무 위치",
+            "submit": "구인 등록"
+        }
     }
 
 }
