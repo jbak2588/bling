@@ -224,7 +224,7 @@
         }
     },
 
-    "feed": {
+    "mainFeed": {
         "error": "Terjadi kesalahan: {error}",
         "empty": "Tidak ada berita baru."
     }
@@ -285,7 +285,7 @@
         }
     },
 
-    "createPost": {
+    "localNewsCreate": {
         "appBarTitle": "Buat Postingan Baru",
         "form": {
             "categoryLabel": "Kategori",
@@ -306,7 +306,7 @@
         }
     },
 
-    "postDetail": {
+    "localNewsDetail": {
         "appBarTitle": "Postingan",
         "menu": {
             "edit": "Ubah",
@@ -324,7 +324,7 @@
         }
     },
 
-    "editPost": {
+    "localNewsEdit": {
         "appBarTitle": "Ubah Postingan",
         "buttons": {
             "submit": "Perbarui"

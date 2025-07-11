@@ -226,7 +226,7 @@
         }
     },
 
-    "feed": {
+    "mainFeed": {
         "error": "An error occurred: {error}",
         "empty": "No new posts."
     },
@@ -286,7 +286,7 @@
         }
     },
 
-    "createPost": {
+    "localNewsCreate": {
         "appBarTitle": "Create New Post",
         "form": {
             "categoryLabel": "Category",
@@ -307,7 +307,7 @@
         }
     },
 
-    "postDetail": {
+    "localNewsDetail": {
         "appBarTitle": "Post",
         "menu": {
             "edit": "Edit",
@@ -325,7 +325,7 @@
         }
     },
 
-    "editPost": {
+    "localNewsEdit": {
         "appBarTitle": "Edit Post",
         "buttons": {
             "submit": "Update"

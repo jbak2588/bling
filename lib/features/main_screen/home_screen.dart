@@ -4,13 +4,13 @@ import 'dart:async';
 import 'package:bling_app/features/auction/screens/auction_screen.dart';
 import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
 import 'package:bling_app/features/clubs/screens/clubs_screen.dart';
-import 'package:bling_app/features/feed/screens/feed_screen.dart';
+import 'package:bling_app/features/main_feed/screens/main_feed_screen.dart';
 import 'package:bling_app/features/find_friends/screens/find_friends_screen.dart';
 import 'package:bling_app/features/jobs/screens/jobs_screen.dart';
 import 'package:bling_app/features/local_stores/screens/local_stores_screen.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
 import 'package:bling_app/features/pom/screens/pom_screen.dart';
-import 'package:bling_app/features/post/screens/create_post_screen.dart';
+import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
 import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -160,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       case 0:
       case 1:
         Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => const CreatePostScreen()));
+            .push(MaterialPageRoute(builder: (_) => const CreateLocalNewsScreen()));
         break;
       case 2:
         Navigator.of(context).push(MaterialPageRoute(
@@ -259,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       TabBarView(
         controller: _tabController,
         children: [
-          FeedScreen(userModel: _userModel),
+          MainFeedScreen(userModel: _userModel),
           LocalFeedScreen(userModel: _userModel),
           MarketplaceScreen(userModel: _userModel),
           FindFriendsScreen(userModel: _userModel),

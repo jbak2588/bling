@@ -1,4 +1,4 @@
-// lib/features/post/screens/create_post_screen.dart
+// lib/features/local_news/screens/create_local_news_screen.dart
 
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,14 +12,14 @@ import '../../../core/constants/app_categories.dart';
 import '../../../core/models/post_category_model.dart';
 import '../../../core/models/user_model.dart';
 
-class CreatePostScreen extends StatefulWidget {
-  const CreatePostScreen({super.key});
+class CreateLocalNewsScreen extends StatefulWidget {
+  const CreateLocalNewsScreen({super.key});
 
   @override
-  State<CreatePostScreen> createState() => _CreatePostScreenState();
+  State<CreateLocalNewsScreen> createState() => _CreateLocalNewsScreenState();
 }
 
-class _CreatePostScreenState extends State<CreatePostScreen> {
+class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _tagsController = TextEditingController();
@@ -66,12 +66,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Future<void> _submitPost() async {
     if (_contentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('createPost.alerts.contentRequired'.tr())));
+          SnackBar(content: Text('localNewsCreate.alerts.contentRequired'.tr())));
       return;
     }
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('createPost.alerts.categoryRequired'.tr())));
+          SnackBar(content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
       return;
     }
 
@@ -117,12 +117,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('createPost.alerts.success'.tr())));
+          SnackBar(content: Text('localNewsCreate.alerts.success'.tr())));
       Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('createPost.alerts.failure'
+            content: Text('localNewsCreate.alerts.failure'
                 .tr(namedArgs: {'error': e.toString()}))));
       }
     } finally {
@@ -133,7 +133,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('createPost.appBarTitle'.tr())),
+      appBar: AppBar(title: Text('localNewsCreate.appBarTitle'.tr())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -142,7 +142,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             DropdownButtonFormField<PostCategoryModel>(
               value: _selectedCategory,
               decoration: InputDecoration(
-                  labelText: 'createPost.form.categoryLabel'.tr(),
+                  labelText: 'localNewsCreate.form.categoryLabel'.tr(),
                   border: const OutlineInputBorder()),
               items: AppCategories.postCategories.map((category) {
                 return DropdownMenuItem<PostCategoryModel>(
@@ -175,21 +175,21 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             TextField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                    labelText: 'createPost.form.titleLabel'.tr(),
+                    labelText: 'localNewsCreate.form.titleLabel'.tr(),
                     border: const OutlineInputBorder())),
             const SizedBox(height: 16),
             TextField(
                 controller: _contentController,
                 maxLines: 8,
                 decoration: InputDecoration(
-                    labelText: 'createPost.form.contentLabel'.tr(),
+                    labelText: 'localNewsCreate.form.contentLabel'.tr(),
                     border: const OutlineInputBorder())),
             const SizedBox(height: 16),
             TextField(
                 controller: _tagsController,
                 decoration: InputDecoration(
-                    labelText: 'createPost.form.tagsLabel'.tr(),
-                    hintText: 'createPost.form.tagsHint'.tr(),
+                    labelText: 'localNewsCreate.form.tagsLabel'.tr(),
+                    hintText: 'localNewsCreate.form.tagsHint'.tr(),
                     border: const OutlineInputBorder())),
             const SizedBox(height: 16),
             _buildImagePicker(),
@@ -200,7 +200,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               onPressed: _isSubmitting ? null : _submitPost,
               child: _isSubmitting
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : Text('createPost.buttons.submit'.tr()),
+                  : Text('localNewsCreate.buttons.submit'.tr()),
             ),
           ],
         ),
@@ -215,7 +215,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         OutlinedButton.icon(
             onPressed: _pickImages,
             icon: const Icon(Icons.camera_alt),
-            label: Text('createPost.buttons.addImage'.tr())),
+            label: Text('localNewsCreate.buttons.addImage'.tr())),
         const SizedBox(height: 8),
         if (_selectedImages.isNotEmpty)
           SizedBox(

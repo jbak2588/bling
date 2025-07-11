@@ -221,7 +221,7 @@
             "updateFailed": "프로필 업데이트에 실패했습니다: {error}"
         }
     },
-    "feed": {
+    "mainFeed": {
         "error": "오류가 발생했습니다: {error}",
         "empty": "새로운 소식이 없습니다."
     },
@@ -276,7 +276,7 @@
             }
         }
     },
-    "createPost": {
+    "localNewsCreate": {
         "appBarTitle": "새 게시물 작성",
         "form": {
             "categoryLabel": "카테고리",
@@ -296,7 +296,7 @@
             "failure": "업로드 실패: {error}"
         }
     },
-    "postDetail": {
+    "localNewsDetail": {
         "appBarTitle": "게시물",
         "menu": {
             "edit": "수정하기",
@@ -313,7 +313,7 @@
             "comment": "댓글 달기"
         }
     },
-    "editPost": {
+    "localNewsEdit": {
         "appBarTitle": "게시물 수정",
         "buttons": {
             "submit": "수정하기"

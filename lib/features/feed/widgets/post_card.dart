@@ -2,7 +2,7 @@
 
 import 'package:bling_app/core/models/post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/features/post/screens/post_detail_screen.dart';
+import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
@@ -58,7 +58,7 @@ class PostCard extends StatelessWidget {
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => PostDetailScreen(post: post),
+            builder: (_) => LocalNewsDetailScreen(post: post),
           ));
         },
         borderRadius: BorderRadius.circular(12),
