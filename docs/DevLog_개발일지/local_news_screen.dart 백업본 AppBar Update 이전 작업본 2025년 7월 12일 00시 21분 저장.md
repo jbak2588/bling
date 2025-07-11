@@ -198,7 +198,7 @@ class __FeedCategoryListState extends State<_FeedCategoryList>
           _posts.addAll(querySnapshot.docs);
           _lastDocument =
               querySnapshot.docs.isNotEmpty ? querySnapshot.docs.last : null;
-          
+              // querySnapshot.docs.isNotEmpty ? querySnapshot.docs.last : null;
           _hasMore = querySnapshot.docs.length == _limit;
           _isLoading = false;
         });
