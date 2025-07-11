@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class LocationSettingScreen extends StatefulWidget {
@@ -18,17 +19,9 @@ class LocationSettingScreen extends StatefulWidget {
 }
 
 class _LocationSettingScreenState extends State<LocationSettingScreen> {
-  final _searchController = TextEditingController();
   final GoogleMapsPlaces _places =
       GoogleMapsPlaces(apiKey: ApiKeys.googleApiKey);
-  List<Prediction> _predictions = [];
   bool _isLoading = false;
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   // 주소 정보를 locationParts 맵으로 변환하는 Helper 함수
   Map<String, String> _createLocationParts(List<AddressComponent> components) {
@@ -75,25 +68,68 @@ class _LocationSettingScreenState extends State<LocationSettingScreen> {
     }
   }
 
-  // 장소 검색 결과로 주소 업데이트
-  Future<void> _onPlaceSelected(Prediction prediction) async {
-    final placeId = prediction.placeId;
-    if (placeId == null) return;
-
+  // 현재 GPS 위치로 주소 업데이트
+  Future<void> _setNeighborhoodWithGPS() async {
     setState(() => _isLoading = true);
 
     try {
-      final detailResult = await _places.getDetailsByPlaceId(placeId);
-      if (mounted &&
-          detailResult.isOkay &&
-          detailResult.result.geometry != null) {
-        final location = detailResult.result.geometry!.location;
-        final components = detailResult.result.addressComponents;
-        final locationMap = _createLocationParts(components);
-        final fullAddress = prediction.description ?? '';
-        final geoPoint = GeoPoint(location.lat, location.lng);
+      // 1. 위치 서비스 활성화 여부 확인
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('location.error'
+                .tr(namedArgs: {'error': 'GPS service is disabled'}))));
+        setState(() => _isLoading = false);
+        return;
+      }
 
-        await _updateUserLocation(fullAddress, locationMap, geoPoint);
+      // 2. 위치 권한 요청
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('location.permissionDenied'.tr())));
+        }
+        openAppSettings();
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        // 3. 현재 위치 가져오기
+        final position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high);
+
+        // 4. 좌표를 주소로 변환
+        final response = await _places.searchNearbyWithRadius(
+            Location(lat: position.latitude, lng: position.longitude), 100,
+            language: context.locale.languageCode);
+
+        if (mounted && response.isOkay && response.results.isNotEmpty) {
+          final place = response.results.first;
+          final detailResult =
+              await _places.getDetailsByPlaceId(place.placeId);
+
+          if (mounted &&
+              detailResult.isOkay &&
+              detailResult.result.geometry != null) {
+            final location = detailResult.result.geometry!.location;
+            final components = detailResult.result.addressComponents;
+            final locationMap = _createLocationParts(components);
+            final fullAddress = detailResult.result.formattedAddress ??
+                place.formattedAddress ??
+                place.name;
+            final geoPoint = GeoPoint(location.lat, location.lng);
+
+            await _updateUserLocation(fullAddress, locationMap, geoPoint);
+          }
+        } else {
+          throw Exception("Could not find address for current location.");
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -106,89 +142,8 @@ class _LocationSettingScreenState extends State<LocationSettingScreen> {
     }
   }
 
-  // 현재 GPS 위치로 주소 업데이트
-  Future<void> _useCurrentLocation() async {
-    setState(() => _isLoading = true);
-
-    var status = await Permission.location.status;
-    if (status.isDenied) {
-      status = await Permission.location.request();
-    }
-
-    if (status.isPermanentlyDenied) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('location.permissionDenied'.tr())));
-        openAppSettings(); // 사용자가 직접 설정에서 권한을 켜도록 유도
-      }
-      setState(() => _isLoading = false);
-      return;
-    }
-
-    if (status.isGranted) {
-      try {
-        final position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high);
-        // final response = await _places.searchByText('${position.latitude},${position.longitude}');
-           final response = await _places.searchNearbyWithRadius(
-          Location(lat: position.latitude, lng: position.longitude),
-         100, // 100미터 반경
-         language: context.locale.languageCode, // 언어 코드 명시
-       );
-
-        if (mounted && response.isOkay && response.results.isNotEmpty) {
-          final detailResult =
-              await _places.getDetailsByPlaceId(response.results.first.placeId);
-                final firstResult = response.results.first;
-          if (mounted &&
-              detailResult.isOkay &&
-              detailResult.result.geometry != null) {
-            final location = detailResult.result.geometry!.location;
-            final components = detailResult.result.addressComponents;
-            final locationMap = _createLocationParts(components);
-            // final fullAddress = detailResult.result.formattedAddress ??
-            //     response.results.first.formattedAddress ??
-            //     '';
-            final fullAddress = firstResult.formattedAddress ??
-                firstResult.vicinity ??
-                firstResult.name;
-            final geoPoint = GeoPoint(location.lat, location.lng);
-
-            await _updateUserLocation(fullAddress, locationMap, geoPoint);
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(
-                  'location.error'.tr(namedArgs: {'error': e.toString()}))));
-        }
-      } finally {
-        if (mounted) setState(() => _isLoading = false);
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('location.permissionDenied'.tr())));
-        setState(() => _isLoading = false);
-      }
-    }
-    
-  }
-
   // 검색어 입력 시 자동완성 목록을 가져오는 함수
-  Future<void> _onSearchChanged(String value) async {
-    if (value.trim().length < 2) {
-      if (_predictions.isNotEmpty && mounted) setState(() => _predictions = []);
-      return;
-    }
-    final response = await _places.autocomplete(value,
-        language: context.locale.languageCode,
-        components: [Component(Component.country, 'id')]);
-    if (response.isOkay && mounted) {
-      setState(() => _predictions = response.predictions);
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -197,56 +152,38 @@ class _LocationSettingScreenState extends State<LocationSettingScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(24.0),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  onChanged: _onSearchChanged,
-                  decoration: InputDecoration(
-                    hintText: 'location.searchHint'.tr(),
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade300)),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                            color: Color(0xFF00A66C), width: 2)),
-                  ),
-                ),
+                const Icon(Icons.location_on_rounded,
+                    size: 80, color: Color(0xFF00A66C)),
+                const SizedBox(height: 24),
+                Text('prompt.title'.tr(),
+                    style: GoogleFonts.inter(
+                        fontSize: 22, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center),
                 const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _useCurrentLocation,
-                  icon: const Icon(Icons.my_location, color: Colors.white),
-                  label: Text('location.gpsButton'.tr(),
-                      style: const TextStyle(color: Colors.white)),
+                Text('prompt.subtitle'.tr(),
+                    style: GoogleFonts.inter(
+                        fontSize: 16, color: Colors.grey[700]),
+                    textAlign: TextAlign.center),
+                const SizedBox(height: 48),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _setNeighborhoodWithGPS,
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 48),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: const Color(0xFF00A66C),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                    foregroundColor: Colors.white,
                   ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text('prompt.button'.tr(),
+                          style: GoogleFonts.inter(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ],
-            ),
-          ),
-          if (_isLoading) const LinearProgressIndicator(),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _predictions.length,
-              itemBuilder: (context, index) {
-                final prediction = _predictions[index];
-                return ListTile(
-                  leading: const Icon(Icons.location_on_outlined,
-                      color: Color(0xFF616161)),
-                  title: Text(prediction.description ?? ''),
-                  subtitle: Text(
-                      prediction.structuredFormatting?.secondaryText ?? ''),
-                  onTap: () => _onPlaceSelected(prediction),
-                );
-              },
             ),
           ),
         ],
