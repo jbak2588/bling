@@ -53,7 +53,6 @@
             "agree": "I agree to the terms and wish to continue."
         }
     },
-
     "main": {
         "appBar": {
             "locationNotSet": "Set Location",
@@ -110,7 +109,6 @@
             }
         }
     },
-
     "marketplace": {
         "error": "An error has occurred: {error}",
         "empty": "No items registered yet.\nPress the + button to add the first item!",
@@ -137,7 +135,6 @@
         "detail": {
             "makeOffer": "Make an offer",
             "fixedPrice": "Fixed price",
-         
             "description": "Product Description",
             "sellerInfo": "Seller Information",
             "chat": "Chat",
@@ -186,7 +183,6 @@
             "bookmarks": "Bookmarks"
         }
     },
-
     "prompt": {
         "title": "Welcome to Bling!",
         "subtitle": "To see interesting news and items around you, please set your neighborhood first.",
@@ -201,7 +197,6 @@
         "empty": "Please enter a neighborhood name.",
         "permissionDenied": "Location permission is required to find your neighborhood."
     },
-
     "profileEdit": {
         "title": "Edit Profile",
         "nicknameHint": "Nickname",
@@ -225,12 +220,10 @@
             "updateFailed": "Failed to update profile: {error}"
         }
     },
-
     "mainFeed": {
         "error": "An error occurred: {error}",
         "empty": "No new posts."
     },
-
     "postCard": {
         "locationNotSet": "Location not set"
     },
@@ -242,17 +235,14 @@
         "dateFormat": "dd/MM/yy",
         "dateFormatLong": "MMM d"
     },
-
-   "productCard": {
-    "currency": "$"
+    "productCard": {
+        "currency": "$"
     },
-
     "localNewsFeed": {
         "setLocationPrompt": "Please set your neighborhood first to see local stories!",
         "allCategory": "All",
         "empty": "There are no posts to display."
     },
-
     "categories": {
         "post": {
             "daily_life": {
@@ -285,7 +275,6 @@
             }
         }
     },
-
     "localNewsCreate": {
         "appBarTitle": "Create New Post",
         "form": {
@@ -306,7 +295,6 @@
             "failure": "Upload failed: {error}"
         }
     },
-
     "localNewsDetail": {
         "appBarTitle": "Post",
         "menu": {
@@ -324,7 +312,6 @@
             "comment": "Add a comment"
         }
     },
-
     "localNewsEdit": {
         "appBarTitle": "Edit Post",
         "buttons": {
@@ -335,7 +322,6 @@
             "failure": "Update failed: {error}"
         }
     },
-
     "commentInputField": {
         "secretCommentLabel": "Secret",
         "hintText": "Enter a comment...",
@@ -344,7 +330,6 @@
             "send": "Send"
         }
     },
-
     "commentListView": {
         "empty": "No comments yet. Be the first to comment!",
         "reply": "Reply",
@@ -352,7 +337,6 @@
         "deleted": "[This comment has been deleted]",
         "secret": "This is a secret comment visible only to the author and post owner."
     },
-
     "common": {
         "cancel": "Cancel",
         "delete": "Delete"
@@ -362,7 +346,6 @@
         "content": "Are you sure you want to delete this comment?",
         "failure": "Failed to delete comment: {error}"
     },
-
     "replyInputField": {
         "hintText": "Enter a reply",
         "button": {
@@ -370,13 +353,20 @@
         },
         "failure": "Failed to add reply: {error}"
     },
-
     "chat_list": {
         "appBarTitle": "Chat",
         "empty": "There are no ongoing conversations."
     },
     "chat_room": {
         "placeholder": "Enter a message..."
+    },
+    "jobs": {
+        "form": {
+            "titleHint": "Job title",
+            "descriptionHint": "Describe the position",
+            "categoryHint": "Category",
+            "locationHint": "Location",
+            "submit": "Post Job"
+        }
     }
-    
 }

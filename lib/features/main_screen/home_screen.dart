@@ -171,8 +171,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  AppBar _buildHomeAppBar() {
-    return AppBar(
+  // SliverAppBar로 변경하여 스크롤 최적화 적용
+  SliverAppBar _buildHomeSliverAppBar() {
+    return SliverAppBar(
+      floating: true,
+      snap: true,
+      pinned: true,
       leading: Builder(
         builder: (context) => IconButton(
           icon: CircleAvatar(
@@ -253,10 +257,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      TabBarView(
+  Widget _buildHomePage() {
+    return NestedScrollView(
+      headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            _buildHomeSliverAppBar(),
+          ],
+      body: TabBarView(
         controller: _tabController,
         children: [
           MainFeedScreen(userModel: _userModel),
@@ -270,16 +276,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           PomScreen(userModel: _userModel),
         ],
       ),
-      SearchScreen(),
-      ChatListScreen(),
-      MyBlingScreen(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> pages = [
+      _buildHomePage(),
+      const SearchScreen(),
+      const ChatListScreen(),
+      const MyBlingScreen(),
     ];
 
     int effectiveIndex =
         _bottomNavIndex > 2 ? _bottomNavIndex - 1 : _bottomNavIndex;
 
     return Scaffold(
-      appBar: effectiveIndex == 0 ? _buildHomeAppBar() : null,
+      appBar: null,
       drawer: _buildAppDrawer(_userModel),
       body: IndexedStack(
         index: effectiveIndex,

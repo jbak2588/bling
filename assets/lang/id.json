@@ -167,7 +167,6 @@
             "noCategory": "Silakan pilih kategori."
         }
     },
-
     "myBling": {
         "title": "Bling Saya",
         "editProfile": "Ubah Profil",
@@ -184,7 +183,6 @@
             "bookmarks": "Markah"
         }
     },
-
     "prompt": {
         "title": "Selamat datang di Bling!",
         "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
@@ -199,7 +197,6 @@
         "empty": "Silakan masukkan nama lingkungan.",
         "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
     },
-
     "profileEdit": {
         "title": "Pengaturan Profil",
         "nicknameHint": "Nama Panggilan",
@@ -223,13 +220,10 @@
             "updateFailed": "Gagal memperbarui profil: {error}"
         }
     },
-
     "mainFeed": {
         "error": "Terjadi kesalahan: {error}",
         "empty": "Tidak ada berita baru."
-    }
-    ,
-
+    },
     "postCard": {
         "locationNotSet": "Lokasi belum diatur"
     },
@@ -241,17 +235,14 @@
         "dateFormat": "dd/MM/yy",
         "dateFormatLong": "d MMM"
     },
-
     "productCard": {
         "currency": "$"
     },
-
     "localNewsFeed": {
         "setLocationPrompt": "Silakan atur lingkungan Anda terlebih dahulu untuk melihat cerita lokal!",
         "allCategory": "Semua",
         "empty": "Tidak ada postingan untuk ditampilkan."
     },
-
     "categories": {
         "post": {
             "daily_life": {
@@ -284,7 +275,6 @@
             }
         }
     },
-
     "localNewsCreate": {
         "appBarTitle": "Buat Postingan Baru",
         "form": {
@@ -305,7 +295,6 @@
             "failure": "Gagal mengunggah: {error}"
         }
     },
-
     "localNewsDetail": {
         "appBarTitle": "Postingan",
         "menu": {
@@ -323,7 +312,6 @@
             "comment": "Tambahkan komentar"
         }
     },
-
     "localNewsEdit": {
         "appBarTitle": "Ubah Postingan",
         "buttons": {
@@ -334,7 +322,6 @@
             "failure": "Gagal memperbarui: {error}"
         }
     },
-
     "commentInputField": {
         "secretCommentLabel": "Rahasia",
         "hintText": "Masukkan komentar...",
@@ -343,7 +330,6 @@
             "send": "Kirim"
         }
     },
-
     "commentListView": {
         "empty": "Belum ada komentar. Jadilah yang pertama berkomentar!",
         "reply": "Balas",
@@ -351,7 +337,6 @@
         "deleted": "[Komentar ini telah dihapus]",
         "secret": "Ini adalah komentar rahasia yang hanya dapat dilihat oleh penulis dan pemilik postingan."
     },
-
     "common": {
         "cancel": "Batal",
         "delete": "Hapus"
@@ -361,7 +346,6 @@
         "content": "Apakah Anda yakin ingin menghapus komentar ini?",
         "failure": "Gagal menghapus komentar: {error}"
     },
-
     "replyInputField": {
         "hintText": "Masukkan balasan",
         "button": {
@@ -369,14 +353,20 @@
         },
         "failure": "Gagal menambahkan balasan: {error}"
     },
-
     "chat_list": {
         "appBarTitle": "Obrolan",
         "empty": "Belum ada percakapan."
     },
     "chat_room": {
         "placeholder": "Ketik pesan..."
+    },
+    "jobs": {
+        "form": {
+            "titleHint": "Judul pekerjaan",
+            "descriptionHint": "Deskripsikan posisi",
+            "categoryHint": "Kategori",
+            "locationHint": "Lokasi",
+            "submit": "Pasang Lowongan"
+        }
     }
-
-
 }
