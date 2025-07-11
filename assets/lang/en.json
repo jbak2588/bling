@@ -205,7 +205,10 @@
     "profileEdit": {
         "title": "Edit Profile",
         "nicknameHint": "Nickname",
+        "phoneHint": "Phone Number",
         "bioHint": "Bio (Introduction)",
+        "locationTitle": "Location",
+        "changeLocation": "Change",
         "interests": {
             "title": "Interests",
             "hint": "Use comma and Enter to add multiple"

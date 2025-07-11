@@ -203,7 +203,10 @@
     "profileEdit": {
         "title": "Pengaturan Profil",
         "nicknameHint": "Nama Panggilan",
+        "phoneHint": "Nomor Telepon",
         "bioHint": "Bio (Perkenalan Diri)",
+        "locationTitle": "Lokasi",
+        "changeLocation": "Ubah",
         "interests": {
             "title": "Minat",
             "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"

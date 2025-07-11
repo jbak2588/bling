@@ -11,6 +11,7 @@ import '../widgets/user_post_list.dart';
 import '../widgets/user_product_list.dart';
 import '../widgets/user_bookmark_list.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
+import 'profile_edit_screen.dart';
 
 class MyBlingScreen extends StatefulWidget {
   const MyBlingScreen({super.key});
@@ -50,7 +51,12 @@ class _MyBlingScreenState extends State<MyBlingScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
-            onPressed: () {/* 프로필 수정 화면으로 이동 */},
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => const MyProfileEditScreen()),
+              );
+            },
             tooltip: 'myBling.editProfile'.tr(),
           ),
           IconButton(

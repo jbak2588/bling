@@ -26,6 +26,9 @@ class ChatService {
   }
 
   Future<UserModel> getOtherUserInfo(String otherUid) async {
+    if (otherUid.isEmpty) {
+      throw ArgumentError('otherUid cannot be empty');
+    }
     final userDoc = await _firestore.collection('users').doc(otherUid).get();
     return UserModel.fromFirestore(userDoc);
   }
@@ -74,7 +77,7 @@ class ChatService {
   Future<void> sendMessage(
       String chatId, String text, String otherUserId) async {
     final myUid = _auth.currentUser?.uid;
-    if (myUid == null || text.trim().isEmpty) return;
+    if (myUid == null || text.trim().isEmpty || otherUserId.isEmpty) return;
 
     final messageData = ChatMessageModel(
       id: '',
@@ -99,7 +102,7 @@ class ChatService {
 
   Future<void> markMessagesAsRead(String chatId, String otherUserId) async {
     final myUid = _auth.currentUser?.uid;
-    if (myUid == null) return;
+    if (myUid == null || otherUserId.isEmpty) return;
 
     await _firestore
         .collection('chats')
