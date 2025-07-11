@@ -1,117 +1,211 @@
-diff --git a/lib/core/models/job_model.dart b/lib/core/models/job_model.dart
+diff --git a/lib/core/models/shop_model.dart b/lib/core/models/shop_model.dart
 new file mode 100644
-index 0000000000000000000000000000000000000000..39e8b83d094f70c80e685fee6c73488506e04564
+index 0000000000000000000000000000000000000000..200125b1293fe26625888eba0cd13e4b6b5ec30d
 --- /dev/null
-+++ b/lib/core/models/job_model.dart
-@@ -0,0 +1,68 @@
-+// lib/core/models/job_model.dart
++++ b/lib/core/models/shop_model.dart
+@@ -0,0 +1,71 @@
++// lib/core/models/shop_model.dart
 +
 +import 'package:cloud_firestore/cloud_firestore.dart';
 +
-+/// Job listing data model mapped to the Firestore `jobs` collection.
-+class JobModel {
++/// Data model representing a local shop listed in the Local Shops module.
++class ShopModel {
 +  final String id;
-+  final String title;
-+  final String description;
-+  final String category;
-+  final String? location;
++  final String name;
++  final String ownerId;
++  final String location;
 +  final GeoPoint? geoPoint;
++  final List<String> products;
++  final String contactNumber;
++  final String openHours;
++  final bool trustLevelVerified;
 +  final Timestamp createdAt;
-+  final String userId;
-+  final String trustLevelRequired;
 +  final int viewsCount;
 +  final int likesCount;
-+  final bool isPaidListing;
 +
-+  JobModel({
++  ShopModel({
 +    required this.id,
-+    required this.title,
-+    required this.description,
-+    required this.category,
-+    this.location,
++    required this.name,
++    required this.ownerId,
++    required this.location,
 +    this.geoPoint,
++    this.products = const [],
++    required this.contactNumber,
++    required this.openHours,
++    this.trustLevelVerified = false,
 +    required this.createdAt,
-+    required this.userId,
-+    required this.trustLevelRequired,
 +    this.viewsCount = 0,
 +    this.likesCount = 0,
-+    this.isPaidListing = false,
 +  });
 +
-+  factory JobModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
++  factory ShopModel.fromFirestore(
++      DocumentSnapshot<Map<String, dynamic>> doc) {
 +    final data = doc.data() ?? {};
-+    return JobModel(
++    return ShopModel(
 +      id: doc.id,
-+      title: data['title'] ?? '',
-+      description: data['description'] ?? '',
-+      category: data['category'] ?? '',
-+      location: data['location'],
++      name: data['name'] ?? '',
++      ownerId: data['ownerId'] ?? '',
++      location: data['location'] ?? '',
 +      geoPoint: data['geoPoint'],
++      products:
++          data['products'] != null ? List<String>.from(data['products']) : [],
++      contactNumber: data['contactNumber'] ?? '',
++      openHours: data['openHours'] ?? '',
++      trustLevelVerified: data['trustLevelVerified'] ?? false,
 +      createdAt: data['createdAt'] ?? Timestamp.now(),
-+      userId: data['userId'] ?? '',
-+      trustLevelRequired: data['trustLevelRequired'] ?? 'normal',
 +      viewsCount: data['viewsCount'] ?? 0,
 +      likesCount: data['likesCount'] ?? 0,
-+      isPaidListing: data['isPaidListing'] ?? false,
 +    );
 +  }
 +
 +  Map<String, dynamic> toJson() {
 +    return {
-+      'title': title,
-+      'description': description,
-+      'category': category,
++      'name': name,
++      'ownerId': ownerId,
 +      'location': location,
 +      'geoPoint': geoPoint,
++      'products': products,
++      'contactNumber': contactNumber,
++      'openHours': openHours,
++      'trustLevelVerified': trustLevelVerified,
 +      'createdAt': createdAt,
-+      'userId': userId,
-+      'trustLevelRequired': trustLevelRequired,
 +      'viewsCount': viewsCount,
 +      'likesCount': likesCount,
-+      'isPaidListing': isPaidListing,
 +    };
 +  }
 +}
-diff --git a/lib/features/jobs/data/job_repository.dart b/lib/features/jobs/data/job_repository.dart
++
+diff --git a/lib/core/models/shop_review_model.dart b/lib/core/models/shop_review_model.dart
 new file mode 100644
-index 0000000000000000000000000000000000000000..80014f8185af6575169df899db2df3cbe86a4131
+index 0000000000000000000000000000000000000000..9fb1c0fbd5e4f56cb3902e18b7351f30078e2bdd
 --- /dev/null
-+++ b/lib/features/jobs/data/job_repository.dart
-@@ -0,0 +1,37 @@
-+// lib/features/jobs/data/job_repository.dart
++++ b/lib/core/models/shop_review_model.dart
+@@ -0,0 +1,46 @@
++// lib/core/models/shop_review_model.dart
 +
-+import '../../../core/models/job_model.dart';
++import 'package:cloud_firestore/cloud_firestore.dart';
 +
-+/// Repository for managing local job listings.
-+/// All CRUD operations here operate on an in-memory list
-+/// rather than a remote database.
-+class JobRepository {
-+  final List<JobModel> _jobs = [];
++/// Review model stored under `shops/{shopId}/reviews`.
++class ShopReviewModel {
++  final String id;
++  final String shopId;
++  final String userId;
++  final int rating;
++  final String comment;
++  final Timestamp createdAt;
 +
-+  Future<void> createJob(JobModel job) async {
-+    _jobs.add(job);
++  ShopReviewModel({
++    required this.id,
++    required this.shopId,
++    required this.userId,
++    required this.rating,
++    required this.comment,
++    required this.createdAt,
++  });
++
++  factory ShopReviewModel.fromFirestore(
++      DocumentSnapshot<Map<String, dynamic>> doc) {
++    final data = doc.data() ?? {};
++    return ShopReviewModel(
++      id: doc.id,
++      shopId: data['shopId'] ?? '',
++      userId: data['userId'] ?? '',
++      rating: data['rating'] ?? 0,
++      comment: data['comment'] ?? '',
++      createdAt: data['createdAt'] ?? Timestamp.now(),
++    );
 +  }
 +
-+  Future<List<JobModel>> readJobs() async {
-+    return _jobs;
-+  }
-+
-+  Future<JobModel?> readJob(String id) async {
-+    try {
-+      return _jobs.firstWhere((j) => j.id == id);
-+    } catch (_) {
-+      return null;
-+    }
-+  }
-+
-+  Future<void> updateJob(JobModel job) async {
-+    final index = _jobs.indexWhere((j) => j.id == job.id);
-+    if (index != -1) {
-+      _jobs[index] = job;
-+    }
-+  }
-+
-+  Future<void> deleteJob(String id) async {
-+    _jobs.removeWhere((j) => j.id == id);
++  Map<String, dynamic> toJson() {
++    return {
++      'shopId': shopId,
++      'userId': userId,
++      'rating': rating,
++      'comment': comment,
++      'createdAt': createdAt,
++    };
 +  }
 +}
++
+diff --git a/lib/features/local_stores/data/shop_repository.dart b/lib/features/local_stores/data/shop_repository.dart
+new file mode 100644
+index 0000000000000000000000000000000000000000..c07954780ba6eccf929f3683d3648be72a75adc3
+--- /dev/null
++++ b/lib/features/local_stores/data/shop_repository.dart
+@@ -0,0 +1,76 @@
++// lib/features/local_stores/data/shop_repository.dart
++
++import 'package:cloud_firestore/cloud_firestore.dart';
++
++import '../../../core/models/shop_model.dart';
++import '../../../core/models/shop_review_model.dart';
++
++/// Handles CRUD operations for shops and reviews in the Local Shops module.
++class ShopRepository {
++  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
++
++  CollectionReference<Map<String, dynamic>> get _shopsCollection =>
++      _firestore.collection('shops');
++
++  Future<String> createShop(ShopModel shop) async {
++    final doc = await _shopsCollection.add(shop.toJson());
++    return doc.id;
++  }
++
++  Future<void> updateShop(ShopModel shop) async {
++    await _shopsCollection.doc(shop.id).update(shop.toJson());
++  }
++
++  Future<void> deleteShop(String shopId) async {
++    await _shopsCollection.doc(shopId).delete();
++  }
++
++  Future<ShopModel> fetchShop(String shopId) async {
++    final doc = await _shopsCollection.doc(shopId).get();
++    return ShopModel.fromFirestore(doc);
++  }
++
++  Stream<List<ShopModel>> fetchShops() {
++    return _shopsCollection
++        .orderBy('createdAt', descending: true)
++        .snapshots()
++        .map((snapshot) =>
++            snapshot.docs.map(ShopModel.fromFirestore).toList());
++  }
++
++  Future<String> addReview(String shopId, ShopReviewModel review) async {
++    final doc = await _shopsCollection
++        .doc(shopId)
++        .collection('reviews')
++        .add(review.toJson());
++    return doc.id;
++  }
++
++  Future<void> updateReview(String shopId, ShopReviewModel review) async {
++    await _shopsCollection
++        .doc(shopId)
++        .collection('reviews')
++        .doc(review.id)
++        .update(review.toJson());
++  }
++
++  Future<void> deleteReview(String shopId, String reviewId) async {
++    await _shopsCollection
++        .doc(shopId)
++        .collection('reviews')
++        .doc(reviewId)
++        .delete();
++  }
++
++  Stream<List<ShopReviewModel>> fetchReviews(String shopId) {
++    return _shopsCollection
++        .doc(shopId)
++        .collection('reviews')
++        .orderBy('createdAt', descending: true)
++        .snapshots()
++        .map((snapshot) => snapshot.docs
++            .map(ShopReviewModel.fromFirestore)
++            .toList());
++  }
++}
++
