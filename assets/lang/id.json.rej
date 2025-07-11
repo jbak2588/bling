@@ -1,0 +1,731 @@
+diff a/assets/lang/id.json b/assets/lang/id.json	(rejected hunks)
+@@ -1,372 +1,379 @@
+ {
+-    "login": {
+-        "title": "Masuk",
+-        "subtitle": "Ayo, Beli Ringan",
+-        "emailHint": "Alamat Email",
+-        "passwordHint": "Kata Sandi",
+-        "buttons": {
+-            "login": "MASUK",
+-            "google": "Masuk dengan Google",
+-            "apple": "Lanjutkan dengan Apple"
+-        },
+-        "links": {
+-            "findPassword": "Lupa kata sandi?",
+-            "askForAccount": "Belum punya akun?",
+-            "signUp": "Daftar"
+-        },
+-        "alerts": {
+-            "invalidEmail": "Format email tidak valid.",
+-            "userNotFound": "Pengguna tidak ditemukan atau kata sandi salah.",
+-            "wrongPassword": "Kata sandi salah.",
+-            "unknownError": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
+-        }
++  "login": {
++    "title": "Masuk",
++    "subtitle": "Ayo, Beli Ringan",
++    "emailHint": "Alamat Email",
++    "passwordHint": "Kata Sandi",
++    "buttons": {
++      "login": "MASUK",
++      "google": "Masuk dengan Google",
++      "apple": "Lanjutkan dengan Apple"
+     },
+-    "signup": {
+-        "title": "Daftar",
+-        "emailHint": "Alamat Email",
+-        "passwordHint": "Kata Sandi (minimal 6 karakter)",
+-        "passwordConfirmHint": "Konfirmasi Kata Sandi",
+-        "nicknameHint": "Nama Panggilan (Wajib)",
+-        "subtitle": "Ayo mulai dengan Bling! Silakan masukkan informasi Anda.",
+-        "locationHint": "Lokasi Anda (untuk layanan lokal)",
+-        "locationNotice": "Lokasi Anda digunakan untuk menampilkan postingan lingkungan dan tidak diungkapkan kepada orang lain.",
+-        "buttons": {
+-            "signup": "Daftar",
+-            "checkDuplicate": "Cek"
+-        },
+-        "links": {
+-            "askForLogin": "Sudah punya akun?",
+-            "login": "Masuk"
+-        },
+-        "alerts": {
+-            "passwordMismatch": "Kata sandi tidak cocok.",
+-            "passwordTooShort": "Kata sandi harus minimal 6 karakter.",
+-            "emailInUse": "Email ini sudah digunakan.",
+-            "nicknameInUse": "Nama panggilan ini sudah digunakan.",
+-            "nicknameAvailable": "Nama panggilan ini tersedia.",
+-            "nicknameNotChecked": "Silakan periksa duplikasi nama panggilan.",
+-            "unknownError": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
+-        },
+-        "policy": {
+-            "title": "Kebijakan Pendaftaran",
+-            "description": "Bling mengumpulkan informasi minimum untuk komunitas yang aman. Semua informasi disimpan dengan aman dan tidak akan diungkapkan tanpa persetujuan.",
+-            "agree": "Saya setuju dengan ketentuan dan ingin melanjutkan."
+-        }
++    "links": {
++      "findPassword": "Lupa kata sandi?",
++      "askForAccount": "Belum punya akun?",
++      "signUp": "Daftar"
+     },
+-    "main": {
+-        "appBar": {
+-            "locationNotSet": "Atur Lokasi",
+-            "locationError": "Kesalahan Lokasi",
+-            "locationLoading": "Memuat..."
+-        },
+-        "tabs": {
+-            "newFeed": "Berita Baru",
+-            "localNews": "Cerita Lokal",
+-            "marketplace": "Marketplace",
+-            "findFriends": "Cari Teman",
+-            "clubs": "Klub",
+-            "jobs": "Lowongan",
+-            "localStores": "Toko Lokal",
+-            "auction": "Lelang",
+-            "pom": "POM"
+-        },
+-        "bottomNav": {
+-            "home": "Beranda",
+-            "search": "Cari",
+-            "chat": "Obrolan",
+-            "myBling": "Bling Saya"
+-        },
+-        "errors": {
+-            "loginRequired": "Diperlukan login.",
+-            "userNotFound": "Pengguna tidak ditemukan."
+-        }
+-    },
+-    "drawer": {
+-        "editProfile": "Ubah Profil",
+-        "bookmarks": "Markah",
+-        "uploadSampleData": "Unggah Data Sampel",
+-        "logout": "Keluar",
+-        "trustDashboard": {
+-            "title": "Status Verifikasi Kepercayaan Saya",
+-            "kelurahanAuth": "Verifikasi Kelurahan",
+-            "rtRwAuth": "Verifikasi Alamat Detail (RT/RW)",
+-            "phoneAuth": "Verifikasi Nomor Telepon",
+-            "profileComplete": "Profil Lengkap",
+-            "feedThanks": "Feed Thanks",
+-            "marketThanks": " Market Thanks",
+-            "reports": "Reports",
+-            "breakdownButton": "Detail",
+-            "breakdownModalTitle": "Rincian Skor Kepercayaan",
+-            "breakdownClose": "OK",
+-            "breakdown": {
+-                "kelurahanAuth": "+50",
+-                "rtRwAuth": "+50",
+-                "phoneAuth": "+100",
+-                "profileComplete": "+50",
+-                "feedThanks": "+10 per",
+-                "marketThanks": "+20 per",
+-                "reports": "-50 per"
+-            }
+-        }
+-    },
+-    "marketplace": {
+-        "error": "Terjadi kesalahan: {error}",
+-        "empty": "Belum ada produk yang terdaftar.\nTekan tombol + untuk menambahkan produk pertama!",
+-        "registration": {
+-            "title": "Postingan Baru",
+-            "done": "Selesai",
+-            "titleHint": "Judul",
+-            "priceHint": "Harga (Rp)",
+-            "negotiable": "Izinkan Penawaran",
+-            "descriptionHint": "Deskripsi Lengkap",
+-            "success": "Produk berhasil didaftarkan!"
+-        },
+-        "edit": {
+-            "title": "Edit Produk",
+-            "done": "Edit Selesai",
+-            "titleHint": "Ubah Nama Produk",
+-            "addressHint": "Ubah Lokasi",
+-            "priceHint": "Ubah Harga (Rp)",
+-            "negotiable": "Ubah Tawaran Harga",
+-            "descriptionHint": "Ubah Deskripsi Lengkap",
+-            "success": "Produk berhasil diedit!",
+-            "fail": "Gagal memperbarui produk: {error}"
+-        },
+-        "detail": {
+-            "makeOffer": "Tawarkan harga",
+-            "fixedPrice": "Harga tetap",
+-            "description": "Deskripsi Produk",
+-            "sellerInfo": "Informasi Penjual",
+-            "chat": "Chat",
+-            "favorite": "Favorit",
+-            "unfavorite": "Batal Favorit",
+-            "share": "Share",
+-            "edit": "Eidt",
+-            "delete": "Hapus",
+-            "category": "Kategori",
+-            "categoryError": "Kategori: -",
+-            "categoryNone": "Tidak ada kategori",
+-            "views": "Dilihat",
+-            "likes": "Suka",
+-            "chats": "Chat",
+-            "noSeller": "Info penjual tidak tersedia",
+-            "noLocation": "Info lokasi tidak tersedia",
+-            "seller": "Penjual"
+-        },
+-        "dialog": {
+-            "deleteTitle": "Hapus Postingan",
+-            "deleteContent": "Apakah Anda yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.",
+-            "cancel": "Batal",
+-            "deleteConfirm": "Hapus",
+-            "deleteSuccess": "Postingan berhasil dihapus."
+-        },
+-        "errors": {
+-            "deleteError": "Gagal menghapus postingan: {error}",
+-            "requiredField": "Kolom ini wajib diisi.",
+-            "noPhoto": "Silakan tambahkan minimal 1 foto.",
+-            "noCategory": "Silakan pilih kategori."
+-        }
+-    },
+-    "myBling": {
+-        "title": "Bling Saya",
+-        "editProfile": "Ubah Profil",
+-        "settings": "Pengaturan",
+-        "stats": {
+-            "posts": "Postingan",
+-            "followers": "Pengikut",
+-            "neighbors": "Tetangga",
+-            "friends": "Teman"
+-        },
+-        "tabs": {
+-            "posts": "Postingan Saya",
+-            "products": "Produk Saya",
+-            "bookmarks": "Markah"
+-        }
+-    },
+-    "prompt": {
+-        "title": "Selamat datang di Bling!",
+-        "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
+-        "button": "Atur Lingkungan Saya"
++    "alerts": {
++      "invalidEmail": "Format email tidak valid.",
++      "userNotFound": "Pengguna tidak ditemukan atau kata sandi salah.",
++      "wrongPassword": "Kata sandi salah.",
++      "unknownError": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
++    }
++  },
++  "signup": {
++    "title": "Daftar",
++    "emailHint": "Alamat Email",
++    "passwordHint": "Kata Sandi (minimal 6 karakter)",
++    "passwordConfirmHint": "Konfirmasi Kata Sandi",
++    "nicknameHint": "Nama Panggilan (Wajib)",
++    "subtitle": "Ayo mulai dengan Bling! Silakan masukkan informasi Anda.",
++    "locationHint": "Lokasi Anda (untuk layanan lokal)",
++    "locationNotice": "Lokasi Anda digunakan untuk menampilkan postingan lingkungan dan tidak diungkapkan kepada orang lain.",
++    "buttons": {
++      "signup": "Daftar",
++      "checkDuplicate": "Cek"
+     },
+-    "location": {
+-        "title": "Atur Lingkungan",
+-        "searchHint": "Cari berdasarkan lingkungan, cth., Serpong",
+-        "gpsButton": "Cari dengan lokasi saat ini",
+-        "success": "Lingkungan telah diatur.",
+-        "error": "Gagal mengatur lingkungan: {error}",
+-        "empty": "Silakan masukkan nama lingkungan.",
+-        "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
++    "links": {
++      "askForLogin": "Sudah punya akun?",
++      "login": "Masuk"
+     },
+-    "profileEdit": {
+-        "title": "Pengaturan Profil",
+-        "nicknameHint": "Nama Panggilan",
+-        "phoneHint": "Nomor Telepon",
+-        "bioHint": "Bio (Perkenalan Diri)",
+-        "locationTitle": "Lokasi",
+-        "changeLocation": "Ubah",
+-        "interests": {
+-            "title": "Minat",
+-            "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
+-        },
+-        "privacy": {
+-            "title": "Pengaturan Privasi",
+-            "showLocation": "Tampilkan lokasi saya di peta",
+-            "allowRequests": "Izinkan permintaan pertemanan"
+-        },
+-        "saveButton": "Simpan Perubahan",
+-        "successMessage": "Profil berhasil diperbarui.",
+-        "errors": {
+-            "noUser": "Pengguna belum login.",
+-            "updateFailed": "Gagal memperbarui profil: {error}"
+-        }
++    "alerts": {
++      "passwordMismatch": "Kata sandi tidak cocok.",
++      "passwordTooShort": "Kata sandi harus minimal 6 karakter.",
++      "emailInUse": "Email ini sudah digunakan.",
++      "nicknameInUse": "Nama panggilan ini sudah digunakan.",
++      "nicknameAvailable": "Nama panggilan ini tersedia.",
++      "nicknameNotChecked": "Silakan periksa duplikasi nama panggilan.",
++      "unknownError": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
+     },
+-    "mainFeed": {
+-        "error": "Terjadi kesalahan: {error}",
+-        "empty": "Tidak ada berita baru."
++    "policy": {
++      "title": "Kebijakan Pendaftaran",
++      "description": "Bling mengumpulkan informasi minimum untuk komunitas yang aman. Semua informasi disimpan dengan aman dan tidak akan diungkapkan tanpa persetujuan.",
++      "agree": "Saya setuju dengan ketentuan dan ingin melanjutkan."
++    }
++  },
++  "main": {
++    "appBar": {
++      "locationNotSet": "Atur Lokasi",
++      "locationError": "Kesalahan Lokasi",
++      "locationLoading": "Memuat..."
+     },
+-    "postCard": {
+-        "locationNotSet": "Lokasi belum diatur"
++    "tabs": {
++      "newFeed": "Berita Baru",
++      "localNews": "Cerita Lokal",
++      "marketplace": "Marketplace",
++      "findFriends": "Cari Teman",
++      "clubs": "Klub",
++      "jobs": "Lowongan",
++      "localStores": "Toko Lokal",
++      "auction": "Lelang",
++      "pom": "POM"
+     },
+-    "time": {
+-        "now": "Baru saja",
+-        "minutesAgo": "{minutes} menit lalu",
+-        "hoursAgo": "{hours} jam lalu",
+-        "daysAgo": "{days} hari lalu",
+-        "dateFormat": "dd/MM/yy",
+-        "dateFormatLong": "d MMM"
++    "bottomNav": {
++      "home": "Beranda",
++      "search": "Cari",
++      "chat": "Obrolan",
++      "myBling": "Bling Saya"
+     },
+-    "productCard": {
+-        "currency": "$"
++    "errors": {
++      "loginRequired": "Diperlukan login.",
++      "userNotFound": "Pengguna tidak ditemukan."
++    }
++  },
++  "drawer": {
++    "editProfile": "Ubah Profil",
++    "bookmarks": "Markah",
++    "uploadSampleData": "Unggah Data Sampel",
++    "logout": "Keluar",
++    "trustDashboard": {
++      "title": "Status Verifikasi Kepercayaan Saya",
++      "kelurahanAuth": "Verifikasi Kelurahan",
++      "rtRwAuth": "Verifikasi Alamat Detail (RT/RW)",
++      "phoneAuth": "Verifikasi Nomor Telepon",
++      "profileComplete": "Profil Lengkap",
++      "feedThanks": "Feed Thanks",
++      "marketThanks": " Market Thanks",
++      "reports": "Reports",
++      "breakdownButton": "Detail",
++      "breakdownModalTitle": "Rincian Skor Kepercayaan",
++      "breakdownClose": "OK",
++      "breakdown": {
++        "kelurahanAuth": "+50",
++        "rtRwAuth": "+50",
++        "phoneAuth": "+100",
++        "profileComplete": "+50",
++        "feedThanks": "+10 per",
++        "marketThanks": "+20 per",
++        "reports": "-50 per"
++      }
++    }
++  },
++  "marketplace": {
++    "error": "Terjadi kesalahan: {error}",
++    "empty": "Belum ada produk yang terdaftar.\nTekan tombol + untuk menambahkan produk pertama!",
++    "registration": {
++      "title": "Postingan Baru",
++      "done": "Selesai",
++      "titleHint": "Judul",
++      "priceHint": "Harga (Rp)",
++      "negotiable": "Izinkan Penawaran",
++      "descriptionHint": "Deskripsi Lengkap",
++      "success": "Produk berhasil didaftarkan!"
+     },
+-    "localNewsFeed": {
+-        "setLocationPrompt": "Silakan atur lingkungan Anda terlebih dahulu untuk melihat cerita lokal!",
+-        "allCategory": "Semua",
+-        "empty": "Tidak ada postingan untuk ditampilkan."
++    "edit": {
++      "title": "Edit Produk",
++      "done": "Edit Selesai",
++      "titleHint": "Ubah Nama Produk",
++      "addressHint": "Ubah Lokasi",
++      "priceHint": "Ubah Harga (Rp)",
++      "negotiable": "Ubah Tawaran Harga",
++      "descriptionHint": "Ubah Deskripsi Lengkap",
++      "success": "Produk berhasil diedit!",
++      "fail": "Gagal memperbarui produk: {error}"
+     },
+-    "categories": {
+-        "post": {
+-            "daily_life": {
+-                "name": "Harian/Tanya",
+-                "description": "Bagikan kehidupan sehari-hari atau ajukan pertanyaan."
+-            },
+-            "help_share": {
+-                "name": "Bantuan/Berbagi",
+-                "description": "Butuh bantuan atau punya sesuatu untuk dibagikan?"
+-            },
+-            "incident_report": {
+-                "name": "Insiden",
+-                "description": "Bagikan berita tentang insiden di lingkungan sekitar."
+-            },
+-            "local_news": {
+-                "name": "Berita Lokal",
+-                "description": "Bagikan berita dan informasi tentang lingkungan kita."
+-            },
+-            "daily_question": {
+-                "name": "Ada Pertanyaan",
+-                "description": "Tanyakan apa saja kepada tetangga Anda."
+-            },
+-            "store_promo": {
+-                "name": "Promo Toko",
+-                "description": "Promosikan diskon atau acara di toko Anda."
+-            },
+-            "etc": {
+-                "name": "Lain-lain",
+-                "description": "Bagikan cerita lain dengan bebas."
+-            }
+-        }
++    "detail": {
++      "makeOffer": "Tawarkan harga",
++      "fixedPrice": "Harga tetap",
++      "description": "Deskripsi Produk",
++      "sellerInfo": "Informasi Penjual",
++      "chat": "Chat",
++      "favorite": "Favorit",
++      "unfavorite": "Batal Favorit",
++      "share": "Share",
++      "edit": "Eidt",
++      "delete": "Hapus",
++      "category": "Kategori",
++      "categoryError": "Kategori: -",
++      "categoryNone": "Tidak ada kategori",
++      "views": "Dilihat",
++      "likes": "Suka",
++      "chats": "Chat",
++      "noSeller": "Info penjual tidak tersedia",
++      "noLocation": "Info lokasi tidak tersedia",
++      "seller": "Penjual"
+     },
+-    "localNewsCreate": {
+-        "appBarTitle": "Buat Postingan Baru",
+-        "form": {
+-            "categoryLabel": "Kategori",
+-            "titleLabel": "Judul",
+-            "contentLabel": "Masukkan konten",
+-            "tagsLabel": "Tag (pisahkan dengan koma)",
+-            "tagsHint": "cth. anjing, gratisan"
+-        },
+-        "buttons": {
+-            "addImage": "Tambah Gambar",
+-            "submit": "Kirim"
+-        },
+-        "alerts": {
+-            "contentRequired": "Harap masukkan konten.",
+-            "categoryRequired": "Harap pilih kategori.",
+-            "success": "Postingan berhasil dibuat.",
+-            "failure": "Gagal mengunggah: {error}"
+-        }
++    "dialog": {
++      "deleteTitle": "Hapus Postingan",
++      "deleteContent": "Apakah Anda yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.",
++      "cancel": "Batal",
++      "deleteConfirm": "Hapus",
++      "deleteSuccess": "Postingan berhasil dihapus."
+     },
+-    "localNewsDetail": {
+-        "appBarTitle": "Postingan",
+-        "menu": {
+-            "edit": "Ubah",
+-            "report": "Lapor",
+-            "share": "Bagikan"
+-        },
+-        "stats": {
+-            "views": "Dilihat",
+-            "comments": "Komentar",
+-            "likes": "Suka",
+-            "thanks": "Terima Kasih"
+-        },
+-        "buttons": {
+-            "comment": "Tambahkan komentar"
+-        }
++    "errors": {
++      "deleteError": "Gagal menghapus postingan: {error}",
++      "requiredField": "Kolom ini wajib diisi.",
++      "noPhoto": "Silakan tambahkan minimal 1 foto.",
++      "noCategory": "Silakan pilih kategori."
++    }
++  },
++  "myBling": {
++    "title": "Bling Saya",
++    "editProfile": "Ubah Profil",
++    "settings": "Pengaturan",
++    "stats": {
++      "posts": "Postingan",
++      "followers": "Pengikut",
++      "neighbors": "Tetangga",
++      "friends": "Teman"
+     },
+-    "localNewsEdit": {
+-        "appBarTitle": "Ubah Postingan",
+-        "buttons": {
+-            "submit": "Perbarui"
+-        },
+-        "alerts": {
+-            "success": "Postingan berhasil diperbarui.",
+-            "failure": "Gagal memperbarui: {error}"
+-        }
++    "tabs": {
++      "posts": "Postingan Saya",
++      "products": "Produk Saya",
++      "bookmarks": "Markah"
++    }
++  },
++  "prompt": {
++    "title": "Selamat datang di Bling!",
++    "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
++    "button": "Atur Lingkungan Saya"
++  },
++  "location": {
++    "title": "Atur Lingkungan",
++    "searchHint": "Cari berdasarkan lingkungan, cth., Serpong",
++    "gpsButton": "Cari dengan lokasi saat ini",
++    "success": "Lingkungan telah diatur.",
++    "error": "Gagal mengatur lingkungan: {error}",
++    "empty": "Silakan masukkan nama lingkungan.",
++    "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
++  },
++  "profileEdit": {
++    "title": "Pengaturan Profil",
++    "nicknameHint": "Nama Panggilan",
++    "phoneHint": "Nomor Telepon",
++    "bioHint": "Bio (Perkenalan Diri)",
++    "locationTitle": "Lokasi",
++    "changeLocation": "Ubah",
++    "interests": {
++      "title": "Minat",
++      "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
+     },
+-    "commentInputField": {
+-        "secretCommentLabel": "Rahasia",
+-        "hintText": "Masukkan komentar...",
+-        "replyHintText": "Membalas {nickname}...",
+-        "button": {
+-            "send": "Kirim"
+-        }
++    "privacy": {
++      "title": "Pengaturan Privasi",
++      "showLocation": "Tampilkan lokasi saya di peta",
++      "allowRequests": "Izinkan permintaan pertemanan"
+     },
+-    "commentListView": {
+-        "empty": "Belum ada komentar. Jadilah yang pertama berkomentar!",
+-        "reply": "Balas",
+-        "delete": "Hapus",
+-        "deleted": "[Komentar ini telah dihapus]",
+-        "secret": "Ini adalah komentar rahasia yang hanya dapat dilihat oleh penulis dan pemilik postingan."
++    "saveButton": "Simpan Perubahan",
++    "successMessage": "Profil berhasil diperbarui.",
++    "errors": {
++      "noUser": "Pengguna belum login.",
++      "updateFailed": "Gagal memperbarui profil: {error}"
++    }
++  },
++  "mainFeed": {
++    "error": "Terjadi kesalahan: {error}",
++    "empty": "Tidak ada berita baru."
++  },
++  "postCard": {
++    "locationNotSet": "Lokasi belum diatur"
++  },
++  "time": {
++    "now": "Baru saja",
++    "minutesAgo": "{minutes} menit lalu",
++    "hoursAgo": "{hours} jam lalu",
++    "daysAgo": "{days} hari lalu",
++    "dateFormat": "dd/MM/yy",
++    "dateFormatLong": "d MMM"
++  },
++  "productCard": {
++    "currency": "$"
++  },
++  "localNewsFeed": {
++    "setLocationPrompt": "Silakan atur lingkungan Anda terlebih dahulu untuk melihat cerita lokal!",
++    "allCategory": "Semua",
++    "empty": "Tidak ada postingan untuk ditampilkan."
++  },
++  "categories": {
++    "post": {
++      "daily_life": {
++        "name": "Harian/Tanya",
++        "description": "Bagikan kehidupan sehari-hari atau ajukan pertanyaan."
++      },
++      "help_share": {
++        "name": "Bantuan/Berbagi",
++        "description": "Butuh bantuan atau punya sesuatu untuk dibagikan?"
++      },
++      "incident_report": {
++        "name": "Insiden",
++        "description": "Bagikan berita tentang insiden di lingkungan sekitar."
++      },
++      "local_news": {
++        "name": "Berita Lokal",
++        "description": "Bagikan berita dan informasi tentang lingkungan kita."
++      },
++      "daily_question": {
++        "name": "Ada Pertanyaan",
++        "description": "Tanyakan apa saja kepada tetangga Anda."
++      },
++      "store_promo": {
++        "name": "Promo Toko",
++        "description": "Promosikan diskon atau acara di toko Anda."
++      },
++      "etc": {
++        "name": "Lain-lain",
++        "description": "Bagikan cerita lain dengan bebas."
++      }
++    }
++  },
++  "localNewsCreate": {
++    "appBarTitle": "Buat Postingan Baru",
++    "form": {
++      "categoryLabel": "Kategori",
++      "titleLabel": "Judul",
++      "contentLabel": "Masukkan konten",
++      "tagsLabel": "Tag (pisahkan dengan koma)",
++      "tagsHint": "cth. anjing, gratisan"
+     },
+-    "common": {
+-        "cancel": "Batal",
+-        "delete": "Hapus"
++    "buttons": {
++      "addImage": "Tambah Gambar",
++      "submit": "Kirim"
+     },
+-    "deleteConfirm": {
+-        "title": "Hapus Komentar",
+-        "content": "Apakah Anda yakin ingin menghapus komentar ini?",
+-        "failure": "Gagal menghapus komentar: {error}"
++    "alerts": {
++      "contentRequired": "Harap masukkan konten.",
++      "categoryRequired": "Harap pilih kategori.",
++      "success": "Postingan berhasil dibuat.",
++      "failure": "Gagal mengunggah: {error}"
++    }
++  },
++  "localNewsDetail": {
++    "appBarTitle": "Postingan",
++    "menu": {
++      "edit": "Ubah",
++      "report": "Lapor",
++      "share": "Bagikan"
+     },
+-    "replyInputField": {
+-        "hintText": "Masukkan balasan",
+-        "button": {
+-            "send": "Kirim"
+-        },
+-        "failure": "Gagal menambahkan balasan: {error}"
++    "stats": {
++      "views": "Dilihat",
++      "comments": "Komentar",
++      "likes": "Suka",
++      "thanks": "Terima Kasih"
+     },
+-    "chat_list": {
+-        "appBarTitle": "Obrolan",
+-        "empty": "Belum ada percakapan."
++    "buttons": {
++      "comment": "Tambahkan komentar"
++    }
++  },
++  "localNewsEdit": {
++    "appBarTitle": "Ubah Postingan",
++    "buttons": {
++      "submit": "Perbarui"
+     },
+-    "chat_room": {
+-        "placeholder": "Ketik pesan..."
++    "alerts": {
++      "success": "Postingan berhasil diperbarui.",
++      "failure": "Gagal memperbarui: {error}"
++    }
++  },
++  "commentInputField": {
++    "secretCommentLabel": "Rahasia",
++    "hintText": "Masukkan komentar...",
++    "replyHintText": "Membalas {nickname}...",
++    "button": {
++      "send": "Kirim"
++    }
++  },
++  "commentListView": {
++    "empty": "Belum ada komentar. Jadilah yang pertama berkomentar!",
++    "reply": "Balas",
++    "delete": "Hapus",
++    "deleted": "[Komentar ini telah dihapus]",
++    "secret": "Ini adalah komentar rahasia yang hanya dapat dilihat oleh penulis dan pemilik postingan."
++  },
++  "common": {
++    "cancel": "Batal",
++    "delete": "Hapus"
++  },
++  "deleteConfirm": {
++    "title": "Hapus Komentar",
++    "content": "Apakah Anda yakin ingin menghapus komentar ini?",
++    "failure": "Gagal menghapus komentar: {error}"
++  },
++  "replyInputField": {
++    "hintText": "Masukkan balasan",
++    "button": {
++      "send": "Kirim"
+     },
+-    "jobs": {
+-        "form": {
+-            "titleHint": "Judul pekerjaan",
+-            "descriptionHint": "Deskripsikan posisi",
+-            "categoryHint": "Kategori",
+-            "locationHint": "Lokasi",
+-            "submit": "Pasang Lowongan"
+-        }
++    "failure": "Gagal menambahkan balasan: {error}"
++  },
++  "chat_list": {
++    "appBarTitle": "Obrolan",
++    "empty": "Belum ada percakapan."
++  },
++  "chat_room": {
++    "placeholder": "Ketik pesan..."
++  },
++  "jobs": {
++    "form": {
++      "titleHint": "Judul pekerjaan",
++      "descriptionHint": "Deskripsikan posisi",
++      "categoryHint": "Kategori",
++      "locationHint": "Lokasi",
++      "submit": "Pasang Lowongan"
++    }
++  },
++  "findfriend": {
++    "intro": {
++      "title": "Lengkapi profil Anda untuk melihat teman di sekitar.",
++      "subtitle": "Tambahkan usia, jenis kelamin, lokasi, minat, dan setidaknya satu foto untuk menemukan teman di sekitar Anda.",
++      "button": "Buat Profil Saya"
+     }
+-}
+\ No newline at end of file
++  }
++}

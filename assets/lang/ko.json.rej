@@ -1,0 +1,731 @@
+diff a/assets/lang/ko.json b/assets/lang/ko.json	(rejected hunks)
+@@ -1,372 +1,379 @@
+ {
+-    "login": {
+-        "title": "로그인",
+-        "subtitle": "가볍게 사고 팔자, 블링!",
+-        "emailHint": "이메일 주소",
+-        "passwordHint": "비밀번호",
+-        "buttons": {
+-            "login": "로그인",
+-            "google": "Google 계정으로 로그인",
+-            "apple": "Apple로 계속하기"
+-        },
+-        "links": {
+-            "findPassword": "비밀번호를 잊으셨나요?",
+-            "askForAccount": "계정이 없으신가요?",
+-            "signUp": "가입하기"
+-        },
+-        "alerts": {
+-            "invalidEmail": "유효하지 않은 이메일 형식입니다.",
+-            "userNotFound": "사용자를 찾을 수 없거나 비밀번호가 틀렸습니다.",
+-            "wrongPassword": "비밀번호가 틀렸습니다.",
+-            "unknownError": "알 수 없는 오류가 발생했습니다. 다시 시도해주세요."
+-        }
++  "login": {
++    "title": "로그인",
++    "subtitle": "가볍게 사고 팔자, 블링!",
++    "emailHint": "이메일 주소",
++    "passwordHint": "비밀번호",
++    "buttons": {
++      "login": "로그인",
++      "google": "Google 계정으로 로그인",
++      "apple": "Apple로 계속하기"
+     },
+-    "signup": {
+-        "title": "회원가입",
+-        "emailHint": "이메일 주소",
+-        "passwordHint": "비밀번호 (6자 이상)",
+-        "passwordConfirmHint": "비밀번호 확인",
+-        "nicknameHint": "닉네임",
+-        "subtitle": "블링과 함께 시작해봐요! 정보를 입력해주세요.",
+-        "locationHint": "내 동네 (동네 서비스 이용을 위함)",
+-        "locationNotice": "입력하신 동네 정보는 동네 게시물을 보는데 사용되며, 다른 사람에게 공개되지 않습니다.",
+-        "buttons": {
+-            "signup": "가입하기",
+-            "checkDuplicate": "중복확인"
+-        },
+-        "links": {
+-            "askForLogin": "이미 계정이 있으신가요?",
+-            "login": "로그인"
+-        },
+-        "alerts": {
+-            "passwordMismatch": "비밀번호가 일치하지 않습니다.",
+-            "passwordTooShort": "비밀번호는 6자 이상이어야 합니다.",
+-            "emailInUse": "이미 사용 중인 이메일입니다.",
+-            "nicknameInUse": "이미 사용 중인 닉네임입니다.",
+-            "nicknameAvailable": "사용 가능한 닉네임입니다.",
+-            "nicknameNotChecked": "닉네임 중복 확인을 해주세요.",
+-            "unknownError": "알 수 없는 오류가 발생했습니다. 다시 시도해주세요."
+-        },
+-        "policy": {
+-            "title": "가입 정책 안내",
+-            "description": "Bling은 안전한 커뮤니티를 위해 가입 시 최소한의 정보를 받고 있습니다. 모든 정보는 안전하게 보관되며, 동의 없이는 절대 외부에 공개되지 않습니다.",
+-            "agree": "위 내용에 동의하며 가입을 계속합니다."
+-        }
++    "links": {
++      "findPassword": "비밀번호를 잊으셨나요?",
++      "askForAccount": "계정이 없으신가요?",
++      "signUp": "가입하기"
+     },
+-    "main": {
+-        "appBar": {
+-            "locationNotSet": "위치 미설정",
+-            "locationError": "위치 오류",
+-            "locationLoading": "불러오는 중..."
+-        },
+-        "tabs": {
+-            "newFeed": "새 소식",
+-            "localNews": "동네 소식",
+-            "marketplace": "중고거래",
+-            "findFriends": "친구찾기",
+-            "clubs": "모임",
+-            "jobs": "구인구직",
+-            "localStores": "동네업체",
+-            "auction": "경매",
+-            "pom": "POM"
+-        },
+-        "bottomNav": {
+-            "home": "홈",
+-            "search": "검색",
+-            "chat": "채팅",
+-            "myBling": "나의 Bling"
+-        },
+-        "errors": {
+-            "loginRequired": "로그인이 필요합니다.",
+-            "userNotFound": "사용자를 찾을 수 없습니다."
+-        }
+-    },
+-    "drawer": {
+-        "editProfile": "프로필 수정",
+-        "bookmarks": "관심목록",
+-        "uploadSampleData": "샘플 데이터 올리기",
+-        "logout": "로그아웃",
+-        "trustDashboard": {
+-            "title": "나의 신뢰 인증 현황",
+-            "kelurahanAuth": "동네 인증 (Kelurahan)",
+-            "rtRwAuth": "상세 주소 인증 (RT/RW)",
+-            "phoneAuth": "전화번호 인증",
+-            "profileComplete": "프로필 완성",
+-            "feedThanks": "피드 감사",
+-            "reports": "신고",
+-            "marketThanks": "마켓 감사",
+-            "breakdownButton": "상세보기",
+-            "breakdownModalTitle": "신뢰 점수 산정 기준",
+-            "breakdownClose": "확인",
+-            "breakdown": {
+-                "kelurahanAuth": "+50",
+-                "rtRwAuth": "+50",
+-                "phoneAuth": "+100",
+-                "profileComplete": "+50",
+-                "feedThanks": "+10 per",
+-                "marketThanks": "+20 per",
+-                "reports": "-50 per"
+-            }
+-        }
+-    },
+-    "marketplace": {
+-        "error": "오류가 발생했습니다: {error}",
+-        "empty": "등록된 상품이 없습니다.\n아래 + 버튼을 눌러 첫 상품을 등록해보세요!",
+-        "registration": {
+-            "title": "새 게시물",
+-            "done": "완료",
+-            "titleHint": "상품명",
+-            "priceHint": "가격 (Rp)",
+-            "negotiable": "가격 제안 가능",
+-            "descriptionHint": "상세 설명",
+-            "success": "상품이 성공적으로 등록되었습니다!"
+-        },
+-        "edit": {
+-            "title": "게시물 수정",
+-            "done": "수정 완료",
+-            "titleHint": "상품명 수정",
+-            "addressHint": "위치 수정",
+-            "priceHint": "가격 수정 (Rp)",
+-            "negotiable": "가격 제안 수정",
+-            "descriptionHint": "상세 설명 수정",
+-            "success": "상품이 성공적으로 수정되었습니다!",
+-            "fail": "상품 수정 실패: {error}"
+-        },
+-        "detail": {
+-            "makeOffer": "가격 제안하기",
+-            "fixedPrice": "고정 가격",
+-            "description": "제품 설명",
+-            "sellerInfo": "판매자 정보",
+-            "chat": "채팅",
+-            "favorite": "관심",
+-            "unfavorite": "관심해제",
+-            "share": "공유",
+-            "edit": "편집",
+-            "delete": "삭제",
+-            "category": "카테고리",
+-            "categoryError": "카테고리: -",
+-            "categoryNone": "카테고리 없음",
+-            "views": "조회",
+-            "likes": "관심",
+-            "chats": "채팅",
+-            "noSeller": "판매자 정보 없음",
+-            "noLocation": "지역 정보 없음",
+-            "seller": "판매자"
+-        },
+-        "dialog": {
+-            "deleteTitle": "게시물 삭제",
+-            "deleteContent": "이 게시물을 정말 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+-            "cancel": "취소",
+-            "deleteConfirm": "삭제",
+-            "deleteSuccess": "게시물이 성공적으로 삭제되었습니다."
+-        },
+-        "errors": {
+-            "deleteError": "게시물을 삭제하지 못했습니다: {error}",
+-            "requiredField": "필수 입력 항목입니다.",
+-            "noPhoto": "사진을 1장 이상 등록해주세요.",
+-            "noCategory": "카테고리를 선택해주세요."
+-        }
+-    },
+-    "myBling": {
+-        "title": "나의 Bling",
+-        "editProfile": "프로필 수정",
+-        "settings": "설정",
+-        "stats": {
+-            "posts": "게시물",
+-            "followers": "팔로워",
+-            "neighbors": "이웃",
+-            "friends": "친구"
+-        },
+-        "tabs": {
+-            "posts": "내 게시물",
+-            "products": "내 판매상품",
+-            "bookmarks": "관심목록"
+-        }
+-    },
+-    "prompt": {
+-        "title": "블링에 오신 것을 환영합니다!",
+-        "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
+-        "button": "내 동네 설정하기"
++    "alerts": {
++      "invalidEmail": "유효하지 않은 이메일 형식입니다.",
++      "userNotFound": "사용자를 찾을 수 없거나 비밀번호가 틀렸습니다.",
++      "wrongPassword": "비밀번호가 틀렸습니다.",
++      "unknownError": "알 수 없는 오류가 발생했습니다. 다시 시도해주세요."
++    }
++  },
++  "signup": {
++    "title": "회원가입",
++    "emailHint": "이메일 주소",
++    "passwordHint": "비밀번호 (6자 이상)",
++    "passwordConfirmHint": "비밀번호 확인",
++    "nicknameHint": "닉네임",
++    "subtitle": "블링과 함께 시작해봐요! 정보를 입력해주세요.",
++    "locationHint": "내 동네 (동네 서비스 이용을 위함)",
++    "locationNotice": "입력하신 동네 정보는 동네 게시물을 보는데 사용되며, 다른 사람에게 공개되지 않습니다.",
++    "buttons": {
++      "signup": "가입하기",
++      "checkDuplicate": "중복확인"
+     },
+-    "location": {
+-        "title": "동네 설정",
+-        "searchHint": "동네 이름으로 검색 (예: 세르퐁)",
+-        "gpsButton": "현재 위치로 찾기",
+-        "success": "동네가 설정되었습니다.",
+-        "error": "동네 설정에 실패했습니다: {error}",
+-        "empty": "동네 이름을 입력해주세요.",
+-        "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
++    "links": {
++      "askForLogin": "이미 계정이 있으신가요?",
++      "login": "로그인"
+     },
+-    "profileEdit": {
+-        "title": "프로필 설정",
+-        "nicknameHint": "닉네임",
+-        "phoneHint": "전화번호",
+-        "bioHint": "소개 (Bio)",
+-        "locationTitle": "지역",
+-        "changeLocation": "변경",
+-        "interests": {
+-            "title": "관심사",
+-            "hint": "쉼표와 Enter로 여러개 동시 추가"
+-        },
+-        "privacy": {
+-            "title": "개인정보 설정",
+-            "showLocation": "지도에 내 위치 표시",
+-            "allowRequests": "친구 추가 요청 허용"
+-        },
+-        "saveButton": "변경사항 저장",
+-        "successMessage": "프로필이 성공적으로 업데이트되었습니다.",
+-        "errors": {
+-            "noUser": "로그인된 사용자가 없습니다.",
+-            "updateFailed": "프로필 업데이트에 실패했습니다: {error}"
+-        }
++    "alerts": {
++      "passwordMismatch": "비밀번호가 일치하지 않습니다.",
++      "passwordTooShort": "비밀번호는 6자 이상이어야 합니다.",
++      "emailInUse": "이미 사용 중인 이메일입니다.",
++      "nicknameInUse": "이미 사용 중인 닉네임입니다.",
++      "nicknameAvailable": "사용 가능한 닉네임입니다.",
++      "nicknameNotChecked": "닉네임 중복 확인을 해주세요.",
++      "unknownError": "알 수 없는 오류가 발생했습니다. 다시 시도해주세요."
+     },
+-    "mainFeed": {
+-        "error": "오류가 발생했습니다: {error}",
+-        "empty": "새로운 소식이 없습니다."
++    "policy": {
++      "title": "가입 정책 안내",
++      "description": "Bling은 안전한 커뮤니티를 위해 가입 시 최소한의 정보를 받고 있습니다. 모든 정보는 안전하게 보관되며, 동의 없이는 절대 외부에 공개되지 않습니다.",
++      "agree": "위 내용에 동의하며 가입을 계속합니다."
++    }
++  },
++  "main": {
++    "appBar": {
++      "locationNotSet": "위치 미설정",
++      "locationError": "위치 오류",
++      "locationLoading": "불러오는 중..."
+     },
+-    "postCard": {
+-        "locationNotSet": "지역 미설정"
++    "tabs": {
++      "newFeed": "새 소식",
++      "localNews": "동네 소식",
++      "marketplace": "중고거래",
++      "findFriends": "친구찾기",
++      "clubs": "모임",
++      "jobs": "구인구직",
++      "localStores": "동네업체",
++      "auction": "경매",
++      "pom": "POM"
+     },
+-    "time": {
+-        "now": "방금 전",
+-        "minutesAgo": "{minutes}분 전",
+-        "hoursAgo": "{hours}시간 전",
+-        "daysAgo": "{days}일 전",
+-        "dateFormat": "yy.MM.dd",
+-        "dateFormatLong": "M월 d일"
++    "bottomNav": {
++      "home": "홈",
++      "search": "검색",
++      "chat": "채팅",
++      "myBling": "나의 Bling"
+     },
+-    "productCard": {
+-        "currency": "$"
++    "errors": {
++      "loginRequired": "로그인이 필요합니다.",
++      "userNotFound": "사용자를 찾을 수 없습니다."
++    }
++  },
++  "drawer": {
++    "editProfile": "프로필 수정",
++    "bookmarks": "관심목록",
++    "uploadSampleData": "샘플 데이터 올리기",
++    "logout": "로그아웃",
++    "trustDashboard": {
++      "title": "나의 신뢰 인증 현황",
++      "kelurahanAuth": "동네 인증 (Kelurahan)",
++      "rtRwAuth": "상세 주소 인증 (RT/RW)",
++      "phoneAuth": "전화번호 인증",
++      "profileComplete": "프로필 완성",
++      "feedThanks": "피드 감사",
++      "reports": "신고",
++      "marketThanks": "마켓 감사",
++      "breakdownButton": "상세보기",
++      "breakdownModalTitle": "신뢰 점수 산정 기준",
++      "breakdownClose": "확인",
++      "breakdown": {
++        "kelurahanAuth": "+50",
++        "rtRwAuth": "+50",
++        "phoneAuth": "+100",
++        "profileComplete": "+50",
++        "feedThanks": "+10 per",
++        "marketThanks": "+20 per",
++        "reports": "-50 per"
++      }
++    }
++  },
++  "marketplace": {
++    "error": "오류가 발생했습니다: {error}",
++    "empty": "등록된 상품이 없습니다.\n아래 + 버튼을 눌러 첫 상품을 등록해보세요!",
++    "registration": {
++      "title": "새 게시물",
++      "done": "완료",
++      "titleHint": "상품명",
++      "priceHint": "가격 (Rp)",
++      "negotiable": "가격 제안 가능",
++      "descriptionHint": "상세 설명",
++      "success": "상품이 성공적으로 등록되었습니다!"
+     },
+-    "localNewsFeed": {
+-        "setLocationPrompt": "동네 소식을 보려면 먼저 내 동네를 설정해주세요!",
+-        "allCategory": "전체",
+-        "empty": "표시할 게시물이 없습니다."
++    "edit": {
++      "title": "게시물 수정",
++      "done": "수정 완료",
++      "titleHint": "상품명 수정",
++      "addressHint": "위치 수정",
++      "priceHint": "가격 수정 (Rp)",
++      "negotiable": "가격 제안 수정",
++      "descriptionHint": "상세 설명 수정",
++      "success": "상품이 성공적으로 수정되었습니다!",
++      "fail": "상품 수정 실패: {error}"
+     },
+-    "categories": {
+-        "post": {
+-            "daily_life": {
+-                "name": "일상/궁금",
+-                "description": "소소한 일상 이야기나 궁금한 점을 나눠보세요."
+-            },
+-            "help_share": {
+-                "name": "도움/나눔",
+-                "description": "도움이 필요하거나 나눌 물건이 있나요?"
+-            },
+-            "incident_report": {
+-                "name": "사건/사고",
+-                "description": "동네의 사건, 사고 소식을 공유해주세요."
+-            },
+-            "local_news": {
+-                "name": "동네소식",
+-                "description": "우리 동네의 새로운 소식이나 정보를 알려주세요."
+-            },
+-            "daily_question": {
+-                "name": "질문있어요",
+-                "description": "이웃에게 무엇이든 물어보세요."
+-            },
+-            "store_promo": {
+-                "name": "가게홍보",
+-                "description": "가게의 할인 정보나 이벤트를 홍보해보세요."
+-            },
+-            "etc": {
+-                "name": "기타",
+-                "description": "어디에도 속하지 않는 자유로운 이야기를 나눠요."
+-            }
+-        }
++    "detail": {
++      "makeOffer": "가격 제안하기",
++      "fixedPrice": "고정 가격",
++      "description": "제품 설명",
++      "sellerInfo": "판매자 정보",
++      "chat": "채팅",
++      "favorite": "관심",
++      "unfavorite": "관심해제",
++      "share": "공유",
++      "edit": "편집",
++      "delete": "삭제",
++      "category": "카테고리",
++      "categoryError": "카테고리: -",
++      "categoryNone": "카테고리 없음",
++      "views": "조회",
++      "likes": "관심",
++      "chats": "채팅",
++      "noSeller": "판매자 정보 없음",
++      "noLocation": "지역 정보 없음",
++      "seller": "판매자"
+     },
+-    "localNewsCreate": {
+-        "appBarTitle": "새 게시물 작성",
+-        "form": {
+-            "categoryLabel": "카테고리",
+-            "titleLabel": "제목",
+-            "contentLabel": "내용을 입력하세요",
+-            "tagsLabel": "태그 (쉼표로 구분)",
+-            "tagsHint": "예: 강아지, 무료나눔"
+-        },
+-        "buttons": {
+-            "addImage": "이미지 추가",
+-            "submit": "등록하기"
+-        },
+-        "alerts": {
+-            "contentRequired": "내용을 입력해주세요.",
+-            "categoryRequired": "카테고리를 선택해주세요.",
+-            "success": "게시글이 등록되었습니다.",
+-            "failure": "업로드 실패: {error}"
+-        }
++    "dialog": {
++      "deleteTitle": "게시물 삭제",
++      "deleteContent": "이 게시물을 정말 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
++      "cancel": "취소",
++      "deleteConfirm": "삭제",
++      "deleteSuccess": "게시물이 성공적으로 삭제되었습니다."
+     },
+-    "localNewsDetail": {
+-        "appBarTitle": "게시물",
+-        "menu": {
+-            "edit": "수정하기",
+-            "report": "신고하기",
+-            "share": "공유하기"
+-        },
+-        "stats": {
+-            "views": "조회",
+-            "comments": "댓글",
+-            "likes": "좋아요",
+-            "thanks": "감사"
+-        },
+-        "buttons": {
+-            "comment": "댓글 달기"
+-        }
++    "errors": {
++      "deleteError": "게시물을 삭제하지 못했습니다: {error}",
++      "requiredField": "필수 입력 항목입니다.",
++      "noPhoto": "사진을 1장 이상 등록해주세요.",
++      "noCategory": "카테고리를 선택해주세요."
++    }
++  },
++  "myBling": {
++    "title": "나의 Bling",
++    "editProfile": "프로필 수정",
++    "settings": "설정",
++    "stats": {
++      "posts": "게시물",
++      "followers": "팔로워",
++      "neighbors": "이웃",
++      "friends": "친구"
+     },
+-    "localNewsEdit": {
+-        "appBarTitle": "게시물 수정",
+-        "buttons": {
+-            "submit": "수정하기"
+-        },
+-        "alerts": {
+-            "success": "게시물이 수정되었습니다.",
+-            "failure": "수정 실패: {error}"
+-        }
++    "tabs": {
++      "posts": "내 게시물",
++      "products": "내 판매상품",
++      "bookmarks": "관심목록"
++    }
++  },
++  "prompt": {
++    "title": "블링에 오신 것을 환영합니다!",
++    "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
++    "button": "내 동네 설정하기"
++  },
++  "location": {
++    "title": "동네 설정",
++    "searchHint": "동네 이름으로 검색 (예: 세르퐁)",
++    "gpsButton": "현재 위치로 찾기",
++    "success": "동네가 설정되었습니다.",
++    "error": "동네 설정에 실패했습니다: {error}",
++    "empty": "동네 이름을 입력해주세요.",
++    "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
++  },
++  "profileEdit": {
++    "title": "프로필 설정",
++    "nicknameHint": "닉네임",
++    "phoneHint": "전화번호",
++    "bioHint": "소개 (Bio)",
++    "locationTitle": "지역",
++    "changeLocation": "변경",
++    "interests": {
++      "title": "관심사",
++      "hint": "쉼표와 Enter로 여러개 동시 추가"
+     },
+-    "commentInputField": {
+-        "secretCommentLabel": "비밀댓글",
+-        "hintText": "댓글을 입력하세요...",
+-        "replyHintText": "{nickname}님에게 답글 남기기...",
+-        "button": {
+-            "send": "전송"
+-        }
++    "privacy": {
++      "title": "개인정보 설정",
++      "showLocation": "지도에 내 위치 표시",
++      "allowRequests": "친구 추가 요청 허용"
+     },
+-    "commentListView": {
+-        "empty": "아직 댓글이 없습니다. 첫 댓글을 남겨보세요!",
+-        "reply": "답글",
+-        "delete": "삭제",
+-        "deleted": "[삭제된 댓글입니다]",
+-        "secret": "작성자와 게시물 주인만 볼 수 있는 비밀 댓글입니다."
++    "saveButton": "변경사항 저장",
++    "successMessage": "프로필이 성공적으로 업데이트되었습니다.",
++    "errors": {
++      "noUser": "로그인된 사용자가 없습니다.",
++      "updateFailed": "프로필 업데이트에 실패했습니다: {error}"
++    }
++  },
++  "mainFeed": {
++    "error": "오류가 발생했습니다: {error}",
++    "empty": "새로운 소식이 없습니다."
++  },
++  "postCard": {
++    "locationNotSet": "지역 미설정"
++  },
++  "time": {
++    "now": "방금 전",
++    "minutesAgo": "{minutes}분 전",
++    "hoursAgo": "{hours}시간 전",
++    "daysAgo": "{days}일 전",
++    "dateFormat": "yy.MM.dd",
++    "dateFormatLong": "M월 d일"
++  },
++  "productCard": {
++    "currency": "$"
++  },
++  "localNewsFeed": {
++    "setLocationPrompt": "동네 소식을 보려면 먼저 내 동네를 설정해주세요!",
++    "allCategory": "전체",
++    "empty": "표시할 게시물이 없습니다."
++  },
++  "categories": {
++    "post": {
++      "daily_life": {
++        "name": "일상/궁금",
++        "description": "소소한 일상 이야기나 궁금한 점을 나눠보세요."
++      },
++      "help_share": {
++        "name": "도움/나눔",
++        "description": "도움이 필요하거나 나눌 물건이 있나요?"
++      },
++      "incident_report": {
++        "name": "사건/사고",
++        "description": "동네의 사건, 사고 소식을 공유해주세요."
++      },
++      "local_news": {
++        "name": "동네소식",
++        "description": "우리 동네의 새로운 소식이나 정보를 알려주세요."
++      },
++      "daily_question": {
++        "name": "질문있어요",
++        "description": "이웃에게 무엇이든 물어보세요."
++      },
++      "store_promo": {
++        "name": "가게홍보",
++        "description": "가게의 할인 정보나 이벤트를 홍보해보세요."
++      },
++      "etc": {
++        "name": "기타",
++        "description": "어디에도 속하지 않는 자유로운 이야기를 나눠요."
++      }
++    }
++  },
++  "localNewsCreate": {
++    "appBarTitle": "새 게시물 작성",
++    "form": {
++      "categoryLabel": "카테고리",
++      "titleLabel": "제목",
++      "contentLabel": "내용을 입력하세요",
++      "tagsLabel": "태그 (쉼표로 구분)",
++      "tagsHint": "예: 강아지, 무료나눔"
+     },
+-    "common": {
+-        "cancel": "취소",
+-        "delete": "삭제"
++    "buttons": {
++      "addImage": "이미지 추가",
++      "submit": "등록하기"
+     },
+-    "deleteConfirm": {
+-        "title": "댓글 삭제",
+-        "content": "정말 이 댓글을 삭제하시겠습니까?",
+-        "failure": "댓글 삭제 실패: {error}"
++    "alerts": {
++      "contentRequired": "내용을 입력해주세요.",
++      "categoryRequired": "카테고리를 선택해주세요.",
++      "success": "게시글이 등록되었습니다.",
++      "failure": "업로드 실패: {error}"
++    }
++  },
++  "localNewsDetail": {
++    "appBarTitle": "게시물",
++    "menu": {
++      "edit": "수정하기",
++      "report": "신고하기",
++      "share": "공유하기"
+     },
+-    "replyInputField": {
+-        "hintText": "답글을 입력하세요",
+-        "button": {
+-            "send": "전송"
+-        },
+-        "failure": "답글 등록 실패: {error}"
++    "stats": {
++      "views": "조회",
++      "comments": "댓글",
++      "likes": "좋아요",
++      "thanks": "감사"
+     },
+-    "chat_list": {
+-        "appBarTitle": "채팅",
+-        "empty": "진행중인 대화가 없습니다."
++    "buttons": {
++      "comment": "댓글 달기"
++    }
++  },
++  "localNewsEdit": {
++    "appBarTitle": "게시물 수정",
++    "buttons": {
++      "submit": "수정하기"
+     },
+-    "chat_room": {
+-        "placeholder": "메시지를 입력하세요..."
++    "alerts": {
++      "success": "게시물이 수정되었습니다.",
++      "failure": "수정 실패: {error}"
++    }
++  },
++  "commentInputField": {
++    "secretCommentLabel": "비밀댓글",
++    "hintText": "댓글을 입력하세요...",
++    "replyHintText": "{nickname}님에게 답글 남기기...",
++    "button": {
++      "send": "전송"
++    }
++  },
++  "commentListView": {
++    "empty": "아직 댓글이 없습니다. 첫 댓글을 남겨보세요!",
++    "reply": "답글",
++    "delete": "삭제",
++    "deleted": "[삭제된 댓글입니다]",
++    "secret": "작성자와 게시물 주인만 볼 수 있는 비밀 댓글입니다."
++  },
++  "common": {
++    "cancel": "취소",
++    "delete": "삭제"
++  },
++  "deleteConfirm": {
++    "title": "댓글 삭제",
++    "content": "정말 이 댓글을 삭제하시겠습니까?",
++    "failure": "댓글 삭제 실패: {error}"
++  },
++  "replyInputField": {
++    "hintText": "답글을 입력하세요",
++    "button": {
++      "send": "전송"
+     },
+-    "jobs": {
+-        "form": {
+-            "titleHint": "공고 제목",
+-            "descriptionHint": "업무 내용을 입력",
+-            "categoryHint": "직종 카테고리",
+-            "locationHint": "근무 위치",
+-            "submit": "구인 등록"
+-        }
++    "failure": "답글 등록 실패: {error}"
++  },
++  "chat_list": {
++    "appBarTitle": "채팅",
++    "empty": "진행중인 대화가 없습니다."
++  },
++  "chat_room": {
++    "placeholder": "메시지를 입력하세요..."
++  },
++  "jobs": {
++    "form": {
++      "titleHint": "공고 제목",
++      "descriptionHint": "업무 내용을 입력",
++      "categoryHint": "직종 카테고리",
++      "locationHint": "근무 위치",
++      "submit": "구인 등록"
++    }
++  },
++  "findfriend": {
++    "intro": {
++      "title": "주변 친구 리스트를 보려면 내 프로필을 먼저 등록해주세요.",
++      "subtitle": "프로필을 작성하면 관심사와 지역 기반으로 내 주변 이웃과 친구를 찾을 수 있어요.",
++      "button": "프로필 등록하기"
+     }
+-}
+\ No newline at end of file
++  }
++}
