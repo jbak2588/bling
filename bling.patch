@@ -1,211 +1,130 @@
-diff --git a/lib/core/models/short_comment_model.dart b/lib/core/models/short_comment_model.dart
+diff --git a/lib/core/models/lost_item_model.dart b/lib/core/models/lost_item_model.dart
 new file mode 100644
-index 0000000000000000000000000000000000000000..8818c70996aecf7215af8b22bdf15bc52735f04f
+index 0000000000000000000000000000000000000000..79138fbae0102aa20357dc067825a2c9b23f245b
 --- /dev/null
-+++ b/lib/core/models/short_comment_model.dart
-@@ -0,0 +1,38 @@
-+// lib/core/models/short_comment_model.dart
++++ b/lib/core/models/lost_item_model.dart
+@@ -0,0 +1,69 @@
++// lib/core/models/lost_item_model.dart
 +
 +import 'package:cloud_firestore/cloud_firestore.dart';
 +
-+/// Comment model stored under `shorts/{shortId}/comments` in the POM hub.
-+class ShortCommentModel {
++/// Data model for lost and found posts with optional bounty.
++class LostItemModel {
 +  final String id;
-+  final String userId;
-+  final String body;
-+  final Timestamp createdAt;
-+
-+  ShortCommentModel({
-+    required this.id,
-+    required this.userId,
-+    required this.body,
-+    required this.createdAt,
-+  });
-+
-+  factory ShortCommentModel.fromFirestore(
-+      DocumentSnapshot<Map<String, dynamic>> doc) {
-+    final data = doc.data() ?? {};
-+    return ShortCommentModel(
-+      id: doc.id,
-+      userId: data['userId'] ?? '',
-+      body: data['body'] ?? '',
-+      createdAt: data['createdAt'] ?? Timestamp.now(),
-+    );
-+  }
-+
-+  Map<String, dynamic> toJson() {
-+    return {
-+      'userId': userId,
-+      'body': body,
-+      'createdAt': createdAt,
-+    };
-+  }
-+}
-+
-diff --git a/lib/core/models/short_model.dart b/lib/core/models/short_model.dart
-new file mode 100644
-index 0000000000000000000000000000000000000000..af6ec4c3958200ec97ded9e23284f48c37764d30
---- /dev/null
-+++ b/lib/core/models/short_model.dart
-@@ -0,0 +1,79 @@
-+// lib/core/models/short_model.dart
-+
-+import 'package:cloud_firestore/cloud_firestore.dart';
-+
-+/// Model representing a short video uploaded to the POM (Piece of Moment)
-+/// short-video hub.
-+class ShortModel {
-+  final String id;
-+  final String userId;
++  final String type;
 +  final String title;
-+  final String videoUrl;
-+  final String thumbnailUrl;
++  final Timestamp date;
++  final String locationDescription;
 +  final String description;
-+  final String? location;
-+  final GeoPoint? geoPoint;
-+  final List<String>? tags;
-+  final int likesCount;
-+  final int viewsCount;
-+  final bool trustLevelVerified;
-+  final bool isAiVerified;
++  final String? photoUrl;
++  final String contactInfo;
++  final int? reward;
++  final Timestamp expiresAt;
 +  final Timestamp createdAt;
++  final String userId;
 +
-+  ShortModel({
++  LostItemModel({
 +    required this.id,
-+    required this.userId,
++    required this.type,
 +    required this.title,
-+    required this.videoUrl,
-+    required this.thumbnailUrl,
++    required this.date,
++    required this.locationDescription,
 +    required this.description,
-+    this.location,
-+    this.geoPoint,
-+    this.tags,
-+    this.likesCount = 0,
-+    this.viewsCount = 0,
-+    this.trustLevelVerified = false,
-+    this.isAiVerified = false,
++    this.photoUrl,
++    required this.contactInfo,
++    this.reward,
++    required this.expiresAt,
 +    required this.createdAt,
++    required this.userId,
 +  });
 +
-+  factory ShortModel.fromFirestore(
++  factory LostItemModel.fromFirestore(
 +      DocumentSnapshot<Map<String, dynamic>> doc) {
 +    final data = doc.data() ?? {};
-+    return ShortModel(
++    return LostItemModel(
 +      id: doc.id,
-+      userId: data['userId'] ?? '',
++      type: data['type'] ?? '',
 +      title: data['title'] ?? '',
-+      videoUrl: data['videoUrl'] ?? '',
-+      thumbnailUrl: data['thumbnailUrl'] ?? '',
++      date: data['date'] ?? Timestamp.now(),
++      locationDescription: data['locationDescription'] ?? '',
 +      description: data['description'] ?? '',
-+      location: data['location'],
-+      geoPoint: data['geoPoint'],
-+      tags: data['tags'] != null ? List<String>.from(data['tags']) : null,
-+      likesCount: data['likesCount'] ?? 0,
-+      viewsCount: data['viewsCount'] ?? 0,
-+      trustLevelVerified: data['trustLevelVerified'] ?? false,
-+      isAiVerified: data['isAiVerified'] ?? false,
++      photoUrl: data['photoUrl'],
++      contactInfo: data['contactInfo'] ?? '',
++      reward: data['reward'],
++      expiresAt: data['expiresAt'] ?? Timestamp.now(),
 +      createdAt: data['createdAt'] ?? Timestamp.now(),
++      userId: data['userId'] ?? '',
 +    );
 +  }
 +
 +  Map<String, dynamic> toJson() {
 +    return {
-+      'userId': userId,
++      'type': type,
 +      'title': title,
-+      'videoUrl': videoUrl,
-+      'thumbnailUrl': thumbnailUrl,
++      'date': date,
++      'locationDescription': locationDescription,
 +      'description': description,
-+      'location': location,
-+      'geoPoint': geoPoint,
-+      'tags': tags,
-+      'likesCount': likesCount,
-+      'viewsCount': viewsCount,
-+      'trustLevelVerified': trustLevelVerified,
-+      'isAiVerified': isAiVerified,
++      'photoUrl': photoUrl,
++      'contactInfo': contactInfo,
++      'reward': reward,
++      'expiresAt': expiresAt,
 +      'createdAt': createdAt,
++      'userId': userId,
 +    };
 +  }
 +}
-+
-diff --git a/lib/features/pom/data/short_repository.dart b/lib/features/pom/data/short_repository.dart
+diff --git a/lib/features/lost_found/data/lost_item_repository.dart b/lib/features/lost_found/data/lost_item_repository.dart
 new file mode 100644
-index 0000000000000000000000000000000000000000..5f933f1813590b4a706aee46a4f010cfa2c146ae
+index 0000000000000000000000000000000000000000..78c177e692a23fb61db68ca69fe004872428a68a
 --- /dev/null
-+++ b/lib/features/pom/data/short_repository.dart
-@@ -0,0 +1,76 @@
-+// lib/features/pom/data/short_repository.dart
++++ b/lib/features/lost_found/data/lost_item_repository.dart
+@@ -0,0 +1,49 @@
++// lib/features/lost_found/data/lost_item_repository.dart
 +
 +import 'package:cloud_firestore/cloud_firestore.dart';
 +
-+import '../../../core/models/short_model.dart';
-+import '../../../core/models/short_comment_model.dart';
++import '../../../core/models/lost_item_model.dart';
 +
-+/// Firestore repository handling CRUD operations for shorts and their comments.
-+/// This powers the POM (Piece of Moment) short-video hub.
-+class ShortRepository {
++/// Provides CRUD operations for lost & found items and removes expired posts.
++class LostItemRepository {
 +  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 +
-+  CollectionReference<Map<String, dynamic>> get _shortsCollection =>
-+      _firestore.collection('shorts');
++  CollectionReference<Map<String, dynamic>> get _itemsCollection =>
++      _firestore.collection('lost_items');
 +
-+  Future<String> createShort(ShortModel short) async {
-+    final doc = await _shortsCollection.add(short.toJson());
++  Future<String> createLostItem(LostItemModel item) async {
++    final doc = await _itemsCollection.add(item.toJson());
 +    return doc.id;
 +  }
 +
-+  Future<void> updateShort(ShortModel short) async {
-+    await _shortsCollection.doc(short.id).update(short.toJson());
++  Future<void> updateLostItem(LostItemModel item) async {
++    await _itemsCollection.doc(item.id).update(item.toJson());
 +  }
 +
-+  Future<void> deleteShort(String shortId) async {
-+    await _shortsCollection.doc(shortId).delete();
++  Future<void> deleteLostItem(String id) async {
++    await _itemsCollection.doc(id).delete();
 +  }
 +
-+  Future<ShortModel> fetchShort(String shortId) async {
-+    final doc = await _shortsCollection.doc(shortId).get();
-+    return ShortModel.fromFirestore(doc);
++  Future<LostItemModel> fetchLostItem(String id) async {
++    final doc = await _itemsCollection.doc(id).get();
++    return LostItemModel.fromFirestore(doc);
 +  }
 +
-+  Stream<List<ShortModel>> fetchShorts() {
-+    return _shortsCollection
++  Stream<List<LostItemModel>> fetchLostItems() {
++    return _itemsCollection
 +        .orderBy('createdAt', descending: true)
 +        .snapshots()
-+        .map((snapshot) =>
-+            snapshot.docs.map(ShortModel.fromFirestore).toList());
++        .map((s) => s.docs.map(LostItemModel.fromFirestore).toList());
 +  }
 +
-+  Future<String> addComment(String shortId, ShortCommentModel comment) async {
-+    final doc = await _shortsCollection
-+        .doc(shortId)
-+        .collection('comments')
-+        .add(comment.toJson());
-+    return doc.id;
-+  }
-+
-+  Future<void> updateComment(String shortId, ShortCommentModel comment) async {
-+    await _shortsCollection
-+        .doc(shortId)
-+        .collection('comments')
-+        .doc(comment.id)
-+        .update(comment.toJson());
-+  }
-+
-+  Future<void> deleteComment(String shortId, String commentId) async {
-+    await _shortsCollection
-+        .doc(shortId)
-+        .collection('comments')
-+        .doc(commentId)
-+        .delete();
-+  }
-+
-+  Stream<List<ShortCommentModel>> fetchComments(String shortId) {
-+    return _shortsCollection
-+        .doc(shortId)
-+        .collection('comments')
-+        .orderBy('createdAt', descending: true)
-+        .snapshots()
-+        .map((snapshot) =>
-+            snapshot.docs.map(ShortCommentModel.fromFirestore).toList());
++  Future<void> removeExpiredItems() async {
++    final expired = await _itemsCollection
++        .where('expiresAt', isLessThan: Timestamp.now())
++        .get();
++    final batch = _firestore.batch();
++    for (final doc in expired.docs) {
++      batch.delete(doc.reference);
++    }
++    await batch.commit();
 +  }
 +}
-+
