@@ -1,95 +1,58 @@
-diff --git a/lib/core/models/club_member_model.dart b/lib/core/models/club_member_model.dart
+diff --git a/lib/core/models/job_model.dart b/lib/core/models/job_model.dart
 new file mode 100644
-index 0000000000000000000000000000000000000000..b381d8787db5c7eb7cda9c6519ec99753798f645
+index 0000000000000000000000000000000000000000..39e8b83d094f70c80e685fee6c73488506e04564
 --- /dev/null
-+++ b/lib/core/models/club_member_model.dart
-@@ -0,0 +1,34 @@
-+// lib/core/models/club_member_model.dart
++++ b/lib/core/models/job_model.dart
+@@ -0,0 +1,68 @@
++// lib/core/models/job_model.dart
 +
 +import 'package:cloud_firestore/cloud_firestore.dart';
 +
-+/// Represents a user who has joined a specific club. Stored under
-+/// `clubs/{clubId}/members` subcollection.
-+class ClubMemberModel {
-+  final String id;
-+  final String userId;
-+  final Timestamp joinedAt;
-+
-+  ClubMemberModel({
-+    required this.id,
-+    required this.userId,
-+    required this.joinedAt,
-+  });
-+
-+  factory ClubMemberModel.fromFirestore(
-+      DocumentSnapshot<Map<String, dynamic>> doc) {
-+    final data = doc.data() ?? {};
-+    return ClubMemberModel(
-+      id: doc.id,
-+      userId: data['userId'] ?? '',
-+      joinedAt: data['joinedAt'] ?? Timestamp.now(),
-+    );
-+  }
-+
-+  Map<String, dynamic> toJson() {
-+    return {
-+      'userId': userId,
-+      'joinedAt': joinedAt,
-+    };
-+  }
-+}
-diff --git a/lib/core/models/club_model.dart b/lib/core/models/club_model.dart
-new file mode 100644
-index 0000000000000000000000000000000000000000..0863510e49b443cf8d612d5825a9a1d5c9154945
---- /dev/null
-+++ b/lib/core/models/club_model.dart
-@@ -0,0 +1,63 @@
-+// lib/core/models/club_model.dart
-+
-+import 'package:cloud_firestore/cloud_firestore.dart';
-+
-+/// Represents a local community club where neighbors gather around
-+/// common interests. Each document in the `clubs` collection maps
-+/// to one instance of this model.
-+class ClubModel {
++/// Job listing data model mapped to the Firestore `jobs` collection.
++class JobModel {
 +  final String id;
 +  final String title;
 +  final String description;
-+  final String ownerId;
-+  final String location;
-+  final List<String> interests;
-+  final int membersCount;
-+  final bool isPrivate;
-+  final String trustLevelRequired;
++  final String category;
++  final String? location;
++  final GeoPoint? geoPoint;
 +  final Timestamp createdAt;
++  final String userId;
++  final String trustLevelRequired;
++  final int viewsCount;
++  final int likesCount;
++  final bool isPaidListing;
 +
-+  ClubModel({
++  JobModel({
 +    required this.id,
 +    required this.title,
 +    required this.description,
-+    required this.ownerId,
-+    required this.location,
-+    required this.interests,
-+    this.membersCount = 0,
-+    this.isPrivate = false,
-+    this.trustLevelRequired = 'normal',
++    required this.category,
++    this.location,
++    this.geoPoint,
 +    required this.createdAt,
++    required this.userId,
++    required this.trustLevelRequired,
++    this.viewsCount = 0,
++    this.likesCount = 0,
++    this.isPaidListing = false,
 +  });
 +
-+  factory ClubModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
++  factory JobModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
 +    final data = doc.data() ?? {};
-+    return ClubModel(
++    return JobModel(
 +      id: doc.id,
 +      title: data['title'] ?? '',
 +      description: data['description'] ?? '',
-+      ownerId: data['ownerId'] ?? '',
-+      location: data['location'] ?? '',
-+      interests:
-+          data['interests'] != null ? List<String>.from(data['interests']) : [],
-+      membersCount: data['membersCount'] ?? 0,
-+      isPrivate: data['isPrivate'] ?? false,
-+      trustLevelRequired: data['trustLevelRequired'] ?? 'normal',
++      category: data['category'] ?? '',
++      location: data['location'],
++      geoPoint: data['geoPoint'],
 +      createdAt: data['createdAt'] ?? Timestamp.now(),
++      userId: data['userId'] ?? '',
++      trustLevelRequired: data['trustLevelRequired'] ?? 'normal',
++      viewsCount: data['viewsCount'] ?? 0,
++      likesCount: data['likesCount'] ?? 0,
++      isPaidListing: data['isPaidListing'] ?? false,
 +    );
 +  }
 +
@@ -97,86 +60,58 @@ index 0000000000000000000000000000000000000000..0863510e49b443cf8d612d5825a9a1d5
 +    return {
 +      'title': title,
 +      'description': description,
-+      'ownerId': ownerId,
++      'category': category,
 +      'location': location,
-+      'interests': interests,
-+      'membersCount': membersCount,
-+      'isPrivate': isPrivate,
-+      'trustLevelRequired': trustLevelRequired,
++      'geoPoint': geoPoint,
 +      'createdAt': createdAt,
++      'userId': userId,
++      'trustLevelRequired': trustLevelRequired,
++      'viewsCount': viewsCount,
++      'likesCount': likesCount,
++      'isPaidListing': isPaidListing,
 +    };
 +  }
 +}
-diff --git a/lib/features/clubs/data/club_repository.dart b/lib/features/clubs/data/club_repository.dart
+diff --git a/lib/features/jobs/data/job_repository.dart b/lib/features/jobs/data/job_repository.dart
 new file mode 100644
-index 0000000000000000000000000000000000000000..2a20a5e6c043caffb92bb2bdfd872b50e9cc03d1
+index 0000000000000000000000000000000000000000..80014f8185af6575169df899db2df3cbe86a4131
 --- /dev/null
-+++ b/lib/features/clubs/data/club_repository.dart
-@@ -0,0 +1,67 @@
-+// lib/features/clubs/data/club_repository.dart
++++ b/lib/features/jobs/data/job_repository.dart
+@@ -0,0 +1,37 @@
++// lib/features/jobs/data/job_repository.dart
 +
-+import 'package:cloud_firestore/cloud_firestore.dart';
++import '../../../core/models/job_model.dart';
 +
-+import '../../../core/models/club_member_model.dart';
-+import '../../../core/models/club_model.dart';
++/// Repository for managing local job listings.
++/// All CRUD operations here operate on an in-memory list
++/// rather than a remote database.
++class JobRepository {
++  final List<JobModel> _jobs = [];
 +
-+/// Handles CRUD operations for community clubs and their members.
-+class ClubRepository {
-+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-+
-+  Future<String> createClub(ClubModel club) async {
-+    final docRef = await _firestore.collection('clubs').add(club.toJson());
-+    return docRef.id;
++  Future<void> createJob(JobModel job) async {
++    _jobs.add(job);
 +  }
 +
-+  Future<void> updateClub(ClubModel club) async {
-+    await _firestore.collection('clubs').doc(club.id).update(club.toJson());
++  Future<List<JobModel>> readJobs() async {
++    return _jobs;
 +  }
 +
-+  Future<void> deleteClub(String clubId) async {
-+    await _firestore.collection('clubs').doc(clubId).delete();
++  Future<JobModel?> readJob(String id) async {
++    try {
++      return _jobs.firstWhere((j) => j.id == id);
++    } catch (_) {
++      return null;
++    }
 +  }
 +
-+  Future<ClubModel> fetchClub(String clubId) async {
-+    final doc = await _firestore.collection('clubs').doc(clubId).get();
-+    return ClubModel.fromFirestore(doc);
++  Future<void> updateJob(JobModel job) async {
++    final index = _jobs.indexWhere((j) => j.id == job.id);
++    if (index != -1) {
++      _jobs[index] = job;
++    }
 +  }
 +
-+  Stream<List<ClubModel>> fetchClubs() {
-+    return _firestore
-+        .collection('clubs')
-+        .orderBy('createdAt', descending: true)
-+        .snapshots()
-+        .map((snapshot) =>
-+            snapshot.docs.map(ClubModel.fromFirestore).toList());
-+  }
-+
-+  Future<void> addMember(String clubId, ClubMemberModel member) async {
-+    await _firestore
-+        .collection('clubs')
-+        .doc(clubId)
-+        .collection('members')
-+        .doc(member.id)
-+        .set(member.toJson());
-+  }
-+
-+  Future<void> removeMember(String clubId, String memberId) async {
-+    await _firestore
-+        .collection('clubs')
-+        .doc(clubId)
-+        .collection('members')
-+        .doc(memberId)
-+        .delete();
-+  }
-+
-+  Stream<List<ClubMemberModel>> fetchMembers(String clubId) {
-+    return _firestore
-+        .collection('clubs')
-+        .doc(clubId)
-+        .collection('members')
-+        .orderBy('joinedAt', descending: true)
-+        .snapshots()
-+        .map((snapshot) =>
-+            snapshot.docs.map(ClubMemberModel.fromFirestore).toList());
++  Future<void> deleteJob(String id) async {
++    _jobs.removeWhere((j) => j.id == id);
 +  }
 +}
