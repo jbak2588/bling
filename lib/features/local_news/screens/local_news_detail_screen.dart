@@ -1,4 +1,4 @@
-// lib/features/post/screens/post_detail_screen.dart
+// lib/features/local_news/screens/local_news_detail_screen.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,20 +12,20 @@ import '../../../core/models/post_model.dart';
 import '../../../core/models/user_model.dart';
 import '../widgets/comment_input_field.dart';
 import '../widgets/comment_list_view.dart';
-// ✅ [추가] 방금 만든 EditPostScreen을 import 합니다.
-import 'edit_post_screen.dart';
+// ✅ [추가] 방금 만든 EditLocalNewsScreen을 import 합니다.
+import 'edit_local_news_screen.dart';
 
 
 
-class PostDetailScreen extends StatefulWidget {
+class LocalNewsDetailScreen extends StatefulWidget {
   final PostModel post;
-  const PostDetailScreen({super.key, required this.post});
+  const LocalNewsDetailScreen({super.key, required this.post});
 
   @override
-  State<PostDetailScreen> createState() => _PostDetailScreenState();
+  State<LocalNewsDetailScreen> createState() => _LocalNewsDetailScreenState();
 }
 
-class _PostDetailScreenState extends State<PostDetailScreen> {
+class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
   // 기존 상태 변수들은 그대로 유지합니다.
   bool _isLiked = false;
   late int _likesCount;
@@ -216,17 +216,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_currentPost.title ?? 'postDetail.appBarTitle'.tr()),
+        title: Text(_currentPost.title ?? 'localNewsDetail.appBarTitle'.tr()),
         actions: [
           // ✅ [핵심] 현재 사용자가 게시물 작성자일 경우에만 수정 버튼을 보여줍니다.
           if (currentUserId != null && currentUserId == _currentPost.userId)
             IconButton(
               icon: const Icon(Icons.edit_outlined),
-              tooltip: 'postDetail.menu.edit'.tr(),
+              tooltip: 'localNewsDetail.menu.edit'.tr(),
               onPressed: () async {
                 final result = await Navigator.of(context).push<bool>(
                   MaterialPageRoute(
-                    builder: (_) => EditPostScreen(post: _currentPost),
+                    builder: (_) => EditLocalNewsScreen(post: _currentPost),
                   ),
                 );
                 // ✅ [핵심] 수정 화면에서 true를 반환하면 (수정 성공) 데이터를 새로고침합니다.
@@ -239,9 +239,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             onSelected: (value) {/* Handle menu selection */},
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               PopupMenuItem<String>(
-                  value: 'report', child: Text('postDetail.menu.report'.tr())),
+                  value: 'report', child: Text('localNewsDetail.menu.report'.tr())),
               PopupMenuItem<String>(
-                  value: 'share', child: Text('postDetail.menu.share'.tr())),
+                  value: 'share', child: Text('localNewsDetail.menu.share'.tr())),
             ],
           ),
         ],
@@ -299,7 +299,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           child: CommentInputField(
             postId: _currentPost.id,
             onCommentAdded: _handleCommentAdded,
-            hintText: 'postDetail.buttons.comment'.tr(),
+            hintText: 'localNewsDetail.buttons.comment'.tr(),
           ),
         ),
       ),

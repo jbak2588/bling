@@ -1,4 +1,4 @@
-// lib/features/post/screens/edit_post_screen.dart
+// lib/features/local_news/screens/edit_local_news_screen.dart
 
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,15 +13,15 @@ import '../../../core/models/post_model.dart';
 
 
 
-class EditPostScreen extends StatefulWidget {
+class EditLocalNewsScreen extends StatefulWidget {
   final PostModel post;
-  const EditPostScreen({super.key, required this.post});
+  const EditLocalNewsScreen({super.key, required this.post});
 
   @override
-  State<EditPostScreen> createState() => _EditPostScreenState();
+  State<EditLocalNewsScreen> createState() => _EditLocalNewsScreenState();
 }
 
-class _EditPostScreenState extends State<EditPostScreen> {
+class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _tagsController = TextEditingController();
@@ -99,12 +99,12 @@ class _EditPostScreenState extends State<EditPostScreen> {
   Future<void> _updatePost() async {
      if (_contentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('createPost.alerts.contentRequired'.tr())));
+          SnackBar(content: Text('localNewsCreate.alerts.contentRequired'.tr())));
       return;
     }
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('createPost.alerts.categoryRequired'.tr())));
+          SnackBar(content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
       return;
     }
 
@@ -153,7 +153,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
   Widget build(BuildContext context) {
     // UI 코드는 이전과 동일합니다.
     return Scaffold(
-       appBar: AppBar(title: Text('editPost.appBarTitle'.tr())),
+       appBar: AppBar(title: Text('localNewsEdit.appBarTitle'.tr())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -162,7 +162,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
             DropdownButtonFormField<PostCategoryModel>(
               value: _selectedCategory,
                decoration: InputDecoration(
-                  labelText: 'createPost.form.categoryLabel'.tr(),
+                  labelText: 'localNewsCreate.form.categoryLabel'.tr(),
                   border: const OutlineInputBorder()),
               items: AppCategories.postCategories.map((category) {
                 return DropdownMenuItem<PostCategoryModel>(
@@ -204,7 +204,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
               // ✅ [다국어 수정] 수정하기 버튼
               child: _isSubmitting
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : Text('editPost.buttons.submit'.tr()),
+                  : Text('localNewsEdit.buttons.submit'.tr()),
             ),
           ],
         ),
@@ -226,7 +226,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
         OutlinedButton.icon(
             onPressed: _pickImages,
             icon: const Icon(Icons.camera_alt),
-            label: Text('createPost.buttons.addImage'.tr())),
+            label: Text('localNewsCreate.buttons.addImage'.tr())),
         const SizedBox(height: 8),
         if (allImages.isNotEmpty)
           SizedBox(

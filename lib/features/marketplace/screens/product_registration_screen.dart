@@ -41,7 +41,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   bool _isLoading = false;
 
   Category? _selectedCategory;
-  Position? _currentPosition;
+  // Position? _currentPosition;
 
   // 현재 상품 상태 및 추가 입력값
   String _condition = 'used';
@@ -92,7 +92,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
 
         setState(() {
           _addressController.text = neighborhood ?? '';
-          _currentPosition = position;
+          // _currentPosition = position;
         });
       }
     } catch (e) {
