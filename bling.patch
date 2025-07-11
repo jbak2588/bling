@@ -1,199 +1,444 @@
-diff --git a/assets/lang/en.json b/assets/lang/en.json
-index 817bd6f717fc6d530bbb543eb66f79260df83fb2..00ad9481fbf1462f5266a3206bc205fc3d3da358 100644
---- a/assets/lang/en.json
-+++ b/assets/lang/en.json
-@@ -355,28 +355,31 @@
+diff --git a/README.md b/README.md
+index dee67cb9b08ba8017f1cd4ed00744b90230177ed..f1023a3737d95b5dfebeb7c19b5cb4aaf5307cbb 100644
+--- a/README.md
++++ b/README.md
+@@ -1,152 +1,155 @@
+ # 🚀 Bling- Keluharan 기반 슈퍼앱 프로젝트
  
-     "common": {
-         "cancel": "Cancel",
-         "delete": "Delete"
-     },
-     "deleteConfirm": {
-         "title": "Delete Comment",
-         "content": "Are you sure you want to delete this comment?",
-         "failure": "Failed to delete comment: {error}"
-     },
+ ---
  
-     "replyInputField": {
-         "hintText": "Enter a reply",
-         "button": {
-             "send": "Send"
-         },
-         "failure": "Failed to add reply: {error}"
-     },
+ ## ✅ 프로젝트 개요
  
-     "chat_list": {
-         "appBarTitle": "Chat",
-         "empty": "There are no ongoing conversations."
-     },
-     "chat_room": {
-         "placeholder": "Enter a message..."
--    }
--    
-+    },
-+    "selectCategory": "Select Category",
-+    "address_neighborhood": "Neighborhood",
-+    "address_detail_hint": "Detailed meeting place (Optional)"
-+
- }
-\ No newline at end of file
-diff --git a/assets/lang/id.json b/assets/lang/id.json
-index 70c77076cfa75103fa289ebe467908742e4c3ff4..1aa258c0873f31bb2c05912c94bc36377c5f6108 100644
---- a/assets/lang/id.json
-+++ b/assets/lang/id.json
-@@ -354,29 +354,31 @@
+ bling는 인도네시아의 Kuluhara 기반 Nextdoor형 커뮤니티와  
+ Gojek 스타일 런처 UX를 결합한 **하이브리드 로컬 앱**입니다.
  
-     "common": {
-         "cancel": "Batal",
-         "delete": "Hapus"
-     },
-     "deleteConfirm": {
-         "title": "Hapus Komentar",
-         "content": "Apakah Anda yakin ingin menghapus komentar ini?",
-         "failure": "Gagal menghapus komentar: {error}"
-     },
+ ---
  
-     "replyInputField": {
-         "hintText": "Masukkan balasan",
-         "button": {
-             "send": "Kirim"
-         },
-         "failure": "Gagal menambahkan balasan: {error}"
-     },
+ ## ✅ 핵심 컨셉
  
-     "chat_list": {
-         "appBarTitle": "Obrolan",
-         "empty": "Belum ada percakapan."
-     },
-     "chat_room": {
-         "placeholder": "Ketik pesan..."
--    }
+ - Keluhara 기반 신뢰등급 (TrustLevel)
+ - 지역 피드(Warga Feed)
+ - 중고/신상품 마켓플레이스 + AI 검수
+ - 친구찾기/데이팅 (Cari Teman)
+ - Klub(동호회), Lowongan(구인), Toko Lokal(소상공인)
+ - Lelang(경매), POM(지역 쇼츠)
+ - 다국어(Localization) + AppBar GEO 범위 설정
+ 
+-## ✅ 폴더 구조    2025년 7월 4일 Ver 0.4 기준
++## ✅ 폴더 구조    2025년 7월 11일 Ver 0.5 기준
+ 
+ lib
+ ├── api_keys.dart
+ ├── core
+ │   ├── constants
+ │   │   └── app_categories.dart
+ │   ├── models
+ │   │   ├── comment_model.dart
+ │   │   ├── feed_item_model.dart
+ │   │   ├── page_data.dart
+ │   │   ├── post_category_model.dart
+ │   │   ├── post_model.dart
+ │   │   ├── product_model.dart
+ │   │   ├── reply_model.dart
+ │   │   └── user_model.dart
+ │   └── utils
+ │       └── address_formatter.dart
+ ├── features
+ │   ├── admin
+ │   │   └── screens
+ │   │       └── data_uploader_screen.dart
+ │   ├── auction
+ │   │   └── screens
+ │   │       └── auction_screen.dart
+ │   ├── auth
+ │   │   └── screens
+ │   │       ├── auth_gate.dart
+ │   │       ├── login_screen.dart
+ │   │       ├── profile_edit_screen.dart
+ │   │       └── signup_screen.dart
+ │   ├── categories
+ │   │   ├── domain
+ │   │   │   └── category.dart
+ │   │   └── screens
+ │   │       ├── parent_category_screen.dart
+ │   │       └── sub_category_screen.dart
+ │   ├── chat
+ │   │   ├── domain
+ │   │   │   ├── chat_message.dart
+ │   │   │   ├── chat_room.dart
+ │   │   │   └── chat_utils.dart
+ │   │   └── screens
+ │   │       ├── chat_list_screen.dart
+ │   │       └── chat_room_screen.dart
+ │   ├── clubs
+ │   │   └── screens
+ │   │       └── clubs_screen.dart
+ │   ├── community
+ │   │   └── screens
+ │   │       └── community_screen.dart
+-│   ├── feed
++│   ├── main_feed
+ │   │   ├── data
+ │   │   │   └── feed_repository.dart
++│   │   └── screens
++│   │       └── main_feed_screen.dart
++│   ├── local_news
+ │   │   ├── screens
+-│   │   │   ├── feed_screen.dart
+-│   │   │   └── local_feed_screen.dart
++│   │   │   ├── create_local_news_screen.dart
++│   │   │   ├── edit_local_news_screen.dart
++│   │   │   ├── local_news_detail_screen.dart
++│   │   │   └── local_news_screen.dart
+ │   │   └── widgets
+-│   │       └── post_card.dart
++│   │       ├── comment_input_field.dart
++│   │       ├── comment_list_view.dart
++│   │       ├── post_card.dart
++│   │       ├── reply_input_field.dart
++│   │       └── reply_list_view.dart
++│   ├── lost_found
++│   │   └── data
++│   │       └── lost_item_repository.dart
+ │   ├── find_friends
+ │   │   └── screens
+ │   │       └── find_friends_screen.dart
+ │   ├── jobs
+ │   │   └── screens
+ │   │       └── jobs_screen.dart
+ │   ├── local_news
+ │   │   └── screens
+ │   │       └── local_news_screen.dart
+ │   ├── local_stores
+ │   │   └── screens
+ │   │       └── local_stores_screen.dart
+ │   ├── location
+ │   │   └── screens
+ │   │       ├── location_setting_screen.dart
+ │   │       └── neighborhood_prompt_screen.dart
+ │   ├── main_screen
+ │   │   └── home_screen.dart
+ │   ├── marketplace
+ │   │   ├── domain
+ │   │   │   └── product_model.dart
+ │   │   ├── screens
+ │   │   │   ├── marketplace_screen.dart
+ │   │   │   ├── product_detail_screen.dart
+ │   │   │   ├── product_edit_screen.dart
+ │   │   │   └── product_registration_screen.dart
+ │   │   └── widgets
+ │   │       └── product_card.dart
+ │   ├── my_bling
+ │   │   ├── screens
+ │   │   │   └── my_bling_screen.dart
+ │   │   └── widgets
+ │   │       ├── user_bookmark_list.dart
+ │   │       ├── user_post_list.dart
+ │   │       └── user_product_list.dart
+ │   ├── pom
+ │   │   └── screens
+ │   │       └── pom_screen.dart
+-│   ├── post
+-│   │   ├── screens
+-│   │   │   ├── create_post_screen.dart
+-│   │   │   └── post_detail_screen.dart
+-│   │   └── widgets
+-│   │       ├── comment_input_field.dart
+-│   │       ├── comment_list_view.dart
+-│   │       ├── reply_input_field.dart
+-│   │       └── reply_list_view.dart
+ │   ├── real_estate
+ │   │   └── screens
+ │   │       └── real_estate_screen.dart
+ │   └── shared
+ │       ├── controllers
+ │       │   └── locale_controller.dart
+ │       └── widgets
+ │           └── trust_level_badge.dart
+ ├── firebase_options.dart
+ └── main.dart
+ 
+ pubspec.yaml
+ functions-v2
+ ├── index.js
+ ├── node_modules
+ ├── package-lock.json
+ ├── package.json
+ └── pglite-debug.log
+ ├── pubspec.yaml
+ ├── README.md
+ ├── docs
+ │   ├── index
+ │   │   ├── 00  Mainscreen & 런처 & Tab & Drawer QA.md
+ │   │   ├── 01  프로젝트 개요 & 폴더트리.md
+ │   │   ├── 010  Feed(Post) 모듈.md
+@@ -180,52 +183,53 @@ functions-v2
+ │   │   ├── 피드 관련 위치 검색 규칙과 예시.md
+ │   │   └── 📌 Bling_Team_ToDo_QA_Index.md
+ │   ├── team
+ │   │   ├── TeamA__Auth_Trust_module_통합 작업문서.md
+ │   │   ├── teamB_Feed_CRUD_Module_통합 작업문서.md
+ │   │   ├── teamC_Chat & Notification 모듈_통합 작업문서.md
+ │   │   ├── teamD_GeoQuery_Location_Module_통합_작업문서.md
+ │   │   ├── teamF_Design_Privacy_Module_통합_작업문.md
+ │   │   └── temE_AI_Moderation_Module_통합_작업문서.md
+ │   └── templates 
+ └── assets
+     ├── data
+     │   └── sample_posts.json
+     ├── icons
+     │   └── google_logo.png
+     ├── lang
+     │   ├── en.json
+     │   ├── en_old.json
+     │   ├── id.json
+     │   ├── id_old.json
+     │   ├── ko.json
+     │   └── ko_old.json
+     └── sounds
+         └── send_sound.mp3
+ 
 -
-+    },
-+    "selectCategory": "Pilih Kategori",
-+    "address_neighborhood": "Nama Daerah",
-+    "address_detail_hint": "Lokasi pertemuan detail (Opsional)"
+-
++이전 `feed` 폴더는 기능별로 분리되어
++`local_news`(게시물 관리)와 `main_feed`(타임라인 노출) 모듈로
++개편되었습니다.
  
- }
-\ No newline at end of file
-diff --git a/assets/lang/ko.json b/assets/lang/ko.json
-index 1094edae10f7a734d233e104fb76e313205a24be..d1b99856ba13c8d47a8319cc3a69b7dfa74c33f8 100644
---- a/assets/lang/ko.json
-+++ b/assets/lang/ko.json
-@@ -342,28 +342,31 @@
+ ## ✅ 핵심 Firestore 컬렉션
  
-     "common": {
-         "cancel": "취소",
-         "delete": "삭제"
-     },
-     "deleteConfirm": {
-         "title": "댓글 삭제",
-         "content": "정말 이 댓글을 삭제하시겠습니까?",
-         "failure": "댓글 삭제 실패: {error}"
-     },
+ | 컬렉션             | 설명          |
+ | --------------- | ----------- |
+ | `posts`         | Local Feed  |
+ | `products`      | Marketplace |
+ | `shorts`        | POM 쇼츠      |
+ | `auctions`      | 옥션          |
+ | `jobs`          | 구인 구직       |
+ | `shops`         | Local shops |
+ | `clubs`         | 모임/동호회      |
+ | `users`         | 사용자 정보      |
+ | `chats`         | 채팅          |
+ | `notifications` | 알림          |
  
-     "replyInputField": {
-         "hintText": "답글을 입력하세요",
-         "button": {
-             "send": "전송"
-         },
-         "failure": "답글 등록 실패: {error}"
-     },
  
-     "chat_list": {
-         "appBarTitle": "채팅",
-         "empty": "진행중인 대화가 없습니다."
-     },
-     "chat_room": {
-         "placeholder": "메시지를 입력하세요..."
--    }
-+    },
-+    "selectCategory": "카테고리 선택",
-+    "address_neighborhood": "동네",
-+    "address_detail_hint": "상세 거래 장소 (선택사항)"
+ ## ✅ 주요 정책 문서
  
- }
-\ No newline at end of file
-diff --git a/lib/features/marketplace/screens/product_registration_screen.dart b/lib/features/marketplace/screens/product_registration_screen.dart
-index 8ef9f95850cb1c43b7d3230572409676a111b274..b81a3d0d762bd075cfa9d57f3186bcc0ea0fe1ee 100644
---- a/lib/features/marketplace/screens/product_registration_screen.dart
-+++ b/lib/features/marketplace/screens/product_registration_screen.dart
-@@ -41,70 +41,78 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
-   bool _isLoading = false;
+ - 📄 0. 작업 지침!.md
+ - 📄 1. 디자인 UX 가이드 & i18n.md
+ - 📄 2. 프로젝트 개요 & 메인 구조.md
+ - 📄 3. 사용자 화면 & 마이페이지.md
+ - 📄 4. 사용자 DB & 신뢰 등급.md
+ - 📄 5. 지역-위치-개인정보.md
+@@ -248,28 +252,33 @@ assets
+ │   └── google_logo.png
+ lib
  
-   Category? _selectedCategory;
-   // Position? _currentPosition;
+ ---
  
-   // 현재 상품 상태 및 추가 입력값
-   String _condition = 'used';
+ ## ✅ DevOps & AI 협업
  
-   @override
-   void initState() {
-     super.initState();
-     _checkLocationAndPermission();
-   }
+ - **GPT**:  문서제작
+ - **Gemini**: 코드 밎 구조 설계
+ - **Copilot**: Dart 자동완성, VSCode 연동
+ - 모든 `.md` 정책은 GitHub Repo에서 버전 관리
  
-   @override
-   void dispose() {
-     _titleController.dispose();
-     _priceController.dispose();
-     _descriptionController.dispose();
-     _addressController.dispose();
-     _transactionPlaceController.dispose();
-     super.dispose();
-   }
+ ---
  
-   Future<void> _checkLocationAndPermission() async {
-+    if (!mounted) return;
+ ## ✅ 협업 규칙
+ 
+ - PR: 구조 변경 시 `.md` 동기화 필수
+ - Issue: 구조 변경 사전 공유 필수
+ - 디자인: `/design/` Figma 링크 연계
+ - Token Limit 대비 Obsidian + GPT 연계 유지
+ 
+ ---
+ 
+ ## 🚀 Ver.0.3 → Ver.1.0 목표
+ 
+-Bling 은 Ver.09에서 구조 통합을 마치고  
++Bling 은 Ver.0.9에서 구조 통합을 마치고
+ Ver.1.0에서는 실 서비스 론칭을 목표로 합니다.
+ 
++### 프로젝트 현황 (2025-07-11)
 +
-     final status = await Permission.location.status;
-+    if (!mounted) return;
++- Cloud Function 기반 **Trust Score** 계산 기능 적용
++- 채팅(Chat) 모듈과 마켓플레이스 기능 기본 구현 완료
 +
-     if (status.isGranted) {
-       await _getCurrentLocation();
-     } else {
-       final requestedStatus = await Permission.location.request();
-+      if (!mounted) return;
-       if (requestedStatus.isGranted) {
-         await _getCurrentLocation();
-       }
-     }
-   }
+diff --git "a/docs/index/01  \355\224\204\353\241\234\354\240\235\355\212\270 \352\260\234\354\232\224 & \355\217\264\353\215\224\355\212\270\353\246\254.md" "b/docs/index/01  \355\224\204\353\241\234\354\240\235\355\212\270 \352\260\234\354\232\224 & \355\217\264\353\215\224\355\212\270\353\246\254.md"
+index f40e779828e3361f46582da7e8cd7b3adf093969..a1d3561575beb529500b1c7767428e11b362ccf4 100644
+--- "a/docs/index/01  \355\224\204\353\241\234\354\240\235\355\212\270 \352\260\234\354\232\224 & \355\217\264\353\215\224\355\212\270\353\246\254.md"	
++++ "b/docs/index/01  \355\224\204\353\241\234\354\240\235\355\212\270 \352\260\234\354\232\224 & \355\217\264\353\215\224\355\212\270\353\246\254.md"	
+@@ -193,51 +193,51 @@ and Keluhara(Kel.) trust system into a unified **hyperlocal super-app** for Indo
  
-   Future<void> _getCurrentLocation() async {
-     try {
-       Position position = await Geolocator.getCurrentPosition(
-         desiredAccuracy: LocationAccuracy.high,
-       );
-+      if (!mounted) return;
-+
-       List<Placemark> placemarks = await placemarkFromCoordinates(
-         position.latitude,
-         position.longitude,
-       );
-+      if (!mounted) return;
  
-       if (placemarks.isNotEmpty && mounted) {
-         final placemark = placemarks.first;
-         final neighborhood = placemark.subLocality?.isNotEmpty == true
-             ? placemark.subLocality
-             : placemark.locality;
+ # 2_02. Project_FolderTree
  
-         setState(() {
-           _addressController.text = neighborhood ?? '';
-           // _currentPosition = position;
-         });
-       }
-     } catch (e) {
-       // 위치 정보 가져오기 실패 시 처리
-     }
-   }
+ ---
  
-   void _selectCategory() async {
-     final result = await Navigator.of(context).push<Category>(
-       MaterialPageRoute(builder: (context) => const ParentCategoryScreen()),
-     );
+ ## ✅ 폴더트리 개요
  
-     if (result != null && mounted) {
-       setState(() {
-         _selectedCategory = result;
+ Bling은  Keluharan(Kel.)  기반 지역 슈퍼앱으로,  
+ 모든 모듈을 **기능별 폴더 구조**로 관리해  
+ **토큰 리밋/세션 리셋에도 일관된 개발/배포 흐름**을 유지합니다.
+ 
+ ---
+ 
+ ## ✅ 핵심 원칙
+ 
+ - `features/` 폴더 → 기능별 모듈화 (Feed, Marketplace, POM 등)
+ - `core/` 폴더 → 공통 모델, 상수, 헬퍼 관리
+ - `shared/` → 공통 컨트롤러 및 유틸
+ - Localization은 `i18n/`에 통합
+ - `assets/` → 아이콘, JSON, 샘플 데이터 별도 분리
+ - 주소 화면  표기 원칙 (Kel. Kec. 만)
+ 
+ ---
+ 
+-## ✅ 최종 폴더트리 2025년 7월 4일 현재
++## ✅ 최종 폴더트리 2025년 7월 11일 현재
+ 
+ ```plaintext
+ lib
+ ├── api_keys.dart
+ ├── core
+ │   ├── constants
+ │   │   └── app_categories.dart
+ │   ├── models
+ │   │   ├── comment_model.dart
+ │   │   ├── feed_item_model.dart
+ │   │   ├── page_data.dart
+ │   │   ├── post_category_model.dart
+ │   │   ├── post_model.dart
+ │   │   ├── product_model.dart
+ │   │   ├── reply_model.dart
+ │   │   └── user_model.dart
+ │   └── utils
+ │       └── address_formatter.dart
+ ├── features
+ │   ├── admin
+ │   │   └── screens
+ │   │       └── data_uploader_screen.dart
+ │   ├── auction
+ │   │   └── screens
+ │   │       └── auction_screen.dart
+@@ -245,105 +245,108 @@ lib
+ │   │   └── screens
+ │   │       ├── auth_gate.dart
+ │   │       ├── login_screen.dart
+ │   │       ├── profile_edit_screen.dart
+ │   │       └── signup_screen.dart
+ │   ├── categories
+ │   │   ├── domain
+ │   │   │   └── category.dart
+ │   │   └── screens
+ │   │       ├── parent_category_screen.dart
+ │   │       └── sub_category_screen.dart
+ │   ├── chat
+ │   │   ├── domain
+ │   │   │   ├── chat_message.dart
+ │   │   │   ├── chat_room.dart
+ │   │   │   └── chat_utils.dart
+ │   │   └── screens
+ │   │       ├── chat_list_screen.dart
+ │   │       └── chat_room_screen.dart
+ │   ├── clubs
+ │   │   └── screens
+ │   │       └── clubs_screen.dart
+ │   ├── community
+ │   │   └── screens
+ │   │       └── community_screen.dart
+-│   ├── feed
++│   ├── main_feed
+ │   │   ├── data
+ │   │   │   └── feed_repository.dart
++│   │   └── screens
++│   │       └── main_feed_screen.dart
++│   ├── local_news
+ │   │   ├── screens
+-│   │   │   ├── feed_screen.dart
+-│   │   │   └── local_feed_screen.dart
++│   │   │   ├── create_local_news_screen.dart
++│   │   │   ├── edit_local_news_screen.dart
++│   │   │   ├── local_news_detail_screen.dart
++│   │   │   └── local_news_screen.dart
+ │   │   └── widgets
+-│   │       └── post_card.dart
++│   │       ├── comment_input_field.dart
++│   │       ├── comment_list_view.dart
++│   │       ├── post_card.dart
++│   │       ├── reply_input_field.dart
++│   │       └── reply_list_view.dart
++│   ├── lost_found
++│   │   └── data
++│   │       └── lost_item_repository.dart
+ │   ├── find_friends
+ │   │   └── screens
+ │   │       └── find_friends_screen.dart
+ │   ├── jobs
+ │   │   └── screens
+ │   │       └── jobs_screen.dart
+ │   ├── local_news
+ │   │   └── screens
+ │   │       └── local_news_screen.dart
+ │   ├── local_stores
+ │   │   └── screens
+ │   │       └── local_stores_screen.dart
+ │   ├── location
+ │   │   └── screens
+ │   │       ├── location_setting_screen.dart
+ │   │       └── neighborhood_prompt_screen.dart
+ │   ├── main_screen
+ │   │   └── home_screen.dart
+ │   ├── marketplace
+ │   │   ├── domain
+ │   │   │   └── product_model.dart
+ │   │   ├── screens
+ │   │   │   ├── marketplace_screen.dart
+ │   │   │   ├── product_detail_screen.dart
+ │   │   │   ├── product_edit_screen.dart
+ │   │   │   └── product_registration_screen.dart
+ │   │   └── widgets
+ │   │       └── product_card.dart
+ │   ├── my_bling
+ │   │   ├── screens
+ │   │   │   └── my_bling_screen.dart
+ │   │   └── widgets
+ │   │       ├── user_bookmark_list.dart
+ │   │       ├── user_post_list.dart
+ │   │       └── user_product_list.dart
+ │   ├── pom
+ │   │   └── screens
+ │   │       └── pom_screen.dart
+-│   ├── post
+-│   │   ├── screens
+-│   │   │   ├── create_post_screen.dart
+-│   │   │   └── post_detail_screen.dart
+-│   │   └── widgets
+-│   │       ├── comment_input_field.dart
+-│   │       ├── comment_list_view.dart
+-│   │       ├── reply_input_field.dart
+-│   │       └── reply_list_view.dart
+ │   ├── real_estate
+ │   │   └── screens
+ │   │       └── real_estate_screen.dart
+ │   └── shared
+ │       ├── controllers
+ │       │   └── locale_controller.dart
+ │       └── widgets
+ │           └── trust_level_badge.dart
+ ├── firebase_options.dart
+ └── main.dart
+ assets
+ ├── data
+ │   └── sample_posts.json
+ ├── icons
+ │   └── google_logo.png
+ ├── lang
+ │   ├── en.json
+ │   ├── en_old.json
+ │   ├── id.json
+ │   ├── id_old.json
+ │   ├── ko.json
+ │   └── ko_old.json
+ └── sounds
+     └── send_sound.mp3
+ pubspec.yaml
