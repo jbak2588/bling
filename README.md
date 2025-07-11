@@ -59,7 +59,6 @@ lib
 │   ├── chat
 │   │   ├── domain
 │   │   │   ├── chat_message.dart
-│   │   │   ├── chat_room.dart
 │   │   │   └── chat_utils.dart
 │   │   └── screens
 │   │       ├── chat_list_screen.dart
@@ -70,14 +69,11 @@ lib
 │   ├── community
 │   │   └── screens
 │   │       └── community_screen.dart
-│   ├── feed
+│   ├── main_feed
 │   │   ├── data
 │   │   │   └── feed_repository.dart
-│   │   ├── screens
-│   │   │   ├── feed_screen.dart
-│   │   │   └── local_feed_screen.dart
-│   │   └── widgets
-│   │       └── post_card.dart
+│   │   └── screens
+│   │       └── main_feed_screen.dart
 │   ├── find_friends
 │   │   └── screens
 │   │       └── find_friends_screen.dart
@@ -85,8 +81,17 @@ lib
 │   │   └── screens
 │   │       └── jobs_screen.dart
 │   ├── local_news
-│   │   └── screens
-│   │       └── local_news_screen.dart
+│   │   ├── screens
+│   │   │   ├── create_local_news_screen.dart
+│   │   │   ├── edit_local_news_screen.dart
+│   │   │   ├── local_news_detail_screen.dart
+│   │   │   └── local_news_screen.dart
+│   │   └── widgets
+│   │       ├── comment_input_field.dart
+│   │       ├── comment_list_view.dart
+│   │       ├── post_card.dart
+│   │       ├── reply_input_field.dart
+│   │       └── reply_list_view.dart
 │   ├── local_stores
 │   │   └── screens
 │   │       └── local_stores_screen.dart
@@ -94,11 +99,14 @@ lib
 │   │   └── screens
 │   │       ├── location_setting_screen.dart
 │   │       └── neighborhood_prompt_screen.dart
+│   ├── lost_found
+│   │   └── data
+│   │       └── lost_item_repository.dart
 │   ├── main_screen
 │   │   └── home_screen.dart
 │   ├── marketplace
 │   │   ├── domain
-│   │   │   └── product_model.dart
+│   │   │   └── product_model_old.dart
 │   │   ├── screens
 │   │   │   ├── marketplace_screen.dart
 │   │   │   ├── product_detail_screen.dart
@@ -116,15 +124,6 @@ lib
 │   ├── pom
 │   │   └── screens
 │   │       └── pom_screen.dart
-│   ├── post
-│   │   ├── screens
-│   │   │   ├── create_post_screen.dart
-│   │   │   └── post_detail_screen.dart
-│   │   └── widgets
-│   │       ├── comment_input_field.dart
-│   │       ├── comment_list_view.dart
-│   │       ├── reply_input_field.dart
-│   │       └── reply_list_view.dart
 │   ├── real_estate
 │   │   └── screens
 │   │       └── real_estate_screen.dart
