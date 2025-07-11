@@ -83,12 +83,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "DevLog_개발일지/local_news_screen.dart 백업본 AppBar Update 이전 작업본 2025년 7월 12일 00시 21분 저장.md",
+                "file": "Find_Friend/FindFriend_Feature_Spec.md.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "local_news_screen.dart 백업본 AppBar Update 이전 작업본 2025년 7월 12일 00시 21분 저장"
+              "title": "FindFriend_Feature_Spec.md"
             }
           }
         ],
@@ -241,8 +241,10 @@
   },
   "active": "ff27b3b52377b3f7",
   "lastOpenFiles": [
-    "index/📌 Bling_Team_ToDo_QA_Index.md",
     "Find_Friend/8_05_1. 친구 찾기 초기 기획서.md",
+    "Find_Friend/FindFriend_Feature_Spec.md.md",
+    "DevLog_개발일지/local_news_screen.dart 백업본 AppBar Update 이전 작업본 2025년 7월 12일 00시 21분 저장.md",
+    "index/📌 Bling_Team_ToDo_QA_Index.md",
     "DevLog_개발일지/room_listing_model.md",
     "빌드시 터미널 로그.md",
     "Sliver Appbar + TabBar 스크롤 구현.md",
@@ -252,7 +254,6 @@
     "chat_list_screen.dart 백업 7월 11일 오전 00시 7분 버전.md",
     "하단메뉴바 유지 home_screen.dart 7월10일 23시41분 버전.md",
     "DevLog_개발일지/Add SliverAppBar with TabBar funcitonality diff Patch 2025년 7월 11일 22시 26분.md",
-    "DevLog_개발일지/local_news_screen.dart 백업본 AppBar Update 이전 작업본 2025년 7월 12일 00시 21분 저장.md",
     "DevLog_개발일지/home_screen.dart 백업본 7월11일 22시24분 SliverAppBar 구현전 안전구동 코드.md",
     "DevLog_개발일지",
     "index/012  Find Friend & Club & Jobs & etc 모듈.md",
