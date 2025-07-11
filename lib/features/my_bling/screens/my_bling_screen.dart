@@ -122,11 +122,16 @@ class _MyBlingScreenState extends State<MyBlingScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _buildStatColumn(
-                          'myBling.stats.posts', '12'), // TODO: 실제 데이터 연동
-                      _buildStatColumn('myBling.stats.followers', '128'),
+                          'myBling.stats.posts', _getPostsCount(user.uid)),
+                      _buildStatColumn(
+                          'myBling.stats.followers',
+                          _getFollowersCount(user.uid)),
                       const VerticalDivider(width: 20, thickness: 1),
-                      _buildStatColumn('myBling.stats.neighbors', '34'),
-                      _buildStatColumn('myBling.stats.friends', '5'),
+                      _buildStatColumn(
+                          'myBling.stats.neighbors',
+                          _getNeighborsCount(user.uid)),
+                      _buildStatColumn(
+                          'myBling.stats.friends', _getFriendsCount(user.uid)),
                     ],
                   ),
                 ),
@@ -188,7 +193,10 @@ class _MyBlingScreenState extends State<MyBlingScreen>
 
   /// 프로필 하단 탭 UI 위젯
   Widget _buildProfileTabs(UserModel user) {
-    // TODO: 추후 user.privacySettings 값에 따라 공개 여부 결정 로직 추가
+    final isPublic = user.privacySettings?['isProfilePublic'] ?? true;
+    if (!isPublic) {
+      return const Center(child: Text('This profile is private.'));
+    }
     return Column(
       children: [
         TabBar(
@@ -221,17 +229,64 @@ class _MyBlingScreenState extends State<MyBlingScreen>
   }
 
   /// 프로필 통계 정보 표시 위젯
-  Widget _buildStatColumn(String labelKey, String count) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(count,
-            style:
-                GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 2),
-        Text(labelKey.tr(),
-            style: GoogleFonts.inter(color: Colors.grey, fontSize: 12)),
-      ],
+  Widget _buildStatColumn(String labelKey, Future<int> countFuture) {
+    return FutureBuilder<int>(
+      future: countFuture,
+      builder: (context, snapshot) {
+        final count = snapshot.data ?? 0;
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('$count',
+                style: GoogleFonts.inter(
+                    fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 2),
+            Text(labelKey.tr(),
+                style: GoogleFonts.inter(color: Colors.grey, fontSize: 12)),
+          ],
+        );
+      },
     );
+  }
+
+  Future<int> _getPostsCount(String uid) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('posts')
+        .where('userId', isEqualTo: uid)
+        .get();
+    return snapshot.size;
+  }
+
+  Future<int> _getFollowersCount(String uid) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('follows')
+        .where('toUserId', isEqualTo: uid)
+        .get();
+    return snapshot.size;
+  }
+
+  Future<int> _getNeighborsCount(String uid) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('follows')
+        .where('fromUserId', isEqualTo: uid)
+        .get();
+    return snapshot.size;
+  }
+
+  Future<int> _getFriendsCount(String uid) async {
+    final followersSnapshot = await FirebaseFirestore.instance
+        .collection('follows')
+        .where('toUserId', isEqualTo: uid)
+        .get();
+    final followingSnapshot = await FirebaseFirestore.instance
+        .collection('follows')
+        .where('fromUserId', isEqualTo: uid)
+        .get();
+
+    final followerIds =
+        followersSnapshot.docs.map((d) => d['fromUserId'] as String).toSet();
+    final followingIds =
+        followingSnapshot.docs.map((d) => d['toUserId'] as String).toSet();
+    return followerIds.intersection(followingIds).length;
   }
 }
