@@ -247,6 +247,44 @@ assets
 │   └── google_logo.png
 lib
 
+## ✅ 개발 환경 & 실행 방법
+
+1. 의존성 설치
+
+```bash
+flutter pub get
+```
+
+2. Android/iOS 에뮬레이터를 실행하거나 실제 기기를 연결한 후 앱을 구동합니다.
+
+```bash
+flutter run
+```
+
+3. Google Maps API 키를 `lib/api_keys.dart`에 정의해야 합니다. 파일 예시는 다음과 같습니다.
+
+```dart
+class ApiKeys {
+  static const googleApiKey = 'YOUR_GOOGLE_API_KEY';
+}
+```
+
+4. `sample_data/serviceAccountKey.json`을 준비한 뒤 샘플 데이터를 업로드합니다.
+
+```bash
+node sample_data/upload_data.js
+```
+
+5. Cloud Functions는 `functions-v2` 폴더에서 다음과 같이 실행하거나 배포합니다.
+
+```bash
+cd functions-v2
+npm install
+npm run serve      # 로컬 에뮬레이터
+# 배포 시
+npm run deploy
+```
+
 ---
 
 ## ✅ DevOps & AI 협업

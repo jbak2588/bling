@@ -1,204 +1,93 @@
-diff --git a/lib/features/my_bling/screens/my_bling_screen.dart b/lib/features/my_bling/screens/my_bling_screen.dart
-index f2e6ea250fb3f22b6f49cb16a89fe1b970bf2aff..aea51ddcf71870a3946df832f5e168404fb0c453 100644
---- a/lib/features/my_bling/screens/my_bling_screen.dart
-+++ b/lib/features/my_bling/screens/my_bling_screen.dart
-@@ -100,55 +100,60 @@ class _MyBlingScreenState extends State<MyBlingScreen>
-   Widget _buildProfileHeader(BuildContext context, UserModel user) {
-     return Padding(
-       padding: const EdgeInsets.all(20.0),
-       child: Column(
-         children: [
-           Row(
-             children: [
-               CircleAvatar(
-                 radius: 40,
-                 backgroundImage:
-                     (user.photoUrl != null && user.photoUrl!.startsWith('http'))
-                         ? NetworkImage(user.photoUrl!)
-                         : null,
-                 child: (user.photoUrl == null ||
-                         !user.photoUrl!.startsWith('http'))
-                     ? const Icon(Icons.person, size: 40)
-                     : null,
-               ),
-               const SizedBox(width: 20),
-               Expanded(
-                 child: IntrinsicHeight(
-                   child: Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                     children: [
-                       _buildStatColumn(
--                          'myBling.stats.posts', '12'), // TODO: 실제 데이터 연동
--                      _buildStatColumn('myBling.stats.followers', '128'),
-+                          'myBling.stats.posts', _getPostsCount(user.uid)),
-+                      _buildStatColumn(
-+                          'myBling.stats.followers',
-+                          _getFollowersCount(user.uid)),
-                       const VerticalDivider(width: 20, thickness: 1),
--                      _buildStatColumn('myBling.stats.neighbors', '34'),
--                      _buildStatColumn('myBling.stats.friends', '5'),
-+                      _buildStatColumn(
-+                          'myBling.stats.neighbors',
-+                          _getNeighborsCount(user.uid)),
-+                      _buildStatColumn(
-+                          'myBling.stats.friends', _getFriendsCount(user.uid)),
-                     ],
-                   ),
-                 ),
-               ),
-             ],
-           ),
-           const SizedBox(height: 16),
-           Align(
-             alignment: Alignment.centerLeft,
-             child: Column(
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: [
-                 Row(
-                   children: [
-                     Text(
-                       user.nickname,
-                       style: GoogleFonts.inter(
-                           fontWeight: FontWeight.bold, fontSize: 18),
-                     ),
-                     const SizedBox(width: 6),
-                     TrustLevelBadge(trustLevel: user.trustLevel),
-                     const SizedBox(width: 4),
-                     Text(
-                       '(${user.trustScore})',
-                       style: GoogleFonts.inter(
-@@ -166,72 +171,122 @@ class _MyBlingScreenState extends State<MyBlingScreen>
-                     style: GoogleFonts.inter(color: Colors.grey[700]),
-                   ),
-                 const SizedBox(height: 6),
-                 if (user.locationName != null)
-                   Row(
-                     children: [
-                       Icon(Icons.location_on_outlined,
-                           size: 16, color: Colors.grey[600]),
-                       const SizedBox(width: 4),
-                       Text(
-                         user.locationName!,
-                         style: GoogleFonts.inter(color: Colors.grey[600]),
-                       ),
-                     ],
-                   ),
-               ],
-             ),
-           ),
-         ],
-       ),
-     );
-   }
+diff --git a/README.md b/README.md
+index 17f8360be092a495a586e02d469723745734c4ec..c9eaa1c8b03810aa2d406467349be6b38fc33310 100644
+--- a/README.md
++++ b/README.md
+@@ -225,50 +225,88 @@ functions-v2
+ - 📄 0. 작업 지침!.md
+ - 📄 1. 디자인 UX 가이드 & i18n.md
+ - 📄 2. 프로젝트 개요 & 메인 구조.md
+ - 📄 3. 사용자 화면 & 마이페이지.md
+ - 📄 4. 사용자 DB & 신뢰 등급.md
+ - 📄 5. 지역-위치-개인정보.md
+ - 📄 6. 피드 (Local Feed).md
+ - 📄 7. Marketplace.md
+ - 📄 8. Frind-Club-Jobs-Shops-Auciton-POM.md
+ - 📄 9. Notification - 신고 - 커뮤니티.md
+ - 📄 Bling_Location_GeoQuery_Structure
+ - 📄 피드 관련 위치 검색 규칙과 예시
+ ---
  
-   /// 프로필 하단 탭 UI 위젯
-   Widget _buildProfileTabs(UserModel user) {
--    // TODO: 추후 user.privacySettings 값에 따라 공개 여부 결정 로직 추가
-+    final isPublic = user.privacySettings?['isProfilePublic'] ?? true;
-+    if (!isPublic) {
-+      return const Center(child: Text('This profile is private.'));
-+    }
-     return Column(
-       children: [
-         TabBar(
-           controller: _tabController,
-           labelColor: const Color(0xFF00A66C),
-           unselectedLabelColor: const Color(0xFF616161),
-           indicatorColor: const Color(0xFF00A66C),
-           tabs: [
-             Tab(text: 'myBling.tabs.posts'.tr()),
-             Tab(text: 'myBling.tabs.products'.tr()),
-             Tab(text: 'myBling.tabs.bookmarks'.tr()),
-           ],
-         ),
-         Expanded(
-           child: TabBarView(
-             controller: _tabController,
-             children: const [
-               // Center(child: Text('내가 쓴 게시물이 표시될 영역')),
-               // ▼▼▼▼▼ '내 게시물' 탭에 새로운 위젯 적용 ▼▼▼▼▼
-               UserPostList(),
-               // Center(child: Text('내 판매상품이 표시될 영역')),
-               // ▼▼▼▼▼ '내 판매상품' 탭에 새로운 위젯 적용 ▼▼▼▼▼
-               UserProductList(),
-               UserBookmarkList(),
-             ],
-           ),
-         ),
-       ],
-     );
-   }
+ ## ✅ 다국어
  
-   /// 프로필 통계 정보 표시 위젯
--  Widget _buildStatColumn(String labelKey, String count) {
--    return Column(
--      mainAxisAlignment: MainAxisAlignment.center,
--      children: [
--        Text(count,
--            style:
--                GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
--        const SizedBox(height: 2),
--        Text(labelKey.tr(),
--            style: GoogleFonts.inter(color: Colors.grey, fontSize: 12)),
--      ],
-+  Widget _buildStatColumn(String labelKey, Future<int> countFuture) {
-+    return FutureBuilder<int>(
-+      future: countFuture,
-+      builder: (context, snapshot) {
-+        final count = snapshot.data ?? 0;
-+        return Column(
-+          mainAxisAlignment: MainAxisAlignment.center,
-+          children: [
-+            Text('$count',
-+                style: GoogleFonts.inter(
-+                    fontSize: 18, fontWeight: FontWeight.bold)),
-+            const SizedBox(height: 2),
-+            Text(labelKey.tr(),
-+                style: GoogleFonts.inter(color: Colors.grey, fontSize: 12)),
-+          ],
-+        );
-+      },
-     );
-   }
+ assets
+ ├── lang
+ │   ├── en.json
+ │   ├── id.json
+ │   └── ko.json
+ ├── icons
+ │   └── google_logo.png
+ lib
+ 
++## ✅ 개발 환경 & 실행 방법
 +
-+  Future<int> _getPostsCount(String uid) async {
-+    final snapshot = await FirebaseFirestore.instance
-+        .collection('posts')
-+        .where('userId', isEqualTo: uid)
-+        .get();
-+    return snapshot.size;
-+  }
++1. 의존성 설치
 +
-+  Future<int> _getFollowersCount(String uid) async {
-+    final snapshot = await FirebaseFirestore.instance
-+        .collection('follows')
-+        .where('toUserId', isEqualTo: uid)
-+        .get();
-+    return snapshot.size;
-+  }
++```bash
++flutter pub get
++```
 +
-+  Future<int> _getNeighborsCount(String uid) async {
-+    final snapshot = await FirebaseFirestore.instance
-+        .collection('follows')
-+        .where('fromUserId', isEqualTo: uid)
-+        .get();
-+    return snapshot.size;
-+  }
++2. Android/iOS 에뮬레이터를 실행하거나 실제 기기를 연결한 후 앱을 구동합니다.
 +
-+  Future<int> _getFriendsCount(String uid) async {
-+    final followersSnapshot = await FirebaseFirestore.instance
-+        .collection('follows')
-+        .where('toUserId', isEqualTo: uid)
-+        .get();
-+    final followingSnapshot = await FirebaseFirestore.instance
-+        .collection('follows')
-+        .where('fromUserId', isEqualTo: uid)
-+        .get();
++```bash
++flutter run
++```
 +
-+    final followerIds =
-+        followersSnapshot.docs.map((d) => d['fromUserId'] as String).toSet();
-+    final followingIds =
-+        followingSnapshot.docs.map((d) => d['toUserId'] as String).toSet();
-+    return followerIds.intersection(followingIds).length;
-+  }
- }
++3. Google Maps API 키를 `lib/api_keys.dart`에 정의해야 합니다. 파일 예시는 다음과 같습니다.
++
++```dart
++class ApiKeys {
++  static const googleApiKey = 'YOUR_GOOGLE_API_KEY';
++}
++```
++
++4. `sample_data/serviceAccountKey.json`을 준비한 뒤 샘플 데이터를 업로드합니다.
++
++```bash
++node sample_data/upload_data.js
++```
++
++5. Cloud Functions는 `functions-v2` 폴더에서 다음과 같이 실행하거나 배포합니다.
++
++```bash
++cd functions-v2
++npm install
++npm run serve      # 로컬 에뮬레이터
++# 배포 시
++npm run deploy
++```
++
+ ---
+ 
+ ## ✅ DevOps & AI 협업
+ 
+ - **GPT**:  문서제작
+ - **Gemini**: 코드 밎 구조 설계
+ - **Copilot**: Dart 자동완성, VSCode 연동
+ - 모든 `.md` 정책은 GitHub Repo에서 버전 관리
+ 
+ ---
+ 
+ ## ✅ 협업 규칙
+ 
+ - PR: 구조 변경 시 `.md` 동기화 필수
+ - Issue: 구조 변경 사전 공유 필수
+ - 디자인: `/design/` Figma 링크 연계
+ - Token Limit 대비 Obsidian + GPT 연계 유지
+ 
+ ---
+ 
+ ## 🚀 Ver.0.3 → Ver.1.0 목표
+ 
+ Bling 은 Ver.09에서 구조 통합을 마치고  
+ Ver.1.0에서는 실 서비스 론칭을 목표로 합니다.
+ 
