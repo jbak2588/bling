@@ -1,182 +1,817 @@
-diff --git a/docs/room_listing_model.md b/docs/room_listing_model.md
-new file mode 100644
-index 0000000000000000000000000000000000000000..a1007581076edf10f36299a0c05bfda395e14c3c
---- /dev/null
-+++ b/docs/room_listing_model.md
-@@ -0,0 +1,16 @@
-+# RoomListingModel Overview
+diff --git a/assets/lang/en.json b/assets/lang/en.json
+index 2412bcaccdecdfffcd2e3a613a3f122d7ae046d4..4f818550eedba67f0c316f844d77199ef9f11920 100644
+--- a/assets/lang/en.json
++++ b/assets/lang/en.json
+@@ -355,28 +355,85 @@
+ 
+     "common": {
+         "cancel": "Cancel",
+         "delete": "Delete"
+     },
+     "deleteConfirm": {
+         "title": "Delete Comment",
+         "content": "Are you sure you want to delete this comment?",
+         "failure": "Failed to delete comment: {error}"
+     },
+ 
+     "replyInputField": {
+         "hintText": "Enter a reply",
+         "button": {
+             "send": "Send"
+         },
+         "failure": "Failed to add reply: {error}"
+     },
+ 
+     "chat_list": {
+         "appBarTitle": "Chat",
+         "empty": "There are no ongoing conversations."
+     },
+     "chat_room": {
+         "placeholder": "Enter a message..."
++    },
 +
-+`RoomListingModel` defines the data used for Kos/boarding and other real estate listings.
-+It mirrors the `rooms_listings` collection described in the project docs.
++    "findFriend": {
++        "listTitle": "Find Friends",
++        "createTitle": "Add Friend Profile",
++        "editTitle": "Edit Friend Profile",
++        "deleteTitle": "Delete Friend Profile",
++        "detailTitle": "Friend Details"
++    },
++    "clubs": {
++        "listTitle": "Clubs",
++        "createTitle": "Create Club",
++        "editTitle": "Edit Club",
++        "deleteTitle": "Delete Club",
++        "detailTitle": "Club Details"
++    },
++    "jobs": {
++        "listTitle": "Jobs",
++        "createTitle": "Post Job",
++        "editTitle": "Edit Job",
++        "deleteTitle": "Delete Job",
++        "detailTitle": "Job Details"
++    },
++    "shops": {
++        "listTitle": "Local Shops",
++        "createTitle": "Add Shop",
++        "editTitle": "Edit Shop",
++        "deleteTitle": "Delete Shop",
++        "detailTitle": "Shop Details"
++    },
++    "auction": {
++        "listTitle": "Auctions",
++        "createTitle": "Create Auction",
++        "editTitle": "Edit Auction",
++        "deleteTitle": "Delete Auction",
++        "detailTitle": "Auction Details"
++    },
++    "pom": {
++        "listTitle": "POM",
++        "createTitle": "Create POM",
++        "editTitle": "Edit POM",
++        "deleteTitle": "Delete POM",
++        "detailTitle": "POM Details"
++    },
++    "lostFound": {
++        "listTitle": "Lost & Found",
++        "createTitle": "Report Item",
++        "editTitle": "Edit Report",
++        "deleteTitle": "Delete Report",
++        "detailTitle": "Item Details"
++    },
++    "rooms": {
++        "listTitle": "Rooms",
++        "createTitle": "Add Room Listing",
++        "editTitle": "Edit Room Listing",
++        "deleteTitle": "Delete Room Listing",
++        "detailTitle": "Room Details"
+     }
+     
+ }
+\ No newline at end of file
+diff --git a/assets/lang/id.json b/assets/lang/id.json
+index 655078d343e639e842a9acee89b864ba4feffafd..69689457afd94fd058034ed6ec811e015c975228 100644
+--- a/assets/lang/id.json
++++ b/assets/lang/id.json
+@@ -354,29 +354,86 @@
+ 
+     "common": {
+         "cancel": "Batal",
+         "delete": "Hapus"
+     },
+     "deleteConfirm": {
+         "title": "Hapus Komentar",
+         "content": "Apakah Anda yakin ingin menghapus komentar ini?",
+         "failure": "Gagal menghapus komentar: {error}"
+     },
+ 
+     "replyInputField": {
+         "hintText": "Masukkan balasan",
+         "button": {
+             "send": "Kirim"
+         },
+         "failure": "Gagal menambahkan balasan: {error}"
+     },
+ 
+     "chat_list": {
+         "appBarTitle": "Obrolan",
+         "empty": "Belum ada percakapan."
+     },
+     "chat_room": {
+         "placeholder": "Ketik pesan..."
++    },
 +
-+Fields captured include:
-+- `roomType` (e.g. private or shared)
-+- `address` and optional `geoPoint`
-+- `price` and optional `deposit`
-+- `size` and `amenities`
-+- `photos` URLs
-+- `contactInfo` for the host
-+- `ownerType` (owner or agent)
-+- `createdAt` timestamp
++    "findFriend": {
++        "listTitle": "Cari Teman",
++        "createTitle": "Buat Profil Teman",
++        "editTitle": "Edit Profil Teman",
++        "deleteTitle": "Hapus Profil Teman",
++        "detailTitle": "Detail Teman"
++    },
++    "clubs": {
++        "listTitle": "Klub",
++        "createTitle": "Buat Klub",
++        "editTitle": "Edit Klub",
++        "deleteTitle": "Hapus Klub",
++        "detailTitle": "Detail Klub"
++    },
++    "jobs": {
++        "listTitle": "Lowongan",
++        "createTitle": "Pasang Lowongan",
++        "editTitle": "Edit Lowongan",
++        "deleteTitle": "Hapus Lowongan",
++        "detailTitle": "Detail Lowongan"
++    },
++    "shops": {
++        "listTitle": "Toko Lokal",
++        "createTitle": "Tambah Toko",
++        "editTitle": "Edit Toko",
++        "deleteTitle": "Hapus Toko",
++        "detailTitle": "Detail Toko"
++    },
++    "auction": {
++        "listTitle": "Lelang",
++        "createTitle": "Buat Lelang",
++        "editTitle": "Edit Lelang",
++        "deleteTitle": "Hapus Lelang",
++        "detailTitle": "Detail Lelang"
++    },
++    "pom": {
++        "listTitle": "POM",
++        "createTitle": "Buat POM",
++        "editTitle": "Edit POM",
++        "deleteTitle": "Hapus POM",
++        "detailTitle": "Detail POM"
++    },
++    "lostFound": {
++        "listTitle": "Hilang & Temu",
++        "createTitle": "Laporkan Barang",
++        "editTitle": "Edit Laporan",
++        "deleteTitle": "Hapus Laporan",
++        "detailTitle": "Detail Barang"
++    },
++    "rooms": {
++        "listTitle": "Kamar",
++        "createTitle": "Tambah Iklan Kamar",
++        "editTitle": "Edit Iklan Kamar",
++        "deleteTitle": "Hapus Iklan Kamar",
++        "detailTitle": "Detail Kamar"
+     }
+ 
+ 
+ }
+\ No newline at end of file
+diff --git a/assets/lang/ko.json b/assets/lang/ko.json
+index 224514550cc60d889f636b7928e4bf02200209be..0b65a06e704ab5f62efc367143c6412e72425dfe 100644
+--- a/assets/lang/ko.json
++++ b/assets/lang/ko.json
+@@ -342,28 +342,85 @@
+ 
+     "common": {
+         "cancel": "취소",
+         "delete": "삭제"
+     },
+     "deleteConfirm": {
+         "title": "댓글 삭제",
+         "content": "정말 이 댓글을 삭제하시겠습니까?",
+         "failure": "댓글 삭제 실패: {error}"
+     },
+ 
+     "replyInputField": {
+         "hintText": "답글을 입력하세요",
+         "button": {
+             "send": "전송"
+         },
+         "failure": "답글 등록 실패: {error}"
+     },
+ 
+     "chat_list": {
+         "appBarTitle": "채팅",
+         "empty": "진행중인 대화가 없습니다."
+     },
+     "chat_room": {
+         "placeholder": "메시지를 입력하세요..."
++    },
 +
-+See `lib/core/models/room_listing_model.dart` for implementation.
-diff --git a/lib/core/models/room_listing_model.dart b/lib/core/models/room_listing_model.dart
-new file mode 100644
-index 0000000000000000000000000000000000000000..ac7059e6a2f5cb71f44962ee95abf3534fc4af13
---- /dev/null
-+++ b/lib/core/models/room_listing_model.dart
-@@ -0,0 +1,73 @@
-+// lib/core/models/room_listing_model.dart
-+
-+import 'package:cloud_firestore/cloud_firestore.dart';
-+
-+/// Data model representing a room or boarding house listing.
-+///
-+/// Used for KOS/boarding/real estate listings under the
-+/// `rooms_listings` collection as described in the project docs.
-+class RoomListingModel {
-+  final String id;
-+  final String roomType;
-+  final String address;
-+  final GeoPoint? geoPoint;
-+  final int price;
-+  final int? deposit;
-+  final String size;
-+  final List<String> amenities;
-+  final List<String> photos;
-+  final String contactInfo;
-+  final String ownerType;
-+  final Timestamp createdAt;
-+
-+  RoomListingModel({
-+    required this.id,
-+    required this.roomType,
-+    required this.address,
-+    this.geoPoint,
-+    required this.price,
-+    this.deposit,
-+    required this.size,
-+    required this.amenities,
-+    required this.photos,
-+    required this.contactInfo,
-+    required this.ownerType,
-+    required this.createdAt,
-+  });
-+
-+  factory RoomListingModel.fromFirestore(
-+      DocumentSnapshot<Map<String, dynamic>> doc) {
-+    final data = doc.data() ?? {};
-+    return RoomListingModel(
-+      id: doc.id,
-+      roomType: data['roomType'] ?? '',
-+      address: data['address'] ?? '',
-+      geoPoint: data['geoPoint'],
-+      price: data['price'] ?? 0,
-+      deposit: data['deposit'],
-+      size: data['size'] ?? '',
-+      amenities:
-+          data['amenities'] != null ? List<String>.from(data['amenities']) : [],
-+      photos: data['photos'] != null ? List<String>.from(data['photos']) : [],
-+      contactInfo: data['contactInfo'] ?? '',
-+      ownerType: data['ownerType'] ?? 'owner',
-+      createdAt: data['createdAt'] ?? Timestamp.now(),
-+    );
-+  }
-+
-+  Map<String, dynamic> toJson() {
-+    return {
-+      'roomType': roomType,
-+      'address': address,
-+      'geoPoint': geoPoint,
-+      'price': price,
-+      'deposit': deposit,
-+      'size': size,
-+      'amenities': amenities,
-+      'photos': photos,
-+      'contactInfo': contactInfo,
-+      'ownerType': ownerType,
-+      'createdAt': createdAt,
-+    };
-+  }
-+}
-diff --git a/lib/features/real_estate/data/room_repository.dart b/lib/features/real_estate/data/room_repository.dart
-new file mode 100644
-index 0000000000000000000000000000000000000000..6984d968a2e6a42972355c1d5cca5dcf57331ab2
---- /dev/null
-+++ b/lib/features/real_estate/data/room_repository.dart
-@@ -0,0 +1,75 @@
-+// lib/features/real_estate/data/room_repository.dart
-+
-+import 'package:cloud_firestore/cloud_firestore.dart';
-+
-+import '../../../core/models/room_listing_model.dart';
-+
-+/// Repository handling CRUD and favorite operations for room listings.
-+class RoomRepository {
-+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-+
-+  CollectionReference<Map<String, dynamic>> get _listingsCollection =>
-+      _firestore.collection('rooms_listings');
-+
-+  Future<String> createListing(RoomListingModel listing) async {
-+    final doc = await _listingsCollection.add(listing.toJson());
-+    return doc.id;
-+  }
-+
-+  Future<void> updateListing(RoomListingModel listing) async {
-+    await _listingsCollection.doc(listing.id).update(listing.toJson());
-+  }
-+
-+  Future<void> deleteListing(String listingId) async {
-+    await _listingsCollection.doc(listingId).delete();
-+  }
-+
-+  Future<RoomListingModel> fetchListing(String listingId) async {
-+    final doc = await _listingsCollection.doc(listingId).get();
-+    return RoomListingModel.fromFirestore(doc);
-+  }
-+
-+  Stream<List<RoomListingModel>> fetchListings() {
-+    return _listingsCollection
-+        .orderBy('createdAt', descending: true)
-+        .snapshots()
-+        .map((s) => s.docs.map(RoomListingModel.fromFirestore).toList());
-+  }
-+
-+  Future<void> addFavorite(String userId, String listingId) async {
-+    await _firestore
-+        .collection('users')
-+        .doc(userId)
-+        .collection('favorites')
-+        .doc(listingId)
-+        .set({'createdAt': FieldValue.serverTimestamp()});
-+  }
-+
-+  Future<void> removeFavorite(String userId, String listingId) async {
-+    await _firestore
-+        .collection('users')
-+        .doc(userId)
-+        .collection('favorites')
-+        .doc(listingId)
-+        .delete();
-+  }
-+
-+  Future<bool> isFavorite(String userId, String listingId) async {
-+    final doc = await _firestore
-+        .collection('users')
-+        .doc(userId)
-+        .collection('favorites')
-+        .doc(listingId)
-+        .get();
-+    return doc.exists;
-+  }
-+
-+  Stream<List<String>> watchFavorites(String userId) {
-+    return _firestore
-+        .collection('users')
-+        .doc(userId)
-+        .collection('favorites')
-+        .snapshots()
-+        .map((s) => s.docs.map((d) => d.id).toList());
-+  }
-+}
++    "findFriend": {
++        "listTitle": "친구찾기",
++        "createTitle": "친구 프로필 만들기",
++        "editTitle": "친구 프로필 수정",
++        "deleteTitle": "친구 프로필 삭제",
++        "detailTitle": "친구 상세"
++    },
++    "clubs": {
++        "listTitle": "클럽",
++        "createTitle": "클럽 생성",
++        "editTitle": "클럽 수정",
++        "deleteTitle": "클럽 삭제",
++        "detailTitle": "클럽 상세"
++    },
++    "jobs": {
++        "listTitle": "구인구직",
++        "createTitle": "구인 글 작성",
++        "editTitle": "구인 글 수정",
++        "deleteTitle": "구인 글 삭제",
++        "detailTitle": "구인 상세"
++    },
++    "shops": {
++        "listTitle": "동네 상점",
++        "createTitle": "상점 등록",
++        "editTitle": "상점 수정",
++        "deleteTitle": "상점 삭제",
++        "detailTitle": "상점 상세"
++    },
++    "auction": {
++        "listTitle": "경매",
++        "createTitle": "경매 등록",
++        "editTitle": "경매 수정",
++        "deleteTitle": "경매 삭제",
++        "detailTitle": "경매 상세"
++    },
++    "pom": {
++        "listTitle": "POM",
++        "createTitle": "POM 생성",
++        "editTitle": "POM 수정",
++        "deleteTitle": "POM 삭제",
++        "detailTitle": "POM 상세"
++    },
++    "lostFound": {
++        "listTitle": "분실물 센터",
++        "createTitle": "분실물 등록",
++        "editTitle": "분실물 수정",
++        "deleteTitle": "분실물 삭제",
++        "detailTitle": "분실물 상세"
++    },
++    "rooms": {
++        "listTitle": "방 구하기",
++        "createTitle": "방 등록",
++        "editTitle": "방 수정",
++        "deleteTitle": "방 삭제",
++        "detailTitle": "방 상세"
+     }
+ 
+ }
+\ No newline at end of file
+diff --git "a/docs/index/012  Find Friend & Club & Jobs & etc \353\252\250\353\223\210.md" "b/docs/index/012  Find Friend & Club & Jobs & etc \353\252\250\353\223\210.md"
+index 944f755cdf33b974924f7ae5476c6dcafbae76a1..336bb65101b3d3dcbf8f68a256398d56effb61ed 100644
+--- "a/docs/index/012  Find Friend & Club & Jobs & etc \353\252\250\353\223\210.md"	
++++ "b/docs/index/012  Find Friend & Club & Jobs & etc \353\252\250\353\223\210.md"	
+@@ -125,51 +125,51 @@ Bling의 **Find Friend(친구찾기)**는  Kelurahan(Kec.)  인증 기반으로
+     
+ -  단계별 축약 Helper (`formatShortLocation()`)
+     
+ -  Privacy Center 옵트인 & 철회 흐름 UI
+     
+ 
+ ---
+ 
+ ### 12️⃣ **User DB & TrustLevel**
+ 
+ -  `users/{uid}` 필드 표준화 (`trustLevel`, `thanksReceived`, `reportCount`)
+     
+ -  신고/차단 흐름 → `reports` + `blockList[]`
+     
+ -  TrustLevel 자동 상향/하향 로직
+     
+ -  프로필 지연 활성화 → `profileCompleted` 동기화
+     
+ -  감사 수(`thanksReceived`) UI & 버튼 흐름
+     
+ 
+ ---
+ 
+ ## ✅ 공통
+ 
+--  `.json` 다국어 키 QA → `{TODO}` 제거
++-  `.json` 다국어 키 QA → `TODO` 제거
+     
+ -  Obsidian Vault → 최신 정책 연동 유지
+     
+ -  DevOps → CI/CD 파이프라인 GitHub 연동
+     
+ -  버전별 릴리즈 노트 작성 (`docs/releases/`)
+     
+ 
+ 
+ ---
+ 
+ ## ✅ 연계 문서
+ 
+ - [[2_01. Bling_Project_Overview]]
+     
+ - [[2_04. Bling_MainScreen_Structure]]
+     
+ - [[4_21. User_Field_Standard]]
+     
+ - [[3_18_2. TrustLevel_Policy]]
+ - Firestore: `users`, `follows`
+ ---
+ 
+ 
+ ---
+@@ -548,51 +548,51 @@ Bling Club은 Kelurahan(Kec.) 인증을 기반으로 주민들이
+ 6️⃣ 공지/일정 관리 기능 설계  
+ 7️⃣ 그룹 전용 채팅 연동
+     
+ -  그룹 채팅 Room → 기존 Chat 재사용
+ 
+ ---
+ 
+ 
+ ### 9️⃣ **Chat**
+ 
+ -  공통 `chats` 컬렉션 → Feed, Marketplace, Find Friend, Auction 전 모듈 재사용 검증
+     
+ -  차단/허용 로직 → `blockedUsers` 필드 연계
+     
+ -  메시지 알림 → Notification 모듈 연계
+     
+ -  TrustLevel 조건 메시지 가드(`trusted` 이상)
+     
+ 
+  
+ 
+ ---
+ 
+ ## ✅ 공통
+ 
+--  `.json` 다국어 키 QA → `{TODO}` 제거
++-  `.json` 다국어 키 QA → `TODO` 제거
+     
+ 
+ ---
+ 
+ # ✅ 8_06. Bling_Club_Policy & To-Do 목록 (보완)
+ 
+ ## 8_06_1 필요성 / Purpose
+ 
+ 지역 주민이 공통 관심사(취미, 운동, 종교 등)로 모임을 제안/운영. 목표 인원 달성 시 그룹 자동 생성. 지역 기반 커뮤니티 체류시간 극대화.
+ 
+ ## 8_06_2 Key Components
+ 
+ - 모임 제안 게시판 (‘함께해요’)
+     
+ - 목표 인원 달성 → Cloud Function으로 `/groups` 자동 생성
+     
+ - 모임명/활동/위치/조건/인원/대표 이미지
+     
+ - 활동 피드, 공지, 자유글, 사진/후기, 건의, 투표
+     
+ - 참여/탈퇴 UI + 참여자 트래킹 + 모임장 권한
+     
+ 
+ ## 8_06_3 System Logic
+ 
+diff --git "a/docs/index/013 \354\260\270\354\241\260\354\232\251 \354\236\220\353\243\214/1  \353\224\224\354\236\220\354\235\270 UX \352\260\200\354\235\264\353\223\234 n i18n.md" "b/docs/index/013 \354\260\270\354\241\260\354\232\251 \354\236\220\353\243\214/1  \353\224\224\354\236\220\354\235\270 UX \352\260\200\354\235\264\353\223\234 n i18n.md"
+index 3b1a0234c5a7b9650e50d1b32beead33e6af6f98..393e8b1ef4ad6fddc8cc6fbf1c5f2a0614062e06 100644
+--- "a/docs/index/013 \354\260\270\354\241\260\354\232\251 \354\236\220\353\243\214/1  \353\224\224\354\236\220\354\235\270 UX \352\260\200\354\235\264\353\223\234 n i18n.md"	
++++ "b/docs/index/013 \354\260\270\354\241\260\354\232\251 \354\236\220\353\243\214/1  \353\224\224\354\236\220\354\235\270 UX \352\260\200\354\235\264\353\223\234 n i18n.md"	
+@@ -167,102 +167,102 @@ Flutter `easy_localization` 또는 `intl` 패키지를 활용해
+ ## ✅ JSON Nested 구조 예시
+ 
+ ```json
+ {
+   "_metadata": {
+     "version": "v0.3",
+     "lastUpdated": "2025-07-01"
+   },
+   "common": {
+     "ok": "OK",
+     "cancel": "Cancel"
+   },
+   "login": {
+     "title": "Welcome to Bling",
+     "googleButton": {
+       "text": "Sign in with Google"
+     }
+   }
+ }
+ ````
+ 
+ ---
+ 
+ ## ✅ TODO & QA 규칙
+ 
+-- 번역 미완 → `{TODO}` 텍스트로 표시
++- 번역 미완 → `TODO` 텍스트로 표시
+     
+-- 빌드시 `{TODO}` 존재 시 경고
++- 빌드시 `TODO` 존재 시 경고
+     
+ - QA 시 누락 키 자동 스캔
+     
+ 
+ ---
+ 
+ ## ✅ Figma 연계
+ 
+ - 디자이너와 개발자, 번역가가 동일 키명 사용
+     
+ - 디자인 키맵 `design_keymap.md` 별도 관리 권장
+     
+ - Figma → Flutter → JSON 흐름 정리
+     
+ 
+ ---
+ 
+ ## ✅ 협업 워크플로우
+ 
+ 1️⃣ 새 Key 추가 → GitHub PR 설명 필수  
+ 2️⃣ Reviewer → JSON 키명 규칙 확인  
+ 3️⃣ Release Note → 추가/삭제된 Key 기록  
+ 4️⃣ Obsidian → 다국어 정책 버전 기록
+ 
+ ---
+ 
+ ## ✅ 연계 문서
+ 
+ - [[2_01. Bling_Project_Overview]]
+     
+ - [[2_04. Bling_MainScreen_Structure]]
+     
+ - [[4_21. User_Field_Standard]]
+     
+ 
+ ---
+ 
+ ## ✅ 결론
+ 
+ Bling의 다국어 정책은  
+ **ISO 표준, JSON Key 규칙, 변수, 메타 정보**까지 포함해  
+ **안전하고 반복 가능한 글로벌 서비스 운영**을 목표로 합니다.
+ 
+ 
+ 
+ ### ✅ 핵심 정리
+ - ISO 639-1 표준 → 파일명 통일 (`en.json`, `id.json`)
+ - `feature.component.property` → 키명 일관성
+-- `{TODO}` → QA 자동화 연계
++- `TODO` → QA 자동화 연계
+ - Figma~Flutter~Repo 전체 워크플로 반영
+ 
+ ---
+ 
+ 
+ 
+ 
+ # 1_14. UIUX_Guide
+ 
+ ---
+ 
+ ## ✅ UI/UX Guide 개요
+ 
+ Bling은 Keluharan(Kel.) 기반 지역 슈퍼앱으로,  
+ Nextdoor의 피드 구조와 Gojek 런처 UX를  
+ 하나로 통합해 **일관된 사용자 흐름과 직관적 인터페이스**를 목표로 합니다.
+ 
+ ---
+ 
+ ## ✅ 메인 레이아웃 구성
+ 
+ - **상단 AppBar**
+     
+     - 좌측: 사용자 프로필 아이콘 (Drawer 열기)
+         
+diff --git "a/docs/index/013 \354\260\270\354\241\260\354\232\251 \354\236\220\353\243\214/8  Frind-Club-Jobs-Shops-Auciton-POM.md" "b/docs/index/013 \354\260\270\354\241\260\354\232\251 \354\236\220\353\243\214/8  Frind-Club-Jobs-Shops-Auciton-POM.md"
+index 5f87653cb9e0663505277cba24223b3dd474032b..1817ebfb7c25ed18ed592565e0d2562db915c371 100644
+--- "a/docs/index/013 \354\260\270\354\241\260\354\232\251 \354\236\220\353\243\214/8  Frind-Club-Jobs-Shops-Auciton-POM.md"	
++++ "b/docs/index/013 \354\260\270\354\241\260\354\232\251 \354\236\220\353\243\214/8  Frind-Club-Jobs-Shops-Auciton-POM.md"	
+@@ -144,51 +144,51 @@
+     
+ -  단계별 축약 Helper (`formatShortLocation()`)
+     
+ -  Privacy Center 옵트인 & 철회 흐름 UI
+     
+ 
+ ---
+ 
+ ### 12️⃣ **User DB & TrustLevel**
+ 
+ -  `users/{uid}` 필드 표준화 (`trustLevel`, `thanksReceived`, `reportCount`)
+     
+ -  신고/차단 흐름 → `reports` + `blockList[]`
+     
+ -  TrustLevel 자동 상향/하향 로직
+     
+ -  프로필 지연 활성화 → `profileCompleted` 동기화
+     
+ -  감사 수(`thanksReceived`) UI & 버튼 흐름
+     
+ 
+ ---
+ 
+ ## ✅ 공통
+ 
+--  `.json` 다국어 키 QA → `{TODO}` 제거
++-  `.json` 다국어 키 QA → `TODO` 제거
+     
+ -  Obsidian Vault → 최신 정책 연동 유지
+     
+ -  DevOps → CI/CD 파이프라인 GitHub 연동
+     
+ -  버전별 릴리즈 노트 작성 (`docs/releases/`)
+     
+ 
+ ---
+ 
+ ## ✅ 🚩 결론
+ 
+ 이대로 진행하면 **Bling Ver.0.3 → Ver.1.0** 완성 흐름에 필요한 **핵심 To-Do**를 빠짐없이 커버할 수 있습니다.
+ 
+ 필요하다면 👉 **Google Sheets** or **Obsidian Task Table**로 내보내 드릴까요?  
+ 필요하면 말씀만 해주세요! 🔥✨
+ 
+ 
+ # 8_05. Bling_Find_Friend_Policy & To-Do 목록
+ 
+ ---
+ 
+ ## ✅ Cari Teman (Find Friend) 개요
+ 
+ Bling의 **Find Friend(친구찾기)**는  
+@@ -314,51 +314,51 @@ Kelurahan(Kec.)  인증 기반으로 내 주변 이웃과 안전하게 연결되
+     
+ -  단계별 축약 Helper (`formatShortLocation()`)
+     
+ -  Privacy Center 옵트인 & 철회 흐름 UI
+     
+ 
+ ---
+ 
+ ### 12️⃣ **User DB & TrustLevel**
+ 
+ -  `users/{uid}` 필드 표준화 (`trustLevel`, `thanksReceived`, `reportCount`)
+     
+ -  신고/차단 흐름 → `reports` + `blockList[]`
+     
+ -  TrustLevel 자동 상향/하향 로직
+     
+ -  프로필 지연 활성화 → `profileCompleted` 동기화
+     
+ -  감사 수(`thanksReceived`) UI & 버튼 흐름
+     
+ 
+ ---
+ 
+ ## ✅ 공통
+ 
+--  `.json` 다국어 키 QA → `{TODO}` 제거
++-  `.json` 다국어 키 QA → `TODO` 제거
+     
+ -  Obsidian Vault → 최신 정책 연동 유지
+     
+ -  DevOps → CI/CD 파이프라인 GitHub 연동
+     
+ -  버전별 릴리즈 노트 작성 (`docs/releases/`)
+     
+ 
+ 
+ ---
+ 
+ ## ✅ 연계 문서
+ 
+ - [[2_01. Bling_Project_Overview]]
+     
+ - [[2_04. Bling_MainScreen_Structure]]
+     
+ - [[4_21. User_Field_Standard]]
+     
+ - [[3_18_2. TrustLevel_Policy]]
+ - Firestore: `users`, `follows`
+ ---
+ 
+ ## ✅ 결론
+ 
+@@ -466,51 +466,51 @@ Bling Club은 Kelurahan(Kec.) 인증을 기반으로 주민들이
+ 6️⃣ 공지/일정 관리 기능 설계  
+ 7️⃣ 그룹 전용 채팅 연동
+     
+ -  그룹 채팅 Room → 기존 Chat 재사용
+ 
+ ---
+ 
+ 
+ ### 9️⃣ **Chat**
+ 
+ -  공통 `chats` 컬렉션 → Feed, Marketplace, Find Friend, Auction 전 모듈 재사용 검증
+     
+ -  차단/허용 로직 → `blockedUsers` 필드 연계
+     
+ -  메시지 알림 → Notification 모듈 연계
+     
+ -  TrustLevel 조건 메시지 가드(`trusted` 이상)
+     
+ 
+  
+ 
+ ---
+ 
+ ## ✅ 공통
+ 
+--  `.json` 다국어 키 QA → `{TODO}` 제거
++-  `.json` 다국어 키 QA → `TODO` 제거
+     
+ 
+ 
+ ## ✅ 연계 문서
+ 
+ - [[2_01. Bling_Project_Overview]]
+     
+ - [[2_04. Bling_MainScreen_Structure]]
+     
+ - [[4_21. User_Field_Standard]]
+     
+ - [[3_18_2. TrustLevel_Policy]]
+     
+ 
+ ---
+ 
+ ## ✅ 결론
+ 
+ Bling Club은 Keluharan(Kec.) 기반의 **지역 동호회/소모임 허브**로,  
+ 사용자(User) 컬렉션과 직접 연결되어 **참여 기록과 TrustLevel**로  
+ 안전하고 신뢰할 수 있는 커뮤니티를 제공합니다.
+ 
+ 
+ # 8_07. Bling_Jobs_Policy & To-Do 목록
+ 
+diff --git a/docs/index/02  Design Guide + i18n.md b/docs/index/02  Design Guide + i18n.md
+index d15a66f656410bfc47d4d706ab875c9e3cf38ec5..0c9a58342e4aa2d3962d8af0a850783e705db6bf 100644
+--- a/docs/index/02  Design Guide + i18n.md	
++++ b/docs/index/02  Design Guide + i18n.md	
+@@ -241,102 +241,102 @@ Flutter `easy_localization` 또는 `intl` 패키지를 활용해
+ ## ✅ JSON Nested 구조 예시
+ 
+ ```json
+ {
+   "_metadata": {
+     "version": "v0.3",
+     "lastUpdated": "2025-07-01"
+   },
+   "common": {
+     "ok": "OK",
+     "cancel": "Cancel"
+   },
+   "login": {
+     "title": "Welcome to Bling",
+     "googleButton": {
+       "text": "Sign in with Google"
+     }
+   }
+ }
+ ````
+ 
+ ---
+ 
+ ## ✅ TODO & QA 규칙
+ 
+-- 번역 미완 → `{TODO}` 텍스트로 표시
++- 번역 미완 → `TODO` 텍스트로 표시
+     
+-- 빌드시 `{TODO}` 존재 시 경고
++- 빌드시 `TODO` 존재 시 경고
+     
+ - QA 시 누락 키 자동 스캔
+     
+ 
+ ---
+ 
+ ## ✅ Figma 연계
+ 
+ - 디자이너와 개발자, 번역가가 동일 키명 사용
+     
+ - 디자인 키맵 `design_keymap.md` 별도 관리 권장
+     
+ - Figma → Flutter → JSON 흐름 정리
+     
+ 
+ ---
+ 
+ ## ✅ 협업 워크플로우
+ 
+ 1️⃣ 새 Key 추가 → GitHub PR 설명 필수  
+ 2️⃣ Reviewer → JSON 키명 규칙 확인  
+ 3️⃣ Release Note → 추가/삭제된 Key 기록  
+ 4️⃣ Obsidian → 다국어 정책 버전 기록
+ 
+ ---
+ 
+ ## ✅ 연계 문서
+ 
+ - [[2_01. Bling_Project_Overview]]
+     
+ - [[2_04. Bling_MainScreen_Structure]]
+     
+ - [[4_21. User_Field_Standard]]
+     
+ 
+ ---
+ 
+ ## ✅ 결론
+ 
+ Bling의 다국어 정책은  
+ **ISO 표준, JSON Key 규칙, 변수, 메타 정보**까지 포함해  
+ **안전하고 반복 가능한 글로벌 서비스 운영**을 목표로 합니다.
+ 
+ 
+ 
+ ### ✅ 핵심 정리
+ - ISO 639-1 표준 → 파일명 통일 (`en.json`, `id.json`)
+ - `feature.component.property` → 키명 일관성
+-- `{TODO}` → QA 자동화 연계
++- `TODO` → QA 자동화 연계
+ - Figma~Flutter~Repo 전체 워크플로 반영
+ 
+ ---
+ 
+ 
+ 
+ 
+ # 1_14. UIUX_Guide
+ 
+ ---
+ 
+ ## ✅ UI/UX Guide 개요
+ 
+ Bling은 Keluharan(Kel.) 기반 지역 슈퍼앱으로,  
+ Nextdoor의 피드 구조와 Gojek 런처 UX를  
+ 하나로 통합해 **일관된 사용자 흐름과 직관적 인터페이스**를 목표로 합니다.
+ 
+ ---
+ 
+ ## ✅ 메인 레이아웃 구성
+ 
+ - **상단 AppBar**
+     
+     - 좌측: 사용자 프로필 아이콘 (Drawer 열기)
+         
+diff --git "a/docs/index/07  Chat \353\252\250\353\223\210 Core.md" "b/docs/index/07  Chat \353\252\250\353\223\210 Core.md"
+index 2b3cdb60ceda18f00b4db1fb482e934b605d8f80..449ecf8f5bb6ff5658c8a6a89f37c7b29006968f 100644
+--- "a/docs/index/07  Chat \353\252\250\353\223\210 Core.md"	
++++ "b/docs/index/07  Chat \353\252\250\353\223\210 Core.md"	
+@@ -338,44 +338,44 @@ json
+     
+ -  단계별 축약 Helper (`formatShortLocation()`)
+     
+ -  Privacy Center 옵트인 & 철회 흐름 UI
+     
+ 
+ ---
+ 
+ ### 12️⃣ **User DB & TrustLevel**
+ 
+ -  `users/{uid}` 필드 표준화 (`trustLevel`, `thanksReceived`, `reportCount`)
+     
+ -  신고/차단 흐름 → `reports` + `blockList[]`
+     
+ -  TrustLevel 자동 상향/하향 로직
+     
+ -  프로필 지연 활성화 → `profileCompleted` 동기화
+     
+ -  감사 수(`thanksReceived`) UI & 버튼 흐름
+     
+ 
+ ---
+ 
+ ## ✅ 공통
+ 
+--  `.json` 다국어 키 QA → `{TODO}` 제거
++-  `.json` 다국어 키 QA → `TODO` 제거
+     
+ -  Obsidian Vault → 최신 정책 연동 유지
+     
+ -  DevOps → CI/CD 파이프라인 GitHub 연동
+     
+ -  버전별 릴리즈 노트 작성 (`docs/releases/`)
+     
+ 
+ ---
+ 
+ ## ✅ 🚩 결론
+ 
+ 이대로 진행하면 **Bling Ver.0.3 → Ver.1.0** 완성 흐름에 필요한 **핵심 To-Do**를 빠짐없이 커버할 수 있습니다.
+ 
+ 필요하다면 👉 **Google Sheets** or **Obsidian Task Table**로 내보내 드릴까요?  
+ 필요하면 말씀만 해주세요! 🔥✨
+ 
+ 
