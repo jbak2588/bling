@@ -8,7 +8,7 @@ import '../../../core/models/post_model.dart';
 import '../../../core/models/product_model.dart';
 import '../../../core/models/user_model.dart';
 
-import '../../feed/widgets/post_card.dart';
+import '../../local_news/widgets/post_card.dart';
 import '../../marketplace/widgets/product_card.dart';
 
 

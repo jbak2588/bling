@@ -1,1526 +1,199 @@
 diff --git a/assets/lang/en.json b/assets/lang/en.json
-index 2412bcaccdecdfffcd2e3a613a3f122d7ae046d4..817bd6f717fc6d530bbb543eb66f79260df83fb2 100644
+index 817bd6f717fc6d530bbb543eb66f79260df83fb2..00ad9481fbf1462f5266a3206bc205fc3d3da358 100644
 --- a/assets/lang/en.json
 +++ b/assets/lang/en.json
-@@ -204,51 +204,51 @@
+@@ -355,28 +355,31 @@
  
-     "profileEdit": {
-         "title": "Edit Profile",
-         "nicknameHint": "Nickname",
-         "phoneHint": "Phone Number",
-         "bioHint": "Bio (Introduction)",
-         "locationTitle": "Location",
-         "changeLocation": "Change",
-         "interests": {
-             "title": "Interests",
-             "hint": "Use comma and Enter to add multiple"
-         },
-         "privacy": {
-             "title": "Privacy Settings",
-             "showLocation": "Show my location on map",
-             "allowRequests": "Allow friend requests"
-         },
-         "saveButton": "Save Changes",
-         "successMessage": "Profile updated successfully.",
-         "errors": {
-             "noUser": "User not logged in.",
-             "updateFailed": "Failed to update profile: {error}"
-         }
+     "common": {
+         "cancel": "Cancel",
+         "delete": "Delete"
+     },
+     "deleteConfirm": {
+         "title": "Delete Comment",
+         "content": "Are you sure you want to delete this comment?",
+         "failure": "Failed to delete comment: {error}"
      },
  
--    "feed": {
-+    "mainFeed": {
-         "error": "An error occurred: {error}",
-         "empty": "No new posts."
-     },
- 
-     "postCard": {
-         "locationNotSet": "Location not set"
-     },
-     "time": {
-         "now": "Just now",
-         "minutesAgo": "{minutes} min ago",
-         "hoursAgo": "{hours} hours ago",
-         "daysAgo": "{days} days ago",
-         "dateFormat": "dd/MM/yy",
-         "dateFormatLong": "MMM d"
-     },
- 
-    "productCard": {
-     "currency": "$"
-     },
- 
-     "localFeed": {
-         "setLoactionPrompt": "Please set your neighborhood first to see local stories!",
-         "allCategory": "All",
-         "empty": "There are no posts to display."
-     },
-@@ -264,90 +264,90 @@
-                 "description": "Need help or have something to share?"
-             },
-             "incident_report": {
-                 "name": "Incidents",
-                 "description": "Share news about incidents in the neighborhood."
-             },
-             "local_news": {
-                 "name": "Local News",
-                 "description": "Share news and information about our neighborhood."
-             },
-             "daily_question": {
-                 "name": "I have a question",
-                 "description": "Ask your neighbors anything."
-             },
-             "store_promo": {
-                 "name": "Store Promo",
-                 "description": "Promote discounts or events at your store."
-             },
-             "etc": {
-                 "name": "Etc.",
-                 "description": "Share any other stories freely."
-             }
-         }
-     },
- 
--    "createPost": {
-+    "localNewsCreate": {
-         "appBarTitle": "Create New Post",
-         "form": {
-             "categoryLabel": "Category",
-             "titleLabel": "Title",
-             "contentLabel": "Enter content",
-             "tagsLabel": "Tags (comma-separated)",
-             "tagsHint": "e.g. dog, freeshare"
-         },
-         "buttons": {
-             "addImage": "Add Image",
-             "submit": "Submit"
-         },
-         "alerts": {
-             "contentRequired": "Please enter content.",
-             "categoryRequired": "Please select a category.",
-             "success": "Post created successfully.",
-             "failure": "Upload failed: {error}"
-         }
-     },
- 
--    "postDetail": {
-+    "localNewsDetail": {
-         "appBarTitle": "Post",
-         "menu": {
-             "edit": "Edit",
-             "report": "Report",
-             "share": "Share"
-         },
-         "stats": {
-             "views": "Views",
-             "comments": "Comments",
-             "likes": "Likes",
-             "thanks": "Thanks"
-         },
-         "buttons": {
-             "comment": "Add a comment"
-         }
-     },
- 
--    "editPost": {
-+    "localNewsEdit": {
-         "appBarTitle": "Edit Post",
-         "buttons": {
-             "submit": "Update"
-         },
-         "alerts": {
-             "success": "Post updated successfully.",
-             "failure": "Update failed: {error}"
-         }
-     },
- 
-     "commentInputField": {
-         "secretCommentLabel": "Secret",
-         "hintText": "Enter a comment...",
-         "replyHintText": "Replying to {nickname}...",
+     "replyInputField": {
+         "hintText": "Enter a reply",
          "button": {
              "send": "Send"
-         }
+         },
+         "failure": "Failed to add reply: {error}"
      },
  
-     "commentListView": {
-         "empty": "No comments yet. Be the first to comment!",
-         "reply": "Reply",
-         "delete": "Delete",
-         "deleted": "[This comment has been deleted]",
-         "secret": "This is a secret comment visible only to the author and post owner."
+     "chat_list": {
+         "appBarTitle": "Chat",
+         "empty": "There are no ongoing conversations."
+     },
+     "chat_room": {
+         "placeholder": "Enter a message..."
+-    }
+-    
++    },
++    "selectCategory": "Select Category",
++    "address_neighborhood": "Neighborhood",
++    "address_detail_hint": "Detailed meeting place (Optional)"
++
+ }
+\ No newline at end of file
 diff --git a/assets/lang/id.json b/assets/lang/id.json
-index 655078d343e639e842a9acee89b864ba4feffafd..70c77076cfa75103fa289ebe467908742e4c3ff4 100644
+index 70c77076cfa75103fa289ebe467908742e4c3ff4..1aa258c0873f31bb2c05912c94bc36377c5f6108 100644
 --- a/assets/lang/id.json
 +++ b/assets/lang/id.json
-@@ -202,51 +202,51 @@
+@@ -354,29 +354,31 @@
  
-     "profileEdit": {
-         "title": "Pengaturan Profil",
-         "nicknameHint": "Nama Panggilan",
-         "phoneHint": "Nomor Telepon",
-         "bioHint": "Bio (Perkenalan Diri)",
-         "locationTitle": "Lokasi",
-         "changeLocation": "Ubah",
-         "interests": {
-             "title": "Minat",
-             "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
-         },
-         "privacy": {
-             "title": "Pengaturan Privasi",
-             "showLocation": "Tampilkan lokasi saya di peta",
-             "allowRequests": "Izinkan permintaan pertemanan"
-         },
-         "saveButton": "Simpan Perubahan",
-         "successMessage": "Profil berhasil diperbarui.",
-         "errors": {
-             "noUser": "Pengguna belum login.",
-             "updateFailed": "Gagal memperbarui profil: {error}"
-         }
+     "common": {
+         "cancel": "Batal",
+         "delete": "Hapus"
+     },
+     "deleteConfirm": {
+         "title": "Hapus Komentar",
+         "content": "Apakah Anda yakin ingin menghapus komentar ini?",
+         "failure": "Gagal menghapus komentar: {error}"
      },
  
--    "feed": {
-+    "mainFeed": {
-         "error": "Terjadi kesalahan: {error}",
-         "empty": "Tidak ada berita baru."
-     }
-     ,
- 
-     "postCard": {
-         "locationNotSet": "Lokasi belum diatur"
-     },
-     "time": {
-         "now": "Baru saja",
-         "minutesAgo": "{minutes} menit lalu",
-         "hoursAgo": "{hours} jam lalu",
-         "daysAgo": "{days} hari lalu",
-         "dateFormat": "dd/MM/yy",
-         "dateFormatLong": "d MMM"
-     },
- 
-     "productCard": {
-         "currency": "$"
-     },
- 
-     "localFeed": {
-         "setLoactionPrompt": "Silakan atur lingkungan Anda terlebih dahulu untuk melihat cerita lokal!",
-         "allCategory": "Semua",
-         "empty": "Tidak ada postingan untuk ditampilkan."
-@@ -263,90 +263,90 @@
-                 "description": "Butuh bantuan atau punya sesuatu untuk dibagikan?"
-             },
-             "incident_report": {
-                 "name": "Insiden",
-                 "description": "Bagikan berita tentang insiden di lingkungan sekitar."
-             },
-             "local_news": {
-                 "name": "Berita Lokal",
-                 "description": "Bagikan berita dan informasi tentang lingkungan kita."
-             },
-             "daily_question": {
-                 "name": "Ada Pertanyaan",
-                 "description": "Tanyakan apa saja kepada tetangga Anda."
-             },
-             "store_promo": {
-                 "name": "Promo Toko",
-                 "description": "Promosikan diskon atau acara di toko Anda."
-             },
-             "etc": {
-                 "name": "Lain-lain",
-                 "description": "Bagikan cerita lain dengan bebas."
-             }
-         }
-     },
- 
--    "createPost": {
-+    "localNewsCreate": {
-         "appBarTitle": "Buat Postingan Baru",
-         "form": {
-             "categoryLabel": "Kategori",
-             "titleLabel": "Judul",
-             "contentLabel": "Masukkan konten",
-             "tagsLabel": "Tag (pisahkan dengan koma)",
-             "tagsHint": "cth. anjing, gratisan"
-         },
-         "buttons": {
-             "addImage": "Tambah Gambar",
-             "submit": "Kirim"
-         },
-         "alerts": {
-             "contentRequired": "Harap masukkan konten.",
-             "categoryRequired": "Harap pilih kategori.",
-             "success": "Postingan berhasil dibuat.",
-             "failure": "Gagal mengunggah: {error}"
-         }
-     },
- 
--    "postDetail": {
-+    "localNewsDetail": {
-         "appBarTitle": "Postingan",
-         "menu": {
-             "edit": "Ubah",
-             "report": "Lapor",
-             "share": "Bagikan"
-         },
-         "stats": {
-             "views": "Dilihat",
-             "comments": "Komentar",
-             "likes": "Suka",
-             "thanks": "Terima Kasih"
-         },
-         "buttons": {
-             "comment": "Tambahkan komentar"
-         }
-     },
- 
--    "editPost": {
-+    "localNewsEdit": {
-         "appBarTitle": "Ubah Postingan",
-         "buttons": {
-             "submit": "Perbarui"
-         },
-         "alerts": {
-             "success": "Postingan berhasil diperbarui.",
-             "failure": "Gagal memperbarui: {error}"
-         }
-     },
- 
-     "commentInputField": {
-         "secretCommentLabel": "Rahasia",
-         "hintText": "Masukkan komentar...",
-         "replyHintText": "Membalas {nickname}...",
+     "replyInputField": {
+         "hintText": "Masukkan balasan",
          "button": {
              "send": "Kirim"
-         }
+         },
+         "failure": "Gagal menambahkan balasan: {error}"
      },
  
-     "commentListView": {
-         "empty": "Belum ada komentar. Jadilah yang pertama berkomentar!",
-         "reply": "Balas",
-         "delete": "Hapus",
-         "deleted": "[Komentar ini telah dihapus]",
-         "secret": "Ini adalah komentar rahasia yang hanya dapat dilihat oleh penulis dan pemilik postingan."
+     "chat_list": {
+         "appBarTitle": "Obrolan",
+         "empty": "Belum ada percakapan."
+     },
+     "chat_room": {
+         "placeholder": "Ketik pesan..."
+-    }
+-
++    },
++    "selectCategory": "Pilih Kategori",
++    "address_neighborhood": "Nama Daerah",
++    "address_detail_hint": "Lokasi pertemuan detail (Opsional)"
+ 
+ }
+\ No newline at end of file
 diff --git a/assets/lang/ko.json b/assets/lang/ko.json
-index 224514550cc60d889f636b7928e4bf02200209be..1094edae10f7a734d233e104fb76e313205a24be 100644
+index 1094edae10f7a734d233e104fb76e313205a24be..d1b99856ba13c8d47a8319cc3a69b7dfa74c33f8 100644
 --- a/assets/lang/ko.json
 +++ b/assets/lang/ko.json
-@@ -199,51 +199,51 @@
-         "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
+@@ -342,28 +342,31 @@
+ 
+     "common": {
+         "cancel": "취소",
+         "delete": "삭제"
      },
-     "profileEdit": {
-         "title": "프로필 설정",
-         "nicknameHint": "닉네임",
-         "phoneHint": "전화번호",
-         "bioHint": "소개 (Bio)",
-         "locationTitle": "지역",
-         "changeLocation": "변경",
-         "interests": {
-             "title": "관심사",
-             "hint": "쉼표와 Enter로 여러개 동시 추가"
-         },
-         "privacy": {
-             "title": "개인정보 설정",
-             "showLocation": "지도에 내 위치 표시",
-             "allowRequests": "친구 추가 요청 허용"
-         },
-         "saveButton": "변경사항 저장",
-         "successMessage": "프로필이 성공적으로 업데이트되었습니다.",
-         "errors": {
-             "noUser": "로그인된 사용자가 없습니다.",
-             "updateFailed": "프로필 업데이트에 실패했습니다: {error}"
-         }
+     "deleteConfirm": {
+         "title": "댓글 삭제",
+         "content": "정말 이 댓글을 삭제하시겠습니까?",
+         "failure": "댓글 삭제 실패: {error}"
      },
--    "feed": {
-+    "mainFeed": {
-         "error": "오류가 발생했습니다: {error}",
-         "empty": "새로운 소식이 없습니다."
-     },
-     "postCard": {
-         "locationNotSet": "지역 미설정"
-     },
-     "time": {
-         "now": "방금 전",
-         "minutesAgo": "{minutes}분 전",
-         "hoursAgo": "{hours}시간 전",
-         "daysAgo": "{days}일 전",
-         "dateFormat": "yy.MM.dd",
-         "dateFormatLong": "M월 d일"
-     },
-     "productCard": {
-         "currency": "$"
-     },
-     "localFeed": {
-         "setLoactionPrompt": "동네 소식을 보려면 먼저 내 동네를 설정해주세요!",
-         "allCategory": "전체",
-         "empty": "표시할 게시물이 없습니다."
-     },
-     "categories": {
-         "post": {
-             "daily_life": {
-@@ -254,88 +254,88 @@
-                 "name": "도움/나눔",
-                 "description": "도움이 필요하거나 나눌 물건이 있나요?"
-             },
-             "incident_report": {
-                 "name": "사건/사고",
-                 "description": "동네의 사건, 사고 소식을 공유해주세요."
-             },
-             "local_news": {
-                 "name": "동네소식",
-                 "description": "우리 동네의 새로운 소식이나 정보를 알려주세요."
-             },
-             "daily_question": {
-                 "name": "질문있어요",
-                 "description": "이웃에게 무엇이든 물어보세요."
-             },
-             "store_promo": {
-                 "name": "가게홍보",
-                 "description": "가게의 할인 정보나 이벤트를 홍보해보세요."
-             },
-             "etc": {
-                 "name": "기타",
-                 "description": "어디에도 속하지 않는 자유로운 이야기를 나눠요."
-             }
-         }
-     },
--    "createPost": {
-+    "localNewsCreate": {
-         "appBarTitle": "새 게시물 작성",
-         "form": {
-             "categoryLabel": "카테고리",
-             "titleLabel": "제목",
-             "contentLabel": "내용을 입력하세요",
-             "tagsLabel": "태그 (쉼표로 구분)",
-             "tagsHint": "예: 강아지, 무료나눔"
-         },
-         "buttons": {
-             "addImage": "이미지 추가",
-             "submit": "등록하기"
-         },
-         "alerts": {
-             "contentRequired": "내용을 입력해주세요.",
-             "categoryRequired": "카테고리를 선택해주세요.",
-             "success": "게시글이 등록되었습니다.",
-             "failure": "업로드 실패: {error}"
-         }
-     },
--    "postDetail": {
-+    "localNewsDetail": {
-         "appBarTitle": "게시물",
-         "menu": {
-             "edit": "수정하기",
-             "report": "신고하기",
-             "share": "공유하기"
-         },
-         "stats": {
-             "views": "조회",
-             "comments": "댓글",
-             "likes": "좋아요",
-             "thanks": "감사"
-         },
-         "buttons": {
-             "comment": "댓글 달기"
-         }
-     },
--    "editPost": {
-+    "localNewsEdit": {
-         "appBarTitle": "게시물 수정",
-         "buttons": {
-             "submit": "수정하기"
-         },
-         "alerts": {
-             "success": "게시물이 수정되었습니다.",
-             "failure": "수정 실패: {error}"
-         }
-     },
-     "commentInputField": {
-         "secretCommentLabel": "비밀댓글",
-         "hintText": "댓글을 입력하세요...",
-         "replyHintText": "{nickname}님에게 답글 남기기...",
+ 
+     "replyInputField": {
+         "hintText": "답글을 입력하세요",
          "button": {
              "send": "전송"
-         }
-     },
- 
-     "commentListView": {
-         "empty": "아직 댓글이 없습니다. 첫 댓글을 남겨보세요!",
-         "reply": "답글",
-         "delete": "삭제",
-         "deleted": "[삭제된 댓글입니다]",
-         "secret": "작성자와 게시물 주인만 볼 수 있는 비밀 댓글입니다."
-     },
-diff --git a/lib/features/feed/widgets/post_card.dart b/lib/features/feed/widgets/post_card.dart
-index acfa2507c165a11b7b3ee40cc483f3aa7a478171..155133b93825a7ef371779ec9f63b1a8ab3e970c 100644
---- a/lib/features/feed/widgets/post_card.dart
-+++ b/lib/features/feed/widgets/post_card.dart
-@@ -1,30 +1,30 @@
- // lib/features/feed/widgets/post_card.dart
- 
- import 'package:bling_app/core/models/post_model.dart';
- import 'package:bling_app/core/models/user_model.dart';
--import 'package:bling_app/features/post/screens/post_detail_screen.dart';
-+import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
- import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
- import 'package:flutter/material.dart';
- import 'package:google_fonts/google_fonts.dart';
- 
- import '../../../core/constants/app_categories.dart';
- import '../../../core/models/post_category_model.dart';
- 
- class PostCard extends StatelessWidget {
-   final PostModel post;
-   const PostCard({super.key, required this.post});
- 
-   // ✅ [다국어 수정] 시간 포맷 함수가 다국어 키를 사용하도록 변경
-   String _formatTimestamp(BuildContext context, Timestamp timestamp) {
-     final now = DateTime.now();
-     final dt = timestamp.toDate();
-     final diff = now.difference(dt);
- 
-     if (diff.inMinutes < 1) return 'time.now'.tr();
-     if (diff.inHours < 1) {
-       return 'time.minutesAgo'
-           .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
-     }
-     if (diff.inDays < 1) {
-@@ -36,51 +36,51 @@ class PostCard extends StatelessWidget {
-     return DateFormat('time.dateFormat'.tr()).format(dt);
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     final category = AppCategories.postCategories.firstWhere(
-         (c) => c.categoryId == post.category,
-         orElse: () => AppCategories.postCategories.first);
- 
-     // ✅ [다국어 수정] mediaUrl을 안전하게 처리
-     String? firstImageUrl;
-     if (post.mediaUrl != null && post.mediaUrl!.isNotEmpty) {
-       firstImageUrl = post.mediaUrl!.first;
-     }
- 
-     return Card(
-       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
-       elevation: 0,
-       shape: RoundedRectangleBorder(
-         borderRadius: BorderRadius.circular(12),
-         side: BorderSide(color: Colors.grey.shade200),
-       ),
-       child: InkWell(
-         onTap: () {
-           Navigator.of(context).push(MaterialPageRoute(
--            builder: (_) => PostDetailScreen(post: post),
-+            builder: (_) => LocalNewsDetailScreen(post: post),
-           ));
          },
-         borderRadius: BorderRadius.circular(12),
-         child: Padding(
-           padding: const EdgeInsets.all(16.0),
-           child: Column(
-             crossAxisAlignment: CrossAxisAlignment.start,
-             children: [
-               _buildAuthorInfo(context, post.userId, post.createdAt),
-               const SizedBox(height: 12),
-               _buildTitleAndCategory(context, post, category, firstImageUrl),
-               if (firstImageUrl != null) ...[
-                 const SizedBox(height: 12),
-                 ClipRRect(
-                   borderRadius: BorderRadius.circular(8),
-                   child: Image.network(
-                     firstImageUrl,
-                     width: double.infinity,
-                     height: 180,
-                     fit: BoxFit.cover,
-                     errorBuilder: (context, error, stackTrace) =>
-                         Container(color: Colors.grey.shade100),
-                   ),
-                 ),
-               ],
-diff --git a/lib/features/post/screens/create_post_screen.dart b/lib/features/local_news/screens/create_local_news_screen.dart
-similarity index 87%
-rename from lib/features/post/screens/create_post_screen.dart
-rename to lib/features/local_news/screens/create_local_news_screen.dart
-index 01fd5ff67540bfd409188160529411e57f2e78ba..e6e7ed47f2e5a3f21f1975f0ce87bb34d6f32aa8 100644
---- a/lib/features/post/screens/create_post_screen.dart
-+++ b/lib/features/local_news/screens/create_local_news_screen.dart
-@@ -1,243 +1,243 @@
--// lib/features/post/screens/create_post_screen.dart
-+// lib/features/local_news/screens/create_local_news_screen.dart
+         "failure": "답글 등록 실패: {error}"
+     },
  
- import 'dart:io';
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:firebase_auth/firebase_auth.dart';
- import 'package:firebase_storage/firebase_storage.dart';
- import 'package:flutter/material.dart';
- import 'package:image_picker/image_picker.dart';
- import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
+     "chat_list": {
+         "appBarTitle": "채팅",
+         "empty": "진행중인 대화가 없습니다."
+     },
+     "chat_room": {
+         "placeholder": "메시지를 입력하세요..."
+-    }
++    },
++    "selectCategory": "카테고리 선택",
++    "address_neighborhood": "동네",
++    "address_detail_hint": "상세 거래 장소 (선택사항)"
  
- import '../../../core/constants/app_categories.dart';
- import '../../../core/models/post_category_model.dart';
- import '../../../core/models/user_model.dart';
- 
--class CreatePostScreen extends StatefulWidget {
--  const CreatePostScreen({super.key});
-+class CreateLocalNewsScreen extends StatefulWidget {
-+  const CreateLocalNewsScreen({super.key});
- 
-   @override
--  State<CreatePostScreen> createState() => _CreatePostScreenState();
-+  State<CreateLocalNewsScreen> createState() => _CreateLocalNewsScreenState();
  }
+\ No newline at end of file
+diff --git a/lib/features/marketplace/screens/product_registration_screen.dart b/lib/features/marketplace/screens/product_registration_screen.dart
+index 8ef9f95850cb1c43b7d3230572409676a111b274..b81a3d0d762bd075cfa9d57f3186bcc0ea0fe1ee 100644
+--- a/lib/features/marketplace/screens/product_registration_screen.dart
++++ b/lib/features/marketplace/screens/product_registration_screen.dart
+@@ -41,70 +41,78 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
+   bool _isLoading = false;
  
--class _CreatePostScreenState extends State<CreatePostScreen> {
-+class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
-   final _titleController = TextEditingController();
-   final _contentController = TextEditingController();
-   final _tagsController = TextEditingController();
-   final List<XFile> _selectedImages = [];
-   final _picker = ImagePicker();
-   PostCategoryModel? _selectedCategory;
-   bool _isSubmitting = false;
+   Category? _selectedCategory;
+   // Position? _currentPosition;
+ 
+   // 현재 상품 상태 및 추가 입력값
+   String _condition = 'used';
  
    @override
    void initState() {
      super.initState();
-     if (AppCategories.postCategories.isNotEmpty) {
-       _selectedCategory = AppCategories.postCategories.first;
+     _checkLocationAndPermission();
+   }
+ 
+   @override
+   void dispose() {
+     _titleController.dispose();
+     _priceController.dispose();
+     _descriptionController.dispose();
+     _addressController.dispose();
+     _transactionPlaceController.dispose();
+     super.dispose();
+   }
+ 
+   Future<void> _checkLocationAndPermission() async {
++    if (!mounted) return;
++
+     final status = await Permission.location.status;
++    if (!mounted) return;
++
+     if (status.isGranted) {
+       await _getCurrentLocation();
+     } else {
+       final requestedStatus = await Permission.location.request();
++      if (!mounted) return;
+       if (requestedStatus.isGranted) {
+         await _getCurrentLocation();
+       }
      }
    }
  
-   Future<void> _pickImages() async {
-     final pickedImages =
-         await _picker.pickMultiImage(imageQuality: 70, limit: 10);
-     if (pickedImages.isNotEmpty) {
+   Future<void> _getCurrentLocation() async {
+     try {
+       Position position = await Geolocator.getCurrentPosition(
+         desiredAccuracy: LocationAccuracy.high,
+       );
++      if (!mounted) return;
++
+       List<Placemark> placemarks = await placemarkFromCoordinates(
+         position.latitude,
+         position.longitude,
+       );
++      if (!mounted) return;
+ 
+       if (placemarks.isNotEmpty && mounted) {
+         final placemark = placemarks.first;
+         final neighborhood = placemark.subLocality?.isNotEmpty == true
+             ? placemark.subLocality
+             : placemark.locality;
+ 
+         setState(() {
+           _addressController.text = neighborhood ?? '';
+           // _currentPosition = position;
+         });
+       }
+     } catch (e) {
+       // 위치 정보 가져오기 실패 시 처리
+     }
+   }
+ 
+   void _selectCategory() async {
+     final result = await Navigator.of(context).push<Category>(
+       MaterialPageRoute(builder: (context) => const ParentCategoryScreen()),
+     );
+ 
+     if (result != null && mounted) {
        setState(() {
-         _selectedImages.addAll(pickedImages.take(10 - _selectedImages.length));
-       });
-     }
-   }
- 
-   void _removeImage(int index) {
-     setState(() {
-       _selectedImages.removeAt(index);
-     });
-   }
- 
-   Future<List<String>> _uploadImages() async {
-     List<String> downloadUrls = [];
-     for (var image in _selectedImages) {
-       final ref = FirebaseStorage.instance.ref(
-           'post_images/${DateTime.now().millisecondsSinceEpoch}_${image.name}');
-       final uploadTask = await ref.putFile(File(image.path));
-       downloadUrls.add(await uploadTask.ref.getDownloadURL());
-     }
-     return downloadUrls;
-   }
- 
-   Future<void> _submitPost() async {
-     if (_contentController.text.trim().isEmpty) {
-       ScaffoldMessenger.of(context).showSnackBar(
--          SnackBar(content: Text('createPost.alerts.contentRequired'.tr())));
-+          SnackBar(content: Text('localNewsCreate.alerts.contentRequired'.tr())));
-       return;
-     }
-     if (_selectedCategory == null) {
-       ScaffoldMessenger.of(context).showSnackBar(
--          SnackBar(content: Text('createPost.alerts.categoryRequired'.tr())));
-+          SnackBar(content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
-       return;
-     }
- 
-     setState(() => _isSubmitting = true);
- 
-     try {
-       final user = FirebaseAuth.instance.currentUser;
-       if (user == null) throw Exception("로그인이 필요합니다.");
- 
-       final userDoc = await FirebaseFirestore.instance
-           .collection('users')
-           .doc(user.uid)
-           .get();
-       if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
-       final userModel = UserModel.fromFirestore(userDoc);
- 
-       final imageUrls = await _uploadImages();
-       final tags = _tagsController.text
-           .split(',')
-           .map((tag) => tag.trim())
-           .where((tag) => tag.isNotEmpty)
-           .toList();
- 
-       final postData = {
-         'userId': user.uid,
-         'title': _titleController.text.trim(),
-         'body': _contentController.text.trim(),
-         'mediaUrl': imageUrls,
-         'mediaType': imageUrls.isNotEmpty ? 'image' : null,
-         'category': _selectedCategory!.categoryId,
-         'tags': tags,
-         'locationName': userModel.locationName,
-         'locationParts': userModel.locationParts,
-         'geoPoint': userModel.geoPoint,
-         'createdAt': FieldValue.serverTimestamp(),
-         'likesCount': 0,
-         'commentsCount': 0,
-         'viewsCount': 0,
-         'thanksCount': 0,
-       };
- 
-       await FirebaseFirestore.instance.collection('posts').add(postData);
- 
-       if (!mounted) return;
-       ScaffoldMessenger.of(context).showSnackBar(
--          SnackBar(content: Text('createPost.alerts.success'.tr())));
-+          SnackBar(content: Text('localNewsCreate.alerts.success'.tr())));
-       Navigator.pop(context, true);
-     } catch (e) {
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
--            content: Text('createPost.alerts.failure'
-+            content: Text('localNewsCreate.alerts.failure'
-                 .tr(namedArgs: {'error': e.toString()}))));
-       }
-     } finally {
-       if (mounted) setState(() => _isSubmitting = false);
-     }
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     return Scaffold(
--      appBar: AppBar(title: Text('createPost.appBarTitle'.tr())),
-+      appBar: AppBar(title: Text('localNewsCreate.appBarTitle'.tr())),
-       body: SingleChildScrollView(
-         padding: const EdgeInsets.all(16),
-         child: Column(
-           crossAxisAlignment: CrossAxisAlignment.stretch,
-           children: [
-             DropdownButtonFormField<PostCategoryModel>(
-               value: _selectedCategory,
-               decoration: InputDecoration(
--                  labelText: 'createPost.form.categoryLabel'.tr(),
-+                  labelText: 'localNewsCreate.form.categoryLabel'.tr(),
-                   border: const OutlineInputBorder()),
-               items: AppCategories.postCategories.map((category) {
-                 return DropdownMenuItem<PostCategoryModel>(
-                   value: category,
-                   child: Row(children: [
-                     Text(category.emoji, style: const TextStyle(fontSize: 20)),
-                     const SizedBox(width: 10),
-                     // ✅ [다국어 수정] 카테고리 이름을 nameKey.tr()로 가져옵니다.
-                     Text(category.nameKey.tr()),
-                   ]),
-                 );
-               }).toList(),
-               onChanged: (value) {
-                 if (value != null) setState(() => _selectedCategory = value);
-               },
-             ),
-             if (_selectedCategory != null)
-               Padding(
-                 padding: const EdgeInsets.only(top: 8.0, left: 12.0),
-                 // ✅ [다국어 수정] 카테고리 설명을 descriptionKey.tr()로 가져옵니다.
-                 child: Text(
-                   _selectedCategory!.descriptionKey.tr(),
-                   style: Theme.of(context)
-                       .textTheme
-                       .bodySmall
-                       ?.copyWith(color: Colors.grey[600]),
-                 ),
-               ),
-             const SizedBox(height: 16),
-             TextField(
-                 controller: _titleController,
-                 decoration: InputDecoration(
--                    labelText: 'createPost.form.titleLabel'.tr(),
-+                    labelText: 'localNewsCreate.form.titleLabel'.tr(),
-                     border: const OutlineInputBorder())),
-             const SizedBox(height: 16),
-             TextField(
-                 controller: _contentController,
-                 maxLines: 8,
-                 decoration: InputDecoration(
--                    labelText: 'createPost.form.contentLabel'.tr(),
-+                    labelText: 'localNewsCreate.form.contentLabel'.tr(),
-                     border: const OutlineInputBorder())),
-             const SizedBox(height: 16),
-             TextField(
-                 controller: _tagsController,
-                 decoration: InputDecoration(
--                    labelText: 'createPost.form.tagsLabel'.tr(),
--                    hintText: 'createPost.form.tagsHint'.tr(),
-+                    labelText: 'localNewsCreate.form.tagsLabel'.tr(),
-+                    hintText: 'localNewsCreate.form.tagsHint'.tr(),
-                     border: const OutlineInputBorder())),
-             const SizedBox(height: 16),
-             _buildImagePicker(),
-             const SizedBox(height: 24),
-             ElevatedButton(
-               style: ElevatedButton.styleFrom(
-                   minimumSize: const Size(double.infinity, 50)),
-               onPressed: _isSubmitting ? null : _submitPost,
-               child: _isSubmitting
-                   ? const CircularProgressIndicator(color: Colors.white)
--                  : Text('createPost.buttons.submit'.tr()),
-+                  : Text('localNewsCreate.buttons.submit'.tr()),
-             ),
-           ],
-         ),
-       ),
-     );
-   }
- 
-   Widget _buildImagePicker() {
-     return Column(
-       crossAxisAlignment: CrossAxisAlignment.start,
-       children: [
-         OutlinedButton.icon(
-             onPressed: _pickImages,
-             icon: const Icon(Icons.camera_alt),
--            label: Text('createPost.buttons.addImage'.tr())),
-+            label: Text('localNewsCreate.buttons.addImage'.tr())),
-         const SizedBox(height: 8),
-         if (_selectedImages.isNotEmpty)
-           SizedBox(
-             height: 100,
-             child: ListView.builder(
-               scrollDirection: Axis.horizontal,
-               itemCount: _selectedImages.length,
-               itemBuilder: (context, index) {
-                 return Padding(
-                   padding: const EdgeInsets.only(right: 8.0),
-                   child: Stack(children: [
-                     ClipRRect(
-                         borderRadius: BorderRadius.circular(8),
-                         child: Image.file(File(_selectedImages[index].path),
-                             width: 100, height: 100, fit: BoxFit.cover)),
-                     Positioned(
-                       top: 4,
-                       right: 4,
-                       child: InkWell(
-                         onTap: () => _removeImage(index),
-                         child: const CircleAvatar(
-                             radius: 12,
-                             backgroundColor: Colors.black54,
-                             child: Icon(Icons.close,
-                                 color: Colors.white, size: 16)),
-diff --git a/lib/features/post/screens/edit_post_screen.dart b/lib/features/local_news/screens/edit_local_news_screen.dart
-similarity index 91%
-rename from lib/features/post/screens/edit_post_screen.dart
-rename to lib/features/local_news/screens/edit_local_news_screen.dart
-index eb3227238ca1a5bf3e78144f183cb47bc80972cd..246b12029f37c8a3d15e5d3939748a03b79662ae 100644
---- a/lib/features/post/screens/edit_post_screen.dart
-+++ b/lib/features/local_news/screens/edit_local_news_screen.dart
-@@ -1,49 +1,49 @@
--// lib/features/post/screens/edit_post_screen.dart
-+// lib/features/local_news/screens/edit_local_news_screen.dart
- 
- import 'dart:io';
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:firebase_storage/firebase_storage.dart';
- import 'package:flutter/material.dart';
- import 'package:image_picker/image_picker.dart';
- import 'package:easy_localization/easy_localization.dart';
- 
- import '../../../core/constants/app_categories.dart';
- import '../../../core/models/post_category_model.dart';
- import '../../../core/models/post_model.dart';
- 
- 
- 
--class EditPostScreen extends StatefulWidget {
-+class EditLocalNewsScreen extends StatefulWidget {
-   final PostModel post;
--  const EditPostScreen({super.key, required this.post});
-+  const EditLocalNewsScreen({super.key, required this.post});
- 
-   @override
--  State<EditPostScreen> createState() => _EditPostScreenState();
-+  State<EditLocalNewsScreen> createState() => _EditLocalNewsScreenState();
- }
- 
--class _EditPostScreenState extends State<EditPostScreen> {
-+class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
-   final _titleController = TextEditingController();
-   final _contentController = TextEditingController();
-   final _tagsController = TextEditingController();
- 
-   final List<XFile> _newSelectedImages = [];
-   final List<String> _existingImageUrls = [];
-   final _picker = ImagePicker();
- 
-   PostCategoryModel? _selectedCategory;
-   bool _isSubmitting = false;
- 
-   @override
-   void initState() {
-     super.initState();
-     _titleController.text = widget.post.title ?? '';
-     _contentController.text = widget.post.body;
- 
-     // Convert List<String> tags to a comma-separated String for the controller
-     // ignore: unnecessary_type_check
-     _tagsController.text = (widget.post.tags is List)
-         ? widget.post.tags.join(', ')
-         : '';
- 
-     // Handle mediaUrl being either a List or a single String
-     if (widget.post.mediaUrl != null) {
-@@ -77,178 +77,178 @@ class _EditPostScreenState extends State<EditPostScreen> {
-     setState(() {
-       _newSelectedImages.removeAt(index);
-     });
-   }
- 
-   void _removeExistingImage(int index) {
-     setState(() {
-       _existingImageUrls.removeAt(index);
-     });
-   }
- 
-   Future<List<String>> _uploadImages() async {
-     List<String> downloadUrls = [];
-     for (var image in _newSelectedImages) {
-       final ref = FirebaseStorage.instance.ref(
-           'post_images/${DateTime.now().millisecondsSinceEpoch}_${image.name}');
-       await ref.putFile(File(image.path));
-       downloadUrls.add(await ref.getDownloadURL());
-     }
-     return downloadUrls;
-   }
- 
-   Future<void> _updatePost() async {
-      if (_contentController.text.trim().isEmpty) {
-       ScaffoldMessenger.of(context).showSnackBar(
--          SnackBar(content: Text('createPost.alerts.contentRequired'.tr())));
-+          SnackBar(content: Text('localNewsCreate.alerts.contentRequired'.tr())));
-       return;
-     }
-     if (_selectedCategory == null) {
-       ScaffoldMessenger.of(context).showSnackBar(
--          SnackBar(content: Text('createPost.alerts.categoryRequired'.tr())));
-+          SnackBar(content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
-       return;
-     }
- 
-     setState(() => _isSubmitting = true);
- 
-     try {
-       final newImageUrls = await _uploadImages();
-       // 이제 mediaUrl은 항상 List<String> 타입으로 저장됩니다.
-       final finalImageUrls = [..._existingImageUrls, ...newImageUrls];
-       final tags = _tagsController.text
-           .split(',')
-           .map((tag) => tag.trim())
-           .where((tag) => tag.isNotEmpty)
-           .toList();
- 
-       final updatedData = {
-         'title': _titleController.text.trim(),
-         'body': _contentController.text.trim(),
-         'mediaUrl': finalImageUrls,
-         'mediaType': finalImageUrls.isNotEmpty ? 'image' : null,
-         'category': _selectedCategory!.categoryId,
-         'tags': tags,
-         'updatedAt': FieldValue.serverTimestamp(),
-       };
- 
-       await FirebaseFirestore.instance
-           .collection('posts')
-           .doc(widget.post.id)
-           .update(updatedData);
- 
-       if (!mounted) return;
-       ScaffoldMessenger.of(context)
-           .showSnackBar(const SnackBar(content: Text('게시글이 수정되었습니다')));
-       Navigator.of(context).pop(true);
-     } catch (e) {
-       if (mounted) {
-         ScaffoldMessenger.of(context)
-             .showSnackBar(SnackBar(content: Text('수정 실패: $e')));
-       }
-     } finally {
-       if (mounted) setState(() => _isSubmitting = false);
-     }
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     // UI 코드는 이전과 동일합니다.
-     return Scaffold(
--       appBar: AppBar(title: Text('editPost.appBarTitle'.tr())),
-+       appBar: AppBar(title: Text('localNewsEdit.appBarTitle'.tr())),
-       body: SingleChildScrollView(
-         padding: const EdgeInsets.all(16),
-         child: Column(
-           crossAxisAlignment: CrossAxisAlignment.stretch,
-           children: [
-             DropdownButtonFormField<PostCategoryModel>(
-               value: _selectedCategory,
-                decoration: InputDecoration(
--                  labelText: 'createPost.form.categoryLabel'.tr(),
-+                  labelText: 'localNewsCreate.form.categoryLabel'.tr(),
-                   border: const OutlineInputBorder()),
-               items: AppCategories.postCategories.map((category) {
-                 return DropdownMenuItem<PostCategoryModel>(
-                   value: category,
-                   child: Row(children: [
-                     Text(category.emoji, style: const TextStyle(fontSize: 20)),
-                     const SizedBox(width: 10),
-                     Text(category.nameKey.tr()),
-                   ]),
-                 );
-               }).toList(),
-               onChanged: (value) {
-                 if (value != null) setState(() => _selectedCategory = value);
-               },
-             ),
-             const SizedBox(height: 16),
-             TextField(
-                 controller: _titleController,
-                 decoration: const InputDecoration(
-                     labelText: '제목', border: OutlineInputBorder())),
-             const SizedBox(height: 16),
-             TextField(
-                 controller: _contentController,
-                 maxLines: 8,
-                 decoration: const InputDecoration(
-                     labelText: '내용', border: OutlineInputBorder())),
-             const SizedBox(height: 16),
-             TextField(
-                 controller: _tagsController,
-                 decoration: const InputDecoration(
-                     labelText: '태그 (쉼표로 구분)', border: OutlineInputBorder())),
-             const SizedBox(height: 16),
-             _buildImagePicker(),
-             const SizedBox(height: 24),
-             ElevatedButton(
-               style: ElevatedButton.styleFrom(
-                   minimumSize: const Size(double.infinity, 50)),
-               onPressed: _isSubmitting ? null : _updatePost,
-               // ✅ [다국어 수정] 수정하기 버튼
-               child: _isSubmitting
-                   ? const CircularProgressIndicator(color: Colors.white)
--                  : Text('editPost.buttons.submit'.tr()),
-+                  : Text('localNewsEdit.buttons.submit'.tr()),
-             ),
-           ],
-         ),
-       ),
-     );
-   }
- 
-   Widget _buildImagePicker() {
-     final allImages = <Widget>[
-       ..._existingImageUrls.asMap().entries.map((entry) =>
-           _buildImageThumbnail(entry.key, entry.value, isExisting: true)),
-       ..._newSelectedImages.asMap().entries.map((entry) =>
-           _buildImageThumbnail(entry.key, entry.value, isExisting: false)),
-     ];
- 
-         return Column(
-       crossAxisAlignment: CrossAxisAlignment.start,
-       children: [
-         OutlinedButton.icon(
-             onPressed: _pickImages,
-             icon: const Icon(Icons.camera_alt),
--            label: Text('createPost.buttons.addImage'.tr())),
-+            label: Text('localNewsCreate.buttons.addImage'.tr())),
-         const SizedBox(height: 8),
-         if (allImages.isNotEmpty)
-           SizedBox(
-               height: 100,
-               child: ListView(
-                   scrollDirection: Axis.horizontal, children: allImages)),
-       ],
-     );
-   }
- 
-   Widget _buildImageThumbnail(int index, dynamic imageData,
-       {required bool isExisting}) {
-     return Padding(
-       padding: const EdgeInsets.only(right: 8.0),
-       child: Stack(
-         children: [
-           ClipRRect(
-             borderRadius: BorderRadius.circular(8),
-             child: isExisting
-                 ? Image.network(imageData,
-                     width: 100, height: 100, fit: BoxFit.cover)
-                 : Image.file(File(imageData.path),
-                     width: 100, height: 100, fit: BoxFit.cover),
-           ),
-           Positioned(
-diff --git a/lib/features/post/screens/post_detail_screen.dart b/lib/features/local_news/screens/local_news_detail_screen.dart
-similarity index 93%
-rename from lib/features/post/screens/post_detail_screen.dart
-rename to lib/features/local_news/screens/local_news_detail_screen.dart
-index 268ea574f81bae17075b254779de7bd738e6f780..b07435c8c77957ea4ac5f63c58a563252028acb8 100644
---- a/lib/features/post/screens/post_detail_screen.dart
-+++ b/lib/features/local_news/screens/local_news_detail_screen.dart
-@@ -1,53 +1,53 @@
--// lib/features/post/screens/post_detail_screen.dart
-+// lib/features/local_news/screens/local_news_detail_screen.dart
- 
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:firebase_auth/firebase_auth.dart';
- import 'package:flutter/material.dart';
- import 'package:easy_localization/easy_localization.dart';
- 
- import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
- 
- import '../../../core/constants/app_categories.dart';
- import '../../../core/models/post_model.dart';
- import '../../../core/models/user_model.dart';
- import '../widgets/comment_input_field.dart';
- import '../widgets/comment_list_view.dart';
--// ✅ [추가] 방금 만든 EditPostScreen을 import 합니다.
--import 'edit_post_screen.dart';
-+// ✅ [추가] 방금 만든 EditLocalNewsScreen을 import 합니다.
-+import 'edit_local_news_screen.dart';
- 
- 
- 
--class PostDetailScreen extends StatefulWidget {
-+class LocalNewsDetailScreen extends StatefulWidget {
-   final PostModel post;
--  const PostDetailScreen({super.key, required this.post});
-+  const LocalNewsDetailScreen({super.key, required this.post});
- 
-   @override
--  State<PostDetailScreen> createState() => _PostDetailScreenState();
-+  State<LocalNewsDetailScreen> createState() => _LocalNewsDetailScreenState();
- }
- 
--class _PostDetailScreenState extends State<PostDetailScreen> {
-+class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
-   // 기존 상태 변수들은 그대로 유지합니다.
-   bool _isLiked = false;
-   late int _likesCount;
-   bool _likeLoading = false;
-   String? _activeReplyCommentId;
-   late int _commentCount;
-   late int _thanksCount;
-   bool _isThanksProcessing = false;
- 
-   // ✅ [추가] 수정 후 데이터를 새로고침하기 위한 상태 변수
-   late PostModel _currentPost;
- 
-   @override
-   void initState() {
-     super.initState();
-     // ✅ [추가] 초기 게시물 상태를 저장합니다.
-     _currentPost = widget.post;
- 
-     _likesCount = _currentPost.likesCount;
-     _commentCount = _currentPost.commentsCount;
-     _thanksCount = _currentPost.thanksCount;
-     _checkLiked();
-     _increaseViewsCount();
-   }
- 
-@@ -194,76 +194,76 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
-     if (imageUrl != null && imageUrl.isNotEmpty) {
-       return [
-         ClipRRect(
-           borderRadius: BorderRadius.circular(12),
-           child: Image.network(imageUrl),
-         ),
-         const SizedBox(height: 16),
-       ];
-     }
-     return [];
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     // ✅ [핵심] 현재 로그인한 사용자의 ID를 가져옵니다.
-     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
- 
-     final category = AppCategories.postCategories.firstWhere(
-       (cat) => cat.categoryId == _currentPost.category,
-       orElse: () =>
-           AppCategories.postCategories.firstWhere((c) => c.categoryId == 'etc'),
-     );
- 
-     return Scaffold(
-       appBar: AppBar(
--        title: Text(_currentPost.title ?? 'postDetail.appBarTitle'.tr()),
-+        title: Text(_currentPost.title ?? 'localNewsDetail.appBarTitle'.tr()),
-         actions: [
-           // ✅ [핵심] 현재 사용자가 게시물 작성자일 경우에만 수정 버튼을 보여줍니다.
-           if (currentUserId != null && currentUserId == _currentPost.userId)
-             IconButton(
-               icon: const Icon(Icons.edit_outlined),
--              tooltip: 'postDetail.menu.edit'.tr(),
-+              tooltip: 'localNewsDetail.menu.edit'.tr(),
-               onPressed: () async {
-                 final result = await Navigator.of(context).push<bool>(
-                   MaterialPageRoute(
--                    builder: (_) => EditPostScreen(post: _currentPost),
-+                    builder: (_) => EditLocalNewsScreen(post: _currentPost),
-                   ),
-                 );
-                 // ✅ [핵심] 수정 화면에서 true를 반환하면 (수정 성공) 데이터를 새로고침합니다.
-                 if (result == true) {
-                   _refreshPostData();
-                 }
-               },
-             ),
-           PopupMenuButton<String>(
-             onSelected: (value) {/* Handle menu selection */},
-             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-               PopupMenuItem<String>(
--                  value: 'report', child: Text('postDetail.menu.report'.tr())),
-+                  value: 'report', child: Text('localNewsDetail.menu.report'.tr())),
-               PopupMenuItem<String>(
--                  value: 'share', child: Text('postDetail.menu.share'.tr())),
-+                  value: 'share', child: Text('localNewsDetail.menu.share'.tr())),
-             ],
-           ),
-         ],
-       ),
-       body: CustomScrollView(slivers: [
-         SliverToBoxAdapter(
-           child: Padding(
-             padding: const EdgeInsets.all(16.0),
-             child: Column(
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: [
-                 _buildAuthorInfo(_currentPost.userId),
-                 const SizedBox(height: 16),
-                 Chip(
-                   avatar: Text(category.emoji,
-                       style: const TextStyle(fontSize: 16)),
-                   label: Text(category.nameKey.tr()),
-                   visualDensity: VisualDensity.compact,
-                 ),
-                 const SizedBox(height: 8),
-                 Text(_currentPost.title ?? '',
-                     style: Theme.of(context)
-                         .textTheme
-                         .headlineSmall
-                         ?.copyWith(fontWeight: FontWeight.bold)),
-@@ -277,51 +277,51 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
-                 ..._buildPostImageWidget(_currentPost.mediaUrl),
-                 const Divider(height: 32),
-                 _buildPostStats(),
-               ],
-             ),
-           ),
-         ),
-         SliverToBoxAdapter(
-           child: CommentListView(
-             postId: _currentPost.id,
-             postOwnerId: _currentPost.userId,
-             activeReplyCommentId: _activeReplyCommentId,
-             onReplyTap: _handleReplyTap,
-             onCommentDeleted: _handleCommentDeleted,
-           ),
-         ),
-       ]),
-       bottomNavigationBar: SafeArea(
-         child: Padding(
-           padding: EdgeInsets.fromLTRB(
-               8, 8, 8, MediaQuery.of(context).viewInsets.bottom + 8),
-           // ✅ [다국어 수정] 댓글 입력 필드
-           child: CommentInputField(
-             postId: _currentPost.id,
-             onCommentAdded: _handleCommentAdded,
--            hintText: 'postDetail.buttons.comment'.tr(),
-+            hintText: 'localNewsDetail.buttons.comment'.tr(),
-           ),
-         ),
-       ),
-     );
-   }
- 
-   Widget _buildAuthorInfo(String userId) {
-     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-         stream: FirebaseFirestore.instance
-             .collection('users')
-             .doc(userId)
-             .snapshots(),
-         builder: (context, snapshot) {
-           if (!snapshot.hasData) return const SizedBox();
-           final user = UserModel.fromFirestore(snapshot.data!);
-           return Row(
-             children: [
-               CircleAvatar(
-                 backgroundImage:
-                     user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-                 child: user.photoUrl == null ? const Icon(Icons.person) : null,
-               ),
-               const SizedBox(width: 12),
-               Expanded(
-                 child: Column(
-diff --git a/lib/features/post/widgets/comment_input_field.dart b/lib/features/local_news/widgets/comment_input_field.dart
-similarity index 100%
-rename from lib/features/post/widgets/comment_input_field.dart
-rename to lib/features/local_news/widgets/comment_input_field.dart
-diff --git a/lib/features/post/widgets/comment_list_view.dart b/lib/features/local_news/widgets/comment_list_view.dart
-similarity index 100%
-rename from lib/features/post/widgets/comment_list_view.dart
-rename to lib/features/local_news/widgets/comment_list_view.dart
-diff --git a/lib/features/post/widgets/reply_input_field.dart b/lib/features/local_news/widgets/reply_input_field.dart
-similarity index 100%
-rename from lib/features/post/widgets/reply_input_field.dart
-rename to lib/features/local_news/widgets/reply_input_field.dart
-diff --git a/lib/features/post/widgets/reply_list_view.dart b/lib/features/local_news/widgets/reply_list_view.dart
-similarity index 100%
-rename from lib/features/post/widgets/reply_list_view.dart
-rename to lib/features/local_news/widgets/reply_list_view.dart
-diff --git a/lib/features/feed/screens/feed_screen.dart b/lib/features/main_feed/screens/main_feed_screen.dart
-similarity index 78%
-rename from lib/features/feed/screens/feed_screen.dart
-rename to lib/features/main_feed/screens/main_feed_screen.dart
-index 26be66e1c7b44b0bdd35e66f46d530ce072a02d9..24462c887d198a53145dd1ae51579fef334c3a96 100644
---- a/lib/features/feed/screens/feed_screen.dart
-+++ b/lib/features/main_feed/screens/main_feed_screen.dart
-@@ -1,82 +1,82 @@
--// lib/features/feed/screens/feed_screen.dart
-+// lib/features/main_feed/screens/main_feed_screen.dart
- 
- import 'package:bling_app/core/models/user_model.dart';
- import 'package:flutter/material.dart';
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
- 
- import '../../../core/models/feed_item_model.dart';
- import '../../../core/models/post_model.dart';
- import '../../../core/models/product_model.dart';
--import '../data/feed_repository.dart';
--import '../widgets/post_card.dart';
-+import '../../feed/data/feed_repository.dart';
-+import '../../feed/widgets/post_card.dart';
- import '../../marketplace/widgets/product_card.dart';
- 
- /// 'New Feed' 탭에 표시될 통합 피드 화면입니다.
--class FeedScreen extends StatefulWidget {
-+class MainFeedScreen extends StatefulWidget {
-   final UserModel? userModel;
--  const FeedScreen({this.userModel, super.key});
-+  const MainFeedScreen({this.userModel, super.key});
- 
-   @override
--  State<FeedScreen> createState() => _FeedScreenState();
-+  State<MainFeedScreen> createState() => _MainFeedScreenState();
- }
- 
--class _FeedScreenState extends State<FeedScreen> {
-+class _MainFeedScreenState extends State<MainFeedScreen> {
-   final FeedRepository _feedRepository = FeedRepository();
-   late Future<List<FeedItemModel>> _feedFuture;
- 
-   @override
-   void initState() {
-     super.initState();
-     _feedFuture = _feedRepository.fetchUnifiedFeed();
-   }
- 
-   // 새로고침 기능
-   Future<void> _handleRefresh() async {
-     setState(() {
-       _feedFuture = _feedRepository.fetchUnifiedFeed();
-     });
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     return FutureBuilder<List<FeedItemModel>>(
-       future: _feedFuture,
-       builder: (context, snapshot) {
-         if (snapshot.connectionState == ConnectionState.waiting) {
-           return const Center(child: CircularProgressIndicator());
-         }
-         if (snapshot.hasError) {
--          // ✅ [다국어 수정] 'feed.error' 키를 사용하여 에러 메시지를 표시합니다.
-+          // ✅ [다국어 수정] 'mainFeed.error' 키를 사용하여 에러 메시지를 표시합니다.
-           return Center(
--              child: Text('feed.error'
-+              child: Text('mainFeed.error'
-                   .tr(namedArgs: {'error': snapshot.error.toString()})));
-         }
-         if (!snapshot.hasData || snapshot.data!.isEmpty) {
--          // ✅ [다국어 수정] 'feed.empty' 키를 사용하여 안내 메시지를 표시합니다.
--          return Center(child: Text('feed.empty'.tr()));
-+          // ✅ [다국어 수정] 'mainFeed.empty' 키를 사용하여 안내 메시지를 표시합니다.
-+          return Center(child: Text('mainFeed.empty'.tr()));
-         }
- 
-         final feedItems = snapshot.data!;
- 
-         return RefreshIndicator(
-           onRefresh: _handleRefresh,
-           child: ListView.builder(
-             padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-             itemCount: feedItems.length,
-             itemBuilder: (context, index) {
-               final item = feedItems[index];
- 
-               switch (item.type) {
-                 case FeedItemType.post:
-                   final post = PostModel.fromFirestore(item.originalDoc
-                       as DocumentSnapshot<Map<String, dynamic>>);
-                   return PostCard(post: post);
-                 case FeedItemType.product:
-                   final product = ProductModel.fromFirestore(item.originalDoc
-                       as DocumentSnapshot<Map<String, dynamic>>);
-                   return ProductCard(product: product);
-                 default:
-                   return const SizedBox.shrink();
-               }
-             },
-diff --git a/lib/features/main_screen/home_screen.dart b/lib/features/main_screen/home_screen.dart
-index 2d3adf38bfe48717ef6213656c65d77a6919f18d..6815bef2f429c7fe44fea2999d3e40dd3a51669b 100644
---- a/lib/features/main_screen/home_screen.dart
-+++ b/lib/features/main_screen/home_screen.dart
-@@ -1,38 +1,38 @@
- // lib/features/main_screen/home_screen.dart
- 
- import 'dart:async';
- import 'package:bling_app/features/auction/screens/auction_screen.dart';
- import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
- import 'package:bling_app/features/clubs/screens/clubs_screen.dart';
--import 'package:bling_app/features/feed/screens/feed_screen.dart';
-+import 'package:bling_app/features/main_feed/screens/main_feed_screen.dart';
- import 'package:bling_app/features/find_friends/screens/find_friends_screen.dart';
- import 'package:bling_app/features/jobs/screens/jobs_screen.dart';
- import 'package:bling_app/features/local_stores/screens/local_stores_screen.dart';
- import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
- import 'package:bling_app/features/pom/screens/pom_screen.dart';
--import 'package:bling_app/features/post/screens/create_post_screen.dart';
-+import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
- import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:easy_localization/easy_localization.dart';
- import 'package:firebase_auth/firebase_auth.dart';
- import 'package:flutter/material.dart';
- import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
- import 'package:google_fonts/google_fonts.dart';
- 
- import '../../../core/models/user_model.dart';
- import '../../../core/utils/address_formatter.dart';
- import '../auth/screens/profile_edit_screen.dart';
- import '../feed/screens/local_feed_screen.dart';
- import '../location/screens/location_setting_screen.dart';
- import '../marketplace/screens/marketplace_screen.dart';
- import '../admin/screens/data_fix_screen.dart';
- 
- // 검색 화면을 위한 임시 Placeholder
- class SearchScreen extends StatelessWidget {
-   const SearchScreen({super.key});
-   @override
-   Widget build(BuildContext context) {
-     return Scaffold(
-       appBar: AppBar(title: Text('main.bottomNav.search'.tr())),
-       body: const Center(child: Text("Search Screen")),
-     );
-@@ -138,51 +138,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-       }
-     });
-   }
- 
-   void _onBottomNavItemTapped(int index) {
-     if (index == 2) {
-       _onFloatingActionButtonTapped();
-       return;
-     }
- 
-     if (index == 0) {
-       _tabController.animateTo(0);
-     }
- 
-     setState(() {
-       _bottomNavIndex = index;
-     });
-   }
- 
-   void _onFloatingActionButtonTapped() {
-     final currentTabIndex = _tabController.index;
-     switch (currentTabIndex) {
-       case 0:
-       case 1:
-         Navigator.of(context)
--            .push(MaterialPageRoute(builder: (_) => const CreatePostScreen()));
-+            .push(MaterialPageRoute(builder: (_) => const CreateLocalNewsScreen()));
-         break;
-       case 2:
-         Navigator.of(context).push(MaterialPageRoute(
-             builder: (_) => const ProductRegistrationScreen()));
-         break;
-       default:
-         debugPrint('\x1B[33m${currentTabIndex + 1}번 탭의 등록 기능이 호출되었습니다.\x1B[0m');
-     }
-   }
- 
-   AppBar _buildHomeAppBar() {
-     return AppBar(
-       leading: Builder(
-         builder: (context) => IconButton(
-           icon: CircleAvatar(
-             backgroundImage: (_userModel?.photoUrl != null)
-                 ? NetworkImage(_userModel!.photoUrl!)
-                 : null,
-             child: (_userModel?.photoUrl == null)
-                 ? const Icon(Icons.person)
-                 : null,
-           ),
-           onPressed: () => Scaffold.of(context).openDrawer(),
-           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-         ),
-@@ -237,51 +237,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-         unselectedLabelColor: const Color(0xFF616161),
-         indicatorColor: const Color(0xFF00A66C),
-         indicatorWeight: 3.0,
-         tabs: _topTabs
-             .map((tab) => Tab(
-                   child: Row(
-                     mainAxisAlignment: MainAxisAlignment.center,
-                     children: [
-                       Icon(tab['icon']),
-                       const SizedBox(width: 8),
-                       Text(tab['key'].toString().tr()),
-                     ],
-                   ),
-                 ))
-             .toList(),
-       ),
-     );
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     final List<Widget> pages = [
-       TabBarView(
-         controller: _tabController,
-         children: [
--          FeedScreen(userModel: _userModel),
-+          MainFeedScreen(userModel: _userModel),
-           LocalFeedScreen(userModel: _userModel),
-           MarketplaceScreen(userModel: _userModel),
-           FindFriendsScreen(userModel: _userModel),
-           ClubsScreen(userModel: _userModel),
-           JobsScreen(userModel: _userModel),
-           LocalStoresScreen(userModel: _userModel),
-           AuctionScreen(userModel: _userModel),
-           PomScreen(userModel: _userModel),
-         ],
-       ),
-       SearchScreen(),
-       ChatListScreen(),
-       MyBlingScreen(),
-     ];
- 
-     int effectiveIndex =
-         _bottomNavIndex > 2 ? _bottomNavIndex - 1 : _bottomNavIndex;
- 
-     return Scaffold(
-       appBar: effectiveIndex == 0 ? _buildHomeAppBar() : null,
-       drawer: _buildAppDrawer(_userModel),
-       body: IndexedStack(
-         index: effectiveIndex,
-         children: pages,
-       ),
+         _selectedCategory = result;

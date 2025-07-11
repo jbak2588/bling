@@ -22,7 +22,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/utils/address_formatter.dart';
 import '../auth/screens/profile_edit_screen.dart';
-import '../feed/screens/local_feed_screen.dart';
+import '../local_news/screens/local_news_screen.dart';
 import '../location/screens/location_setting_screen.dart';
 import '../marketplace/screens/marketplace_screen.dart';
 import '../admin/screens/data_fix_screen.dart';
@@ -260,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         controller: _tabController,
         children: [
           MainFeedScreen(userModel: _userModel),
-          LocalFeedScreen(userModel: _userModel),
+          LocalNewsScreen(userModel: _userModel),
           MarketplaceScreen(userModel: _userModel),
           FindFriendsScreen(userModel: _userModel),
           ClubsScreen(userModel: _userModel),
