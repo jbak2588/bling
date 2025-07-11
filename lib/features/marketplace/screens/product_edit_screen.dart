@@ -9,6 +9,8 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../../core/models/product_model.dart';
 import '../../../core/models/user_model.dart';
+import '../../categories/domain/category.dart';
+import '../../categories/screens/parent_category_screen.dart';
 
 class ProductEditScreen extends StatefulWidget {
 final ProductModel product;
@@ -30,6 +32,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   List<String> _existingImageUrls = [];
   final List<XFile> _images = [];
   bool _isLoading = false;
+  Category? _selectedCategory;
+  String _condition = 'used';
 
   @override
   void initState() {
@@ -41,6 +45,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     _transactionPlaceController.text = widget.product.transactionPlace ?? '';
     _isNegotiable = widget.product.negotiable;
     _existingImageUrls = List<String>.from(widget.product.imageUrls);
+    _condition = widget.product.condition;
+    _loadInitialCategory();
   }
 
   @override
@@ -73,6 +79,42 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     setState(() {
       _images.removeAt(index);
     });
+  }
+
+  Future<void> _loadInitialCategory() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('categories')
+        .doc(widget.product.categoryId)
+        .get();
+    if (doc.exists) {
+      setState(() {
+        _selectedCategory = Category.fromFirestore(doc);
+      });
+    }
+  }
+
+  void _selectCategory() async {
+    final result = await Navigator.of(context).push<Category>(
+      MaterialPageRoute(builder: (context) => const ParentCategoryScreen()),
+    );
+    if (result != null && mounted) {
+      setState(() {
+        _selectedCategory = result;
+      });
+    }
+  }
+
+  String _getCategoryName(BuildContext context, Category? category) {
+    if (category == null) return 'selectCategory'.tr();
+    final langCode = context.locale.languageCode;
+    switch (langCode) {
+      case 'ko':
+        return category.nameKo;
+      case 'id':
+        return category.nameId;
+      default:
+        return category.nameEn;
+    }
   }
 
   Future<void> _saveProduct() async {
@@ -139,6 +181,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         'transactionPlace': _transactionPlaceController.text,
         'negotiable': _isNegotiable,
         'imageUrls': allImageUrls,
+        'categoryId': _selectedCategory?.id ?? widget.product.categoryId,
+        'condition': _condition,
         'updatedAt': Timestamp.now(),
         // ✅ 구버전 address 대신, 사용자의 최신 위치 정보로 덮어씁니다.
         'locationName': userModel.locationName,
@@ -303,6 +347,18 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                         : null,
               ),
               const SizedBox(height: 16),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                onTap: _selectCategory,
+                title: Text(_getCategoryName(context, _selectedCategory)),
+                leading: const Icon(Icons.category_outlined),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _priceController,
                 keyboardType: TextInputType.number,
@@ -349,7 +405,17 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                   ),
                 ],
               ),
-              // 카테고리 선택 등 나머지 UI는 product_registration_screen.dart와 동일하게 복사해서 사용
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _condition,
+                decoration: const InputDecoration(labelText: 'Condition'),
+                items: const [
+                  DropdownMenuItem(value: 'new', child: Text('New')),
+                  DropdownMenuItem(value: 'used', child: Text('Used')),
+                ],
+                onChanged: (value) =>
+                    setState(() => _condition = value ?? 'used'),
+              ),
             ],
           ),
         ),
