@@ -368,5 +368,13 @@
             "locationHint": "Lokasi",
             "submit": "Pasang Lowongan"
         }
+    },
+    
+    "findfriend": {
+        "intro": {
+            "title": "Lengkapi profil Anda untuk melihat teman di sekitar.",
+            "subtitle": "Tambahkan usia, jenis kelamin, lokasi, minat, dan setidaknya satu foto untuk menemukan teman di sekitar Anda.",
+            "button": "Buat Profil Saya"
+        }
     }
 }
