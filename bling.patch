@@ -1,80 +1,152 @@
-diff --git a/lib/features/find_friends/screens/find_friends_screen.dart b/lib/features/find_friends/screens/find_friends_screen.dart
-index f7fef0aaa7ba735b4bccfeb25b2f5052d6f64661..0ee141d51cd1de1b85dbf165e846da8e75d55166 100644
---- a/lib/features/find_friends/screens/find_friends_screen.dart
-+++ b/lib/features/find_friends/screens/find_friends_screen.dart
-@@ -1,10 +1,16 @@
- import 'package:flutter/material.dart';
- import '../../../core/models/user_model.dart';
+diff --git a/lib/features/find_friends/screens/findfriend_profile_form.dart b/lib/features/find_friends/screens/findfriend_profile_form.dart
+index 31bfb44586a649dfc7438965853b41d77de8f036..1ca693421d2878f13849112160dbbed59d3944ba 100644
+--- a/lib/features/find_friends/screens/findfriend_profile_form.dart
++++ b/lib/features/find_friends/screens/findfriend_profile_form.dart
+@@ -1,65 +1,81 @@
+ // lib/features/find_friends/screens/findfriend_profile_form.dart
+ import 'dart:io';
  
- class FindFriendsScreen extends StatelessWidget {
--  final UserModel? userModel;
--  const FindFriendsScreen({this.userModel, super.key});
-+  /// Existing user profile for the current user.
-+  final UserModel? profile;
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:firebase_storage/firebase_storage.dart';
+ import 'package:flutter/material.dart';
+ import 'package:image_picker/image_picker.dart';
+ import 'package:uuid/uuid.dart';
+ 
+ import '../../../core/models/user_model.dart';
+ import '../../location/screens/location_setting_screen.dart';
+ 
++import '../../../core/models/findfriend_model.dart';
 +
-+  /// Callback triggered when the profile is saved or updated.
-+  final VoidCallback? onSave;
+ class FindFriendProfileForm extends StatefulWidget {
+-  const FindFriendProfileForm({super.key});
++  final FindFriend? profile;
++  final void Function(FindFriend profile)? onSave;
 +
-+  const FindFriendsScreen({this.profile, this.onSave, super.key});
-+
++  const FindFriendProfileForm({this.profile, this.onSave, super.key});
+ 
    @override
-   Widget build(BuildContext context) =>
-       const Center(child: Text('Find Friends Screen'));
+   State<FindFriendProfileForm> createState() => _FindFriendProfileFormState();
  }
-diff --git a/lib/features/main_screen/home_screen.dart b/lib/features/main_screen/home_screen.dart
-index f238c0929ce8a62bc4c030fb5035fb19f99c9ed6..018443923442339afd216cf61b7913239376fa07 100644
---- a/lib/features/main_screen/home_screen.dart
-+++ b/lib/features/main_screen/home_screen.dart
-@@ -246,51 +246,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-                   child: Row(
-                     mainAxisAlignment: MainAxisAlignment.center,
-                     children: [
-                       Icon(tab['icon']),
-                       const SizedBox(width: 8),
-                       Text(tab['key'].toString().tr()),
-                     ],
-                   ),
-                 ))
-             .toList(),
-       ),
-     );
+ 
+ class _FindFriendProfileFormState extends State<FindFriendProfileForm> {
+   final _nicknameController = TextEditingController();
+   final _bioController = TextEditingController();
+   final _interestController = TextEditingController();
+ 
+   String? _selectedAgeRange;
+   String? _selectedGender;
+   String? _locationName;
+   Map<String, dynamic>? _locationParts;
+ 
+   final List<XFile> _images = [];
+   List<String> _profileImageUrls = [];
+   List<String> _interests = [];
+ 
+   bool _isLoading = false;
+ 
+   @override
+   void initState() {
+     super.initState();
+-    _loadUserProfile();
++    if (widget.profile != null) {
++      final p = widget.profile!;
++      _nicknameController.text = p.nickname;
++      _bioController.text = p.bio ?? '';
++      _selectedAgeRange = p.ageRange;
++      _selectedGender = p.gender;
++      _locationName = p.location;
++      _profileImageUrls = List<String>.from(p.profileImages);
++      _interests = List<String>.from(p.interests ?? []);
++    } else {
++      _loadUserProfile();
++    }
    }
  
-   Widget _buildHomePage() {
-     return NestedScrollView(
-       headerSliverBuilder: (context, innerBoxIsScrolled) => [
-             _buildHomeSliverAppBar(),
-           ],
-       body: TabBarView(
-         controller: _tabController,
-         children: [
-           MainFeedScreen(userModel: _userModel),
-           LocalNewsScreen(userModel: _userModel),
-           MarketplaceScreen(userModel: _userModel),
--          FindFriendsScreen(userModel: _userModel),
-+          FindFriendsScreen(profile: _userModel),
-           ClubsScreen(userModel: _userModel),
-           JobsScreen(userModel: _userModel),
-           LocalStoresScreen(userModel: _userModel),
-           AuctionScreen(userModel: _userModel),
-           PomScreen(userModel: _userModel),
-         ],
-       ),
-     );
+   @override
+   void dispose() {
+     _nicknameController.dispose();
+     _bioController.dispose();
+     _interestController.dispose();
+     super.dispose();
+   }
+ 
+   Future<void> _loadUserProfile() async {
+     final user = FirebaseAuth.instance.currentUser;
+     if (user == null) return;
+ 
+     final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+     if (!doc.exists) return;
+ 
+     final userModel = UserModel.fromFirestore(doc);
+     final matchProfile = userModel.matchProfile ?? {};
+ 
+     setState(() {
+       _nicknameController.text = userModel.nickname;
+       _bioController.text = matchProfile['bio'] ?? '';
+       _selectedAgeRange = matchProfile['ageRange'];
+       _selectedGender = matchProfile['gender'];
+@@ -136,50 +152,63 @@ class _FindFriendProfileFormState extends State<FindFriendProfileForm> {
+ 
+     setState(() => _isLoading = true);
+ 
+     try {
+       final user = FirebaseAuth.instance.currentUser;
+       if (user == null) throw Exception('No user');
+ 
+       final newUrls = await _uploadImages(user.uid);
+       _profileImageUrls.addAll(newUrls);
+ 
+       final Map<String, dynamic> matchProfile = {
+         'nickname': _nicknameController.text.trim(),
+         'ageRange': _selectedAgeRange,
+         'gender': _selectedGender,
+         'bio': _bioController.text.trim(),
+         'interests': _interests,
+         'profileImages': _profileImageUrls,
+       };
+ 
+       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+         'matchProfile': matchProfile,
+         'locationName': _locationName,
+         'locationParts': _locationParts,
+       }, SetOptions(merge: true));
+ 
++      final profile = FindFriend(
++        userId: user.uid,
++        nickname: _nicknameController.text.trim(),
++        profileImages: _profileImageUrls,
++        location: _locationName,
++        interests: _interests,
++        ageRange: _selectedAgeRange,
++        gender: _selectedGender,
++        bio: _bioController.text.trim(),
++      );
++
++      widget.onSave?.call(profile);
++
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(content: Text('Profile saved successfully.')),
+         );
+         Navigator.of(context).pop();
+       }
+     } catch (e) {
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('Failed to save profile: $e')),
+         );
+       }
+     } finally {
+       if (mounted) setState(() => _isLoading = false);
+     }
    }
  
    @override
    Widget build(BuildContext context) {
-     final List<Widget> pages = [
-       _buildHomePage(),
-       const SearchScreen(),
-       const ChatListScreen(),
-       const MyBlingScreen(),
-     ];
- 
-     int effectiveIndex =
-         _bottomNavIndex > 2 ? _bottomNavIndex - 1 : _bottomNavIndex;
- 
      return Scaffold(
-       appBar: null,
-       drawer: _buildAppDrawer(_userModel),
+       appBar: AppBar(title: const Text('Find Friend Profile')),
+       body: SingleChildScrollView(
+         padding: const EdgeInsets.all(24),
+         child: Column(
+           crossAxisAlignment: CrossAxisAlignment.start,

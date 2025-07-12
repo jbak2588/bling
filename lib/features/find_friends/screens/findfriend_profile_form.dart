@@ -11,8 +11,13 @@ import 'package:uuid/uuid.dart';
 import '../../../core/models/user_model.dart';
 import '../../location/screens/location_setting_screen.dart';
 
+import '../../../core/models/findfriend_model.dart';
+
 class FindFriendProfileForm extends StatefulWidget {
-  const FindFriendProfileForm({super.key});
+  final FindFriend? profile;
+  final void Function(FindFriend profile)? onSave;
+
+  const FindFriendProfileForm({this.profile, this.onSave, super.key});
 
   @override
   State<FindFriendProfileForm> createState() => _FindFriendProfileFormState();
@@ -37,7 +42,18 @@ class _FindFriendProfileFormState extends State<FindFriendProfileForm> {
   @override
   void initState() {
     super.initState();
-    _loadUserProfile();
+    if (widget.profile != null) {
+      final p = widget.profile!;
+      _nicknameController.text = p.nickname;
+      _bioController.text = p.bio ?? '';
+      _selectedAgeRange = p.ageRange;
+      _selectedGender = p.gender;
+      _locationName = p.location;
+      _profileImageUrls = List<String>.from(p.profileImages);
+      _interests = List<String>.from(p.interests ?? []);
+    } else {
+      _loadUserProfile();
+    }
   }
 
   @override
@@ -157,6 +173,19 @@ class _FindFriendProfileFormState extends State<FindFriendProfileForm> {
         'locationName': _locationName,
         'locationParts': _locationParts,
       }, SetOptions(merge: true));
+
+      final profile = FindFriend(
+        userId: user.uid,
+        nickname: _nicknameController.text.trim(),
+        profileImages: _profileImageUrls,
+        location: _locationName,
+        interests: _interests,
+        ageRange: _selectedAgeRange,
+        gender: _selectedGender,
+        bio: _bioController.text.trim(),
+      );
+
+      widget.onSave?.call(profile);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
