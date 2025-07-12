@@ -109,10 +109,14 @@
             "id": "7f53776ee317e027",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "guide_coding/Bling 프로젝트 폴더 구조 & 명명 규칙 기준서.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "새 탭"
+              "title": "Bling 프로젝트 폴더 구조 & 명명 규칙 기준서"
             }
           }
         ],
@@ -263,9 +267,11 @@
       "command-palette:명령어 팔레트 열기": false
     }
   },
-  "active": "7f53776ee317e027",
+  "active": "95bb295f059fcc54",
   "lastOpenFiles": [
+    "guide_coding",
     "en.json.md",
+    "guide_coding/Bling 프로젝트 폴더 구조 & 명명 규칙 기준서.md",
     "Find_Friend/FindFriend_Feature_Spec.md.md",
     "Find_Friend/8_05_1. 친구 찾기 초기 기획서.md",
     "DevLog_개발일지/local_news_screen.dart 백업본 AppBar Update 이전 작업본 2025년 7월 12일 00시 21분 저장.md",
@@ -290,8 +296,6 @@
     "index/010  Post 모듈.md",
     "index/011  Marketplace 모듈.md",
     "index/09  신고 & 차단 & Privacy Guard.md",
-    "index/08  Notification 모듈 Core.md",
-    "index/07  Chat 모듈 Core.md",
-    "index/03  User 필드 & TrustLever & 프로필정책.md"
+    "index/08  Notification 모듈 Core.md"
   ]
 }

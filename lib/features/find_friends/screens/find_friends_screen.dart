@@ -12,13 +12,17 @@ class FindFriendsScreen extends StatelessWidget {
   FindFriendsScreen({this.userModel, super.key});
 
   bool get _profileComplete {
-    final profile = userModel?.matchProfile;
-    if (profile == null) return false;
-    return (profile['profileImages'] != null &&
-            (profile['profileImages'] as List).isNotEmpty) &&
-        profile['ageRange'] != null &&
-        profile['gender'] != null &&
-        profile['location'] != null;
+    final data = userModel?.findfriend;
+    if (data == null) return false;
+    final profile = FindFriend.fromMap(
+        Map<String, dynamic>.from(data), userModel!.uid);
+    return profile.nickname.isNotEmpty &&
+        profile.ageRange != null &&
+        profile.gender != null &&
+        profile.location != null &&
+        profile.bio != null &&
+        profile.interests != null && profile.interests!.isNotEmpty &&
+        profile.profileImages.isNotEmpty;
   }
 
   @override
@@ -41,7 +45,7 @@ class FindFriendsScreen extends StatelessWidget {
                       profile: userModel != null
                           ? FindFriend.fromMap(
                               Map<String, dynamic>.from(
-                                  userModel!.matchProfile ?? {}),
+                                  userModel!.findfriend ?? {}),
                               userModel!.uid)
                           : null,
                       onSave: (profile) {

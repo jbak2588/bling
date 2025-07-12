@@ -72,17 +72,18 @@ class _FindFriendProfileFormState extends State<FindFriendProfileForm> {
     if (!doc.exists) return;
 
     final userModel = UserModel.fromFirestore(doc);
-    final matchProfile = userModel.matchProfile ?? {};
+    final profileData = userModel.findfriend ?? {};
 
     setState(() {
       _nicknameController.text = userModel.nickname;
-      _bioController.text = matchProfile['bio'] ?? '';
-      _selectedAgeRange = matchProfile['ageRange'];
-      _selectedGender = matchProfile['gender'];
+      _bioController.text = profileData['bio'] ?? '';
+      _selectedAgeRange = profileData['ageRange'];
+      _selectedGender = profileData['gender'];
       _locationName = userModel.locationName;
       _locationParts = userModel.locationParts;
-      _profileImageUrls = List<String>.from(matchProfile['profileImages'] ?? []);
-      _interests = List<String>.from(matchProfile['interests'] ?? []);
+      _profileImageUrls =
+          List<String>.from(profileData['profileImages'] ?? []);
+      _interests = List<String>.from(profileData['interests'] ?? []);
     });
   }
 
@@ -159,21 +160,6 @@ class _FindFriendProfileFormState extends State<FindFriendProfileForm> {
       final newUrls = await _uploadImages(user.uid);
       _profileImageUrls.addAll(newUrls);
 
-      final Map<String, dynamic> matchProfile = {
-        'nickname': _nicknameController.text.trim(),
-        'ageRange': _selectedAgeRange,
-        'gender': _selectedGender,
-        'bio': _bioController.text.trim(),
-        'interests': _interests,
-        'profileImages': _profileImageUrls,
-      };
-
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'matchProfile': matchProfile,
-        'locationName': _locationName,
-        'locationParts': _locationParts,
-      }, SetOptions(merge: true));
-
       final profile = FindFriend(
         userId: user.uid,
         nickname: _nicknameController.text.trim(),
@@ -185,6 +171,11 @@ class _FindFriendProfileFormState extends State<FindFriendProfileForm> {
         bio: _bioController.text.trim(),
       );
 
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'findfriend': profile.toJson(),
+        'locationName': _locationName,
+        'locationParts': _locationParts,
+      }, SetOptions(merge: true));
       widget.onSave?.call(profile);
 
       if (mounted) {

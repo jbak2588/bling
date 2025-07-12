@@ -1,66 +1,249 @@
+diff --git a/lib/core/models/user_model.dart b/lib/core/models/user_model.dart
+index c5025ead685bfbbc9425a15df9ed37430d0aeabc..522f1ffd1379e3721bcb2b25263d9c4f584ec3fb 100644
+--- a/lib/core/models/user_model.dart
++++ b/lib/core/models/user_model.dart
+@@ -27,137 +27,143 @@ class UserModel {
+   final List<String>? bookmarkedProductIds;
+ 
+   // --- Trust System Fields ---
+ 
+   /// 최종 신뢰 점수 (Cloud Function에 의해 자동 계산됨)
+   final int trustScore;
+ 
+   /// 전화번호 (인증 시 높은 신뢰 점수 획득)
+   final String? phoneNumber;
+ 
+   /// 피드 활동으로 받은 '감사' 수
+   final int feedThanksReceived;
+ 
+   /// 마켓 거래로 받은 '감사' 수
+   final int marketThanksReceived;
+ 
+   /// 전체 '감사' 수 (feed + market, UI 표시용)
+   final int thanksReceived;
+ 
+   final int reportCount;
+   final bool isBanned;
+   final List<String>? blockedUsers;
+   final bool profileCompleted;
+   final Timestamp createdAt;
+   final Map<String, dynamic>? matchProfile;
++  final Map<String, dynamic>? findfriend;
+ 
+   UserModel({
+     required this.uid,
+     required this.nickname,
+     required this.email,
+     this.photoUrl,
+     this.bio,
+     this.trustLevel = 'normal',
+     this.locationName,
+     this.locationParts,
+     this.geoPoint,
+     this.interests,
+     this.privacySettings,
+     this.postIds,
+     this.productIds,
+     this.bookmarkedPostIds,
+     this.bookmarkedProductIds,
+     this.trustScore = 0,
+     this.phoneNumber,
+     this.feedThanksReceived = 0,
+     this.marketThanksReceived = 0,
+     this.thanksReceived = 0,
+     this.reportCount = 0,
+     this.isBanned = false,
+     this.blockedUsers,
+     this.profileCompleted = false,
+     required this.createdAt,
+     this.matchProfile,
++    this.findfriend,
+   });
+ 
+   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+     final data = doc.data() ?? {};
+     return UserModel(
+       uid: data['uid'] ?? '',
+       nickname: data['nickname'] ?? '',
+       email: data['email'] ?? '',
+       photoUrl: data['photoUrl'],
+       bio: data['bio'],
+       trustLevel: data['trustLevel'] ?? 'normal',
+       locationName: data['locationName'],
+       locationParts: data['locationParts'] != null
+           ? Map<String, dynamic>.from(data['locationParts'])
+           : null,
+       geoPoint: data['geoPoint'],
+       interests: data['interests'] != null
+           ? List<String>.from(data['interests'])
+           : null,
+       privacySettings: data['privacySettings'] != null
+           ? Map<String, dynamic>.from(data['privacySettings'])
+           : null,
+       postIds:
+           data['postIds'] != null ? List<String>.from(data['postIds']) : null,
+       productIds: data['productIds'] != null
+           ? List<String>.from(data['productIds'])
+           : null,
+       bookmarkedPostIds: data['bookmarkedPostIds'] != null
+           ? List<String>.from(data['bookmarkedPostIds'])
+           : null,
+       bookmarkedProductIds: data['bookmarkedProductIds'] != null
+           ? List<String>.from(data['bookmarkedProductIds'])
+           : null,
+       trustScore: data['trustScore'] ?? 0,
+       phoneNumber: data['phoneNumber'],
+       feedThanksReceived: data['feedThanksReceived'] ?? 0,
+       marketThanksReceived: data['marketThanksReceived'] ?? 0,
+       thanksReceived: data['thanksReceived'] ?? 0,
+       reportCount: data['reportCount'] ?? 0,
+       isBanned: data['isBanned'] ?? false,
+       blockedUsers: data['blockedUsers'] != null
+           ? List<String>.from(data['blockedUsers'])
+           : null,
+       profileCompleted: data['profileCompleted'] ?? false,
+       createdAt: data['createdAt'] is Timestamp
+           ? data['createdAt']
+           : (data['createdAt'] != null ? Timestamp.fromMillisecondsSinceEpoch(data['createdAt']) : Timestamp.now()),
+       matchProfile: data['matchProfile'] != null
+           ? Map<String, dynamic>.from(data['matchProfile'])
+           : null,
++      findfriend: data['findfriend'] != null
++          ? Map<String, dynamic>.from(data['findfriend'])
++          : null,
+     );
+   }
+ 
+   Map<String, dynamic> toJson() {
+     return {
+       'uid': uid,
+       'nickname': nickname,
+       'email': email,
+       'photoUrl': photoUrl,
+       'bio': bio,
+       'trustLevel': trustLevel,
+       'locationName': locationName,
+       'locationParts': locationParts,
+       'geoPoint': geoPoint,
+       'interests': interests,
+       'privacySettings': privacySettings,
+       'postIds': postIds,
+       'productIds': productIds,
+       'bookmarkedPostIds': bookmarkedPostIds,
+       'bookmarkedProductIds': bookmarkedProductIds,
+       'trustScore': trustScore,
+       'phoneNumber': phoneNumber,
+       'feedThanksReceived': feedThanksReceived,
+       'marketThanksReceived': marketThanksReceived,
+       'thanksReceived': thanksReceived,
+       'reportCount': reportCount,
+       'isBanned': isBanned,
+       'blockedUsers': blockedUsers,
+       'profileCompleted': profileCompleted,
+       'createdAt': createdAt,
+       'matchProfile': matchProfile,
++      'findfriend': findfriend,
+     };
+   }
+ }
+diff --git a/lib/features/find_friends/screens/find_friends_screen.dart b/lib/features/find_friends/screens/find_friends_screen.dart
+index 302732aabc356dfde7edf0927d8f7c6511071b65..386f0a2a7526e3d1191c0d10806c500231425e85 100644
+--- a/lib/features/find_friends/screens/find_friends_screen.dart
++++ b/lib/features/find_friends/screens/find_friends_screen.dart
+@@ -1,69 +1,73 @@
+ import 'package:flutter/material.dart';
+ import '../../../core/models/user_model.dart';
+ import 'findfriend_profile_form.dart';
+ import '../data/findfriend_repository.dart';
+ import '../../../core/models/findfriend_model.dart';
+ import 'findfriend_profile_detail.dart';
+ 
+ class FindFriendsScreen extends StatelessWidget {
+   final UserModel? userModel;
+   final FindFriendRepository repository = FindFriendRepository();
+ 
+   FindFriendsScreen({this.userModel, super.key});
+ 
+   bool get _profileComplete {
+-    final profile = userModel?.matchProfile;
+-    if (profile == null) return false;
+-    return (profile['profileImages'] != null &&
+-            (profile['profileImages'] as List).isNotEmpty) &&
+-        profile['ageRange'] != null &&
+-        profile['gender'] != null &&
+-        profile['location'] != null;
++    final data = userModel?.findfriend;
++    if (data == null) return false;
++    final profile = FindFriend.fromMap(
++        Map<String, dynamic>.from(data), userModel!.uid);
++    return profile.nickname.isNotEmpty &&
++        profile.ageRange != null &&
++        profile.gender != null &&
++        profile.location != null &&
++        profile.bio != null &&
++        profile.interests != null && profile.interests!.isNotEmpty &&
++        profile.profileImages.isNotEmpty;
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     if (!_profileComplete) {
+       return Center(
+         child: Column(
+           mainAxisAlignment: MainAxisAlignment.center,
+           children: [
+             Text(
+               'Complete your profile to see nearby friends.',
+               textAlign: TextAlign.center,
+             ),
+             const SizedBox(height: 8),
+             ElevatedButton(
+               onPressed: () {
+                 Navigator.of(context).push(
+                   MaterialPageRoute(
+                     builder: (_) => FindFriendProfileForm(
+                       profile: userModel != null
+                           ? FindFriend.fromMap(
+                               Map<String, dynamic>.from(
+-                                  userModel!.matchProfile ?? {}),
++                                  userModel!.findfriend ?? {}),
+                               userModel!.uid)
+                           : null,
+                       onSave: (profile) {
+                         repository.saveProfile(profile);
+                       },
+                     ),
+                   ),
+                 );
+               },
+               child: const Text('Create My Profile'),
+             )
+           ],
+         ),
+       );
+     }
+ 
+     return StreamBuilder<List<FindFriend>>(
+       stream: repository.getNearbyFriends(),
+       builder: (context, snapshot) {
+         final list = snapshot.data ?? [];
+         if (list.isEmpty) {
+           return const Center(child: Text('No nearby friends'));
+         }
+         return ListView.builder(
+           itemCount: list.length,
 diff --git a/lib/features/find_friends/screens/findfriend_profile_form.dart b/lib/features/find_friends/screens/findfriend_profile_form.dart
-index 31bfb44586a649dfc7438965853b41d77de8f036..1ca693421d2878f13849112160dbbed59d3944ba 100644
+index 1ca693421d2878f13849112160dbbed59d3944ba..e49576606f112cf0560efd1ba3aa328a984b6f94 100644
 --- a/lib/features/find_friends/screens/findfriend_profile_form.dart
 +++ b/lib/features/find_friends/screens/findfriend_profile_form.dart
-@@ -1,65 +1,81 @@
- // lib/features/find_friends/screens/findfriend_profile_form.dart
- import 'dart:io';
- 
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:firebase_auth/firebase_auth.dart';
- import 'package:firebase_storage/firebase_storage.dart';
- import 'package:flutter/material.dart';
- import 'package:image_picker/image_picker.dart';
- import 'package:uuid/uuid.dart';
- 
- import '../../../core/models/user_model.dart';
- import '../../location/screens/location_setting_screen.dart';
- 
-+import '../../../core/models/findfriend_model.dart';
-+
- class FindFriendProfileForm extends StatefulWidget {
--  const FindFriendProfileForm({super.key});
-+  final FindFriend? profile;
-+  final void Function(FindFriend profile)? onSave;
-+
-+  const FindFriendProfileForm({this.profile, this.onSave, super.key});
- 
-   @override
-   State<FindFriendProfileForm> createState() => _FindFriendProfileFormState();
- }
- 
- class _FindFriendProfileFormState extends State<FindFriendProfileForm> {
-   final _nicknameController = TextEditingController();
-   final _bioController = TextEditingController();
-   final _interestController = TextEditingController();
- 
-   String? _selectedAgeRange;
-   String? _selectedGender;
-   String? _locationName;
-   Map<String, dynamic>? _locationParts;
- 
-   final List<XFile> _images = [];
-   List<String> _profileImageUrls = [];
-   List<String> _interests = [];
- 
-   bool _isLoading = false;
- 
-   @override
-   void initState() {
-     super.initState();
--    _loadUserProfile();
-+    if (widget.profile != null) {
-+      final p = widget.profile!;
-+      _nicknameController.text = p.nickname;
-+      _bioController.text = p.bio ?? '';
-+      _selectedAgeRange = p.ageRange;
-+      _selectedGender = p.gender;
-+      _locationName = p.location;
-+      _profileImageUrls = List<String>.from(p.profileImages);
-+      _interests = List<String>.from(p.interests ?? []);
-+    } else {
-+      _loadUserProfile();
-+    }
+@@ -50,61 +50,62 @@ class _FindFriendProfileFormState extends State<FindFriendProfileForm> {
+       _selectedGender = p.gender;
+       _locationName = p.location;
+       _profileImageUrls = List<String>.from(p.profileImages);
+       _interests = List<String>.from(p.interests ?? []);
+     } else {
+       _loadUserProfile();
+     }
    }
  
    @override
@@ -79,14 +262,65 @@ index 31bfb44586a649dfc7438965853b41d77de8f036..1ca693421d2878f13849112160dbbed5
      if (!doc.exists) return;
  
      final userModel = UserModel.fromFirestore(doc);
-     final matchProfile = userModel.matchProfile ?? {};
+-    final matchProfile = userModel.matchProfile ?? {};
++    final profileData = userModel.findfriend ?? {};
  
      setState(() {
        _nicknameController.text = userModel.nickname;
-       _bioController.text = matchProfile['bio'] ?? '';
-       _selectedAgeRange = matchProfile['ageRange'];
-       _selectedGender = matchProfile['gender'];
-@@ -136,50 +152,63 @@ class _FindFriendProfileFormState extends State<FindFriendProfileForm> {
+-      _bioController.text = matchProfile['bio'] ?? '';
+-      _selectedAgeRange = matchProfile['ageRange'];
+-      _selectedGender = matchProfile['gender'];
++      _bioController.text = profileData['bio'] ?? '';
++      _selectedAgeRange = profileData['ageRange'];
++      _selectedGender = profileData['gender'];
+       _locationName = userModel.locationName;
+       _locationParts = userModel.locationParts;
+-      _profileImageUrls = List<String>.from(matchProfile['profileImages'] ?? []);
+-      _interests = List<String>.from(matchProfile['interests'] ?? []);
++      _profileImageUrls =
++          List<String>.from(profileData['profileImages'] ?? []);
++      _interests = List<String>.from(profileData['interests'] ?? []);
+     });
+   }
+ 
+   Future<void> _pickImages() async {
+     final picker = ImagePicker();
+     final picked = await picker.pickMultiImage(imageQuality: 70, limit: 5);
+     if (picked.isNotEmpty) {
+       setState(() {
+         _images.addAll(picked.take(5 - _images.length));
+       });
+     }
+   }
+ 
+   void _removeImage(int index) {
+     setState(() {
+       _images.removeAt(index);
+     });
+   }
+ 
+   void _addInterest() {
+     final input = _interestController.text;
+     final newItems = input.split(',');
+     setState(() {
+       for (var item in newItems) {
+         final normalized = item.trim().toLowerCase();
+@@ -137,76 +138,66 @@ class _FindFriendProfileFormState extends State<FindFriendProfileForm> {
+       await ref.putFile(File(image.path));
+       urls.add(await ref.getDownloadURL());
+     }
+     return urls;
+   }
+ 
+   Future<void> _saveProfile() async {
+     if (_isLoading) return;
+     if ((_selectedAgeRange == null || _selectedGender == null || _locationName == null) ||
+         (_profileImageUrls.isEmpty && _images.isEmpty)) {
+       ScaffoldMessenger.of(context).showSnackBar(
+         const SnackBar(content: Text('Please complete all required fields.')),
+       );
+       return;
+     }
  
      setState(() => _isLoading = true);
  
@@ -97,34 +331,39 @@ index 31bfb44586a649dfc7438965853b41d77de8f036..1ca693421d2878f13849112160dbbed5
        final newUrls = await _uploadImages(user.uid);
        _profileImageUrls.addAll(newUrls);
  
-       final Map<String, dynamic> matchProfile = {
-         'nickname': _nicknameController.text.trim(),
-         'ageRange': _selectedAgeRange,
-         'gender': _selectedGender,
-         'bio': _bioController.text.trim(),
-         'interests': _interests,
-         'profileImages': _profileImageUrls,
-       };
+-      final Map<String, dynamic> matchProfile = {
+-        'nickname': _nicknameController.text.trim(),
+-        'ageRange': _selectedAgeRange,
+-        'gender': _selectedGender,
+-        'bio': _bioController.text.trim(),
+-        'interests': _interests,
+-        'profileImages': _profileImageUrls,
+-      };
+-
+-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+-        'matchProfile': matchProfile,
+-        'locationName': _locationName,
+-        'locationParts': _locationParts,
+-      }, SetOptions(merge: true));
+-
+       final profile = FindFriend(
+         userId: user.uid,
+         nickname: _nicknameController.text.trim(),
+         profileImages: _profileImageUrls,
+         location: _locationName,
+         interests: _interests,
+         ageRange: _selectedAgeRange,
+         gender: _selectedGender,
+         bio: _bioController.text.trim(),
+       );
  
-       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-         'matchProfile': matchProfile,
-         'locationName': _locationName,
-         'locationParts': _locationParts,
-       }, SetOptions(merge: true));
++      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
++        'findfriend': profile.toJson(),
++        'locationName': _locationName,
++        'locationParts': _locationParts,
++      }, SetOptions(merge: true));
+       widget.onSave?.call(profile);
  
-+      final profile = FindFriend(
-+        userId: user.uid,
-+        nickname: _nicknameController.text.trim(),
-+        profileImages: _profileImageUrls,
-+        location: _locationName,
-+        interests: _interests,
-+        ageRange: _selectedAgeRange,
-+        gender: _selectedGender,
-+        bio: _bioController.text.trim(),
-+      );
-+
-+      widget.onSave?.call(profile);
-+
        if (mounted) {
          ScaffoldMessenger.of(context).showSnackBar(
            const SnackBar(content: Text('Profile saved successfully.')),
@@ -148,5 +387,3 @@ index 31bfb44586a649dfc7438965853b41d77de8f036..1ca693421d2878f13849112160dbbed5
        appBar: AppBar(title: const Text('Find Friend Profile')),
        body: SingleChildScrollView(
          padding: const EdgeInsets.all(24),
-         child: Column(
-           crossAxisAlignment: CrossAxisAlignment.start,

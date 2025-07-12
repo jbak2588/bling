@@ -49,6 +49,7 @@ class UserModel {
   final bool profileCompleted;
   final Timestamp createdAt;
   final Map<String, dynamic>? matchProfile;
+  final Map<String, dynamic>? findfriend;
 
   UserModel({
     required this.uid,
@@ -77,6 +78,7 @@ class UserModel {
     this.profileCompleted = false,
     required this.createdAt,
     this.matchProfile,
+    this.findfriend,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -127,6 +129,9 @@ class UserModel {
       matchProfile: data['matchProfile'] != null
           ? Map<String, dynamic>.from(data['matchProfile'])
           : null,
+      findfriend: data['findfriend'] != null
+          ? Map<String, dynamic>.from(data['findfriend'])
+          : null,
     );
   }
 
@@ -158,6 +163,7 @@ class UserModel {
       'profileCompleted': profileCompleted,
       'createdAt': createdAt,
       'matchProfile': matchProfile,
+      'findfriend': findfriend,
     };
   }
 }
