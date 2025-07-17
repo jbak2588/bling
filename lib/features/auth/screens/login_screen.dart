@@ -103,6 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
             email: result.user!.email ?? '',
             photoUrl: result.user!.photoURL,
             createdAt: Timestamp.now(),
+            isDatingProfile: false, // 추가된 필수 매개변수
           );
           await userDocRef.set(newUser.toJson());
         }

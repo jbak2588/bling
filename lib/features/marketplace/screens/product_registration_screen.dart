@@ -147,7 +147,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
     }
 
     try {
-      // ✅ [핵심 수정] 현재 사용자의 프로필 정보를 가져와서 위치 데이터를 확보합니다.
+      // 현재 사용자의 프로필 정보를 가져와서 위치 데이터를 확보
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -155,6 +155,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
       final userModel = UserModel.fromFirestore(userDoc);
 
+      // 이미지 업로드
       List<String> imageUrls = [];
       for (var image in _images) {
         final fileName = const Uuid().v4();
@@ -187,10 +188,19 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         updatedAt: Timestamp.now(),
       );
 
+      // 1. 상품 문서 저장
       await FirebaseFirestore.instance
           .collection('products')
           .doc(newProductId)
           .set(newProduct.toJson());
+
+      // 2. ✅ [핵심 추가] 사용자의 productIds 배열에 새 상품 ID 추가
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({
+        'productIds': FieldValue.arrayUnion([newProductId]),
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
