@@ -113,7 +113,17 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
         'thanksCount': 0,
       };
 
-      await FirebaseFirestore.instance.collection('posts').add(postData);
+      // 1. 새 게시물 저장 (DocumentReference로 ID 생성)
+      final newPostRef = await FirebaseFirestore.instance.collection('posts').add(postData);
+      final newPostId = newPostRef.id;
+
+      // 2. ✅ [핵심 추가] 사용자의 postIds 배열에 새 게시물 ID 추가
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({
+        'postIds': FieldValue.arrayUnion([newPostId]),
+      });
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
