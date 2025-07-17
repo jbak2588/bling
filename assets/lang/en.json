@@ -368,5 +368,12 @@
             "locationHint": "Location",
             "submit": "Post Job"
         }
+    },
+    "findFriend": {
+        "intro": {
+            "title": "Complete your profile to see nearby friends.",
+            "subtitle": "Add your age, gender, location and at least one photo to find friends.",
+            "button": "Create My Profile"
+        }
     }
 }

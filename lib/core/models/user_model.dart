@@ -36,7 +36,17 @@ class UserModel {
   final bool profileCompleted; // 기본 프로필 완성 여부
   final Timestamp createdAt; // 가입 시각 (Firestore Timestamp)
   final bool isDatingProfile; // 친구찾기 기능 활성화 여부 (ON/OFF)
-
+  final int? age; // 실제 나이
+  final String? ageRange; // 허용 나이대 범위
+  final String? gender; // 성별
+  final List<String>? findfriendProfileImages; // 친구찾기용 추가 이미지
+  final bool isVisibleInList; // 내 프로필 노출 여부
+  final List<String>? likesGiven; // 내가 좋아요 누른 유저 ID
+  final List<String>? likesReceived; // 나를 좋아요한 유저 ID
+  final List<Map<String, dynamic>>? friendRequests; // 친구 요청 상태
+  final List<String>? friends; // 수락된 친구 ID
+  final int likeCount; // 받은 좋아요 수
+  
   UserModel({
     required this.uid,
     required this.nickname,
@@ -64,6 +74,16 @@ class UserModel {
     this.profileCompleted = false,
     required this.createdAt,
     required this.isDatingProfile,
+    this.age,
+    this.ageRange,
+    this.gender,
+    this.findfriendProfileImages,
+    this.isVisibleInList = true,
+    this.likesGiven,
+    this.likesReceived,
+    this.friendRequests,
+    this.friends,
+    this.likeCount = 0,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -108,6 +128,25 @@ class UserModel {
           ? List<String>.from(data['blockedUsers'])
           : null,
       profileCompleted: data['profileCompleted'] ?? false,
+      age: data['age'],
+      ageRange: data['ageRange'],
+      gender: data['gender'],
+      findfriendProfileImages: data['findfriend_profileImages'] != null
+          ? List<String>.from(data['findfriend_profileImages'])
+          : null,
+      isVisibleInList: data['isVisibleInList'] ?? true,
+      likesGiven: data['likesGiven'] != null
+          ? List<String>.from(data['likesGiven'])
+          : null,
+      likesReceived: data['likesReceived'] != null
+          ? List<String>.from(data['likesReceived'])
+          : null,
+      friendRequests: data['friendRequests'] != null
+          ? List<Map<String, dynamic>>.from(data['friendRequests'])
+          : null,
+      friends:
+          data['friends'] != null ? List<String>.from(data['friends']) : null,
+      likeCount: data['likeCount'] ?? 0,
       createdAt: data['createdAt'] is Timestamp
           ? data['createdAt']
           : (data['createdAt'] != null
@@ -145,6 +184,16 @@ class UserModel {
       'profileCompleted': profileCompleted,
       'createdAt': createdAt,
       'isDatingProfile': isDatingProfile,
+      'age': age,
+      'ageRange': ageRange,
+      'gender': gender,
+      'findfriend_profileImages': findfriendProfileImages,
+      'isVisibleInList': isVisibleInList,
+      'likesGiven': likesGiven,
+      'likesReceived': likesReceived,
+      'friendRequests': friendRequests,
+      'friends': friends,
+      'likeCount': likeCount,
     };
   }
 }
