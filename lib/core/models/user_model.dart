@@ -1,54 +1,41 @@
 // lib/core/models/user_model.dart
-// Bling App v0.4
-// 새로운 구조의 작동 방식
-// 초기 상태: 모든 사용자는 matchProfile 필드 없이 가입합니다.
-// 기능 활성화: 사용자가 'Find Friend' 탭에서 데이팅 기능을 사용하기로 **동의(Opt-in)**하면, 앱은 성별, 연령대 등을 입력받아 matchProfile 맵을 생성하고, privacySettings에 { 'isDatingProfileActive': true } 와 같은 플래그를 저장합니다.
-// 공개/비공개 제어: privacySettings의 플래그 값에 따라 데이팅 프로필의 노출 여부를 완벽하게 제어할 수 있습니다.
-// 이처럼 UserModel을 수정하면, 보스께서 기획하신 유연한 프로필 공개/비공개 정책을 완벽하게 구현할 수 있습니다. 
+// Bling App v0.7.15
 
-// lib/core/models/user_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
-  final String uid;
-  final String nickname;
-  final String email;
-  final String? photoUrl;
-  final String? bio;
-  final String trustLevel;
-  final String? locationName;
-  final Map<String, dynamic>? locationParts;
-  final GeoPoint? geoPoint;
-  final List<String>? interests;
-  final Map<String, dynamic>? privacySettings;
-  final List<String>? postIds;
-  final List<String>? productIds;
-  final List<String>? bookmarkedPostIds;
-  final List<String>? bookmarkedProductIds;
+  final String uid; // 유저 고유 ID (Firestore 문서 ID)
+  final String nickname; // 유저 닉네임
+  final String email; // 이메일 주소
+  final String? photoUrl; // 대표 프로필 사진 URL
+  final String? bio; // 자기소개
+  final String trustLevel; // 사용자 신뢰등급 (unverified, verified 등)
+  final String? locationName; // 간략 주소명 (예: "Tangerang, Banten")
+  final Map<String, dynamic>? locationParts; // 주소 분리 (prov, kab, kec, kel)
+  final GeoPoint? geoPoint; // 좌표 (지도 표시 및 거리 계산용)
+  final List<String>? interests; // 관심사 리스트 (hobby 등)
+
+  final Map<String, dynamic>? privacySettings; // 공개 범위 설정
+  // 예: { 'showLocationOnMap': true, 'allowFriendRequests': true }
+  final List<String>? postIds; // 작성한 피드 ID 목록
+  final List<String>? productIds; // 등록한 마켓 상품 ID 목록
+  final List<String>? bookmarkedPostIds; // 북마크한 피드 ID 목록
+  final List<String>? bookmarkedProductIds; // 북마크한 마켓 상품 ID 목록
 
   // --- Trust System Fields ---
+  final int trustScore; // 신뢰 점수 (0-500, 기본 0)
 
-  /// 최종 신뢰 점수 (Cloud Function에 의해 자동 계산됨)
-  final int trustScore;
-
-  /// 전화번호 (인증 시 높은 신뢰 점수 획득)
-  final String? phoneNumber;
-
-  /// 피드 활동으로 받은 '감사' 수
-  final int feedThanksReceived;
-
-  /// 마켓 거래로 받은 '감사' 수
-  final int marketThanksReceived;
-
-  /// 전체 '감사' 수 (feed + market, UI 표시용)
-  final int thanksReceived;
-
+  final String? phoneNumber; // 전화번호 (인증 시 높은 신뢰 점수 획득)
+  final int feedThanksReceived;   /// 피드 활동으로 받은 '감사' 수
+  final int marketThanksReceived;    /// 마켓 거래로 받은 '감사' 수
+  final int thanksReceived;   /// 전체 '감사' 수 (feed + market, UI 표시용)
+  
   final int reportCount;
-  final bool isBanned;
-  final List<String>? blockedUsers;
-  final bool profileCompleted;
-  final Timestamp createdAt;
-  final Map<String, dynamic>? matchProfile;
+  final bool isBanned; // 차단 여부 (true 시 계정 제한)
+  final List<String>? blockedUsers; // 차단 유저 목록 (uid 리스트)
+  final bool profileCompleted; // 기본 프로필 완성 여부
+  final Timestamp createdAt; // 가입 시각 (Firestore Timestamp)
+  final bool isDatingProfile; // 친구찾기 기능 활성화 여부 (ON/OFF)
 
   UserModel({
     required this.uid,
@@ -76,7 +63,7 @@ class UserModel {
     this.blockedUsers,
     this.profileCompleted = false,
     required this.createdAt,
-    this.matchProfile,
+    required this.isDatingProfile,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -123,10 +110,10 @@ class UserModel {
       profileCompleted: data['profileCompleted'] ?? false,
       createdAt: data['createdAt'] is Timestamp
           ? data['createdAt']
-          : (data['createdAt'] != null ? Timestamp.fromMillisecondsSinceEpoch(data['createdAt']) : Timestamp.now()),
-      matchProfile: data['matchProfile'] != null
-          ? Map<String, dynamic>.from(data['matchProfile'])
-          : null,
+          : (data['createdAt'] != null
+              ? Timestamp.fromMillisecondsSinceEpoch(data['createdAt'])
+              : Timestamp.now()),
+      isDatingProfile: data['isDatingProfile'] ?? false,
     );
   }
 
@@ -157,7 +144,7 @@ class UserModel {
       'blockedUsers': blockedUsers,
       'profileCompleted': profileCompleted,
       'createdAt': createdAt,
-      'matchProfile': matchProfile,
+      'isDatingProfile': isDatingProfile,
     };
   }
 }

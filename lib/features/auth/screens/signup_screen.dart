@@ -161,6 +161,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           nickname: _nicknameController.text.trim(),
           email: _emailController.text.trim(),
           createdAt: Timestamp.now(),
+          isDatingProfile: false, // 추가된 필수 매개변수
           // 나머지 모든 필드는 모델에 정의된 기본값(null, false, 0, [])으로 자동 설정됩니다.
         );
 
