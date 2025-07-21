@@ -254,8 +254,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         }
 
         final user = UserModel.fromFirestore(snapshot.data!);
-        final kelurahan =
-            user.locationParts?['kel'] ?? 'marketplace.detail.noLocation'.tr();
+        final kelurahan = user.locationParts?['kel'] ??
+            user.locationParts?['kec'] ??
+            'marketplace.detail.noLocation'.tr();
 
         return Row(
           children: [
