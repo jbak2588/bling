@@ -172,7 +172,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                             ),
                             const SizedBox(height: 4.0),
                             Text(
-                              '${product.locationParts?['kel'] ?? 'postCard.locationNotSet'.tr()} • $registeredAt',
+                              '${product.locationParts?['kel'] ?? product.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $registeredAt',
                               style: TextStyle(
                                   fontSize: 12.0, color: Colors.grey[600]),
                               maxLines: 1,

@@ -134,7 +134,7 @@ class PostCard extends StatelessWidget {
                   ),
                   Text(
                     // ✅ [다국어 수정] '지역 미설정' 텍스트에 다국어 키 적용
-                    '${user.locationParts ?['kel'] ?? 'postCard.locationNotSet'.tr()} • $timeAgo',
+                    '${user.locationParts?['kel'] ?? user.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $timeAgo',
                    
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                   ),

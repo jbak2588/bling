@@ -83,12 +83,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Find_Friend/FindFriend_Feature_Spec.md",
+                "file": "Find_Friend/Bling FindFriend Features Spec (Final).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "FindFriend_Feature_Spec"
+              "title": "Bling FindFriend Features Spec (Final)"
             }
           }
         ],
@@ -242,6 +242,7 @@
   "active": "ff27b3b52377b3f7",
   "lastOpenFiles": [
     "Find_Friend/FindFriend_Feature_Spec.md.md",
+    "Find_Friend/Bling FindFriend Features Spec (Final).md",
     "DevLog_개발일지/local_news_screen.dart 백업본 AppBar Update 이전 작업본 2025년 7월 12일 00시 21분 저장.md",
     "Find_Friend/8_05_1. 친구 찾기 초기 기획서.md",
     "index/📌 Bling_Team_ToDo_QA_Index.md",
@@ -267,7 +268,6 @@
     "index/09  신고 & 차단 & Privacy Guard.md",
     "index/08  Notification 모듈 Core.md",
     "index/07  Chat 모듈 Core.md",
-    "index/03  User 필드 & TrustLever & 프로필정책.md",
-    "환영합니다!.md"
+    "index/03  User 필드 & TrustLever & 프로필정책.md"
   ]
 }
