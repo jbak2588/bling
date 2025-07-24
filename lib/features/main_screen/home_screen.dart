@@ -28,6 +28,8 @@ import '../marketplace/screens/marketplace_screen.dart';
 import '../admin/screens/data_fix_screen.dart';
 
 // 검색 화면을 위한 임시 Placeholder
+// git 테스트
+
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
   @override
