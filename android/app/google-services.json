@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "1075298230474-j9kgg12l3d1pdknj37j4e7jl4numuf8o.apps.googleusercontent.com",
+          "client_id": "1075298230474-m3oq3ing8j5emi255cpc60dpsv6a39qk.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.bling_app",
-            "certificate_hash": "9ca6cf2357019fc2b3e15d4bb0e211cb46796981"
+            "certificate_hash": "1dcff3b93b1d547f4d4bd2210a9069b64aac463f"
           }
         },
         {
