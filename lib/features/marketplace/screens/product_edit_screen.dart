@@ -11,6 +11,7 @@ import '../../../core/models/product_model.dart';
 import '../../../core/models/user_model.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/screens/parent_category_screen.dart';
+import '../../location/screens/location_setting_screen.dart';
 
 class ProductEditScreen extends StatefulWidget {
 final ProductModel product;
@@ -101,6 +102,27 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       setState(() {
         _selectedCategory = result;
       });
+    }
+  }
+
+  Future<void> _resetLocation() async {
+    final result = await Navigator.of(context).push<Map<String, dynamic>?>(
+      MaterialPageRoute(builder: (_) => const LocationSettingScreen()),
+    );
+    if (result != null) {
+      await FirebaseFirestore.instance
+          .collection('products')
+          .doc(widget.product.id)
+          .update({
+        'locationName': result['locationName'],
+        'locationParts': result['locationParts'],
+        'geoPoint': result['geoPoint'],
+      });
+      if (mounted) {
+        setState(() {
+          _addressController.text = result['locationName'] ?? '';
+        });
+      }
     }
   }
 
@@ -385,6 +407,13 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 controller: _addressController,
                 decoration: InputDecoration(
                     labelText: 'marketplace.edit.addressHint'.tr()),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _resetLocation,
+                  child: Text('marketplace.edit.resetLocation'.tr()),
+                ),
               ),
               const SizedBox(height: 16),
               TextFormField(

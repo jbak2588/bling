@@ -121,11 +121,11 @@ class _LocationSettingScreenState extends State<LocationSettingScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('location.success'.tr())));
-      // 성공 후, 모든 이전 화면을 지우고 HomeScreen으로 이동합니다.
-      // Navigator.of(context).pushAndRemoveUntil(
-      //   MaterialPageRoute(builder: (context) => const HomeScreen()),
-      //   (Route<dynamic> route) => false,
-      // );
+      Navigator.pop(context, {
+        'locationName': locationName,
+        'locationParts': locationParts,
+        'geoPoint': geoPoint,
+      });
     }
   }
 

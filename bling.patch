@@ -1,689 +1,464 @@
-diff --git a/lib/core/models/friend_request_model.dart b/lib/core/models/friend_request_model.dart
-new file mode 100644
-index 0000000000000000000000000000000000000000..d5ab44195d169596dc86d43c1eed16ef5df23707
---- /dev/null
-+++ b/lib/core/models/friend_request_model.dart
-@@ -0,0 +1,41 @@
-+// lib/core/models/friend_request_model.dart
-+
-+import 'package:cloud_firestore/cloud_firestore.dart';
-+
-+/// Model representing a friend request between two users.
-+class FriendRequestModel {
-+  final String id;
-+  final String fromUserId;
-+  final String toUserId;
-+  final String status; // pending, accepted, rejected
-+  final Timestamp createdAt;
-+
-+  FriendRequestModel({
-+    required this.id,
-+    required this.fromUserId,
-+    required this.toUserId,
-+    required this.status,
-+    required this.createdAt,
-+  });
-+
-+  factory FriendRequestModel.fromFirestore(
-+      DocumentSnapshot<Map<String, dynamic>> doc) {
-+    final data = doc.data() ?? {};
-+    return FriendRequestModel(
-+      id: doc.id,
-+      fromUserId: data['fromUserId'] ?? '',
-+      toUserId: data['toUserId'] ?? '',
-+      status: data['status'] ?? 'pending',
-+      createdAt: data['createdAt'] ?? Timestamp.now(),
-+    );
-+  }
-+
-+  Map<String, dynamic> toJson() {
-+    return {
-+      'fromUserId': fromUserId,
-+      'toUserId': toUserId,
-+      'status': status,
-+      'createdAt': createdAt,
-+    };
-+  }
-+}
-diff --git a/lib/core/models/user_model.dart b/lib/core/models/user_model.dart
-index bf90192acb7d71b279f243a21699190741698c81..3a5c72dc8c55f9cd36061f82d4fb638aa5e6312f 100644
---- a/lib/core/models/user_model.dart
-+++ b/lib/core/models/user_model.dart
-@@ -14,137 +14,186 @@ class UserModel {
-   final Map<String, dynamic>? locationParts; // 주소 분리 (prov, kab, kec, kel)
-   final GeoPoint? geoPoint; // 좌표 (지도 표시 및 거리 계산용)
-   final List<String>? interests; // 관심사 리스트 (hobby 등)
+diff --git a/lib/features/location/screens/location_setting_screen.dart b/lib/features/location/screens/location_setting_screen.dart
+index fa39d0fa6c6f2a0b323284e6a160a49db8b8bc0c..e0fb5ac2a19e94f4a587a3747bcb709f30d83919 100644
+--- a/lib/features/location/screens/location_setting_screen.dart
++++ b/lib/features/location/screens/location_setting_screen.dart
+@@ -99,55 +99,55 @@ class _LocationSettingScreenState extends State<LocationSettingScreen> {
  
-   final Map<String, dynamic>? privacySettings; // 공개 범위 설정
-   // 예: { 'showLocationOnMap': true, 'allowFriendRequests': true }
-   final List<String>? postIds; // 작성한 피드 ID 목록
-   final List<String>? productIds; // 등록한 마켓 상품 ID 목록
-   final List<String>? bookmarkedPostIds; // 북마크한 피드 ID 목록
-   final List<String>? bookmarkedProductIds; // 북마크한 마켓 상품 ID 목록
- 
-   // --- Trust System Fields ---
-   final int trustScore; // 신뢰 점수 (0-500, 기본 0)
- 
-   final String? phoneNumber; // 전화번호 (인증 시 높은 신뢰 점수 획득)
-   final int feedThanksReceived;   /// 피드 활동으로 받은 '감사' 수
-   final int marketThanksReceived;    /// 마켓 거래로 받은 '감사' 수
-   final int thanksReceived;   /// 전체 '감사' 수 (feed + market, UI 표시용)
-   
-   final int reportCount;
-   final bool isBanned; // 차단 여부 (true 시 계정 제한)
-   final List<String>? blockedUsers; // 차단 유저 목록 (uid 리스트)
-   final bool profileCompleted; // 기본 프로필 완성 여부
-   final Timestamp createdAt; // 가입 시각 (Firestore Timestamp)
-   final bool isDatingProfile; // 친구찾기 기능 활성화 여부 (ON/OFF)
--
-+  final int? age; // 실제 나이
-+  final String? ageRange; // 허용 나이대 범위
-+  final String? gender; // 성별
-+  final List<String>? findfriendProfileImages; // 친구찾기용 추가 이미지
-+  final bool isVisibleInList; // 내 프로필 노출 여부
-+  final List<String>? likesGiven; // 내가 좋아요 누른 유저 ID
-+  final List<String>? likesReceived; // 나를 좋아요한 유저 ID
-+  final List<Map<String, dynamic>>? friendRequests; // 친구 요청 상태
-+  final List<String>? friends; // 수락된 친구 ID
-+  final int likeCount; // 받은 좋아요 수
-+  
-   UserModel({
-     required this.uid,
-     required this.nickname,
-     required this.email,
-     this.photoUrl,
-     this.bio,
-     this.trustLevel = 'normal',
-     this.locationName,
-     this.locationParts,
-     this.geoPoint,
-     this.interests,
-     this.privacySettings,
-     this.postIds,
-     this.productIds,
-     this.bookmarkedPostIds,
-     this.bookmarkedProductIds,
-     this.trustScore = 0,
-     this.phoneNumber,
-     this.feedThanksReceived = 0,
-     this.marketThanksReceived = 0,
-     this.thanksReceived = 0,
-     this.reportCount = 0,
-     this.isBanned = false,
-     this.blockedUsers,
-     this.profileCompleted = false,
-     required this.createdAt,
-     required this.isDatingProfile,
-+    this.age,
-+    this.ageRange,
-+    this.gender,
-+    this.findfriendProfileImages,
-+    this.isVisibleInList = true,
-+    this.likesGiven,
-+    this.likesReceived,
-+    this.friendRequests,
-+    this.friends,
-+    this.likeCount = 0,
-   });
- 
-   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-     final data = doc.data() ?? {};
-     return UserModel(
-       uid: data['uid'] ?? '',
-       nickname: data['nickname'] ?? '',
-       email: data['email'] ?? '',
-       photoUrl: data['photoUrl'],
-       bio: data['bio'],
-       trustLevel: data['trustLevel'] ?? 'normal',
-       locationName: data['locationName'],
-       locationParts: data['locationParts'] != null
-           ? Map<String, dynamic>.from(data['locationParts'])
-           : null,
-       geoPoint: data['geoPoint'],
-       interests: data['interests'] != null
-           ? List<String>.from(data['interests'])
-           : null,
-       privacySettings: data['privacySettings'] != null
-           ? Map<String, dynamic>.from(data['privacySettings'])
-           : null,
-       postIds:
-           data['postIds'] != null ? List<String>.from(data['postIds']) : null,
-       productIds: data['productIds'] != null
-           ? List<String>.from(data['productIds'])
-           : null,
-       bookmarkedPostIds: data['bookmarkedPostIds'] != null
-           ? List<String>.from(data['bookmarkedPostIds'])
-           : null,
-       bookmarkedProductIds: data['bookmarkedProductIds'] != null
-           ? List<String>.from(data['bookmarkedProductIds'])
-           : null,
-       trustScore: data['trustScore'] ?? 0,
-       phoneNumber: data['phoneNumber'],
-       feedThanksReceived: data['feedThanksReceived'] ?? 0,
-       marketThanksReceived: data['marketThanksReceived'] ?? 0,
-       thanksReceived: data['thanksReceived'] ?? 0,
-       reportCount: data['reportCount'] ?? 0,
-       isBanned: data['isBanned'] ?? false,
-       blockedUsers: data['blockedUsers'] != null
-           ? List<String>.from(data['blockedUsers'])
-           : null,
-       profileCompleted: data['profileCompleted'] ?? false,
-+      age: data['age'],
-+      ageRange: data['ageRange'],
-+      gender: data['gender'],
-+      findfriendProfileImages: data['findfriend_profileImages'] != null
-+          ? List<String>.from(data['findfriend_profileImages'])
-+          : null,
-+      isVisibleInList: data['isVisibleInList'] ?? true,
-+      likesGiven: data['likesGiven'] != null
-+          ? List<String>.from(data['likesGiven'])
-+          : null,
-+      likesReceived: data['likesReceived'] != null
-+          ? List<String>.from(data['likesReceived'])
-+          : null,
-+      friendRequests: data['friendRequests'] != null
-+          ? List<Map<String, dynamic>>.from(data['friendRequests'])
-+          : null,
-+      friends:
-+          data['friends'] != null ? List<String>.from(data['friends']) : null,
-+      likeCount: data['likeCount'] ?? 0,
-       createdAt: data['createdAt'] is Timestamp
-           ? data['createdAt']
-           : (data['createdAt'] != null
-               ? Timestamp.fromMillisecondsSinceEpoch(data['createdAt'])
-               : Timestamp.now()),
-       isDatingProfile: data['isDatingProfile'] ?? false,
-     );
+     // 5. 우리 DB 어디에서도 해당 Kecamatan을 찾지 못한 경우
+     debugPrint("DB 오류: '$provName' 주에서 '$cleanKecName' Kecamatan을 찾을 수 없습니다.");
+     return null;
    }
  
-   Map<String, dynamic> toJson() {
-     return {
-       'uid': uid,
-       'nickname': nickname,
-       'email': email,
-       'photoUrl': photoUrl,
-       'bio': bio,
-       'trustLevel': trustLevel,
+ // 기존의 _createLocationParts 함수는 삭제합니다.
+ 
+   // Firestore에 사용자 위치 정보를 생성 또는 업데이트하는 통합 함수
+   Future<void> _updateUserLocation(String locationName,
+       Map<String, String> locationParts, GeoPoint geoPoint) async {
+     final user = FirebaseAuth.instance.currentUser;
+     if (user == null) return;
+ 
+     // .set(..., merge: true)를 사용하여, 문서가 없으면 생성하고 있으면 필드를 업데이트합니다.
+     await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
        'locationName': locationName,
        'locationParts': locationParts,
        'geoPoint': geoPoint,
-       'interests': interests,
-       'privacySettings': privacySettings,
-       'postIds': postIds,
-       'productIds': productIds,
-       'bookmarkedPostIds': bookmarkedPostIds,
-       'bookmarkedProductIds': bookmarkedProductIds,
-       'trustScore': trustScore,
-       'phoneNumber': phoneNumber,
-       'feedThanksReceived': feedThanksReceived,
-       'marketThanksReceived': marketThanksReceived,
-       'thanksReceived': thanksReceived,
-       'reportCount': reportCount,
-       'isBanned': isBanned,
-       'blockedUsers': blockedUsers,
-       'profileCompleted': profileCompleted,
-       'createdAt': createdAt,
-       'isDatingProfile': isDatingProfile,
-+      'age': age,
-+      'ageRange': ageRange,
-+      'gender': gender,
-+      'findfriend_profileImages': findfriendProfileImages,
-+      'isVisibleInList': isVisibleInList,
-+      'likesGiven': likesGiven,
-+      'likesReceived': likesReceived,
-+      'friendRequests': friendRequests,
-+      'friends': friends,
-+      'likeCount': likeCount,
-     };
-   }
- }
-diff --git a/lib/features/find_friends/data/find_friend_repository.dart b/lib/features/find_friends/data/find_friend_repository.dart
-new file mode 100644
-index 0000000000000000000000000000000000000000..48c2a34ecd71bce526922083faef72ed391440c5
---- /dev/null
-+++ b/lib/features/find_friends/data/find_friend_repository.dart
-@@ -0,0 +1,64 @@
-+// lib/features/find_friends/data/find_friend_repository.dart
-+
-+import 'package:cloud_firestore/cloud_firestore.dart';
-+
-+import '../../../core/models/friend_request_model.dart';
-+import '../../../core/models/user_model.dart';
-+
-+/// Firestore helper for FindFriend features.
-+class FindFriendRepository {
-+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-+
-+  CollectionReference<Map<String, dynamic>> get _users =>
-+      _firestore.collection('users');
-+  CollectionReference<Map<String, dynamic>> get _requests =>
-+      _firestore.collection('friend_requests');
-+
-+  Future<void> saveProfile(String uid, Map<String, dynamic> data) async {
-+    await _users.doc(uid).set(data, SetOptions(merge: true));
-+  }
-+
-+  Stream<List<UserModel>> getNearbyFriends(String kab) {
-+    return _users
-+        .where('isDatingProfile', isEqualTo: true)
-+        .where('isVisibleInList', isEqualTo: true)
-+        .where('neighborhoodVerified', isEqualTo: true)
-+        .where('locationParts.kab', isEqualTo: kab)
-+        .snapshots()
-+        .map((s) => s.docs.map(UserModel.fromFirestore).toList());
-+  }
-+
-+  Future<void> sendFriendRequest(String fromUserId, String toUserId) async {
-+    final existing = await _requests
-+        .where('fromUserId', isEqualTo: fromUserId)
-+        .where('toUserId', isEqualTo: toUserId)
-+        .get();
-+    if (existing.docs.isNotEmpty) return;
-+    await _requests.add({
-+      'fromUserId': fromUserId,
-+      'toUserId': toUserId,
-+      'status': 'pending',
-+      'createdAt': Timestamp.now(),
-+    });
-+  }
-+
-+  Future<void> respondRequest(String requestId, String status) async {
-+    await _requests.doc(requestId).update({'status': status});
-+  }
-+
-+  Stream<List<FriendRequestModel>> getReceivedRequests(String userId) {
-+    return _requests
-+        .where('toUserId', isEqualTo: userId)
-+        .snapshots()
-+        .map((s) =>
-+            s.docs.map(FriendRequestModel.fromFirestore).toList());
-+  }
-+
-+  Stream<List<FriendRequestModel>> getSentRequests(String userId) {
-+    return _requests
-+        .where('fromUserId', isEqualTo: userId)
-+        .snapshots()
-+        .map((s) =>
-+            s.docs.map(FriendRequestModel.fromFirestore).toList());
-+  }
-+}
-diff --git a/lib/features/find_friends/screens/find_friends_screen.dart b/lib/features/find_friends/screens/find_friends_screen.dart
-index f7fef0aaa7ba735b4bccfeb25b2f5052d6f64661..b7fafd2b522f28977ce60bc8c6964e21ea8e72bd 100644
---- a/lib/features/find_friends/screens/find_friends_screen.dart
-+++ b/lib/features/find_friends/screens/find_friends_screen.dart
-@@ -1,10 +1,42 @@
- import 'package:flutter/material.dart';
-+
- import '../../../core/models/user_model.dart';
-+import '../data/find_friend_repository.dart';
-+import '../widgets/findfriend_card.dart';
+       'neighborhoodVerified': true,
+     }, SetOptions(merge: true));
  
- class FindFriendsScreen extends StatelessWidget {
-   final UserModel? userModel;
-   const FindFriendsScreen({this.userModel, super.key});
-+
+     if (mounted) {
+       ScaffoldMessenger.of(context)
+           .showSnackBar(SnackBar(content: Text('location.success'.tr())));
+-      // 성공 후, 모든 이전 화면을 지우고 HomeScreen으로 이동합니다.
+-      // Navigator.of(context).pushAndRemoveUntil(
+-      //   MaterialPageRoute(builder: (context) => const HomeScreen()),
+-      //   (Route<dynamic> route) => false,
+-      // );
++      Navigator.pop(context, {
++        'locationName': locationName,
++        'locationParts': locationParts,
++        'geoPoint': geoPoint,
++      });
+     }
+   }
+ 
+   // 현재 GPS 위치로 주소 업데이트
+   Future<void> _setNeighborhoodWithGPS() async {
+     setState(() => _isLoading = true);
+ 
+     try {
+       // 1. 위치 서비스 활성화 여부 확인
+       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+       if (!serviceEnabled && mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+             content: Text('location.error'
+                 .tr(namedArgs: {'error': 'GPS service is disabled'}))));
+         setState(() => _isLoading = false);
+         return;
+       }
+ 
+       // 2. 위치 권한 요청
+       LocationPermission permission = await Geolocator.checkPermission();
+       if (permission == LocationPermission.denied) {
+         permission = await Geolocator.requestPermission();
+       }
+       if (permission == LocationPermission.deniedForever) {
+         if (mounted) {
+diff --git a/lib/features/marketplace/screens/product_edit_screen.dart b/lib/features/marketplace/screens/product_edit_screen.dart
+index c51acd62be4477f158b1c1fd3b685bb298f49380..164da6088af92f9d03c30f4d0b1b25d20e276cdc 100644
+--- a/lib/features/marketplace/screens/product_edit_screen.dart
++++ b/lib/features/marketplace/screens/product_edit_screen.dart
+@@ -1,38 +1,39 @@
+ import 'dart:io';
+ // import 'package:bling_app/features/marketplace/domain/product_model_old.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_storage/firebase_storage.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:flutter/material.dart';
+ import 'package:image_picker/image_picker.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ 
+ import '../../../core/models/product_model.dart';
+ import '../../../core/models/user_model.dart';
+ import '../../categories/domain/category.dart';
+ import '../../categories/screens/parent_category_screen.dart';
++import '../../location/screens/location_setting_screen.dart';
+ 
+ class ProductEditScreen extends StatefulWidget {
+ final ProductModel product;
+   const ProductEditScreen({super.key, required this.product});
+ 
    @override
--  Widget build(BuildContext context) =>
--      const Center(child: Text('Find Friends Screen'));
-+  Widget build(BuildContext context) {
-+    if (userModel == null || userModel!.locationParts == null) {
-+      return const Center(child: Text('Please create your FindFriend profile.'));
-+    }
-+
-+    final repo = FindFriendRepository();
-+    final kab = userModel!.locationParts!['kab'];
-+
-+    return StreamBuilder<List<UserModel>>(
-+      stream: repo.getNearbyFriends(kab),
-+      builder: (context, snapshot) {
-+        if (!snapshot.hasData) {
-+          return const Center(child: CircularProgressIndicator());
-+        }
-+
-+        final friends = snapshot.data!;
-+        if (friends.isEmpty) {
-+          return const Center(child: Text('No users'));
-+        }
-+
-+        return ListView.builder(
-+          itemCount: friends.length,
-+          itemBuilder: (context, index) {
-+            final user = friends[index];
-+            return FindFriendCard(user: user);
-+          },
-+        );
-+      },
-+    );
-+  }
+   State<ProductEditScreen> createState() => _ProductEditScreenState();
  }
-diff --git a/lib/features/find_friends/screens/findfriend_edit_screen.dart b/lib/features/find_friends/screens/findfriend_edit_screen.dart
-new file mode 100644
-index 0000000000000000000000000000000000000000..43883d294bc6b7e1cc3ad0870cb0922d884cbafa
---- /dev/null
-+++ b/lib/features/find_friends/screens/findfriend_edit_screen.dart
-@@ -0,0 +1,150 @@
-+// lib/features/find_friends/screens/findfriend_edit_screen.dart
-+
-+import 'dart:io';
-+
-+import 'package:cloud_firestore/cloud_firestore.dart';
-+import 'package:firebase_auth/firebase_auth.dart';
-+import 'package:firebase_storage/firebase_storage.dart';
-+import 'package:flutter/material.dart';
-+import 'package:image_picker/image_picker.dart';
-+
-+import '../../../core/models/user_model.dart';
-+
-+/// Screen for editing an existing FindFriend profile.
-+class FindFriendEditScreen extends StatefulWidget {
-+  final UserModel user;
-+  const FindFriendEditScreen({super.key, required this.user});
-+
-+  @override
-+  State<FindFriendEditScreen> createState() => _FindFriendEditScreenState();
-+}
-+
-+class _FindFriendEditScreenState extends State<FindFriendEditScreen> {
-+  late TextEditingController _ageController;
-+  late TextEditingController _ageRangeController;
-+  List<File> _newImages = [];
-+  late List<String> _existingImages;
-+  bool _isVisibleInList = true;
-+  bool _saving = false;
-+
-+  @override
-+  void initState() {
-+    super.initState();
-+    _ageController = TextEditingController(
-+        text: widget.user.age != null ? widget.user.age.toString() : '');
-+    _ageRangeController =
-+        TextEditingController(text: widget.user.ageRange ?? '');
-+    _existingImages = List<String>.from(widget.user.findfriendProfileImages ?? []);
-+    _isVisibleInList = widget.user.isVisibleInList;
-+  }
-+
-+  Future<void> _pickImage() async {
-+    final picker = ImagePicker();
-+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
-+    if (picked != null) {
-+      setState(() {
-+        _newImages.add(File(picked.path));
+ 
+ class _ProductEditScreenState extends State<ProductEditScreen> {
+   final _formKey = GlobalKey<FormState>();
+   final _titleController = TextEditingController();
+   final _priceController = TextEditingController();
+   final _descriptionController = TextEditingController();
+   final _addressController = TextEditingController();
+   final _transactionPlaceController = TextEditingController();
+ 
+   bool _isNegotiable = false;
+   List<String> _existingImageUrls = [];
+   final List<XFile> _images = [];
+   bool _isLoading = false;
+   Category? _selectedCategory;
+   String _condition = 'used';
+ 
+   @override
+@@ -82,50 +83,71 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
+   }
+ 
+   Future<void> _loadInitialCategory() async {
+     final doc = await FirebaseFirestore.instance
+         .collection('categories')
+         .doc(widget.product.categoryId)
+         .get();
+     if (doc.exists) {
+       setState(() {
+         _selectedCategory = Category.fromFirestore(doc);
+       });
+     }
+   }
+ 
+   void _selectCategory() async {
+     final result = await Navigator.of(context).push<Category>(
+       MaterialPageRoute(builder: (context) => const ParentCategoryScreen()),
+     );
+     if (result != null && mounted) {
+       setState(() {
+         _selectedCategory = result;
+       });
+     }
+   }
+ 
++  Future<void> _resetLocation() async {
++    final result = await Navigator.of(context).push<Map<String, dynamic>?>(
++      MaterialPageRoute(builder: (_) => const LocationSettingScreen()),
++    );
++    if (result != null) {
++      await FirebaseFirestore.instance
++          .collection('products')
++          .doc(widget.product.id)
++          .update({
++        'locationName': result['locationName'],
++        'locationParts': result['locationParts'],
++        'geoPoint': result['geoPoint'],
 +      });
++      if (mounted) {
++        setState(() {
++          _addressController.text = result['locationName'] ?? '';
++        });
++      }
 +    }
 +  }
 +
-+  Future<void> _save() async {
-+    if (_saving) return;
-+    final user = FirebaseAuth.instance.currentUser;
-+    if (user == null) return;
-+    setState(() => _saving = true);
-+
-+    final List<String> urls = List<String>.from(_existingImages);
-+    for (final file in _newImages) {
-+      final ref = FirebaseStorage.instance
-+          .ref()
-+          .child('findfriend_profiles')
-+          .child(user.uid)
-+          .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
-+      await ref.putFile(file);
-+      urls.add(await ref.getDownloadURL());
-+    }
-+
-+    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-+      'age': int.tryParse(_ageController.text),
-+      'ageRange': _ageRangeController.text.trim(),
-+      'findfriend_profileImages': urls,
-+      'isVisibleInList': _isVisibleInList,
-+    });
-+
-+    if (mounted) Navigator.of(context).pop();
-+  }
-+
-+  @override
-+  Widget build(BuildContext context) {
-+    final enable = _ageController.text.isNotEmpty &&
-+        _ageRangeController.text.isNotEmpty &&
-+        (_newImages.isNotEmpty || _existingImages.isNotEmpty);
-+
-+    return Scaffold(
-+      appBar: AppBar(title: const Text('Edit FindFriend Profile')),
-+      body: SingleChildScrollView(
-+        padding: const EdgeInsets.all(16),
-+        child: Column(
-+          crossAxisAlignment: CrossAxisAlignment.start,
-+          children: [
-+            TextField(
-+              controller: _ageController,
-+              keyboardType: TextInputType.number,
-+              decoration: const InputDecoration(labelText: 'Age'),
-+            ),
-+            const SizedBox(height: 12),
-+            TextField(
-+              controller: _ageRangeController,
-+              decoration: const InputDecoration(labelText: 'Age Range'),
-+            ),
-+            const SizedBox(height: 12),
-+            SwitchListTile(
-+              title: const Text('Hide my profile from list'),
-+              value: !_isVisibleInList,
-+              onChanged: (val) => setState(() => _isVisibleInList = !val),
-+            ),
-+            const SizedBox(height: 12),
-+            Wrap(
-+              spacing: 8,
-+              children: [
-+                ..._existingImages.map(
-+                  (url) => Stack(
-+                    children: [
-+                      Image.network(url, width: 80, height: 80, fit: BoxFit.cover),
-+                      Positioned(
-+                        right: 0,
-+                        top: 0,
-+                        child: IconButton(
-+                          icon: const Icon(Icons.close, size: 16),
-+                          onPressed: () {
-+                            setState(() => _existingImages.remove(url));
-+                          },
-+                        ),
-+                      ),
-+                    ],
-+                  ),
+   String _getCategoryName(BuildContext context, Category? category) {
+     if (category == null) return 'selectCategory'.tr();
+     final langCode = context.locale.languageCode;
+     switch (langCode) {
+       case 'ko':
+         return category.nameKo;
+       case 'id':
+         return category.nameId;
+       default:
+         return category.nameEn;
+     }
+   }
+ 
+   Future<void> _saveProduct() async {
+     if (_isLoading) return;
+     if (_existingImageUrls.isEmpty && _images.isEmpty) {
+       ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(content: Text('marketplace.errors.noPhoto'.tr())),
+       );
+       return;
+     }
+     if (!_formKey.currentState!.validate()) {
+       return;
+     }
+ 
+@@ -364,50 +386,57 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
+                 keyboardType: TextInputType.number,
+                 decoration: InputDecoration(
+                     labelText: 'marketplace.edit.priceHint'.tr()),
+                 validator: (value) =>
+                     value == null || value.isEmpty
+                         ? 'marketplace.errors.requiredField'.tr()
+                         : null,
+               ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _descriptionController,
+                 maxLines: 5,
+                 decoration: InputDecoration(
+                     labelText: 'marketplace.edit.descriptionHint'.tr()),
+                 validator: (value) =>
+                     value == null || value.isEmpty
+                         ? 'marketplace.errors.requiredField'.tr()
+                         : null,
+               ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _addressController,
+                 decoration: InputDecoration(
+                     labelText: 'marketplace.edit.addressHint'.tr()),
+               ),
++              Align(
++                alignment: Alignment.centerRight,
++                child: TextButton(
++                  onPressed: _resetLocation,
++                  child: Text('marketplace.edit.resetLocation'.tr()),
 +                ),
-+                ..._newImages.map((f) => Image.file(f, width: 80, height: 80, fit: BoxFit.cover)),
-+                if (_existingImages.length + _newImages.length < 9)
-+                  IconButton(onPressed: _pickImage, icon: const Icon(Icons.add_a_photo)),
-+              ],
-+            ),
-+          ],
-+        ),
-+      ),
-+      bottomNavigationBar: Padding(
-+        padding: const EdgeInsets.all(16),
-+        child: ElevatedButton(
-+          onPressed: enable ? _save : null,
-+          child: _saving
-+              ? const SizedBox(
-+                  width: 20,
-+                  height: 20,
-+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-+              : const Text('Save'),
-+        ),
-+      ),
-+    );
-+  }
-+}
-diff --git a/lib/features/find_friends/screens/findfriend_form_screen.dart b/lib/features/find_friends/screens/findfriend_form_screen.dart
-new file mode 100644
-index 0000000000000000000000000000000000000000..a961391a711d48ea0eac3b0176661ae2e9b35148
---- /dev/null
-+++ b/lib/features/find_friends/screens/findfriend_form_screen.dart
-@@ -0,0 +1,112 @@
-+// lib/features/find_friends/screens/findfriend_form_screen.dart
-+
-+import 'dart:io';
-+
-+import 'package:cloud_firestore/cloud_firestore.dart';
-+import 'package:firebase_auth/firebase_auth.dart';
-+import 'package:firebase_storage/firebase_storage.dart';
-+import 'package:flutter/material.dart';
-+import 'package:image_picker/image_picker.dart';
-+
-+/// Screen for creating the initial FindFriend profile when the user does not
-+/// have one yet.
-+class FindFriendFormScreen extends StatefulWidget {
-+  const FindFriendFormScreen({super.key});
-+
-+  @override
-+  State<FindFriendFormScreen> createState() => _FindFriendFormScreenState();
-+}
-+
-+class _FindFriendFormScreenState extends State<FindFriendFormScreen> {
-+  final _ageController = TextEditingController();
-+  final _ageRangeController = TextEditingController();
-+  List<File> _images = [];
-+  bool _saving = false;
-+
-+  Future<void> _pickImage() async {
-+    final picker = ImagePicker();
-+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
-+    if (picked != null) {
-+      setState(() {
-+        _images.add(File(picked.path));
-+      });
-+    }
-+  }
-+
-+  Future<void> _save() async {
-+    if (_saving || _images.isEmpty) return;
++              ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _transactionPlaceController,
+                 decoration: InputDecoration(labelText: 'address_detail_hint'.tr()),
+               ),
+               const SizedBox(height: 16),
+               Row(
+                 children: [
+                   Text('marketplace.edit.negotiable'.tr()),
+                   Switch(
+                     value: _isNegotiable,
+                     onChanged: (value) {
+                       setState(() {
+                         _isNegotiable = value;
+                       });
+                     },
+                   ),
+                 ],
+               ),
+               const SizedBox(height: 16),
+               DropdownButtonFormField<String>(
+                 value: _condition,
+                 decoration: const InputDecoration(labelText: 'Condition'),
+                 items: const [
+                   DropdownMenuItem(value: 'new', child: Text('New')),
+diff --git a/lib/features/marketplace/screens/product_registration_screen.dart b/lib/features/marketplace/screens/product_registration_screen.dart
+index 3b4a2ad4c0aeab229e34bd038fbf2d31f2addba9..0f15b7eb653d587efedfe7257d33e13d5e320f49 100644
+--- a/lib/features/marketplace/screens/product_registration_screen.dart
++++ b/lib/features/marketplace/screens/product_registration_screen.dart
+@@ -1,124 +1,100 @@
+ // lib/features/marketplace/presentation/screens/product_registration_screen.dart
+ 
+ import 'dart:io';
+ import 'package:bling_app/features/categories/domain/category.dart';
+ import 'package:bling_app/features/categories/screens/parent_category_screen.dart';
+ // import old model is replaced with ProductModel
+ import '../../../core/models/product_model.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:firebase_storage/firebase_storage.dart';
+ import 'package:flutter/material.dart';
+-import 'package:geocoding/geocoding.dart';
+-// import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
+-import 'package:geolocator/geolocator.dart';
+ import 'package:image_picker/image_picker.dart';
+-import 'package:permission_handler/permission_handler.dart';
+ import 'package:uuid/uuid.dart';
+ 
+ // ✅ [추가] UserModel을 사용하기 위해 import 합니다.
+ import '../../../../core/models/user_model.dart';
+ 
+ class ProductRegistrationScreen extends StatefulWidget {
+   const ProductRegistrationScreen({super.key});
+ 
+   @override
+   State<ProductRegistrationScreen> createState() =>
+       _ProductRegistrationScreenState();
+ }
+ 
+ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
+   final _formKey = GlobalKey<FormState>();
+   final _titleController = TextEditingController();
+   final _priceController = TextEditingController();
+   final _descriptionController = TextEditingController();
+   final _addressController = TextEditingController();
+   final _transactionPlaceController = TextEditingController();
+ 
+   List<XFile> _images = [];
+   bool _isNegotiable = false;
+   bool _isLoading = false;
+ 
+   Category? _selectedCategory;
+   // Position? _currentPosition;
+ 
+   // 현재 상품 상태 및 추가 입력값
+   String _condition = 'used';
+ 
+   @override
+   void initState() {
+     super.initState();
+-    _checkLocationAndPermission();
++    _initializeLocation();
+   }
+ 
+   @override
+   void dispose() {
+     _titleController.dispose();
+     _priceController.dispose();
+     _descriptionController.dispose();
+     _addressController.dispose();
+     _transactionPlaceController.dispose();
+     super.dispose();
+   }
+ 
+-  Future<void> _checkLocationAndPermission() async {
+-    final status = await Permission.location.status;
+-    if (status.isGranted) {
+-      await _getCurrentLocation();
+-    } else {
+-      final requestedStatus = await Permission.location.request();
+-      if (requestedStatus.isGranted) {
+-        await _getCurrentLocation();
+-      }
+-    }
+-  }
+-
+-  Future<void> _getCurrentLocation() async {
+-    try {
+-      Position position = await Geolocator.getCurrentPosition(
+-        desiredAccuracy: LocationAccuracy.high,
+-      );
+-      List<Placemark> placemarks = await placemarkFromCoordinates(
+-        position.latitude,
+-        position.longitude,
+-      );
+-
+-      if (placemarks.isNotEmpty && mounted) {
+-        final placemark = placemarks.first;
+-        final neighborhood = placemark.subLocality?.isNotEmpty == true
+-            ? placemark.subLocality
+-            : placemark.locality;
++  Future<void> _initializeLocation() async {
 +    final user = FirebaseAuth.instance.currentUser;
 +    if (user == null) return;
-+    setState(() => _saving = true);
-+
-+    final List<String> urls = [];
-+    for (final file in _images) {
-+      final ref = FirebaseStorage.instance
-+          .ref()
-+          .child('findfriend_profiles')
-+          .child(user.uid)
-+          .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
-+      await ref.putFile(file);
-+      urls.add(await ref.getDownloadURL());
-+    }
-+
-+    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-+      'isDatingProfile': true,
-+      'age': int.tryParse(_ageController.text),
-+      'ageRange': _ageRangeController.text.trim(),
-+      'findfriend_profileImages': urls,
-+    });
-+
-+    if (mounted) Navigator.of(context).pop();
-+  }
-+
-+  @override
-+  Widget build(BuildContext context) {
-+    final enable = _ageController.text.isNotEmpty &&
-+        _ageRangeController.text.isNotEmpty &&
-+        _images.isNotEmpty;
-+
-+    return Scaffold(
-+      appBar: AppBar(title: const Text('FindFriend Profile')),
-+      body: SingleChildScrollView(
-+        padding: const EdgeInsets.all(16),
-+        child: Column(
-+          crossAxisAlignment: CrossAxisAlignment.start,
-+          children: [
-+            TextField(
-+              controller: _ageController,
-+              keyboardType: TextInputType.number,
-+              decoration: const InputDecoration(labelText: 'Age'),
-+            ),
-+            const SizedBox(height: 12),
-+            TextField(
-+              controller: _ageRangeController,
-+              decoration: const InputDecoration(labelText: 'Age Range'),
-+            ),
-+            const SizedBox(height: 12),
-+            Wrap(
-+              spacing: 8,
-+              children: [
-+                ..._images.map((f) => Image.file(f, width: 80, height: 80, fit: BoxFit.cover)),
-+                if (_images.length < 9)
-+                  IconButton(onPressed: _pickImage, icon: const Icon(Icons.add_a_photo)),
-+              ],
-+            ),
-+          ],
-+        ),
-+      ),
-+      bottomNavigationBar: Padding(
-+        padding: const EdgeInsets.all(16),
-+        child: ElevatedButton(
-+          onPressed: enable ? _save : null,
-+          child: _saving
-+              ? const SizedBox(
-+                  width: 20,
-+                  height: 20,
-+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-+              : const Text('Save'),
-+        ),
-+      ),
-+    );
-+  }
-+}
-diff --git a/lib/features/find_friends/widgets/findfriend_card.dart b/lib/features/find_friends/widgets/findfriend_card.dart
-new file mode 100644
-index 0000000000000000000000000000000000000000..66b360af9019386255cf64f85f3e0519b2ca5b9c
---- /dev/null
-+++ b/lib/features/find_friends/widgets/findfriend_card.dart
-@@ -0,0 +1,51 @@
-+// lib/features/find_friends/widgets/findfriend_card.dart
-+
-+import 'package:flutter/material.dart';
-+
-+import '../../../core/models/user_model.dart';
-+
-+/// Card displaying basic information for a FindFriend profile.
-+class FindFriendCard extends StatelessWidget {
-+  final UserModel user;
-+  const FindFriendCard({super.key, required this.user});
-+
-+  @override
-+  Widget build(BuildContext context) {
-+    return Card(
-+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-+      child: Padding(
-+        padding: const EdgeInsets.all(16.0),
-+        child: Row(
-+          children: [
-+            CircleAvatar(
-+              radius: 30,
-+              backgroundImage: user.photoUrl != null
-+                  ? NetworkImage(user.photoUrl!)
-+                  : null,
-+              child:
-+                  user.photoUrl == null ? const Icon(Icons.person) : null,
-+            ),
-+            const SizedBox(width: 16),
-+            Expanded(
-+              child: Column(
-+                crossAxisAlignment: CrossAxisAlignment.start,
-+                children: [
-+                  Text(user.nickname,
-+                      style: const TextStyle(
-+                          fontSize: 16, fontWeight: FontWeight.bold)),
-+                  if (user.age != null)
-+                    Text('${user.age}',
-+                        style: const TextStyle(fontSize: 14)),
-+                  if (user.locationName != null)
-+                    Text(user.locationName!,
-+                        style:
-+                            const TextStyle(fontSize: 12, color: Colors.grey)),
-+                ],
-+              ),
-+            ),
-+          ],
-+        ),
-+      ),
-+    );
-+  }
-+}
+ 
++    final doc = await FirebaseFirestore.instance
++        .collection('users')
++        .doc(user.uid)
++        .get();
++    if (doc.exists) {
++      final userModel = UserModel.fromFirestore(doc);
++      if (mounted) {
+         setState(() {
+-          _addressController.text = neighborhood ?? '';
+-          // _currentPosition = position;
++          _addressController.text = userModel.locationName ?? '';
+         });
+       }
+-    } catch (e) {
+-      // 위치 정보 가져오기 실패 시 처리
+     }
+   }
+ 
+   void _selectCategory() async {
+     final result = await Navigator.of(context).push<Category>(
+       MaterialPageRoute(builder: (context) => const ParentCategoryScreen()),
+     );
+ 
+     if (result != null && mounted) {
+       setState(() {
+         _selectedCategory = result;
+       });
+     }
+   }
+ 
+   Future<void> _pickImages() async {
+     final pickedImages = await ImagePicker().pickMultiImage(limit: 10);
+     if (pickedImages.isNotEmpty) {
+       setState(() {
+         _images = pickedImages;
+       });
+     }
+   }
+ 
+   Future<void> _submitProduct() async {
+diff --git a/lib/features/my_bling/screens/profile_edit_screen.dart b/lib/features/my_bling/screens/profile_edit_screen.dart
+index e4603fb5158af34d848320dc727d7ea30d72e56c..7a516a4e2806d7cbdfef4d370ce7f23439b69f8f 100644
+--- a/lib/features/my_bling/screens/profile_edit_screen.dart
++++ b/lib/features/my_bling/screens/profile_edit_screen.dart
+@@ -234,66 +234,64 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
+                               ),
+                             ],
+                           ),
+                         ),
+                         const SizedBox(height: 24),
+                         TextField(
+                           controller: _nicknameController,
+                           decoration: InputDecoration(
+                               labelText: 'profileEdit.nicknameHint'.tr()),
+                         ),
+                         const SizedBox(height: 16),
+                         TextField(
+                           controller: _phoneController,
+                           keyboardType: TextInputType.phone,
+                           decoration: InputDecoration(
+                               labelText: 'profileEdit.phoneHint'.tr()),
+                         ),
+                         const SizedBox(height: 16),
+                         TextField(
+                           controller: _bioController,
+                           decoration: InputDecoration(
+                               labelText: 'profileEdit.bioHint'.tr()),
+                           maxLines: 3,
+                         ),
+                         const SizedBox(height: 24),
+-                        Row(
+-                          children: [
+-                            Expanded(
+-                              child: Text(
+-                                'profileEdit.locationTitle'.tr(),
+-                                style: theme.textTheme.titleMedium,
+-                              ),
+-                            ),
+-                            TextButton(
+-                              onPressed: _openLocationSetting,
+-                              child: Text('profileEdit.changeLocation'.tr()),
+-                            ),
+-                          ],
++                        ListTile(
++                          contentPadding: EdgeInsets.zero,
++                          title: Text(
++                            'profileEdit.locationTitle'.tr(),
++                            style: theme.textTheme.titleMedium,
++                          ),
++                          subtitle: Text(
++                              _locationName ?? 'location.locationNotSet'.tr()),
++                          trailing: TextButton(
++                            onPressed: _openLocationSetting,
++                            child: Text('profileEdit.changeLocation'.tr()),
++                          ),
+                         ),
+-                        const SizedBox(height: 8),
+-                        Text(_locationName ?? 'location.locationNotSet'.tr()),
++                        const SizedBox(height: 16),
+                         const SizedBox(height: 24),
+                         // const Divider(),
+                         const SizedBox(height: 16),
+                         Text('profileEdit.interests.title'.tr(),
+                             style: theme.textTheme.titleMedium),
+                         const SizedBox(height: 8),
+                         Row(
+                           children: [
+                             Expanded(
+                               child: TextField(
+                                 controller: _interestController,
+                                 decoration: InputDecoration(
+                                     hintText:
+                                         'profileEdit.interests.hint'.tr(),
+                                         hintStyle: const TextStyle(color: Colors.grey),),
+                                 onSubmitted: (_) => _addInterest(),
+                               ),
+                             ),
+                             IconButton(
+                               icon: const Icon(Icons.add),
+                               onPressed: _addInterest,
+                             ),
+                           ],
+                         ),
+                         const SizedBox(height: 8),

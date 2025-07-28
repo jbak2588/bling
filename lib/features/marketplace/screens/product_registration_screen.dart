@@ -10,11 +10,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-// import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 // ✅ [추가] UserModel을 사용하기 위해 import 합니다.
@@ -49,7 +45,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   @override
   void initState() {
     super.initState();
-    _checkLocationAndPermission();
+    _initializeLocation();
   }
 
   @override
@@ -62,41 +58,21 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
     super.dispose();
   }
 
-  Future<void> _checkLocationAndPermission() async {
-    final status = await Permission.location.status;
-    if (status.isGranted) {
-      await _getCurrentLocation();
-    } else {
-      final requestedStatus = await Permission.location.request();
-      if (requestedStatus.isGranted) {
-        await _getCurrentLocation();
-      }
-    }
-  }
+  Future<void> _initializeLocation() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-  Future<void> _getCurrentLocation() async {
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      if (placemarks.isNotEmpty && mounted) {
-        final placemark = placemarks.first;
-        final neighborhood = placemark.subLocality?.isNotEmpty == true
-            ? placemark.subLocality
-            : placemark.locality;
-
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    if (doc.exists) {
+      final userModel = UserModel.fromFirestore(doc);
+      if (mounted) {
         setState(() {
-          _addressController.text = neighborhood ?? '';
-          // _currentPosition = position;
+          _addressController.text = userModel.locationName ?? '';
         });
       }
-    } catch (e) {
-      // 위치 정보 가져오기 실패 시 처리
     }
   }
 
