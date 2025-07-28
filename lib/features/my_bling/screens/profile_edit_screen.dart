@@ -256,22 +256,20 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
                           maxLines: 3,
                         ),
                         const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'profileEdit.locationTitle'.tr(),
-                                style: theme.textTheme.titleMedium,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: _openLocationSetting,
-                              child: Text('profileEdit.changeLocation'.tr()),
-                            ),
-                          ],
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            'profileEdit.locationTitle'.tr(),
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          subtitle: Text(
+                              _locationName ?? 'location.locationNotSet'.tr()),
+                          trailing: TextButton(
+                            onPressed: _openLocationSetting,
+                            child: Text('profileEdit.changeLocation'.tr()),
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(_locationName ?? 'location.locationNotSet'.tr()),
+                        const SizedBox(height: 16),
                         const SizedBox(height: 24),
                         // const Divider(),
                         const SizedBox(height: 16),
