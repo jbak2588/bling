@@ -23,25 +23,86 @@ class _LocationSettingScreenState extends State<LocationSettingScreen> {
       GoogleMapsPlaces(apiKey: ApiKeys.googleApiKey);
   bool _isLoading = false;
 
-  // 주소 정보를 locationParts 맵으로 변환하는 Helper 함수
-  Map<String, String> _createLocationParts(List<AddressComponent> components) {
-    final parts = <String, String>{};
+  // [최종 해결 버전] DB를 기준으로 주소를 역추적하는 '상향식' 검증 함수
+  Future<Map<String, String?>?> _buildCorrectLocationParts(
+      List<AddressComponent> components) async {
+    // 1. Google API에서 필요한 최소 정보(prov, kec, kel)를 추출합니다.
+    String? provName;
+    String? kecName;
+    String? kelName;
+
     for (var component in components) {
       final types = component.types;
       if (types.contains('administrative_area_level_1')) {
-        parts['prov'] = component.longName;
-      } else if (types.contains('administrative_area_level_2')) {
-        parts['kab'] = component.longName;
-      } else if (types.contains('locality') ||
+        provName = component.longName;
+      } else if (types.contains('administrative_area_level_3') ||
+          types.contains('locality') ||
           types.contains('sublocality_level_1')) {
-        parts['kec'] = component.longName;
+        kecName = component.longName;
       } else if (types.contains('administrative_area_level_4') ||
           types.contains('sublocality_level_2')) {
-        parts['kel'] = component.longName;
+        kelName = component.longName;
       }
     }
-    return parts;
+
+    // 2. 필수 정보가 없으면 진행할 수 없으므로 null을 반환합니다.
+    if (provName == null || kecName == null) {
+      debugPrint("Provinsi 또는 Kecamatan 정보를 찾을 수 없습니다.");
+      return null;
+    }
+
+    // [핵심 수정] kecName에서도 "Kecamatan " 접두사를 제거합니다.
+    final cleanKecName = kecName.replaceFirst('Kecamatan ', '').trim();
+
+    final provDocRef =
+        FirebaseFirestore.instance.collection('provinces').doc(provName);
+
+    // 3. 'kota' 컬렉션을 먼저 탐색합니다.
+    final kotaSnapshot = await provDocRef.collection('kota').get();
+    for (final kotaDoc in kotaSnapshot.docs) {
+      final kecSnapshot = await kotaDoc.reference
+          .collection('kecamatan')
+          .doc(cleanKecName)
+          .get();
+      if (kecSnapshot.exists) {
+        debugPrint(
+            "DB 검증: Kota '${kotaDoc.id}'에서 Kecamatan '$cleanKecName'을 찾았습니다.");
+        return {
+          'prov': provName,
+          'kota': kotaDoc.id,
+          'kab': null,
+          'kec': cleanKecName,
+          'kel': kelName,
+        };
+      }
+    }
+
+    // 4. 'kota'에 없으면, 'kabupaten' 컬렉션을 탐색합니다.
+    final kabSnapshot = await provDocRef.collection('kabupaten').get();
+    for (final kabDoc in kabSnapshot.docs) {
+      final kecSnapshot = await kabDoc.reference
+          .collection('kecamatan')
+          .doc(cleanKecName)
+          .get();
+      if (kecSnapshot.exists) {
+        debugPrint(
+            "DB 검증: Kabupaten '${kabDoc.id}'에서 Kecamatan '$cleanKecName'을 찾았습니다.");
+        return {
+          'prov': provName,
+          'kota': null,
+          'kab': kabDoc.id,
+          'kec': cleanKecName,
+          'kel': kelName,
+        };
+      }
+    }
+
+    // 5. 우리 DB 어디에서도 해당 Kecamatan을 찾지 못한 경우
+    debugPrint("DB 오류: '$provName' 주에서 '$cleanKecName' Kecamatan을 찾을 수 없습니다.");
+    return null;
   }
+
+// 기존의 _createLocationParts 함수는 삭제합니다.
 
   // Firestore에 사용자 위치 정보를 생성 또는 업데이트하는 통합 함수
   Future<void> _updateUserLocation(String locationName,
@@ -111,21 +172,53 @@ class _LocationSettingScreenState extends State<LocationSettingScreen> {
 
         if (mounted && response.isOkay && response.results.isNotEmpty) {
           final place = response.results.first;
-          final detailResult =
-              await _places.getDetailsByPlaceId(place.placeId);
+          final detailResult = await _places.getDetailsByPlaceId(place.placeId);
 
           if (mounted &&
               detailResult.isOkay &&
               detailResult.result.geometry != null) {
             final location = detailResult.result.geometry!.location;
             final components = detailResult.result.addressComponents;
-            final locationMap = _createLocationParts(components);
-            final fullAddress = detailResult.result.formattedAddress ??
-                place.formattedAddress ??
-                place.name;
+            // final locationMap = _createLocationParts(components);
+
+            // [핵심 수정] 새로운 DB 검증 함수를 호출하여 정확한 locationParts를 생성합니다.
+            final Map<String, String?>? locationMap =
+                await _buildCorrectLocationParts(components);
+
+            // 만약 DB에서 정확한 주소를 찾지 못하면, 사용자에게 알리고 중단합니다.
+            if (locationMap == null) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text("정확한 주소를 찾을 수 없습니다. 다른 위치에서 시도해주세요.")));
+              }
+              setState(() => _isLoading = false);
+              return;
+            }
+
+            // [핵심 수정] 검증된 locationMap을 기반으로 직접 fullAddress를 생성합니다.
+            final addressParts = [
+              locationMap['kel'],
+              locationMap['kec'],
+              locationMap['kab'] ??
+                  locationMap['kota'], // kab이나 kota 중 null이 아닌 값 사용
+              locationMap['prov'],
+            ];
+            // null이 아닌 주소 부분만 합쳐서 문자열로 만듭니다.
+            final fullAddress = addressParts.where((p) => p != null).join(', ');
+
             final geoPoint = GeoPoint(location.lat, location.lng);
 
-            await _updateUserLocation(fullAddress, locationMap, geoPoint);
+            // ✅ [수정] Map<String, String?>을 Map<String, String>으로 변환합니다.
+            final filteredLocationMap = <String, String>{};
+            locationMap.forEach((key, value) {
+              if (value != null) {
+                filteredLocationMap[key] = value;
+              }
+            });
+
+            // ✅ [수정] 다시 _updateUserLocation 함수를 호출하도록 변경하여 코드 중복을 없애고 에러를 해결합니다.
+            await _updateUserLocation(
+                fullAddress, filteredLocationMap, geoPoint);
           }
         } else {
           throw Exception("Could not find address for current location.");
@@ -143,7 +236,6 @@ class _LocationSettingScreenState extends State<LocationSettingScreen> {
   }
 
   // 검색어 입력 시 자동완성 목록을 가져오는 함수
-
 
   @override
   Widget build(BuildContext context) {
