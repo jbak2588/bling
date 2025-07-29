@@ -23,7 +23,8 @@ import '../../../core/models/user_model.dart';
 import '../../../core/utils/address_formatter.dart';
 import '../auth/screens/profile_edit_screen.dart';
 import '../local_news/screens/local_news_screen.dart';
-import '../location/screens/location_setting_screen.dart';
+// import '../location/screens/location_setting_screen.dart';
+import '../location/screens/location_filter_screen.dart';
 import '../marketplace/screens/marketplace_screen.dart';
 import '../admin/screens/data_fix_screen.dart';
 
@@ -53,7 +54,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _bottomNavIndex = 0;
 
   UserModel? _userModel;
-  String _currentAddress = "";
+  Map<String, String?>? _activeLocationFilter;
+  String _currentAddress = "Loading...";
   bool _isLocationLoading = true;
   StreamSubscription? _userSubscription;
   StreamSubscription? _unreadChatsSubscription;
@@ -161,8 +163,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     switch (currentTabIndex) {
       case 0:
       case 1:
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => const CreateLocalNewsScreen()));
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const CreateLocalNewsScreen()));
         break;
       case 2:
         Navigator.of(context).push(MaterialPageRoute(
@@ -171,6 +173,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       default:
         debugPrint('\x1B[33m${currentTabIndex + 1}번 탭의 등록 기능이 호출되었습니다.\x1B[0m');
     }
+  }
+
+  // ✅ [추가] AppBar 타이틀을 동적으로 생성하는 함수
+  String getAppBarTitle() {
+    if (_isLocationLoading) {
+      return 'main.appBar.locationLoading'.tr();
+    }
+    if (_activeLocationFilter != null) {
+      // 필터 값 중 가장 구체적인 지역 이름만 찾아 반환
+      return (_activeLocationFilter!['kel'] ??
+              _activeLocationFilter!['kec'] ??
+              _activeLocationFilter!['kab'] ??
+              _activeLocationFilter!['kota'] ??
+              _activeLocationFilter!['prov'] ??
+              'Filter Applied')
+          .capitalize();
+    }
+    // 필터가 없으면 기존 주소 반환
+    return AddressFormatter.toSingkatan(_currentAddress);
   }
 
   // SliverAppBar로 변경하여 스크롤 최적화 적용
@@ -194,8 +215,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
       ),
       title: InkWell(
-        onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const LocationSettingScreen())),
+        onTap: () async {
+          final result = await Navigator.of(context).push<Map<String, String?>>(
+            MaterialPageRoute(
+                builder: (_) => LocationFilterScreen(userModel: _userModel)),
+          );
+          if (result != null && mounted) {
+            setState(() => _activeLocationFilter = result);
+          }
+        },
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -205,9 +233,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                _isLocationLoading
-                    ? 'main.appBar.locationLoading'.tr()
-                    : AddressFormatter.toSingkatan(_currentAddress),
+                // _isLocationLoading
+                //     ? 'main.appBar.locationLoading'.tr()
+                //     : AddressFormatter.toSingkatan(_currentAddress),
+                getAppBarTitle(),
                 style:
                     const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 overflow: TextOverflow.ellipsis,
@@ -262,14 +291,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildHomePage() {
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            _buildHomeSliverAppBar(),
-          ],
+        _buildHomeSliverAppBar(),
+      ],
       body: TabBarView(
         controller: _tabController,
         children: [
           MainFeedScreen(userModel: _userModel),
-          LocalNewsScreen(userModel: _userModel),
-          MarketplaceScreen(userModel: _userModel),
+          LocalNewsScreen(
+              userModel: _userModel, locationFilter: _activeLocationFilter),
+          MarketplaceScreen(
+              userModel: _userModel, locationFilter: _activeLocationFilter),
           FindFriendsScreen(userModel: _userModel),
           ClubsScreen(userModel: _userModel),
           JobsScreen(userModel: _userModel),
@@ -356,54 +387,65 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           : ListView(
               padding: EdgeInsets.zero,
               children: [
-                DrawerHeader(
-                  decoration: const BoxDecoration(color: Color(0xFF6A1B9A)),
-                  margin: EdgeInsets.zero,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundImage: (userModel.photoUrl != null &&
-                                userModel.photoUrl!.startsWith('http'))
-                            ? NetworkImage(userModel.photoUrl!)
-                            : null,
-                        child: (userModel.photoUrl == null ||
-                                !userModel.photoUrl!.startsWith('http'))
-                            ? const Icon(Icons.person, size: 30)
-                            : null,
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Text(userModel.nickname,
-                              style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 18,
-                                  color: Colors.white),
-                              overflow: TextOverflow.ellipsis),
-                          const SizedBox(width: 8),
-                          TrustLevelBadge(
-                              trustLevel: userModel.trustLevel, showText: true),
-                          const SizedBox(width: 6),
-                          Text('(${userModel.trustScore})',
-                              style: GoogleFonts.inter(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14)),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(userModel.email,
-                          style: GoogleFonts.inter(
-                              color: Colors.white70, fontSize: 14),
-                          overflow: TextOverflow.ellipsis),
-                    ],
-                  ),
-                ),
+               // ✅ [수정] 오버플로우 방지를 위해 Row와 Expanded 구조로 변경
+               DrawerHeader(
+                 decoration: const BoxDecoration(color: Color(0xFF6A1B9A)),
+                 margin: EdgeInsets.zero,
+                 padding:
+                     const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                 child: Row(
+                   crossAxisAlignment: CrossAxisAlignment.center,
+                   children: [
+                     CircleAvatar(
+                       radius: 30,
+                       backgroundImage: (userModel.photoUrl != null &&
+                               userModel.photoUrl!.startsWith('http'))
+                           ? NetworkImage(userModel.photoUrl!)
+                           : null,
+                       child: (userModel.photoUrl == null ||
+                               !userModel.photoUrl!.startsWith('http'))
+                           ? const Icon(Icons.person, size: 30)
+                           : null,
+                     ),
+                     const SizedBox(width: 16),
+                     Expanded( // 남은 공간을 모두 차지하도록 설정
+                       child: Column(
+                         mainAxisSize: MainAxisSize.min,
+                         crossAxisAlignment: CrossAxisAlignment.start,
+                         children: [
+                           Wrap(
+                             spacing: 8.0,
+                             crossAxisAlignment: WrapCrossAlignment.center,
+                             children: [
+                               Text(userModel.nickname,
+                                   style: GoogleFonts.inter(
+                                       fontWeight: FontWeight.w600,
+                                       fontSize: 18,
+                                       color: Colors.white)),
+                               TrustLevelBadge(
+                                   trustLevel: userModel.trustLevel, showText: true),
+                               Text('(${userModel.trustScore})',
+                                   style: GoogleFonts.inter(
+                                       color: Colors.white70,
+                                       fontWeight: FontWeight.w600,
+                                       fontSize: 14)),
+                             ],
+                           ),
+                           const SizedBox(height: 6),
+                           Text(
+                             userModel.email,
+                             style: GoogleFonts.inter(
+                                 color: Colors.white70, fontSize: 14),
+                             overflow: TextOverflow.ellipsis, // 긴 이메일은 ... 처리
+                           ),
+                         ],
+                       ),
+                     ),
+                   ],
+                 ),
+               ),
+
+               
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 8.0),
@@ -499,6 +541,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       trailing: Icon(isCompleted ? Icons.check_circle : Icons.cancel,
           color: isCompleted ? Colors.green : Colors.grey, size: 22),
     );
+  }
+}
+
+// ✅ [추가] capitalize 유틸리티 함수
+extension StringExtension on String {
+  String capitalize() {
+    if (isEmpty) return "";
+    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }
 

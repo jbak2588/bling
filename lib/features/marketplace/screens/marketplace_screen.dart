@@ -9,9 +9,9 @@ import '../../../core/models/product_model.dart';
 import 'product_detail_screen.dart';
 
 class MarketplaceScreen extends StatefulWidget {
-  // ✅ [수정] UserModel을 받도록 수정
   final UserModel? userModel;
-  const MarketplaceScreen({super.key, this.userModel});
+  final Map<String, String?>? locationFilter;
+  const MarketplaceScreen({super.key, this.userModel, this.locationFilter});
 
   @override
   State<MarketplaceScreen> createState() => _MarketplaceScreenState();
@@ -40,35 +40,53 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     }
   }
 
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyLocationFilter(
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
+    final filter = widget.locationFilter;
+    if (filter == null) return allDocs;
+
+    String? key;
+    if (filter['kel'] != null) {
+      key = 'kel';
+    } else if (filter['kec'] != null) {
+      key = 'kec';
+    } else if (filter['kab'] != null) {
+      key = 'kab';
+    } else if (filter['kota'] != null) {
+      key = 'kota';
+    } else if (filter['prov'] != null) {
+      key = 'prov';
+    }
+    if (key == null) return allDocs;
+
+    final value = filter[key]!.toLowerCase();
+    return allDocs
+        .where((doc) =>
+            (doc.data()['locationParts']?[key] ?? '')
+                .toString()
+                .toLowerCase() ==
+            value)
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     // ✅ [수정] 쿼리 생성 로직을 build 메소드 안으로 이동하고, Tangerang 권역을 모두 포함하도록 수정
     Query<Map<String, dynamic>> buildQuery() {
-      final userKabupaten = widget.userModel?.locationParts?['kab'];
+      final userProv = widget.userModel?.locationParts?['prov'];
 
       Query<Map<String, dynamic>> query =
           FirebaseFirestore.instance.collection('products');
 
-      List<String> targetLocations = [];
-
-      // ✅ 사용자의 위치가 'Tangerang', 'Tangerang City', 'Tangerang Selatan' 중 하나이면 모두 조회
-      if (userKabupaten == 'Tangerang' ||
-          userKabupaten == 'Tangerang City' ||
-          userKabupaten == 'Tangerang Selatan') {
-        targetLocations = ['Tangerang', 'Tangerang City', 'Tangerang Selatan'];
-      } else if (userKabupaten != null && userKabupaten.isNotEmpty) {
-        targetLocations = [userKabupaten];
-      }
-
-      if (targetLocations.isNotEmpty) {
-        query = query.where('locationParts.kab', whereIn: targetLocations);
+      if (userProv != null && userProv.isNotEmpty) {
+        query = query.where('locationParts.prov', isEqualTo: userProv);
       }
 
       return query.orderBy('createdAt', descending: true);
     }
 
     // ✅ [수정] 위치 정보가 없는 경우를 위한 UI 처리
-    if (widget.userModel?.locationParts?['kab'] == null) {
+    if (widget.userModel?.locationParts?['prov'] == null) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(24.0),
@@ -101,7 +119,8 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
             );
           }
 
-          final productsDocs = snapshot.data!.docs;
+          final allDocs = snapshot.data!.docs;
+          final productsDocs = _applyLocationFilter(allDocs);
           return ListView.separated(
             itemCount: productsDocs.length,
             separatorBuilder: (context, index) => const Divider(
