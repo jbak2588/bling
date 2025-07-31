@@ -5,9 +5,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/models/friend_request_model.dart';
 import '../../../core/models/user_model.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+
 /// Firestore helper for FindFriend features.
 class FindFriendRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> updateUserProfile(String userId, Map<String, dynamic> data) async {
+    await _firestore.collection('users').doc(userId).update(data);
+  }
 
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection('users');
@@ -41,6 +47,23 @@ class FindFriendRepository {
       'createdAt': Timestamp.now(),
     });
   }
+
+  Stream<List<UserModel>> getUsersForFindFriends() {
+  final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+  return _firestore
+      .collection('users')
+      // 'privacySettings.findFriendEnabled'가 true인 문서만 필터링
+      .where('privacySettings.findFriendEnabled', isEqualTo: true)
+      // 현재 로그인한 사용자의 uid와 다른 문서만 필터링
+      .where('uid', isNotEqualTo: currentUserId)
+      .snapshots()
+      .map((snapshot) {
+    return snapshot.docs.map((doc) {
+      return UserModel.fromJson(doc.data()); // as Map<String, dynamic> 부분은 생략 가능
+    }).toList();
+  });
+}
 
   Future<void> respondRequest(String requestId, String status) async {
     await _requests.doc(requestId).update({'status': status});
