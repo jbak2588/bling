@@ -301,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               userModel: _userModel, locationFilter: _activeLocationFilter),
           MarketplaceScreen(
               userModel: _userModel, locationFilter: _activeLocationFilter),
-          FindFriendsScreen(userModel: _userModel),
+          const FindFriendsScreen(),
           ClubsScreen(userModel: _userModel),
           JobsScreen(userModel: _userModel),
           LocalStoresScreen(userModel: _userModel),
@@ -387,65 +387,66 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           : ListView(
               padding: EdgeInsets.zero,
               children: [
-               // ✅ [수정] 오버플로우 방지를 위해 Row와 Expanded 구조로 변경
-               DrawerHeader(
-                 decoration: const BoxDecoration(color: Color(0xFF6A1B9A)),
-                 margin: EdgeInsets.zero,
-                 padding:
-                     const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                 child: Row(
-                   crossAxisAlignment: CrossAxisAlignment.center,
-                   children: [
-                     CircleAvatar(
-                       radius: 30,
-                       backgroundImage: (userModel.photoUrl != null &&
-                               userModel.photoUrl!.startsWith('http'))
-                           ? NetworkImage(userModel.photoUrl!)
-                           : null,
-                       child: (userModel.photoUrl == null ||
-                               !userModel.photoUrl!.startsWith('http'))
-                           ? const Icon(Icons.person, size: 30)
-                           : null,
-                     ),
-                     const SizedBox(width: 16),
-                     Expanded( // 남은 공간을 모두 차지하도록 설정
-                       child: Column(
-                         mainAxisSize: MainAxisSize.min,
-                         crossAxisAlignment: CrossAxisAlignment.start,
-                         children: [
-                           Wrap(
-                             spacing: 8.0,
-                             crossAxisAlignment: WrapCrossAlignment.center,
-                             children: [
-                               Text(userModel.nickname,
-                                   style: GoogleFonts.inter(
-                                       fontWeight: FontWeight.w600,
-                                       fontSize: 18,
-                                       color: Colors.white)),
-                               TrustLevelBadge(
-                                   trustLevel: userModel.trustLevel, showText: true),
-                               Text('(${userModel.trustScore})',
-                                   style: GoogleFonts.inter(
-                                       color: Colors.white70,
-                                       fontWeight: FontWeight.w600,
-                                       fontSize: 14)),
-                             ],
-                           ),
-                           const SizedBox(height: 6),
-                           Text(
-                             userModel.email,
-                             style: GoogleFonts.inter(
-                                 color: Colors.white70, fontSize: 14),
-                             overflow: TextOverflow.ellipsis, // 긴 이메일은 ... 처리
-                           ),
-                         ],
-                       ),
-                     ),
-                   ],
-                 ),
-               ),
+                // ✅ [수정] 오버플로우 방지를 위해 Row와 Expanded 구조로 변경
+                DrawerHeader(
+                  decoration: const BoxDecoration(color: Color(0xFF6A1B9A)),
+                  margin: EdgeInsets.zero,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundImage: (userModel.photoUrl != null &&
+                                userModel.photoUrl!.startsWith('http'))
+                            ? NetworkImage(userModel.photoUrl!)
+                            : null,
+                        child: (userModel.photoUrl == null ||
+                                !userModel.photoUrl!.startsWith('http'))
+                            ? const Icon(Icons.person, size: 30)
+                            : null,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        // 남은 공간을 모두 차지하도록 설정
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Wrap(
+                              spacing: 8.0,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Text(userModel.nickname,
+                                    style: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 18,
+                                        color: Colors.white)),
+                                TrustLevelBadge(
+                                    trustLevel: userModel.trustLevel,
+                                    showText: true),
+                                Text('(${userModel.trustScore})',
+                                    style: GoogleFonts.inter(
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14)),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              userModel.email,
+                              style: GoogleFonts.inter(
+                                  color: Colors.white70, fontSize: 14),
+                              overflow: TextOverflow.ellipsis, // 긴 이메일은 ... 처리
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-               
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 8.0),

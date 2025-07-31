@@ -1,32 +1,35 @@
 // lib/main.dart
 
 import 'package:bling_app/features/auth/screens/auth_gate.dart';
+// [추가] 우리가 만든 컨트롤러와 Provider 패키지를 임포트합니다.
+import 'package:bling_app/features/find_friends/controllers/find_friend_controller.dart';
+import 'package:provider/provider.dart';
+// [기존 임포트]
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// firebase_options.dart를 import 합니다. (flutterfire configure 시 자동 생성)
-// import 'firebase_options.dart';
-
 void main() async {
-  // Flutter 엔진과 위젯 바인딩을 보장합니다.
   WidgetsFlutterBinding.ensureInitialized();
-
-  // EasyLocalization과 Firebase를 순서대로 초기화합니다.
   await EasyLocalization.ensureInitialized();
-  await Firebase.initializeApp(
-      // options: DefaultFirebaseOptions.currentPlatform, // firebase_options.dart를 사용할 경우 주석 해제
-      );
+  await Firebase.initializeApp();
 
   runApp(
-    EasyLocalization(
-      supportedLocales: const [Locale('id'), Locale('en'), Locale('ko')],
-      // 이 경로에 새로운 v2 내용의 다국어 파일들이 위치해야 합니다.
-      path: 'assets/lang',
-      fallbackLocale: const Locale('id'), // 기본 언어를 인도네시아어로 설정
-      startLocale: const Locale('id'),
-      child: const BlingApp(),
+    // [수정] runApp의 최상단을 MultiProvider로 감싸줍니다.
+    MultiProvider(
+      providers: [
+        // [추가] 앞으로 앱 전역에서 사용할 컨트롤러(Provider)들을 이 리스트에 추가합니다.
+        // 지금은 FindFriendController 하나만 등록합니다.
+        ChangeNotifierProvider(create: (context) => FindFriendController()),
+      ],
+      child: EasyLocalization(
+        supportedLocales: const [Locale('id'), Locale('en'), Locale('ko')],
+        path: 'assets/lang',
+        fallbackLocale: const Locale('id'),
+        startLocale: const Locale('id'),
+        child: const BlingApp(),
+      ),
     ),
   );
 }
@@ -36,18 +39,15 @@ class BlingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
+    // BlingApp의 build 메소드 내부는 수정할 필요가 없습니다.
     return MaterialApp(
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       title: 'Bling App',
       theme: ThemeData(
-        primarySwatch: Colors.teal, // 색상 가이드는 추후 적용
+        primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-
-        // ▼▼▼▼▼ 앱 전체의 기본 폰트를 'Inter'로 설정 ▼▼▼▼▼
         textTheme: GoogleFonts.interTextTheme(
           Theme.of(context).textTheme,
         ),
