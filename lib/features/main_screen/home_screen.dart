@@ -301,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               userModel: _userModel, locationFilter: _activeLocationFilter),
           MarketplaceScreen(
               userModel: _userModel, locationFilter: _activeLocationFilter),
-          const FindFriendsScreen(),
+          FindFriendsScreen(userModel: _userModel),
           ClubsScreen(userModel: _userModel),
           JobsScreen(userModel: _userModel),
           LocalStoresScreen(userModel: _userModel),

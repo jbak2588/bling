@@ -24,6 +24,8 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
   final _interestController = TextEditingController();
   final _phoneController = TextEditingController();
 
+  UserModel? _userModel;
+
   String? _locationName;
 
   File? _selectedImage;
@@ -61,18 +63,17 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
         .doc(user.uid)
         .get();
     if (doc.exists && mounted) {
-      final userModel = UserModel.fromFirestore(doc);
+      _userModel =
+          UserModel.fromFirestore(doc); // [수정] final을 지우고 멤버 변수에 값을 할당합니다.
       setState(() {
-        _nicknameController.text = userModel.nickname;
-        _bioController.text = userModel.bio ?? '';
-        _initialPhotoUrl = userModel.photoUrl;
-        _interests = List<String>.from(userModel.interests ?? []);
-        _phoneController.text = userModel.phoneNumber ?? '';
-        _locationName = userModel.locationName;
+        _nicknameController.text = _userModel!.nickname;
+        _bioController.text = _userModel!.bio ?? '';
+        _initialPhotoUrl = _userModel!.photoUrl;
+        _interests = List<String>.from(_userModel!.interests ?? []);
         _showLocationOnMap =
-            userModel.privacySettings?['showLocationOnMap'] ?? true;
+            _userModel!.privacySettings?['showLocationOnMap'] ?? true;
         _allowFriendRequests =
-            userModel.privacySettings?['allowFriendRequests'] ?? true;
+            _userModel!.privacySettings?['allowFriendRequests'] ?? true;
         _isLoading = false;
       });
     } else {
@@ -143,19 +144,22 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
         newPhotoUrl = await ref.getDownloadURL();
       }
 
+      // V V V --- [수정] 기존 '친구 찾기' 데이터를 보존하도록 로직 변경 --- V V V
       final Map<String, dynamic> dataToUpdate = {
         'nickname': _nicknameController.text.trim(),
         'bio': _bioController.text.trim(),
         'photoUrl': newPhotoUrl,
-        'phoneNumber': _phoneController.text.trim(),
         'interests': _interests,
+        // 기존 privacySettings 값을 먼저 불러온 후, 수정된 값만 덮어씁니다.
         'privacySettings': {
+          ...?_userModel?.privacySettings, // 기존 설정값 유지
           'showLocationOnMap': _showLocationOnMap,
           'allowFriendRequests': _allowFriendRequests,
         },
         'profileCompleted': true,
         'updatedAt': FieldValue.serverTimestamp(),
       };
+      // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
       await FirebaseFirestore.instance
           .collection('users')
@@ -282,9 +286,10 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
                               child: TextField(
                                 controller: _interestController,
                                 decoration: InputDecoration(
-                                    hintText:
-                                        'profileEdit.interests.hint'.tr(),
-                                        hintStyle: const TextStyle(color: Colors.grey),),
+                                  hintText: 'profileEdit.interests.hint'.tr(),
+                                  hintStyle:
+                                      const TextStyle(color: Colors.grey),
+                                ),
                                 onSubmitted: (_) => _addInterest(),
                               ),
                             ),

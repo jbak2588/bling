@@ -17,13 +17,16 @@ class FindFriendCard extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundImage: user.photoUrl != null
-                  ? NetworkImage(user.photoUrl!)
-                  : null,
-              child:
-                  user.photoUrl == null ? const Icon(Icons.person) : null,
+            Hero(
+              tag: 'profile-image-${user.uid}',
+              child: CircleAvatar(
+                radius: 30,
+                backgroundImage: user.photoUrl != null
+                    ? NetworkImage(user.photoUrl!)
+                    : null,
+                child:
+                    user.photoUrl == null ? const Icon(Icons.person) : null,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
