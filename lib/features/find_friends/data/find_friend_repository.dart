@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/models/friend_request_model.dart';
 import '../../../core/models/user_model.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 
 /// Firestore helper for FindFriend features.
 class FindFriendRepository {
@@ -34,6 +34,35 @@ class FindFriendRepository {
         .map((s) => s.docs.map(UserModel.fromFirestore).toList());
   }
 
+  Future<void> acceptFriendRequest(String requestId, String fromUserId, String toUserId) async {
+    // WriteBatch를 사용하면 여러 작업을 하나의 원자적 단위로 처리하여 안정성을 높입니다.
+    final batch = _firestore.batch();
+
+    // 1. friend_requests 컬렉션에서 해당 요청 문서의 status를 'accepted'로 변경
+    final requestRef = _requests.doc(requestId);
+    batch.update(requestRef, {'status': 'accepted'});
+
+    // 2. 요청을 보낸 사람(fromUser)의 friends 목록에 받는 사람(toUser)의 ID를 추가
+    final fromUserRef = _users.doc(fromUserId);
+    batch.update(fromUserRef, {
+      'friends': FieldValue.arrayUnion([toUserId])
+    });
+
+    // 3. 요청을 받은 사람(toUser)의 friends 목록에 보낸 사람(fromUser)의 ID를 추가
+    final toUserRef = _users.doc(toUserId);
+    batch.update(toUserRef, {
+      'friends': FieldValue.arrayUnion([fromUserId])
+    });
+
+    // 4. 모든 작업을 한 번에 실행
+    await batch.commit();
+  }
+
+  Future<void> rejectFriendRequest(String requestId) async {
+    // 요청 문서의 status를 'rejected'로 변경
+    await _requests.doc(requestId).update({'status': 'rejected'});
+  }
+
   Future<void> sendFriendRequest(String fromUserId, String toUserId) async {
     final existing = await _requests
         .where('fromUserId', isEqualTo: fromUserId)
@@ -48,22 +77,42 @@ class FindFriendRepository {
     });
   }
 
-  Stream<List<UserModel>> getUsersForFindFriends() {
-  final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+  // V V V --- [수정] 성별 필터링 기능이 추가된 함수 --- V V V
+ Stream<List<UserModel>> getUsersForFindFriends(UserModel currentUser) {
+   // 1. Firestore 쿼리를 시작합니다.
+   Query query = _firestore
+       .collection('users')
+       .where('isDatingProfile', isEqualTo: true)
+       .where('isVisibleInList', isEqualTo: true)
+       .where('uid', isNotEqualTo: currentUser.uid);
+ 
+   // 2. 현재 사용자의 '찾고 싶은 성별' 설정을 가져옵니다.
+   final genderPreference = currentUser.privacySettings?['genderPreference'];
+ 
+   // 3. '상관없음(all)'이 아닐 경우에만, 성별 필터링 쿼리를 추가합니다.
+   if (genderPreference == 'male') {
+     query = query.where('gender', isEqualTo: 'male');
+   } else if (genderPreference == 'female') {
+     query = query.where('gender', isEqualTo: 'female');
+   }
+ 
+   // 4. 최종 쿼리를 실행하고 결과를 반환합니다.
+   return query.snapshots().map((snapshot) {
+     return snapshot.docs.map((doc) {
+       return UserModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>);
+     }).toList();
+   });
+ }
+ // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
-  return _firestore
-      .collection('users')
-      // 'privacySettings.findFriendEnabled'가 true인 문서만 필터링
-      .where('privacySettings.findFriendEnabled', isEqualTo: true)
-      // 현재 로그인한 사용자의 uid와 다른 문서만 필터링
-      .where('uid', isNotEqualTo: currentUserId)
-      .snapshots()
-      .map((snapshot) {
-    return snapshot.docs.map((doc) {
-      return UserModel.fromJson(doc.data()); // as Map<String, dynamic> 부분은 생략 가능
-    }).toList();
-  });
-}
+  Stream<QuerySnapshot> getRequestStatus(String fromUserId, String toUserId) {
+    return _requests
+        .where('fromUserId', isEqualTo: fromUserId)
+        .where('toUserId', isEqualTo: toUserId)
+        .where('status', isEqualTo: 'pending')
+        .limit(1) // 요청은 하나만 존재할 것이므로
+        .snapshots();
+  }
 
   Future<void> respondRequest(String requestId, String status) async {
     await _requests.doc(requestId).update({'status': status});

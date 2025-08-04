@@ -20,7 +20,6 @@ class ProfileEditScreen extends StatefulWidget {
 class _ProfileEditScreenState extends State<ProfileEditScreen> {
   final _nicknameController = TextEditingController();
   final _bioController = TextEditingController();
-  final _interestController = TextEditingController();
 
   File? _selectedImage;
   String? _initialPhotoUrl;
@@ -30,6 +29,38 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   bool _isLoading = true;
   bool _isSaving = false;
+
+  // [추가] find_friend_form_screen과 동일한 관심사 카테고리
+  final Map<String, List<String>> _interestCategories = {
+    'category_creative': [
+      'drawing',
+      'instrument',
+      'photography',
+      'writing',
+      'crafting',
+      'gardening'
+    ],
+    'category_sports': [
+      'soccer',
+      'hiking',
+      'camping',
+      'running',
+      'biking',
+      'golf',
+      'workout'
+    ],
+    'category_food_drink': [
+      'foodie',
+      'cooking',
+      'baking',
+      'coffee',
+      'wine',
+      'tea'
+    ],
+    'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
+    'category_growth': ['reading', 'investing', 'language', 'coding'],
+    'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
+  };
 
   @override
   void initState() {
@@ -41,7 +72,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   void dispose() {
     _nicknameController.dispose();
     _bioController.dispose();
-    _interestController.dispose();
+
     super.dispose();
   }
 
@@ -82,26 +113,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         _selectedImage = File(pickedFile.path);
       });
     }
-  }
-
-  void _addInterest() {
-    final input = _interestController.text;
-    final newItems = input.split(',');
-    setState(() {
-      for (var item in newItems) {
-        final normalized = item.trim().toLowerCase();
-        if (normalized.isNotEmpty && !_interests.contains(normalized)) {
-          _interests.add(normalized);
-        }
-      }
-      _interestController.clear();
-    });
-  }
-
-  void _removeInterest(String interest) {
-    setState(() {
-      _interests.remove(interest);
-    });
   }
 
   Future<void> _saveChanges() async {
@@ -235,39 +246,70 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         ),
                         const SizedBox(height: 24),
                         // const Divider(),
-                        const SizedBox(height: 16),
-                        Text('profileEdit.interests.title'.tr(),
-                            style: theme.textTheme.titleMedium),
-                        const SizedBox(height: 8),
+
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _interestController,
-                                decoration: InputDecoration(
-                                    hintText:
-                                        'profileEdit.interests.hint'.tr(),
-                                        hintStyle: const TextStyle(color: Colors.grey),),
-                                onSubmitted: (_) => _addInterest(),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.add),
-                              onPressed: _addInterest,
-                            ),
+                            Text("interests.title".tr(),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text('${_interests.length}/10',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.teal)),
                           ],
                         ),
+                        Text("interests.limit_info".tr(),
+                            style: TextStyle(
+                                color: Colors.grey[600], fontSize: 12)),
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8.0,
-                          runSpacing: 4.0,
-                          children: _interests
-                              .map((interest) => Chip(
-                                    label: Text(interest),
-                                    onDeleted: () => _removeInterest(interest),
-                                  ))
-                              .toList(),
-                        ),
+                        ..._interestCategories.entries.map((entry) {
+                          final categoryKey = entry.key;
+                          final interestKeys = entry.value;
+                          return ExpansionTile(
+                            title: Text("interests.$categoryKey".tr(),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500)),
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 4.0,
+                                  children: interestKeys.map((interestKey) {
+                                    final isSelected =
+                                        _interests.contains(interestKey);
+                                    return FilterChip(
+                                      label: Text(
+                                          "interests.items.$interestKey".tr()),
+                                      selected: isSelected,
+                                      onSelected: (selected) {
+                                        setState(() {
+                                          if (selected) {
+                                            if (_interests.length < 10) {
+                                              _interests.add(interestKey);
+                                            } else {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        "interests.limit_reached"
+                                                            .tr())),
+                                              );
+                                            }
+                                          } else {
+                                            _interests.remove(interestKey);
+                                          }
+                                        });
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              )
+                            ],
+                          );
+                        }),
+
                         const SizedBox(height: 24),
                         const Divider(),
                         const SizedBox(height: 16),
