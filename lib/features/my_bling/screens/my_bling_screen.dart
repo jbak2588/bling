@@ -6,12 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import 'package:bling_app/core/models/friend_request_model.dart';
+import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
+
 import '../../../core/models/user_model.dart';
 import '../widgets/user_post_list.dart';
 import '../widgets/user_product_list.dart';
 import '../widgets/user_bookmark_list.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'profile_edit_screen.dart';
+import 'friend_requests_screen.dart';
 
 class MyBlingScreen extends StatefulWidget {
   const MyBlingScreen({super.key});
@@ -49,12 +53,32 @@ class _MyBlingScreenState extends State<MyBlingScreen>
       appBar: AppBar(
         title: Text('myBling.title'.tr()),
         actions: [
+          // V V V --- [추가] 받은 친구 요청 확인 버튼 --- V V V
+          StreamBuilder<List<FriendRequestModel>>(
+              stream: FindFriendRepository().getReceivedRequests(myUid),
+              builder: (context, snapshot) {
+                final requestCount = snapshot.data?.length ?? 0;
+                return IconButton(
+                  icon: Badge(
+                    isLabelVisible: requestCount > 0,
+                    label: Text('$requestCount'),
+                    child: const Icon(Icons.people_alt_outlined),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const FriendRequestsScreen(),
+                    ));
+                  },
+                  tooltip: 'myBling.friendRequests'.tr(),
+                );
+              }),
+          // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (_) => const MyProfileEditScreen()),
+                MaterialPageRoute(builder: (_) => const MyProfileEditScreen()),
               );
             },
             tooltip: 'myBling.editProfile'.tr(),
@@ -123,12 +147,10 @@ class _MyBlingScreenState extends State<MyBlingScreen>
                     children: [
                       _buildStatColumn(
                           'myBling.stats.posts', _getPostsCount(user.uid)),
-                      _buildStatColumn(
-                          'myBling.stats.followers',
+                      _buildStatColumn('myBling.stats.followers',
                           _getFollowersCount(user.uid)),
                       const VerticalDivider(width: 20, thickness: 1),
-                      _buildStatColumn(
-                          'myBling.stats.neighbors',
+                      _buildStatColumn('myBling.stats.neighbors',
                           _getNeighborsCount(user.uid)),
                       _buildStatColumn(
                           'myBling.stats.friends', _getFriendsCount(user.uid)),

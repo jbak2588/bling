@@ -6,18 +6,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-// [수정] 다시 StatelessWidget으로 변경하여 코드를 단순화하고 StreamBuilder로 상태를 관리합니다.
-class FindFriendDetailScreen extends StatelessWidget {
+// [수정] StatelessWidget -> StatefulWidget으로 변경
+class FindFriendDetailScreen extends StatefulWidget {
   final UserModel user;
   final UserModel? currentUserModel;
   const FindFriendDetailScreen({super.key, required this.user, this.currentUserModel});
 
   @override
+  State<FindFriendDetailScreen> createState() => _FindFriendDetailScreenState();
+}
+
+class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
+  @override
   Widget build(BuildContext context) {
+    final user = widget.user;
     final allImages = [user.photoUrl, ...?user.findfriendProfileImages]
         .where((url) => url != null && url.isNotEmpty)
         .toList();
-    final currentUser = currentUserModel;
+    final currentUser = widget.currentUserModel;
 
     return Scaffold(
       appBar: AppBar(
@@ -36,21 +42,15 @@ class FindFriendDetailScreen extends StatelessWidget {
                 itemCount: allImages.isNotEmpty ? allImages.length : 1,
                 itemBuilder: (context, index) {
                   if (allImages.isEmpty) {
-                    return Hero(
-                      tag: 'profile-image-${user.uid}',
-                      child: const Icon(Icons.person, size: 150, color: Colors.grey),
-                    );
+                    return const Icon(Icons.person, size: 150, color: Colors.grey);
                   }
-                  return Hero(
-                    tag: 'profile-image-${user.uid}',
-                    child: Image.network(
-                      allImages[index]!,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, progress) =>
-                          progress == null ? child : const Center(child: CircularProgressIndicator()),
-                      errorBuilder: (context, error, stack) =>
-                          const Icon(Icons.error_outline, size: 50),
-                    ),
+                  return Image.network(
+                    allImages[index]!,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) =>
+                        progress == null ? child : const Center(child: CircularProgressIndicator()),
+                    errorBuilder: (context, error, stack) =>
+                        const Icon(Icons.error_outline, size: 50),
                   );
                 },
               ),
@@ -60,9 +60,17 @@ class FindFriendDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '${user.nickname}, ${user.age ?? ''}',
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${user.nickname}, ${user.age ?? ''}',
+                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
                   ),
                   if (user.locationName != null)
                     Padding(
@@ -105,14 +113,11 @@ class FindFriendDetailScreen extends StatelessWidget {
           ],
         ),
       ),
-      // [수정] FloatingActionButton 부분을 StreamBuilder로 감싸 실시간으로 상태를 확인합니다.
       floatingActionButton: (currentUser == null || currentUser.uid == user.uid)
-          ? null // 로그인 안했거나 자기 자신일 경우 버튼 없음
+          ? null
           : StreamBuilder<QuerySnapshot>(
-              // Repository에 추가한 getRequestStatus 함수를 호출합니다.
               stream: FindFriendRepository().getRequestStatus(currentUser.uid, user.uid),
               builder: (context, snapshot) {
-                // 이미 친구인 경우 (이 정보는 currentUserModel에서 가져옵니다)
                 if (currentUser.friends?.contains(user.uid) ?? false) {
                   return FloatingActionButton.extended(
                     onPressed: null,
@@ -122,7 +127,6 @@ class FindFriendDetailScreen extends StatelessWidget {
                   );
                 }
 
-                // DB에서 '대기중'인 요청을 실시간으로 찾은 경우
                 if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
                   return FloatingActionButton.extended(
                     onPressed: null,
@@ -132,18 +136,22 @@ class FindFriendDetailScreen extends StatelessWidget {
                   );
                 }
                 
-                // 위의 모든 조건에 해당하지 않으면 '친구 요청' 버튼 표시
                 return FloatingActionButton.extended(
                   onPressed: () async {
                     try {
                       await FindFriendRepository().sendFriendRequest(currentUser.uid, user.uid);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("${"friendDetail.request".tr()} 완료")),
-                      );
+                      // V V V --- [수정] 화면이 살아있는지(mounted) 확인 후 SnackBar 호출 --- V V V
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("friendDetail.requestSuccess".tr())),
+                        );
+                      }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("${"friendDetail.requestFailed".tr()} $e")),
-                      );
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("${"friendDetail.requestFailed".tr()} $e")),
+                        );
+                      }
                     }
                   },
                   label: Text("friendDetail.request".tr()),

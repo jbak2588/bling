@@ -181,6 +181,10 @@
             "posts": "내 게시물",
             "products": "내 판매상품",
             "bookmarks": "관심목록"
+        },
+        "friendRequests": {
+            "title": "받은 친구 요청",
+            "noRequests": "받은 친구 요청이 없습니다."
         }
     },
     "prompt": {

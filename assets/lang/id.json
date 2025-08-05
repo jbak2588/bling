@@ -181,6 +181,10 @@
             "posts": "Postingan Saya",
             "products": "Produk Saya",
             "bookmarks": "Markah"
+        },
+        "friendRequests": {
+            "title": "Permintaan Pertemanan",
+            "noRequests": "Tidak ada permintaan pertemanan yang diterima."
         }
     },
     "prompt": {

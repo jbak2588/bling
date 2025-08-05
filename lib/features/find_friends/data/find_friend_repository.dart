@@ -42,17 +42,27 @@ class FindFriendRepository {
     final requestRef = _requests.doc(requestId);
     batch.update(requestRef, {'status': 'accepted'});
 
-    // 2. 요청을 보낸 사람(fromUser)의 friends 목록에 받는 사람(toUser)의 ID를 추가
-    final fromUserRef = _users.doc(fromUserId);
-    batch.update(fromUserRef, {
-      'friends': FieldValue.arrayUnion([toUserId])
-    });
-
-    // 3. 요청을 받은 사람(toUser)의 friends 목록에 보낸 사람(fromUser)의 ID를 추가
-    final toUserRef = _users.doc(toUserId);
-    batch.update(toUserRef, {
-      'friends': FieldValue.arrayUnion([fromUserId])
-    });
+   // --- 2. [추가] 새로운 1:1 채팅방 생성 로직 ---
+   // 기존 ChatService의 getChatRoomId 로직을 활용하여 고유한 채팅방 ID 생성
+   List<String> ids = [fromUserId, toUserId];
+   ids.sort();
+   String chatRoomId = ids.join('_');
+   
+   final chatRoomRef = _firestore.collection('chats').doc(chatRoomId);
+ 
+   // 생성할 채팅방의 초기 데이터 설정
+   final chatRoomData = {
+     'participants': [fromUserId, toUserId],
+     'lastMessage': '이제 친구가 되었습니다! 대화를 시작해보세요.', // TODO: 다국어
+     'lastMessageTimestamp': FieldValue.serverTimestamp(),
+     'unreadCounts': {
+       fromUserId: 0,
+       toUserId: 0,
+     },
+   };
+   
+   // batch에 채팅방 생성 작업을 추가 (set.merge를 사용하여, 혹시 방이 있어도 덮어쓰지 않음)
+   batch.set(chatRoomRef, chatRoomData, SetOptions(merge: true));
 
     // 4. 모든 작업을 한 번에 실행
     await batch.commit();
