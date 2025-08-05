@@ -74,7 +74,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("친구 요청"), // TODO: 다국어
+        title: Text("friendRequests.title".tr()),
       ),
       body: StreamBuilder<List<FriendRequestModel>>(
         stream: _repository.getReceivedRequests(currentUserId),
@@ -86,7 +86,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("받은 친구 요청이 없습니다.")); // TODO: 다국어
+            return Center(child: Text("friendRequests.noRequests".tr()));
           }
 
           final requests = snapshot.data!;

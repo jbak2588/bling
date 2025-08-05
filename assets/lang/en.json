@@ -181,6 +181,10 @@
             "posts": "My Posts",
             "products": "My Products",
             "bookmarks": "Bookmarks"
+        },
+        "friendRequests": {
+            "title": "Friend Requests",
+            "noRequests": "No friend requests received."
         }
     },
     "prompt": {
