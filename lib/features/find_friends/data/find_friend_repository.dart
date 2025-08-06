@@ -1,6 +1,7 @@
 // lib/features/find_friends/data/find_friend_repository.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/models/friend_request_model.dart';
 import '../../../core/models/user_model.dart';
@@ -11,7 +12,8 @@ import '../../../core/models/user_model.dart';
 class FindFriendRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> updateUserProfile(String userId, Map<String, dynamic> data) async {
+  Future<void> updateUserProfile(
+      String userId, Map<String, dynamic> data) async {
     await _firestore.collection('users').doc(userId).update(data);
   }
 
@@ -34,44 +36,68 @@ class FindFriendRepository {
         .map((s) => s.docs.map(UserModel.fromFirestore).toList());
   }
 
-  Future<void> acceptFriendRequest(String requestId, String fromUserId, String toUserId) async {
-    // WriteBatch를 사용하면 여러 작업을 하나의 원자적 단위로 처리하여 안정성을 높입니다.
+  // V V V --- [수정] 누락되었던 친구 추가 로직을 복원한 최종 버전 --- V V V
+  Future<void> acceptFriendRequest(
+      String requestId, String fromUserId, String toUserId) async {
+    try {
+      debugPrint("--- 친구 요청 수락 시작 ---");
+      final batch = _firestore.batch();
+
+      // 1. friend_requests 컬렉션에서 해당 요청 문서의 status를 'accepted'로 변경
+      final requestRef = _requests.doc(requestId);
+      batch.update(requestRef, {'status': 'accepted'});
+
+      // 2. [복원] 요청을 보낸 사람(fromUser)의 friends 목록에 받는 사람(toUser)의 ID를 추가
+      final fromUserRef = _users.doc(fromUserId);
+      batch.update(fromUserRef, {
+        'friends': FieldValue.arrayUnion([toUserId])
+      });
+
+      // 3. [복원] 요청을 받은 사람(toUser)의 friends 목록에 보낸 사람(fromUser)의 ID를 추가
+      final toUserRef = _users.doc(toUserId);
+      batch.update(toUserRef, {
+        'friends': FieldValue.arrayUnion([fromUserId])
+      });
+
+      // 4. 새로운 1:1 채팅방 생성 로직
+      List<String> ids = [fromUserId, toUserId];
+      ids.sort();
+      String chatRoomId = ids.join('_');
+      final chatRoomRef = _firestore.collection('chats').doc(chatRoomId);
+      final chatRoomData = {
+        'participants': [fromUserId, toUserId],
+        'lastMessage': '이제 친구가 되었습니다! 대화를 시작해보세요.', // TODO: 다국어
+        'lastMessageTimestamp': FieldValue.serverTimestamp(),
+        'unreadCounts': {fromUserId: 0, toUserId: 0},
+      };
+      batch.set(chatRoomRef, chatRoomData, SetOptions(merge: true));
+
+      // 5. 모든 작업을 한 번에 실행
+      await batch.commit();
+      debugPrint("--- 친구 요청 수락 성공 (Batch Commit 완료) ---");
+    } catch (e) {
+      debugPrint("!!! 친구 요청 수락 중 에러 발생: $e !!!");
+      rethrow;
+    }
+  }
+
+  // V V V --- [수정] 친구 요청 거절 시, 거절당한 사람을 목록에 추가하는 로직 --- V V V
+  Future<void> rejectFriendRequest(String requestId, String fromUserId, String toUserId) async {
     final batch = _firestore.batch();
 
-    // 1. friend_requests 컬렉션에서 해당 요청 문서의 status를 'accepted'로 변경
+    // 1. 요청 문서의 status를 'rejected'로 변경
     final requestRef = _requests.doc(requestId);
-    batch.update(requestRef, {'status': 'accepted'});
+    batch.update(requestRef, {'status': 'rejected'});
 
-   // --- 2. [추가] 새로운 1:1 채팅방 생성 로직 ---
-   // 기존 ChatService의 getChatRoomId 로직을 활용하여 고유한 채팅방 ID 생성
-   List<String> ids = [fromUserId, toUserId];
-   ids.sort();
-   String chatRoomId = ids.join('_');
-   
-   final chatRoomRef = _firestore.collection('chats').doc(chatRoomId);
- 
-   // 생성할 채팅방의 초기 데이터 설정
-   final chatRoomData = {
-     'participants': [fromUserId, toUserId],
-     'lastMessage': '이제 친구가 되었습니다! 대화를 시작해보세요.', // TODO: 다국어
-     'lastMessageTimestamp': FieldValue.serverTimestamp(),
-     'unreadCounts': {
-       fromUserId: 0,
-       toUserId: 0,
-     },
-   };
-   
-   // batch에 채팅방 생성 작업을 추가 (set.merge를 사용하여, 혹시 방이 있어도 덮어쓰지 않음)
-   batch.set(chatRoomRef, chatRoomData, SetOptions(merge: true));
+    // 2. 요청을 받은 사람(toUser, 거절한 사람)의 rejectedUsers 목록에 요청 보낸 사람(fromUser)의 ID를 추가
+    final toUserRef = _users.doc(toUserId);
+    batch.update(toUserRef, {
+      'rejectedUsers': FieldValue.arrayUnion([fromUserId])
+    });
 
-    // 4. 모든 작업을 한 번에 실행
     await batch.commit();
   }
-
-  Future<void> rejectFriendRequest(String requestId) async {
-    // 요청 문서의 status를 'rejected'로 변경
-    await _requests.doc(requestId).update({'status': 'rejected'});
-  }
+  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
   Future<void> sendFriendRequest(String fromUserId, String toUserId) async {
     final existing = await _requests
@@ -87,33 +113,35 @@ class FindFriendRepository {
     });
   }
 
-  // V V V --- [수정] 성별 필터링 기능이 추가된 함수 --- V V V
- Stream<List<UserModel>> getUsersForFindFriends(UserModel currentUser) {
-   // 1. Firestore 쿼리를 시작합니다.
-   Query query = _firestore
-       .collection('users')
-       .where('isDatingProfile', isEqualTo: true)
-       .where('isVisibleInList', isEqualTo: true)
-       .where('uid', isNotEqualTo: currentUser.uid);
- 
-   // 2. 현재 사용자의 '찾고 싶은 성별' 설정을 가져옵니다.
-   final genderPreference = currentUser.privacySettings?['genderPreference'];
- 
-   // 3. '상관없음(all)'이 아닐 경우에만, 성별 필터링 쿼리를 추가합니다.
-   if (genderPreference == 'male') {
-     query = query.where('gender', isEqualTo: 'male');
-   } else if (genderPreference == 'female') {
-     query = query.where('gender', isEqualTo: 'female');
-   }
- 
-   // 4. 최종 쿼리를 실행하고 결과를 반환합니다.
-   return query.snapshots().map((snapshot) {
-     return snapshot.docs.map((doc) {
-       return UserModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>);
-     }).toList();
-   });
- }
- // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+ // V V V --- [수정] 친구 목록을 불러올 때, 거절/차단한 사용자를 제외하는 로직 --- V V V
+  Stream<List<UserModel>> getUsersForFindFriends(UserModel currentUser) {
+    Query query = _firestore
+        .collection('users')
+        .where('isDatingProfile', isEqualTo: true)
+        .where('isVisibleInList', isEqualTo: true);
+
+    final rejectedUids = currentUser.rejectedUsers ?? [];
+    final blockedUids = currentUser.blockedUsers ?? [];
+    final excludedUids = {...rejectedUids, ...blockedUids, currentUser.uid}.toList();
+
+    if (excludedUids.isNotEmpty) {
+      query = query.where(FieldPath.documentId, whereNotIn: excludedUids.take(10).toList());
+    }
+
+    final genderPreference = currentUser.privacySettings?['genderPreference'];
+    if (genderPreference == 'male') {
+      query = query.where('gender', isEqualTo: 'male');
+    } else if (genderPreference == 'female') {
+      query = query.where('gender', isEqualTo: 'female');
+    }
+
+    return query.snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => UserModel.fromFirestore(doc as QueryDocumentSnapshot<Map<String, dynamic>>))
+          .toList();
+    });
+  }
+  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
   Stream<QuerySnapshot> getRequestStatus(String fromUserId, String toUserId) {
     return _requests
@@ -131,16 +159,15 @@ class FindFriendRepository {
   Stream<List<FriendRequestModel>> getReceivedRequests(String userId) {
     return _requests
         .where('toUserId', isEqualTo: userId)
+        .where('status', isEqualTo: 'pending') // 이 조건이 핵심입니다.
         .snapshots()
-        .map((s) =>
-            s.docs.map(FriendRequestModel.fromFirestore).toList());
+        .map((s) => s.docs.map(FriendRequestModel.fromFirestore).toList());
   }
 
   Stream<List<FriendRequestModel>> getSentRequests(String userId) {
     return _requests
         .where('fromUserId', isEqualTo: userId)
         .snapshots()
-        .map((s) =>
-            s.docs.map(FriendRequestModel.fromFirestore).toList());
+        .map((s) => s.docs.map(FriendRequestModel.fromFirestore).toList());
   }
 }

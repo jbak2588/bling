@@ -26,10 +26,16 @@ class UserModel {
   final int trustScore; // 신뢰 점수 (0-500, 기본 0)
 
   final String? phoneNumber; // 전화번호 (인증 시 높은 신뢰 점수 획득)
-  final int feedThanksReceived;   /// 피드 활동으로 받은 '감사' 수
-  final int marketThanksReceived;    /// 마켓 거래로 받은 '감사' 수
-  final int thanksReceived;   /// 전체 '감사' 수 (feed + market, UI 표시용)
-  
+  final int feedThanksReceived;
+
+  /// 피드 활동으로 받은 '감사' 수
+  final int marketThanksReceived;
+
+  /// 마켓 거래로 받은 '감사' 수
+  final int thanksReceived;
+
+  /// 전체 '감사' 수 (feed + market, UI 표시용)
+
   final int reportCount;
   final bool isBanned; // 차단 여부 (true 시 계정 제한)
   final List<String>? blockedUsers; // 차단 유저 목록 (uid 리스트)
@@ -46,7 +52,8 @@ class UserModel {
   final List<Map<String, dynamic>>? friendRequests; // 친구 요청 상태
   final List<String>? friends; // 수락된 친구 ID
   final int likeCount; // 받은 좋아요 수
-  
+  final List<String>? rejectedUsers;
+
   UserModel({
     required this.uid,
     required this.nickname,
@@ -84,60 +91,87 @@ class UserModel {
     this.friendRequests,
     this.friends,
     this.likeCount = 0,
+    this.rejectedUsers,
   });
 
-factory UserModel.fromJson(Map<String, dynamic> json) {
+  factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       // Non-nullable 필드는 ?? 뒤에 기본값을 지정하여 Null-Safety 에러를 방지합니다.
       uid: json['uid'] ?? '',
       nickname: json['nickname'] ?? '',
       email: json['email'] ?? '',
-      
+
       // Nullable 필드는 그대로 가져옵니다.
       photoUrl: json['photoUrl'],
       bio: json['bio'],
-      
+
       // Non-nullable String 필드 (기본값 지정)
       trustLevel: json['trustLevel'] ?? 'normal',
-      
+
       locationName: json['locationName'],
-      locationParts: json['locationParts'] != null ? Map<String, dynamic>.from(json['locationParts']) : null,
+      locationParts: json['locationParts'] != null
+          ? Map<String, dynamic>.from(json['locationParts'])
+          : null,
       geoPoint: json['geoPoint'],
-      interests: json['interests'] != null ? List<String>.from(json['interests']) : null,
-      privacySettings: json['privacySettings'] != null ? Map<String, dynamic>.from(json['privacySettings']) : null,
-      postIds: json['postIds'] != null ? List<String>.from(json['postIds']) : null,
-      productIds: json['productIds'] != null ? List<String>.from(json['productIds']) : null,
-      bookmarkedPostIds: json['bookmarkedPostIds'] != null ? List<String>.from(json['bookmarkedPostIds']) : null,
-      bookmarkedProductIds: json['bookmarkedProductIds'] != null ? List<String>.from(json['bookmarkedProductIds']) : null,
-      
+      interests: json['interests'] != null
+          ? List<String>.from(json['interests'])
+          : null,
+      privacySettings: json['privacySettings'] != null
+          ? Map<String, dynamic>.from(json['privacySettings'])
+          : null,
+      postIds:
+          json['postIds'] != null ? List<String>.from(json['postIds']) : null,
+      productIds: json['productIds'] != null
+          ? List<String>.from(json['productIds'])
+          : null,
+      bookmarkedPostIds: json['bookmarkedPostIds'] != null
+          ? List<String>.from(json['bookmarkedPostIds'])
+          : null,
+      bookmarkedProductIds: json['bookmarkedProductIds'] != null
+          ? List<String>.from(json['bookmarkedProductIds'])
+          : null,
+
       // Non-nullable 숫자/bool 필드 (기본값 지정)
       trustScore: json['trustScore'] ?? 0,
-      
+
       phoneNumber: json['phoneNumber'],
       feedThanksReceived: json['feedThanksReceived'] ?? 0,
       marketThanksReceived: json['marketThanksReceived'] ?? 0,
       thanksReceived: json['thanksReceived'] ?? 0,
       reportCount: json['reportCount'] ?? 0,
       isBanned: json['isBanned'] ?? false,
-      blockedUsers: json['blockedUsers'] != null ? List<String>.from(json['blockedUsers']) : null,
+      blockedUsers: json['blockedUsers'] != null
+          ? List<String>.from(json['blockedUsers'])
+          : null,
       profileCompleted: json['profileCompleted'] ?? false,
 
       // --- 'find_friend' 관련 필드 ---
       age: json['age'],
       ageRange: json['ageRange'],
       gender: json['gender'],
-      findfriendProfileImages: json['findfriendProfileImages'] != null ? List<String>.from(json['findfriendProfileImages']) : null,
+      findfriendProfileImages: json['findfriendProfileImages'] != null
+          ? List<String>.from(json['findfriendProfileImages'])
+          : null,
       isVisibleInList: json['isVisibleInList'] ?? true,
-      likesGiven: json['likesGiven'] != null ? List<String>.from(json['likesGiven']) : null,
-      likesReceived: json['likesReceived'] != null ? List<String>.from(json['likesReceived']) : null,
-      friendRequests: json['friendRequests'] != null ? List<Map<String, dynamic>>.from(json['friendRequests']) : null,
-      friends: json['friends'] != null ? List<String>.from(json['friends']) : null,
+      likesGiven: json['likesGiven'] != null
+          ? List<String>.from(json['likesGiven'])
+          : null,
+      likesReceived: json['likesReceived'] != null
+          ? List<String>.from(json['likesReceived'])
+          : null,
+      friendRequests: json['friendRequests'] != null
+          ? List<Map<String, dynamic>>.from(json['friendRequests'])
+          : null,
+      friends:
+          json['friends'] != null ? List<String>.from(json['friends']) : null,
       likeCount: json['likeCount'] ?? 0,
 
       // --- 'required' 필드 처리 ---
       // createdAt 필드는 필수(required)이므로, Firestore의 Timestamp 타입으로 변환하고 없으면 현재 시간을 기본값으로 지정합니다.
-      createdAt: json['createdAt'] != null ? (json['createdAt'] as Timestamp) : Timestamp.now(),
-      
+      createdAt: json['createdAt'] != null
+          ? (json['createdAt'] as Timestamp)
+          : Timestamp.now(),
+
       // isDatingProfile 필드도 필수(required)이므로, 값이 없으면 false를 기본값으로 지정합니다.
       isDatingProfile: json['isDatingProfile'] ?? false,
     );
@@ -210,6 +244,9 @@ factory UserModel.fromJson(Map<String, dynamic> json) {
               ? Timestamp.fromMillisecondsSinceEpoch(data['createdAt'])
               : Timestamp.now()),
       isDatingProfile: data['isDatingProfile'] ?? false,
+      rejectedUsers: data['rejectedUsers'] != null
+          ? List<String>.from(data['rejectedUsers'])
+          : null,
     );
   }
 
@@ -251,6 +288,7 @@ factory UserModel.fromJson(Map<String, dynamic> json) {
       'friendRequests': friendRequests,
       'friends': friends,
       'likeCount': likeCount,
+      'rejectedUsers': rejectedUsers,
     };
   }
 }

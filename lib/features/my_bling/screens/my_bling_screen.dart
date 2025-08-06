@@ -13,6 +13,7 @@ import '../../../core/models/user_model.dart';
 import '../widgets/user_post_list.dart';
 import '../widgets/user_product_list.dart';
 import '../widgets/user_bookmark_list.dart';
+import '../widgets/user_friend_list.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'profile_edit_screen.dart';
 import 'friend_requests_screen.dart';
@@ -31,7 +32,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -230,6 +231,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
             Tab(text: 'myBling.tabs.posts'.tr()),
             Tab(text: 'myBling.tabs.products'.tr()),
             Tab(text: 'myBling.tabs.bookmarks'.tr()),
+            Tab(text: 'myBling.tabs.friends'.tr()),
           ],
         ),
         Expanded(
@@ -243,6 +245,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
               // ▼▼▼▼▼ '내 판매상품' 탭에 새로운 위젯 적용 ▼▼▼▼▼
               UserProductList(),
               UserBookmarkList(),
+              UserFriendList(),
             ],
           ),
         ),

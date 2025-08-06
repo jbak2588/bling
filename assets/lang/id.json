@@ -180,12 +180,15 @@
         "tabs": {
             "posts": "Postingan Saya",
             "products": "Produk Saya",
-            "bookmarks": "Markah"
+            "bookmarks": "Markah",
+            "friends": "Teman"
         },
-        "friendRequests": {
-            "title": "Permintaan Pertemanan",
-            "noRequests": "Tidak ada permintaan pertemanan yang diterima."
-        }
+        "friendRequests": "Permintaan Pertemanan"
+    },
+
+    "friendRequests": {
+        "title": "Permintaan Pertemanan",
+        "noRequests": "Tidak ada permintaan pertemanan yang diterima."
     },
     "prompt": {
         "title": "Selamat datang di Bling!",

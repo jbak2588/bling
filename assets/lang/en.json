@@ -180,12 +180,14 @@
         "tabs": {
             "posts": "My Posts",
             "products": "My Products",
-            "bookmarks": "Bookmarks"
+            "bookmarks": "Bookmarks",
+            "friends": "Friends"
         },
-        "friendRequests": {
-            "title": "Friend Requests",
-            "noRequests": "No friend requests received."
-        }
+        "friendRequests": "Friend Requests"
+    },
+    "friendRequests": {
+        "title": "Friend Requests",
+        "noRequests": "No friend requests received."
     },
     "prompt": {
         "title": "Welcome to Bling!",
