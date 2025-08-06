@@ -12,7 +12,8 @@ class SentFriendRequestsScreen extends StatefulWidget {
   const SentFriendRequestsScreen({super.key});
 
   @override
-  State<SentFriendRequestsScreen> createState() => _SentFriendRequestsScreenState();
+  State<SentFriendRequestsScreen> createState() =>
+      _SentFriendRequestsScreenState();
 }
 
 class _SentFriendRequestsScreenState extends State<SentFriendRequestsScreen> {
@@ -21,7 +22,8 @@ class _SentFriendRequestsScreenState extends State<SentFriendRequestsScreen> {
 
   // 요청 받은 사람의 상세 정보를 가져오는 함수
   Future<UserModel?> _getUserData(String userId) async {
-    final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
     if (doc.exists) {
       return UserModel.fromFirestore(doc);
     }
@@ -32,11 +34,20 @@ class _SentFriendRequestsScreenState extends State<SentFriendRequestsScreen> {
   Widget _buildStatusIcon(String status) {
     switch (status) {
       case 'accepted':
-        return const Icon(Icons.check_circle, color: Colors.green, semanticLabel: '수락됨');
+        // return const Icon(Icons.check_circle, color: Colors.green, semanticLabel: '수락됨');
+        return Icon(Icons.check_circle,
+            color: Colors.green,
+            semanticLabel: 'sentFriendRequests.status.accepted'.tr());
       case 'rejected':
-        return const Icon(Icons.cancel, color: Colors.red, semanticLabel: '거절됨');
+        // return const Icon(Icons.cancel, color: Colors.red, semanticLabel: '거절됨');
+        return Icon(Icons.cancel,
+            color: Colors.red,
+            semanticLabel: 'sentFriendRequests.status.rejected'.tr());
       default: // 'pending'
-        return const Icon(Icons.hourglass_top, color: Colors.orange, semanticLabel: '대기중');
+        // return const Icon(Icons.hourglass_top, color: Colors.orange, semanticLabel: '대기중');
+        return Icon(Icons.hourglass_top,
+            color: Colors.orange,
+            semanticLabel: 'sentFriendRequests.status.pending'.tr());
     }
   }
 
@@ -44,7 +55,8 @@ class _SentFriendRequestsScreenState extends State<SentFriendRequestsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("보낸 친구 요청"), // TODO: 다국어
+        // title: Text("보낸 친구 요청"),
+        title: Text('myBling.sentFriendRequests'.tr()),
       ),
       body: StreamBuilder<List<FriendRequestModel>>(
         stream: _repository.getSentRequests(currentUserId),
@@ -56,7 +68,8 @@ class _SentFriendRequestsScreenState extends State<SentFriendRequestsScreen> {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("보낸 친구 요청이 없습니다.")); // TODO: 다국어
+            // return const Center(child: Text("보낸 친구 요청이 없습니다."));
+            return Center(child: Text('sentFriendRequests.noRequests'.tr()));
           }
 
           final requests = snapshot.data!;
@@ -73,21 +86,33 @@ class _SentFriendRequestsScreenState extends State<SentFriendRequestsScreen> {
                   }
                   final receiver = userSnapshot.data!;
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundImage: (receiver.photoUrl != null && receiver.photoUrl!.isNotEmpty)
+                        backgroundImage: (receiver.photoUrl != null &&
+                                receiver.photoUrl!.isNotEmpty)
                             ? NetworkImage(receiver.photoUrl!)
                             : null,
-                        child: (receiver.photoUrl == null || receiver.photoUrl!.isEmpty)
+                        child: (receiver.photoUrl == null ||
+                                receiver.photoUrl!.isEmpty)
                             ? const Icon(Icons.person)
                             : null,
                       ),
-                      title: Text(receiver.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      title: Text(receiver.nickname,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(
-                        '요청 상태: ${request.status}', // TODO: 다국어
+                        // '요청 상태: ${request.status}',
+                        'sentFriendRequests.statusLabel'.tr(namedArgs: {
+                          'status':
+                              'sentFriendRequests.status.${request.status}'.tr()
+                        }),
                         style: TextStyle(
-                          color: request.status == 'accepted' ? Colors.green : (request.status == 'rejected' ? Colors.red : Colors.orange)
+                                    color: request.status == 'accepted'
+                              ? Colors.green
+                              : (request.status == 'rejected'
+                                  ? Colors.red
+                                  : Colors.orange),
                         ),
                       ),
                       trailing: _buildStatusIcon(request.status),

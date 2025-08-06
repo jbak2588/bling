@@ -1,562 +1,587 @@
-diff --git a/lib/features/clubs/screens/clubs_screen.dart b/lib/features/clubs/screens/clubs_screen.dart
-index 5556cb6a97c0802969a85b225fe75f86816e27db..f6cd5b4c249c49e641c068ca5c816f01d8944fa5 100644
---- a/lib/features/clubs/screens/clubs_screen.dart
-+++ b/lib/features/clubs/screens/clubs_screen.dart
-@@ -1,11 +1,12 @@
- import 'package:flutter/material.dart';
-+import 'package:easy_localization/easy_localization.dart';
- import '../../../core/models/user_model.dart';
- 
- class ClubsScreen extends StatelessWidget {
-   final UserModel? userModel;
-   const ClubsScreen({this.userModel, super.key});
-   @override
-   Widget build(BuildContext context) =>
--      const Center(child: Text('Clubs Screen'));
-+      Center(child: Text('main.tabs.clubs'.tr()));
- }
- 
-diff --git a/lib/features/community/screens/community_screen.dart b/lib/features/community/screens/community_screen.dart
-index ec7210e64d5a7416f38b4799c8d9f31db295cb23..a304fc2755faa7613442b5986825d703d287065a 100644
---- a/lib/features/community/screens/community_screen.dart
-+++ b/lib/features/community/screens/community_screen.dart
-@@ -1,10 +1,11 @@
- import 'package:flutter/material.dart';
-+import 'package:easy_localization/easy_localization.dart';
- 
- class CommunityScreen extends StatelessWidget {
-   const CommunityScreen({super.key});
- 
-   @override
-   Widget build(BuildContext context) {
--    return const Center(child: Text('커뮤니티 화면'));
-+    return Center(child: Text('community.title'.tr()));
-   }
- }
-diff --git a/lib/features/jobs/screens/jobs_screen.dart b/lib/features/jobs/screens/jobs_screen.dart
-index 65d8522d0f7bb378ca2e7159949c7175b920f537..dd79eab399f27d5d5078626fc383c7c826f62a62 100644
---- a/lib/features/jobs/screens/jobs_screen.dart
-+++ b/lib/features/jobs/screens/jobs_screen.dart
-@@ -1,10 +1,11 @@
- import 'package:flutter/material.dart';
-+import 'package:easy_localization/easy_localization.dart';
- import '../../../core/models/user_model.dart';
- 
- class JobsScreen extends StatelessWidget {
-   final UserModel? userModel;
-   const JobsScreen({this.userModel, super.key});
-   @override
-   Widget build(BuildContext context) =>
--      const Center(child: Text('Jobs Screen'));
-+      Center(child: Text('main.tabs.jobs'.tr()));
- }
-diff --git a/lib/features/local_stores/screens/local_stores_screen.dart b/lib/features/local_stores/screens/local_stores_screen.dart
-index 94af6fbdf09d23cd58e24e2130d9b8cf3835351a..2afad49b5babc40aa658fcda94cae3508b118f85 100644
---- a/lib/features/local_stores/screens/local_stores_screen.dart
-+++ b/lib/features/local_stores/screens/local_stores_screen.dart
-@@ -1,10 +1,11 @@
- import 'package:flutter/material.dart';
-+import 'package:easy_localization/easy_localization.dart';
- import '../../../core/models/user_model.dart';
- 
- class LocalStoresScreen extends StatelessWidget {
-   final UserModel? userModel;
-   const LocalStoresScreen({this.userModel, super.key});
-   @override
-   Widget build(BuildContext context) =>
--      const Center(child: Text('Local Stores Screen'));
-+      Center(child: Text('main.tabs.localStores'.tr()));
- }
-diff --git a/lib/features/location/screens/location_filter_screen.dart b/lib/features/location/screens/location_filter_screen.dart
-index 2e3e3837d3d1dadb398b74160eb35061c24d02ca..eca2aa03c761d9da2fe013722a407e5a4903e613 100644
---- a/lib/features/location/screens/location_filter_screen.dart
-+++ b/lib/features/location/screens/location_filter_screen.dart
-@@ -1,27 +1,28 @@
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:flutter/material.dart';
-+import 'package:easy_localization/easy_localization.dart';
- 
- import '../../../core/models/user_model.dart';
- 
- class LocationFilterScreen extends StatefulWidget {
-   final UserModel? userModel;
-   const LocationFilterScreen({this.userModel, super.key});
- 
-   @override
-   State<LocationFilterScreen> createState() => _LocationFilterScreenState();
- }
- 
- class _LocationFilterScreenState extends State<LocationFilterScreen> {
-   final List<String> _provinsiList = [];
-   final List<String> _kabupatenList = [];
-   final List<String> _kotaList = [];
-   final List<String> _kecamatanList = [];
-   final List<String> _kelurahanList = [];
- 
-   String? _selectedProvinsi;
-   String? _selectedKabupaten;
-   String? _selectedKota;
-   String? _selectedKecamatan;
-   String? _selectedKelurahan;
- 
-   bool _kabupatenEnabled = false;
-@@ -138,92 +139,92 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
-     final kelSnapshot = await parent.doc(value).collection('kelurahan').get();
-     setState(() {
-       _kelurahanList.addAll(kelSnapshot.docs.map((d) => d.id));
-       _kelurahanEnabled = true;
-     });
-   }
- 
-   void _onKelurahanChanged(String? value) {
-     setState(() => _selectedKelurahan = value);
-   }
- 
-   void _applyFilter() {
-     final result = {
-       'prov': _selectedProvinsi,
-       'kab': _selectedKabupaten,
-       'kota': _selectedKota,
-       'kec': _selectedKecamatan,
-       'kel': _selectedKelurahan,
-     };
-     Navigator.pop(context, result);
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     return Scaffold(
--      appBar: AppBar(title: const Text('Location Filter')),
-+      appBar: AppBar(title: Text('locationFilter.title'.tr())),
-       body: _loadingProvinces
-           ? const Center(child: CircularProgressIndicator())
-           : Padding(
-               padding: const EdgeInsets.all(16.0),
-               child: Column(
-                 children: [
-                   DropdownButton<String>(
-                     value: _selectedProvinsi,
--                    hint: const Text('Provinsi'),
-+                    hint: Text('locationFilter.provinsi'.tr()),
-                     isExpanded: true,
-                     items: _provinsiList
-                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                         .toList(),
-                     onChanged: _onProvinsiChanged,
-                   ),
-                   const SizedBox(height: 12),
-                   DropdownButton<String>(
-                     value: _selectedKabupaten,
--                    hint: const Text('Kabupaten'),
-+                    hint: Text('locationFilter.kabupaten'.tr()),
-                     isExpanded: true,
-                     items: _kabupatenList
-                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                         .toList(),
-                     onChanged: _kabupatenEnabled ? _onKabupatenChanged : null,
-                   ),
-                   const SizedBox(height: 12),
-                   DropdownButton<String>(
-                     value: _selectedKota,
--                    hint: const Text('Kota'),
-+                    hint: Text('locationFilter.kota'.tr()),
-                     isExpanded: true,
-                     items: _kotaList
-                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                         .toList(),
-                     onChanged: _kotaEnabled ? _onKotaChanged : null,
-                   ),
-                   const SizedBox(height: 12),
-                   DropdownButton<String>(
-                     value: _selectedKecamatan,
--                    hint: const Text('Kecamatan'),
-+                    hint: Text('locationFilter.kecamatan'.tr()),
-                     isExpanded: true,
-                     items: _kecamatanList
-                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                         .toList(),
-                     onChanged: _kecamatanEnabled ? _onKecamatanChanged : null,
-                   ),
-                   const SizedBox(height: 12),
-                   DropdownButton<String>(
-                     value: _selectedKelurahan,
--                    hint: const Text('Kelurahan'),
-+                    hint: Text('locationFilter.kelurahan'.tr()),
-                     isExpanded: true,
-                     items: _kelurahanList
-                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                         .toList(),
-                     onChanged: _kelurahanEnabled ? _onKelurahanChanged : null,
-                   ),
-                   const Spacer(),
-                   ElevatedButton(
-                     onPressed: _applyFilter,
--                    child: const Text('필터 적용하기'),
-+                    child: Text('locationFilter.apply'.tr()),
-                   ),
-                 ],
-               ),
-             ),
-     );
-   }
- }
-diff --git a/lib/features/main_screen/home_screen.dart b/lib/features/main_screen/home_screen.dart
-index df06d3eae557c10767036789266e047c88df3a55..b963642222eb601cb7b6fa3f8f31cb7b36af15eb 100644
---- a/lib/features/main_screen/home_screen.dart
-+++ b/lib/features/main_screen/home_screen.dart
-@@ -15,51 +15,51 @@ import 'package:bling_app/features/marketplace/screens/product_registration_scre
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:easy_localization/easy_localization.dart';
- import 'package:firebase_auth/firebase_auth.dart';
- import 'package:flutter/material.dart';
- import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
- import 'package:google_fonts/google_fonts.dart';
- 
- import '../../../core/models/user_model.dart';
- import '../../../core/utils/address_formatter.dart';
- import '../auth/screens/profile_edit_screen.dart';
- import '../local_news/screens/local_news_screen.dart';
- // import '../location/screens/location_setting_screen.dart';
- import '../location/screens/location_filter_screen.dart';
- import '../marketplace/screens/marketplace_screen.dart';
- import '../admin/screens/data_fix_screen.dart';
- 
- // 검색 화면을 위한 임시 Placeholder
- // git 테스트
- 
- class SearchScreen extends StatelessWidget {
-   const SearchScreen({super.key});
-   @override
-   Widget build(BuildContext context) {
-     return Scaffold(
-       appBar: AppBar(title: Text('main.bottomNav.search'.tr())),
--      body: const Center(child: Text("Search Screen")),
-+      body: Center(child: Text('main.search.placeholder'.tr())),
-     );
-   }
- }
- 
- class HomeScreen extends StatefulWidget {
-   const HomeScreen({super.key});
- 
-   @override
-   State<HomeScreen> createState() => _HomeScreenState();
- }
- 
- class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-   late final TabController _tabController;
-   int _bottomNavIndex = 0;
- 
-   UserModel? _userModel;
-   Map<String, String?>? _activeLocationFilter;
-   String _currentAddress = "Loading...";
-   bool _isLocationLoading = true;
-   StreamSubscription? _userSubscription;
-   StreamSubscription? _unreadChatsSubscription;
-   int _totalUnreadCount = 0;
- 
-   final List<Map<String, dynamic>> _topTabs = [
-     {'icon': Icons.new_releases_outlined, 'key': 'main.tabs.newFeed'},
-@@ -205,51 +205,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-           icon: CircleAvatar(
-             backgroundImage: (_userModel?.photoUrl != null)
-                 ? NetworkImage(_userModel!.photoUrl!)
-                 : null,
-             child: (_userModel?.photoUrl == null)
-                 ? const Icon(Icons.person)
-                 : null,
-           ),
-           onPressed: () => Scaffold.of(context).openDrawer(),
-           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-         ),
-       ),
-       title: InkWell(
-         onTap: () async {
-           final result = await Navigator.of(context).push<Map<String, String?>>(
-             MaterialPageRoute(
-                 builder: (_) => LocationFilterScreen(userModel: _userModel)),
-           );
-           if (result != null && mounted) {
-             setState(() => _activeLocationFilter = result);
-           }
+diff --git a/assets/lang/en.json b/assets/lang/en.json
+index 6e05ba6b9721065d38264ba6eeedfe2f5a9033cf..e5facd1dd203b7b5e26efc1c4cca6e851b694428 100644
+--- a/assets/lang/en.json
++++ b/assets/lang/en.json
+@@ -177,51 +177,69 @@
+             "new": "New",
+             "used": "Used"
+         }
+     },
+     "myBling": {
+         "title": "My Bling",
+         "editProfile": "Edit Profile",
+         "settings": "Settings",
+         "stats": {
+             "posts": "Posts",
+             "followers": "Followers",
+             "neighbors": "Neighbors",
+             "friends": "Friends"
          },
-         child: Row(
-           mainAxisSize: MainAxisSize.min,
-           children: [
--            Text('My Town',
-+            Text('main.myTown'.tr(),
-                 style: GoogleFonts.inter(
-                     fontWeight: FontWeight.bold, fontSize: 16)),
-             const SizedBox(width: 8),
-             Flexible(
-               child: Text(
-                 // _isLocationLoading
-                 //     ? 'main.appBar.locationLoading'.tr()
-                 //     : AddressFormatter.toSingkatan(_currentAddress),
-                 getAppBarTitle(),
-                 style:
-                     const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                 overflow: TextOverflow.ellipsis,
-               ),
-             ),
-             const Icon(Icons.arrow_drop_down, size: 24),
-           ],
-         ),
-       ),
-       centerTitle: true,
-       actions: [
-         IconButton(
-           tooltip: 'Change Language',
-           icon: const Icon(Icons.language),
-           onPressed: () {
-             final currentLang = context.locale.languageCode;
-@@ -489,52 +489,52 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-                     titleKey: 'drawer.trustDashboard.rtRwAuth',
-                     isCompleted: userModel.locationParts?['rt'] != null),
-                 _buildTrustInfoTile(
-                     icon: Icons.phone_android,
-                     titleKey: 'drawer.trustDashboard.phoneAuth',
-                     isCompleted: userModel.phoneNumber != null &&
-                         userModel.phoneNumber!.isNotEmpty),
-                 _buildTrustInfoTile(
-                     icon: Icons.verified_user,
-                     titleKey: 'drawer.trustDashboard.profileComplete',
-                     isCompleted: userModel.profileCompleted),
-                 const Divider(),
-                 ListTile(
-                   leading: const Icon(Icons.edit_outlined),
-                   title: Text('drawer.editProfile'.tr()),
-                   onTap: () {
-                     Navigator.of(context).pop();
-                     Navigator.of(context).push(MaterialPageRoute(
-                         builder: (_) => const ProfileEditScreen()));
-                   },
-                 ),
-                 const Divider(),
-                 ListTile(
-                   leading: const Icon(Icons.build_circle_outlined,
-                       color: Colors.red),
--                  title: const Text('데이터 보정 실행',
--                      style: TextStyle(color: Colors.red)),
-+                  title: Text('drawer.runDataFix'.tr(),
-+                      style: const TextStyle(color: Colors.red)),
-                   onTap: () {
-                     Navigator.pop(context);
-                     Navigator.of(context).push(MaterialPageRoute(
-                         builder: (_) => const DataFixScreen()));
-                   },
-                 ),
-                 ListTile(
-                   leading: const Icon(Icons.logout),
-                   title: Text('drawer.logout'.tr()),
-                   onTap: () async {
-                     if (mounted) Navigator.pop(context);
-                     await FirebaseAuth.instance.signOut();
-                   },
-                 ),
-               ],
-             ),
-     );
+         "tabs": {
+             "posts": "My Posts",
+             "products": "My Products",
+             "bookmarks": "Bookmarks",
+             "friends": "Friends"
+         },
+         "friendRequests": "Friend Requests",
+         "sentFriendRequests": "Sent Requests"
+     },
+     "friendRequests": {
+         "title": "Friend Requests",
+-        "noRequests": "No friend requests received."
++        "noRequests": "No friend requests received.",
++        "acceptSuccess": "Friend request accepted.",
++        "rejectSuccess": "Friend request rejected.",
++        "error": "An error occurred: {error}",
++        "tooltip": {
++            "accept": "Accept",
++            "reject": "Reject"
++        },
++        "defaultChatMessage": "You are now friends! Start chatting."
++    },
++    "sentFriendRequests": {
++        "title": "Sent Friend Requests",
++        "noRequests": "No sent friend requests.",
++        "statusLabel": "Status: {status}",
++        "status": {
++            "pending": "Pending",
++            "accepted": "Accepted",
++            "rejected": "Rejected"
++        }
+     },
+     "prompt": {
+         "title": "Welcome to Bling!",
+         "subtitle": "To see interesting news and items around you, please set your neighborhood first.",
+         "button": "Set My Neighborhood"
+     },
+     "location": {
+         "title": "Set Neighborhood",
+         "searchHint": "Search by neighborhood, e.g., Serpong",
+         "gpsButton": "Find with current location",
+         "success": "Neighborhood has been set.",
+         "error": "Failed to set neighborhood: {error}",
+         "empty": "Please enter a neighborhood name.",
+         "permissionDenied": "Location permission is required to find your neighborhood."
+     },
+     "profileEdit": {
+         "title": "Edit Profile",
+         "nicknameHint": "Nickname",
+         "phoneHint": "Phone Number",
+         "bioHint": "Bio (Introduction)",
+         "locationTitle": "Location",
+         "changeLocation": "Change",
+         "interests": {
+             "title": "Interests",
+             "hint": "Use comma and Enter to add multiple"
+diff --git a/assets/lang/id.json b/assets/lang/id.json
+index e6993f1806d0b5085bf9a00a9fd249ee0273d10f..5fcd78080f131bcbb2ec9053e55e82e13d22fa6b 100644
+--- a/assets/lang/id.json
++++ b/assets/lang/id.json
+@@ -177,51 +177,69 @@
+             "new": "Baru",
+             "used": "Bekas"
+         }
+     },
+     "myBling": {
+         "title": "Bling Saya",
+         "editProfile": "Ubah Profil",
+         "settings": "Pengaturan",
+         "stats": {
+             "posts": "Postingan",
+             "followers": "Pengikut",
+             "neighbors": "Tetangga",
+             "friends": "Teman"
+         },
+         "tabs": {
+             "posts": "Postingan Saya",
+             "products": "Produk Saya",
+             "bookmarks": "Markah",
+             "friends": "Teman"
+         },
+         "friendRequests": "Permintaan Pertemanan",
+         "sentFriendRequests": "Permintaan Terkirim"
+     },
+     "friendRequests": {
+         "title": "Permintaan Pertemanan",
+-        "noRequests": "Tidak ada permintaan pertemanan yang diterima."
++        "noRequests": "Tidak ada permintaan pertemanan yang diterima.",
++        "acceptSuccess": "Permintaan pertemanan diterima.",
++        "rejectSuccess": "Permintaan pertemanan ditolak.",
++        "error": "Terjadi kesalahan: {error}",
++        "tooltip": {
++            "accept": "Terima",
++            "reject": "Tolak"
++        },
++        "defaultChatMessage": "Sekarang kalian berteman! Mulai percakapan."
++    },
++    "sentFriendRequests": {
++        "title": "Permintaan Pertemanan Terkirim",
++        "noRequests": "Tidak ada permintaan pertemanan yang dikirim.",
++        "statusLabel": "Status: {status}",
++        "status": {
++            "pending": "Menunggu",
++            "accepted": "Diterima",
++            "rejected": "Ditolak"
++        }
+     },
+     "prompt": {
+         "title": "Selamat datang di Bling!",
+         "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
+         "button": "Atur Lingkungan Saya"
+     },
+     "location": {
+         "title": "Atur Lingkungan",
+         "searchHint": "Cari berdasarkan lingkungan, cth., Serpong",
+         "gpsButton": "Cari dengan lokasi saat ini",
+         "success": "Lingkungan telah diatur.",
+         "error": "Gagal mengatur lingkungan: {error}",
+         "empty": "Silakan masukkan nama lingkungan.",
+         "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
+     },
+     "profileEdit": {
+         "title": "Pengaturan Profil",
+         "nicknameHint": "Nama Panggilan",
+         "phoneHint": "Nomor Telepon",
+         "bioHint": "Bio (Perkenalan Diri)",
+         "locationTitle": "Lokasi",
+         "changeLocation": "Ubah",
+         "interests": {
+             "title": "Minat",
+             "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
+diff --git a/assets/lang/ko.json b/assets/lang/ko.json
+index dd9085e513f1d9e9abd30e4e9d4410feb270f66a..ab804ceb7bb870b76f5a8e37fc40f1e8f82dec8b 100644
+--- a/assets/lang/ko.json
++++ b/assets/lang/ko.json
+@@ -176,51 +176,69 @@
+             "new": "새것",
+             "used": "중고"
+         }
+     },
+     "myBling": {
+         "title": "나의 Bling",
+         "editProfile": "프로필 수정",
+         "settings": "설정",
+         "stats": {
+             "posts": "게시물",
+             "followers": "팔로워",
+             "neighbors": "이웃",
+             "friends": "친구"
+         },
+         "tabs": {
+             "posts": "내 게시물",
+             "products": "내 판매상품",
+             "bookmarks": "관심목록",
+             "friends": "친구목록"
+         },
+         "friendRequests": "받은 친구 요청",
+         "sentFriendRequests": "보낸 친구 요청" 
+     },
+     "friendRequests": {
+         "title": "받은 친구 요청",
+-        "noRequests": "받은 친구 요청이 없습니다."
++        "noRequests": "받은 친구 요청이 없습니다.",
++        "acceptSuccess": "친구 요청을 수락했습니다.",
++        "rejectSuccess": "친구 요청을 거절했습니다.",
++        "error": "오류가 발생했습니다: {error}",
++        "tooltip": {
++            "accept": "수락",
++            "reject": "거절"
++        },
++        "defaultChatMessage": "이제 친구가 되었습니다! 대화를 시작해보세요."
++    },
++    "sentFriendRequests": {
++        "title": "보낸 친구 요청",
++        "noRequests": "보낸 친구 요청이 없습니다.",
++        "statusLabel": "요청 상태: {status}",
++        "status": {
++            "pending": "대기중",
++            "accepted": "수락됨",
++            "rejected": "거절됨"
++        }
+     },
+     "prompt": {
+         "title": "블링에 오신 것을 환영합니다!",
+         "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
+         "button": "내 동네 설정하기"
+     },
+     "location": {
+         "title": "동네 설정",
+         "searchHint": "동네 이름으로 검색 (예: 세르퐁)",
+         "gpsButton": "현재 위치로 찾기",
+         "success": "동네가 설정되었습니다.",
+         "error": "동네 설정에 실패했습니다: {error}",
+         "empty": "동네 이름을 입력해주세요.",
+         "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
+     },
+     "profileEdit": {
+         "title": "프로필 설정",
+         "nicknameHint": "닉네임",
+         "phoneHint": "전화번호",
+         "bioHint": "소개 (Bio)",
+         "locationTitle": "지역",
+         "changeLocation": "변경",
+         "interests": {
+             "title": "관심사",
+             "hint": "쉼표와 Enter로 여러개 동시 추가"
+diff --git a/lib/features/find_friends/data/find_friend_repository.dart b/lib/features/find_friends/data/find_friend_repository.dart
+index 8e4140a504e6b7543c5971a5b2e02b2ca48b512e..cbbe067f671c4fcd328cfe5eed1f4f7b60ef8a3f 100644
+--- a/lib/features/find_friends/data/find_friend_repository.dart
++++ b/lib/features/find_friends/data/find_friend_repository.dart
+@@ -1,29 +1,30 @@
+ // lib/features/find_friends/data/find_friend_repository.dart
+ 
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:flutter/material.dart';
++import 'package:easy_localization/easy_localization.dart';
+ 
+ import '../../../core/models/friend_request_model.dart';
+ import '../../../core/models/user_model.dart';
+ 
+ // import 'package:firebase_auth/firebase_auth.dart';
+ 
+ /// Firestore helper for FindFriend features.
+ class FindFriendRepository {
+   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+ 
+   Future<void> updateUserProfile(
+       String userId, Map<String, dynamic> data) async {
+     await _firestore.collection('users').doc(userId).update(data);
    }
  
-   Widget _buildTrustInfoTile(
-       {required IconData icon,
-       required String titleKey,
-       required bool isCompleted}) {
-     return ListTile(
-       leading: Icon(icon, color: isCompleted ? Colors.teal : Colors.grey),
-diff --git a/lib/features/marketplace/screens/product_edit_screen.dart b/lib/features/marketplace/screens/product_edit_screen.dart
-index 164da6088af92f9d03c30f4d0b1b25d20e276cdc..a5e6c5af091181bb872888a0bcd86d8ece9b3097 100644
---- a/lib/features/marketplace/screens/product_edit_screen.dart
-+++ b/lib/features/marketplace/screens/product_edit_screen.dart
-@@ -415,40 +415,45 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
-                   child: Text('marketplace.edit.resetLocation'.tr()),
-                 ),
-               ),
-               const SizedBox(height: 16),
-               TextFormField(
-                 controller: _transactionPlaceController,
-                 decoration: InputDecoration(labelText: 'address_detail_hint'.tr()),
-               ),
-               const SizedBox(height: 16),
-               Row(
-                 children: [
-                   Text('marketplace.edit.negotiable'.tr()),
-                   Switch(
-                     value: _isNegotiable,
-                     onChanged: (value) {
-                       setState(() {
-                         _isNegotiable = value;
-                       });
-                     },
-                   ),
-                 ],
-               ),
-               const SizedBox(height: 16),
-               DropdownButtonFormField<String>(
-                 value: _condition,
--                decoration: const InputDecoration(labelText: 'Condition'),
--                items: const [
--                  DropdownMenuItem(value: 'new', child: Text('New')),
--                  DropdownMenuItem(value: 'used', child: Text('Used')),
-+                decoration:
-+                    InputDecoration(labelText: 'marketplace.condition.label'.tr()),
-+                items: [
-+                  DropdownMenuItem(
-+                      value: 'new',
-+                      child: Text('marketplace.condition.new'.tr())),
-+                  DropdownMenuItem(
-+                      value: 'used',
-+                      child: Text('marketplace.condition.used'.tr())),
-                 ],
-                 onChanged: (value) =>
-                     setState(() => _condition = value ?? 'used'),
-               ),
-             ],
-           ),
-         ),
-       ),
-     );
+   CollectionReference<Map<String, dynamic>> get _users =>
+       _firestore.collection('users');
+   CollectionReference<Map<String, dynamic>> get _requests =>
+       _firestore.collection('friend_requests');
+ 
+   Future<void> saveProfile(String uid, Map<String, dynamic> data) async {
+     await _users.doc(uid).set(data, SetOptions(merge: true));
    }
- }
-diff --git a/lib/features/marketplace/screens/product_registration_screen.dart b/lib/features/marketplace/screens/product_registration_screen.dart
-index 0f15b7eb653d587efedfe7257d33e13d5e320f49..f5289503a2a87de7ec1b6144bec699160b6f7550 100644
---- a/lib/features/marketplace/screens/product_registration_screen.dart
-+++ b/lib/features/marketplace/screens/product_registration_screen.dart
-@@ -165,51 +165,54 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
-       );
  
-       // 1. 상품 문서 저장
-       await FirebaseFirestore.instance
-           .collection('products')
-           .doc(newProductId)
-           .set(newProduct.toJson());
+   Stream<List<UserModel>> getNearbyFriends(String kab) {
+@@ -44,51 +45,51 @@ class FindFriendRepository {
+       final batch = _firestore.batch();
  
-       // 2. ✅ [핵심 추가] 사용자의 productIds 배열에 새 상품 ID 추가
-       await FirebaseFirestore.instance
-           .collection('users')
-           .doc(user.uid)
-           .update({
-         'productIds': FieldValue.arrayUnion([newProductId]),
+       // 1. friend_requests 컬렉션에서 해당 요청 문서의 status를 'accepted'로 변경
+       final requestRef = _requests.doc(requestId);
+       batch.update(requestRef, {'status': 'accepted'});
+ 
+       // 2. [복원] 요청을 보낸 사람(fromUser)의 friends 목록에 받는 사람(toUser)의 ID를 추가
+       final fromUserRef = _users.doc(fromUserId);
+       batch.update(fromUserRef, {
+         'friends': FieldValue.arrayUnion([toUserId])
        });
  
+       // 3. [복원] 요청을 받은 사람(toUser)의 friends 목록에 보낸 사람(fromUser)의 ID를 추가
+       final toUserRef = _users.doc(toUserId);
+       batch.update(toUserRef, {
+         'friends': FieldValue.arrayUnion([fromUserId])
+       });
+ 
+       // 4. 새로운 1:1 채팅방 생성 로직
+       List<String> ids = [fromUserId, toUserId];
+       ids.sort();
+       String chatRoomId = ids.join('_');
+       final chatRoomRef = _firestore.collection('chats').doc(chatRoomId);
+       final chatRoomData = {
+         'participants': [fromUserId, toUserId],
+-        'lastMessage': '이제 친구가 되었습니다! 대화를 시작해보세요.', // TODO: 다국어
++        'lastMessage': 'friendRequests.defaultChatMessage'.tr(),
+         'lastMessageTimestamp': FieldValue.serverTimestamp(),
+         'unreadCounts': {fromUserId: 0, toUserId: 0},
+       };
+       batch.set(chatRoomRef, chatRoomData, SetOptions(merge: true));
+ 
+       // 5. 모든 작업을 한 번에 실행
+       await batch.commit();
+       debugPrint("--- 친구 요청 수락 성공 (Batch Commit 완료) ---");
+     } catch (e) {
+       debugPrint("!!! 친구 요청 수락 중 에러 발생: $e !!!");
+       rethrow;
+     }
+   }
+ 
+   // V V V --- [수정] 친구 요청 거절 시, 거절당한 사람을 목록에 추가하는 로직 --- V V V
+   Future<void> rejectFriendRequest(String requestId, String fromUserId, String toUserId) async {
+     final batch = _firestore.batch();
+ 
+     // 1. 요청 문서의 status를 'rejected'로 변경
+     final requestRef = _requests.doc(requestId);
+     batch.update(requestRef, {'status': 'rejected'});
+ 
+     // 2. 요청을 받은 사람(toUser, 거절한 사람)의 rejectedUsers 목록에 요청 보낸 사람(fromUser)의 ID를 추가
+     final toUserRef = _users.doc(toUserId);
+     batch.update(toUserRef, {
+diff --git a/lib/features/my_bling/screens/friend_requests_screen.dart b/lib/features/my_bling/screens/friend_requests_screen.dart
+index 60870086c7302b1a053cbfe963fc6b22fea5b8f8..36fb56c277f36fff6ce8777dbb3e9726ca44cab1 100644
+--- a/lib/features/my_bling/screens/friend_requests_screen.dart
++++ b/lib/features/my_bling/screens/friend_requests_screen.dart
+@@ -21,84 +21,93 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
+   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+   
+   final Map<String, bool> _isLoading = {};
+ 
+   // [삭제] 화면 내부에 있던 중복된 acceptFriendRequest 함수를 제거합니다.
+ 
+   @override
+   void initState() {
+     super.initState();
+   }
+ 
+   Future<UserModel?> _getUserData(String userId) async {
+     final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+     if (doc.exists) {
+       return UserModel.fromFirestore(doc);
+     }
+     return null;
+   }
+ 
+   // [수정] 친구 요청 수락 후, 이전 화면(My Bling)으로 돌아가는 로직
+   Future<void> _acceptRequest(FriendRequestModel request) async {
+     setState(() => _isLoading[request.id] = true);
+     try {
+       // 1. Repository의 acceptFriendRequest 함수를 호출하여 친구 추가 및 채팅방 생성
+       await _repository.acceptFriendRequest(request.id, request.fromUserId, request.toUserId);
+-      
++
        if (mounted) {
+         // 2. 성공 메시지를 보여줍니다.
          ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text('marketplace.registration.success'.tr())),
+-          SnackBar(content: Text("${request.fromUserId}님과 친구가 되었습니다."), backgroundColor: Colors.green), // TODO: 다국어
++          SnackBar(
++            content: Text('friendRequests.acceptSuccess'.tr()),
++            backgroundColor: Colors.green,
++          ),
          );
-         Navigator.of(context).popUntil((route) => route.isFirst);
+         // 3. 현재 화면을 닫고 이전 화면(My Bling)으로 돌아갑니다.
+         Navigator.of(context).pop();
        }
      } catch (e) {
        if (mounted) {
+         setState(() => _isLoading[request.id] = false);
          ScaffoldMessenger.of(context).showSnackBar(
--          SnackBar(content: Text('상품 등록 실패: $e')),
+-          SnackBar(content: Text("오류가 발생했습니다: $e"), backgroundColor: Colors.red),
 +          SnackBar(
-+            content:
-+                Text('marketplace.registration.fail'.tr(args: {'error': e.toString()})),
++            content: Text('friendRequests.error'.tr(namedArgs: {'error': e.toString()})),
++            backgroundColor: Colors.red,
 +          ),
          );
        }
-     } finally {
+     }
+   }
+ 
+  Future<void> _rejectRequest(FriendRequestModel request) async {
+     setState(() => _isLoading[request.id] = true);
+     try {
+       // Repository의 rejectFriendRequest 함수에 필요한 ID들을 모두 전달합니다.
+       await _repository.rejectFriendRequest(request.id, request.fromUserId, currentUserId);
        if (mounted) {
-         setState(() => _isLoading = false);
+         ScaffoldMessenger.of(context).showSnackBar(
+-          const SnackBar(content: Text("친구 요청을 거절했습니다.")),
++          SnackBar(content: Text('friendRequests.rejectSuccess'.tr())),
+         );
+       }
+     } catch (e) {
+        if (mounted) {
+         setState(() => _isLoading[request.id] = false);
+         ScaffoldMessenger.of(context).showSnackBar(
+-          SnackBar(content: Text("오류가 발생했습니다: $e"), backgroundColor: Colors.red),
++          SnackBar(
++            content: Text('friendRequests.error'.tr(namedArgs: {'error': e.toString()})),
++            backgroundColor: Colors.red,
++          ),
+         );
        }
      }
    }
  
-   String _getCategoryName(BuildContext context, Category? category) {
-     if (category == null) {
-       return 'selectCategory'.tr();
-     }
-     final langCode = context.locale.languageCode;
-     switch (langCode) {
-       case 'ko':
-         return category.nameKo;
-       case 'id':
-         return category.nameId;
-       default:
-         return category.nameEn;
-     }
-   }
  
    @override
-@@ -315,54 +318,59 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
-               TextFormField(
-                 controller: _transactionPlaceController,
-                 decoration:
-                     InputDecoration(labelText: 'address_detail_hint'.tr()),
-               ),
-               const SizedBox(height: 16),
-               TextFormField(
-                 controller: _priceController,
-                 decoration:
-                     InputDecoration(
-                         labelText: 'marketplace.registration.priceHint'.tr()),
-                 keyboardType: TextInputType.number,
-                 validator: (value) => (value == null || value.isEmpty)
-                     ? 'marketplace.errors.requiredField'.tr()
-                     : null,
-               ),
-               SwitchListTile(
-                 title: Text('marketplace.registration.negotiable'.tr()),
-                 value: _isNegotiable,
-                 onChanged: (value) => setState(() => _isNegotiable = value),
-                 contentPadding: EdgeInsets.zero,
-               ),
-               const SizedBox(height: 16),
-               DropdownButtonFormField<String>(
-                 value: _condition,
--                decoration: const InputDecoration(labelText: 'Condition'),
--                items: const [
--                  DropdownMenuItem(value: 'new', child: Text('New')),
--                  DropdownMenuItem(value: 'used', child: Text('Used')),
-+                decoration:
-+                    InputDecoration(labelText: 'marketplace.condition.label'.tr()),
-+                items: [
-+                  DropdownMenuItem(
-+                      value: 'new',
-+                      child: Text('marketplace.condition.new'.tr())),
-+                  DropdownMenuItem(
-+                      value: 'used',
-+                      child: Text('marketplace.condition.used'.tr())),
-                 ],
-                 onChanged: (value) =>
-                     setState(() => _condition = value ?? 'used'),
-               ),
-               const SizedBox(height: 16),
-               TextFormField(
-                 controller: _descriptionController,
-                 decoration: InputDecoration(
-                   labelText:
-                       'marketplace.registration.descriptionHint'.tr(),
-                   alignLabelWithHint: true,
-                   border: const OutlineInputBorder(),
-                 ),
-                 maxLines: 5,
-                 validator: (value) => (value == null || value.isEmpty)
-                     ? 'marketplace.errors.requiredField'.tr()
-                     : null,
-               ),
-             ],
-           ),
-         ),
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(
+         title: Text("friendRequests.title".tr()),
+       ),
+       body: StreamBuilder<List<FriendRequestModel>>(
+         stream: _repository.getReceivedRequests(currentUserId),
+         builder: (context, snapshot) {
+           if (snapshot.connectionState == ConnectionState.waiting) {
+             return const Center(child: CircularProgressIndicator());
+           }
+           if (snapshot.hasError) {
+             return Center(child: Text('Error: ${snapshot.error}'));
+           }
+           if (!snapshot.hasData || snapshot.data!.isEmpty) {
+             return Center(child: Text("friendRequests.noRequests".tr()));
+           }
+ 
+@@ -119,47 +128,47 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
+                       child: ListTile(leading: CircleAvatar(), title: Text("...")),
+                     );
+                   }
+                   final sender = userSnapshot.data!;
+                   return Card(
+                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                     child: ListTile(
+                       leading: CircleAvatar(
+                         backgroundImage: (sender.photoUrl != null && sender.photoUrl!.isNotEmpty)
+                             ? NetworkImage(sender.photoUrl!)
+                             : null,
+                         child: (sender.photoUrl == null || sender.photoUrl!.isEmpty)
+                             ? const Icon(Icons.person)
+                             : null,
+                       ),
+                       title: Text(sender.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
+                       subtitle: Text(sender.bio ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
+                       trailing: isLoading 
+                           ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) 
+                           : Row(
+                               mainAxisSize: MainAxisSize.min,
+                               children: [
+                                // V V V --- [수정] 거절 버튼이 올바른 파라미터를 전달하도록 변경 --- V V V
+                                 IconButton(
+                                   icon: const Icon(Icons.close, color: Colors.red),
+-                                  tooltip: '거절',
++                                  tooltip: 'friendRequests.tooltip.reject'.tr(),
+                                   onPressed: () => _rejectRequest(request),
+                                 ),
+                                 // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+                                 IconButton(
+                                   icon: const Icon(Icons.check, color: Colors.green),
+-                                  tooltip: '수락',
++                                  tooltip: 'friendRequests.tooltip.accept'.tr(),
+                                   onPressed: () => _acceptRequest(request),
+                                 ),
+                               ],
+                             ),
+                     ),
+                   );
+                 },
+               );
+             },
+           );
+         },
        ),
      );
    }
  }
-diff --git a/lib/features/pom/screens/pom_screen.dart b/lib/features/pom/screens/pom_screen.dart
-index 3b150c3ab8434642c4149c34743f119a92b31084..a74d1ccaf2eb83677ea16e8cc2edc273b2863248 100644
---- a/lib/features/pom/screens/pom_screen.dart
-+++ b/lib/features/pom/screens/pom_screen.dart
-@@ -1,9 +1,11 @@
- import 'package:flutter/material.dart';
-+import 'package:easy_localization/easy_localization.dart';
- import '../../../core/models/user_model.dart';
+\ No newline at end of file
+diff --git a/lib/features/my_bling/screens/sent_friend_requests_screen.dart b/lib/features/my_bling/screens/sent_friend_requests_screen.dart
+index ddca1222e41762371ad44eded0ee7d7e7c765de0..3829b73f32729ac5b5d2d814da64be63bc04081a 100644
+--- a/lib/features/my_bling/screens/sent_friend_requests_screen.dart
++++ b/lib/features/my_bling/screens/sent_friend_requests_screen.dart
+@@ -10,95 +10,107 @@ import 'package:easy_localization/easy_localization.dart';
  
- class PomScreen extends StatelessWidget {
-   final UserModel? userModel;
-   const PomScreen({this.userModel, super.key});
+ class SentFriendRequestsScreen extends StatefulWidget {
+   const SentFriendRequestsScreen({super.key});
+ 
    @override
--  Widget build(BuildContext context) => const Center(child: Text('Pom Screen'));
-+  Widget build(BuildContext context) =>
-+      Center(child: Text('main.tabs.pom'.tr()));
+   State<SentFriendRequestsScreen> createState() => _SentFriendRequestsScreenState();
  }
+ 
+ class _SentFriendRequestsScreenState extends State<SentFriendRequestsScreen> {
+   final FindFriendRepository _repository = FindFriendRepository();
+   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+ 
+   // 요청 받은 사람의 상세 정보를 가져오는 함수
+   Future<UserModel?> _getUserData(String userId) async {
+     final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+     if (doc.exists) {
+       return UserModel.fromFirestore(doc);
+     }
+     return null;
+   }
+ 
+   // 요청 상태에 따라 다른 아이콘과 색상을 반환하는 함수
+   Widget _buildStatusIcon(String status) {
+     switch (status) {
+       case 'accepted':
+-        return const Icon(Icons.check_circle, color: Colors.green, semanticLabel: '수락됨');
++        return Icon(Icons.check_circle,
++            color: Colors.green,
++            semanticLabel: 'sentFriendRequests.status.accepted'.tr());
+       case 'rejected':
+-        return const Icon(Icons.cancel, color: Colors.red, semanticLabel: '거절됨');
++        return Icon(Icons.cancel,
++            color: Colors.red,
++            semanticLabel: 'sentFriendRequests.status.rejected'.tr());
+       default: // 'pending'
+-        return const Icon(Icons.hourglass_top, color: Colors.orange, semanticLabel: '대기중');
++        return Icon(Icons.hourglass_top,
++            color: Colors.orange,
++            semanticLabel: 'sentFriendRequests.status.pending'.tr());
+     }
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(
+-        title: Text("보낸 친구 요청"), // TODO: 다국어
++        title: Text('myBling.sentFriendRequests'.tr()),
+       ),
+       body: StreamBuilder<List<FriendRequestModel>>(
+         stream: _repository.getSentRequests(currentUserId),
+         builder: (context, snapshot) {
+           if (snapshot.connectionState == ConnectionState.waiting) {
+             return const Center(child: CircularProgressIndicator());
+           }
+           if (snapshot.hasError) {
+             return Center(child: Text('Error: ${snapshot.error}'));
+           }
+           if (!snapshot.hasData || snapshot.data!.isEmpty) {
+-            return const Center(child: Text("보낸 친구 요청이 없습니다.")); // TODO: 다국어
++            return Center(child: Text('sentFriendRequests.noRequests'.tr()));
+           }
+ 
+           final requests = snapshot.data!;
+ 
+           return ListView.builder(
+             itemCount: requests.length,
+             itemBuilder: (context, index) {
+               final request = requests[index];
+               return FutureBuilder<UserModel?>(
+                 future: _getUserData(request.toUserId), // 요청 받은 사람의 정보를 가져옴
+                 builder: (context, userSnapshot) {
+                   if (!userSnapshot.hasData) {
+                     return const ListTile(title: Text("..."));
+                   }
+                   final receiver = userSnapshot.data!;
+                   return Card(
+                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                     child: ListTile(
+                       leading: CircleAvatar(
+                         backgroundImage: (receiver.photoUrl != null && receiver.photoUrl!.isNotEmpty)
+                             ? NetworkImage(receiver.photoUrl!)
+                             : null,
+                         child: (receiver.photoUrl == null || receiver.photoUrl!.isEmpty)
+                             ? const Icon(Icons.person)
+                             : null,
+                       ),
+                       title: Text(receiver.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
+                       subtitle: Text(
+-                        '요청 상태: ${request.status}', // TODO: 다국어
++                        'sentFriendRequests.statusLabel'.tr(namedArgs: {
++                          'status': 'sentFriendRequests.status.${request.status}'.tr()
++                        }),
+                         style: TextStyle(
+-                          color: request.status == 'accepted' ? Colors.green : (request.status == 'rejected' ? Colors.red : Colors.orange)
++                          color: request.status == 'accepted'
++                              ? Colors.green
++                              : (request.status == 'rejected'
++                                  ? Colors.red
++                                  : Colors.orange),
+                         ),
+                       ),
+                       trailing: _buildStatusIcon(request.status),
+                     ),
+                   );
+                 },
+               );
+             },
+           );
+         },
+       ),
+     );
+   }
+ }
+\ No newline at end of file
