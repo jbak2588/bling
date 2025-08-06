@@ -2,6 +2,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/models/friend_request_model.dart';
 import '../../../core/models/user_model.dart';
@@ -66,7 +68,7 @@ class FindFriendRepository {
       final chatRoomRef = _firestore.collection('chats').doc(chatRoomId);
       final chatRoomData = {
         'participants': [fromUserId, toUserId],
-        'lastMessage': '이제 친구가 되었습니다! 대화를 시작해보세요.', // TODO: 다국어
+        'lastMessage': 'friendRequests.defaultChatMessage'.tr(),
         'lastMessageTimestamp': FieldValue.serverTimestamp(),
         'unreadCounts': {fromUserId: 0, toUserId: 0},
       };
@@ -82,7 +84,8 @@ class FindFriendRepository {
   }
 
   // V V V --- [수정] 친구 요청 거절 시, 거절당한 사람을 목록에 추가하는 로직 --- V V V
-  Future<void> rejectFriendRequest(String requestId, String fromUserId, String toUserId) async {
+  Future<void> rejectFriendRequest(
+      String requestId, String fromUserId, String toUserId) async {
     final batch = _firestore.batch();
 
     // 1. 요청 문서의 status를 'rejected'로 변경
@@ -99,6 +102,13 @@ class FindFriendRepository {
   }
   // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
+   // V V V --- [추가] 사용자 차단 해제 함수 --- V V V
+  Future<void> unblockUser(String currentUserId, String blockedUserId) async {
+    await _users.doc(currentUserId).update({
+      'blockedUsers': FieldValue.arrayRemove([blockedUserId])
+    });
+  }
+
   Future<void> sendFriendRequest(String fromUserId, String toUserId) async {
     final existing = await _requests
         .where('fromUserId', isEqualTo: fromUserId)
@@ -113,7 +123,7 @@ class FindFriendRepository {
     });
   }
 
- // V V V --- [수정] 친구 목록을 불러올 때, 거절/차단한 사용자를 제외하는 로직 --- V V V
+  // V V V --- [수정] 친구 목록을 불러올 때, 거절/차단한 사용자를 제외하는 로직 --- V V V
   Stream<List<UserModel>> getUsersForFindFriends(UserModel currentUser) {
     Query query = _firestore
         .collection('users')
@@ -122,10 +132,12 @@ class FindFriendRepository {
 
     final rejectedUids = currentUser.rejectedUsers ?? [];
     final blockedUids = currentUser.blockedUsers ?? [];
-    final excludedUids = {...rejectedUids, ...blockedUids, currentUser.uid}.toList();
+    final excludedUids =
+        {...rejectedUids, ...blockedUids, currentUser.uid}.toList();
 
     if (excludedUids.isNotEmpty) {
-      query = query.where(FieldPath.documentId, whereNotIn: excludedUids.take(10).toList());
+      query = query.where(FieldPath.documentId,
+          whereNotIn: excludedUids.take(10).toList());
     }
 
     final genderPreference = currentUser.privacySettings?['genderPreference'];
@@ -137,7 +149,8 @@ class FindFriendRepository {
 
     return query.snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => UserModel.fromFirestore(doc as QueryDocumentSnapshot<Map<String, dynamic>>))
+          .map((doc) => UserModel.fromFirestore(
+              doc as QueryDocumentSnapshot<Map<String, dynamic>>))
           .toList();
     });
   }

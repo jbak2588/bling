@@ -19,7 +19,7 @@ class FriendRequestsScreen extends StatefulWidget {
 class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
   final FindFriendRepository _repository = FindFriendRepository();
   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
-  
+
   final Map<String, bool> _isLoading = {};
 
   // [삭제] 화면 내부에 있던 중복된 acceptFriendRequest 함수를 제거합니다.
@@ -30,7 +30,8 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
   }
 
   Future<UserModel?> _getUserData(String userId) async {
-    final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
     if (doc.exists) {
       return UserModel.fromFirestore(doc);
     }
@@ -42,46 +43,62 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     setState(() => _isLoading[request.id] = true);
     try {
       // 1. Repository의 acceptFriendRequest 함수를 호출하여 친구 추가 및 채팅방 생성
-      await _repository.acceptFriendRequest(request.id, request.fromUserId, request.toUserId);
-      
+      await _repository.acceptFriendRequest(
+          request.id, request.fromUserId, request.toUserId);
+
       if (mounted) {
         // 2. 성공 메시지를 보여줍니다.
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("${request.fromUserId}님과 친구가 되었습니다."), backgroundColor: Colors.green), // TODO: 다국어
+          SnackBar(
+            content: Text('friendRequests.acceptSuccess'.tr()),
+            backgroundColor: Colors.green,
+          ),
         );
         // 3. 현재 화면을 닫고 이전 화면(My Bling)으로 돌아갑니다.
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading[request.id] = false);
+        setState(() => _isLoading[request.id] = false); // 오류 발생 시 로딩 상태 해제
+        // 4. 오류 메시지를 보여줍니다.
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("오류가 발생했습니다: $e"), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+                'friendRequests.error'.tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
   }
 
- Future<void> _rejectRequest(FriendRequestModel request) async {
+  Future<void> _rejectRequest(FriendRequestModel request) async {
     setState(() => _isLoading[request.id] = true);
     try {
       // Repository의 rejectFriendRequest 함수에 필요한 ID들을 모두 전달합니다.
-      await _repository.rejectFriendRequest(request.id, request.fromUserId, currentUserId);
+      await _repository.rejectFriendRequest(
+          request.id, request.fromUserId, currentUserId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("친구 요청을 거절했습니다.")),
+          SnackBar(
+              content: Text(
+                  'friendRequests.rejectSuccess'.tr())), // 친구 요청을 거절했다는 메시지
         );
       }
     } catch (e) {
-       if (mounted) {
-        setState(() => _isLoading[request.id] = false);
+      if (mounted) {
+        setState(() => _isLoading[request.id] = false); // 오류 발생 시 로딩 상태 해제
+        // 오류 메시지를 보여줍니다. "friendRequests.error" 키를 사용하여 다국어 지원 -> 오류가 발생했습니다.
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("오류가 발생했습니다: $e"), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+                'friendRequests.error'.tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -116,38 +133,51 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
                   if (!userSnapshot.hasData) {
                     return const Card(
                       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: ListTile(leading: CircleAvatar(), title: Text("...")),
+                      child:
+                          ListTile(leading: CircleAvatar(), title: Text("...")),
                     );
                   }
                   final sender = userSnapshot.data!;
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundImage: (sender.photoUrl != null && sender.photoUrl!.isNotEmpty)
+                        backgroundImage: (sender.photoUrl != null &&
+                                sender.photoUrl!.isNotEmpty)
                             ? NetworkImage(sender.photoUrl!)
                             : null,
-                        child: (sender.photoUrl == null || sender.photoUrl!.isEmpty)
+                        child: (sender.photoUrl == null ||
+                                sender.photoUrl!.isEmpty)
                             ? const Icon(Icons.person)
                             : null,
                       ),
-                      title: Text(sender.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(sender.bio ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
-                      trailing: isLoading 
-                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) 
+                      title: Text(sender.nickname,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(sender.bio ?? '',
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      trailing: isLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2))
                           : Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                               // V V V --- [수정] 거절 버튼이 올바른 파라미터를 전달하도록 변경 --- V V V
+                                // V V V --- [수정] 거절 버튼이 올바른 파라미터를 전달하도록 변경 --- V V V
                                 IconButton(
-                                  icon: const Icon(Icons.close, color: Colors.red),
-                                  tooltip: '거절',
+                                  icon: const Icon(Icons.close,
+                                      color: Colors.red),
+                                  // tooltip: '거절',
+                                  tooltip: 'friendRequests.tooltip.reject'.tr(),
                                   onPressed: () => _rejectRequest(request),
                                 ),
                                 // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
                                 IconButton(
-                                  icon: const Icon(Icons.check, color: Colors.green),
-                                  tooltip: '수락',
+                                  icon: const Icon(Icons.check,
+                                      color: Colors.green),
+                                  // tooltip: '수락',
+                                  tooltip: 'friendRequests.tooltip.accept'.tr(),
                                   onPressed: () => _acceptRequest(request),
                                 ),
                               ],

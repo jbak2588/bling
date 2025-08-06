@@ -194,11 +194,29 @@
             "friends": "친구목록"
         },
         "friendRequests": "받은 친구 요청",
-        "sentFriendRequests": "보낸 친구 요청" 
+        "sentFriendRequests": "보낸 친구 요청"
     },
     "friendRequests": {
         "title": "받은 친구 요청",
-        "noRequests": "받은 친구 요청이 없습니다."
+        "noRequests": "받은 친구 요청이 없습니다.",
+        "acceptSuccess": "친구 요청을 수락했습니다.",
+        "rejectSuccess": "친구 요청을 거절했습니다.",
+        "error": "오류가 발생했습니다: {error}",
+        "tooltip": {
+            "accept": "수락",
+            "reject": "거절"
+        },
+        "defaultChatMessage": "이제 친구가 되었습니다! 대화를 시작해보세요."
+    },
+    "sentFriendRequests": {
+        "title": "보낸 친구 요청",
+        "noRequests": "보낸 친구 요청이 없습니다.",
+        "statusLabel": "요청 상태: {status}",
+        "status": {
+            "pending": "대기중",
+            "accepted": "수락됨",
+            "rejected": "거절됨"
+        }
     },
     "prompt": {
         "title": "블링에 오신 것을 환영합니다!",

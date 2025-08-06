@@ -199,7 +199,25 @@
     },
     "friendRequests": {
         "title": "Permintaan Pertemanan",
-        "noRequests": "Tidak ada permintaan pertemanan yang diterima."
+        "noRequests": "Tidak ada permintaan pertemanan yang diterima.",
+        "acceptSuccess": "Permintaan pertemanan diterima.",
+        "rejectSuccess": "Permintaan pertemanan ditolak.",
+        "error": "Terjadi kesalahan: {error}",
+        "tooltip": {
+            "accept": "Terima",
+            "reject": "Tolak"
+        },
+        "defaultChatMessage": "Sekarang kalian berteman! Mulai percakapan."
+    },
+    "sentFriendRequests": {
+        "title": "Permintaan Pertemanan Terkirim",
+        "noRequests": "Tidak ada permintaan pertemanan yang dikirim.",
+        "statusLabel": "Status: {status}",
+        "status": {
+            "pending": "Menunggu",
+            "accepted": "Diterima",
+            "rejected": "Ditolak"
+        }
     },
     "prompt": {
         "title": "Selamat datang di Bling!",
