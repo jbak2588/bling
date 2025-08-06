@@ -219,6 +219,18 @@
             "rejected": "Rejected"
         }
     },
+    "blockedUsers": {
+        "title": "Blocked Users",
+        "noBlockedUsers": "You haven't blocked anyone.",
+        "unblock": "Unblock",
+        "unblockDialog": {
+            "title": "Unblock {nickname}?",
+            "content": "If you unblock, this user will be able to find you and send friend requests again."
+        },
+        "unblockSuccess": "{nickname} has been unblocked.",
+        "unblockFailure": "Failed to unblock: {error}",
+        "unknownUser": "Unknown user"
+    },
     "prompt": {
         "title": "Welcome to Bling!",
         "subtitle": "To see interesting news and items around you, please set your neighborhood first.",

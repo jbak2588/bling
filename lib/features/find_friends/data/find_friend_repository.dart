@@ -101,6 +101,11 @@ class FindFriendRepository {
     await batch.commit();
   }
   // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+   Future<void> unrejectUser(String currentUserId, String rejectedUserId) async {
+    await _users.doc(currentUserId).update({
+      'rejectedUsers': FieldValue.arrayRemove([rejectedUserId])
+    });
+  }
 
    // V V V --- [추가] 사용자 차단 해제 함수 --- V V V
   Future<void> unblockUser(String currentUserId, String blockedUserId) async {

@@ -18,14 +18,16 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
   final FindFriendRepository _repository = FindFriendRepository();
   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
-  // 차단 해제 확인 대화상자 및 로직
-  Future<void> _showUnblockConfirmationDialog(String blockedUserId, String nickname) async {
+  // [수정] '차단 해제'가 아닌 '거절 해제' 로직
+  Future<void> _showUnrejectConfirmationDialog(
+      String rejectedUserId, String nickname) async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('$nickname 님을 차단 해제할까요?'), // TODO: 다국어
-          content: Text('차단을 해제하면 상대방이 회원님을 다시 찾을 수 있게 되며, 친구 요청을 보낼 수 있습니다.'), // TODO: 다국어
+          title: Text('$nickname 님에 대한 거절을 취소할까요?'), // TODO: 다국어
+          content:
+              Text('거절을 취소하면, 상대방의 친구 찾기 목록에 회원님이 다시 표시될 수 있습니다.'), // TODO: 다국어
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -33,7 +35,8 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text('차단 해제', style: TextStyle(color: Colors.red)), // TODO: 다국어
+              child: Text('거절 취소',
+                  style: TextStyle(color: Colors.red)), // TODO: 다국어
             ),
           ],
         );
@@ -42,22 +45,29 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
 
     if (confirmed == true && mounted) {
       try {
-        await _repository.unblockUser(_currentUserId!, blockedUserId);
+        // [수정] Repository에 unrejectUser 함수를 추가해야 합니다 (다음 단계에서 진행)
+        await _repository.unrejectUser(_currentUserId!, rejectedUserId);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$nickname 님의 차단을 해제했습니다.'), backgroundColor: Colors.green), // TODO: 다국어
+          SnackBar(
+              content: Text('$nickname 님에 대한 거절을 취소했습니다.'),
+              backgroundColor: Colors.green), // TODO: 다국어
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('차단 해제에 실패했습니다: $e'), backgroundColor: Colors.red), // TODO: 다국어
+          SnackBar(
+              content: Text('거절 취소에 실패했습니다: $e'),
+              backgroundColor: Colors.red), // TODO: 다국어
         );
       }
     }
   }
 
-  // 차단된 사용자의 상세 정보를 가져오는 함수
   Future<UserModel?> _getUserData(String userId) async {
     try {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
       if (doc.exists) {
         return UserModel.fromFirestore(doc);
       }
@@ -70,32 +80,39 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
   @override
   Widget build(BuildContext context) {
     if (_currentUserId == null) {
-      return Scaffold(appBar: AppBar(), body: Center(child: Text('로그인이 필요합니다.'))); // TODO: 다국어
+      return Scaffold(
+          appBar: AppBar(), body: Center(child: Text('로그인이 필요합니다.')));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('차단 사용자 관리'), // TODO: 다국어
+        title: Text('거절한 사용자 관리'), // TODO: 다국어
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance.collection('users').doc(_currentUserId).snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(_currentUserId)
+            .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData || !snapshot.data!.exists) {
             return const Center(child: CircularProgressIndicator());
           }
-          final currentUser = UserModel.fromFirestore(snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
-          final blockedUids = currentUser.blockedUsers ?? [];
+          final currentUser = UserModel.fromFirestore(
+              snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
+          // V V V --- [핵심 수정] 'blockedUsers'가 아닌 'rejectedUsers' 필드를 읽어옵니다 --- V V V
+          final rejectedUids = currentUser.rejectedUsers ?? [];
+          // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
-          if (blockedUids.isEmpty) {
-            return Center(child: Text('차단한 사용자가 없습니다.')); // TODO: 다국어
+          if (rejectedUids.isEmpty) {
+            return Center(child: Text('친구 요청을 거절한 사용자가 없습니다.')); // TODO: 다국어
           }
 
           return ListView.builder(
-            itemCount: blockedUids.length,
+            itemCount: rejectedUids.length,
             itemBuilder: (context, index) {
-              final blockedUserId = blockedUids[index];
+              final rejectedUserId = rejectedUids[index];
               return FutureBuilder<UserModel?>(
-                future: _getUserData(blockedUserId),
+                future: _getUserData(rejectedUserId),
                 builder: (context, userSnapshot) {
                   if (userSnapshot.connectionState == ConnectionState.waiting) {
                     return const ListTile(title: Text('...'));
@@ -103,24 +120,27 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                   if (!userSnapshot.hasData || userSnapshot.data == null) {
                     return ListTile(
                       title: Text('알 수 없는 사용자'),
-                      subtitle: Text(blockedUserId),
+                      subtitle: Text(rejectedUserId),
                     );
                   }
 
-                  final blockedUser = userSnapshot.data!;
+                  final rejectedUser = userSnapshot.data!;
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: (blockedUser.photoUrl != null && blockedUser.photoUrl!.isNotEmpty)
-                          ? NetworkImage(blockedUser.photoUrl!)
+                      backgroundImage: (rejectedUser.photoUrl != null &&
+                              rejectedUser.photoUrl!.isNotEmpty)
+                          ? NetworkImage(rejectedUser.photoUrl!)
                           : null,
-                       child: (blockedUser.photoUrl == null || blockedUser.photoUrl!.isEmpty)
-                           ? const Icon(Icons.person)
-                           : null,
+                      child: (rejectedUser.photoUrl == null ||
+                              rejectedUser.photoUrl!.isEmpty)
+                          ? const Icon(Icons.person)
+                          : null,
                     ),
-                    title: Text(blockedUser.nickname),
+                    title: Text(rejectedUser.nickname),
                     trailing: OutlinedButton(
-                      onPressed: () => _showUnblockConfirmationDialog(blockedUser.uid, blockedUser.nickname),
-                      child: Text('차단 해제'), // TODO: 다국어
+                      onPressed: () => _showUnrejectConfirmationDialog(
+                          rejectedUser.uid, rejectedUser.nickname),
+                      child: Text('거절 취소'), // TODO: 다국어
                     ),
                   );
                 },

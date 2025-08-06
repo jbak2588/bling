@@ -17,7 +17,8 @@ import '../widgets/user_friend_list.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'profile_edit_screen.dart';
 import 'friend_requests_screen.dart';
-import 'sent_friend_requests_screen.dart'; 
+import 'sent_friend_requests_screen.dart';
+import 'settings_screen.dart'; // [추가] 방금 만든 설정 화면 import
 
 class MyBlingScreen extends StatefulWidget {
   const MyBlingScreen({super.key});
@@ -55,7 +56,6 @@ class _MyBlingScreenState extends State<MyBlingScreen>
       appBar: AppBar(
         title: Text('myBling.title'.tr()),
         actions: [
-          // V V V --- [추가] 받은 친구 요청 확인 버튼 --- V V V
           StreamBuilder<List<FriendRequestModel>>(
               stream: FindFriendRepository().getReceivedRequests(myUid),
               builder: (context, snapshot) {
@@ -84,7 +84,6 @@ class _MyBlingScreenState extends State<MyBlingScreen>
             },
             tooltip: 'myBling.sentFriendRequests'.tr(),
           ),
-          // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
           IconButton(
             icon: const Icon(Icons.edit_outlined),
@@ -95,11 +94,18 @@ class _MyBlingScreenState extends State<MyBlingScreen>
             },
             tooltip: 'myBling.editProfile'.tr(),
           ),
+          // V V V --- [수정] 설정 아이콘의 onPressed 이벤트를 수정합니다 --- V V V
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () {/* 설정 화면으로 이동 */},
+            onPressed: () {
+              // 설정 화면으로 이동하도록 Navigator.push를 사용합니다.
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
+              ));
+            },
             tooltip: 'myBling.settings'.tr(),
           ),
+          // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
         ],
       ),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -249,11 +255,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
           child: TabBarView(
             controller: _tabController,
             children: const [
-              // Center(child: Text('내가 쓴 게시물이 표시될 영역')),
-              // ▼▼▼▼▼ '내 게시물' 탭에 새로운 위젯 적용 ▼▼▼▼▼
               UserPostList(),
-              // Center(child: Text('내 판매상품이 표시될 영역')),
-              // ▼▼▼▼▼ '내 판매상품' 탭에 새로운 위젯 적용 ▼▼▼▼▼
               UserProductList(),
               UserBookmarkList(),
               UserFriendList(),
@@ -310,19 +312,12 @@ class _MyBlingScreenState extends State<MyBlingScreen>
   }
 
   Future<int> _getFriendsCount(String uid) async {
-    final followersSnapshot = await FirebaseFirestore.instance
-        .collection('follows')
-        .where('toUserId', isEqualTo: uid)
-        .get();
-    final followingSnapshot = await FirebaseFirestore.instance
-        .collection('follows')
-        .where('fromUserId', isEqualTo: uid)
-        .get();
-
-    final followerIds =
-        followersSnapshot.docs.map((d) => d['fromUserId'] as String).toSet();
-    final followingIds =
-        followingSnapshot.docs.map((d) => d['toUserId'] as String).toSet();
-    return followerIds.intersection(followingIds).length;
+    // This is a simplified logic. A real implementation might need to check both follow collections.
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    if (userDoc.exists) {
+      final user = UserModel.fromFirestore(userDoc);
+      return user.friends?.length ?? 0;
+    }
+    return 0;
   }
 }

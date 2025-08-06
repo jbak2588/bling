@@ -1,367 +1,83 @@
-diff --git a/assets/lang/en.json b/assets/lang/en.json
-index 6e05ba6b9721065d38264ba6eeedfe2f5a9033cf..e5facd1dd203b7b5e26efc1c4cca6e851b694428 100644
---- a/assets/lang/en.json
-+++ b/assets/lang/en.json
-@@ -177,51 +177,69 @@
-             "new": "New",
-             "used": "Used"
-         }
-     },
-     "myBling": {
-         "title": "My Bling",
-         "editProfile": "Edit Profile",
-         "settings": "Settings",
-         "stats": {
-             "posts": "Posts",
-             "followers": "Followers",
-             "neighbors": "Neighbors",
-             "friends": "Friends"
-         },
-         "tabs": {
-             "posts": "My Posts",
-             "products": "My Products",
-             "bookmarks": "Bookmarks",
-             "friends": "Friends"
-         },
-         "friendRequests": "Friend Requests",
-         "sentFriendRequests": "Sent Requests"
-     },
-     "friendRequests": {
-         "title": "Friend Requests",
--        "noRequests": "No friend requests received."
-+        "noRequests": "No friend requests received.",
-+        "acceptSuccess": "Friend request accepted.",
-+        "rejectSuccess": "Friend request rejected.",
-+        "error": "An error occurred: {error}",
-+        "tooltip": {
-+            "accept": "Accept",
-+            "reject": "Reject"
-+        },
-+        "defaultChatMessage": "You are now friends! Start chatting."
-+    },
-+    "sentFriendRequests": {
-+        "title": "Sent Friend Requests",
-+        "noRequests": "No sent friend requests.",
-+        "statusLabel": "Status: {status}",
-+        "status": {
-+            "pending": "Pending",
-+            "accepted": "Accepted",
-+            "rejected": "Rejected"
-+        }
-     },
-     "prompt": {
-         "title": "Welcome to Bling!",
-         "subtitle": "To see interesting news and items around you, please set your neighborhood first.",
-         "button": "Set My Neighborhood"
-     },
-     "location": {
-         "title": "Set Neighborhood",
-         "searchHint": "Search by neighborhood, e.g., Serpong",
-         "gpsButton": "Find with current location",
-         "success": "Neighborhood has been set.",
-         "error": "Failed to set neighborhood: {error}",
-         "empty": "Please enter a neighborhood name.",
-         "permissionDenied": "Location permission is required to find your neighborhood."
-     },
-     "profileEdit": {
-         "title": "Edit Profile",
-         "nicknameHint": "Nickname",
-         "phoneHint": "Phone Number",
-         "bioHint": "Bio (Introduction)",
-         "locationTitle": "Location",
-         "changeLocation": "Change",
-         "interests": {
-             "title": "Interests",
-             "hint": "Use comma and Enter to add multiple"
-diff --git a/assets/lang/id.json b/assets/lang/id.json
-index e6993f1806d0b5085bf9a00a9fd249ee0273d10f..5fcd78080f131bcbb2ec9053e55e82e13d22fa6b 100644
---- a/assets/lang/id.json
-+++ b/assets/lang/id.json
-@@ -177,51 +177,69 @@
-             "new": "Baru",
-             "used": "Bekas"
-         }
-     },
-     "myBling": {
-         "title": "Bling Saya",
-         "editProfile": "Ubah Profil",
-         "settings": "Pengaturan",
-         "stats": {
-             "posts": "Postingan",
-             "followers": "Pengikut",
-             "neighbors": "Tetangga",
-             "friends": "Teman"
-         },
-         "tabs": {
-             "posts": "Postingan Saya",
-             "products": "Produk Saya",
-             "bookmarks": "Markah",
-             "friends": "Teman"
-         },
-         "friendRequests": "Permintaan Pertemanan",
-         "sentFriendRequests": "Permintaan Terkirim"
-     },
-     "friendRequests": {
-         "title": "Permintaan Pertemanan",
--        "noRequests": "Tidak ada permintaan pertemanan yang diterima."
-+        "noRequests": "Tidak ada permintaan pertemanan yang diterima.",
-+        "acceptSuccess": "Permintaan pertemanan diterima.",
-+        "rejectSuccess": "Permintaan pertemanan ditolak.",
-+        "error": "Terjadi kesalahan: {error}",
-+        "tooltip": {
-+            "accept": "Terima",
-+            "reject": "Tolak"
-+        },
-+        "defaultChatMessage": "Sekarang kalian berteman! Mulai percakapan."
-+    },
-+    "sentFriendRequests": {
-+        "title": "Permintaan Pertemanan Terkirim",
-+        "noRequests": "Tidak ada permintaan pertemanan yang dikirim.",
-+        "statusLabel": "Status: {status}",
-+        "status": {
-+            "pending": "Menunggu",
-+            "accepted": "Diterima",
-+            "rejected": "Ditolak"
-+        }
-     },
-     "prompt": {
-         "title": "Selamat datang di Bling!",
-         "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
-         "button": "Atur Lingkungan Saya"
-     },
-     "location": {
-         "title": "Atur Lingkungan",
-         "searchHint": "Cari berdasarkan lingkungan, cth., Serpong",
-         "gpsButton": "Cari dengan lokasi saat ini",
-         "success": "Lingkungan telah diatur.",
-         "error": "Gagal mengatur lingkungan: {error}",
-         "empty": "Silakan masukkan nama lingkungan.",
-         "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
-     },
-     "profileEdit": {
-         "title": "Pengaturan Profil",
-         "nicknameHint": "Nama Panggilan",
-         "phoneHint": "Nomor Telepon",
-         "bioHint": "Bio (Perkenalan Diri)",
-         "locationTitle": "Lokasi",
-         "changeLocation": "Ubah",
-         "interests": {
-             "title": "Minat",
-             "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
-diff --git a/assets/lang/ko.json b/assets/lang/ko.json
-index dd9085e513f1d9e9abd30e4e9d4410feb270f66a..ab804ceb7bb870b76f5a8e37fc40f1e8f82dec8b 100644
---- a/assets/lang/ko.json
-+++ b/assets/lang/ko.json
-@@ -176,51 +176,69 @@
-             "new": "새것",
-             "used": "중고"
-         }
-     },
-     "myBling": {
-         "title": "나의 Bling",
-         "editProfile": "프로필 수정",
-         "settings": "설정",
-         "stats": {
-             "posts": "게시물",
-             "followers": "팔로워",
-             "neighbors": "이웃",
-             "friends": "친구"
-         },
-         "tabs": {
-             "posts": "내 게시물",
-             "products": "내 판매상품",
-             "bookmarks": "관심목록",
-             "friends": "친구목록"
-         },
-         "friendRequests": "받은 친구 요청",
-         "sentFriendRequests": "보낸 친구 요청" 
-     },
-     "friendRequests": {
-         "title": "받은 친구 요청",
--        "noRequests": "받은 친구 요청이 없습니다."
-+        "noRequests": "받은 친구 요청이 없습니다.",
-+        "acceptSuccess": "친구 요청을 수락했습니다.",
-+        "rejectSuccess": "친구 요청을 거절했습니다.",
-+        "error": "오류가 발생했습니다: {error}",
-+        "tooltip": {
-+            "accept": "수락",
-+            "reject": "거절"
-+        },
-+        "defaultChatMessage": "이제 친구가 되었습니다! 대화를 시작해보세요."
-+    },
-+    "sentFriendRequests": {
-+        "title": "보낸 친구 요청",
-+        "noRequests": "보낸 친구 요청이 없습니다.",
-+        "statusLabel": "요청 상태: {status}",
-+        "status": {
-+            "pending": "대기중",
-+            "accepted": "수락됨",
-+            "rejected": "거절됨"
-+        }
-     },
-     "prompt": {
-         "title": "블링에 오신 것을 환영합니다!",
-         "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
-         "button": "내 동네 설정하기"
-     },
-     "location": {
-         "title": "동네 설정",
-         "searchHint": "동네 이름으로 검색 (예: 세르퐁)",
-         "gpsButton": "현재 위치로 찾기",
-         "success": "동네가 설정되었습니다.",
-         "error": "동네 설정에 실패했습니다: {error}",
-         "empty": "동네 이름을 입력해주세요.",
-         "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
-     },
-     "profileEdit": {
-         "title": "프로필 설정",
-         "nicknameHint": "닉네임",
-         "phoneHint": "전화번호",
-         "bioHint": "소개 (Bio)",
-         "locationTitle": "지역",
-         "changeLocation": "변경",
-         "interests": {
-             "title": "관심사",
-             "hint": "쉼표와 Enter로 여러개 동시 추가"
-diff --git a/lib/features/find_friends/data/find_friend_repository.dart b/lib/features/find_friends/data/find_friend_repository.dart
-index 8e4140a504e6b7543c5971a5b2e02b2ca48b512e..cbbe067f671c4fcd328cfe5eed1f4f7b60ef8a3f 100644
---- a/lib/features/find_friends/data/find_friend_repository.dart
-+++ b/lib/features/find_friends/data/find_friend_repository.dart
-@@ -1,29 +1,30 @@
- // lib/features/find_friends/data/find_friend_repository.dart
+diff --git a/lib/features/my_bling/screens/blocked_users_screen.dart b/lib/features/my_bling/screens/blocked_users_screen.dart
+index 6f4f266cbc6688aa0b80b834ed73cdd53c2efd86..313399601a1bb099ddce14468ac14fdfe0e61eca 100644
+--- a/lib/features/my_bling/screens/blocked_users_screen.dart
++++ b/lib/features/my_bling/screens/blocked_users_screen.dart
+@@ -1,134 +1,167 @@
+ // lib/features/my_bling/screens/blocked_users_screen.dart
  
+ import 'package:bling_app/core/models/user_model.dart';
+ import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
  import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
  import 'package:flutter/material.dart';
-+import 'package:easy_localization/easy_localization.dart';
+ import 'package:easy_localization/easy_localization.dart';
  
- import '../../../core/models/friend_request_model.dart';
- import '../../../core/models/user_model.dart';
- 
- // import 'package:firebase_auth/firebase_auth.dart';
- 
- /// Firestore helper for FindFriend features.
- class FindFriendRepository {
-   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
- 
-   Future<void> updateUserProfile(
-       String userId, Map<String, dynamic> data) async {
-     await _firestore.collection('users').doc(userId).update(data);
-   }
- 
-   CollectionReference<Map<String, dynamic>> get _users =>
-       _firestore.collection('users');
-   CollectionReference<Map<String, dynamic>> get _requests =>
-       _firestore.collection('friend_requests');
- 
-   Future<void> saveProfile(String uid, Map<String, dynamic> data) async {
-     await _users.doc(uid).set(data, SetOptions(merge: true));
-   }
- 
-   Stream<List<UserModel>> getNearbyFriends(String kab) {
-@@ -44,51 +45,51 @@ class FindFriendRepository {
-       final batch = _firestore.batch();
- 
-       // 1. friend_requests 컬렉션에서 해당 요청 문서의 status를 'accepted'로 변경
-       final requestRef = _requests.doc(requestId);
-       batch.update(requestRef, {'status': 'accepted'});
- 
-       // 2. [복원] 요청을 보낸 사람(fromUser)의 friends 목록에 받는 사람(toUser)의 ID를 추가
-       final fromUserRef = _users.doc(fromUserId);
-       batch.update(fromUserRef, {
-         'friends': FieldValue.arrayUnion([toUserId])
-       });
- 
-       // 3. [복원] 요청을 받은 사람(toUser)의 friends 목록에 보낸 사람(fromUser)의 ID를 추가
-       final toUserRef = _users.doc(toUserId);
-       batch.update(toUserRef, {
-         'friends': FieldValue.arrayUnion([fromUserId])
-       });
- 
-       // 4. 새로운 1:1 채팅방 생성 로직
-       List<String> ids = [fromUserId, toUserId];
-       ids.sort();
-       String chatRoomId = ids.join('_');
-       final chatRoomRef = _firestore.collection('chats').doc(chatRoomId);
-       final chatRoomData = {
-         'participants': [fromUserId, toUserId],
--        'lastMessage': '이제 친구가 되었습니다! 대화를 시작해보세요.', // TODO: 다국어
-+        'lastMessage': 'friendRequests.defaultChatMessage'.tr(),
-         'lastMessageTimestamp': FieldValue.serverTimestamp(),
-         'unreadCounts': {fromUserId: 0, toUserId: 0},
-       };
-       batch.set(chatRoomRef, chatRoomData, SetOptions(merge: true));
- 
-       // 5. 모든 작업을 한 번에 실행
-       await batch.commit();
-       debugPrint("--- 친구 요청 수락 성공 (Batch Commit 완료) ---");
-     } catch (e) {
-       debugPrint("!!! 친구 요청 수락 중 에러 발생: $e !!!");
-       rethrow;
-     }
-   }
- 
-   // V V V --- [수정] 친구 요청 거절 시, 거절당한 사람을 목록에 추가하는 로직 --- V V V
-   Future<void> rejectFriendRequest(String requestId, String fromUserId, String toUserId) async {
-     final batch = _firestore.batch();
- 
-     // 1. 요청 문서의 status를 'rejected'로 변경
-     final requestRef = _requests.doc(requestId);
-     batch.update(requestRef, {'status': 'rejected'});
- 
-     // 2. 요청을 받은 사람(toUser, 거절한 사람)의 rejectedUsers 목록에 요청 보낸 사람(fromUser)의 ID를 추가
-     final toUserRef = _users.doc(toUserId);
-     batch.update(toUserRef, {
-diff --git a/lib/features/my_bling/screens/friend_requests_screen.dart b/lib/features/my_bling/screens/friend_requests_screen.dart
-index 60870086c7302b1a053cbfe963fc6b22fea5b8f8..36fb56c277f36fff6ce8777dbb3e9726ca44cab1 100644
---- a/lib/features/my_bling/screens/friend_requests_screen.dart
-+++ b/lib/features/my_bling/screens/friend_requests_screen.dart
-@@ -21,84 +21,93 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
-   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
-   
-   final Map<String, bool> _isLoading = {};
- 
-   // [삭제] 화면 내부에 있던 중복된 acceptFriendRequest 함수를 제거합니다.
+ class BlockedUsersScreen extends StatefulWidget {
+   const BlockedUsersScreen({super.key});
  
    @override
-   void initState() {
-     super.initState();
-   }
+   State<BlockedUsersScreen> createState() => _BlockedUsersScreenState();
+ }
  
-   Future<UserModel?> _getUserData(String userId) async {
-     final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-     if (doc.exists) {
-       return UserModel.fromFirestore(doc);
-     }
-     return null;
-   }
+ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
+   final FindFriendRepository _repository = FindFriendRepository();
+   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
  
-   // [수정] 친구 요청 수락 후, 이전 화면(My Bling)으로 돌아가는 로직
-   Future<void> _acceptRequest(FriendRequestModel request) async {
-     setState(() => _isLoading[request.id] = true);
-     try {
-       // 1. Repository의 acceptFriendRequest 함수를 호출하여 친구 추가 및 채팅방 생성
-       await _repository.acceptFriendRequest(request.id, request.fromUserId, request.toUserId);
--      
-+
-       if (mounted) {
-         // 2. 성공 메시지를 보여줍니다.
+   // 차단 해제 확인 대화상자 및 로직
+-  Future<void> _showUnblockConfirmationDialog(String blockedUserId, String nickname) async {
++  Future<void> _showUnblockConfirmationDialog(
++      String blockedUserId, String nickname) async {
+     final bool? confirmed = await showDialog<bool>(
+       context: context,
+       builder: (context) {
+         return AlertDialog(
+-          title: Text('$nickname 님을 차단 해제할까요?'), // TODO: 다국어
+-          content: Text('차단을 해제하면 상대방이 회원님을 다시 찾을 수 있게 되며, 친구 요청을 보낼 수 있습니다.'), // TODO: 다국어
++          title: Text(
++            'blockedUsers.unblockDialog.title'
++                .tr(namedArgs: {'nickname': nickname}),
++          ),
++          content: Text('blockedUsers.unblockDialog.content'.tr()),
+           actions: [
+             TextButton(
+               onPressed: () => Navigator.of(context).pop(false),
+-              child: Text('취소'), // TODO: 다국어
++              child: Text('common.cancel'.tr()),
+             ),
+             TextButton(
+               onPressed: () => Navigator.of(context).pop(true),
+-              child: Text('차단 해제', style: TextStyle(color: Colors.red)), // TODO: 다국어
++              child: Text(
++                'blockedUsers.unblock'.tr(),
++                style: const TextStyle(color: Colors.red),
++              ),
+             ),
+           ],
+         );
+       },
+     );
+ 
+     if (confirmed == true && mounted) {
+       try {
+         await _repository.unblockUser(_currentUserId!, blockedUserId);
          ScaffoldMessenger.of(context).showSnackBar(
--          SnackBar(content: Text("${request.fromUserId}님과 친구가 되었습니다."), backgroundColor: Colors.green), // TODO: 다국어
+-          SnackBar(content: Text('$nickname 님의 차단을 해제했습니다.'), backgroundColor: Colors.green), // TODO: 다국어
 +          SnackBar(
-+            content: Text('friendRequests.acceptSuccess'.tr()),
++            content: Text(
++              'blockedUsers.unblockSuccess'
++                  .tr(namedArgs: {'nickname': nickname}),
++            ),
 +            backgroundColor: Colors.green,
 +          ),
          );
-         // 3. 현재 화면을 닫고 이전 화면(My Bling)으로 돌아갑니다.
-         Navigator.of(context).pop();
-       }
-     } catch (e) {
-       if (mounted) {
-         setState(() => _isLoading[request.id] = false);
+       } catch (e) {
          ScaffoldMessenger.of(context).showSnackBar(
--          SnackBar(content: Text("오류가 발생했습니다: $e"), backgroundColor: Colors.red),
+-          SnackBar(content: Text('차단 해제에 실패했습니다: $e'), backgroundColor: Colors.red), // TODO: 다국어
 +          SnackBar(
-+            content: Text('friendRequests.error'.tr(namedArgs: {'error': e.toString()})),
++            content: Text(
++              'blockedUsers.unblockFailure'
++                  .tr(namedArgs: {'error': e.toString()}),
++            ),
 +            backgroundColor: Colors.red,
 +          ),
          );
@@ -369,210 +85,99 @@ index 60870086c7302b1a053cbfe963fc6b22fea5b8f8..36fb56c277f36fff6ce8777dbb3e9726
      }
    }
  
-  Future<void> _rejectRequest(FriendRequestModel request) async {
-     setState(() => _isLoading[request.id] = true);
-     try {
-       // Repository의 rejectFriendRequest 함수에 필요한 ID들을 모두 전달합니다.
-       await _repository.rejectFriendRequest(request.id, request.fromUserId, currentUserId);
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
--          const SnackBar(content: Text("친구 요청을 거절했습니다.")),
-+          SnackBar(content: Text('friendRequests.rejectSuccess'.tr())),
-         );
-       }
-     } catch (e) {
-        if (mounted) {
-         setState(() => _isLoading[request.id] = false);
-         ScaffoldMessenger.of(context).showSnackBar(
--          SnackBar(content: Text("오류가 발생했습니다: $e"), backgroundColor: Colors.red),
-+          SnackBar(
-+            content: Text('friendRequests.error'.tr(namedArgs: {'error': e.toString()})),
-+            backgroundColor: Colors.red,
-+          ),
-         );
-       }
-     }
-   }
- 
- 
-   @override
-   Widget build(BuildContext context) {
-     return Scaffold(
-       appBar: AppBar(
-         title: Text("friendRequests.title".tr()),
-       ),
-       body: StreamBuilder<List<FriendRequestModel>>(
-         stream: _repository.getReceivedRequests(currentUserId),
-         builder: (context, snapshot) {
-           if (snapshot.connectionState == ConnectionState.waiting) {
-             return const Center(child: CircularProgressIndicator());
-           }
-           if (snapshot.hasError) {
-             return Center(child: Text('Error: ${snapshot.error}'));
-           }
-           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-             return Center(child: Text("friendRequests.noRequests".tr()));
-           }
- 
-@@ -119,47 +128,47 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
-                       child: ListTile(leading: CircleAvatar(), title: Text("...")),
-                     );
-                   }
-                   final sender = userSnapshot.data!;
-                   return Card(
-                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                     child: ListTile(
-                       leading: CircleAvatar(
-                         backgroundImage: (sender.photoUrl != null && sender.photoUrl!.isNotEmpty)
-                             ? NetworkImage(sender.photoUrl!)
-                             : null,
-                         child: (sender.photoUrl == null || sender.photoUrl!.isEmpty)
-                             ? const Icon(Icons.person)
-                             : null,
-                       ),
-                       title: Text(sender.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
-                       subtitle: Text(sender.bio ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
-                       trailing: isLoading 
-                           ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) 
-                           : Row(
-                               mainAxisSize: MainAxisSize.min,
-                               children: [
-                                // V V V --- [수정] 거절 버튼이 올바른 파라미터를 전달하도록 변경 --- V V V
-                                 IconButton(
-                                   icon: const Icon(Icons.close, color: Colors.red),
--                                  tooltip: '거절',
-+                                  tooltip: 'friendRequests.tooltip.reject'.tr(),
-                                   onPressed: () => _rejectRequest(request),
-                                 ),
-                                 // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-                                 IconButton(
-                                   icon: const Icon(Icons.check, color: Colors.green),
--                                  tooltip: '수락',
-+                                  tooltip: 'friendRequests.tooltip.accept'.tr(),
-                                   onPressed: () => _acceptRequest(request),
-                                 ),
-                               ],
-                             ),
-                     ),
-                   );
-                 },
-               );
-             },
-           );
-         },
-       ),
-     );
-   }
- }
-\ No newline at end of file
-diff --git a/lib/features/my_bling/screens/sent_friend_requests_screen.dart b/lib/features/my_bling/screens/sent_friend_requests_screen.dart
-index ddca1222e41762371ad44eded0ee7d7e7c765de0..3829b73f32729ac5b5d2d814da64be63bc04081a 100644
---- a/lib/features/my_bling/screens/sent_friend_requests_screen.dart
-+++ b/lib/features/my_bling/screens/sent_friend_requests_screen.dart
-@@ -10,95 +10,107 @@ import 'package:easy_localization/easy_localization.dart';
- 
- class SentFriendRequestsScreen extends StatefulWidget {
-   const SentFriendRequestsScreen({super.key});
- 
-   @override
-   State<SentFriendRequestsScreen> createState() => _SentFriendRequestsScreenState();
- }
- 
- class _SentFriendRequestsScreenState extends State<SentFriendRequestsScreen> {
-   final FindFriendRepository _repository = FindFriendRepository();
-   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
- 
-   // 요청 받은 사람의 상세 정보를 가져오는 함수
+   // 차단된 사용자의 상세 정보를 가져오는 함수
    Future<UserModel?> _getUserData(String userId) async {
-     final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-     if (doc.exists) {
-       return UserModel.fromFirestore(doc);
+     try {
+-      final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
++      final doc = await FirebaseFirestore.instance
++          .collection('users')
++          .doc(userId)
++          .get();
+       if (doc.exists) {
+         return UserModel.fromFirestore(doc);
+       }
+     } catch (e) {
+       debugPrint("Error fetching user data for $userId: $e");
      }
      return null;
    }
  
-   // 요청 상태에 따라 다른 아이콘과 색상을 반환하는 함수
-   Widget _buildStatusIcon(String status) {
-     switch (status) {
-       case 'accepted':
--        return const Icon(Icons.check_circle, color: Colors.green, semanticLabel: '수락됨');
-+        return Icon(Icons.check_circle,
-+            color: Colors.green,
-+            semanticLabel: 'sentFriendRequests.status.accepted'.tr());
-       case 'rejected':
--        return const Icon(Icons.cancel, color: Colors.red, semanticLabel: '거절됨');
-+        return Icon(Icons.cancel,
-+            color: Colors.red,
-+            semanticLabel: 'sentFriendRequests.status.rejected'.tr());
-       default: // 'pending'
--        return const Icon(Icons.hourglass_top, color: Colors.orange, semanticLabel: '대기중');
-+        return Icon(Icons.hourglass_top,
-+            color: Colors.orange,
-+            semanticLabel: 'sentFriendRequests.status.pending'.tr());
-     }
-   }
- 
    @override
    Widget build(BuildContext context) {
+     if (_currentUserId == null) {
+-      return Scaffold(appBar: AppBar(), body: Center(child: Text('로그인이 필요합니다.'))); // TODO: 다국어
++      return Scaffold(
++        appBar: AppBar(),
++        body: Center(child: Text('main.errors.loginRequired'.tr())),
++      );
+     }
+ 
      return Scaffold(
        appBar: AppBar(
--        title: Text("보낸 친구 요청"), // TODO: 다국어
-+        title: Text('myBling.sentFriendRequests'.tr()),
+-        title: Text('차단 사용자 관리'), // TODO: 다국어
++        title: Text('blockedUsers.title'.tr()),
        ),
-       body: StreamBuilder<List<FriendRequestModel>>(
-         stream: _repository.getSentRequests(currentUserId),
+       body: StreamBuilder<DocumentSnapshot>(
+-        stream: FirebaseFirestore.instance.collection('users').doc(_currentUserId).snapshots(),
++        stream: FirebaseFirestore.instance
++            .collection('users')
++            .doc(_currentUserId)
++            .snapshots(),
          builder: (context, snapshot) {
-           if (snapshot.connectionState == ConnectionState.waiting) {
+           if (!snapshot.hasData || !snapshot.data!.exists) {
              return const Center(child: CircularProgressIndicator());
            }
-           if (snapshot.hasError) {
-             return Center(child: Text('Error: ${snapshot.error}'));
-           }
-           if (!snapshot.hasData || snapshot.data!.isEmpty) {
--            return const Center(child: Text("보낸 친구 요청이 없습니다.")); // TODO: 다국어
-+            return Center(child: Text('sentFriendRequests.noRequests'.tr()));
-           }
+-          final currentUser = UserModel.fromFirestore(snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
++          final currentUser = UserModel.fromFirestore(
++              snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
+           final blockedUids = currentUser.blockedUsers ?? [];
  
-           final requests = snapshot.data!;
+           if (blockedUids.isEmpty) {
+-            return Center(child: Text('차단한 사용자가 없습니다.')); // TODO: 다국어
++            return Center(child: Text('blockedUsers.noBlockedUsers'.tr()));
+           }
  
            return ListView.builder(
-             itemCount: requests.length,
+             itemCount: blockedUids.length,
              itemBuilder: (context, index) {
-               final request = requests[index];
+               final blockedUserId = blockedUids[index];
                return FutureBuilder<UserModel?>(
-                 future: _getUserData(request.toUserId), // 요청 받은 사람의 정보를 가져옴
+                 future: _getUserData(blockedUserId),
                  builder: (context, userSnapshot) {
-                   if (!userSnapshot.hasData) {
-                     return const ListTile(title: Text("..."));
+                   if (userSnapshot.connectionState == ConnectionState.waiting) {
+                     return const ListTile(title: Text('...'));
                    }
-                   final receiver = userSnapshot.data!;
-                   return Card(
-                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                     child: ListTile(
-                       leading: CircleAvatar(
-                         backgroundImage: (receiver.photoUrl != null && receiver.photoUrl!.isNotEmpty)
-                             ? NetworkImage(receiver.photoUrl!)
-                             : null,
-                         child: (receiver.photoUrl == null || receiver.photoUrl!.isEmpty)
-                             ? const Icon(Icons.person)
-                             : null,
-                       ),
-                       title: Text(receiver.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
-                       subtitle: Text(
--                        '요청 상태: ${request.status}', // TODO: 다국어
-+                        'sentFriendRequests.statusLabel'.tr(namedArgs: {
-+                          'status': 'sentFriendRequests.status.${request.status}'.tr()
-+                        }),
-                         style: TextStyle(
--                          color: request.status == 'accepted' ? Colors.green : (request.status == 'rejected' ? Colors.red : Colors.orange)
-+                          color: request.status == 'accepted'
-+                              ? Colors.green
-+                              : (request.status == 'rejected'
-+                                  ? Colors.red
-+                                  : Colors.orange),
-                         ),
-                       ),
-                       trailing: _buildStatusIcon(request.status),
+                   if (!userSnapshot.hasData || userSnapshot.data == null) {
+                     return ListTile(
+-                      title: Text('알 수 없는 사용자'),
++                      title: Text('blockedUsers.unknownUser'.tr()),
+                       subtitle: Text(blockedUserId),
+                     );
+                   }
+ 
+                   final blockedUser = userSnapshot.data!;
+                   return ListTile(
+                     leading: CircleAvatar(
+-                      backgroundImage: (blockedUser.photoUrl != null && blockedUser.photoUrl!.isNotEmpty)
++                      backgroundImage: (blockedUser.photoUrl != null &&
++                              blockedUser.photoUrl!.isNotEmpty)
+                           ? NetworkImage(blockedUser.photoUrl!)
+                           : null,
+-                       child: (blockedUser.photoUrl == null || blockedUser.photoUrl!.isEmpty)
+-                           ? const Icon(Icons.person)
+-                           : null,
++                      child: (blockedUser.photoUrl == null ||
++                              blockedUser.photoUrl!.isEmpty)
++                          ? const Icon(Icons.person)
++                          : null,
+                     ),
+                     title: Text(blockedUser.nickname),
+                     trailing: OutlinedButton(
+-                      onPressed: () => _showUnblockConfirmationDialog(blockedUser.uid, blockedUser.nickname),
+-                      child: Text('차단 해제'), // TODO: 다국어
++                      onPressed: () => _showUnblockConfirmationDialog(
++                          blockedUser.uid, blockedUser.nickname),
++                      child: Text('blockedUsers.unblock'.tr()),
                      ),
                    );
                  },
@@ -583,5 +188,7 @@ index ddca1222e41762371ad44eded0ee7d7e7c765de0..3829b73f32729ac5b5d2d814da64be63
        ),
      );
    }
- }
+-}
 \ No newline at end of file
++}
++
