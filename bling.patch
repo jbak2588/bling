@@ -1,567 +1,210 @@
-diff --git a/lib/features/local_news/screens/local_news_screen.dart b/lib/features/local_news/screens/local_news_screen.dart
-index f26cbf253f0db1f122f329e339d452d19ab53eb8..54c4ee4468a048d04a7da450468f70a186251cbd 100644
---- a/lib/features/local_news/screens/local_news_screen.dart
-+++ b/lib/features/local_news/screens/local_news_screen.dart
-@@ -1,40 +1,41 @@
- // lib/features/local_news/screens/local_news_screen.dart
- 
- import 'package:bling_app/core/models/user_model.dart';
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
+diff --git a/lib/features/clubs/screens/clubs_screen.dart b/lib/features/clubs/screens/clubs_screen.dart
+index 5556cb6a97c0802969a85b225fe75f86816e27db..f6cd5b4c249c49e641c068ca5c816f01d8944fa5 100644
+--- a/lib/features/clubs/screens/clubs_screen.dart
++++ b/lib/features/clubs/screens/clubs_screen.dart
+@@ -1,11 +1,12 @@
  import 'package:flutter/material.dart';
- import 'package:google_fonts/google_fonts.dart';
++import 'package:easy_localization/easy_localization.dart';
+ import '../../../core/models/user_model.dart';
  
- import '../../../core/constants/app_categories.dart';
- import '../../../core/models/post_model.dart';
- import '../widgets/post_card.dart';
- 
- class LocalNewsScreen extends StatefulWidget {
+ class ClubsScreen extends StatelessWidget {
    final UserModel? userModel;
--  const LocalNewsScreen({this.userModel, super.key});
-+  final Map<String, String?>? locationFilter;
-+  const LocalNewsScreen({this.userModel, this.locationFilter, super.key});
- 
+   const ClubsScreen({this.userModel, super.key});
    @override
-   State<LocalNewsScreen> createState() => _LocalNewsScreenState();
+   Widget build(BuildContext context) =>
+-      const Center(child: Text('Clubs Screen'));
++      Center(child: Text('main.tabs.clubs'.tr()));
  }
  
- class _LocalNewsScreenState extends State<LocalNewsScreen>
-     with TickerProviderStateMixin {
-   late final TabController _tabController;
+diff --git a/lib/features/community/screens/community_screen.dart b/lib/features/community/screens/community_screen.dart
+index ec7210e64d5a7416f38b4799c8d9f31db295cb23..a304fc2755faa7613442b5986825d703d287065a 100644
+--- a/lib/features/community/screens/community_screen.dart
++++ b/lib/features/community/screens/community_screen.dart
+@@ -1,10 +1,11 @@
+ import 'package:flutter/material.dart';
++import 'package:easy_localization/easy_localization.dart';
  
-   // ✅ [다국어 수정] '전체' 탭 이름을 다국어 키로 변경합니다.
-   // late final List<String> _tabs;
- 
-   final List<String> _categoryIds = [
-     'all',
-     ...AppCategories.postCategories.map((c) => c.categoryId)
-   ];
- 
-   @override
-   void initState() {
-     super.initState();
-     _tabController = TabController(length: _categoryIds.length, vsync: this);
-   }
+ class CommunityScreen extends StatelessWidget {
+   const CommunityScreen({super.key});
  
    @override
-   void dispose() {
-@@ -58,195 +59,123 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
- 
-     final List<String> tabs = [
-       'localNewsFeed.allCategory'.tr(),
-       ...AppCategories.postCategories.map((c) => c.nameKey.tr())
-     ];
- 
-     return Column(
-       children: [
-         TabBar(
-           controller: _tabController,
-           isScrollable: true,
-           tabAlignment: TabAlignment.start,
-           labelColor: const Color(0xFF00A66C),
-           unselectedLabelColor: const Color(0xFF616161),
-           indicatorColor: const Color(0xFF00A66C),
-           indicatorWeight: 2.0,
-           labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
-           unselectedLabelStyle: GoogleFonts.inter(),
-           tabs: tabs.map((label) => Tab(text: label)).toList(),
-         ),
-         Expanded(
-           child: TabBarView(
-             controller: _tabController,
-             children: _categoryIds.map((categoryId) {
-               return _FeedCategoryList(
--                key: PageStorageKey('feed_category_$categoryId'),
-+                key: PageStorageKey('feed_category_\$categoryId'),
-                 category: categoryId,
-                 userModel: widget.userModel,
-+                locationFilter: widget.locationFilter,
-               );
-             }).toList(),
-           ),
-         ),
-       ],
-     );
+   Widget build(BuildContext context) {
+-    return const Center(child: Text('커뮤니티 화면'));
++    return Center(child: Text('community.title'.tr()));
    }
  }
+diff --git a/lib/features/jobs/screens/jobs_screen.dart b/lib/features/jobs/screens/jobs_screen.dart
+index 65d8522d0f7bb378ca2e7159949c7175b920f537..dd79eab399f27d5d5078626fc383c7c826f62a62 100644
+--- a/lib/features/jobs/screens/jobs_screen.dart
++++ b/lib/features/jobs/screens/jobs_screen.dart
+@@ -1,10 +1,11 @@
+ import 'package:flutter/material.dart';
++import 'package:easy_localization/easy_localization.dart';
+ import '../../../core/models/user_model.dart';
  
--class _FeedCategoryList extends StatefulWidget {
-+class _FeedCategoryList extends StatelessWidget {
-   final String category;
+ class JobsScreen extends StatelessWidget {
    final UserModel? userModel;
--  const _FeedCategoryList({super.key, required this.category, this.userModel});
-+  final Map<String, String?>? locationFilter;
-+  const _FeedCategoryList(
-+      {super.key, required this.category, this.userModel, this.locationFilter});
+   const JobsScreen({this.userModel, super.key});
+   @override
+   Widget build(BuildContext context) =>
+-      const Center(child: Text('Jobs Screen'));
++      Center(child: Text('main.tabs.jobs'.tr()));
+ }
+diff --git a/lib/features/local_stores/screens/local_stores_screen.dart b/lib/features/local_stores/screens/local_stores_screen.dart
+index 94af6fbdf09d23cd58e24e2130d9b8cf3835351a..2afad49b5babc40aa658fcda94cae3508b118f85 100644
+--- a/lib/features/local_stores/screens/local_stores_screen.dart
++++ b/lib/features/local_stores/screens/local_stores_screen.dart
+@@ -1,10 +1,11 @@
+ import 'package:flutter/material.dart';
++import 'package:easy_localization/easy_localization.dart';
+ import '../../../core/models/user_model.dart';
  
--  @override
--  State<_FeedCategoryList> createState() => __FeedCategoryListState();
--}
--
--class __FeedCategoryListState extends State<_FeedCategoryList>
--    with AutomaticKeepAliveClientMixin {
--  final List<DocumentSnapshot> _posts = [];
--  bool _isLoading = false;
--  bool _hasMore = true;
--  DocumentSnapshot? _lastDocument;
--  final int _limit = 10;
--  final _scrollController = ScrollController();
--
--  @override
--  void initState() {
--    super.initState();
--    _fetchFirstPosts();
--    _scrollController.addListener(_onScroll);
--  }
--
--  @override
--  bool get wantKeepAlive => true;
-+  Query<Map<String, dynamic>> _buildQuery() {
-+    final userProv = userModel?.locationParts?['prov'];
+ class LocalStoresScreen extends StatelessWidget {
+   final UserModel? userModel;
+   const LocalStoresScreen({this.userModel, super.key});
+   @override
+   Widget build(BuildContext context) =>
+-      const Center(child: Text('Local Stores Screen'));
++      Center(child: Text('main.tabs.localStores'.tr()));
+ }
+diff --git a/lib/features/location/screens/location_filter_screen.dart b/lib/features/location/screens/location_filter_screen.dart
+index 2e3e3837d3d1dadb398b74160eb35061c24d02ca..eca2aa03c761d9da2fe013722a407e5a4903e613 100644
+--- a/lib/features/location/screens/location_filter_screen.dart
++++ b/lib/features/location/screens/location_filter_screen.dart
+@@ -1,27 +1,28 @@
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:flutter/material.dart';
++import 'package:easy_localization/easy_localization.dart';
  
--  @override
--  void dispose() {
--    _scrollController.removeListener(_onScroll);
--    _scrollController.dispose();
--    super.dispose();
--  }
-+    Query<Map<String, dynamic>> query =
-+        FirebaseFirestore.instance.collection('posts');
+ import '../../../core/models/user_model.dart';
  
--  void _onScroll() {
--    if (_scrollController.position.pixels >=
--        _scrollController.position.maxScrollExtent - 300) {
--      _fetchMorePosts();
-+    if (userProv != null && userProv.isNotEmpty) {
-+      query = query.where('locationParts.prov', isEqualTo: userProv);
-     }
--  }
--
--  Query _buildQuery({DocumentSnapshot? startAfter}) {
--    final userKabupaten = widget.userModel?.locationParts?['kab'];
--
--    Query query = FirebaseFirestore.instance.collection('posts');
--
--    List<String> targetLocations = [];
+ class LocationFilterScreen extends StatefulWidget {
+   final UserModel? userModel;
+   const LocationFilterScreen({this.userModel, super.key});
  
--    if (userKabupaten == 'Tangerang' ||
--        userKabupaten == 'Tangerang City' ||
--        userKabupaten == 'Tangerang Selatan') {
--      targetLocations = ['Tangerang', 'Tangerang City', 'Tangerang Selatan'];
--    } else if (userKabupaten != null && userKabupaten.isNotEmpty) {
--      targetLocations = [userKabupaten];
-+    if (category != 'all') {
-+      query = query.where('category', isEqualTo: category);
-     }
+   @override
+   State<LocationFilterScreen> createState() => _LocationFilterScreenState();
+ }
  
--    if (targetLocations.isNotEmpty) {
--      query = query.where('locationParts.kab', whereIn: targetLocations);
--    }
--
--    if (widget.category != 'all') {
--      query = query.where('category', isEqualTo: widget.category);
--    }
--
--    query = query.orderBy('createdAt', descending: true);
--
--    if (startAfter != null) {
--      query = query.startAfterDocument(startAfter);
--    }
--
--    return query.limit(_limit);
-+    return query.orderBy('createdAt', descending: true);
+ class _LocationFilterScreenState extends State<LocationFilterScreen> {
+   final List<String> _provinsiList = [];
+   final List<String> _kabupatenList = [];
+   final List<String> _kotaList = [];
+   final List<String> _kecamatanList = [];
+   final List<String> _kelurahanList = [];
+ 
+   String? _selectedProvinsi;
+   String? _selectedKabupaten;
+   String? _selectedKota;
+   String? _selectedKecamatan;
+   String? _selectedKelurahan;
+ 
+   bool _kabupatenEnabled = false;
+@@ -138,92 +139,92 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
+     final kelSnapshot = await parent.doc(value).collection('kelurahan').get();
+     setState(() {
+       _kelurahanList.addAll(kelSnapshot.docs.map((d) => d.id));
+       _kelurahanEnabled = true;
+     });
    }
  
--  Future<void> _fetchFirstPosts() async {
--    if (_isLoading) return;
--    setState(() => _isLoading = true);
--
--    try {
--      final querySnapshot = await _buildQuery().get();
--      if (mounted) {
--        setState(() {
--          _posts.clear();
--          _posts.addAll(querySnapshot.docs);
--          _lastDocument =
--              querySnapshot.docs.isNotEmpty ? querySnapshot.docs.last : null;
--          _hasMore = querySnapshot.docs.length == _limit;
--          _isLoading = false;
--        });
--      }
--    } catch (e) {
--      if (mounted) setState(() => _isLoading = false);
--    }
--  }
--
--  Future<void> _fetchMorePosts() async {
--    if (_isLoading || !_hasMore) return;
--    setState(() => _isLoading = true);
--
--    try {
--      final querySnapshot = await _buildQuery(startAfter: _lastDocument).get();
--      if (mounted) {
--        setState(() {
--          _posts.addAll(querySnapshot.docs);
--          _lastDocument =
--              querySnapshot.docs.isNotEmpty ? querySnapshot.docs.last : null;
--          
--          _hasMore = querySnapshot.docs.length == _limit;
--          _isLoading = false;
--        });
--      }
--    } catch (e) {
--      if (mounted) setState(() => _isLoading = false);
-+  List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyLocationFilter(
-+      List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
-+    final filter = locationFilter;
-+    if (filter == null) return allDocs;
-+
-+    String? key;
-+    if (filter['kel'] != null) {
-+      key = 'kel';
-+    } else if (filter['kec'] != null) {
-+      key = 'kec';
-+    } else if (filter['kab'] != null) {
-+      key = 'kab';
-+    } else if (filter['kota'] != null) {
-+      key = 'kota';
-+    } else if (filter['prov'] != null) {
-+      key = 'prov';
-     }
-+    if (key == null) return allDocs;
-+
-+    final value = filter[key]!.toLowerCase();
-+    return allDocs
-+        .where((doc) =>
-+            (doc.data()['locationParts']?[key] ?? '')
-+                .toString()
-+                .toLowerCase() ==
-+            value)
-+        .toList();
+   void _onKelurahanChanged(String? value) {
+     setState(() => _selectedKelurahan = value);
+   }
+ 
+   void _applyFilter() {
+     final result = {
+       'prov': _selectedProvinsi,
+       'kab': _selectedKabupaten,
+       'kota': _selectedKota,
+       'kec': _selectedKecamatan,
+       'kel': _selectedKelurahan,
+     };
+     Navigator.pop(context, result);
    }
  
    @override
    Widget build(BuildContext context) {
--    super.build(context);
--
--    if (_posts.isEmpty && _isLoading) {
--      return const Center(child: CircularProgressIndicator());
--    }
--    if (_posts.isEmpty && !_isLoading) {
--      return Center(
--        child: RefreshIndicator(
--          onRefresh: _fetchFirstPosts,
--          child: SingleChildScrollView(
--              physics: const AlwaysScrollableScrollPhysics(),
--              child: SizedBox(
--                  height: MediaQuery.of(context).size.height * 0.5,
--                  // ✅ [다국어 수정] 게시물 없음 안내 메시지를 다국어 키로 변경합니다.
--                  child: Center(child: Text('localNewsFeed.empty'.tr())))),
--        ),
--      );
--    }
--
--    return RefreshIndicator(
--      onRefresh: _fetchFirstPosts,
--      child: ListView.builder(
--        controller: _scrollController,
--        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
--        itemCount: _posts.length + (_hasMore ? 1 : 0),
--        itemBuilder: (context, index) {
--          if (index == _posts.length) {
--            return const Padding(
--              padding: EdgeInsets.all(16.0),
--              child: Center(child: CircularProgressIndicator()),
--            );
--          }
--          final post = PostModel.fromFirestore(
--              _posts[index] as DocumentSnapshot<Map<String, dynamic>>);
--          return PostCard(post: post);
--        },
--      ),
-+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-+      stream: _buildQuery().snapshots(),
-+      builder: (context, snapshot) {
-+        if (snapshot.connectionState == ConnectionState.waiting) {
-+          return const Center(child: CircularProgressIndicator());
-+        }
-+        if (snapshot.hasError) {
-+          return Center(
-+              child: Text('localNewsFeed.error'
-+                  .tr(namedArgs: {'error': snapshot.error.toString()})));
-+        }
-+
-+        final allDocs = snapshot.data?.docs ?? [];
-+        final postsDocs = _applyLocationFilter(allDocs);
-+        if (postsDocs.isEmpty) {
-+          return Center(child: Text('localNewsFeed.empty'.tr()));
-+        }
-+
-+        return ListView.builder(
-+          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-+          itemCount: postsDocs.length,
-+          itemBuilder: (context, index) {
-+            final post = PostModel.fromFirestore(postsDocs[index]);
-+            return PostCard(post: post);
-+          },
-+        );
-+      },
+     return Scaffold(
+-      appBar: AppBar(title: const Text('Location Filter')),
++      appBar: AppBar(title: Text('locationFilter.title'.tr())),
+       body: _loadingProvinces
+           ? const Center(child: CircularProgressIndicator())
+           : Padding(
+               padding: const EdgeInsets.all(16.0),
+               child: Column(
+                 children: [
+                   DropdownButton<String>(
+                     value: _selectedProvinsi,
+-                    hint: const Text('Provinsi'),
++                    hint: Text('locationFilter.provinsi'.tr()),
+                     isExpanded: true,
+                     items: _provinsiList
+                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                         .toList(),
+                     onChanged: _onProvinsiChanged,
+                   ),
+                   const SizedBox(height: 12),
+                   DropdownButton<String>(
+                     value: _selectedKabupaten,
+-                    hint: const Text('Kabupaten'),
++                    hint: Text('locationFilter.kabupaten'.tr()),
+                     isExpanded: true,
+                     items: _kabupatenList
+                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                         .toList(),
+                     onChanged: _kabupatenEnabled ? _onKabupatenChanged : null,
+                   ),
+                   const SizedBox(height: 12),
+                   DropdownButton<String>(
+                     value: _selectedKota,
+-                    hint: const Text('Kota'),
++                    hint: Text('locationFilter.kota'.tr()),
+                     isExpanded: true,
+                     items: _kotaList
+                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                         .toList(),
+                     onChanged: _kotaEnabled ? _onKotaChanged : null,
+                   ),
+                   const SizedBox(height: 12),
+                   DropdownButton<String>(
+                     value: _selectedKecamatan,
+-                    hint: const Text('Kecamatan'),
++                    hint: Text('locationFilter.kecamatan'.tr()),
+                     isExpanded: true,
+                     items: _kecamatanList
+                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                         .toList(),
+                     onChanged: _kecamatanEnabled ? _onKecamatanChanged : null,
+                   ),
+                   const SizedBox(height: 12),
+                   DropdownButton<String>(
+                     value: _selectedKelurahan,
+-                    hint: const Text('Kelurahan'),
++                    hint: Text('locationFilter.kelurahan'.tr()),
+                     isExpanded: true,
+                     items: _kelurahanList
+                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                         .toList(),
+                     onChanged: _kelurahanEnabled ? _onKelurahanChanged : null,
+                   ),
+                   const Spacer(),
+                   ElevatedButton(
+                     onPressed: _applyFilter,
+-                    child: const Text('필터 적용하기'),
++                    child: Text('locationFilter.apply'.tr()),
+                   ),
+                 ],
+               ),
+             ),
      );
    }
  }
-diff --git a/lib/features/location/screens/location_filter_screen.dart b/lib/features/location/screens/location_filter_screen.dart
-new file mode 100644
-index 0000000000000000000000000000000000000000..2e3e3837d3d1dadb398b74160eb35061c24d02ca
---- /dev/null
-+++ b/lib/features/location/screens/location_filter_screen.dart
-@@ -0,0 +1,229 @@
-+import 'package:cloud_firestore/cloud_firestore.dart';
-+import 'package:flutter/material.dart';
-+
-+import '../../../core/models/user_model.dart';
-+
-+class LocationFilterScreen extends StatefulWidget {
-+  final UserModel? userModel;
-+  const LocationFilterScreen({this.userModel, super.key});
-+
-+  @override
-+  State<LocationFilterScreen> createState() => _LocationFilterScreenState();
-+}
-+
-+class _LocationFilterScreenState extends State<LocationFilterScreen> {
-+  final List<String> _provinsiList = [];
-+  final List<String> _kabupatenList = [];
-+  final List<String> _kotaList = [];
-+  final List<String> _kecamatanList = [];
-+  final List<String> _kelurahanList = [];
-+
-+  String? _selectedProvinsi;
-+  String? _selectedKabupaten;
-+  String? _selectedKota;
-+  String? _selectedKecamatan;
-+  String? _selectedKelurahan;
-+
-+  bool _kabupatenEnabled = false;
-+  bool _kotaEnabled = false;
-+  bool _kecamatanEnabled = false;
-+  bool _kelurahanEnabled = false;
-+  bool _loadingProvinces = true;
-+
-+  @override
-+  void initState() {
-+    super.initState();
-+    _loadProvinces();
-+  }
-+
-+  Future<void> _loadProvinces() async {
-+    final snapshot = await FirebaseFirestore.instance.collection('provinces').get();
-+    setState(() {
-+      _provinsiList.addAll(snapshot.docs.map((d) => d.id));
-+      _loadingProvinces = false;
-+    });
-+  }
-+
-+  Future<void> _onProvinsiChanged(String? value) async {
-+    if (value == null) return;
-+    setState(() {
-+      _selectedProvinsi = value;
-+      _selectedKabupaten = null;
-+      _selectedKota = null;
-+      _selectedKecamatan = null;
-+      _selectedKelurahan = null;
-+      _kabupatenEnabled = false;
-+      _kotaEnabled = false;
-+      _kecamatanEnabled = false;
-+      _kelurahanEnabled = false;
-+      _kabupatenList.clear();
-+      _kotaList.clear();
-+      _kecamatanList.clear();
-+      _kelurahanList.clear();
-+    });
-+
-+    final provRef = FirebaseFirestore.instance.collection('provinces').doc(value);
-+    final kabSnapshot = await provRef.collection('kabupaten').get();
-+    final kotaSnapshot = await provRef.collection('kota').get();
-+    setState(() {
-+      _kabupatenList.addAll(kabSnapshot.docs.map((d) => d.id));
-+      _kotaList.addAll(kotaSnapshot.docs.map((d) => d.id));
-+      _kabupatenEnabled = true;
-+      _kotaEnabled = true;
-+    });
-+  }
-+
-+  Future<void> _onKabupatenChanged(String? value) async {
-+    if (value == null) return;
-+    setState(() {
-+      _selectedKabupaten = value;
-+      _selectedKota = null;
-+      _selectedKecamatan = null;
-+      _selectedKelurahan = null;
-+      _kotaEnabled = false;
-+      _kecamatanEnabled = false;
-+      _kelurahanEnabled = false;
-+      _kotaList.clear();
-+      _kecamatanList.clear();
-+      _kelurahanList.clear();
-+    });
-+    final provRef = FirebaseFirestore.instance.collection('provinces').doc(_selectedProvinsi);
-+    final kecSnapshot = await provRef.collection('kabupaten').doc(value).collection('kecamatan').get();
-+    setState(() {
-+      _kecamatanList.addAll(kecSnapshot.docs.map((d) => d.id));
-+      _kecamatanEnabled = true;
-+    });
-+  }
-+
-+  Future<void> _onKotaChanged(String? value) async {
-+    if (value == null) return;
-+    setState(() {
-+      _selectedKota = value;
-+      _selectedKabupaten = null;
-+      _selectedKecamatan = null;
-+      _selectedKelurahan = null;
-+      _kabupatenEnabled = false;
-+      _kecamatanEnabled = false;
-+      _kelurahanEnabled = false;
-+      _kabupatenList.clear();
-+      _kecamatanList.clear();
-+      _kelurahanList.clear();
-+    });
-+    final provRef = FirebaseFirestore.instance.collection('provinces').doc(_selectedProvinsi);
-+    final kecSnapshot = await provRef.collection('kota').doc(value).collection('kecamatan').get();
-+    setState(() {
-+      _kecamatanList.addAll(kecSnapshot.docs.map((d) => d.id));
-+      _kecamatanEnabled = true;
-+    });
-+  }
-+
-+  Future<void> _onKecamatanChanged(String? value) async {
-+    if (value == null) return;
-+    setState(() {
-+      _selectedKecamatan = value;
-+      _selectedKelurahan = null;
-+      _kelurahanEnabled = false;
-+      _kelurahanList.clear();
-+    });
-+    if (_selectedProvinsi == null) return;
-+    final provRef = FirebaseFirestore.instance.collection('provinces').doc(_selectedProvinsi);
-+    CollectionReference<Map<String, dynamic>> parent;
-+    if (_selectedKabupaten != null) {
-+      parent = provRef.collection('kabupaten').doc(_selectedKabupaten!).collection('kecamatan');
-+    } else if (_selectedKota != null) {
-+      parent = provRef.collection('kota').doc(_selectedKota!).collection('kecamatan');
-+    } else {
-+      return;
-+    }
-+    final kelSnapshot = await parent.doc(value).collection('kelurahan').get();
-+    setState(() {
-+      _kelurahanList.addAll(kelSnapshot.docs.map((d) => d.id));
-+      _kelurahanEnabled = true;
-+    });
-+  }
-+
-+  void _onKelurahanChanged(String? value) {
-+    setState(() => _selectedKelurahan = value);
-+  }
-+
-+  void _applyFilter() {
-+    final result = {
-+      'prov': _selectedProvinsi,
-+      'kab': _selectedKabupaten,
-+      'kota': _selectedKota,
-+      'kec': _selectedKecamatan,
-+      'kel': _selectedKelurahan,
-+    };
-+    Navigator.pop(context, result);
-+  }
-+
-+  @override
-+  Widget build(BuildContext context) {
-+    return Scaffold(
-+      appBar: AppBar(title: const Text('Location Filter')),
-+      body: _loadingProvinces
-+          ? const Center(child: CircularProgressIndicator())
-+          : Padding(
-+              padding: const EdgeInsets.all(16.0),
-+              child: Column(
-+                children: [
-+                  DropdownButton<String>(
-+                    value: _selectedProvinsi,
-+                    hint: const Text('Provinsi'),
-+                    isExpanded: true,
-+                    items: _provinsiList
-+                        .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-+                        .toList(),
-+                    onChanged: _onProvinsiChanged,
-+                  ),
-+                  const SizedBox(height: 12),
-+                  DropdownButton<String>(
-+                    value: _selectedKabupaten,
-+                    hint: const Text('Kabupaten'),
-+                    isExpanded: true,
-+                    items: _kabupatenList
-+                        .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-+                        .toList(),
-+                    onChanged: _kabupatenEnabled ? _onKabupatenChanged : null,
-+                  ),
-+                  const SizedBox(height: 12),
-+                  DropdownButton<String>(
-+                    value: _selectedKota,
-+                    hint: const Text('Kota'),
-+                    isExpanded: true,
-+                    items: _kotaList
-+                        .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-+                        .toList(),
-+                    onChanged: _kotaEnabled ? _onKotaChanged : null,
-+                  ),
-+                  const SizedBox(height: 12),
-+                  DropdownButton<String>(
-+                    value: _selectedKecamatan,
-+                    hint: const Text('Kecamatan'),
-+                    isExpanded: true,
-+                    items: _kecamatanList
-+                        .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-+                        .toList(),
-+                    onChanged: _kecamatanEnabled ? _onKecamatanChanged : null,
-+                  ),
-+                  const SizedBox(height: 12),
-+                  DropdownButton<String>(
-+                    value: _selectedKelurahan,
-+                    hint: const Text('Kelurahan'),
-+                    isExpanded: true,
-+                    items: _kelurahanList
-+                        .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-+                        .toList(),
-+                    onChanged: _kelurahanEnabled ? _onKelurahanChanged : null,
-+                  ),
-+                  const Spacer(),
-+                  ElevatedButton(
-+                    onPressed: _applyFilter,
-+                    child: const Text('필터 적용하기'),
-+                  ),
-+                ],
-+              ),
-+            ),
-+    );
-+  }
-+}
 diff --git a/lib/features/main_screen/home_screen.dart b/lib/features/main_screen/home_screen.dart
-index 960c9bd976842063418bff5b0c651529f3c11f5c..a598680802080f98223d73ce31a26eea703efed8 100644
+index df06d3eae557c10767036789266e047c88df3a55..b963642222eb601cb7b6fa3f8f31cb7b36af15eb 100644
 --- a/lib/features/main_screen/home_screen.dart
 +++ b/lib/features/main_screen/home_screen.dart
-@@ -2,79 +2,81 @@
- 
- import 'dart:async';
- import 'package:bling_app/features/auction/screens/auction_screen.dart';
- import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
- import 'package:bling_app/features/clubs/screens/clubs_screen.dart';
- import 'package:bling_app/features/main_feed/screens/main_feed_screen.dart';
- import 'package:bling_app/features/find_friends/screens/find_friends_screen.dart';
- import 'package:bling_app/features/jobs/screens/jobs_screen.dart';
- import 'package:bling_app/features/local_stores/screens/local_stores_screen.dart';
- import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
- import 'package:bling_app/features/pom/screens/pom_screen.dart';
- import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
- import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
+@@ -15,51 +15,51 @@ import 'package:bling_app/features/marketplace/screens/product_registration_scre
  import 'package:cloud_firestore/cloud_firestore.dart';
  import 'package:easy_localization/easy_localization.dart';
  import 'package:firebase_auth/firebase_auth.dart';
@@ -573,8 +216,8 @@ index 960c9bd976842063418bff5b0c651529f3c11f5c..a598680802080f98223d73ce31a26eea
  import '../../../core/utils/address_formatter.dart';
  import '../auth/screens/profile_edit_screen.dart';
  import '../local_news/screens/local_news_screen.dart';
- import '../location/screens/location_setting_screen.dart';
-+import '../location/screens/location_filter_screen.dart';
+ // import '../location/screens/location_setting_screen.dart';
+ import '../location/screens/location_filter_screen.dart';
  import '../marketplace/screens/marketplace_screen.dart';
  import '../admin/screens/data_fix_screen.dart';
  
@@ -587,7 +230,8 @@ index 960c9bd976842063418bff5b0c651529f3c11f5c..a598680802080f98223d73ce31a26eea
    Widget build(BuildContext context) {
      return Scaffold(
        appBar: AppBar(title: Text('main.bottomNav.search'.tr())),
-       body: const Center(child: Text("Search Screen")),
+-      body: const Center(child: Text("Search Screen")),
++      body: Center(child: Text('main.search.placeholder'.tr())),
      );
    }
  }
@@ -604,8 +248,8 @@ index 960c9bd976842063418bff5b0c651529f3c11f5c..a598680802080f98223d73ce31a26eea
    int _bottomNavIndex = 0;
  
    UserModel? _userModel;
-+  Map<String, String?>? _activeLocationFilter;
-   String _currentAddress = "";
+   Map<String, String?>? _activeLocationFilter;
+   String _currentAddress = "Loading...";
    bool _isLocationLoading = true;
    StreamSubscription? _userSubscription;
    StreamSubscription? _unreadChatsSubscription;
@@ -613,36 +257,7 @@ index 960c9bd976842063418bff5b0c651529f3c11f5c..a598680802080f98223d73ce31a26eea
  
    final List<Map<String, dynamic>> _topTabs = [
      {'icon': Icons.new_releases_outlined, 'key': 'main.tabs.newFeed'},
-     {'icon': Icons.newspaper_outlined, 'key': 'main.tabs.localNews'},
-     {'icon': Icons.storefront_outlined, 'key': 'main.tabs.marketplace'},
-     {'icon': Icons.favorite_border_outlined, 'key': 'main.tabs.findFriends'},
-     {'icon': Icons.groups_outlined, 'key': 'main.tabs.clubs'},
-     {'icon': Icons.work_outline, 'key': 'main.tabs.jobs'},
-     {
-       'icon': Icons.store_mall_directory_outlined,
-       'key': 'main.tabs.localStores'
-     },
-     {'icon': Icons.gavel_outlined, 'key': 'main.tabs.auction'},
-     {'icon': Icons.star_outline, 'key': 'main.tabs.pom'},
-   ];
- 
-   @override
-   void initState() {
-     super.initState();
-     _tabController = TabController(length: _topTabs.length, vsync: this);
-@@ -172,52 +174,60 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-         debugPrint('\x1B[33m${currentTabIndex + 1}번 탭의 등록 기능이 호출되었습니다.\x1B[0m');
-     }
-   }
- 
-   // SliverAppBar로 변경하여 스크롤 최적화 적용
-   SliverAppBar _buildHomeSliverAppBar() {
-     return SliverAppBar(
-       floating: true,
-       snap: true,
-       pinned: true,
-       leading: Builder(
-         builder: (context) => IconButton(
+@@ -205,51 +205,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
            icon: CircleAvatar(
              backgroundImage: (_userModel?.photoUrl != null)
                  ? NetworkImage(_userModel!.photoUrl!)
@@ -656,30 +271,29 @@ index 960c9bd976842063418bff5b0c651529f3c11f5c..a598680802080f98223d73ce31a26eea
          ),
        ),
        title: InkWell(
--        onTap: () => Navigator.of(context).push(
--            MaterialPageRoute(builder: (_) => const LocationSettingScreen())),
-+        onTap: () async {
-+          final result = await Navigator.of(context).push<Map<String, String?>>(
-+            MaterialPageRoute(
-+                builder: (_) =>
-+                    LocationFilterScreen(userModel: _userModel)),
-+          );
-+          if (result != null && mounted) {
-+            setState(() => _activeLocationFilter = result);
-+          }
-+        },
+         onTap: () async {
+           final result = await Navigator.of(context).push<Map<String, String?>>(
+             MaterialPageRoute(
+                 builder: (_) => LocationFilterScreen(userModel: _userModel)),
+           );
+           if (result != null && mounted) {
+             setState(() => _activeLocationFilter = result);
+           }
+         },
          child: Row(
            mainAxisSize: MainAxisSize.min,
            children: [
-             Text('My Town',
+-            Text('My Town',
++            Text('main.myTown'.tr(),
                  style: GoogleFonts.inter(
                      fontWeight: FontWeight.bold, fontSize: 16)),
              const SizedBox(width: 8),
              Flexible(
                child: Text(
-                 _isLocationLoading
-                     ? 'main.appBar.locationLoading'.tr()
-                     : AddressFormatter.toSingkatan(_currentAddress),
+                 // _isLocationLoading
+                 //     ? 'main.appBar.locationLoading'.tr()
+                 //     : AddressFormatter.toSingkatan(_currentAddress),
+                 getAppBarTitle(),
                  style:
                      const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                  overflow: TextOverflow.ellipsis,
@@ -693,231 +307,256 @@ index 960c9bd976842063418bff5b0c651529f3c11f5c..a598680802080f98223d73ce31a26eea
        actions: [
          IconButton(
            tooltip: 'Change Language',
-@@ -246,52 +256,54 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-         tabs: _topTabs
-             .map((tab) => Tab(
-                   child: Row(
-                     mainAxisAlignment: MainAxisAlignment.center,
-                     children: [
-                       Icon(tab['icon']),
-                       const SizedBox(width: 8),
-                       Text(tab['key'].toString().tr()),
-                     ],
+           icon: const Icon(Icons.language),
+           onPressed: () {
+             final currentLang = context.locale.languageCode;
+@@ -489,52 +489,52 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+                     titleKey: 'drawer.trustDashboard.rtRwAuth',
+                     isCompleted: userModel.locationParts?['rt'] != null),
+                 _buildTrustInfoTile(
+                     icon: Icons.phone_android,
+                     titleKey: 'drawer.trustDashboard.phoneAuth',
+                     isCompleted: userModel.phoneNumber != null &&
+                         userModel.phoneNumber!.isNotEmpty),
+                 _buildTrustInfoTile(
+                     icon: Icons.verified_user,
+                     titleKey: 'drawer.trustDashboard.profileComplete',
+                     isCompleted: userModel.profileCompleted),
+                 const Divider(),
+                 ListTile(
+                   leading: const Icon(Icons.edit_outlined),
+                   title: Text('drawer.editProfile'.tr()),
+                   onTap: () {
+                     Navigator.of(context).pop();
+                     Navigator.of(context).push(MaterialPageRoute(
+                         builder: (_) => const ProfileEditScreen()));
+                   },
+                 ),
+                 const Divider(),
+                 ListTile(
+                   leading: const Icon(Icons.build_circle_outlined,
+                       color: Colors.red),
+-                  title: const Text('데이터 보정 실행',
+-                      style: TextStyle(color: Colors.red)),
++                  title: Text('drawer.runDataFix'.tr(),
++                      style: const TextStyle(color: Colors.red)),
+                   onTap: () {
+                     Navigator.pop(context);
+                     Navigator.of(context).push(MaterialPageRoute(
+                         builder: (_) => const DataFixScreen()));
+                   },
+                 ),
+                 ListTile(
+                   leading: const Icon(Icons.logout),
+                   title: Text('drawer.logout'.tr()),
+                   onTap: () async {
+                     if (mounted) Navigator.pop(context);
+                     await FirebaseAuth.instance.signOut();
+                   },
+                 ),
+               ],
+             ),
+     );
+   }
+ 
+   Widget _buildTrustInfoTile(
+       {required IconData icon,
+       required String titleKey,
+       required bool isCompleted}) {
+     return ListTile(
+       leading: Icon(icon, color: isCompleted ? Colors.teal : Colors.grey),
+diff --git a/lib/features/marketplace/screens/product_edit_screen.dart b/lib/features/marketplace/screens/product_edit_screen.dart
+index 164da6088af92f9d03c30f4d0b1b25d20e276cdc..a5e6c5af091181bb872888a0bcd86d8ece9b3097 100644
+--- a/lib/features/marketplace/screens/product_edit_screen.dart
++++ b/lib/features/marketplace/screens/product_edit_screen.dart
+@@ -415,40 +415,45 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
+                   child: Text('marketplace.edit.resetLocation'.tr()),
+                 ),
+               ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _transactionPlaceController,
+                 decoration: InputDecoration(labelText: 'address_detail_hint'.tr()),
+               ),
+               const SizedBox(height: 16),
+               Row(
+                 children: [
+                   Text('marketplace.edit.negotiable'.tr()),
+                   Switch(
+                     value: _isNegotiable,
+                     onChanged: (value) {
+                       setState(() {
+                         _isNegotiable = value;
+                       });
+                     },
                    ),
-                 ))
-             .toList(),
-       ),
-     );
-   }
- 
-   Widget _buildHomePage() {
-     return NestedScrollView(
-       headerSliverBuilder: (context, innerBoxIsScrolled) => [
-             _buildHomeSliverAppBar(),
-           ],
-       body: TabBarView(
-         controller: _tabController,
-         children: [
-           MainFeedScreen(userModel: _userModel),
--          LocalNewsScreen(userModel: _userModel),
--          MarketplaceScreen(userModel: _userModel),
-+          LocalNewsScreen(
-+              userModel: _userModel, locationFilter: _activeLocationFilter),
-+          MarketplaceScreen(
-+              userModel: _userModel, locationFilter: _activeLocationFilter),
-           FindFriendsScreen(userModel: _userModel),
-           ClubsScreen(userModel: _userModel),
-           JobsScreen(userModel: _userModel),
-           LocalStoresScreen(userModel: _userModel),
-           AuctionScreen(userModel: _userModel),
-           PomScreen(userModel: _userModel),
-         ],
-       ),
-     );
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     final List<Widget> pages = [
-       _buildHomePage(),
-       const SearchScreen(),
-       const ChatListScreen(),
-       const MyBlingScreen(),
-     ];
- 
-     int effectiveIndex =
-         _bottomNavIndex > 2 ? _bottomNavIndex - 1 : _bottomNavIndex;
- 
-     return Scaffold(
-       appBar: null,
-diff --git a/lib/features/marketplace/screens/marketplace_screen.dart b/lib/features/marketplace/screens/marketplace_screen.dart
-index 5753c290a8c048c4dce891ab33ee96daf885975c..476891559e0839cdc84120ab4802c4af99d94481 100644
---- a/lib/features/marketplace/screens/marketplace_screen.dart
-+++ b/lib/features/marketplace/screens/marketplace_screen.dart
-@@ -1,129 +1,148 @@
- // lib/features/marketplace/screens/marketplace_screen.dart
- // Bling App v0.4
- import 'package:bling_app/core/models/user_model.dart';
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:easy_localization/easy_localization.dart';
- import 'package:flutter/material.dart';
- 
- import '../../../core/models/product_model.dart';
- import 'product_detail_screen.dart';
- 
- class MarketplaceScreen extends StatefulWidget {
--  // ✅ [수정] UserModel을 받도록 수정
-   final UserModel? userModel;
--  const MarketplaceScreen({super.key, this.userModel});
-+  final Map<String, String?>? locationFilter;
-+  const MarketplaceScreen({super.key, this.userModel, this.locationFilter});
- 
-   @override
-   State<MarketplaceScreen> createState() => _MarketplaceScreenState();
- }
- 
- class _MarketplaceScreenState extends State<MarketplaceScreen> {
-   String _formatTimestamp(Timestamp timestamp) {
-     // ... (내용 변경 없음)
-     final now = DateTime.now();
-     final dt = timestamp.toDate();
-     final diff = now.difference(dt);
- 
-     if (diff.inMinutes < 1) {
-       return 'time.now'.tr();
-     } else if (diff.inHours < 1) {
-       return 'time.minutesAgo'
-           .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
-     } else if (diff.inDays < 1) {
-       return 'time.hoursAgo'
-           .tr(namedArgs: {'hours': diff.inHours.toString()});
-     } else if (diff.inDays < 7) {
-       return 'time.daysAgo'
-           .tr(namedArgs: {'days': diff.inDays.toString()});
-     } else {
-       return DateFormat('time.dateFormat'.tr()).format(dt);
-     }
-   }
- 
-+  List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyLocationFilter(
-+      List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
-+    final filter = widget.locationFilter;
-+    if (filter == null) return allDocs;
-+
-+    String? key;
-+    if (filter['kel'] != null) {
-+      key = 'kel';
-+    } else if (filter['kec'] != null) {
-+      key = 'kec';
-+    } else if (filter['kab'] != null) {
-+      key = 'kab';
-+    } else if (filter['kota'] != null) {
-+      key = 'kota';
-+    } else if (filter['prov'] != null) {
-+      key = 'prov';
-+    }
-+    if (key == null) return allDocs;
-+
-+    final value = filter[key]!.toLowerCase();
-+    return allDocs
-+        .where((doc) =>
-+            (doc.data()['locationParts']?[key] ?? '')
-+                .toString()
-+                .toLowerCase() ==
-+            value)
-+        .toList();
-+  }
-+
-   @override
-   Widget build(BuildContext context) {
-     // ✅ [수정] 쿼리 생성 로직을 build 메소드 안으로 이동하고, Tangerang 권역을 모두 포함하도록 수정
-     Query<Map<String, dynamic>> buildQuery() {
--      final userKabupaten = widget.userModel?.locationParts?['kab'];
-+      final userProv = widget.userModel?.locationParts?['prov'];
- 
-       Query<Map<String, dynamic>> query =
-           FirebaseFirestore.instance.collection('products');
- 
--      List<String> targetLocations = [];
--
--      // ✅ 사용자의 위치가 'Tangerang', 'Tangerang City', 'Tangerang Selatan' 중 하나이면 모두 조회
--      if (userKabupaten == 'Tangerang' ||
--          userKabupaten == 'Tangerang City' ||
--          userKabupaten == 'Tangerang Selatan') {
--        targetLocations = ['Tangerang', 'Tangerang City', 'Tangerang Selatan'];
--      } else if (userKabupaten != null && userKabupaten.isNotEmpty) {
--        targetLocations = [userKabupaten];
--      }
--
--      if (targetLocations.isNotEmpty) {
--        query = query.where('locationParts.kab', whereIn: targetLocations);
-+      if (userProv != null && userProv.isNotEmpty) {
-+        query = query.where('locationParts.prov', isEqualTo: userProv);
-       }
- 
-       return query.orderBy('createdAt', descending: true);
-     }
- 
-     // ✅ [수정] 위치 정보가 없는 경우를 위한 UI 처리
--    if (widget.userModel?.locationParts?['kab'] == null) {
-+    if (widget.userModel?.locationParts?['prov'] == null) {
-       return const Center(
-         child: Padding(
-           padding: EdgeInsets.all(24.0),
-           child: Text(
-             '중고거래 상품을 보려면 먼저 내 동네를 설정해주세요!',
-             textAlign: TextAlign.center,
-             style: TextStyle(fontSize: 16, color: Colors.grey),
+                 ],
+               ),
+               const SizedBox(height: 16),
+               DropdownButtonFormField<String>(
+                 value: _condition,
+-                decoration: const InputDecoration(labelText: 'Condition'),
+-                items: const [
+-                  DropdownMenuItem(value: 'new', child: Text('New')),
+-                  DropdownMenuItem(value: 'used', child: Text('Used')),
++                decoration:
++                    InputDecoration(labelText: 'marketplace.condition.label'.tr()),
++                items: [
++                  DropdownMenuItem(
++                      value: 'new',
++                      child: Text('marketplace.condition.new'.tr())),
++                  DropdownMenuItem(
++                      value: 'used',
++                      child: Text('marketplace.condition.used'.tr())),
+                 ],
+                 onChanged: (value) =>
+                     setState(() => _condition = value ?? 'used'),
+               ),
+             ],
            ),
          ),
+       ),
+     );
+   }
+ }
+diff --git a/lib/features/marketplace/screens/product_registration_screen.dart b/lib/features/marketplace/screens/product_registration_screen.dart
+index 0f15b7eb653d587efedfe7257d33e13d5e320f49..f5289503a2a87de7ec1b6144bec699160b6f7550 100644
+--- a/lib/features/marketplace/screens/product_registration_screen.dart
++++ b/lib/features/marketplace/screens/product_registration_screen.dart
+@@ -165,51 +165,54 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
        );
+ 
+       // 1. 상품 문서 저장
+       await FirebaseFirestore.instance
+           .collection('products')
+           .doc(newProductId)
+           .set(newProduct.toJson());
+ 
+       // 2. ✅ [핵심 추가] 사용자의 productIds 배열에 새 상품 ID 추가
+       await FirebaseFirestore.instance
+           .collection('users')
+           .doc(user.uid)
+           .update({
+         'productIds': FieldValue.arrayUnion([newProductId]),
+       });
+ 
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('marketplace.registration.success'.tr())),
+         );
+         Navigator.of(context).popUntil((route) => route.isFirst);
+       }
+     } catch (e) {
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+-          SnackBar(content: Text('상품 등록 실패: $e')),
++          SnackBar(
++            content:
++                Text('marketplace.registration.fail'.tr(args: {'error': e.toString()})),
++          ),
+         );
+       }
+     } finally {
+       if (mounted) {
+         setState(() => _isLoading = false);
+       }
      }
+   }
  
-     return Scaffold(
-       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-         // ✅ [수정] 수정된 쿼리 빌더 함수를 사용
-         stream: buildQuery().snapshots(),
-         builder: (context, snapshot) {
-           if (snapshot.connectionState == ConnectionState.waiting) {
-             return const Center(child: CircularProgressIndicator());
-           }
-           if (snapshot.hasError) {
-             return Center(
-                 child: Text('marketplace.error'
-                     .tr(namedArgs: {'error': snapshot.error.toString()})));
-           }
-           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-             return Center(
-               child:
-                   Text('marketplace.empty'.tr(), textAlign: TextAlign.center),
-             );
-           }
+   String _getCategoryName(BuildContext context, Category? category) {
+     if (category == null) {
+       return 'selectCategory'.tr();
+     }
+     final langCode = context.locale.languageCode;
+     switch (langCode) {
+       case 'ko':
+         return category.nameKo;
+       case 'id':
+         return category.nameId;
+       default:
+         return category.nameEn;
+     }
+   }
  
--          final productsDocs = snapshot.data!.docs;
-+          final allDocs = snapshot.data!.docs;
-+          final productsDocs = _applyLocationFilter(allDocs);
-           return ListView.separated(
-             itemCount: productsDocs.length,
-             separatorBuilder: (context, index) => const Divider(
-               height: 1,
-               thickness: 1,
-               indent: 16,
-               endIndent: 16,
-             ),
-             itemBuilder: (context, index) {
-              final product = ProductModel.fromFirestore(productsDocs[index]);
-               final String registeredAt = _formatTimestamp(product.createdAt);
+   @override
+@@ -315,54 +318,59 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
+               TextFormField(
+                 controller: _transactionPlaceController,
+                 decoration:
+                     InputDecoration(labelText: 'address_detail_hint'.tr()),
+               ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _priceController,
+                 decoration:
+                     InputDecoration(
+                         labelText: 'marketplace.registration.priceHint'.tr()),
+                 keyboardType: TextInputType.number,
+                 validator: (value) => (value == null || value.isEmpty)
+                     ? 'marketplace.errors.requiredField'.tr()
+                     : null,
+               ),
+               SwitchListTile(
+                 title: Text('marketplace.registration.negotiable'.tr()),
+                 value: _isNegotiable,
+                 onChanged: (value) => setState(() => _isNegotiable = value),
+                 contentPadding: EdgeInsets.zero,
+               ),
+               const SizedBox(height: 16),
+               DropdownButtonFormField<String>(
+                 value: _condition,
+-                decoration: const InputDecoration(labelText: 'Condition'),
+-                items: const [
+-                  DropdownMenuItem(value: 'new', child: Text('New')),
+-                  DropdownMenuItem(value: 'used', child: Text('Used')),
++                decoration:
++                    InputDecoration(labelText: 'marketplace.condition.label'.tr()),
++                items: [
++                  DropdownMenuItem(
++                      value: 'new',
++                      child: Text('marketplace.condition.new'.tr())),
++                  DropdownMenuItem(
++                      value: 'used',
++                      child: Text('marketplace.condition.used'.tr())),
+                 ],
+                 onChanged: (value) =>
+                     setState(() => _condition = value ?? 'used'),
+               ),
+               const SizedBox(height: 16),
+               TextFormField(
+                 controller: _descriptionController,
+                 decoration: InputDecoration(
+                   labelText:
+                       'marketplace.registration.descriptionHint'.tr(),
+                   alignLabelWithHint: true,
+                   border: const OutlineInputBorder(),
+                 ),
+                 maxLines: 5,
+                 validator: (value) => (value == null || value.isEmpty)
+                     ? 'marketplace.errors.requiredField'.tr()
+                     : null,
+               ),
+             ],
+           ),
+         ),
+       ),
+     );
+   }
+ }
+diff --git a/lib/features/pom/screens/pom_screen.dart b/lib/features/pom/screens/pom_screen.dart
+index 3b150c3ab8434642c4149c34743f119a92b31084..a74d1ccaf2eb83677ea16e8cc2edc273b2863248 100644
+--- a/lib/features/pom/screens/pom_screen.dart
++++ b/lib/features/pom/screens/pom_screen.dart
+@@ -1,9 +1,11 @@
+ import 'package:flutter/material.dart';
++import 'package:easy_localization/easy_localization.dart';
+ import '../../../core/models/user_model.dart';
  
-               return InkWell(
-                 onTap: () {
-                   Navigator.of(context).push(
-                     MaterialPageRoute(
-                       builder: (context) =>
-                           ProductDetailScreen(product: product),
-                     ),
-                   );
-                 },
-                 child: Padding(
-                   padding: const EdgeInsets.symmetric(
-                     horizontal: 16.0,
-                     vertical: 12.0,
+ class PomScreen extends StatelessWidget {
+   final UserModel? userModel;
+   const PomScreen({this.userModel, super.key});
+   @override
+-  Widget build(BuildContext context) => const Center(child: Text('Pom Screen'));
++  Widget build(BuildContext context) =>
++      Center(child: Text('main.tabs.pom'.tr()));
+ }

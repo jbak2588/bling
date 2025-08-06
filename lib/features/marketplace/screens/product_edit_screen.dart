@@ -437,10 +437,15 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _condition,
-                decoration: const InputDecoration(labelText: 'Condition'),
-                items: const [
-                  DropdownMenuItem(value: 'new', child: Text('New')),
-                  DropdownMenuItem(value: 'used', child: Text('Used')),
+                decoration:
+                    InputDecoration(labelText: 'marketplace.condition.label'.tr()),
+                items: [
+                  DropdownMenuItem(
+                      value: 'new',
+                      child: Text('marketplace.condition.new'.tr())),
+                  DropdownMenuItem(
+                      value: 'used',
+                      child: Text('marketplace.condition.used'.tr())),
                 ],
                 onChanged: (value) =>
                     setState(() => _condition = value ?? 'used'),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/models/user_model.dart';
 
 class JobsScreen extends StatelessWidget {
@@ -6,5 +7,5 @@ class JobsScreen extends StatelessWidget {
   const JobsScreen({this.userModel, super.key});
   @override
   Widget build(BuildContext context) =>
-      const Center(child: Text('Jobs Screen'));
+      Center(child: Text('main.tabs.jobs'.tr()));
 }

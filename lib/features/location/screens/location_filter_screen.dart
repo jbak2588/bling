@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../core/models/user_model.dart';
 
@@ -160,7 +161,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Location Filter')),
+      appBar: AppBar(title: Text('locationFilter.title'.tr())),
       body: _loadingProvinces
           ? const Center(child: CircularProgressIndicator())
           : Padding(
@@ -169,7 +170,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
                 children: [
                   DropdownButton<String>(
                     value: _selectedProvinsi,
-                    hint: const Text('Provinsi'),
+                    hint: Text('locationFilter.provinsi'.tr()),
                     isExpanded: true,
                     items: _provinsiList
                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
@@ -179,7 +180,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
                   const SizedBox(height: 12),
                   DropdownButton<String>(
                     value: _selectedKabupaten,
-                    hint: const Text('Kabupaten'),
+                    hint: Text('locationFilter.kabupaten'.tr()),
                     isExpanded: true,
                     items: _kabupatenList
                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
@@ -189,7 +190,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
                   const SizedBox(height: 12),
                   DropdownButton<String>(
                     value: _selectedKota,
-                    hint: const Text('Kota'),
+                    hint: Text('locationFilter.kota'.tr()),
                     isExpanded: true,
                     items: _kotaList
                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
@@ -199,7 +200,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
                   const SizedBox(height: 12),
                   DropdownButton<String>(
                     value: _selectedKecamatan,
-                    hint: const Text('Kecamatan'),
+                    hint: Text('locationFilter.kecamatan'.tr()),
                     isExpanded: true,
                     items: _kecamatanList
                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
@@ -209,7 +210,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
                   const SizedBox(height: 12),
                   DropdownButton<String>(
                     value: _selectedKelurahan,
-                    hint: const Text('Kelurahan'),
+                    hint: Text('locationFilter.kelurahan'.tr()),
                     isExpanded: true,
                     items: _kelurahanList
                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
@@ -219,7 +220,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
                   const Spacer(),
                   ElevatedButton(
                     onPressed: _applyFilter,
-                    child: const Text('필터 적용하기'),
+                    child: Text('locationFilter.apply'.tr()),
                   ),
                 ],
               ),

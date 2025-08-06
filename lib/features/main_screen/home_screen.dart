@@ -37,7 +37,7 @@ class SearchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('main.bottomNav.search'.tr())),
-      body: const Center(child: Text("Search Screen")),
+      body: Center(child: Text('main.search.placeholder'.tr())),
     );
   }
 }
@@ -227,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('My Town',
+            Text('main.myTown'.tr(),
                 style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(width: 8),
@@ -511,8 +511,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ListTile(
                   leading: const Icon(Icons.build_circle_outlined,
                       color: Colors.red),
-                  title: const Text('데이터 보정 실행',
-                      style: TextStyle(color: Colors.red)),
+                  title: Text('drawer.runDataFix'.tr(),
+                      style: const TextStyle(color: Colors.red)),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.of(context).push(MaterialPageRoute(
