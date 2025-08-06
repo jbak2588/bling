@@ -79,6 +79,10 @@
         "errors": {
             "loginRequired": "로그인이 필요합니다.",
             "userNotFound": "사용자를 찾을 수 없습니다."
+        },
+        "myTown": "우리 동네",
+        "search": {
+            "placeholder": "검색 화면"
         }
     },
     "drawer": {
@@ -107,7 +111,8 @@
                 "marketThanks": "+20 per",
                 "reports": "-50 per"
             }
-        }
+        },
+        "runDataFix": "데이터 보정 실행"
     },
     "marketplace": {
         "error": "오류가 발생했습니다: {error}",
@@ -165,6 +170,11 @@
             "requiredField": "필수 입력 항목입니다.",
             "noPhoto": "사진을 1장 이상 등록해주세요.",
             "noCategory": "카테고리를 선택해주세요."
+        },
+        "condition": {
+            "label": "상태",
+            "new": "새것",
+            "used": "중고"
         }
     },
     "myBling": {
@@ -183,9 +193,9 @@
             "bookmarks": "관심목록",
             "friends": "친구목록"
         },
-          "friendRequests": "받은 친구 요청"
+        "friendRequests": "받은 친구 요청",
+        "sentFriendRequests": "보낸 친구 요청" 
     },
-
     "friendRequests": {
         "title": "받은 친구 요청",
         "noRequests": "받은 친구 요청이 없습니다."
@@ -454,5 +464,17 @@
         "alreadyFriends": "이미 친구입니다",
         "requestFailed": "요청에 실패했습니다:",
         "loginRequired": "로그인이 필요합니다."
+    },
+    "locationFilter": {
+        "title": "지역 필터",
+        "provinsi": "Provinsi",
+        "kabupaten": "Kabupaten",
+        "kota": "Kota",
+        "kecamatan": "Kecamatan",
+        "kelurahan": "Kelurahan",
+        "apply": "필터 적용하기"
+    },
+    "community": {
+        "title": "커뮤니티 화면"
     }
 }

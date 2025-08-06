@@ -79,6 +79,10 @@
         "errors": {
             "loginRequired": "Diperlukan login.",
             "userNotFound": "Pengguna tidak ditemukan."
+        },
+        "myTown": "Kota Saya",
+        "search": {
+            "placeholder": "Halaman Pencarian"
         }
     },
     "drawer": {
@@ -107,7 +111,8 @@
                 "marketThanks": "+20 per",
                 "reports": "-50 per"
             }
-        }
+        },
+        "runDataFix": "Jalankan Perbaikan Data"
     },
     "marketplace": {
         "error": "Terjadi kesalahan: {error}",
@@ -119,7 +124,8 @@
             "priceHint": "Harga (Rp)",
             "negotiable": "Izinkan Penawaran",
             "descriptionHint": "Deskripsi Lengkap",
-            "success": "Produk berhasil didaftarkan!"
+            "success": "Produk berhasil didaftarkan!",
+            "fail": "Gagal mendaftarkan produk: {error}"
         },
         "edit": {
             "title": "Edit Produk",
@@ -165,6 +171,11 @@
             "requiredField": "Kolom ini wajib diisi.",
             "noPhoto": "Silakan tambahkan minimal 1 foto.",
             "noCategory": "Silakan pilih kategori."
+        },
+        "condition": {
+            "label": "Kondisi",
+            "new": "Baru",
+            "used": "Bekas"
         }
     },
     "myBling": {
@@ -183,9 +194,9 @@
             "bookmarks": "Markah",
             "friends": "Teman"
         },
-        "friendRequests": "Permintaan Pertemanan"
+        "friendRequests": "Permintaan Pertemanan",
+        "sentFriendRequests": "Permintaan Terkirim"
     },
-
     "friendRequests": {
         "title": "Permintaan Pertemanan",
         "noRequests": "Tidak ada permintaan pertemanan yang diterima."
@@ -454,5 +465,17 @@
         "alreadyFriends": "Sudah Berteman",
         "requestFailed": "Permintaan gagal:",
         "loginRequired": "Diperlukan login."
+    },
+    "locationFilter": {
+        "title": "Filter Lokasi",
+        "provinsi": "Provinsi",
+        "kabupaten": "Kabupaten",
+        "kota": "Kota",
+        "kecamatan": "Kecamatan",
+        "kelurahan": "Kelurahan",
+        "apply": "Terapkan Filter"
+    },
+    "community": {
+        "title": "Halaman Komunitas"
     }
 }

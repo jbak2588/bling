@@ -17,6 +17,7 @@ import '../widgets/user_friend_list.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'profile_edit_screen.dart';
 import 'friend_requests_screen.dart';
+import 'sent_friend_requests_screen.dart'; 
 
 class MyBlingScreen extends StatefulWidget {
   const MyBlingScreen({super.key});
@@ -73,6 +74,16 @@ class _MyBlingScreenState extends State<MyBlingScreen>
                   tooltip: 'myBling.friendRequests'.tr(),
                 );
               }),
+ 
+          IconButton(
+            icon: const Icon(Icons.outbox_rounded),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const SentFriendRequestsScreen(),
+              ));
+            },
+            tooltip: 'myBling.sentFriendRequests'.tr(),
+          ),
           // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
           IconButton(

@@ -76,6 +76,10 @@
             "chat": "Chat",
             "myBling": "My Bling"
         },
+        "myTown": "My Town",
+        "search": {
+            "placeholder": "Search Screen"
+        },
         "errors": {
             "loginRequired": "Login is required.",
             "userNotFound": "User not found."
@@ -85,6 +89,7 @@
         "editProfile": "Edit Profile",
         "bookmarks": "Bookmarks",
         "uploadSampleData": "Upload Sample Data",
+        "runDataFix": "Run Data Fix",
         "logout": "Logout",
         "trustDashboard": {
             "title": "My Trust Verification",
@@ -119,7 +124,8 @@
             "priceHint": "Price (Rp)",
             "negotiable": "Allow Offers",
             "descriptionHint": "Detailed Description",
-            "success": "Product has been successfully listed!"
+            "success": "Product has been successfully listed!",
+            "fail": "Failed to register product: {error}"
         },
         "edit": {
             "title": "Edit Product",
@@ -165,6 +171,11 @@
             "requiredField": "This field is required.",
             "noPhoto": "Please add at least one photo.",
             "noCategory": "Please select a category."
+        },
+        "condition": {
+            "label": "Condition",
+            "new": "New",
+            "used": "Used"
         }
     },
     "myBling": {
@@ -183,7 +194,8 @@
             "bookmarks": "Bookmarks",
             "friends": "Friends"
         },
-        "friendRequests": "Friend Requests"
+        "friendRequests": "Friend Requests",
+        "sentFriendRequests": "Sent Requests"
     },
     "friendRequests": {
         "title": "Friend Requests",
@@ -453,5 +465,17 @@
         "alreadyFriends": "Already Friends",
         "requestFailed": "Request failed:",
         "loginRequired": "Login is required."
+    },
+    "locationFilter": {
+        "title": "Location Filter",
+        "provinsi": "Province",
+        "kabupaten": "Regency",
+        "kota": "City",
+        "kecamatan": "District",
+        "kelurahan": "Subdistrict",
+        "apply": "Apply Filter"
+    },
+    "community": {
+        "title": "Community Screen"
     }
 }

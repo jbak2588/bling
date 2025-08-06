@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/models/user_model.dart';
 
 class ClubsScreen extends StatelessWidget {
@@ -6,6 +7,6 @@ class ClubsScreen extends StatelessWidget {
   const ClubsScreen({this.userModel, super.key});
   @override
   Widget build(BuildContext context) =>
-      const Center(child: Text('Clubs Screen'));
+      Center(child: Text('main.tabs.clubs'.tr()));
 }
 
