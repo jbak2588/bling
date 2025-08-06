@@ -219,6 +219,18 @@
             "rejected": "Ditolak"
         }
     },
+    "blockedUsers": {
+        "title": "Pengguna Diblokir",
+        "noBlockedUsers": "Anda belum memblokir siapa pun.",
+        "unblock": "Buka blokir",
+        "unblockDialog": {
+            "title": "Buka blokir {nickname}?",
+            "content": "Jika Anda membuka blokir, pengguna ini dapat menemukan Anda lagi dan mengirim permintaan pertemanan."
+        },
+        "unblockSuccess": "{nickname} telah dibuka blokir.",
+        "unblockFailure": "Gagal membuka blokir: {error}",
+        "unknownUser": "Pengguna tidak dikenal"
+    },
     "prompt": {
         "title": "Selamat datang di Bling!",
         "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
