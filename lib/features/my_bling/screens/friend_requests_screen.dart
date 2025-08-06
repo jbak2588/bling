@@ -2,6 +2,7 @@
 
 import 'package:bling_app/core/models/friend_request_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
+// import 'package:bling_app/features/chat/screens/chat_room_screen.dart'; // 더 이상 채팅방으로 바로 이동하지 않으므로 주석 처리하거나 삭제
 import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,10 +20,15 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
   final FindFriendRepository _repository = FindFriendRepository();
   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
   
-  // [추가] 로딩 상태 관리를 위한 변수
   final Map<String, bool> _isLoading = {};
 
-  // 요청 보낸 사람의 상세 정보를 가져오는 함수
+  // [삭제] 화면 내부에 있던 중복된 acceptFriendRequest 함수를 제거합니다.
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   Future<UserModel?> _getUserData(String userId) async {
     final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
     if (doc.exists) {
@@ -31,31 +37,36 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     return null;
   }
 
-  // [추가] 친구 요청 수락 로직
+  // [수정] 친구 요청 수락 후, 이전 화면(My Bling)으로 돌아가는 로직
   Future<void> _acceptRequest(FriendRequestModel request) async {
     setState(() => _isLoading[request.id] = true);
     try {
+      // 1. Repository의 acceptFriendRequest 함수를 호출하여 친구 추가 및 채팅방 생성
       await _repository.acceptFriendRequest(request.id, request.fromUserId, request.toUserId);
+      
       if (mounted) {
+        // 2. 성공 메시지를 보여줍니다.
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("친구 요청을 수락했습니다."), backgroundColor: Colors.green),
+          SnackBar(content: Text("${request.fromUserId}님과 친구가 되었습니다."), backgroundColor: Colors.green), // TODO: 다국어
         );
+        // 3. 현재 화면을 닫고 이전 화면(My Bling)으로 돌아갑니다.
+        Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _isLoading[request.id] = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("오류가 발생했습니다: $e"), backgroundColor: Colors.red),
         );
       }
     }
-    // finally 블록을 사용하지 않아, 성공적으로 처리된 항목은 목록에서 사라지게 됩니다.
   }
 
-  // [추가] 친구 요청 거절 로직
-  Future<void> _rejectRequest(String requestId) async {
-    setState(() => _isLoading[requestId] = true);
+ Future<void> _rejectRequest(FriendRequestModel request) async {
+    setState(() => _isLoading[request.id] = true);
     try {
-      await _repository.rejectFriendRequest(requestId);
+      // Repository의 rejectFriendRequest 함수에 필요한 ID들을 모두 전달합니다.
+      await _repository.rejectFriendRequest(request.id, request.fromUserId, currentUserId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("친구 요청을 거절했습니다.")),
@@ -63,12 +74,14 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
       }
     } catch (e) {
        if (mounted) {
+        setState(() => _isLoading[request.id] = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("오류가 발생했습니다: $e"), backgroundColor: Colors.red),
         );
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +114,10 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
                 future: _getUserData(request.fromUserId),
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData) {
-                    return const ListTile(title: Text("..."));
+                    return const Card(
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: ListTile(leading: CircleAvatar(), title: Text("...")),
+                    );
                   }
                   final sender = userSnapshot.data!;
                   return Card(
@@ -118,22 +134,22 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
                       title: Text(sender.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(sender.bio ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
                       trailing: isLoading 
-                          ? const CircularProgressIndicator() // 로딩 중일 때 인디케이터 표시
+                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) 
                           : Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                // V V V --- [수정] 거절 버튼 기능 연동 --- V V V
+                               // V V V --- [수정] 거절 버튼이 올바른 파라미터를 전달하도록 변경 --- V V V
                                 IconButton(
                                   icon: const Icon(Icons.close, color: Colors.red),
-                                  onPressed: () => _rejectRequest(request.id),
+                                  tooltip: '거절',
+                                  onPressed: () => _rejectRequest(request),
                                 ),
                                 // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-                                // V V V --- [수정] 수락 버튼 기능 연동 --- V V V
                                 IconButton(
                                   icon: const Icon(Icons.check, color: Colors.green),
+                                  tooltip: '수락',
                                   onPressed: () => _acceptRequest(request),
                                 ),
-                                // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
                               ],
                             ),
                     ),
