@@ -2,11 +2,10 @@
 
 import 'package:bling_app/core/models/chat_room_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/features/chat/data/chat_service.dart'; // ⭐️[수정]
+import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 
 import 'chat_room_screen.dart';
 
@@ -18,7 +17,6 @@ class ChatListScreen extends StatefulWidget {
 }
 
 class _ChatListScreenState extends State<ChatListScreen> {
-  // ⭐️[수정] ChatService 인스턴스 생성
   final ChatService _chatService = ChatService();
   final String? _myUid = FirebaseAuth.instance.currentUser?.uid;
 
@@ -31,7 +29,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
       ),
       body: _myUid == null
           ? Center(child: Text('main.errors.loginRequired'.tr()))
-          // ⭐️[수정] StreamBuilder가 ChatService의 함수를 직접 호출
           : StreamBuilder<List<ChatRoomModel>>(
               stream: _chatService.getChatRoomsStream(),
               builder: (context, snapshot) {
@@ -60,7 +57,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
                     if (otherUid.isEmpty) return const SizedBox.shrink();
 
-                    // ⭐️[수정] FutureBuilder가 ChatService의 함수를 직접 호출
                     return FutureBuilder<UserModel>(
                       future: _chatService.getOtherUserInfo(otherUid),
                       builder: (context, userSnapshot) {
@@ -70,24 +66,22 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
                         final otherUser = userSnapshot.data!;
 
+                        // V V V --- [핵심 수정] 채팅 유형을 판별합니다 --- V V V
+                        final bool isProductChat = chatRoom.productId.isNotEmpty;
+                        // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+
                         return ListTile(
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: chatRoom.productImage.isNotEmpty
-                                ? Image.network(
-                                    chatRoom.productImage,
-                                    width: 56,
-                                    height: 56,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (c, e, s) =>
-                                        _buildPlaceholderImage(),
-                                  )
-                                : _buildPlaceholderImage(),
-                          ),
+                          
+                          // [수정] 채팅 유형에 따라 다른 이미지를 보여줍니다.
+                          leading: isProductChat
+                              ? _buildProductImage(chatRoom.productImage) // 중고거래: 상품 이미지
+                              : _buildUserAvatar(otherUser.photoUrl),   // 친구채팅: 상대방 프로필 사진
+
+                          // [수정] 채팅 유형에 따라 다른 제목을 보여줍니다.
                           title: Text(
-                            chatRoom.productTitle,
+                            isProductChat ? chatRoom.productTitle : otherUser.nickname, // 중고거래: 상품명, 친구채팅: 상대방 닉네임
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 15),
                             maxLines: 1,
@@ -97,12 +91,15 @@ class _ChatListScreenState extends State<ChatListScreen> {
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Row(
                               children: [
-                                Text(otherUser.nickname,
-                                    style: TextStyle(
-                                        fontSize: 13, color: Colors.grey[700])),
-                                const Text(' • ',
-                                    style: TextStyle(
-                                        fontSize: 13, color: Colors.grey)),
+                                // [수정] 친구 채팅일 경우, 부제에 상대방 닉네임을 한번 더 보여줄 필요가 없으므로 숨깁니다.
+                                if (isProductChat) ...[
+                                  Text(otherUser.nickname,
+                                      style: TextStyle(
+                                          fontSize: 13, color: Colors.grey[700])),
+                                  const Text(' • ',
+                                      style: TextStyle(
+                                          fontSize: 13, color: Colors.grey)),
+                                ],
                                 Expanded(
                                   child: Text(
                                     chatRoom.lastMessage,
@@ -139,7 +136,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                   chatId: chatRoom.id,
                                   otherUserName: otherUser.nickname,
                                   otherUserId: otherUser.uid,
-                                  productTitle: chatRoom.productTitle,
+                                  // [수정] 중고거래 채팅일 때만 상품명을 전달합니다.
+                                  productTitle: isProductChat ? chatRoom.productTitle : null,
                                 ),
                               ),
                             );
@@ -151,6 +149,36 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 );
               },
             ),
+    );
+  }
+
+  // [추가] 사용자 프로필 아바타 위젯
+  Widget _buildUserAvatar(String? photoUrl) {
+    return CircleAvatar(
+      radius: 28,
+      backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
+          ? NetworkImage(photoUrl)
+          : null,
+      child: (photoUrl == null || photoUrl.isEmpty)
+          ? const Icon(Icons.person)
+          : null,
+    );
+  }
+
+  // [수정] 기존 상품 이미지 위젯 로직을 별도 함수로 분리
+  Widget _buildProductImage(String productImage) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8.0),
+      child: productImage.isNotEmpty
+          ? Image.network(
+              productImage,
+              width: 56,
+              height: 56,
+              fit: BoxFit.cover,
+              errorBuilder: (c, e, s) =>
+                  _buildPlaceholderImage(),
+            )
+          : _buildPlaceholderImage(),
     );
   }
 

@@ -32,8 +32,11 @@ class ClubRepository {
         .collection('clubs')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map(ClubModel.fromFirestore).toList());
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => ClubModel.fromFirestore(doc))
+          .toList();
+    });
   }
 
   Future<void> addMember(String clubId, ClubMemberModel member) async {

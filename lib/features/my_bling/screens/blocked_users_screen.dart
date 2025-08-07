@@ -25,18 +25,24 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('$nickname 님에 대한 거절을 취소할까요?'), // TODO: 다국어
-          content:
-              Text('거절을 취소하면, 상대방의 친구 찾기 목록에 회원님이 다시 표시될 수 있습니다.'), // TODO: 다국어
+          title: Text(
+            'rejectedUsers.unrejectDialog.title'
+                .tr(namedArgs: {'nickname': nickname}),
+          ),
+          content: Text(
+            'rejectedUsers.unrejectDialog.content'.tr(),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('취소'), // TODO: 다국어
+              child: Text('common.cancel'.tr()),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text('거절 취소',
-                  style: TextStyle(color: Colors.red)), // TODO: 다국어
+              child: Text(
+                'rejectedUsers.unreject'.tr(),
+                style: const TextStyle(color: Colors.red),
+              ),
             ),
           ],
         );
@@ -49,14 +55,22 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         await _repository.unrejectUser(_currentUserId!, rejectedUserId);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('$nickname 님에 대한 거절을 취소했습니다.'),
-              backgroundColor: Colors.green), // TODO: 다국어
+            content: Text(
+              'rejectedUsers.unrejectSuccess'
+                  .tr(namedArgs: {'nickname': nickname}),
+            ),
+            backgroundColor: Colors.green,
+          ),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('거절 취소에 실패했습니다: $e'),
-              backgroundColor: Colors.red), // TODO: 다국어
+            content: Text(
+              'rejectedUsers.unrejectFailure'
+                  .tr(namedArgs: {'error': e.toString()}),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -86,7 +100,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('거절한 사용자 관리'), // TODO: 다국어
+        title: Text('rejectedUsers.title'.tr()),
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
@@ -104,7 +118,9 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
           // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
           if (rejectedUids.isEmpty) {
-            return Center(child: Text('친구 요청을 거절한 사용자가 없습니다.')); // TODO: 다국어
+            return Center(
+              child: Text('rejectedUsers.noRejectedUsers'.tr()),
+            );
           }
 
           return ListView.builder(
@@ -140,7 +156,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                     trailing: OutlinedButton(
                       onPressed: () => _showUnrejectConfirmationDialog(
                           rejectedUser.uid, rejectedUser.nickname),
-                      child: Text('거절 취소'), // TODO: 다국어
+                      child: Text('rejectedUsers.unreject'.tr()),
                     ),
                   );
                 },

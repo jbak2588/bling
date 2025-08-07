@@ -237,6 +237,17 @@
         "unblockFailure": "Failed to unblock: {error}",
         "unknownUser": "Unknown user"
     },
+    "rejectedUsers": {
+        "title": "Manage Rejected Users",
+        "noRejectedUsers": "You haven't rejected any friend requests.",
+        "unreject": "Undo Rejection",
+        "unrejectDialog": {
+            "title": "Undo rejection for {nickname}?",
+            "content": "If you undo the rejection, you may appear again in their friend search list."
+        },
+        "unrejectSuccess": "You have undone the rejection for {nickname}.",
+        "unrejectFailure": "Failed to undo rejection: {error}"
+    },
     "prompt": {
         "title": "Welcome to Bling!",
         "subtitle": "To see interesting news and items around you, please set your neighborhood first.",

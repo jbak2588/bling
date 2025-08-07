@@ -1,10 +1,206 @@
+diff --git a/assets/lang/en.json b/assets/lang/en.json
+index 6816c035bec5bd8660d86b086639ae8711adc522..8869339dd11b345782105421afb85b53da86fa46 100644
+--- a/assets/lang/en.json
++++ b/assets/lang/en.json
+@@ -215,50 +215,61 @@
+         },
+         "defaultChatMessage": "You are now friends! Start chatting."
+     },
+     "sentFriendRequests": {
+         "title": "Sent Friend Requests",
+         "noRequests": "No sent friend requests.",
+         "statusLabel": "Status: {status}",
+         "status": {
+             "pending": "Pending",
+             "accepted": "Accepted",
+             "rejected": "Rejected"
+         }
+     },
+     "blockedUsers": {
+         "title": "Blocked Users",
+         "noBlockedUsers": "You haven't blocked anyone.",
+         "unblock": "Unblock",
+         "unblockDialog": {
+             "title": "Unblock {nickname}?",
+             "content": "If you unblock, this user will be able to find you and send friend requests again."
+         },
+         "unblockSuccess": "{nickname} has been unblocked.",
+         "unblockFailure": "Failed to unblock: {error}",
+         "unknownUser": "Unknown user"
+     },
++    "rejectedUsers": {
++        "title": "Manage Rejected Users",
++        "noRejectedUsers": "You haven't rejected any friend requests.",
++        "unreject": "Undo Rejection",
++        "unrejectDialog": {
++            "title": "Undo rejection for {nickname}?",
++            "content": "If you undo the rejection, you may appear again in their friend search list."
++        },
++        "unrejectSuccess": "You have undone the rejection for {nickname}.",
++        "unrejectFailure": "Failed to undo rejection: {error}"
++    },
+     "prompt": {
+         "title": "Welcome to Bling!",
+         "subtitle": "To see interesting news and items around you, please set your neighborhood first.",
+         "button": "Set My Neighborhood"
+     },
+     "location": {
+         "title": "Set Neighborhood",
+         "searchHint": "Search by neighborhood, e.g., Serpong",
+         "gpsButton": "Find with current location",
+         "success": "Neighborhood has been set.",
+         "error": "Failed to set neighborhood: {error}",
+         "empty": "Please enter a neighborhood name.",
+         "permissionDenied": "Location permission is required to find your neighborhood."
+     },
+     "profileEdit": {
+         "title": "Edit Profile",
+         "nicknameHint": "Nickname",
+         "phoneHint": "Phone Number",
+         "bioHint": "Bio (Introduction)",
+         "locationTitle": "Location",
+         "changeLocation": "Change",
+         "interests": {
+             "title": "Interests",
+             "hint": "Use comma and Enter to add multiple"
+         },
+diff --git a/assets/lang/id.json b/assets/lang/id.json
+index 65b3abd0827eae9ff2d2947f2acd48f58df47a98..f23dac0a851032fbe8153ec04703e8165849a8dc 100644
+--- a/assets/lang/id.json
++++ b/assets/lang/id.json
+@@ -215,50 +215,61 @@
+         },
+         "defaultChatMessage": "Sekarang kalian berteman! Mulai percakapan."
+     },
+     "sentFriendRequests": {
+         "title": "Permintaan Pertemanan Terkirim",
+         "noRequests": "Tidak ada permintaan pertemanan yang dikirim.",
+         "statusLabel": "Status: {status}",
+         "status": {
+             "pending": "Menunggu",
+             "accepted": "Diterima",
+             "rejected": "Ditolak"
+         }
+     },
+     "blockedUsers": {
+         "title": "Pengguna Diblokir",
+         "noBlockedUsers": "Anda belum memblokir siapa pun.",
+         "unblock": "Buka blokir",
+         "unblockDialog": {
+             "title": "Buka blokir {nickname}?",
+             "content": "Jika Anda membuka blokir, pengguna ini dapat menemukan Anda lagi dan mengirim permintaan pertemanan."
+         },
+         "unblockSuccess": "{nickname} telah dibuka blokir.",
+         "unblockFailure": "Gagal membuka blokir: {error}",
+         "unknownUser": "Pengguna tidak dikenal"
+     },
++    "rejectedUsers": {
++        "title": "Kelola Pengguna yang Ditolak",
++        "noRejectedUsers": "Tidak ada permintaan pertemanan yang Anda tolak.",
++        "unreject": "Batalkan Penolakan",
++        "unrejectDialog": {
++            "title": "Batalkan penolakan untuk {nickname}?",
++            "content": "Jika penolakan dibatalkan, Anda mungkin akan muncul kembali di daftar cari teman mereka."
++        },
++        "unrejectSuccess": "Penolakan terhadap {nickname} telah dibatalkan.",
++        "unrejectFailure": "Gagal membatalkan penolakan: {error}"
++    },
+     "prompt": {
+         "title": "Selamat datang di Bling!",
+         "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
+         "button": "Atur Lingkungan Saya"
+     },
+     "location": {
+         "title": "Atur Lingkungan",
+         "searchHint": "Cari berdasarkan lingkungan, cth., Serpong",
+         "gpsButton": "Cari dengan lokasi saat ini",
+         "success": "Lingkungan telah diatur.",
+         "error": "Gagal mengatur lingkungan: {error}",
+         "empty": "Silakan masukkan nama lingkungan.",
+         "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
+     },
+     "profileEdit": {
+         "title": "Pengaturan Profil",
+         "nicknameHint": "Nama Panggilan",
+         "phoneHint": "Nomor Telepon",
+         "bioHint": "Bio (Perkenalan Diri)",
+         "locationTitle": "Lokasi",
+         "changeLocation": "Ubah",
+         "interests": {
+             "title": "Minat",
+             "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
+         },
+diff --git a/assets/lang/ko.json b/assets/lang/ko.json
+index e01f32c93ab1714afb9aca37a2225322c507704b..9e481b2b39ade9309dc40ac47acaf3dfa599879e 100644
+--- a/assets/lang/ko.json
++++ b/assets/lang/ko.json
+@@ -214,50 +214,61 @@
+         },
+         "defaultChatMessage": "이제 친구가 되었습니다! 대화를 시작해보세요."
+     },
+     "sentFriendRequests": {
+         "title": "보낸 친구 요청",
+         "noRequests": "보낸 친구 요청이 없습니다.",
+         "statusLabel": "요청 상태: {status}",
+         "status": {
+             "pending": "대기중",
+             "accepted": "수락됨",
+             "rejected": "거절됨"
+         }
+     },
+     "blockedUsers": {
+         "title": "차단 사용자 관리",
+         "noBlockedUsers": "차단한 사용자가 없습니다.",
+         "unblock": "차단 해제",
+         "unblockDialog": {
+             "title": "{nickname} 님을 차단 해제할까요?",
+             "content": "차단을 해제하면 상대방이 회원님을 다시 찾을 수 있게 되며, 친구 요청을 보낼 수 있습니다."
+         },
+         "unblockSuccess": "{nickname} 님의 차단을 해제했습니다.",
+         "unblockFailure": "차단 해제에 실패했습니다: {error}",
+         "unknownUser": "알 수 없는 사용자"
+     },
++    "rejectedUsers": {
++        "title": "거절한 사용자 관리",
++        "noRejectedUsers": "친구 요청을 거절한 사용자가 없습니다.",
++        "unreject": "거절 취소",
++        "unrejectDialog": {
++            "title": "{nickname} 님에 대한 거절을 취소할까요?",
++            "content": "거절을 취소하면, 상대방의 친구 찾기 목록에 회원님이 다시 표시될 수 있습니다."
++        },
++        "unrejectSuccess": "{nickname} 님에 대한 거절을 취소했습니다.",
++        "unrejectFailure": "거절 취소에 실패했습니다: {error}"
++    },
+     "prompt": {
+         "title": "블링에 오신 것을 환영합니다!",
+         "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
+         "button": "내 동네 설정하기"
+     },
+     "location": {
+         "title": "동네 설정",
+         "searchHint": "동네 이름으로 검색 (예: 세르퐁)",
+         "gpsButton": "현재 위치로 찾기",
+         "success": "동네가 설정되었습니다.",
+         "error": "동네 설정에 실패했습니다: {error}",
+         "empty": "동네 이름을 입력해주세요.",
+         "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
+     },
+     "profileEdit": {
+         "title": "프로필 설정",
+         "nicknameHint": "닉네임",
+         "phoneHint": "전화번호",
+         "bioHint": "소개 (Bio)",
+         "locationTitle": "지역",
+         "changeLocation": "변경",
+         "interests": {
+             "title": "관심사",
+             "hint": "쉼표와 Enter로 여러개 동시 추가"
+         },
 diff --git a/lib/features/my_bling/screens/blocked_users_screen.dart b/lib/features/my_bling/screens/blocked_users_screen.dart
-index d6aed8e730921c3def9375b409d3f3c3bd38d12a..13dc9ccb1593ce2bcfc57203d60407e08dbe52c8 100644
+index d6aed8e730921c3def9375b409d3f3c3bd38d12a..7c01330494ba485d957a26bdbff2a4448d0faee3 100644
 --- a/lib/features/my_bling/screens/blocked_users_screen.dart
 +++ b/lib/features/my_bling/screens/blocked_users_screen.dart
-@@ -1,154 +1,166 @@
- // lib/features/my_bling/screens/blocked_users_screen.dart
- 
+@@ -3,152 +3,168 @@
  import 'package:bling_app/core/models/user_model.dart';
  import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
  import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,11 +219,9 @@ index d6aed8e730921c3def9375b409d3f3c3bd38d12a..13dc9ccb1593ce2bcfc57203d60407e0
    final FindFriendRepository _repository = FindFriendRepository();
    final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
  
--  // [수정] '차단 해제'가 아닌 '거절 해제' 로직
--  Future<void> _showUnrejectConfirmationDialog(
--      String rejectedUserId, String nickname) async {
-+  Future<void> _showUnblockConfirmationDialog(
-+      String blockedUserId, String nickname) async {
+   // [수정] '차단 해제'가 아닌 '거절 해제' 로직
+   Future<void> _showUnrejectConfirmationDialog(
+       String rejectedUserId, String nickname) async {
      final bool? confirmed = await showDialog<bool>(
        context: context,
        builder: (context) {
@@ -36,10 +230,12 @@ index d6aed8e730921c3def9375b409d3f3c3bd38d12a..13dc9ccb1593ce2bcfc57203d60407e0
 -          content:
 -              Text('거절을 취소하면, 상대방의 친구 찾기 목록에 회원님이 다시 표시될 수 있습니다.'), // TODO: 다국어
 +          title: Text(
-+            'blockedUsers.unblockDialog.title'
++            'rejectedUsers.unrejectDialog.title'
 +                .tr(namedArgs: {'nickname': nickname}),
 +          ),
-+          content: Text('blockedUsers.unblockDialog.content'.tr()),
++          content: Text(
++            'rejectedUsers.unrejectDialog.content'.tr(),
++          ),
            actions: [
              TextButton(
                onPressed: () => Navigator.of(context).pop(false),
@@ -51,7 +247,7 @@ index d6aed8e730921c3def9375b409d3f3c3bd38d12a..13dc9ccb1593ce2bcfc57203d60407e0
 -              child: Text('거절 취소',
 -                  style: TextStyle(color: Colors.red)), // TODO: 다국어
 +              child: Text(
-+                'blockedUsers.unblock'.tr(),
++                'rejectedUsers.unreject'.tr(),
 +                style: const TextStyle(color: Colors.red),
 +              ),
              ),
@@ -62,15 +258,14 @@ index d6aed8e730921c3def9375b409d3f3c3bd38d12a..13dc9ccb1593ce2bcfc57203d60407e0
  
      if (confirmed == true && mounted) {
        try {
--        // [수정] Repository에 unrejectUser 함수를 추가해야 합니다 (다음 단계에서 진행)
--        await _repository.unrejectUser(_currentUserId!, rejectedUserId);
-+        await _repository.unblockUser(_currentUserId!, blockedUserId);
+         // [수정] Repository에 unrejectUser 함수를 추가해야 합니다 (다음 단계에서 진행)
+         await _repository.unrejectUser(_currentUserId!, rejectedUserId);
          ScaffoldMessenger.of(context).showSnackBar(
            SnackBar(
 -              content: Text('$nickname 님에 대한 거절을 취소했습니다.'),
 -              backgroundColor: Colors.green), // TODO: 다국어
 +            content: Text(
-+              'blockedUsers.unblockSuccess'
++              'rejectedUsers.unrejectSuccess'
 +                  .tr(namedArgs: {'nickname': nickname}),
 +            ),
 +            backgroundColor: Colors.green,
@@ -82,7 +277,7 @@ index d6aed8e730921c3def9375b409d3f3c3bd38d12a..13dc9ccb1593ce2bcfc57203d60407e0
 -              content: Text('거절 취소에 실패했습니다: $e'),
 -              backgroundColor: Colors.red), // TODO: 다국어
 +            content: Text(
-+              'blockedUsers.unblockFailure'
++              'rejectedUsers.unrejectFailure'
 +                  .tr(namedArgs: {'error': e.toString()}),
 +            ),
 +            backgroundColor: Colors.red,
@@ -111,16 +306,13 @@ index d6aed8e730921c3def9375b409d3f3c3bd38d12a..13dc9ccb1593ce2bcfc57203d60407e0
    Widget build(BuildContext context) {
      if (_currentUserId == null) {
        return Scaffold(
--          appBar: AppBar(), body: Center(child: Text('로그인이 필요합니다.')));
-+        appBar: AppBar(),
-+        body: Center(child: Text('main.errors.loginRequired'.tr())),
-+      );
+           appBar: AppBar(), body: Center(child: Text('로그인이 필요합니다.')));
      }
  
      return Scaffold(
        appBar: AppBar(
 -        title: Text('거절한 사용자 관리'), // TODO: 다국어
-+        title: Text('blockedUsers.title'.tr()),
++        title: Text('rejectedUsers.title'.tr()),
        ),
        body: StreamBuilder<DocumentSnapshot>(
          stream: FirebaseFirestore.instance
@@ -133,68 +325,52 @@ index d6aed8e730921c3def9375b409d3f3c3bd38d12a..13dc9ccb1593ce2bcfc57203d60407e0
            }
            final currentUser = UserModel.fromFirestore(
                snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
--          // V V V --- [핵심 수정] 'blockedUsers'가 아닌 'rejectedUsers' 필드를 읽어옵니다 --- V V V
--          final rejectedUids = currentUser.rejectedUsers ?? [];
--          // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-+          final blockedUids = currentUser.blockedUsers ?? [];
+           // V V V --- [핵심 수정] 'blockedUsers'가 아닌 'rejectedUsers' 필드를 읽어옵니다 --- V V V
+           final rejectedUids = currentUser.rejectedUsers ?? [];
+           // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
  
--          if (rejectedUids.isEmpty) {
+           if (rejectedUids.isEmpty) {
 -            return Center(child: Text('친구 요청을 거절한 사용자가 없습니다.')); // TODO: 다국어
-+          if (blockedUids.isEmpty) {
-+            return Center(child: Text('blockedUsers.noBlockedUsers'.tr()));
++            return Center(
++              child: Text('rejectedUsers.noRejectedUsers'.tr()),
++            );
            }
  
            return ListView.builder(
--            itemCount: rejectedUids.length,
-+            itemCount: blockedUids.length,
+             itemCount: rejectedUids.length,
              itemBuilder: (context, index) {
--              final rejectedUserId = rejectedUids[index];
-+              final blockedUserId = blockedUids[index];
+               final rejectedUserId = rejectedUids[index];
                return FutureBuilder<UserModel?>(
--                future: _getUserData(rejectedUserId),
-+                future: _getUserData(blockedUserId),
+                 future: _getUserData(rejectedUserId),
                  builder: (context, userSnapshot) {
--                  if (userSnapshot.connectionState == ConnectionState.waiting) {
-+                  if (userSnapshot.connectionState ==
-+                      ConnectionState.waiting) {
+                   if (userSnapshot.connectionState == ConnectionState.waiting) {
                      return const ListTile(title: Text('...'));
                    }
                    if (!userSnapshot.hasData || userSnapshot.data == null) {
                      return ListTile(
--                      title: Text('알 수 없는 사용자'),
--                      subtitle: Text(rejectedUserId),
-+                      title: Text('blockedUsers.unknownUser'.tr()),
-+                      subtitle: Text(blockedUserId),
+                       title: Text('알 수 없는 사용자'),
+                       subtitle: Text(rejectedUserId),
                      );
                    }
  
--                  final rejectedUser = userSnapshot.data!;
-+                  final blockedUser = userSnapshot.data!;
+                   final rejectedUser = userSnapshot.data!;
                    return ListTile(
                      leading: CircleAvatar(
--                      backgroundImage: (rejectedUser.photoUrl != null &&
--                              rejectedUser.photoUrl!.isNotEmpty)
--                          ? NetworkImage(rejectedUser.photoUrl!)
-+                      backgroundImage: (blockedUser.photoUrl != null &&
-+                              blockedUser.photoUrl!.isNotEmpty)
-+                          ? NetworkImage(blockedUser.photoUrl!)
+                       backgroundImage: (rejectedUser.photoUrl != null &&
+                               rejectedUser.photoUrl!.isNotEmpty)
+                           ? NetworkImage(rejectedUser.photoUrl!)
                            : null,
--                      child: (rejectedUser.photoUrl == null ||
--                              rejectedUser.photoUrl!.isEmpty)
-+                      child: (blockedUser.photoUrl == null ||
-+                              blockedUser.photoUrl!.isEmpty)
+                       child: (rejectedUser.photoUrl == null ||
+                               rejectedUser.photoUrl!.isEmpty)
                            ? const Icon(Icons.person)
                            : null,
                      ),
--                    title: Text(rejectedUser.nickname),
-+                    title: Text(blockedUser.nickname),
+                     title: Text(rejectedUser.nickname),
                      trailing: OutlinedButton(
--                      onPressed: () => _showUnrejectConfirmationDialog(
--                          rejectedUser.uid, rejectedUser.nickname),
+                       onPressed: () => _showUnrejectConfirmationDialog(
+                           rejectedUser.uid, rejectedUser.nickname),
 -                      child: Text('거절 취소'), // TODO: 다국어
-+                      onPressed: () => _showUnblockConfirmationDialog(
-+                          blockedUser.uid, blockedUser.nickname),
-+                      child: Text('blockedUsers.unblock'.tr()),
++                      child: Text('rejectedUsers.unreject'.tr()),
                      ),
                    );
                  },
@@ -206,81 +382,3 @@ index d6aed8e730921c3def9375b409d3f3c3bd38d12a..13dc9ccb1593ce2bcfc57203d60407e0
      );
    }
  }
-+
-diff --git a/lib/features/my_bling/screens/settings_screen.dart b/lib/features/my_bling/screens/settings_screen.dart
-index 5dcdc24388865b7f48e231de365652aff0b455b7..0e577d960fd51e30512cc7224301b55e4812c459 100644
---- a/lib/features/my_bling/screens/settings_screen.dart
-+++ b/lib/features/my_bling/screens/settings_screen.dart
-@@ -1,59 +1,59 @@
- // lib/features/my_bling/screens/settings_screen.dart
- 
- import 'package:flutter/material.dart';
- import 'package:easy_localization/easy_localization.dart';
--import 'blocked_users_screen.dart'; // 방금 만든 차단 사용자 관리 화면 import
-+import 'blocked_users_screen.dart';
- 
- class SettingsScreen extends StatelessWidget {
-   const SettingsScreen({super.key});
- 
-   @override
-   Widget build(BuildContext context) {
-     return Scaffold(
-       appBar: AppBar(
--        title: Text('설정'), // TODO: 다국어
-+        title: Text('settings.title'.tr()),
-       ),
-       body: ListView(
-         children: [
-           // --- 계정 설정 ---
-           ListTile(
--            leading: Icon(Icons.shield_outlined),
--            title: Text('계정 및 개인정보'), // TODO: 다국어
-+            leading: const Icon(Icons.shield_outlined),
-+            title: Text('settings.accountPrivacy'.tr()),
-             onTap: () {
-               // TODO: 계정 및 개인정보 화면으로 이동
-             },
-           ),
-           // --- 친구 찾기 설정 ---
-           ListTile(
--            leading: Icon(Icons.block),
--            title: Text('친구요청 거절 사용자 관리'), // TODO: 다국어
--            trailing: Icon(Icons.arrow_forward_ios, size: 16),
-+            leading: const Icon(Icons.block),
-+            title: Text('blockedUsers.title'.tr()),
-+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-             onTap: () {
-               Navigator.of(context).push(
-                 MaterialPageRoute(
-                   builder: (_) => const BlockedUsersScreen(),
-                 ),
-               );
-             },
-           ),
-           Divider(),
-           // --- 기타 설정 ---
-           ListTile(
--            leading: Icon(Icons.notifications_outlined),
--            title: Text('알림 설정'), // TODO: 다국어
-+            leading: const Icon(Icons.notifications_outlined),
-+            title: Text('settings.notifications'.tr()),
-             onTap: () {
-               // TODO: 알림 설정 화면으로 이동
-             },
-           ),
-           ListTile(
--            leading: Icon(Icons.info_outline),
--            title: Text('앱 정보'), // TODO: 다국어
-+            leading: const Icon(Icons.info_outline),
-+            title: Text('settings.appInfo'.tr()),
-             onTap: () {
-               // TODO: 앱 정보 화면으로 이동
-             },
-           ),
-         ],
-       ),
-     );
-   }
--}
-\ No newline at end of file
-+}

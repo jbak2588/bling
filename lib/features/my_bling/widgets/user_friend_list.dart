@@ -5,6 +5,7 @@ import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 
 class UserFriendList extends StatelessWidget {
   const UserFriendList({super.key});
@@ -74,6 +75,19 @@ class UserFriendList extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(friend.bio ?? '',
                         maxLines: 1, overflow: TextOverflow.ellipsis),
+                        // V V V --- [수정] ListTile의 onTap 이벤트를 추가합니다 --- V V V
+                    onTap: () {
+                      // 탭하면 친구의 상세 프로필 화면으로 이동합니다.
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => FindFriendDetailScreen(
+                            user: friend, // 친구의 정보
+                            currentUserModel: user, // 나의 정보
+                          ),
+                        ),
+                      );
+                    },
+                    // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
                     trailing: IconButton(
                       icon: const Icon(Icons.chat_bubble_outline),
                       onPressed: () {

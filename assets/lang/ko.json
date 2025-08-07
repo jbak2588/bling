@@ -236,6 +236,17 @@
         "unblockFailure": "차단 해제에 실패했습니다: {error}",
         "unknownUser": "알 수 없는 사용자"
     },
+    "rejectedUsers": {
+        "title": "거절한 사용자 관리",
+        "noRejectedUsers": "친구 요청을 거절한 사용자가 없습니다.",
+        "unreject": "거절 취소",
+        "unrejectDialog": {
+            "title": "{nickname} 님에 대한 거절을 취소할까요?",
+            "content": "거절을 취소하면, 상대방의 친구 찾기 목록에 회원님이 다시 표시될 수 있습니다."
+        },
+        "unrejectSuccess": "{nickname} 님에 대한 거절을 취소했습니다.",
+        "unrejectFailure": "거절 취소에 실패했습니다: {error}"
+    },
     "prompt": {
         "title": "블링에 오신 것을 환영합니다!",
         "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",

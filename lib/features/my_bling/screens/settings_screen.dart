@@ -26,7 +26,7 @@ class SettingsScreen extends StatelessWidget {
           // --- 친구 찾기 설정 ---
           ListTile(
                    leading: const Icon(Icons.block),
-            title: Text('blockedUsers.title'.tr()),
+            title: Text('rejectedUsers.title'.tr()),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Navigator.of(context).push(
