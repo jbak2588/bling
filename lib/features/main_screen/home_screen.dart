@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+
 import '../../../core/models/user_model.dart';
 import '../../../core/utils/address_formatter.dart';
 import '../auth/screens/profile_edit_screen.dart';
@@ -29,8 +30,7 @@ import '../location/screens/location_filter_screen.dart';
 import '../marketplace/screens/marketplace_screen.dart';
 import '../admin/screens/data_fix_screen.dart';
 
-// 검색 화면을 위한 임시 Placeholder
-// git 테스트
+
 
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
@@ -160,6 +160,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _onFloatingActionButtonTapped() {
+    // [수정] 사용자 정보가 로드되기 전에는 버튼이 동작하지 않도록 방어합니다.
+    if (_userModel == null) return;
+
     final currentTabIndex = _tabController.index;
     switch (currentTabIndex) {
       case 0:
@@ -176,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             builder: (_) => CreateClubScreen(userModel: _userModel!)));
         break;
       default:
-        debugPrint('\x1B[33m${currentTabIndex + 1}번 탭의 등록 기능이 호출되었습니다.\x1B[0m');
+        debugPrint('${_topTabs[currentTabIndex]['key']} 탭에서는 생성 기능이 지원되지 않습니다.');
     }
   }
 
