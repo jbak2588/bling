@@ -196,6 +196,12 @@
         "friendRequests": "받은 친구 요청",
         "sentFriendRequests": "보낸 친구 요청"
     },
+    "settings": {
+        "title": "설정",
+        "accountPrivacy": "계정 및 개인정보",
+        "notifications": "알림 설정",
+        "appInfo": "앱 정보"
+    },
     "friendRequests": {
         "title": "받은 친구 요청",
         "noRequests": "받은 친구 요청이 없습니다.",

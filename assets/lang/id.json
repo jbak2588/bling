@@ -197,6 +197,12 @@
         "friendRequests": "Permintaan Pertemanan",
         "sentFriendRequests": "Permintaan Terkirim"
     },
+    "settings": {
+        "title": "Pengaturan",
+        "accountPrivacy": "Akun & Privasi",
+        "notifications": "Pengaturan Notifikasi",
+        "appInfo": "Info Aplikasi"
+    },
     "friendRequests": {
         "title": "Permintaan Pertemanan",
         "noRequests": "Tidak ada permintaan pertemanan yang diterima.",
