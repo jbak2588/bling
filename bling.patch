@@ -1,8 +1,8 @@
 diff --git a/lib/features/my_bling/screens/blocked_users_screen.dart b/lib/features/my_bling/screens/blocked_users_screen.dart
-index 6f4f266cbc6688aa0b80b834ed73cdd53c2efd86..313399601a1bb099ddce14468ac14fdfe0e61eca 100644
+index d6aed8e730921c3def9375b409d3f3c3bd38d12a..13dc9ccb1593ce2bcfc57203d60407e08dbe52c8 100644
 --- a/lib/features/my_bling/screens/blocked_users_screen.dart
 +++ b/lib/features/my_bling/screens/blocked_users_screen.dart
-@@ -1,134 +1,167 @@
+@@ -1,154 +1,166 @@
  // lib/features/my_bling/screens/blocked_users_screen.dart
  
  import 'package:bling_app/core/models/user_model.dart';
@@ -23,16 +23,18 @@ index 6f4f266cbc6688aa0b80b834ed73cdd53c2efd86..313399601a1bb099ddce14468ac14fdf
    final FindFriendRepository _repository = FindFriendRepository();
    final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
  
-   // 차단 해제 확인 대화상자 및 로직
--  Future<void> _showUnblockConfirmationDialog(String blockedUserId, String nickname) async {
+-  // [수정] '차단 해제'가 아닌 '거절 해제' 로직
+-  Future<void> _showUnrejectConfirmationDialog(
+-      String rejectedUserId, String nickname) async {
 +  Future<void> _showUnblockConfirmationDialog(
 +      String blockedUserId, String nickname) async {
      final bool? confirmed = await showDialog<bool>(
        context: context,
        builder: (context) {
          return AlertDialog(
--          title: Text('$nickname 님을 차단 해제할까요?'), // TODO: 다국어
--          content: Text('차단을 해제하면 상대방이 회원님을 다시 찾을 수 있게 되며, 친구 요청을 보낼 수 있습니다.'), // TODO: 다국어
+-          title: Text('$nickname 님에 대한 거절을 취소할까요?'), // TODO: 다국어
+-          content:
+-              Text('거절을 취소하면, 상대방의 친구 찾기 목록에 회원님이 다시 표시될 수 있습니다.'), // TODO: 다국어
 +          title: Text(
 +            'blockedUsers.unblockDialog.title'
 +                .tr(namedArgs: {'nickname': nickname}),
@@ -46,7 +48,8 @@ index 6f4f266cbc6688aa0b80b834ed73cdd53c2efd86..313399601a1bb099ddce14468ac14fdf
              ),
              TextButton(
                onPressed: () => Navigator.of(context).pop(true),
--              child: Text('차단 해제', style: TextStyle(color: Colors.red)), // TODO: 다국어
+-              child: Text('거절 취소',
+-                  style: TextStyle(color: Colors.red)), // TODO: 다국어
 +              child: Text(
 +                'blockedUsers.unblock'.tr(),
 +                style: const TextStyle(color: Colors.red),
@@ -59,10 +62,13 @@ index 6f4f266cbc6688aa0b80b834ed73cdd53c2efd86..313399601a1bb099ddce14468ac14fdf
  
      if (confirmed == true && mounted) {
        try {
-         await _repository.unblockUser(_currentUserId!, blockedUserId);
+-        // [수정] Repository에 unrejectUser 함수를 추가해야 합니다 (다음 단계에서 진행)
+-        await _repository.unrejectUser(_currentUserId!, rejectedUserId);
++        await _repository.unblockUser(_currentUserId!, blockedUserId);
          ScaffoldMessenger.of(context).showSnackBar(
--          SnackBar(content: Text('$nickname 님의 차단을 해제했습니다.'), backgroundColor: Colors.green), // TODO: 다국어
-+          SnackBar(
+           SnackBar(
+-              content: Text('$nickname 님에 대한 거절을 취소했습니다.'),
+-              backgroundColor: Colors.green), // TODO: 다국어
 +            content: Text(
 +              'blockedUsers.unblockSuccess'
 +                  .tr(namedArgs: {'nickname': nickname}),
@@ -72,8 +78,9 @@ index 6f4f266cbc6688aa0b80b834ed73cdd53c2efd86..313399601a1bb099ddce14468ac14fdf
          );
        } catch (e) {
          ScaffoldMessenger.of(context).showSnackBar(
--          SnackBar(content: Text('차단 해제에 실패했습니다: $e'), backgroundColor: Colors.red), // TODO: 다국어
-+          SnackBar(
+           SnackBar(
+-              content: Text('거절 취소에 실패했습니다: $e'),
+-              backgroundColor: Colors.red), // TODO: 다국어
 +            content: Text(
 +              'blockedUsers.unblockFailure'
 +                  .tr(namedArgs: {'error': e.toString()}),
@@ -85,14 +92,12 @@ index 6f4f266cbc6688aa0b80b834ed73cdd53c2efd86..313399601a1bb099ddce14468ac14fdf
      }
    }
  
-   // 차단된 사용자의 상세 정보를 가져오는 함수
    Future<UserModel?> _getUserData(String userId) async {
      try {
--      final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-+      final doc = await FirebaseFirestore.instance
-+          .collection('users')
-+          .doc(userId)
-+          .get();
+       final doc = await FirebaseFirestore.instance
+           .collection('users')
+           .doc(userId)
+           .get();
        if (doc.exists) {
          return UserModel.fromFirestore(doc);
        }
@@ -105,8 +110,8 @@ index 6f4f266cbc6688aa0b80b834ed73cdd53c2efd86..313399601a1bb099ddce14468ac14fdf
    @override
    Widget build(BuildContext context) {
      if (_currentUserId == null) {
--      return Scaffold(appBar: AppBar(), body: Center(child: Text('로그인이 필요합니다.'))); // TODO: 다국어
-+      return Scaffold(
+       return Scaffold(
+-          appBar: AppBar(), body: Center(child: Text('로그인이 필요합니다.')));
 +        appBar: AppBar(),
 +        body: Center(child: Text('main.errors.loginRequired'.tr())),
 +      );
@@ -114,67 +119,79 @@ index 6f4f266cbc6688aa0b80b834ed73cdd53c2efd86..313399601a1bb099ddce14468ac14fdf
  
      return Scaffold(
        appBar: AppBar(
--        title: Text('차단 사용자 관리'), // TODO: 다국어
+-        title: Text('거절한 사용자 관리'), // TODO: 다국어
 +        title: Text('blockedUsers.title'.tr()),
        ),
        body: StreamBuilder<DocumentSnapshot>(
--        stream: FirebaseFirestore.instance.collection('users').doc(_currentUserId).snapshots(),
-+        stream: FirebaseFirestore.instance
-+            .collection('users')
-+            .doc(_currentUserId)
-+            .snapshots(),
+         stream: FirebaseFirestore.instance
+             .collection('users')
+             .doc(_currentUserId)
+             .snapshots(),
          builder: (context, snapshot) {
            if (!snapshot.hasData || !snapshot.data!.exists) {
              return const Center(child: CircularProgressIndicator());
            }
--          final currentUser = UserModel.fromFirestore(snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
-+          final currentUser = UserModel.fromFirestore(
-+              snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
-           final blockedUids = currentUser.blockedUsers ?? [];
+           final currentUser = UserModel.fromFirestore(
+               snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
+-          // V V V --- [핵심 수정] 'blockedUsers'가 아닌 'rejectedUsers' 필드를 읽어옵니다 --- V V V
+-          final rejectedUids = currentUser.rejectedUsers ?? [];
+-          // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
++          final blockedUids = currentUser.blockedUsers ?? [];
  
-           if (blockedUids.isEmpty) {
--            return Center(child: Text('차단한 사용자가 없습니다.')); // TODO: 다국어
+-          if (rejectedUids.isEmpty) {
+-            return Center(child: Text('친구 요청을 거절한 사용자가 없습니다.')); // TODO: 다국어
++          if (blockedUids.isEmpty) {
 +            return Center(child: Text('blockedUsers.noBlockedUsers'.tr()));
            }
  
            return ListView.builder(
-             itemCount: blockedUids.length,
+-            itemCount: rejectedUids.length,
++            itemCount: blockedUids.length,
              itemBuilder: (context, index) {
-               final blockedUserId = blockedUids[index];
+-              final rejectedUserId = rejectedUids[index];
++              final blockedUserId = blockedUids[index];
                return FutureBuilder<UserModel?>(
-                 future: _getUserData(blockedUserId),
+-                future: _getUserData(rejectedUserId),
++                future: _getUserData(blockedUserId),
                  builder: (context, userSnapshot) {
-                   if (userSnapshot.connectionState == ConnectionState.waiting) {
+-                  if (userSnapshot.connectionState == ConnectionState.waiting) {
++                  if (userSnapshot.connectionState ==
++                      ConnectionState.waiting) {
                      return const ListTile(title: Text('...'));
                    }
                    if (!userSnapshot.hasData || userSnapshot.data == null) {
                      return ListTile(
 -                      title: Text('알 수 없는 사용자'),
+-                      subtitle: Text(rejectedUserId),
 +                      title: Text('blockedUsers.unknownUser'.tr()),
-                       subtitle: Text(blockedUserId),
++                      subtitle: Text(blockedUserId),
                      );
                    }
  
-                   final blockedUser = userSnapshot.data!;
+-                  final rejectedUser = userSnapshot.data!;
++                  final blockedUser = userSnapshot.data!;
                    return ListTile(
                      leading: CircleAvatar(
--                      backgroundImage: (blockedUser.photoUrl != null && blockedUser.photoUrl!.isNotEmpty)
+-                      backgroundImage: (rejectedUser.photoUrl != null &&
+-                              rejectedUser.photoUrl!.isNotEmpty)
+-                          ? NetworkImage(rejectedUser.photoUrl!)
 +                      backgroundImage: (blockedUser.photoUrl != null &&
 +                              blockedUser.photoUrl!.isNotEmpty)
-                           ? NetworkImage(blockedUser.photoUrl!)
++                          ? NetworkImage(blockedUser.photoUrl!)
                            : null,
--                       child: (blockedUser.photoUrl == null || blockedUser.photoUrl!.isEmpty)
--                           ? const Icon(Icons.person)
--                           : null,
+-                      child: (rejectedUser.photoUrl == null ||
+-                              rejectedUser.photoUrl!.isEmpty)
 +                      child: (blockedUser.photoUrl == null ||
 +                              blockedUser.photoUrl!.isEmpty)
-+                          ? const Icon(Icons.person)
-+                          : null,
+                           ? const Icon(Icons.person)
+                           : null,
                      ),
-                     title: Text(blockedUser.nickname),
+-                    title: Text(rejectedUser.nickname),
++                    title: Text(blockedUser.nickname),
                      trailing: OutlinedButton(
--                      onPressed: () => _showUnblockConfirmationDialog(blockedUser.uid, blockedUser.nickname),
--                      child: Text('차단 해제'), // TODO: 다국어
+-                      onPressed: () => _showUnrejectConfirmationDialog(
+-                          rejectedUser.uid, rejectedUser.nickname),
+-                      child: Text('거절 취소'), // TODO: 다국어
 +                      onPressed: () => _showUnblockConfirmationDialog(
 +                          blockedUser.uid, blockedUser.nickname),
 +                      child: Text('blockedUsers.unblock'.tr()),
@@ -188,7 +205,82 @@ index 6f4f266cbc6688aa0b80b834ed73cdd53c2efd86..313399601a1bb099ddce14468ac14fdf
        ),
      );
    }
+ }
++
+diff --git a/lib/features/my_bling/screens/settings_screen.dart b/lib/features/my_bling/screens/settings_screen.dart
+index 5dcdc24388865b7f48e231de365652aff0b455b7..0e577d960fd51e30512cc7224301b55e4812c459 100644
+--- a/lib/features/my_bling/screens/settings_screen.dart
++++ b/lib/features/my_bling/screens/settings_screen.dart
+@@ -1,59 +1,59 @@
+ // lib/features/my_bling/screens/settings_screen.dart
+ 
+ import 'package:flutter/material.dart';
+ import 'package:easy_localization/easy_localization.dart';
+-import 'blocked_users_screen.dart'; // 방금 만든 차단 사용자 관리 화면 import
++import 'blocked_users_screen.dart';
+ 
+ class SettingsScreen extends StatelessWidget {
+   const SettingsScreen({super.key});
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(
+-        title: Text('설정'), // TODO: 다국어
++        title: Text('settings.title'.tr()),
+       ),
+       body: ListView(
+         children: [
+           // --- 계정 설정 ---
+           ListTile(
+-            leading: Icon(Icons.shield_outlined),
+-            title: Text('계정 및 개인정보'), // TODO: 다국어
++            leading: const Icon(Icons.shield_outlined),
++            title: Text('settings.accountPrivacy'.tr()),
+             onTap: () {
+               // TODO: 계정 및 개인정보 화면으로 이동
+             },
+           ),
+           // --- 친구 찾기 설정 ---
+           ListTile(
+-            leading: Icon(Icons.block),
+-            title: Text('친구요청 거절 사용자 관리'), // TODO: 다국어
+-            trailing: Icon(Icons.arrow_forward_ios, size: 16),
++            leading: const Icon(Icons.block),
++            title: Text('blockedUsers.title'.tr()),
++            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+             onTap: () {
+               Navigator.of(context).push(
+                 MaterialPageRoute(
+                   builder: (_) => const BlockedUsersScreen(),
+                 ),
+               );
+             },
+           ),
+           Divider(),
+           // --- 기타 설정 ---
+           ListTile(
+-            leading: Icon(Icons.notifications_outlined),
+-            title: Text('알림 설정'), // TODO: 다국어
++            leading: const Icon(Icons.notifications_outlined),
++            title: Text('settings.notifications'.tr()),
+             onTap: () {
+               // TODO: 알림 설정 화면으로 이동
+             },
+           ),
+           ListTile(
+-            leading: Icon(Icons.info_outline),
+-            title: Text('앱 정보'), // TODO: 다국어
++            leading: const Icon(Icons.info_outline),
++            title: Text('settings.appInfo'.tr()),
+             onTap: () {
+               // TODO: 앱 정보 화면으로 이동
+             },
+           ),
+         ],
+       ),
+     );
+   }
 -}
 \ No newline at end of file
 +}
-+

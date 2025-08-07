@@ -197,6 +197,12 @@
         "friendRequests": "Friend Requests",
         "sentFriendRequests": "Sent Requests"
     },
+    "settings": {
+        "title": "Settings",
+        "accountPrivacy": "Account & Privacy",
+        "notifications": "Notification Settings",
+        "appInfo": "App Info"
+    },
     "friendRequests": {
         "title": "Friend Requests",
         "noRequests": "No friend requests received.",
