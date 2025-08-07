@@ -19,23 +19,44 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
-  List<String> _selectedInterests = [];
+
+  final List<String> _selectedInterests = [];
   bool _isPrivate = false;
   bool _isSaving = false;
-  
+
   final ClubRepository _repository = ClubRepository();
 
 // [수정] find_friend와 동일한 전체 관심사 목록을 사용합니다.
   final Map<String, List<String>> _interestCategories = {
-    'category_creative': ['drawing', 'instrument', 'photography', 'writing', 'crafting', 'gardening'],
-    'category_sports': ['soccer', 'hiking', 'camping', 'running', 'biking', 'golf', 'workout'],
-    'category_food_drink': ['foodie', 'cooking', 'baking', 'coffee', 'wine', 'tea'],
+    'category_creative': [
+      'drawing',
+      'instrument',
+      'photography',
+      'writing',
+      'crafting',
+      'gardening'
+    ],
+    'category_sports': [
+      'soccer',
+      'hiking',
+      'camping',
+      'running',
+      'biking',
+      'golf',
+      'workout'
+    ],
+    'category_food_drink': [
+      'foodie',
+      'cooking',
+      'baking',
+      'coffee',
+      'wine',
+      'tea'
+    ],
     'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
     'category_growth': ['reading', 'investing', 'language', 'coding'],
     'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
   };
-
 
   @override
   void dispose() {
@@ -46,7 +67,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
 
   // [수정] 동호회 생성 로직 구현
 
-Future<void> _createClub() async {
+  Future<void> _createClub() async {
     if (!_formKey.currentState!.validate() || _isSaving) {
       return;
     }
@@ -65,25 +86,38 @@ Future<void> _createClub() async {
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         ownerId: widget.userModel.uid,
-        location: widget.userModel.locationParts?['kec'] ?? 'Unknown', // 사용자의 Kecamatan 정보 활용
-        interests: _selectedInterests,
+        location: widget.userModel.locationParts?['kec'] ??
+            'Unknown', // 사용자의 Kecamatan 정보 활용
+        // interests: _selectedInterests, // Removed or renamed as per ClubModel definition
         isPrivate: _isPrivate,
         createdAt: Timestamp.now(),
         membersCount: 1, // 개설자는 자동으로 멤버 1명이 됩니다.
+        mainCategory: _selectedInterests.isNotEmpty
+            ? _interestCategories.entries
+                .firstWhere(
+                  (entry) => entry.value.contains(_selectedInterests.first),
+                  orElse: () => _interestCategories.entries.first,
+                )
+                .key
+            : '', // 첫 번째 선택된 관심사의 카테고리, 없으면 빈 문자열
+        interestTags: _selectedInterests, // 선택된 관심사 리스트
       );
 
       await _repository.createClub(newClub);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('동호회가 성공적으로 만들어졌습니다!'), backgroundColor: Colors.green),
+          SnackBar(
+              content: Text('동호회가 성공적으로 만들어졌습니다!'),
+              backgroundColor: Colors.green),
         );
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('동호회 생성에 실패했습니다: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('동호회 생성에 실패했습니다: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -143,12 +177,16 @@ Future<void> _createClub() async {
                   },
                 ),
                 const SizedBox(height: 24),
-                
-               Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("interests.title".tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text('${_selectedInterests.length}/3', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.teal)), // 동호회는 최대 3개로 제한
+                    Text("interests.title".tr(),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text('${_selectedInterests.length}/3',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal)), // 동호회는 최대 3개로 제한
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -156,7 +194,8 @@ Future<void> _createClub() async {
                   final categoryKey = entry.key;
                   final interestKeys = entry.value;
                   return ExpansionTile(
-                    title: Text("interests.$categoryKey".tr(), style: const TextStyle(fontWeight: FontWeight.w500)),
+                    title: Text("interests.$categoryKey".tr(),
+                        style: const TextStyle(fontWeight: FontWeight.w500)),
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -164,18 +203,23 @@ Future<void> _createClub() async {
                           spacing: 8.0,
                           runSpacing: 4.0,
                           children: interestKeys.map((interestKey) {
-                            final isSelected = _selectedInterests.contains(interestKey);
+                            final isSelected =
+                                _selectedInterests.contains(interestKey);
                             return FilterChip(
                               label: Text("interests.items.$interestKey".tr()),
                               selected: isSelected,
                               onSelected: (selected) {
                                 setState(() {
                                   if (selected) {
-                                    if (_selectedInterests.length < 3) { // 최대 3개 제한
+                                    if (_selectedInterests.length < 3) {
+                                      // 최대 3개 제한
                                       _selectedInterests.add(interestKey);
                                     } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('관심사는 최대 3개까지 선택할 수 있습니다.')), // TODO: 다국어
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                '관심사는 최대 3개까지 선택할 수 있습니다.')), // TODO: 다국어
                                       );
                                     }
                                   } else {
@@ -191,7 +235,6 @@ Future<void> _createClub() async {
                   );
                 }),
                 const SizedBox(height: 24),
-
                 SwitchListTile(
                   title: Text('비공개 동호회'),
                   subtitle: Text('초대를 통해서만 가입할 수 있습니다.'),
@@ -208,7 +251,7 @@ Future<void> _createClub() async {
           // 로딩 중일 때 화면 전체에 로딩 인디케이터 표시
           if (_isSaving)
             Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black54,
               child: const Center(child: CircularProgressIndicator(color: Colors.white)),
             ),
         ],
