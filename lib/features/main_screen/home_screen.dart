@@ -12,6 +12,7 @@ import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
 import 'package:bling_app/features/pom/screens/pom_screen.dart';
 import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
 import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
+import 'package:bling_app/features/clubs/screens/create_club_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -169,6 +170,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       case 2:
         Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => const ProductRegistrationScreen()));
+        break;
+      case 4: // Clubs
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => CreateClubScreen(userModel: _userModel!)));
         break;
       default:
         debugPrint('\x1B[33m${currentTabIndex + 1}번 탭의 등록 기능이 호출되었습니다.\x1B[0m');

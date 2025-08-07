@@ -237,6 +237,17 @@
         "unblockFailure": "Gagal membuka blokir: {error}",
         "unknownUser": "Pengguna tidak dikenal"
     },
+    "rejectedUsers": {
+        "title": "Kelola Pengguna yang Ditolak",
+        "noRejectedUsers": "Tidak ada permintaan pertemanan yang Anda tolak.",
+        "unreject": "Batalkan Penolakan",
+        "unrejectDialog": {
+            "title": "Batalkan penolakan untuk {nickname}?",
+            "content": "Jika penolakan dibatalkan, Anda mungkin akan muncul kembali di daftar cari teman mereka."
+        },
+        "unrejectSuccess": "Penolakan terhadap {nickname} telah dibatalkan.",
+        "unrejectFailure": "Gagal membatalkan penolakan: {error}"
+    },
     "prompt": {
         "title": "Selamat datang di Bling!",
         "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
