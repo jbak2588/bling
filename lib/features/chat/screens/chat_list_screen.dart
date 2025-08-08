@@ -37,8 +37,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 }
                 if (snapshot.hasError) {
                   return Center(
-                      child: Text('marketplace.error'.tr(
-                          namedArgs: {'error': snapshot.error.toString()})));
+                      child: Text('marketplace.error'
+                          .tr(namedArgs: {'error': snapshot.error.toString()})));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(child: Text('chat_list.empty'.tr()));
@@ -52,103 +52,112 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       const Divider(height: 1, indent: 82),
                   itemBuilder: (context, index) {
                     final chatRoom = chatRooms[index];
-                    final otherUid = chatRoom.participants
-                        .firstWhere((uid) => uid != _myUid, orElse: () => '');
+                    
+                    // 그룹 채팅이 아닐 경우에만 otherUid를 찾습니다.
+                    final otherUid = !chatRoom.isGroupChat
+                        ? chatRoom.participants.firstWhere((uid) => uid != _myUid, orElse: () => '')
+                        : '';
 
-                    if (otherUid.isEmpty) return const SizedBox.shrink();
+                    // 그룹 채팅이 아닌데 상대방 정보가 없으면 표시하지 않습니다.
+                    if (!chatRoom.isGroupChat && otherUid.isEmpty) return const SizedBox.shrink();
 
-                    return FutureBuilder<UserModel>(
-                      future: _chatService.getOtherUserInfo(otherUid),
+                    return FutureBuilder<UserModel?>(
+                      // 그룹 채팅이 아닐 때만 상대방 정보를 가져옵니다.
+                      future: !chatRoom.isGroupChat ? _chatService.getOtherUserInfo(otherUid) : Future.value(null),
                       builder: (context, userSnapshot) {
-                        if (!userSnapshot.hasData) {
+                        if (userSnapshot.connectionState == ConnectionState.waiting) {
                           return const ListTile(title: Text("..."));
                         }
 
-                        final otherUser = userSnapshot.data!;
+                        final otherUser = userSnapshot.data;
 
-                        // V V V --- [핵심 수정] 채팅 유형을 판별합니다 --- V V V
-                        final bool isProductChat = chatRoom.productId.isNotEmpty;
-                        // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-
-                        return ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          
-                          // [수정] 채팅 유형에 따라 다른 이미지를 보여줍니다.
-                          leading: isProductChat
-                              ? _buildProductImage(chatRoom.productImage) // 중고거래: 상품 이미지
-                              : _buildUserAvatar(otherUser.photoUrl),   // 친구채팅: 상대방 프로필 사진
-
-                          // [수정] 채팅 유형에 따라 다른 제목을 보여줍니다.
-                          title: Text(
-                            isProductChat ? chatRoom.productTitle : otherUser.nickname, // 중고거래: 상품명, 친구채팅: 상대방 닉네임
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 15),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
-                            child: Row(
-                              children: [
-                                // [수정] 친구 채팅일 경우, 부제에 상대방 닉네임을 한번 더 보여줄 필요가 없으므로 숨깁니다.
-                                if (isProductChat) ...[
-                                  Text(otherUser.nickname,
-                                      style: TextStyle(
-                                          fontSize: 13, color: Colors.grey[700])),
-                                  const Text(' • ',
-                                      style: TextStyle(
-                                          fontSize: 13, color: Colors.grey)),
-                                ],
-                                Expanded(
-                                  child: Text(
-                                    chatRoom.lastMessage,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        fontSize: 13, color: Colors.grey[700]),
+                        // V V V --- [핵심 수정] 채팅 유형에 따라 UI와 네비게이션 로직을 분리합니다 --- V V V
+                        if (chatRoom.isGroupChat) {
+                          // --- 그룹 채팅 UI ---
+                          return ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            leading: _buildGroupAvatar(chatRoom.groupImage), // 동호회 대표 이미지
+                            title: Text(chatRoom.groupName ?? 'Group Chat', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            subtitle: Text(chatRoom.lastMessage, maxLines: 1, overflow: TextOverflow.ellipsis),
+                            trailing: _buildTrailing(chatRoom),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ChatRoomScreen(
+                                    chatId: chatRoom.id,
+                                    isGroupChat: true,
+                                    groupName: chatRoom.groupName,
+                                    participants: chatRoom.participants,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                DateFormat('MM/dd')
-                                    .format(chatRoom.lastTimestamp.toDate()),
-                                style: const TextStyle(
-                                    color: Colors.grey, fontSize: 12),
-                              ),
-                              const SizedBox(height: 4),
-                              if ((chatRoom.unreadCounts[_myUid] ?? 0) > 0)
-                                Badge(
-                                    label: Text(
-                                        '${chatRoom.unreadCounts[_myUid]}')),
-                            ],
-                          ),
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => ChatRoomScreen(
-                                  chatId: chatRoom.id,
-                                  otherUserName: otherUser.nickname,
-                                  otherUserId: otherUser.uid,
-                                  // [수정] 중고거래 채팅일 때만 상품명을 전달합니다.
-                                  productTitle: isProductChat ? chatRoom.productTitle : null,
+                              );
+                            },
+                          );
+                        } else {
+                          // --- 1:1 채팅 UI (기존 로직) ---
+                          if (otherUser == null) return const SizedBox.shrink();
+                          
+                          final bool isProductChat = chatRoom.productId != null && chatRoom.productId!.isNotEmpty;
+
+                          return ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            leading: isProductChat
+                                ? _buildProductImage(chatRoom.productImage ?? '')
+                                : _buildUserAvatar(otherUser.photoUrl),
+                            title: Text(isProductChat ? chatRoom.productTitle ?? '' : otherUser.nickname, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            subtitle: Text(chatRoom.lastMessage, maxLines: 1, overflow: TextOverflow.ellipsis),
+                            trailing: _buildTrailing(chatRoom),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ChatRoomScreen(
+                                    chatId: chatRoom.id,
+                                    otherUserName: otherUser.nickname,
+                                    otherUserId: otherUser.uid,
+                                    productTitle: chatRoom.productTitle,
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        );
+                              );
+                            },
+                          );
+                        }
+                        // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
                       },
                     );
                   },
                 );
               },
             ),
+    );
+  }
+
+  // [추가] 그룹(동호회) 아바타 위젯
+  Widget _buildGroupAvatar(String? groupImageUrl) {
+    return CircleAvatar(
+      radius: 28,
+      backgroundImage: (groupImageUrl != null && groupImageUrl.isNotEmpty)
+          ? NetworkImage(groupImageUrl)
+          : null,
+      child: (groupImageUrl == null || groupImageUrl.isEmpty)
+          ? const Icon(Icons.groups) // 그룹 기본 아이콘
+          : null,
+    );
+  }
+  
+  // [추가] 재사용을 위해 trailing 위젯을 함수로 분리
+  Widget _buildTrailing(ChatRoomModel chatRoom) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          DateFormat('MM/dd').format(chatRoom.lastTimestamp.toDate()),
+          style: const TextStyle(color: Colors.grey, fontSize: 12),
+        ),
+        const SizedBox(height: 4),
+        if ((chatRoom.unreadCounts[_myUid] ?? 0) > 0)
+          Badge(label: Text('${chatRoom.unreadCounts[_myUid]}')),
+      ],
     );
   }
 

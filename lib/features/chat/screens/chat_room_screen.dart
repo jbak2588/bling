@@ -10,16 +10,22 @@ import 'package:flutter/material.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final String chatId;
-  final String otherUserName;
-  final String otherUserId;
+  final bool isGroupChat;
+  final String? groupName;
+  final String? otherUserName;
+  final String? otherUserId;
   final String? productTitle;
+  final List<String>? participants;
 
   const ChatRoomScreen({
     super.key,
     required this.chatId,
-    required this.otherUserName,
-    required this.otherUserId,
+    this.isGroupChat = false,
+    this.groupName,
+    this.otherUserName,
+    this.otherUserId,
     this.productTitle,
+    this.participants,
   });
 
   @override
@@ -30,18 +36,17 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final _messageController = TextEditingController();
   final _myUid = FirebaseAuth.instance.currentUser!.uid;
   final _audioPlayer = AudioPlayer();
-
-  // ⭐️ [수정] ChatService 인스턴스 생성
   final ChatService _chatService = ChatService();
-  UserModel? _otherUser;
+  
+  Map<String, UserModel> _participantsInfo = {};
+  bool _isLoadingParticipants = true;
 
   @override
   void initState() {
     super.initState();
-    // AudioPlayer.global.setLogLevel(LogLevel.error); // 불필요한 로그 숨기기
-    if (widget.otherUserId.isNotEmpty) {
-      _fetchOtherUserData();
-      _chatService.markMessagesAsRead(widget.chatId, widget.otherUserId);
+    _loadParticipantsData();
+    if (!widget.isGroupChat && widget.otherUserId != null) {
+      _chatService.markMessagesAsRead(widget.chatId, widget.otherUserId!);
     }
   }
 
@@ -52,133 +57,112 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     super.dispose();
   }
 
-  Future<void> _fetchOtherUserData() async {
-    if (widget.otherUserId.isEmpty) return;
-    final user = await _chatService.getOtherUserInfo(widget.otherUserId);
-    if (mounted) setState(() => _otherUser = user);
-  }
+  Future<void> _loadParticipantsData() async {
+    List<String> idsToFetch = widget.isGroupChat 
+        ? (widget.participants ?? []) 
+        : (widget.otherUserId != null ? [_myUid, widget.otherUserId!] : []);
 
-  // ⭐️ [수정] 모든 로직을 ChatService에 위임
-  Future<void> _sendMessage() async {
-    if (_messageController.text.trim().isEmpty ||
-        widget.otherUserId.isEmpty) {
-      return;
+    if (idsToFetch.isNotEmpty) {
+      final usersMap = await _chatService.getParticipantsInfo(idsToFetch);
+      if (mounted) setState(() { _participantsInfo = usersMap; _isLoadingParticipants = false; });
+    } else {
+      if (mounted) setState(() => _isLoadingParticipants = false);
     }
+  }
+  
+  Future<void> _sendMessage() async {
     final messageText = _messageController.text.trim();
+    if (messageText.isEmpty) return;
+    
     _messageController.clear();
-
-    // await _audioPlayer.setAudioContext(const AudioContext(
-    //     android: AudioContextAndroid(
-    //         contentType: AndroidContentType.sonification,
-    //         usageType: AndroidUsageType.assistanceSonification),
-    //     ios: AudioContextIOS(category: AVAudioSessionCategory.playback)));
     await _audioPlayer.play(AssetSource('sounds/send_sound.mp3'));
 
     await _chatService.sendMessage(
-        widget.chatId, messageText, widget.otherUserId);
-  }
-
-  Widget _buildReadReceipt(ChatMessageModel message) {
-    if (message.senderId != _myUid) return const SizedBox.shrink();
-    final bool isReadByOther = message.readBy.contains(widget.otherUserId);
-    return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
-      child: Icon(
-        isReadByOther ? Icons.done_all : Icons.done,
-        size: 16,
-        color: isReadByOther ? Colors.blueAccent : Colors.grey,
-      ),
+      widget.chatId, messageText,
+      otherUserId: widget.isGroupChat ? null : widget.otherUserId,
+      allParticipantIds: widget.isGroupChat ? widget.participants : null,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final appBarTitle = widget.isGroupChat ? widget.groupName ?? 'Group Chat' : widget.productTitle ?? widget.otherUserName ?? 'Chat';
+
     return Scaffold(
-      appBar: AppBar(title: Text(widget.productTitle ?? widget.otherUserName)),
-      body: Column(
-        children: [
-          Expanded(
-            // ⭐️ [수정] StreamBuilder가 ChatService를 사용
-            child: StreamBuilder<List<ChatMessageModel>>(
-              stream: _chatService.getMessagesStream(widget.chatId),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                // Mark all retrieved messages as read once data is available
-                _chatService.markMessagesAsRead(
-                    widget.chatId, widget.otherUserId);
-
-                if (snapshot.data!.isEmpty) {
-                  return Center(child: Text('chat_room.placeholder'.tr()));
-                }
-
-                final messages = snapshot.data!;
-                return ListView.builder(
-                  reverse: true,
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 8.0),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final isMe = message.senderId == _myUid;
-
-                    return Row(
-                      mainAxisAlignment: isMe
-                          ? MainAxisAlignment.end
-                          : MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (!isMe)
-                          CircleAvatar(
-                            radius: 18,
-                            backgroundImage: _otherUser?.photoUrl != null
-                                ? NetworkImage(_otherUser!.photoUrl!)
-                                : null,
-                            child: _otherUser?.photoUrl == null
-                                ? const Icon(Icons.person)
-                                : null,
-                          ),
-                        Flexible(
-                          child: Container(
-                            margin: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 14),
-                            decoration: BoxDecoration(
-                              color:
-                                  isMe ? Colors.indigo[50] : Colors.grey[200],
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(message.text),
-                          ),
-                        ),
-                        if (isMe) _buildReadReceipt(message),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
+      appBar: AppBar(title: Text(appBarTitle)),
+      body: _isLoadingParticipants
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'chat_room.placeholder'.tr(),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                    ),
-                    onSubmitted: (_) => _sendMessage(),
+                  child: StreamBuilder<List<ChatMessageModel>>(
+                    stream: _chatService.getMessagesStream(widget.chatId),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                      if (snapshot.data!.isEmpty) return Center(child: Text('chat_room.placeholder'.tr()));
+                      
+                      final messages = snapshot.data!;
+                      return ListView.builder(
+                        reverse: true,
+                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[index];
+                          final sender = _participantsInfo[message.senderId];
+                          final isMe = message.senderId == _myUid;
+                          return _buildMessageItem(message, sender, isMe);
+                        },
+                      );
+                    },
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.send, color: Colors.indigo),
-                  onPressed: _sendMessage,
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _messageController,
+                          decoration: InputDecoration(hintText: 'chat_room.placeholder'.tr(), border: OutlineInputBorder(borderRadius: BorderRadius.circular(20))),
+                          onSubmitted: (_) => _sendMessage(),
+                        ),
+                      ),
+                      IconButton(icon: const Icon(Icons.send, color: Colors.teal), onPressed: _sendMessage),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildMessageItem(ChatMessageModel message, UserModel? sender, bool isMe) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (!isMe)
+            CircleAvatar(
+              radius: 18,
+              backgroundImage: (sender?.photoUrl != null && sender!.photoUrl!.isNotEmpty) ? NetworkImage(sender.photoUrl!) : null,
+              child: (sender?.photoUrl == null || sender!.photoUrl!.isEmpty) ? const Icon(Icons.person) : null,
+            ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                if (!isMe && widget.isGroupChat)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0, left: 8.0),
+                    child: Text(sender?.nickname ?? 'Unknown', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                  ),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                  decoration: BoxDecoration(color: isMe ? Colors.teal[50] : Colors.grey[200], borderRadius: BorderRadius.circular(16)),
+                  child: Text(message.text),
                 ),
               ],
             ),
