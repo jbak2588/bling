@@ -1,6 +1,7 @@
 // lib/features/clubs/data/club_repository.dart
 
 import 'package:bling_app/core/models/club_member_model.dart';
+import 'package:bling_app/core/models/club_post_model.dart';
 import 'package:bling_app/core/models/club_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -113,13 +114,27 @@ class ClubRepository {
     await batch.commit();
   }
 
+  // V V V --- [수정] 멤버 제거 시 관련된 모든 데이터를 함께 삭제하는 로직 --- V V V
   Future<void> removeMember(String clubId, String memberId) async {
-    // TODO: 멤버 제거 시 membersCount 감소, users/{uid}/clubs 및 chats participants 필드에서 제거하는 로직 추가 필요
-    await _clubs
-        .doc(clubId)
-        .collection('members')
-        .doc(memberId)
-        .delete();
+    final batch = _firestore.batch();
+
+    // 1. clubs/{clubId}/members에서 멤버 문서 삭제
+    final memberRef = _clubs.doc(clubId).collection('members').doc(memberId);
+    batch.delete(memberRef);
+
+    // 2. clubs 문서의 membersCount 1 감소
+    final clubRef = _clubs.doc(clubId);
+    batch.update(clubRef, {'membersCount': FieldValue.increment(-1)});
+
+    // 3. 강퇴된 사용자의 users 문서에 있는 clubs 필드에서 동호회 ID 제거
+    final userRef = _users.doc(memberId);
+    batch.update(userRef, {'clubs': FieldValue.arrayRemove([clubId])});
+
+    // 4. 동호회 채팅방(chats)의 participants 목록에서 멤버 ID 제거
+    final chatRoomRef = _chats.doc(clubId);
+    batch.update(chatRoomRef, {'participants': FieldValue.arrayRemove([memberId])});
+
+    await batch.commit();
   }
 
   Stream<List<ClubMemberModel>> fetchMembers(String clubId) {
@@ -143,5 +158,34 @@ class ClubRepository {
         .doc(currentUserId)
         .snapshots()
         .map((snapshot) => snapshot.exists);
+  }
+
+  /// 특정 동호회에 새로운 게시글을 작성합니다.
+  Future<void> createClubPost(String clubId, ClubPostModel post) async {
+    await _clubs
+        .doc(clubId)
+        .collection('posts')
+        .add(post.toJson());
+  }
+
+  /// 특정 동호회의 모든 게시글 목록을 실시간으로 가져옵니다.
+  Stream<List<ClubPostModel>> getClubPostsStream(String clubId) {
+    return _clubs
+        .doc(clubId)
+        .collection('posts')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => ClubPostModel.fromFirestore(doc))
+          .toList();
+    });
+  }
+  
+  // V V V --- [추가] 방장이 게시글을 삭제하는 함수 --- V V V
+  Future<void> deleteClubPost(String clubId, String postId) async {
+    final postRef = _clubs.doc(clubId).collection('posts').doc(postId);
+    // TODO: 게시글에 달린 댓글, 좋아요 등도 함께 삭제하는 로직 추가 필요
+    await postRef.delete();
   }
 }

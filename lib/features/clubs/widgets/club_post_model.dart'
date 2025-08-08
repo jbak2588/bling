@@ -1,0 +1,57 @@
+// lib/features/clubs/widgets/club_post_list.dart
+
+import 'package:bling_app/core/models/club_post_model.dart';
+import 'package:bling_app/features/clubs/data/club_repository.dart';
+import 'package:flutter/material.dart';
+import '../screens/create_club_post_screen.dart'; // 방금 만든 글쓰기 화면 임포트
+import 'club_post_card.dart';
+
+class ClubPostList extends StatelessWidget {
+  final String clubId;
+  const ClubPostList({super.key, required this.clubId});
+
+  @override
+  Widget build(BuildContext context) {
+    final ClubRepository repository = ClubRepository();
+    
+    // [수정] Scaffold로 감싸서 FloatingActionButton을 추가합니다.
+    return Scaffold(
+      body: StreamBuilder<List<ClubPostModel>>(
+        stream: repository.getClubPostsStream(clubId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text('게시글을 불러오는 중 오류가 발생했습니다.')); // TODO: 다국어
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('아직 게시글이 없습니다. 첫 글을 작성해보세요!')); // TODO: 다국어
+          }
+
+          final posts = snapshot.data!;
+          return ListView.builder(
+            padding: const EdgeInsets.all(8.0),
+            itemCount: posts.length,
+            itemBuilder: (context, index) {
+              final post = posts[index];
+              return ClubPostCard(post: post); // 개별 게시글 카드를 사용
+            },
+          );
+        },
+      ),
+      // [추가] 글쓰기 화면으로 이동하는 FloatingActionButton
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => CreateClubPostScreen(clubId: clubId),
+            ),
+          );
+        },
+        child: const Icon(Icons.edit),
+        tooltip: '글쓰기', // TODO: 다국어
+      ),
+    );
+  }
+}
