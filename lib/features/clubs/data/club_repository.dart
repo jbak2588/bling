@@ -1,10 +1,10 @@
 // lib/features/clubs/data/club_repository.dart
 
+import 'package:bling_app/core/models/club_member_model.dart';
+import 'package:bling_app/core/models/club_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-import '../../../core/models/club_member_model.dart';
-import '../../../core/models/club_model.dart';
+import 'package:flutter/foundation.dart';
 
 /// Handles CRUD operations for community clubs and their members.
 class ClubRepository {
@@ -17,24 +17,24 @@ class ClubRepository {
   CollectionReference<Map<String, dynamic>> get _chats =>
       _firestore.collection('chats');
 
-  Future<String> createClub(ClubModel club) async {
-    // 1. clubs 컬렉션에 새로운 동호회 문서를 먼저 생성합니다.
-    final docRef = await _clubs.add(club.toJson());
-    final clubId = docRef.id;
+ // [올바르게 수정된 새 코드]
+ Future<String> createClub(ClubModel club) async {
+    final batch = _firestore.batch();
 
-    // 2. 동호회 개설자를 첫 멤버로 추가하는 MemberModel을 만듭니다.
+    // 1. clubs 컬렉션에 대한 새로운 문서 참조를 미리 만듭니다. (ID를 먼저 알기 위해)
+    final clubDocRef = _clubs.doc();
+    final clubId = clubDocRef.id;
+
     final creatorAsMember = ClubMemberModel(
-      id: club.ownerId, 
-      userId: club.ownerId, 
+      id: club.ownerId,
+      userId: club.ownerId,
       joinedAt: Timestamp.now()
     );
-    // 3. addMember 함수를 호출하여 멤버 추가 및 사용자 프로필 업데이트를 처리합니다.
-    await addMember(clubId, creatorAsMember);
 
-    // 4. 동호회 전용 그룹 채팅방을 생성합니다.
+    // 2. 동호회 전용 그룹 채팅방을 먼저 생성합니다.
     final chatRoomRef = _chats.doc(clubId); // 채팅방 ID는 동호회 ID와 동일하게 설정
     final chatRoomData = {
-      'isGroupChat': true, // 그룹 채팅방임을 명시
+      'isGroupChat': true,
       'groupName': club.title,
       'groupImage': null, // TODO: 동호회 대표 이미지 필드 추가 시 연동
       'participants': [club.ownerId], // 첫 참여자는 개설자
@@ -42,62 +42,80 @@ class ClubRepository {
       'lastMessageTimestamp': FieldValue.serverTimestamp(),
       'unreadCounts': {club.ownerId: 0},
     };
-    await chatRoomRef.set(chatRoomData);
-
-    return docRef.id;
+    batch.set(chatRoomRef, chatRoomData);
+    
+    // 3. 동호회 문서를 생성합니다.
+    batch.set(clubDocRef, club.toJson());
+    
+    // 4. 개설자를 members 하위 컬렉션에 추가합니다.
+    final memberRef = clubDocRef.collection('members').doc(club.ownerId);
+    batch.set(memberRef, creatorAsMember.toJson());
+    
+    // 5. 개설자의 user 문서에 가입한 동호회 ID를 추가합니다.
+    final userRef = _users.doc(club.ownerId);
+    batch.update(userRef, {'clubs': FieldValue.arrayUnion([clubId])});
+    
+    // 6. 모든 작업을 한 번에 원자적으로 실행합니다.
+    await batch.commit();
+    
+    debugPrint("동호회 및 그룹 채팅방 생성 완료: $clubId");
+    return clubId;
   }
 
   Future<void> updateClub(ClubModel club) async {
-    await _firestore.collection('clubs').doc(club.id).update(club.toJson());
+    await _clubs.doc(club.id).update(club.toJson());
   }
 
   Future<void> deleteClub(String clubId) async {
-    await _firestore.collection('clubs').doc(clubId).delete();
+    await _clubs.doc(clubId).delete();
   }
 
   Future<ClubModel> fetchClub(String clubId) async {
-    final doc = await _firestore.collection('clubs').doc(clubId).get();
+    final doc = await _clubs.doc(clubId).get();
     return ClubModel.fromFirestore(doc);
   }
 
   Stream<List<ClubModel>> fetchClubs() {
-    return _firestore
-        .collection('clubs')
+    return _clubs
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) {
-      return snapshot.docs.map((doc) => ClubModel.fromFirestore(doc)).toList();
-    });
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => ClubModel.fromFirestore(doc)).toList());
   }
+    
+  // V V V --- [추가] 특정 동호회 정보를 실시간으로 가져오는 Stream 함수 --- V V V
+  Stream<ClubModel> getClubStream(String clubId) {
+    return _clubs
+        .doc(clubId)
+        .snapshots()
+        .map((snapshot) => ClubModel.fromFirestore(snapshot));
+  }
+  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
- Future<void> addMember(String clubId, ClubMemberModel member) async {
+  Future<void> addMember(String clubId, ClubMemberModel member) async {
     final clubRef = _clubs.doc(clubId);
     final memberRef = clubRef.collection('members').doc(member.userId);
     final userRef = _users.doc(member.userId);
-    // [추가] 동호회 채팅방 문서 참조
     final chatRoomRef = _chats.doc(clubId);
 
     final batch = _firestore.batch();
-    
-    // 작업 1: clubs/{clubId}/members에 멤버 추가
+
     batch.set(memberRef, member.toJson());
-    // 작업 2: clubs/{clubId}의 membersCount 1 증가
     batch.update(clubRef, {'membersCount': FieldValue.increment(1)});
-    // 작업 3: users/{uid}의 clubs 필드에 clubId 추가
-    batch.update(userRef, {'clubs': FieldValue.arrayUnion([clubId])});
-    // 작업 4: chats/{clubId}의 participants 목록에 멤버 ID 추가
+    batch.update(userRef, {
+      'clubs': FieldValue.arrayUnion([clubId])
+    });
     batch.update(chatRoomRef, {
       'participants': FieldValue.arrayUnion([member.userId]),
-      'unreadCounts.${member.userId}': 0, // 새로운 멤버의 안 읽은 메시지 수 초기화
+      'unreadCounts.${member.userId}': 0,
     });
 
     await batch.commit();
   }
 
   Future<void> removeMember(String clubId, String memberId) async {
-    // TODO: 멤버 제거 시 membersCount를 1 감소시키는 로직 추가 필요
-    await _firestore
-        .collection('clubs')
+    // TODO: 멤버 제거 시 membersCount 감소, users/{uid}/clubs 및 chats participants 필드에서 제거하는 로직 추가 필요
+    await _clubs
         .doc(clubId)
         .collection('members')
         .doc(memberId)
@@ -105,8 +123,7 @@ class ClubRepository {
   }
 
   Stream<List<ClubMemberModel>> fetchMembers(String clubId) {
-    return _firestore
-        .collection('clubs')
+    return _clubs
         .doc(clubId)
         .collection('members')
         .orderBy('joinedAt', descending: true)
@@ -120,12 +137,11 @@ class ClubRepository {
     if (currentUserId == null) {
       return Stream.value(false);
     }
-    return _firestore
-        .collection('clubs')
+    return _clubs
         .doc(clubId)
         .collection('members')
         .doc(currentUserId)
         .snapshots()
-        .map((snapshot) => snapshot.exists); // 문서가 존재하면 true(멤버임), 아니면 false
+        .map((snapshot) => snapshot.exists);
   }
 }
