@@ -8,16 +8,17 @@ class ClubModel {
   final String description;
   final String ownerId;
   final String location;
-  
-  // V V V --- [수정] 관심사 필드를 두 개로 분리합니다 --- V V V
-  final String mainCategory; // 대표 관심사 (예: 'category_sports')
-  final List<String> interestTags; // 세부 관심사 태그 목록 (예: ['soccer', 'hiking'])
-  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-
+  final String mainCategory;
+  final List<String> interestTags;
   final int membersCount;
   final bool isPrivate;
   final String trustLevelRequired;
   final Timestamp createdAt;
+
+  // V V V --- [추가] 강퇴자 및 가입 대기자 목록 필드 --- V V V
+  final List<String>? kickedMembers;
+  final List<String>? pendingMembers;
+  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
   ClubModel({
     required this.id,
@@ -25,12 +26,15 @@ class ClubModel {
     required this.description,
     required this.ownerId,
     required this.location,
-    required this.mainCategory, // [수정] 생성자에 추가
-    required this.interestTags, // [수정] 생성자에 추가 (이전 interests -> interestTags)
+    required this.mainCategory,
+    required this.interestTags,
     this.membersCount = 0,
     this.isPrivate = false,
     this.trustLevelRequired = 'normal',
     required this.createdAt,
+    // [추가] 생성자에 새로운 필드 추가
+    this.kickedMembers,
+    this.pendingMembers,
   });
 
   factory ClubModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -41,13 +45,15 @@ class ClubModel {
       description: data['description'] ?? '',
       ownerId: data['ownerId'] ?? '',
       location: data['location'] ?? '',
-      // [수정] 새로운 필드에 맞게 데이터를 불러옵니다.
-      mainCategory: data['mainCategory'] ?? '', 
+      mainCategory: data['mainCategory'] ?? '',
       interestTags: data['interestTags'] != null ? List<String>.from(data['interestTags']) : [],
       membersCount: data['membersCount'] ?? 0,
       isPrivate: data['isPrivate'] ?? false,
       trustLevelRequired: data['trustLevelRequired'] ?? 'normal',
       createdAt: data['createdAt'] ?? Timestamp.now(),
+      // [추가] Firestore에서 새로운 필드를 불러오는 로직
+      kickedMembers: data['kickedMembers'] != null ? List<String>.from(data['kickedMembers']) : [],
+      pendingMembers: data['pendingMembers'] != null ? List<String>.from(data['pendingMembers']) : [],
     );
   }
 
@@ -57,13 +63,15 @@ class ClubModel {
       'description': description,
       'ownerId': ownerId,
       'location': location,
-      // [수정] 새로운 필드에 맞게 데이터를 저장합니다.
       'mainCategory': mainCategory,
       'interestTags': interestTags,
       'membersCount': membersCount,
       'isPrivate': isPrivate,
       'trustLevelRequired': trustLevelRequired,
       'createdAt': createdAt,
+      // [추가] Firestore에 새로운 필드를 저장하는 로직
+      'kickedMembers': kickedMembers,
+      'pendingMembers': pendingMembers,
     };
   }
 }
