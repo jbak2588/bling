@@ -10,7 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:bling_app/features/clubs/screens/club_member_list_screen.dart';
+import 'package:bling_app/features/clubs/screens/club_member_list.dart';
 
 
 class ClubDetailScreen extends StatefulWidget {
@@ -44,29 +44,53 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 
   Future<void> _joinClub() async {
     if (_currentUserId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("로그인이 필요합니다.")));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("로그인이 필요합니다.")));
+      }
       return;
     }
+    
+    // [추가] 사용자 피드백을 위한 스낵바 표시 함수
+    void showSnackbar(String message, {bool isError = false}) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(message),
+          backgroundColor: isError ? Colors.red : Colors.green,
+        ));
+      }
+    }
+
+    // [추가] 로딩 상태 표시 (선택 사항이지만 UX에 좋음)
+    setState(() {
+      // 이 화면에 _isLoading 같은 상태 변수를 추가하고 관리할 수 있습니다.
+    });
+
     try {
       final newMember = ClubMemberModel(
         id: _currentUserId!,
         userId: _currentUserId!,
         joinedAt: Timestamp.now(),
       );
-      await _repository.addMember(widget.club.id, newMember);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("'${widget.club.title}' 동호회에 가입했습니다!"), backgroundColor: Colors.green),
-        );
+      
+      // Repository의 addMember 함수는 이제 'joined' 또는 'pending' 문자열을 반환합니다.
+      final result = await _repository.addMember(widget.club.id, newMember);
+
+      if (result == 'joined') {
+        showSnackbar("'${widget.club.title}' 동호회에 가입했습니다!"); // TODO: 다국어
+      } else if (result == 'pending') {
+        showSnackbar("방장의 승인을 기다리고 있습니다. 승인 후 활동할 수 있습니다."); // TODO: 다국어
       }
+
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("가입에 실패했습니다: $e"), backgroundColor: Colors.red),
-        );
-      }
+      showSnackbar("가입 신청에 실패했습니다: $e", isError: true); // TODO: 다국어
+    } finally {
+      // [추가] 로딩 상태 해제
+       if (mounted) setState(() { /* _isLoading = false; */ });
     }
   }
+
+
 
   Future<void> _navigateToGroupChat() async {
     final chatRoom = await _chatService.getChatRoom(widget.club.id);
@@ -110,19 +134,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 
          return TabBarView(
             controller: _tabController,
-            children: [
-              // '정보' 탭 UI
+             children: [
               _buildInfoTab(context, club),
-              
-              // '게시판' 탭 UI
-             ClubPostList(clubId: club.id, ownerId: club.ownerId),
-              
-              // V V V --- [수정] '멤버' 탭에 ownerId를 함께 전달합니다 --- V V V
-              ClubMemberList(
-                clubId: club.id,
-                ownerId: club.ownerId, // 방장 ID 전달
-              ),
+              // V V V --- [수정] ClubPostList에 ownerId를 전달합니다 --- V V V
+             ClubPostList(club: club),
               // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+              ClubMemberList(clubId: club.id, ownerId: club.ownerId),
             ],
           );
         },
