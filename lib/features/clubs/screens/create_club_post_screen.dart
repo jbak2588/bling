@@ -9,6 +9,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CreateClubPostScreen extends StatefulWidget {
   final String clubId;
@@ -33,7 +34,8 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
   Future<void> _pickImages() async {
     if (_images.length >= 5) return;
     final picker = ImagePicker();
-    final pickedFiles = await picker.pickMultiImage(imageQuality: 70, limit: 5 - _images.length);
+    final pickedFiles = await picker.pickMultiImage(
+        imageQuality: 70, limit: 5 - _images.length);
     if (pickedFiles.isNotEmpty) {
       setState(() => _images.addAll(pickedFiles));
     }
@@ -53,30 +55,38 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
       List<String> imageUrls = [];
       for (var imageFile in _images) {
         final fileName = const Uuid().v4();
-        final ref = FirebaseStorage.instance.ref().child('club_posts/${widget.clubId}/$fileName');
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('club_posts/${widget.clubId}/$fileName');
         await ref.putFile(File(imageFile.path));
         imageUrls.add(await ref.getDownloadURL());
       }
 
       final newPost = ClubPostModel(
-        id: '', clubId: widget.clubId, userId: user.uid,
-        body: _bodyController.text.trim(), imageUrls: imageUrls,
+        id: '',
+        clubId: widget.clubId,
+        userId: user.uid,
+        body: _bodyController.text.trim(),
+        imageUrls: imageUrls,
         createdAt: Timestamp.now(),
       );
 
       await _repository.createClubPost(widget.clubId, newPost);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('게시글이 등록되었습니다.'), backgroundColor: Colors.green),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('clubs.createPost.success'.tr()),
+          backgroundColor: Colors.green,
+        ));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('게시글 등록에 실패했습니다: $e'), backgroundColor: Colors.red),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              'clubs.createPost.fail'.tr(namedArgs: {'error': e.toString()})),
+          backgroundColor: Colors.red,
+        ));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -87,9 +97,12 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('새 게시글 작성'), // TODO: 다국어
+        title: Text('clubs.createPost.title'.tr()),
         actions: [
-          if (!_isSaving) TextButton(onPressed: _submitPost, child: const Text('등록'))
+          if (!_isSaving)
+            TextButton(
+                onPressed: _submitPost,
+                child: Text('clubs.createPost.submit'.tr()))
         ],
       ),
       body: Stack(
@@ -100,7 +113,9 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
               children: [
                 TextField(
                   controller: _bodyController,
-                  decoration: const InputDecoration(hintText: '내용을 입력하세요...', border: OutlineInputBorder()),
+                  decoration: InputDecoration(
+                      hintText: 'clubs.createPost.bodyHint'.tr(),
+                      border: const OutlineInputBorder()),
                   maxLines: 8,
                 ),
                 const SizedBox(height: 16),
@@ -110,19 +125,24 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
                     scrollDirection: Axis.horizontal,
                     children: [
                       ..._images.map((xfile) => Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.file(File(xfile.path), width: 100, height: 100, fit: BoxFit.cover),
-                        ),
-                      )),
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Image.file(File(xfile.path),
+                                  width: 100, height: 100, fit: BoxFit.cover),
+                            ),
+                          )),
                       if (_images.length < 5)
                         GestureDetector(
                           onTap: _pickImages,
                           child: Container(
-                            width: 100, height: 100,
-                            decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
-                            child: const Icon(Icons.add_a_photo_outlined, color: Colors.grey),
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8)),
+                            child: const Icon(Icons.add_a_photo_outlined,
+                                color: Colors.grey),
                           ),
                         ),
                     ],
@@ -132,7 +152,10 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
             ),
           ),
           if (_isSaving)
-            Container(color: Colors.black54, child: const Center(child: CircularProgressIndicator(color: Colors.white))),
+            Container(
+                color: Colors.black54,
+                child: const Center(
+                    child: CircularProgressIndicator(color: Colors.white))),
         ],
       ),
     );

@@ -1,380 +1,714 @@
-diff --git a/assets/lang/en.json b/assets/lang/en.json
-index 6816c035bec5bd8660d86b086639ae8711adc522..8869339dd11b345782105421afb85b53da86fa46 100644
---- a/assets/lang/en.json
-+++ b/assets/lang/en.json
-@@ -215,50 +215,61 @@
-         },
-         "defaultChatMessage": "You are now friends! Start chatting."
-     },
-     "sentFriendRequests": {
-         "title": "Sent Friend Requests",
-         "noRequests": "No sent friend requests.",
-         "statusLabel": "Status: {status}",
-         "status": {
-             "pending": "Pending",
-             "accepted": "Accepted",
-             "rejected": "Rejected"
-         }
-     },
-     "blockedUsers": {
-         "title": "Blocked Users",
-         "noBlockedUsers": "You haven't blocked anyone.",
-         "unblock": "Unblock",
-         "unblockDialog": {
-             "title": "Unblock {nickname}?",
-             "content": "If you unblock, this user will be able to find you and send friend requests again."
-         },
-         "unblockSuccess": "{nickname} has been unblocked.",
-         "unblockFailure": "Failed to unblock: {error}",
-         "unknownUser": "Unknown user"
-     },
-+    "rejectedUsers": {
-+        "title": "Manage Rejected Users",
-+        "noRejectedUsers": "You haven't rejected any friend requests.",
-+        "unreject": "Undo Rejection",
-+        "unrejectDialog": {
-+            "title": "Undo rejection for {nickname}?",
-+            "content": "If you undo the rejection, you may appear again in their friend search list."
-+        },
-+        "unrejectSuccess": "You have undone the rejection for {nickname}.",
-+        "unrejectFailure": "Failed to undo rejection: {error}"
-+    },
-     "prompt": {
-         "title": "Welcome to Bling!",
-         "subtitle": "To see interesting news and items around you, please set your neighborhood first.",
-         "button": "Set My Neighborhood"
-     },
-     "location": {
-         "title": "Set Neighborhood",
-         "searchHint": "Search by neighborhood, e.g., Serpong",
-         "gpsButton": "Find with current location",
-         "success": "Neighborhood has been set.",
-         "error": "Failed to set neighborhood: {error}",
-         "empty": "Please enter a neighborhood name.",
-         "permissionDenied": "Location permission is required to find your neighborhood."
-     },
-     "profileEdit": {
-         "title": "Edit Profile",
-         "nicknameHint": "Nickname",
-         "phoneHint": "Phone Number",
-         "bioHint": "Bio (Introduction)",
-         "locationTitle": "Location",
-         "changeLocation": "Change",
-         "interests": {
-             "title": "Interests",
-             "hint": "Use comma and Enter to add multiple"
-         },
-diff --git a/assets/lang/id.json b/assets/lang/id.json
-index 65b3abd0827eae9ff2d2947f2acd48f58df47a98..f23dac0a851032fbe8153ec04703e8165849a8dc 100644
---- a/assets/lang/id.json
-+++ b/assets/lang/id.json
-@@ -215,50 +215,61 @@
-         },
-         "defaultChatMessage": "Sekarang kalian berteman! Mulai percakapan."
-     },
-     "sentFriendRequests": {
-         "title": "Permintaan Pertemanan Terkirim",
-         "noRequests": "Tidak ada permintaan pertemanan yang dikirim.",
-         "statusLabel": "Status: {status}",
-         "status": {
-             "pending": "Menunggu",
-             "accepted": "Diterima",
-             "rejected": "Ditolak"
-         }
-     },
-     "blockedUsers": {
-         "title": "Pengguna Diblokir",
-         "noBlockedUsers": "Anda belum memblokir siapa pun.",
-         "unblock": "Buka blokir",
-         "unblockDialog": {
-             "title": "Buka blokir {nickname}?",
-             "content": "Jika Anda membuka blokir, pengguna ini dapat menemukan Anda lagi dan mengirim permintaan pertemanan."
-         },
-         "unblockSuccess": "{nickname} telah dibuka blokir.",
-         "unblockFailure": "Gagal membuka blokir: {error}",
-         "unknownUser": "Pengguna tidak dikenal"
-     },
-+    "rejectedUsers": {
-+        "title": "Kelola Pengguna yang Ditolak",
-+        "noRejectedUsers": "Tidak ada permintaan pertemanan yang Anda tolak.",
-+        "unreject": "Batalkan Penolakan",
-+        "unrejectDialog": {
-+            "title": "Batalkan penolakan untuk {nickname}?",
-+            "content": "Jika penolakan dibatalkan, Anda mungkin akan muncul kembali di daftar cari teman mereka."
-+        },
-+        "unrejectSuccess": "Penolakan terhadap {nickname} telah dibatalkan.",
-+        "unrejectFailure": "Gagal membatalkan penolakan: {error}"
-+    },
-     "prompt": {
-         "title": "Selamat datang di Bling!",
-         "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
-         "button": "Atur Lingkungan Saya"
-     },
-     "location": {
-         "title": "Atur Lingkungan",
-         "searchHint": "Cari berdasarkan lingkungan, cth., Serpong",
-         "gpsButton": "Cari dengan lokasi saat ini",
-         "success": "Lingkungan telah diatur.",
-         "error": "Gagal mengatur lingkungan: {error}",
-         "empty": "Silakan masukkan nama lingkungan.",
-         "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
-     },
-     "profileEdit": {
-         "title": "Pengaturan Profil",
-         "nicknameHint": "Nama Panggilan",
-         "phoneHint": "Nomor Telepon",
-         "bioHint": "Bio (Perkenalan Diri)",
-         "locationTitle": "Lokasi",
-         "changeLocation": "Ubah",
-         "interests": {
-             "title": "Minat",
-             "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
-         },
-diff --git a/assets/lang/ko.json b/assets/lang/ko.json
-index e01f32c93ab1714afb9aca37a2225322c507704b..9e481b2b39ade9309dc40ac47acaf3dfa599879e 100644
---- a/assets/lang/ko.json
-+++ b/assets/lang/ko.json
-@@ -214,50 +214,61 @@
-         },
-         "defaultChatMessage": "이제 친구가 되었습니다! 대화를 시작해보세요."
-     },
-     "sentFriendRequests": {
-         "title": "보낸 친구 요청",
-         "noRequests": "보낸 친구 요청이 없습니다.",
-         "statusLabel": "요청 상태: {status}",
-         "status": {
-             "pending": "대기중",
-             "accepted": "수락됨",
-             "rejected": "거절됨"
-         }
-     },
-     "blockedUsers": {
-         "title": "차단 사용자 관리",
-         "noBlockedUsers": "차단한 사용자가 없습니다.",
-         "unblock": "차단 해제",
-         "unblockDialog": {
-             "title": "{nickname} 님을 차단 해제할까요?",
-             "content": "차단을 해제하면 상대방이 회원님을 다시 찾을 수 있게 되며, 친구 요청을 보낼 수 있습니다."
-         },
-         "unblockSuccess": "{nickname} 님의 차단을 해제했습니다.",
-         "unblockFailure": "차단 해제에 실패했습니다: {error}",
-         "unknownUser": "알 수 없는 사용자"
-     },
-+    "rejectedUsers": {
-+        "title": "거절한 사용자 관리",
-+        "noRejectedUsers": "친구 요청을 거절한 사용자가 없습니다.",
-+        "unreject": "거절 취소",
-+        "unrejectDialog": {
-+            "title": "{nickname} 님에 대한 거절을 취소할까요?",
-+            "content": "거절을 취소하면, 상대방의 친구 찾기 목록에 회원님이 다시 표시될 수 있습니다."
-+        },
-+        "unrejectSuccess": "{nickname} 님에 대한 거절을 취소했습니다.",
-+        "unrejectFailure": "거절 취소에 실패했습니다: {error}"
-+    },
-     "prompt": {
-         "title": "블링에 오신 것을 환영합니다!",
-         "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
-         "button": "내 동네 설정하기"
-     },
-     "location": {
-         "title": "동네 설정",
-         "searchHint": "동네 이름으로 검색 (예: 세르퐁)",
-         "gpsButton": "현재 위치로 찾기",
-         "success": "동네가 설정되었습니다.",
-         "error": "동네 설정에 실패했습니다: {error}",
-         "empty": "동네 이름을 입력해주세요.",
-         "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
-     },
-     "profileEdit": {
-         "title": "프로필 설정",
-         "nicknameHint": "닉네임",
-         "phoneHint": "전화번호",
-         "bioHint": "소개 (Bio)",
-         "locationTitle": "지역",
-         "changeLocation": "변경",
-         "interests": {
-             "title": "관심사",
-             "hint": "쉼표와 Enter로 여러개 동시 추가"
-         },
-diff --git a/lib/features/my_bling/screens/blocked_users_screen.dart b/lib/features/my_bling/screens/blocked_users_screen.dart
-index d6aed8e730921c3def9375b409d3f3c3bd38d12a..7c01330494ba485d957a26bdbff2a4448d0faee3 100644
---- a/lib/features/my_bling/screens/blocked_users_screen.dart
-+++ b/lib/features/my_bling/screens/blocked_users_screen.dart
-@@ -3,152 +3,168 @@
+diff --git a/lib/features/clubs/data/club_repository.dart b/lib/features/clubs/data/club_repository.dart
+index 39ad4e7e1ec0f50d9e91121179164745401ccdab..efde75526d2092d31228076b8ddf361d1465601e 100644
+--- a/lib/features/clubs/data/club_repository.dart
++++ b/lib/features/clubs/data/club_repository.dart
+@@ -1,70 +1,71 @@
+ // lib/features/clubs/data/club_repository.dart
+ 
+ import 'package:bling_app/core/models/club_member_model.dart';
+ import 'package:bling_app/core/models/club_post_model.dart';
+ import 'package:bling_app/core/models/club_model.dart';
  import 'package:bling_app/core/models/user_model.dart';
- import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
+ import 'package:bling_app/core/models/club_comment_model.dart';
  import 'package:cloud_firestore/cloud_firestore.dart';
  import 'package:firebase_auth/firebase_auth.dart';
- import 'package:flutter/material.dart';
- import 'package:easy_localization/easy_localization.dart';
+ import 'package:flutter/foundation.dart';
++import 'package:easy_localization/easy_localization.dart';
  
- class BlockedUsersScreen extends StatefulWidget {
-   const BlockedUsersScreen({super.key});
  
-   @override
-   State<BlockedUsersScreen> createState() => _BlockedUsersScreenState();
- }
+ /// Handles CRUD operations for community clubs and their members.
+ class ClubRepository {
+   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
  
- class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
-   final FindFriendRepository _repository = FindFriendRepository();
-   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
+   CollectionReference<Map<String, dynamic>> get _users =>
+       _firestore.collection('users');
+   CollectionReference<Map<String, dynamic>> get _clubs =>
+       _firestore.collection('clubs');
+   CollectionReference<Map<String, dynamic>> get _chats =>
+       _firestore.collection('chats');
  
-   // [수정] '차단 해제'가 아닌 '거절 해제' 로직
-   Future<void> _showUnrejectConfirmationDialog(
-       String rejectedUserId, String nickname) async {
-     final bool? confirmed = await showDialog<bool>(
-       context: context,
-       builder: (context) {
-         return AlertDialog(
--          title: Text('$nickname 님에 대한 거절을 취소할까요?'), // TODO: 다국어
--          content:
--              Text('거절을 취소하면, 상대방의 친구 찾기 목록에 회원님이 다시 표시될 수 있습니다.'), // TODO: 다국어
-+          title: Text(
-+            'rejectedUsers.unrejectDialog.title'
-+                .tr(namedArgs: {'nickname': nickname}),
-+          ),
-+          content: Text(
-+            'rejectedUsers.unrejectDialog.content'.tr(),
-+          ),
-           actions: [
-             TextButton(
-               onPressed: () => Navigator.of(context).pop(false),
--              child: Text('취소'), // TODO: 다국어
-+              child: Text('common.cancel'.tr()),
-             ),
-             TextButton(
-               onPressed: () => Navigator.of(context).pop(true),
--              child: Text('거절 취소',
--                  style: TextStyle(color: Colors.red)), // TODO: 다국어
-+              child: Text(
-+                'rejectedUsers.unreject'.tr(),
-+                style: const TextStyle(color: Colors.red),
-+              ),
-             ),
-           ],
-         );
-       },
+  // [올바르게 수정된 새 코드]
+  Future<String> createClub(ClubModel club) async {
+     final batch = _firestore.batch();
+ 
+     // 1. clubs 컬렉션에 대한 새로운 문서 참조를 미리 만듭니다. (ID를 먼저 알기 위해)
+     final clubDocRef = _clubs.doc();
+     final clubId = clubDocRef.id;
+ 
+     final creatorAsMember = ClubMemberModel(
+       id: club.ownerId,
+       userId: club.ownerId,
+       joinedAt: Timestamp.now()
      );
  
-     if (confirmed == true && mounted) {
-       try {
-         // [수정] Repository에 unrejectUser 함수를 추가해야 합니다 (다음 단계에서 진행)
-         await _repository.unrejectUser(_currentUserId!, rejectedUserId);
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
--              content: Text('$nickname 님에 대한 거절을 취소했습니다.'),
--              backgroundColor: Colors.green), // TODO: 다국어
-+            content: Text(
-+              'rejectedUsers.unrejectSuccess'
-+                  .tr(namedArgs: {'nickname': nickname}),
-+            ),
-+            backgroundColor: Colors.green,
-+          ),
-         );
-       } catch (e) {
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
--              content: Text('거절 취소에 실패했습니다: $e'),
--              backgroundColor: Colors.red), // TODO: 다국어
-+            content: Text(
-+              'rejectedUsers.unrejectFailure'
-+                  .tr(namedArgs: {'error': e.toString()}),
-+            ),
-+            backgroundColor: Colors.red,
-+          ),
-         );
+     // 2. 동호회 전용 그룹 채팅방을 먼저 생성합니다.
+     final chatRoomRef = _chats.doc(clubId); // 채팅방 ID는 동호회 ID와 동일하게 설정
+     final chatRoomData = {
+       'isGroupChat': true,
+       'groupName': club.title,
+       'groupImage': null, // TODO: 동호회 대표 이미지 필드 추가 시 연동
+       'participants': [club.ownerId], // 첫 참여자는 개설자
+-      'lastMessage': '동호회 채팅방이 개설되었습니다.', // TODO: 다국어
++      'lastMessage': 'clubs.repository.chatCreated'.tr(),
+       'lastMessageTimestamp': FieldValue.serverTimestamp(),
+       'unreadCounts': {club.ownerId: 0},
+     };
+     batch.set(chatRoomRef, chatRoomData);
+     
+     // 3. 동호회 문서를 생성합니다.
+     batch.set(clubDocRef, club.toJson());
+     
+     // 4. 개설자를 members 하위 컬렉션에 추가합니다.
+     final memberRef = clubDocRef.collection('members').doc(club.ownerId);
+     batch.set(memberRef, creatorAsMember.toJson());
+     
+     // 5. 개설자의 user 문서에 가입한 동호회 ID를 추가합니다.
+     final userRef = _users.doc(club.ownerId);
+     batch.update(userRef, {'clubs': FieldValue.arrayUnion([clubId])});
+     
+     // 6. 모든 작업을 한 번에 원자적으로 실행합니다.
+     await batch.commit();
+     
+     debugPrint("동호회 및 그룹 채팅방 생성 완료: $clubId");
+     return clubId;
+   }
+ 
+   Future<void> updateClub(ClubModel club) async {
+     await _clubs.doc(club.id).update(club.toJson());
+diff --git a/lib/features/clubs/screens/club_detail_screen.dart b/lib/features/clubs/screens/club_detail_screen.dart
+index 0d3e502ee596d32af0abc762057288eeb6cc1343..48041d888426f937fbad823eff0c020b442edcb9 100644
+--- a/lib/features/clubs/screens/club_detail_screen.dart
++++ b/lib/features/clubs/screens/club_detail_screen.dart
+@@ -23,189 +23,196 @@ class ClubDetailScreen extends StatefulWidget {
+ 
+ class _ClubDetailScreenState extends State<ClubDetailScreen>
+     with SingleTickerProviderStateMixin {
+   final ClubRepository _repository = ClubRepository();
+   final ChatService _chatService = ChatService();
+   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
+ 
+   late final TabController _tabController;
+ 
+   @override
+   void initState() {
+     super.initState();
+     // [수정] 탭 개수를 2개에서 3개로 변경합니다.
+     _tabController = TabController(length: 3, vsync: this);
+   }
+  
+   @override
+   void dispose() {
+     _tabController.dispose();
+     super.dispose();
+   }
+ 
+   Future<void> _joinClub() async {
+     if (_currentUserId == null) {
+       if (mounted) {
+-        ScaffoldMessenger.of(context)
+-            .showSnackBar(SnackBar(content: Text("로그인이 필요합니다.")));
++        ScaffoldMessenger.of(context).showSnackBar(
++            SnackBar(content: Text('main.errors.loginRequired'.tr())));
        }
+       return;
+     }
+     
+     // [추가] 사용자 피드백을 위한 스낵바 표시 함수
+     void showSnackbar(String message, {bool isError = false}) {
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+           content: Text(message),
+           backgroundColor: isError ? Colors.red : Colors.green,
+         ));
+       }
+     }
+ 
+     // [추가] 로딩 상태 표시 (선택 사항이지만 UX에 좋음)
+     setState(() {
+       // 이 화면에 _isLoading 같은 상태 변수를 추가하고 관리할 수 있습니다.
+     });
+ 
+     try {
+       final newMember = ClubMemberModel(
+         id: _currentUserId!,
+         userId: _currentUserId!,
+         joinedAt: Timestamp.now(),
+       );
+       
+       // Repository의 addMember 함수는 이제 'joined' 또는 'pending' 문자열을 반환합니다.
+       final result = await _repository.addMember(widget.club.id, newMember);
+ 
+       if (result == 'joined') {
+-        showSnackbar("'${widget.club.title}' 동호회에 가입했습니다!"); // TODO: 다국어
++        showSnackbar('clubs.detail.joined'
++            .tr(namedArgs: {'title': widget.club.title}));
+       } else if (result == 'pending') {
+-        showSnackbar("방장의 승인을 기다리고 있습니다. 승인 후 활동할 수 있습니다."); // TODO: 다국어
++        showSnackbar('clubs.detail.pendingApproval'.tr());
+       }
+ 
+     } catch (e) {
+-      showSnackbar("가입 신청에 실패했습니다: $e", isError: true); // TODO: 다국어
++      showSnackbar(
++          'clubs.detail.joinFail'.tr(namedArgs: {'error': e.toString()}),
++          isError: true);
+     } finally {
+       // [추가] 로딩 상태 해제
+        if (mounted) setState(() { /* _isLoading = false; */ });
      }
    }
  
-   Future<UserModel?> _getUserData(String userId) async {
-     try {
-       final doc = await FirebaseFirestore.instance
-           .collection('users')
-           .doc(userId)
-           .get();
-       if (doc.exists) {
-         return UserModel.fromFirestore(doc);
-       }
-     } catch (e) {
-       debugPrint("Error fetching user data for $userId: $e");
-     }
-     return null;
+ 
+ 
+   Future<void> _navigateToGroupChat() async {
+     final chatRoom = await _chatService.getChatRoom(widget.club.id);
+     if (chatRoom == null || !mounted) return;
+ 
+     Navigator.of(context).push(
+       MaterialPageRoute(
+         builder: (_) => ChatRoomScreen(
+           chatId: chatRoom.id,
+           isGroupChat: true,
+           groupName: chatRoom.groupName,
+           participants: chatRoom.participants,
+         ),
+       ),
+     );
    }
  
    @override
    Widget build(BuildContext context) {
-     if (_currentUserId == null) {
-       return Scaffold(
-           appBar: AppBar(), body: Center(child: Text('로그인이 필요합니다.')));
-     }
- 
      return Scaffold(
        appBar: AppBar(
--        title: Text('거절한 사용자 관리'), // TODO: 다국어
-+        title: Text('rejectedUsers.title'.tr()),
+         title: Text(widget.club.title),
+         bottom: TabBar(
+           controller: _tabController,
+-          tabs: const [
+-            Tab(text: '정보'), // TODO: 다국어
+-            Tab(text: '게시판'), // TODO: 다국어
+-            // V V V --- [추가] '멤버' 탭 --- V V V
+-            Tab(text: '멤버'), // TODO: 다국어
+-            // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
++          tabs: [
++            Tab(text: 'clubs.detail.tabs.info'.tr()),
++            Tab(text: 'clubs.detail.tabs.board'.tr()),
++            Tab(text: 'clubs.detail.tabs.members'.tr()),
+           ],
+         ),
        ),
-       body: StreamBuilder<DocumentSnapshot>(
-         stream: FirebaseFirestore.instance
-             .collection('users')
-             .doc(_currentUserId)
-             .snapshots(),
+       body: StreamBuilder<ClubModel>(
+         stream: _repository.getClubStream(widget.club.id),
          builder: (context, snapshot) {
-           if (!snapshot.hasData || !snapshot.data!.exists) {
+           if (!snapshot.hasData) {
              return const Center(child: CircularProgressIndicator());
            }
-           final currentUser = UserModel.fromFirestore(
-               snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
-           // V V V --- [핵심 수정] 'blockedUsers'가 아닌 'rejectedUsers' 필드를 읽어옵니다 --- V V V
-           final rejectedUids = currentUser.rejectedUsers ?? [];
-           // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+           final club = snapshot.data!;
  
-           if (rejectedUids.isEmpty) {
--            return Center(child: Text('친구 요청을 거절한 사용자가 없습니다.')); // TODO: 다국어
-+            return Center(
-+              child: Text('rejectedUsers.noRejectedUsers'.tr()),
-+            );
+          return TabBarView(
+             controller: _tabController,
+              children: [
+               _buildInfoTab(context, club),
+               // V V V --- [수정] ClubPostList에 ownerId를 전달합니다 --- V V V
+              ClubPostList(club: club),
+               // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+               ClubMemberList(clubId: club.id, ownerId: club.ownerId),
+             ],
+           );
+         },
+       ),
+       floatingActionButton: StreamBuilder<bool>(
+         stream: _repository.isCurrentUserMember(widget.club.id),
+         builder: (context, snapshot) {
+           final isMember = snapshot.data ?? false;
+ 
+           if (isMember) {
+             return FloatingActionButton.extended(
+               heroTag: 'club_chat_fab',
+               onPressed: _navigateToGroupChat,
+-              label: Text('채팅 참여하기'),
++              label: Text('clubs.detail.joinChat'.tr()),
+               icon: const Icon(Icons.chat_bubble_outline),
+               backgroundColor: Colors.teal,
+             );
            }
+           
+           return FloatingActionButton.extended(
+             heroTag: 'club_join_fab',
+             onPressed: _joinClub,
+-            label: Text('동호회 가입하기'),
++            label: Text('clubs.detail.joinClub'.tr()),
+             icon: const Icon(Icons.add),
+           );
+         },
+       ),
+       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+     );
+   }
  
-           return ListView.builder(
-             itemCount: rejectedUids.length,
-             itemBuilder: (context, index) {
-               final rejectedUserId = rejectedUids[index];
-               return FutureBuilder<UserModel?>(
-                 future: _getUserData(rejectedUserId),
-                 builder: (context, userSnapshot) {
-                   if (userSnapshot.connectionState == ConnectionState.waiting) {
-                     return const ListTile(title: Text('...'));
-                   }
-                   if (!userSnapshot.hasData || userSnapshot.data == null) {
-                     return ListTile(
-                       title: Text('알 수 없는 사용자'),
-                       subtitle: Text(rejectedUserId),
+   Widget _buildInfoTab(BuildContext context, ClubModel club) {
+     return ListView(
+       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
+       children: [
+         Text(club.title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+         const SizedBox(height: 16),
+         Text(club.description, style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5)),
+         const Divider(height: 32),
+         Row(
+           mainAxisAlignment: MainAxisAlignment.spaceAround,
+           children: [
+-            _buildInfoColumn(icon: Icons.group_outlined, label: 'Members', value: club.membersCount.toString()),
+-            _buildInfoColumn(icon: Icons.location_on_outlined, label: 'Location', value: club.location),
++            _buildInfoColumn(
++                icon: Icons.group_outlined,
++                label: 'clubs.detail.info.members'.tr(),
++                value: club.membersCount.toString()),
++            _buildInfoColumn(
++                icon: Icons.location_on_outlined,
++                label: 'clubs.detail.info.location'.tr(),
++                value: club.location),
+           ],
+         ),
+         const Divider(height: 32),
+         Text("interests.title".tr(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+         const SizedBox(height: 8),
+         Wrap(
+           spacing: 8.0,
+           runSpacing: 4.0,
+           children: club.interestTags.map((interestKey) {
+             return Chip(
+               avatar: const Icon(Icons.tag, size: 16),
+               label: Text("interests.items.$interestKey".tr()),
+             );
+           }).toList(),
+         ),
+       ],
+     );
+   }
+ 
+   Widget _buildInfoColumn({required IconData icon, required String label, required String value}) {
+     return Column(
+       children: [
+         Icon(icon, color: Colors.grey[700]),
+         const SizedBox(height: 4),
+         Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+diff --git a/lib/features/clubs/screens/club_member_list.dart b/lib/features/clubs/screens/club_member_list.dart
+index a384a25603745d8ae7d656c0cc2e9f9be0bf6868..be0e99de088c3d2e5f65595996f35a2aac8a1ae9 100644
+--- a/lib/features/clubs/screens/club_member_list.dart
++++ b/lib/features/clubs/screens/club_member_list.dart
+@@ -1,103 +1,108 @@
+ // lib/features/clubs/widgets/club_member_list.dart
+ 
+ import 'package:bling_app/core/models/club_member_model.dart';
+ import 'package:bling_app/core/models/club_model.dart'; // [추가] ClubModel 임포트
+ import 'package:bling_app/core/models/user_model.dart'; // [추가] UserModel 임포트
+ import 'package:bling_app/features/clubs/data/club_repository.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:flutter/material.dart';
+ import '../widgets/club_member_card.dart';
++import 'package:easy_localization/easy_localization.dart';
+ 
+ class ClubMemberList extends StatelessWidget {
+   final String clubId;
+   final String ownerId;
+   const ClubMemberList({super.key, required this.clubId, required this.ownerId});
+ 
+   @override
+   Widget build(BuildContext context) {
+     final ClubRepository repository = ClubRepository();
+     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+     final bool amIOwner = currentUserId == ownerId;
+ 
+     return Scaffold(
+       body: StreamBuilder<ClubModel>( // [수정] ClubModel 전체를 감시하여 pendingMembers 목록을 가져옴
+         stream: repository.getClubStream(clubId),
+         builder: (context, clubSnapshot) {
+           if (!clubSnapshot.hasData) {
+             return const Center(child: CircularProgressIndicator());
+           }
+           final club = clubSnapshot.data!;
+           final pendingMemberIds = club.pendingMembers ?? [];
+ 
+           return CustomScrollView(
+             slivers: [
+               // --- [추가] 방장에게만 보이는 '가입 대기' 목록 ---
+               if (amIOwner && pendingMemberIds.isNotEmpty) ...[
+-                const SliverToBoxAdapter(
++                SliverToBoxAdapter(
+                   child: Padding(
+-                    padding: EdgeInsets.all(16.0),
+-                    child: Text('가입 대기중인 멤버', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), // TODO: 다국어
++                    padding: const EdgeInsets.all(16.0),
++                    child: Text('clubs.memberList.pendingMembers'.tr(),
++                        style: const TextStyle(
++                            fontSize: 18, fontWeight: FontWeight.bold)),
+                   ),
+                 ),
+                 StreamBuilder<List<UserModel>>(
+                   stream: repository.fetchPendingMembers(pendingMemberIds),
+                   builder: (context, snapshot) {
+                     if (!snapshot.hasData) return const SliverToBoxAdapter(child: SizedBox.shrink());
+                     final pendingMembers = snapshot.data!;
+                     return SliverList(
+                       delegate: SliverChildBuilderDelegate(
+                         (context, index) {
+                           final member = pendingMembers[index];
+                           return Card(
+                             margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                             child: ListTile(
+                               leading: CircleAvatar(backgroundImage: (member.photoUrl != null && member.photoUrl!.isNotEmpty) ? NetworkImage(member.photoUrl!) : null),
+                               title: Text(member.nickname),
+                               trailing: Row(
+                                 mainAxisSize: MainAxisSize.min,
+                                 children: [
+                                   IconButton(icon: const Icon(Icons.close, color: Colors.red), onPressed: () => repository.rejectPendingMember(clubId, member.uid)),
+                                   IconButton(icon: const Icon(Icons.check, color: Colors.green), onPressed: () => repository.approvePendingMember(clubId, member.uid)),
+                                 ],
+                               ),
+                             ),
+                           );
+                         },
+                         childCount: pendingMembers.length,
+                       ),
                      );
-                   }
- 
-                   final rejectedUser = userSnapshot.data!;
-                   return ListTile(
-                     leading: CircleAvatar(
-                       backgroundImage: (rejectedUser.photoUrl != null &&
-                               rejectedUser.photoUrl!.isNotEmpty)
-                           ? NetworkImage(rejectedUser.photoUrl!)
-                           : null,
-                       child: (rejectedUser.photoUrl == null ||
-                               rejectedUser.photoUrl!.isEmpty)
-                           ? const Icon(Icons.person)
-                           : null,
-                     ),
-                     title: Text(rejectedUser.nickname),
-                     trailing: OutlinedButton(
-                       onPressed: () => _showUnrejectConfirmationDialog(
-                           rejectedUser.uid, rejectedUser.nickname),
--                      child: Text('거절 취소'), // TODO: 다국어
-+                      child: Text('rejectedUsers.unreject'.tr()),
+                   },
+                 ),
+                 const SliverToBoxAdapter(child: Divider(height: 32)),
+               ],
+               
+               // --- 기존 '정식 멤버' 목록 ---
+-              const SliverToBoxAdapter(
++              SliverToBoxAdapter(
+                 child: Padding(
+-                  padding: EdgeInsets.all(16.0),
+-                  child: Text('전체 멤버', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), // TODO: 다국어
++                  padding: const EdgeInsets.all(16.0),
++                  child: Text('clubs.memberList.allMembers'.tr(),
++                      style: const TextStyle(
++                          fontSize: 18, fontWeight: FontWeight.bold)),
+                 ),
+               ),
+               StreamBuilder<List<ClubMemberModel>>(
+                 stream: repository.fetchMembers(clubId),
+                 builder: (context, snapshot) {
+                   if (!snapshot.hasData) return const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator()));
+                   final members = snapshot.data!;
+                   return SliverList(
+                     delegate: SliverChildBuilderDelegate(
+                       (context, index) {
+                         final member = members[index];
+                         return ClubMemberCard(member: member, clubId: clubId, clubOwnerId: ownerId);
+                       },
+                       childCount: members.length,
                      ),
                    );
                  },
-               );
+               ),
+             ],
+           );
+         },
+       ),
+     );
+   }
+ }
+\ No newline at end of file
+diff --git a/lib/features/clubs/screens/club_post_detail_screen.dart b/lib/features/clubs/screens/club_post_detail_screen.dart
+index 4779194faeda806acac5c9ffd05551b35c2830af..560aa207b52ae3e903b0ed9f687f62ebc00ec773 100644
+--- a/lib/features/clubs/screens/club_post_detail_screen.dart
++++ b/lib/features/clubs/screens/club_post_detail_screen.dart
+@@ -31,218 +31,226 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
+     _commentController.dispose();
+     super.dispose();
+   }
+ 
+   // [추가] 댓글 전송 함수
+   Future<void> _submitComment() async {
+     final body = _commentController.text.trim();
+     final user = FirebaseAuth.instance.currentUser;
+ 
+     if (body.isEmpty || user == null) return;
+ 
+     setState(() => _isSendingComment = true);
+ 
+     try {
+       final newComment = ClubCommentModel(
+         id: '',
+         userId: user.uid,
+         body: body,
+         createdAt: Timestamp.now(),
+       );
+       await _repository.addClubPostComment(widget.club.id, widget.post.id, newComment);
+       _commentController.clear();
+       FocusScope.of(context).unfocus();
+     } catch (e) {
+       if (mounted) {
+-        ScaffoldMessenger.of(context).showSnackBar(
+-          SnackBar(content: Text('댓글 등록에 실패했습니다: $e'), backgroundColor: Colors.red),
+-        );
++        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
++          content: Text('clubs.postDetail.commentFail'
++              .tr(namedArgs: {'error': e.toString()})),
++          backgroundColor: Colors.red,
++        ));
+       }
+     } finally {
+       if (mounted) {
+         setState(() => _isSendingComment = false);
+       }
+     }
+   }
+ 
+   // [복원] 누락되었던 _formatTimestamp 함수
+   String _formatTimestamp(BuildContext context, Timestamp timestamp) {
+     final now = DateTime.now();
+     final dt = timestamp.toDate();
+     final diff = now.difference(dt);
+ 
+     if (diff.inMinutes < 1) return 'time.now'.tr();
+     if (diff.inHours < 1) return 'time.minutesAgo'.tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+     if (diff.inDays < 1) return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
+     return DateFormat('time.dateFormat'.tr()).format(dt);
+   }
+ 
+   // [복원] 누락되었던 _buildAuthorInfo 헬퍼 함수
+   Widget _buildAuthorInfo(String userId) {
+     final bool isKicked = widget.club.kickedMembers?.contains(userId) ?? false;
+ 
+     // 강퇴된 멤버일 경우, DB를 조회하지 않고 바로 UI를 반환합니다.
+     if (isKicked) {
+-        return const ListTile(
++      return ListTile(
+         contentPadding: EdgeInsets.zero,
+-        leading: CircleAvatar(child: Icon(Icons.person_off_outlined)),
+-        title: Text('탈퇴한 멤버', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+-        subtitle: Text(''),
++        leading: const CircleAvatar(child: Icon(Icons.person_off_outlined)),
++        title: Text('clubs.postCard.withdrawnMember'.tr(),
++            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
++        subtitle: const Text(''),
+       );
+     }
+ 
+     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+       stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+       builder: (context, snapshot) {
+         if (!snapshot.hasData || !snapshot.data!.exists) {
+-          return const ListTile(
++          return ListTile(
+             contentPadding: EdgeInsets.zero,
+-            leading: CircleAvatar(child: Icon(Icons.person_off)),
+-            title: Text('알 수 없는 사용자'),
++            leading: const CircleAvatar(child: Icon(Icons.person_off)),
++            title: Text('clubs.postDetail.unknownUser'.tr()),
+           );
+         }
+         final user = UserModel.fromFirestore(snapshot.data!);
+         return ListTile(
+           contentPadding: EdgeInsets.zero,
+           leading: CircleAvatar(
+             backgroundImage: (user.photoUrl != null && user.photoUrl!.isNotEmpty) ? NetworkImage(user.photoUrl!) : null,
+             child: (user.photoUrl == null || user.photoUrl!.isEmpty) ? const Icon(Icons.person) : null,
+           ),
+           title: Text(user.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
+           subtitle: Text(_formatTimestamp(context, widget.post.createdAt)),
+         );
+       },
+     );
+   }
+   
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(
+-        title: Text('${widget.club.title} 게시판'),
++        title: Text('clubs.postDetail.appBarTitle'
++            .tr(namedArgs: {'title': widget.club.title})),
+       ),
+       body: Column(
+         children: [
+           Expanded(
+             child: CustomScrollView(
+               slivers: [
+                 SliverToBoxAdapter(
+                   child: Padding(
+                     padding: const EdgeInsets.all(16.0),
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: [
+                         _buildAuthorInfo(widget.post.userId),
+                         const Divider(height: 24),
+                         Text(widget.post.body, style: const TextStyle(fontSize: 16, height: 1.5)),
+                         const SizedBox(height: 16),
+                         if (widget.post.imageUrls != null && widget.post.imageUrls!.isNotEmpty)
+                           ...widget.post.imageUrls!.map((url) => Padding(
+                             padding: const EdgeInsets.only(bottom: 8.0),
+                             child: ClipRRect(
+                               borderRadius: BorderRadius.circular(12),
+                               child: Image.network(url),
+                             ),
+                           )),
+                         const Divider(height: 32),
+                       ],
+                     ),
+                   ),
+                 ),
+-                const SliverToBoxAdapter(
++                SliverToBoxAdapter(
+                   child: Padding(
+-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+-                    child: Text('댓글', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
++                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
++                    child: Text('clubs.postDetail.commentsTitle'.tr(),
++                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                   ),
+                 ),
+                 StreamBuilder<List<ClubCommentModel>>(
+                   stream: _repository.getClubPostCommentsStream(widget.club.id, widget.post.id),
+                   builder: (context, snapshot) {
+                     if (!snapshot.hasData) {
+                       return const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator()));
+                     }
+                     final comments = snapshot.data!;
+                     if (comments.isEmpty) {
+-                      return const SliverToBoxAdapter(
++                      return SliverToBoxAdapter(
+                         child: Padding(
+-                          padding: EdgeInsets.all(20.0),
+-                          child: Center(child: Text('아직 댓글이 없습니다.', style: TextStyle(color: Colors.grey))),
++                          padding: const EdgeInsets.all(20.0),
++                          child: Center(
++                              child: Text('clubs.postDetail.noComments'.tr(),
++                                  style: const TextStyle(color: Colors.grey))),
+                         ),
+                       );
+                     }
+                     return SliverList(
+                       delegate: SliverChildBuilderDelegate(
+                         (context, index) => _buildCommentItem(comments[index]),
+                         childCount: comments.length,
+                       ),
+                     );
+                   },
+                 ),
+               ],
+             ),
+           ),
+           // --- 댓글 입력창 ---
+           SafeArea(
+             child: Padding(
+               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+               child: Row(
+                 children: [
+                   Expanded(
+                     child: TextField(
+                       controller: _commentController,
+                       decoration: InputDecoration(
+-                        hintText: '댓글을 입력하세요...',
++                        hintText: 'clubs.postDetail.commentHint'.tr(),
+                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                       ),
+                       textInputAction: TextInputAction.send,
+                       onSubmitted: (_) => _submitComment(),
+                     ),
+                   ),
+                   IconButton(
+                     icon: _isSendingComment ? const SizedBox(width:24, height:24, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.send),
+                     onPressed: _isSendingComment ? null : _submitComment,
+                   ),
+                 ],
+               ),
+             ),
+           ),
+         ],
+       ),
+     );
+   }
+ 
+   Widget _buildCommentItem(ClubCommentModel comment) {
+     return Padding(
+       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+       child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+         stream: FirebaseFirestore.instance.collection('users').doc(comment.userId).snapshots(),
+         builder: (context, snapshot) {
+           if (!snapshot.hasData) return const SizedBox.shrink();
+           final user = (snapshot.data!.exists) ? UserModel.fromFirestore(snapshot.data!) : null;
+ 
+           return Row(
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
+               CircleAvatar(
+                 radius: 18,
+                 backgroundImage: (user?.photoUrl != null && user!.photoUrl!.isNotEmpty) ? NetworkImage(user.photoUrl!) : null,
+                 child: (user == null || user.photoUrl == null || user.photoUrl!.isEmpty) ? const Icon(Icons.person, size: 18) : null,
+               ),
+               const SizedBox(width: 12),
+               Expanded(
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+-                    Text(user?.nickname ?? '탈퇴한 멤버', style: const TextStyle(fontWeight: FontWeight.bold)),
++                    Text(user?.nickname ?? 'clubs.postCard.withdrawnMember'.tr(),
++                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                     const SizedBox(height: 2),
+                     Text(comment.body),
+                   ],
+                 ),
+               ),
+             ],
+           );
+         },
+       ),
+     );
+   }
+ }
+\ No newline at end of file
+diff --git a/lib/features/clubs/screens/clubs_screen.dart b/lib/features/clubs/screens/clubs_screen.dart
+index 1a7871dffd1601966af7e0cc3d61b51c7ad4fbbe..e385f52f48e1d1bdcabc71c12547ce640a329b67 100644
+--- a/lib/features/clubs/screens/clubs_screen.dart
++++ b/lib/features/clubs/screens/clubs_screen.dart
+@@ -1,44 +1,47 @@
+ // lib/features/clubs/screens/clubs_screen.dart
+ 
+ import 'package:bling_app/core/models/club_model.dart';
+ import 'package:bling_app/core/models/user_model.dart';
+ import 'package:bling_app/features/clubs/data/club_repository.dart';
+ import 'package:bling_app/features/clubs/widgets/club_card.dart';
+ import 'package:flutter/material.dart';
++import 'package:easy_localization/easy_localization.dart';
+ 
+ class ClubsScreen extends StatelessWidget {
+   final UserModel? userModel;
+   const ClubsScreen({this.userModel, super.key});
+ 
+   @override
+   Widget build(BuildContext context) {
+     final ClubRepository clubRepository = ClubRepository();
+ 
+     return Scaffold(
+       body: StreamBuilder<List<ClubModel>>(
+         stream: clubRepository.fetchClubs(),
+         builder: (context, snapshot) {
+           if (snapshot.connectionState == ConnectionState.waiting) {
+             return const Center(child: CircularProgressIndicator());
+           }
+           if (snapshot.hasError) {
+-            return Center(child: Text('Error: ${snapshot.error}'));
++            return Center(
++                child: Text('clubs.screen.error'
++                    .tr(namedArgs: {'error': snapshot.error.toString()})));
+           }
+           if (!snapshot.hasData || snapshot.data!.isEmpty) {
+-            return const Center(child: Text('아직 동호회가 없습니다.'));
++            return Center(child: Text('clubs.screen.empty'.tr()));
+           }
+ 
+           final clubs = snapshot.data!;
+ 
+           return ListView.builder(
+             itemCount: clubs.length,
+             itemBuilder: (context, index) {
+               final club = clubs[index];
+               return ClubCard(club: club);
              },
            );
          },
@@ -382,3 +716,881 @@ index d6aed8e730921c3def9375b409d3f3c3bd38d12a..7c01330494ba485d957a26bdbff2a444
      );
    }
  }
+\ No newline at end of file
+diff --git a/lib/features/clubs/screens/create_club_post_screen.dart b/lib/features/clubs/screens/create_club_post_screen.dart
+index b8a88d5a91a4363b3d8b81d5246723f692a5243e..f44abd42fcbebe280abd28055f0bc2a704827e87 100644
+--- a/lib/features/clubs/screens/create_club_post_screen.dart
++++ b/lib/features/clubs/screens/create_club_post_screen.dart
+@@ -1,36 +1,37 @@
+ // lib/features/clubs/screens/create_club_post_screen.dart
+ 
+ import 'dart:io';
+ import 'package:bling_app/core/models/club_post_model.dart';
+ import 'package:bling_app/features/clubs/data/club_repository.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:firebase_storage/firebase_storage.dart';
+ import 'package:flutter/material.dart';
+ import 'package:image_picker/image_picker.dart';
+ import 'package:uuid/uuid.dart';
++import 'package:easy_localization/easy_localization.dart';
+ 
+ class CreateClubPostScreen extends StatefulWidget {
+   final String clubId;
+   const CreateClubPostScreen({super.key, required this.clubId});
+ 
+   @override
+   State<CreateClubPostScreen> createState() => _CreateClubPostScreenState();
+ }
+ 
+ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
+   final _bodyController = TextEditingController();
+   final List<XFile> _images = [];
+   bool _isSaving = false;
+   final ClubRepository _repository = ClubRepository();
+ 
+   @override
+   void dispose() {
+     _bodyController.dispose();
+     super.dispose();
+   }
+ 
+   Future<void> _pickImages() async {
+     if (_images.length >= 5) return;
+     final picker = ImagePicker();
+     final pickedFiles = await picker.pickMultiImage(imageQuality: 70, limit: 5 - _images.length);
+@@ -45,84 +46,92 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
+ 
+     final user = FirebaseAuth.instance.currentUser;
+     if (user == null) {
+       setState(() => _isSaving = false);
+       return;
+     }
+ 
+     try {
+       List<String> imageUrls = [];
+       for (var imageFile in _images) {
+         final fileName = const Uuid().v4();
+         final ref = FirebaseStorage.instance.ref().child('club_posts/${widget.clubId}/$fileName');
+         await ref.putFile(File(imageFile.path));
+         imageUrls.add(await ref.getDownloadURL());
+       }
+ 
+       final newPost = ClubPostModel(
+         id: '', clubId: widget.clubId, userId: user.uid,
+         body: _bodyController.text.trim(), imageUrls: imageUrls,
+         createdAt: Timestamp.now(),
+       );
+ 
+       await _repository.createClubPost(widget.clubId, newPost);
+ 
+       if (mounted) {
+-        ScaffoldMessenger.of(context).showSnackBar(
+-          const SnackBar(content: Text('게시글이 등록되었습니다.'), backgroundColor: Colors.green),
+-        );
++        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
++          content: Text('clubs.createPost.success'.tr()),
++          backgroundColor: Colors.green,
++        ));
+         Navigator.of(context).pop();
+       }
+     } catch (e) {
+       if (mounted) {
+-        ScaffoldMessenger.of(context).showSnackBar(
+-          SnackBar(content: Text('게시글 등록에 실패했습니다: $e'), backgroundColor: Colors.red),
+-        );
++        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
++          content: Text('clubs.createPost.fail'
++              .tr(namedArgs: {'error': e.toString()})),
++          backgroundColor: Colors.red,
++        ));
+       }
+     } finally {
+       if (mounted) setState(() => _isSaving = false);
+     }
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(
+-        title: const Text('새 게시글 작성'), // TODO: 다국어
++        title: Text('clubs.createPost.title'.tr()),
+         actions: [
+-          if (!_isSaving) TextButton(onPressed: _submitPost, child: const Text('등록'))
++          if (!_isSaving)
++            TextButton(
++                onPressed: _submitPost,
++                child: Text('clubs.createPost.submit'.tr()))
+         ],
+       ),
+       body: Stack(
+         children: [
+           Padding(
+             padding: const EdgeInsets.all(16.0),
+             child: Column(
+               children: [
+                 TextField(
+                   controller: _bodyController,
+-                  decoration: const InputDecoration(hintText: '내용을 입력하세요...', border: OutlineInputBorder()),
++                  decoration: InputDecoration(
++                      hintText: 'clubs.createPost.bodyHint'.tr(),
++                      border: const OutlineInputBorder()),
+                   maxLines: 8,
+                 ),
+                 const SizedBox(height: 16),
+                 SizedBox(
+                   height: 100,
+                   child: ListView(
+                     scrollDirection: Axis.horizontal,
+                     children: [
+                       ..._images.map((xfile) => Padding(
+                         padding: const EdgeInsets.only(right: 8.0),
+                         child: ClipRRect(
+                           borderRadius: BorderRadius.circular(8.0),
+                           child: Image.file(File(xfile.path), width: 100, height: 100, fit: BoxFit.cover),
+                         ),
+                       )),
+                       if (_images.length < 5)
+                         GestureDetector(
+                           onTap: _pickImages,
+                           child: Container(
+                             width: 100, height: 100,
+                             decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
+                             child: const Icon(Icons.add_a_photo_outlined, color: Colors.grey),
+                           ),
+                         ),
+                     ],
+diff --git a/lib/features/clubs/screens/create_club_screen.dart b/lib/features/clubs/screens/create_club_screen.dart
+index 331f88cc69dd2a6116b009b84231726cbcce3fe3..04e365392bcf926f1fbea5be3a4d503d299ccb82 100644
+--- a/lib/features/clubs/screens/create_club_screen.dart
++++ b/lib/features/clubs/screens/create_club_screen.dart
+@@ -51,211 +51,210 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
+       'baking',
+       'coffee',
+       'wine',
+       'tea'
+     ],
+     'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
+     'category_growth': ['reading', 'investing', 'language', 'coding'],
+     'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
+   };
+ 
+   @override
+   void dispose() {
+     _titleController.dispose();
+     _descriptionController.dispose();
+     super.dispose();
+   }
+ 
+   // [수정] 동호회 생성 로직 구현
+ 
+   Future<void> _createClub() async {
+     if (!_formKey.currentState!.validate() || _isSaving) {
+       return;
+     }
+     if (_selectedInterests.isEmpty) {
+       ScaffoldMessenger.of(context).showSnackBar(
+-        SnackBar(content: Text('관심사를 1개 이상 선택해주세요.')), // TODO: 다국어
++        SnackBar(content: Text('clubs.createClub.selectAtLeastOneInterest'.tr())),
+       );
+       return;
+     }
+ 
+     setState(() => _isSaving = true);
+ 
+     try {
+       final newClub = ClubModel(
+         id: '', // ID는 Firestore에서 자동으로 생성됩니다.
+         title: _titleController.text.trim(),
+         description: _descriptionController.text.trim(),
+         ownerId: widget.userModel.uid,
+         location: widget.userModel.locationParts?['kec'] ??
+             'Unknown', // 사용자의 Kecamatan 정보 활용
+         // interests: _selectedInterests, // Removed or renamed as per ClubModel definition
+         isPrivate: _isPrivate,
+         createdAt: Timestamp.now(),
+         membersCount: 1, // 개설자는 자동으로 멤버 1명이 됩니다.
+         mainCategory: _selectedInterests.isNotEmpty
+             ? _interestCategories.entries
+                 .firstWhere(
+                   (entry) => entry.value.contains(_selectedInterests.first),
+                   orElse: () => _interestCategories.entries.first,
+                 )
+                 .key
+             : '', // 첫 번째 선택된 관심사의 카테고리, 없으면 빈 문자열
+         interestTags: _selectedInterests, // 선택된 관심사 리스트
+       );
+ 
+       await _repository.createClub(newClub);
+ 
+       if (mounted) {
+-        ScaffoldMessenger.of(context).showSnackBar(
+-          SnackBar(
+-              content: Text('동호회가 성공적으로 만들어졌습니다!'),
+-              backgroundColor: Colors.green),
+-        );
++        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
++          content: Text('clubs.createClub.success'.tr()),
++          backgroundColor: Colors.green,
++        ));
+         Navigator.of(context).pop();
+       }
+     } catch (e) {
+       if (mounted) {
+-        ScaffoldMessenger.of(context).showSnackBar(
+-          SnackBar(
+-              content: Text('동호회 생성에 실패했습니다: $e'), backgroundColor: Colors.red),
+-        );
++        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
++          content: Text('clubs.createClub.fail'
++              .tr(namedArgs: {'error': e.toString()})),
++          backgroundColor: Colors.red,
++        ));
+       }
+     } finally {
+       if (mounted) {
+         setState(() => _isSaving = false);
+       }
+     }
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(
+-        title: Text('새 동호회 만들기'),
++        title: Text('clubs.createClub.title'.tr()),
+         actions: [
+           // [수정] _isSaving 상태에 따라 버튼 활성화/비활성화
+           if (!_isSaving)
+             TextButton(
+               onPressed: _createClub,
+-              child: Text('완료'),
++              child: Text('common.done'.tr()),
+             )
+         ],
+       ),
+       body: Stack(
+         children: [
+           Form(
+             key: _formKey,
+             child: ListView(
+               padding: const EdgeInsets.all(16.0),
+               children: [
+                 TextFormField(
+                   controller: _titleController,
+                   decoration: InputDecoration(
+-                    labelText: '동호회 이름',
++                    labelText: 'clubs.createClub.nameLabel'.tr(),
+                     border: OutlineInputBorder(),
+                   ),
+                   validator: (value) {
+                     if (value == null || value.trim().isEmpty) {
+-                      return '동호회 이름을 입력해주세요.';
++                      return 'clubs.createClub.nameError'.tr();
+                     }
+                     return null;
+                   },
+                 ),
+                 const SizedBox(height: 16),
+                 TextFormField(
+                   controller: _descriptionController,
+                   decoration: InputDecoration(
+-                    labelText: '동호회 소개',
++                    labelText: 'clubs.createClub.descriptionLabel'.tr(),
+                     border: OutlineInputBorder(),
+                   ),
+                   maxLines: 5,
+                   validator: (value) {
+                     if (value == null || value.trim().isEmpty) {
+-                      return '동호회 소개를 입력해주세요.';
++                      return 'clubs.createClub.descriptionError'.tr();
+                     }
+                     return null;
+                   },
+                 ),
+                 const SizedBox(height: 24),
+                 Row(
+                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                   children: [
+                     Text("interests.title".tr(),
+                         style: const TextStyle(
+                             fontWeight: FontWeight.bold, fontSize: 16)),
+                     Text('${_selectedInterests.length}/3',
+                         style: const TextStyle(
+                             fontWeight: FontWeight.bold,
+                             color: Colors.teal)), // 동호회는 최대 3개로 제한
+                   ],
+                 ),
+                 const SizedBox(height: 8),
+                 ..._interestCategories.entries.map((entry) {
+                   final categoryKey = entry.key;
+                   final interestKeys = entry.value;
+                   return ExpansionTile(
+                     title: Text("interests.$categoryKey".tr(),
+                         style: const TextStyle(fontWeight: FontWeight.w500)),
+                     children: [
+                       Padding(
+                         padding: const EdgeInsets.all(8.0),
+                         child: Wrap(
+                           spacing: 8.0,
+                           runSpacing: 4.0,
+                           children: interestKeys.map((interestKey) {
+                             final isSelected =
+                                 _selectedInterests.contains(interestKey);
+                             return FilterChip(
+                               label: Text("interests.items.$interestKey".tr()),
+                               selected: isSelected,
+                               onSelected: (selected) {
+                                 setState(() {
+                                   if (selected) {
+                                     if (_selectedInterests.length < 3) {
+                                       // 최대 3개 제한
+                                       _selectedInterests.add(interestKey);
+                                     } else {
+                                       ScaffoldMessenger.of(context)
+                                           .showSnackBar(
+                                         SnackBar(
+-                                            content: Text(
+-                                                '관심사는 최대 3개까지 선택할 수 있습니다.')), // TODO: 다국어
++                                            content: Text('clubs.createClub.maxInterests'.tr())),
+                                       );
+                                     }
+                                   } else {
+                                     _selectedInterests.remove(interestKey);
+                                   }
+                                 });
+                               },
+                             );
+                           }).toList(),
+                         ),
+                       )
+                     ],
+                   );
+                 }),
+                 const SizedBox(height: 24),
+                 SwitchListTile(
+-                  title: Text('비공개 동호회'),
+-                  subtitle: Text('초대를 통해서만 가입할 수 있습니다.'),
++                  title: Text('clubs.createClub.privateClub'.tr()),
++                  subtitle: Text('clubs.createClub.privateDescription'.tr()),
+                   value: _isPrivate,
+                   onChanged: (value) {
+                     setState(() {
+                       _isPrivate = value;
+                     });
+                   },
+                 ),
+               ],
+             ),
+           ),
+           // 로딩 중일 때 화면 전체에 로딩 인디케이터 표시
+           if (_isSaving)
+             Container(
+               color: Colors.black54,
+               child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+             ),
+         ],
+       ),
+     );
+   }
+ }
+diff --git a/lib/features/clubs/widgets/club_card.dart b/lib/features/clubs/widgets/club_card.dart
+index cc75e3ff26f30a81e551badb50e1dec10b9cfab8..fd13854d6b27657ffd75cd81bcd0be284b964695 100644
+--- a/lib/features/clubs/widgets/club_card.dart
++++ b/lib/features/clubs/widgets/club_card.dart
+@@ -1,69 +1,71 @@
+ // lib/features/clubs/widgets/club_card.dart
+ 
+ import 'package:bling_app/core/models/club_model.dart';
+ import 'package:bling_app/features/clubs/screens/club_detail_screen.dart';
+ import 'package:flutter/material.dart';
++import 'package:easy_localization/easy_localization.dart';
+ 
+ class ClubCard extends StatelessWidget {
+   final ClubModel club;
+   const ClubCard({super.key, required this.club});
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Card(
+       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+       elevation: 2,
+       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+       child: InkWell(
+         onTap: () {
+           // 탭하면 ClubDetailScreen으로 이동하며, 선택된 club 정보를 전달합니다.
+           Navigator.of(context).push(
+             MaterialPageRoute(builder: (_) => ClubDetailScreen(club: club)),
+           );
+         },
+         borderRadius: BorderRadius.circular(12),
+         child: Padding(
+           padding: const EdgeInsets.all(16.0),
+           child: Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
+               Text(
+                 club.title,
+                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+               ),
+               const SizedBox(height: 8),
+               Text(
+                 club.description,
+                 maxLines: 2,
+                 overflow: TextOverflow.ellipsis,
+                 style: TextStyle(color: Colors.grey[700]),
+               ),
+               const Divider(height: 24),
+               Row(
+                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                 children: [
+                   // 멤버 수
+                   Row(
+                     children: [
+                       Icon(Icons.group_outlined, size: 16, color: Colors.grey[600]),
+                       const SizedBox(width: 4),
+-                      Text('${club.membersCount} members'), // TODO: 다국어
++                      Text('clubs.card.membersCount'
++                          .tr(namedArgs: {'count': club.membersCount.toString()})),
+                     ],
+                   ),
+                   // 활동 지역
+                   Row(
+                     children: [
+                       Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
+                       const SizedBox(width: 4),
+                       Text(club.location),
+                     ],
+                   ),
+                 ],
+               )
+             ],
+           ),
+         ),
+       ),
+     );
+   }
+ }
+\ No newline at end of file
+diff --git a/lib/features/clubs/widgets/club_member_card.dart b/lib/features/clubs/widgets/club_member_card.dart
+index 42534c71bd64d9e846b66867ab6773398efdd59d..ab9119daa929dcb8a173556abd3082fa5af71822 100644
+--- a/lib/features/clubs/widgets/club_member_card.dart
++++ b/lib/features/clubs/widgets/club_member_card.dart
+@@ -1,111 +1,124 @@
+ // lib/features/clubs/widgets/club_member_card.dart
+ 
+ import 'package:bling_app/core/models/club_member_model.dart';
+ import 'package:bling_app/core/models/user_model.dart';
+ import 'package:bling_app/features/clubs/data/club_repository.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:flutter/material.dart';
++import 'package:easy_localization/easy_localization.dart';
+ 
+ // [수정] StatelessWidget -> StatefulWidget으로 변경
+ class ClubMemberCard extends StatefulWidget {
+   final ClubMemberModel member;
+   final String clubId;
+   final String clubOwnerId;
+   const ClubMemberCard({super.key, required this.member, required this.clubId, required this.clubOwnerId});
+ 
+   @override
+   State<ClubMemberCard> createState() => _ClubMemberCardState();
+ }
+ 
+ class _ClubMemberCardState extends State<ClubMemberCard> {
+   final ClubRepository _repository = ClubRepository();
+ 
+   // 멤버 강퇴 로직
+   Future<void> _kickMember(BuildContext context, String memberId, String memberName) async {
+     final bool? confirmed = await showDialog<bool>(
+       context: context,
+       builder: (context) {
+         return AlertDialog(
+-          title: Text('$memberName 님을 강퇴하시겠습니까?'), // TODO: 다국어
+-          content: const Text('강퇴된 멤버는 동호회 관련 활동에 더 이상 참여할 수 없습니다.'), // TODO: 다국어
++          title: Text('clubs.memberCard.kickConfirmTitle'
++              .tr(namedArgs: {'memberName': memberName})),
++          content: Text('clubs.memberCard.kickConfirmContent'.tr()),
+           actions: [
+-            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('취소')),
+-            TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('강퇴하기', style: TextStyle(color: Colors.red))),
++            TextButton(
++                onPressed: () => Navigator.of(context).pop(false),
++                child: Text('common.cancel'.tr())),
++            TextButton(
++                onPressed: () => Navigator.of(context).pop(true),
++                child: Text('clubs.memberCard.kick'.tr(),
++                    style: const TextStyle(color: Colors.red))),
+           ],
+         );
+       },
+     );
+ 
+     if (confirmed == true) {
+       try {
+         await _repository.removeMember(widget.clubId, memberId);
+         
+         // [핵심] SnackBar를 호출하기 전에, 위젯이 여전히 화면에 있는지(mounted) 확인합니다.
+         if (mounted) {
+-          ScaffoldMessenger.of(context).showSnackBar(
+-            SnackBar(content: Text('$memberName 님을 강퇴했습니다.'), backgroundColor: Colors.green),
+-          );
++          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
++            content: Text('clubs.memberCard.kickedSuccess'
++                .tr(namedArgs: {'memberName': memberName})),
++            backgroundColor: Colors.green,
++          ));
+         }
+       } catch (e) {
+         if (mounted) {
+-          ScaffoldMessenger.of(context).showSnackBar(
+-            SnackBar(content: Text('멤버 강퇴에 실패했습니다: $e'), backgroundColor: Colors.red),
+-          );
++          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
++            content: Text('clubs.memberCard.kickFail'
++                .tr(namedArgs: {'error': e.toString()})),
++            backgroundColor: Colors.red,
++          ));
+         }
+       }
+     }
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+     final member = widget.member;
+     final clubOwnerId = widget.clubOwnerId;
+ 
+     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+       future: FirebaseFirestore.instance.collection('users').doc(member.userId).get(),
+       builder: (context, snapshot) {
+         if (!snapshot.hasData) {
+           return const Card(child: ListTile(title: Text('...')));
+         }
+         final user = UserModel.fromFirestore(snapshot.data!);
+ 
+         final bool isOwner = user.uid == clubOwnerId;
+         final bool amIOwner = currentUserId == clubOwnerId;
+ 
+         return Card(
+           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+           child: ListTile(
+             leading: CircleAvatar(
+               backgroundImage: (user.photoUrl != null && user.photoUrl!.isNotEmpty) ? NetworkImage(user.photoUrl!) : null,
+               child: (user.photoUrl == null || user.photoUrl!.isEmpty) ? const Icon(Icons.person) : null,
+             ),
+             title: Row(
+               children: [
+                 Text(user.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
+                 const SizedBox(width: 8),
+                 if (isOwner) const Icon(Icons.shield_moon, color: Colors.amber, size: 16),
+               ],
+             ),
+             trailing: (amIOwner && !isOwner)
+                 ? PopupMenuButton<String>(
+                     onSelected: (value) {
+                       if (value == 'kick') {
+                         _kickMember(context, member.userId, user.nickname);
+                       }
+                     },
+                     itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+-                      const PopupMenuItem<String>(value: 'kick', child: Text('강퇴하기')),
++                      PopupMenuItem<String>(
++                          value: 'kick',
++                          child: Text('clubs.memberCard.kick'.tr())),
+                     ],
+                   )
+                 : null,
+             onTap: () {
+               // TODO: 멤버 프로필 보기 화면으로 이동
+             },
+           ),
+         );
+       },
+     );
+   }
+ }
+\ No newline at end of file
+diff --git a/lib/features/clubs/widgets/club_post_card.dart b/lib/features/clubs/widgets/club_post_card.dart
+index e6d8d1733956476e6a4918f4fa15697449cb0629..53be72de5782006ff77c1ad9e459a0f6315d1454 100644
+--- a/lib/features/clubs/widgets/club_post_card.dart
++++ b/lib/features/clubs/widgets/club_post_card.dart
+@@ -13,131 +13,135 @@ import 'package:easy_localization/easy_localization.dart';
+ class ClubPostCard extends StatelessWidget {
+   final ClubPostModel post;
+   final ClubModel club;
+   const ClubPostCard({super.key, required this.post, required this.club});
+ 
+   String _formatTimestamp(BuildContext context, Timestamp timestamp) {
+     final now = DateTime.now();
+     final dt = timestamp.toDate();
+     final diff = now.difference(dt);
+ 
+     if (diff.inMinutes < 1) return 'time.now'.tr();
+     if (diff.inHours < 1) {
+       return 'time.minutesAgo'
+           .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+     }
+     if (diff.inDays < 1) {
+       return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
+     }
+     return DateFormat('time.dateFormat'.tr()).format(dt);
+   }
+ 
+   Future<void> _deletePost(BuildContext context) async {
+     final bool? confirmed = await showDialog<bool>(
+       context: context,
+       builder: (context) => AlertDialog(
+-        title: const Text('게시글 삭제'),
+-        content: const Text('이 게시글을 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'),
++        title: Text('clubs.postCard.deleteTitle'.tr()),
++        content: Text('clubs.postCard.deleteContent'.tr()),
+         actions: [
+           TextButton(
+               onPressed: () => Navigator.of(context).pop(false),
+-              child: const Text('취소')),
++              child: Text('common.cancel'.tr())),
+           TextButton(
+               onPressed: () => Navigator.of(context).pop(true),
+-              child: const Text('삭제', style: TextStyle(color: Colors.red))),
++              child: Text('common.delete'.tr(),
++                  style: const TextStyle(color: Colors.red))),
+         ],
+       ),
+     );
+ 
+     if (confirmed == true && context.mounted) {
+       try {
+         await ClubRepository().deleteClubPost(post.clubId, post.id);
+-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+-            content: Text('게시글이 삭제되었습니다.'), backgroundColor: Colors.green));
++        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
++            content: Text('clubs.postCard.deleteSuccess'.tr()),
++            backgroundColor: Colors.green));
+       } catch (e) {
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+-            content: Text('삭제에 실패했습니다: $e'), backgroundColor: Colors.red));
++            content: Text('clubs.postCard.deleteFail'
++                .tr(namedArgs: {'error': e.toString()})),
++            backgroundColor: Colors.red));
+       }
+     }
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+     final clubOwnerId = club.ownerId;
+ 
+     // StreamBuilder를 사용하기 전에 강퇴 여부를 먼저 확인합니다.
+     final isKicked = club.kickedMembers?.contains(post.userId) ?? false;
+ 
+     if (isKicked) {
+       // V V V --- [수정] '탈퇴한 멤버' 카드에 InkWell을 추가하여 탭 가능하게 만듭니다 --- V V V
+       return Card(
+         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+         elevation: 1,
+         clipBehavior: Clip.antiAlias,
+         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+         color: Colors.grey.shade50,
+         child: InkWell(
+           onTap: () {
+             // 탭하면 상세 화면으로 이동합니다.
+             Navigator.of(context).push(
+               MaterialPageRoute(
+                 builder: (_) => ClubPostDetailScreen(post: post, club: club),
+               ),
+             );
+           },
+           child: ListTile(
+             leading: const CircleAvatar(
+               backgroundColor: Colors.white,
+               child: Icon(Icons.person_off_outlined, color: Colors.grey),
+             ),
+-            title: const Text('탈퇴한 멤버',
++            title: Text('clubs.postCard.withdrawnMember'.tr(),
+                 style:
+-                    TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
++                    const TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+             subtitle:
+                 Text(post.body, maxLines: 2, overflow: TextOverflow.ellipsis),
+             trailing: (currentUserId == clubOwnerId)
+                 ? IconButton(
+                     icon: const Icon(Icons.delete_outline, color: Colors.grey),
+-                    tooltip: '게시글 삭제',
++                    tooltip: 'clubs.postCard.deleteTooltip'.tr(),
+                     onPressed: () => _deletePost(context),
+                   )
+                 : null,
+           ),
+         ),
+       );
+     }
+ 
+     // 강퇴되지 않은 멤버일 경우에만, 기존처럼 작성자 정보를 불러옵니다.
+     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+       stream: FirebaseFirestore.instance
+           .collection('users')
+           .doc(post.userId)
+           .snapshots(),
+       builder: (context, snapshot) {
+         if (!snapshot.hasData || !snapshot.data!.exists) {
+-          return const Card(child: ListTile(title: Text('사용자 정보 로딩중...')));
++          return Card(child: ListTile(title: Text('clubs.postCard.loadingUser'.tr())));
+         }
+ 
+         final user = UserModel.fromFirestore(snapshot.data!);
+         final amIOwner = currentUserId == clubOwnerId;
+         final isMyPost = currentUserId == post.userId;
+ 
+         return Card(
+           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+           elevation: 1,
+           clipBehavior: Clip.antiAlias,
+           shape:
+               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+           child: InkWell(
+             onTap: () {
+               Navigator.of(context).push(
+                 MaterialPageRoute(
+                   builder: (_) => ClubPostDetailScreen(post: post, club: club),
+                 ),
+               );
+             },
+             child: Padding(
+               padding: const EdgeInsets.all(12.0),
+               child: Column(
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                 children: [
+@@ -154,52 +158,53 @@ class ClubPostCard extends StatelessWidget {
+                             : null,
+                       ),
+                       const SizedBox(width: 12),
+                       Expanded(
+                         child: Column(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                           children: [
+                             Text(user.nickname,
+                                 style: const TextStyle(
+                                     fontWeight: FontWeight.bold)),
+                             Text(_formatTimestamp(context, post.createdAt),
+                                 style: TextStyle(
+                                     fontSize: 12, color: Colors.grey[600])),
+                           ],
+                         ),
+                       ),
+                       if (amIOwner || isMyPost)
+                         PopupMenuButton<String>(
+                           onSelected: (value) {
+                             if (value == 'delete') {
+                               _deletePost(context);
+                             }
+                           },
+                           itemBuilder: (BuildContext context) =>
+                               <PopupMenuEntry<String>>[
+-                            const PopupMenuItem<String>(
+-                                value: 'delete', child: Text('삭제하기')),
++                            PopupMenuItem<String>(
++                                value: 'delete',
++                                child: Text('common.delete'.tr())),
+                           ],
+                         ),
+                     ],
+                   ),
+                   const SizedBox(height: 12),
+                   Text(post.body,
+                       style: const TextStyle(fontSize: 15, height: 1.4)),
+                   if (post.imageUrls != null && post.imageUrls!.isNotEmpty)
+                     Padding(
+                       padding: const EdgeInsets.only(top: 12.0),
+                       child: ClipRRect(
+                         borderRadius: BorderRadius.circular(8.0),
+                         child: Image.network(post.imageUrls!.first,
+                             fit: BoxFit.cover,
+                             width: double.infinity,
+                             height: 200),
+                       ),
+                     ),
+                   const Divider(height: 24),
+                   Row(
+                     mainAxisAlignment: MainAxisAlignment.start,
+                     children: [
+                       TextButton.icon(
+                         onPressed: () {},
+                         icon: const Icon(Icons.favorite_border, size: 18),
+diff --git a/lib/features/clubs/widgets/club_post_list.dart b/lib/features/clubs/widgets/club_post_list.dart
+index 0f5baffec4db61b8611405934c3cd4db65ed0b5f..b16dfae9cae543bb000de82b48fb5fb80fed6aa6 100644
+--- a/lib/features/clubs/widgets/club_post_list.dart
++++ b/lib/features/clubs/widgets/club_post_list.dart
+@@ -1,63 +1,64 @@
+ // lib/features/clubs/widgets/club_post_list.dart
+ 
+ import 'package:bling_app/core/models/club_model.dart'; // [추가]
+ import 'package:bling_app/core/models/club_post_model.dart';
+ import 'package:bling_app/features/clubs/data/club_repository.dart';
+ import 'package:flutter/material.dart';
++import 'package:easy_localization/easy_localization.dart';
+ import '../screens/create_club_post_screen.dart';
+ import 'club_post_card.dart';
+ 
+ class ClubPostList extends StatelessWidget {
+   final ClubModel club; // [수정] clubId와 ownerId 대신 club 객체 전체를 받습니다.
+   const ClubPostList({super.key, required this.club});
+ 
+   @override
+   Widget build(BuildContext context) {
+     final ClubRepository repository = ClubRepository();
+     
+     return Scaffold(
+       body: StreamBuilder<List<ClubPostModel>>(
+         stream: repository.getClubPostsStream(club.id),
+         builder: (context, snapshot) {
+           if (snapshot.connectionState == ConnectionState.waiting) {
+             return const Center(child: CircularProgressIndicator());
+           }
+           if (!snapshot.hasData || snapshot.data!.isEmpty) {
+-            return const Center(child: Text('아직 게시글이 없습니다. 첫 글을 작성해보세요!'));
++            return Center(child: Text('clubs.postList.empty'.tr()));
+           }
+ 
+           final posts = snapshot.data!;
+           return ListView.builder(
+             padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 80.0),
+             itemCount: posts.length,
+             itemBuilder: (context, index) {
+               final post = posts[index];
+               // [수정] 각 게시글 카드에 club 객체를 전달합니다.
+               return ClubPostCard(post: post, club: club);
+             },
+           );
+         },
+       ),
+       floatingActionButton: StreamBuilder<bool>(
+         stream: repository.isCurrentUserMember(club.id),
+         builder: (context, snapshot) {
+           final isMember = snapshot.data ?? false;
+           if (isMember) {
+             return FloatingActionButton(
+               heroTag: 'club_post_fab',
+               onPressed: () {
+                 Navigator.of(context).push(
+                   MaterialPageRoute(builder: (_) => CreateClubPostScreen(clubId: club.id)),
+                 );
+               },
+               
+-              tooltip: '글쓰기',
++              tooltip: 'clubs.postList.writeTooltip'.tr(),
+               child: const Icon(Icons.edit),
+             );
+           }
+           return const SizedBox.shrink();
+         },
+       ),
+     );
+   }
+ }
+\ No newline at end of file

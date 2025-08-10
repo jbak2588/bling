@@ -142,32 +142,37 @@ Future<void> sendMessage(String chatId, String text, {String? otherUserId, List<
     await batch.commit();
   }
 
-  Future<void> markMessagesAsRead(String chatId, String otherUserId) async {
+    // V V V --- [수정] 복합 색인이 필요 없는, 더 효율적인 읽음 처리 함수 --- V V V
+  Future<void> markMessagesAsRead(String chatId) async {
     final myUid = _auth.currentUser?.uid;
-    if (myUid == null || otherUserId.isEmpty) return;
+    if (myUid == null) return;
 
-    await _firestore
-        .collection('chats')
-        .doc(chatId)
-        .update({'unreadCounts.$myUid': 0});
+    final chatRoomRef = _firestore.collection('chats').doc(chatId);
 
-    final messagesQuery = _firestore
-        .collection('chats')
-        .doc(chatId)
+    // 1. 나의 '안 읽은 메시지 수'를 0으로 초기화합니다. (이 부분은 동일)
+    await chatRoomRef.update({'unreadCounts.$myUid': 0});
+
+    // 2. 이 채팅방의 최근 50개 메시지를 가져옵니다.
+    final messagesQuery = chatRoomRef
         .collection('messages')
-        .where('senderId', isEqualTo: otherUserId);
+        .orderBy('timestamp', descending: true)
+        .limit(50);
 
-    final unreadMessages = await messagesQuery.get();
-
-    WriteBatch batch = _firestore.batch();
-    for (var doc in unreadMessages.docs) {
+    final unreadMessagesSnapshot = await messagesQuery.get();
+    
+    // 3. 가져온 메시지들을 앱(클라이언트)에서 직접 확인하여,
+    //    내가 보내지 않았고 아직 내가 읽지 않은 메시지만 골라냅니다.
+    final batch = _firestore.batch();
+    for (var doc in unreadMessagesSnapshot.docs) {
       final message = ChatMessageModel.fromFirestore(doc);
-      if (!message.readBy.contains(myUid)) {
+      if (message.senderId != myUid && !message.readBy.contains(myUid)) {
+        // 4. 골라낸 메시지들의 'readBy' 목록에 내 ID를 추가하는 작업을 batch에 담습니다.
         batch.update(doc.reference, {
           'readBy': FieldValue.arrayUnion([myUid])
         });
       }
     }
+    // 5. 모든 업데이트를 한 번에 실행합니다.
     await batch.commit();
   }
 }
