@@ -73,7 +73,8 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
     }
     if (_selectedInterests.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('관심사를 1개 이상 선택해주세요.')), // TODO: 다국어
+        SnackBar(
+            content: Text('clubs.createClub.selectAtLeastOneInterest'.tr())),
       );
       return;
     }
@@ -106,19 +107,19 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
       await _repository.createClub(newClub);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('동호회가 성공적으로 만들어졌습니다!'),
-              backgroundColor: Colors.green),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('clubs.createClub.success'.tr()),
+          backgroundColor: Colors.green,
+        ));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('동호회 생성에 실패했습니다: $e'), backgroundColor: Colors.red),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              'clubs.createClub.fail'.tr(namedArgs: {'error': e.toString()})),
+          backgroundColor: Colors.red,
+        ));
       }
     } finally {
       if (mounted) {
@@ -131,13 +132,13 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('새 동호회 만들기'),
+        title: Text('clubs.createClub.title'.tr()),
         actions: [
           // [수정] _isSaving 상태에 따라 버튼 활성화/비활성화
           if (!_isSaving)
             TextButton(
               onPressed: _createClub,
-              child: Text('완료'),
+              child: Text('common.done'.tr()),
             )
         ],
       ),
@@ -151,12 +152,12 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: '동호회 이름',
+                    labelText: 'clubs.createClub.nameLabel'.tr(),
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return '동호회 이름을 입력해주세요.';
+                      return 'clubs.createClub.nameError'.tr();
                     }
                     return null;
                   },
@@ -165,13 +166,13 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: '동호회 소개',
+                    labelText: 'clubs.createClub.descriptionLabel'.tr(),
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 5,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return '동호회 소개를 입력해주세요.';
+                      return 'clubs.createClub.descriptionError'.tr();
                     }
                     return null;
                   },
@@ -219,7 +220,8 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                                           .showSnackBar(
                                         SnackBar(
                                             content: Text(
-                                                '관심사는 최대 3개까지 선택할 수 있습니다.')), // TODO: 다국어
+                                                'clubs.createClub.maxInterests'
+                                                    .tr())),
                                       );
                                     }
                                   } else {
@@ -236,8 +238,8 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 }),
                 const SizedBox(height: 24),
                 SwitchListTile(
-                  title: Text('비공개 동호회'),
-                  subtitle: Text('초대를 통해서만 가입할 수 있습니다.'),
+                  title: Text('clubs.createClub.privateClub'.tr()),
+                  subtitle: Text('clubs.createClub.privateDescription'.tr()),
                   value: _isPrivate,
                   onChanged: (value) {
                     setState(() {
@@ -252,7 +254,8 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
           if (_isSaving)
             Container(
               color: Colors.black54,
-              child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+              child: const Center(
+                  child: CircularProgressIndicator(color: Colors.white)),
             ),
         ],
       ),

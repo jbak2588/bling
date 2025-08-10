@@ -3,6 +3,7 @@
 import 'package:bling_app/core/models/club_model.dart';
 import 'package:bling_app/features/clubs/screens/club_detail_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ClubCard extends StatelessWidget {
   final ClubModel club;
@@ -29,7 +30,8 @@ class ClubCard extends StatelessWidget {
             children: [
               Text(
                 club.title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
@@ -45,15 +47,18 @@ class ClubCard extends StatelessWidget {
                   // 멤버 수
                   Row(
                     children: [
-                      Icon(Icons.group_outlined, size: 16, color: Colors.grey[600]),
+                      Icon(Icons.group_outlined,
+                          size: 16, color: Colors.grey[600]),
                       const SizedBox(width: 4),
-                      Text('${club.membersCount} members'), // TODO: 다국어
+                      Text('clubs.card.membersCount'.tr(
+                          namedArgs: {'count': club.membersCount.toString()})),
                     ],
                   ),
                   // 활동 지역
                   Row(
                     children: [
-                      Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
+                      Icon(Icons.location_on_outlined,
+                          size: 16, color: Colors.grey[600]),
                       const SizedBox(width: 4),
                       Text(club.location),
                     ],

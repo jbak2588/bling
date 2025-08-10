@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/clubs/screens/club_member_list.dart';
 
-
 class ClubDetailScreen extends StatefulWidget {
   final ClubModel club;
   const ClubDetailScreen({super.key, required this.club});
@@ -35,7 +34,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     // [수정] 탭 개수를 2개에서 3개로 변경합니다.
     _tabController = TabController(length: 3, vsync: this);
   }
- 
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -45,12 +44,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   Future<void> _joinClub() async {
     if (_currentUserId == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("로그인이 필요합니다.")));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('main.errors.loginRequired'.tr())));
       }
       return;
     }
-    
+
     // [추가] 사용자 피드백을 위한 스낵바 표시 함수
     void showSnackbar(String message, {bool isError = false}) {
       if (mounted) {
@@ -72,25 +71,25 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         userId: _currentUserId!,
         joinedAt: Timestamp.now(),
       );
-      
+
       // Repository의 addMember 함수는 이제 'joined' 또는 'pending' 문자열을 반환합니다.
       final result = await _repository.addMember(widget.club.id, newMember);
 
       if (result == 'joined') {
-        showSnackbar("'${widget.club.title}' 동호회에 가입했습니다!"); // TODO: 다국어
+        showSnackbar(
+            'clubs.detail.joined'.tr(namedArgs: {'title': widget.club.title}));
       } else if (result == 'pending') {
-        showSnackbar("방장의 승인을 기다리고 있습니다. 승인 후 활동할 수 있습니다."); // TODO: 다국어
+        showSnackbar('clubs.detail.pendingApproval'.tr());
       }
-
     } catch (e) {
-      showSnackbar("가입 신청에 실패했습니다: $e", isError: true); // TODO: 다국어
+      showSnackbar(
+          'clubs.detail.joinFail'.tr(namedArgs: {'error': e.toString()}),
+          isError: true);
     } finally {
       // [추가] 로딩 상태 해제
-       if (mounted) setState(() { /* _isLoading = false; */ });
+      if (mounted) setState(() {/* _isLoading = false; */});
     }
   }
-
-
 
   Future<void> _navigateToGroupChat() async {
     final chatRoom = await _chatService.getChatRoom(widget.club.id);
@@ -115,12 +114,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         title: Text(widget.club.title),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: '정보'), // TODO: 다국어
-            Tab(text: '게시판'), // TODO: 다국어
-            // V V V --- [추가] '멤버' 탭 --- V V V
-            Tab(text: '멤버'), // TODO: 다국어
-            // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+          tabs: [
+            Tab(text: 'clubs.detail.tabs.info'.tr()),
+            Tab(text: 'clubs.detail.tabs.board'.tr()),
+            Tab(text: 'clubs.detail.tabs.members'.tr()),
           ],
         ),
       ),
@@ -132,12 +129,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           }
           final club = snapshot.data!;
 
-         return TabBarView(
+          return TabBarView(
             controller: _tabController,
-             children: [
+            children: [
               _buildInfoTab(context, club),
               // V V V --- [수정] ClubPostList에 ownerId를 전달합니다 --- V V V
-             ClubPostList(club: club),
+              ClubPostList(club: club),
               // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
               ClubMemberList(clubId: club.id, ownerId: club.ownerId),
             ],
@@ -153,16 +150,16 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             return FloatingActionButton.extended(
               heroTag: 'club_chat_fab',
               onPressed: _navigateToGroupChat,
-              label: Text('채팅 참여하기'),
+              label: Text('clubs.detail.joinChat'.tr()),
               icon: const Icon(Icons.chat_bubble_outline),
               backgroundColor: Colors.teal,
             );
           }
-          
+
           return FloatingActionButton.extended(
             heroTag: 'club_join_fab',
             onPressed: _joinClub,
-            label: Text('동호회 가입하기'),
+            label: Text('clubs.detail.joinClub'.tr()),
             icon: const Icon(Icons.add),
           );
         },
@@ -175,19 +172,32 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     return ListView(
       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
       children: [
-        Text(club.title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+        Text(club.title,
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
-        Text(club.description, style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5)),
+        Text(club.description,
+            style:
+                Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5)),
         const Divider(height: 32),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildInfoColumn(icon: Icons.group_outlined, label: 'Members', value: club.membersCount.toString()),
-            _buildInfoColumn(icon: Icons.location_on_outlined, label: 'Location', value: club.location),
+            _buildInfoColumn(
+                icon: Icons.group_outlined,
+                label: 'clubs.detail.info.members'.tr(),
+                value: club.membersCount.toString()),
+            _buildInfoColumn(
+                icon: Icons.location_on_outlined,
+                label: 'clubs.detail.info.location'.tr(),
+                value: club.location),
           ],
         ),
         const Divider(height: 32),
-        Text("interests.title".tr(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text("interests.title".tr(),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8.0,
@@ -203,12 +213,14 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     );
   }
 
-  Widget _buildInfoColumn({required IconData icon, required String label, required String value}) {
+  Widget _buildInfoColumn(
+      {required IconData icon, required String label, required String value}) {
     return Column(
       children: [
         Icon(icon, color: Colors.grey[700]),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(value,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 2),
         Text(label, style: TextStyle(color: Colors.grey[600])),
       ],

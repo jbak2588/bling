@@ -8,6 +8,7 @@ import 'package:bling_app/core/models/club_comment_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 
 /// Handles CRUD operations for community clubs and their members.
@@ -42,7 +43,7 @@ class ClubRepository {
       'groupName': club.title,
       'groupImage': null, // TODO: 동호회 대표 이미지 필드 추가 시 연동
       'participants': [club.ownerId], // 첫 참여자는 개설자
-      'lastMessage': '동호회 채팅방이 개설되었습니다.', // TODO: 다국어
+      'lastMessage': 'clubs.repository.chatCreated'.tr(),
       'lastMessageTimestamp': FieldValue.serverTimestamp(),
       'unreadCounts': {club.ownerId: 0},
     };

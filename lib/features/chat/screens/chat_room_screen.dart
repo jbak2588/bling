@@ -10,12 +10,13 @@ import 'package:flutter/material.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final String chatId;
+  // [수정] 그룹/1:1 채팅을 구분하기 위한 파라미터 추가 및 변경
   final bool isGroupChat;
   final String? groupName;
   final String? otherUserName;
   final String? otherUserId;
   final String? productTitle;
-  final List<String>? participants;
+  final List<String>? participants; // 그룹 채팅의 경우 참여자 목록
 
   const ChatRoomScreen({
     super.key,
@@ -45,9 +46,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   void initState() {
     super.initState();
     _loadParticipantsData();
-    if (!widget.isGroupChat && widget.otherUserId != null) {
-      _chatService.markMessagesAsRead(widget.chatId, widget.otherUserId!);
-    }
+    // [수정] 그룹/1:1 채팅 모두에서 '읽음'으로 표시하는 함수를 호출합니다.
+    _chatService.markMessagesAsRead(widget.chatId);
   }
 
   @override
@@ -58,15 +58,23 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   Future<void> _loadParticipantsData() async {
-    List<String> idsToFetch = widget.isGroupChat 
-        ? (widget.participants ?? []) 
-        : (widget.otherUserId != null ? [_myUid, widget.otherUserId!] : []);
+    List<String> idsToFetch = [];
+    if (widget.isGroupChat) {
+      idsToFetch = widget.participants ?? [];
+    } else if (widget.otherUserId != null) {
+      idsToFetch = [_myUid, widget.otherUserId!];
+    }
 
     if (idsToFetch.isNotEmpty) {
       final usersMap = await _chatService.getParticipantsInfo(idsToFetch);
-      if (mounted) setState(() { _participantsInfo = usersMap; _isLoadingParticipants = false; });
+      if (mounted) {
+        setState(() {
+          _participantsInfo = usersMap;
+          _isLoadingParticipants = false;
+        });
+      }
     } else {
-      if (mounted) setState(() => _isLoadingParticipants = false);
+       if (mounted) setState(() => _isLoadingParticipants = false);
     }
   }
   
@@ -78,15 +86,43 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     await _audioPlayer.play(AssetSource('sounds/send_sound.mp3'));
 
     await _chatService.sendMessage(
-      widget.chatId, messageText,
+      widget.chatId,
+      messageText,
       otherUserId: widget.isGroupChat ? null : widget.otherUserId,
       allParticipantIds: widget.isGroupChat ? widget.participants : null,
     );
   }
 
+  // [복원 및 업그레이드] 읽음 확인 아이콘을 그리는 위젯
+  Widget _buildReadReceipt(ChatMessageModel message) {
+    // 내가 보낸 메시지가 아니면 아무것도 표시하지 않음
+    if (message.senderId != _myUid) return const SizedBox.shrink();
+
+    bool isReadAll = false;
+    if (widget.isGroupChat) {
+      // 그룹 채팅: 나를 제외한 모든 참여자가 읽었는지 확인
+      final otherParticipants = widget.participants?.where((id) => id != _myUid).toList() ?? [];
+      isReadAll = otherParticipants.isNotEmpty && otherParticipants.every((id) => message.readBy.contains(id));
+    } else {
+      // 1:1 채팅: 상대방이 읽었는지 확인
+      isReadAll = widget.otherUserId != null && message.readBy.contains(widget.otherUserId!);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 4.0),
+      child: Icon(
+        isReadAll ? Icons.done_all : Icons.done,
+        size: 16,
+        color: isReadAll ? Colors.blueAccent : Colors.grey,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final appBarTitle = widget.isGroupChat ? widget.groupName ?? 'Group Chat' : widget.productTitle ?? widget.otherUserName ?? 'Chat';
+    final appBarTitle = widget.isGroupChat
+        ? widget.groupName ?? 'Group Chat'
+        : widget.productTitle ?? widget.otherUserName ?? 'Chat';
 
     return Scaffold(
       appBar: AppBar(title: Text(appBarTitle)),
@@ -117,7 +153,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 8, right: 8, top: 8),
                   child: Row(
                     children: [
                       Expanded(
@@ -141,13 +177,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe)
             CircleAvatar(
               radius: 18,
               backgroundImage: (sender?.photoUrl != null && sender!.photoUrl!.isNotEmpty) ? NetworkImage(sender.photoUrl!) : null,
-              child: (sender?.photoUrl == null || sender!.photoUrl!.isEmpty) ? const Icon(Icons.person) : null,
+              child: (sender?.photoUrl == null || sender!.photoUrl!.isEmpty) ? const Icon(Icons.person, size: 18) : null,
             ),
           const SizedBox(width: 8),
           Flexible(
@@ -167,6 +203,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               ],
             ),
           ),
+          if (isMe) ...[
+            const SizedBox(width: 4),
+            _buildReadReceipt(message),
+          ],
         ],
       ),
     );

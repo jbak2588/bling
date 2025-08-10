@@ -7,6 +7,7 @@ import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../widgets/club_member_card.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ClubMemberList extends StatelessWidget {
   final String clubId;
@@ -33,10 +34,12 @@ class ClubMemberList extends StatelessWidget {
             slivers: [
               // --- [추가] 방장에게만 보이는 '가입 대기' 목록 ---
               if (amIOwner && pendingMemberIds.isNotEmpty) ...[
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text('가입 대기중인 멤버', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), // TODO: 다국어
+                         padding: const EdgeInsets.all(16.0),
+                    child: Text('clubs.memberList.pendingMembers'.tr(),
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 StreamBuilder<List<UserModel>>(
@@ -72,10 +75,12 @@ class ClubMemberList extends StatelessWidget {
               ],
               
               // --- 기존 '정식 멤버' 목록 ---
-              const SliverToBoxAdapter(
+                 SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('전체 멤버', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), // TODO: 다국어
+                      padding: const EdgeInsets.all(16.0),
+                  child: Text('clubs.memberList.allMembers'.tr(),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ),
               StreamBuilder<List<ClubMemberModel>>(

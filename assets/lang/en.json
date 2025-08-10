@@ -404,7 +404,8 @@
     },
     "common": {
         "cancel": "Cancel",
-        "delete": "Delete"
+        "delete": "Delete",
+        "done": "Done"
     },
     "deleteConfirm": {
         "title": "Delete Comment",
@@ -521,6 +522,86 @@
         "kecamatan": "District",
         "kelurahan": "Subdistrict",
         "apply": "Apply Filter"
+    },
+      "clubs": {
+        "screen": {
+            "error": "Error: {error}",
+            "empty": "No clubs yet."
+        },
+        "postList": {
+            "empty": "No posts yet. Be the first to write!",
+            "writeTooltip": "Write"
+        },
+        "memberCard": {
+            "kickConfirmTitle": "Remove {memberName}?",
+            "kickConfirmContent": "Removed members can no longer participate in club activities.",
+            "kick": "Remove",
+            "kickedSuccess": "{memberName} has been removed.",
+            "kickFail": "Failed to remove member: {error}"
+        },
+        "postCard": {
+            "deleteTitle": "Delete Post",
+            "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
+            "deleteSuccess": "Post deleted.",
+            "deleteFail": "Failed to delete post: {error}",
+            "withdrawnMember": "Withdrawn member",
+            "deleteTooltip": "Delete post",
+            "loadingUser": "Loading user information..."
+        },
+        "card": {
+            "membersCount": "{count} members"
+        },
+        "postDetail": {
+            "commentFail": "Failed to add comment: {error}",
+            "appBarTitle": "{title} Board",
+            "commentsTitle": "Comments",
+            "noComments": "No comments yet.",
+            "commentHint": "Enter a comment...",
+            "unknownUser": "Unknown user"
+        },
+        "detail": {
+            "joined": "Joined '{title}' club!",
+            "pendingApproval": "Waiting for the owner's approval. You can participate after approval.",
+            "joinFail": "Failed to request to join: {error}",
+            "tabs": {
+                "info": "Info",
+                "board": "Board",
+                "members": "Members"
+            },
+            "joinChat": "Join chat",
+            "joinClub": "Join club",
+            "info": {
+                "members": "Members",
+                "location": "Location"
+            }
+        },
+        "memberList": {
+            "pendingMembers": "Pending Members",
+            "allMembers": "All Members"
+        },
+        "createPost": {
+            "title": "New Post",
+            "submit": "Submit",
+            "success": "Post submitted.",
+            "fail": "Failed to submit post: {error}",
+            "bodyHint": "Enter content..."
+        },
+        "createClub": {
+            "selectAtLeastOneInterest": "Please select at least one interest.",
+            "success": "Club created successfully!",
+            "fail": "Failed to create club: {error}",
+            "title": "Create Club",
+            "nameLabel": "Club Name",
+            "nameError": "Please enter the club name.",
+            "descriptionLabel": "Club Description",
+            "descriptionError": "Please enter the club description.",
+            "maxInterests": "You can select up to 3 interests.",
+            "privateClub": "Private Club",
+            "privateDescription": "Members can join only by invitation."
+        },
+        "repository": {
+            "chatCreated": "Club chat room has been created."
+        }
     },
     "community": {
         "title": "Community Screen"

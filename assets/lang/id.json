@@ -404,7 +404,8 @@
     },
     "common": {
         "cancel": "Batal",
-        "delete": "Hapus"
+        "delete": "Hapus",
+        "done": "Selesai"
     },
     "deleteConfirm": {
         "title": "Hapus Komentar",
@@ -521,6 +522,86 @@
         "kecamatan": "Kecamatan",
         "kelurahan": "Kelurahan",
         "apply": "Terapkan Filter"
+    },
+      "clubs": {
+        "screen": {
+            "error": "Kesalahan: {error}",
+            "empty": "Belum ada klub."
+        },
+        "postList": {
+            "empty": "Belum ada postingan. Jadilah yang pertama!",
+            "writeTooltip": "Tulis"
+        },
+        "memberCard": {
+            "kickConfirmTitle": "Hapus {memberName}?",
+            "kickConfirmContent": "Anggota yang dihapus tidak dapat lagi berpartisipasi dalam kegiatan klub.",
+            "kick": "Hapus",
+            "kickedSuccess": "{memberName} telah dihapus.",
+            "kickFail": "Gagal menghapus anggota: {error}"
+        },
+        "postCard": {
+            "deleteTitle": "Hapus Postingan",
+            "deleteContent": "Apakah Anda yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.",
+            "deleteSuccess": "Postingan dihapus.",
+            "deleteFail": "Gagal menghapus postingan: {error}",
+            "withdrawnMember": "Anggota keluar",
+            "deleteTooltip": "Hapus postingan",
+            "loadingUser": "Memuat info pengguna..."
+        },
+        "card": {
+            "membersCount": "{count} anggota"
+        },
+        "postDetail": {
+            "commentFail": "Gagal menambahkan komentar: {error}",
+            "appBarTitle": "Papan {title}",
+            "commentsTitle": "Komentar",
+            "noComments": "Belum ada komentar.",
+            "commentHint": "Tulis komentar...",
+            "unknownUser": "Pengguna tidak diketahui"
+        },
+        "detail": {
+            "joined": "Bergabung dengan klub '{title}'!",
+            "pendingApproval": "Menunggu persetujuan pemilik. Anda dapat berpartisipasi setelah disetujui.",
+            "joinFail": "Gagal meminta bergabung: {error}",
+            "tabs": {
+                "info": "Info",
+                "board": "Papan",
+                "members": "Anggota"
+            },
+            "joinChat": "Gabung chat",
+            "joinClub": "Gabung klub",
+            "info": {
+                "members": "Anggota",
+                "location": "Lokasi"
+            }
+        },
+        "memberList": {
+            "pendingMembers": "Anggota Menunggu",
+            "allMembers": "Semua Anggota"
+        },
+        "createPost": {
+            "title": "Posting Baru",
+            "submit": "Kirim",
+            "success": "Postingan berhasil dikirim.",
+            "fail": "Gagal mengirim postingan: {error}",
+            "bodyHint": "Masukkan konten..."
+        },
+        "createClub": {
+            "selectAtLeastOneInterest": "Pilih setidaknya satu minat.",
+            "success": "Klub berhasil dibuat!",
+            "fail": "Gagal membuat klub: {error}",
+            "title": "Buat Klub",
+            "nameLabel": "Nama Klub",
+            "nameError": "Silakan masukkan nama klub.",
+            "descriptionLabel": "Deskripsi Klub",
+            "descriptionError": "Silakan masukkan deskripsi klub.",
+            "maxInterests": "Anda dapat memilih hingga 3 minat.",
+            "privateClub": "Klub Privat",
+            "privateDescription": "Hanya bisa bergabung lewat undangan."
+        },
+        "repository": {
+            "chatCreated": "Ruang chat klub telah dibuat."
+        }
     },
     "community": {
         "title": "Halaman Komunitas"

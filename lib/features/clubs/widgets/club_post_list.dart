@@ -4,6 +4,7 @@ import 'package:bling_app/core/models/club_model.dart'; // [추가]
 import 'package:bling_app/core/models/club_post_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../screens/create_club_post_screen.dart';
 import 'club_post_card.dart';
 
@@ -14,7 +15,7 @@ class ClubPostList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ClubRepository repository = ClubRepository();
-    
+
     return Scaffold(
       body: StreamBuilder<List<ClubPostModel>>(
         stream: repository.getClubPostsStream(club.id),
@@ -23,7 +24,7 @@ class ClubPostList extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('아직 게시글이 없습니다. 첫 글을 작성해보세요!'));
+            return Center(child: Text('clubs.postList.empty'.tr()));
           }
 
           final posts = snapshot.data!;
@@ -47,11 +48,11 @@ class ClubPostList extends StatelessWidget {
               heroTag: 'club_post_fab',
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => CreateClubPostScreen(clubId: club.id)),
+                  MaterialPageRoute(
+                      builder: (_) => CreateClubPostScreen(clubId: club.id)),
                 );
               },
-              
-              tooltip: '글쓰기',
+              tooltip: 'clubs.postList.writeTooltip'.tr(),
               child: const Icon(Icons.edit),
             );
           }
