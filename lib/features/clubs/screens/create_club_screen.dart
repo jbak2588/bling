@@ -4,6 +4,7 @@ import 'dart:io'; // [추가] File 클래스 사용
 import 'package:bling_app/core/models/club_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
+import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart'; // [추가] Firebase Storage
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   final List<String> _selectedInterests = [];
   bool _isPrivate = false;
   bool _isSaving = false;
+   Map<String, String?>? _selectedLocationParts;
 
   // V V V --- [추가] 이미지 관련 상태 변수 --- V V V
   XFile? _selectedImage;
@@ -85,6 +87,16 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
     }
   }
 
+    Future<void> _selectLocation() async {
+    final result = await Navigator.of(context)
+        .push<Map<String, String?>>(
+            MaterialPageRoute(builder: (_) => const LocationFilterScreen()));
+    if (result != null) {
+      setState(() => _selectedLocationParts = result);
+    }
+  }
+
+
   // [수정] 동호회 생성 로직 구현
 
   Future<void> _createClub() async {
@@ -95,6 +107,12 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('clubs.createClub.selectAtLeastOneInterest'.tr())),
+      );
+      return;
+    }
+      if (_selectedLocationParts == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select location')),
       );
       return;
     }
@@ -117,8 +135,13 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         ownerId: widget.userModel.uid,
-        location: widget.userModel.locationParts?['kec'] ??
-            'Unknown', // 사용자의 Kecamatan 정보 활용
+          location: _selectedLocationParts?['kel'] ??
+            _selectedLocationParts?['kec'] ??
+            _selectedLocationParts?['kab'] ??
+            _selectedLocationParts?['kota'] ??
+            _selectedLocationParts?['prov'] ??
+            'Unknown',
+        locationParts: _selectedLocationParts,
         // interests: _selectedInterests, // Removed or renamed as per ClubModel definition
         isPrivate: _isPrivate,
         createdAt: Timestamp.now(),
@@ -239,6 +262,20 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 24),
+                    ListTile(
+                  title: const Text('Location'),
+                  subtitle: Text(
+                    _selectedLocationParts?['kel'] ??
+                        _selectedLocationParts?['kec'] ??
+                        _selectedLocationParts?['kab'] ??
+                        _selectedLocationParts?['kota'] ??
+                        _selectedLocationParts?['prov'] ??
+                        'Select location',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _selectLocation,
                 ),
                 const SizedBox(height: 24),
                 Row(

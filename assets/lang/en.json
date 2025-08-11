@@ -523,7 +523,7 @@
         "kelurahan": "Subdistrict",
         "apply": "Apply Filter"
     },
-      "clubs": {
+    "clubs": {
         "screen": {
             "error": "Error: {error}",
             "empty": "No clubs yet."
@@ -598,6 +598,12 @@
             "maxInterests": "You can select up to 3 interests.",
             "privateClub": "Private Club",
             "privateDescription": "Members can join only by invitation."
+        },
+        "editClub": {
+            "title": "Edit Club Information",
+            "save": "Save",
+            "success": "Club information updated.",
+            "fail": "Failed to update club: {error}"
         },
         "repository": {
             "chatCreated": "Club chat room has been created."

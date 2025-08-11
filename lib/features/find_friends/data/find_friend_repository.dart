@@ -129,7 +129,8 @@ class FindFriendRepository {
   }
 
   // V V V --- [수정] 친구 목록을 불러올 때, 거절/차단한 사용자를 제외하는 로직 --- V V V
-  Stream<List<UserModel>> getUsersForFindFriends(UserModel currentUser) {
+  Stream<List<UserModel>> getUsersForFindFriends(UserModel currentUser,
+      {Map<String, String?>? locationFilter}) {
     Query query = _firestore
         .collection('users')
         .where('isDatingProfile', isEqualTo: true)
@@ -150,6 +151,25 @@ class FindFriendRepository {
       query = query.where('gender', isEqualTo: 'male');
     } else if (genderPreference == 'female') {
       query = query.where('gender', isEqualTo: 'female');
+    }
+
+    if (locationFilter != null) {
+      if (locationFilter['prov'] != null) {
+        query = query.where('locationParts.prov',
+            isEqualTo: locationFilter['prov']);
+      }
+      if (locationFilter['kab'] != null) {
+        query = query.where('locationParts.kab',
+            isEqualTo: locationFilter['kab']);
+      }
+      if (locationFilter['kec'] != null) {
+        query = query.where('locationParts.kec',
+            isEqualTo: locationFilter['kec']);
+      }
+      if (locationFilter['kel'] != null) {
+        query = query.where('locationParts.kel',
+            isEqualTo: locationFilter['kel']);
+      }
     }
 
     return query.snapshots().map((snapshot) {

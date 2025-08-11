@@ -2,31 +2,34 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Job listing data model mapped to the Firestore `jobs` collection.
+/// 지역 구인구직 게시글 정보를 담는 데이터 모델입니다.
+/// Firestore의 `jobs` 컬렉션 문서 구조와 1:1로 대응됩니다.
 class JobModel {
   final String id;
+  final String userId; // 작성자 ID
   final String title;
   final String description;
-  final String category;
-  final String? location;
+  final String category; // 직종/업종
+  final String? locationName;
+  final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
   final Timestamp createdAt;
-  final String userId;
-  final String trustLevelRequired;
+  final String trustLevelRequired; // 요구되는 최소 신뢰 등급
   final int viewsCount;
   final int likesCount;
-  final bool isPaidListing;
+  final bool isPaidListing; // 유료 공고 여부
 
   JobModel({
     required this.id,
+    required this.userId,
     required this.title,
     required this.description,
     required this.category,
-    this.location,
+    this.locationName,
+    this.locationParts,
     this.geoPoint,
     required this.createdAt,
-    required this.userId,
-    required this.trustLevelRequired,
+    this.trustLevelRequired = 'normal',
     this.viewsCount = 0,
     this.likesCount = 0,
     this.isPaidListing = false,
@@ -36,13 +39,14 @@ class JobModel {
     final data = doc.data() ?? {};
     return JobModel(
       id: doc.id,
+      userId: data['userId'] ?? '',
       title: data['title'] ?? '',
       description: data['description'] ?? '',
-      category: data['category'] ?? '',
-      location: data['location'],
+      category: data['category'] ?? 'etc',
+      locationName: data['locationName'],
+      locationParts: data['locationParts'] != null ? Map<String, dynamic>.from(data['locationParts']) : null,
       geoPoint: data['geoPoint'],
       createdAt: data['createdAt'] ?? Timestamp.now(),
-      userId: data['userId'] ?? '',
       trustLevelRequired: data['trustLevelRequired'] ?? 'normal',
       viewsCount: data['viewsCount'] ?? 0,
       likesCount: data['likesCount'] ?? 0,
@@ -52,13 +56,14 @@ class JobModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'userId': userId,
       'title': title,
       'description': description,
       'category': category,
-      'location': location,
+      'locationName': locationName,
+      'locationParts': locationParts,
       'geoPoint': geoPoint,
       'createdAt': createdAt,
-      'userId': userId,
       'trustLevelRequired': trustLevelRequired,
       'viewsCount': viewsCount,
       'likesCount': likesCount,

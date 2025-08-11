@@ -126,6 +126,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
         // 수정되지 않는 필드들은 기존 값을 그대로 사용
         ownerId: widget.club.ownerId,
         location: widget.club.location,
+        locationParts: widget.club.locationParts,
         mainCategory: widget.club.mainCategory,
         membersCount: widget.club.membersCount,
         createdAt: widget.club.createdAt,
@@ -136,14 +137,17 @@ class _EditClubScreenState extends State<EditClubScreen> {
       await _repository.updateClub(updatedClub);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('동호회 정보가 수정되었습니다.'), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('clubs.editClub.success'.tr()),
+            backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('수정에 실패했습니다: $e'), backgroundColor: Colors.red));
+            content: Text(
+                'clubs.editClub.fail'.tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -154,10 +158,12 @@ class _EditClubScreenState extends State<EditClubScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('동호회 정보 수정'), // TODO: 다국어
+        title: Text('clubs.editClub.title'.tr()),
         actions: [
-          if (!_isSaving) TextButton(onPressed: _updateClub, child: Text('저장'))
-        ], // TODO: 다국어
+          if (!_isSaving)
+            TextButton(
+                onPressed: _updateClub, child: Text('clubs.editClub.save'.tr()))
+        ],
       ),
       body: Stack(
         children: [
