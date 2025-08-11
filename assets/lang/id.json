@@ -523,7 +523,7 @@
         "kelurahan": "Kelurahan",
         "apply": "Terapkan Filter"
     },
-      "clubs": {
+    "clubs": {
         "screen": {
             "error": "Kesalahan: {error}",
             "empty": "Belum ada klub."
@@ -598,6 +598,12 @@
             "maxInterests": "Anda dapat memilih hingga 3 minat.",
             "privateClub": "Klub Privat",
             "privateDescription": "Hanya bisa bergabung lewat undangan."
+        },
+        "editClub": {
+            "title": "Edit Informasi Klub",
+            "save": "Simpan",
+            "success": "Informasi klub diperbarui.",
+            "fail": "Gagal memperbarui klub: {error}"
         },
         "repository": {
             "chatCreated": "Ruang chat klub telah dibuat."

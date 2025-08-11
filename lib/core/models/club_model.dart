@@ -8,6 +8,7 @@ class ClubModel {
   final String description;
   final String ownerId;
   final String location;
+  final Map<String, dynamic>? locationParts;
   final String mainCategory;
   final List<String> interestTags;
   final int membersCount;
@@ -27,6 +28,7 @@ class ClubModel {
     required this.description,
     required this.ownerId,
     required this.location,
+    this.locationParts,
     required this.mainCategory,
     required this.interestTags,
     this.membersCount = 0,
@@ -46,14 +48,23 @@ class ClubModel {
       description: data['description'] ?? '',
       ownerId: data['ownerId'] ?? '',
       location: data['location'] ?? '',
+      locationParts: data['locationParts'] != null
+          ? Map<String, dynamic>.from(data['locationParts'])
+          : null,
       mainCategory: data['mainCategory'] ?? '',
-      interestTags: data['interestTags'] != null ? List<String>.from(data['interestTags']) : [],
+      interestTags: data['interestTags'] != null
+          ? List<String>.from(data['interestTags'])
+          : [],
       membersCount: data['membersCount'] ?? 0,
       isPrivate: data['isPrivate'] ?? false,
       trustLevelRequired: data['trustLevelRequired'] ?? 'normal',
       createdAt: data['createdAt'] ?? Timestamp.now(),
-      kickedMembers: data['kickedMembers'] != null ? List<String>.from(data['kickedMembers']) : [],
-      pendingMembers: data['pendingMembers'] != null ? List<String>.from(data['pendingMembers']) : [],
+      kickedMembers: data['kickedMembers'] != null
+          ? List<String>.from(data['kickedMembers'])
+          : [],
+      pendingMembers: data['pendingMembers'] != null
+          ? List<String>.from(data['pendingMembers'])
+          : [],
       imageUrl: data['imageUrl'], // [추가] Firestore에서 이미지 URL 불러오기
     );
   }
@@ -64,6 +75,7 @@ class ClubModel {
       'description': description,
       'ownerId': ownerId,
       'location': location,
+      'locationParts': locationParts,
       'mainCategory': mainCategory,
       'interestTags': interestTags,
       'membersCount': membersCount,
