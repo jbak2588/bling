@@ -35,16 +35,15 @@ class ClubPostCard extends StatelessWidget {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-         title: Text('clubs.postCard.deleteTitle'.tr()),
-        content: Text('clubs.postCard.deleteContent'.tr()),
+        title: const Text('게시글 삭제'),
+        content: const Text('이 게시글을 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-             child: Text('common.cancel'.tr())),
+              child: const Text('취소')),
           TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-               child: Text('common.delete'.tr(),
-                  style: const TextStyle(color: Colors.red))),
+              child: const Text('삭제', style: TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -52,14 +51,11 @@ class ClubPostCard extends StatelessWidget {
     if (confirmed == true && context.mounted) {
       try {
         await ClubRepository().deleteClubPost(post.clubId, post.id);
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('clubs.postCard.deleteSuccess'.tr()),
-            backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('게시글이 삭제되었습니다.'), backgroundColor: Colors.green));
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-               content: Text('clubs.postCard.deleteFail'
-                .tr(namedArgs: {'error': e.toString()})),
-            backgroundColor: Colors.red));
+            content: Text('삭제에 실패했습니다: $e'), backgroundColor: Colors.red));
       }
     }
   }
@@ -94,15 +90,15 @@ class ClubPostCard extends StatelessWidget {
               backgroundColor: Colors.white,
               child: Icon(Icons.person_off_outlined, color: Colors.grey),
             ),
-             title: Text('clubs.postCard.withdrawnMember'.tr(),
+            title: const Text('탈퇴한 멤버',
                 style:
-                        const TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+                    TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
             subtitle:
                 Text(post.body, maxLines: 2, overflow: TextOverflow.ellipsis),
             trailing: (currentUserId == clubOwnerId)
                 ? IconButton(
                     icon: const Icon(Icons.delete_outline, color: Colors.grey),
-                       tooltip: 'clubs.postCard.deleteTooltip'.tr(),
+                    tooltip: '게시글 삭제',
                     onPressed: () => _deletePost(context),
                   )
                 : null,
@@ -119,7 +115,7 @@ class ClubPostCard extends StatelessWidget {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-        return Card(child: ListTile(title: Text('clubs.postCard.loadingUser'.tr())));
+          return const Card(child: ListTile(title: Text('사용자 정보 로딩중...')));
         }
 
         final user = UserModel.fromFirestore(snapshot.data!);
@@ -180,9 +176,8 @@ class ClubPostCard extends StatelessWidget {
                           },
                           itemBuilder: (BuildContext context) =>
                               <PopupMenuEntry<String>>[
-                                  PopupMenuItem<String>(
-                                value: 'delete',
-                                child: Text('common.delete'.tr())),
+                            const PopupMenuItem<String>(
+                                value: 'delete', child: Text('삭제하기')),
                           ],
                         ),
                     ],

@@ -5,6 +5,7 @@ import 'package:bling_app/core/models/club_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
+import 'package:bling_app/features/clubs/screens/edit_club_screen.dart';
 import 'package:bling_app/features/clubs/widgets/club_post_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,7 +26,6 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   final ClubRepository _repository = ClubRepository();
   final ChatService _chatService = ChatService();
   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
-
   late final TabController _tabController;
 
   @override
@@ -107,64 +107,147 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     );
   }
 
+// [추가] 동호회 탈퇴 로직
+  void showSnackbar(String message, {bool isError = false}) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+      ));
+    }
+  }
+
+  Future<void> _leaveClub() async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('clubs.detail.leaveConfirmTitle'.tr()),
+        content: Text('clubs.detail.leaveConfirmContent'
+            .tr(namedArgs: {'title': widget.club.title})),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('common.cancel'.tr())),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('clubs.detail.leave'.tr(),
+                  style: const TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+
+    if (confirmed == true && _currentUserId != null) {
+      try {
+        await _repository.leaveClub(widget.club.id, _currentUserId!);
+        if (mounted) {
+          showSnackbar('clubs.detail.leaveSuccess'
+              .tr(namedArgs: {'title': widget.club.title}));
+        }
+      } catch (e) {
+        if (mounted) {
+          showSnackbar(
+              'clubs.detail.leaveFail'.tr(namedArgs: {'error': e.toString()}),
+              isError: true);
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.club.title),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: 'clubs.detail.tabs.info'.tr()),
-            Tab(text: 'clubs.detail.tabs.board'.tr()),
-            Tab(text: 'clubs.detail.tabs.members'.tr()),
-          ],
-        ),
-      ),
-      body: StreamBuilder<ClubModel>(
-        stream: _repository.getClubStream(widget.club.id),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final club = snapshot.data!;
+    return StreamBuilder<ClubModel>(
+      stream: _repository.getClubStream(widget.club.id),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
+        }
+        final club = snapshot.data!;
 
-          return TabBarView(
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(club.title), // [수정] 실시간 club.title 사용
+            actions: [
+              if (club.ownerId == _currentUserId)
+                IconButton(
+                  icon: const Icon(Icons.edit_note_outlined),
+                  tooltip: '동호회 정보 수정',
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) => EditClubScreen(club: club)),
+                    );
+                  },
+                ),
+              StreamBuilder<bool>(
+                  stream: _repository.isCurrentUserMember(club.id),
+                  builder: (context, memberSnapshot) {
+                    final isMember = memberSnapshot.data ?? false;
+                    // 멤버이지만, 방장이 아닐 경우에만 메뉴를 보여줍니다.
+                    if (isMember && club.ownerId != _currentUserId) {
+                      return PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'leave') {
+                            _leaveClub();
+                          }
+                        },
+                        itemBuilder: (BuildContext context) =>
+                            <PopupMenuEntry<String>>[
+                          PopupMenuItem<String>(
+                            value: 'leave',
+                            child: Text('clubs.detail.leave'.tr()),
+                          ),
+                        ],
+                      );
+                    }
+                    return const SizedBox.shrink(); // 그 외에는 아무것도 표시하지 않음
+                  }),
+            ],
+
+            bottom: TabBar(
+              controller: _tabController,
+              tabs: [
+                Tab(text: 'clubs.detail.tabs.info'.tr()),
+                Tab(text: 'clubs.detail.tabs.board'.tr()),
+                Tab(text: 'clubs.detail.tabs.members'.tr()),
+              ],
+            ),
+          ), // <--- [수정] 여기에 닫는 괄호가 빠져있었습니다.
+          body: TabBarView(
             controller: _tabController,
             children: [
               _buildInfoTab(context, club),
-              // V V V --- [수정] ClubPostList에 ownerId를 전달합니다 --- V V V
               ClubPostList(club: club),
-              // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
               ClubMemberList(clubId: club.id, ownerId: club.ownerId),
             ],
-          );
-        },
-      ),
-      floatingActionButton: StreamBuilder<bool>(
-        stream: _repository.isCurrentUserMember(widget.club.id),
-        builder: (context, snapshot) {
-          final isMember = snapshot.data ?? false;
+          ),
+          floatingActionButton: StreamBuilder<bool>(
+            stream: _repository.isCurrentUserMember(widget.club.id),
+            builder: (context, snapshot) {
+              final isMember = snapshot.data ?? false;
 
-          if (isMember) {
-            return FloatingActionButton.extended(
-              heroTag: 'club_chat_fab',
-              onPressed: _navigateToGroupChat,
-              label: Text('clubs.detail.joinChat'.tr()),
-              icon: const Icon(Icons.chat_bubble_outline),
-              backgroundColor: Colors.teal,
-            );
-          }
+              if (isMember) {
+                return FloatingActionButton.extended(
+                  heroTag: 'club_chat_fab',
+                  onPressed: _navigateToGroupChat,
+                  label: Text('clubs.detail.joinChat'.tr()),
+                  icon: const Icon(Icons.chat_bubble_outline),
+                  backgroundColor: Colors.teal,
+                );
+              }
 
-          return FloatingActionButton.extended(
-            heroTag: 'club_join_fab',
-            onPressed: _joinClub,
-            label: Text('clubs.detail.joinClub'.tr()),
-            icon: const Icon(Icons.add),
-          );
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+              return FloatingActionButton.extended(
+                heroTag: 'club_join_fab',
+                onPressed: _joinClub,
+                label: Text('clubs.detail.joinClub'.tr()),
+                icon: const Icon(Icons.add),
+              );
+            },
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
+        );
+      },
     );
   }
 
@@ -172,6 +255,24 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     return ListView(
       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
       children: [
+        if (club.imageUrl != null && club.imageUrl!.isNotEmpty)
+          // V V V --- [추가] 동호회 대표 이미지 --- V V V
+          if (club.imageUrl != null && club.imageUrl!.isNotEmpty)
+            Image.network(
+              club.imageUrl!,
+              height: 220,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (c, e, s) =>
+                  const SizedBox(height: 220, child: Icon(Icons.error)),
+            )
+          else
+            Container(
+              height: 220,
+              color: Colors.grey.shade200,
+              child: Icon(Icons.groups, size: 80, color: Colors.grey.shade400),
+            ),
+        // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
         Text(club.title,
             style: Theme.of(context)
                 .textTheme

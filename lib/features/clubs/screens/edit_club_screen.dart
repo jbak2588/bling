@@ -1,41 +1,36 @@
-// lib/features/clubs/screens/create_club_screen.dart
+// lib/features/clubs/screens/edit_club_screen.dart
 
-import 'dart:io'; // [추가] File 클래스 사용
+import 'dart:io';
 import 'package:bling_app/core/models/club_model.dart';
-import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart'; // [추가] Firebase Storage
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // [추가] image_picker
-import 'package:uuid/uuid.dart'; // [추가] 고유 파일명 생성
+import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class CreateClubScreen extends StatefulWidget {
-  final UserModel userModel;
-  const CreateClubScreen({super.key, required this.userModel});
+class EditClubScreen extends StatefulWidget {
+  final ClubModel club;
+  const EditClubScreen({super.key, required this.club});
 
   @override
-  State<CreateClubScreen> createState() => _CreateClubScreenState();
+  State<EditClubScreen> createState() => _EditClubScreenState();
 }
 
-class _CreateClubScreenState extends State<CreateClubScreen> {
+class _EditClubScreenState extends State<EditClubScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
 
-  final List<String> _selectedInterests = [];
-  bool _isPrivate = false;
+  late List<String> _selectedInterests;
+  late bool _isPrivate;
   bool _isSaving = false;
 
-  // V V V --- [추가] 이미지 관련 상태 변수 --- V V V
   XFile? _selectedImage;
+  String? _existingImageUrl;
   final ImagePicker _picker = ImagePicker();
-  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
   final ClubRepository _repository = ClubRepository();
-
-// [수정] find_friend와 동일한 전체 관심사 목록을 사용합니다.
   final Map<String, List<String>> _interestCategories = {
     'category_creative': [
       'drawing',
@@ -68,29 +63,37 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    // 기존 동호회 정보로 UI 상태를 초기화합니다.
+    _titleController = TextEditingController(text: widget.club.title);
+    _descriptionController =
+        TextEditingController(text: widget.club.description);
+    _selectedInterests = List<String>.from(widget.club.interestTags);
+    _isPrivate = widget.club.isPrivate;
+    _existingImageUrl = widget.club.imageUrl;
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
 
-  // [추가] 이미지 선택 함수
   Future<void> _pickImage() async {
     final pickedFile =
         await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (pickedFile != null) {
       setState(() {
         _selectedImage = pickedFile;
+        _existingImageUrl = null; // 새 이미지를 선택하면 기존 이미지는 무시
       });
     }
   }
 
-  // [수정] 동호회 생성 로직 구현
-
-  Future<void> _createClub() async {
-    if (!_formKey.currentState!.validate() || _isSaving) {
-      return;
-    }
+  Future<void> _updateClub() async {
+    if (!_formKey.currentState!.validate() || _isSaving) return;
     if (_selectedInterests.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -102,8 +105,8 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
     setState(() => _isSaving = true);
 
     try {
-      String? imageUrl;
-      // [수정] 이미지가 선택되었으면 Storage에 업로드
+      String? imageUrl = _existingImageUrl;
+      // 새 이미지가 선택되었으면 Storage에 업로드
       if (_selectedImage != null) {
         final fileName = const Uuid().v4();
         final ref =
@@ -112,50 +115,38 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
         imageUrl = await ref.getDownloadURL();
       }
 
-      final newClub = ClubModel(
-        id: '', // ID는 Firestore에서 자동으로 생성됩니다.
+      // ClubModel 객체를 업데이트된 정보로 새로 만듭니다.
+      final updatedClub = ClubModel(
+        id: widget.club.id, // ID는 기존 ID를 그대로 사용
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
-        ownerId: widget.userModel.uid,
-        location: widget.userModel.locationParts?['kec'] ??
-            'Unknown', // 사용자의 Kecamatan 정보 활용
-        // interests: _selectedInterests, // Removed or renamed as per ClubModel definition
+        imageUrl: imageUrl,
+        interestTags: _selectedInterests,
         isPrivate: _isPrivate,
-        createdAt: Timestamp.now(),
-        membersCount: 1, // 개설자는 자동으로 멤버 1명이 됩니다.
-        imageUrl: imageUrl, // [수정] 업로드된 이미지 URL 전달
-        mainCategory: _selectedInterests.isNotEmpty
-            ? _interestCategories.entries
-                .firstWhere(
-                  (entry) => entry.value.contains(_selectedInterests.first),
-                  orElse: () => _interestCategories.entries.first,
-                )
-                .key
-            : '', // 첫 번째 선택된 관심사의 카테고리, 없으면 빈 문자열
-        interestTags: _selectedInterests, // 선택된 관심사 리스트
+        // 수정되지 않는 필드들은 기존 값을 그대로 사용
+        ownerId: widget.club.ownerId,
+        location: widget.club.location,
+        mainCategory: widget.club.mainCategory,
+        membersCount: widget.club.membersCount,
+        createdAt: widget.club.createdAt,
+        kickedMembers: widget.club.kickedMembers,
+        pendingMembers: widget.club.pendingMembers,
       );
 
-      await _repository.createClub(newClub);
+      await _repository.updateClub(updatedClub);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('clubs.createClub.success'.tr()),
-          backgroundColor: Colors.green,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('동호회 정보가 수정되었습니다.'), backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'clubs.createClub.fail'.tr(namedArgs: {'error': e.toString()})),
-          backgroundColor: Colors.red,
-        ));
+            content: Text('수정에 실패했습니다: $e'), backgroundColor: Colors.red));
       }
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -163,15 +154,10 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('clubs.createClub.title'.tr()),
+        title: Text('동호회 정보 수정'), // TODO: 다국어
         actions: [
-          // [수정] _isSaving 상태에 따라 버튼 활성화/비활성화
-          if (!_isSaving)
-            TextButton(
-              onPressed: _createClub,
-              child: Text('common.done'.tr()),
-            )
-        ],
+          if (!_isSaving) TextButton(onPressed: _updateClub, child: Text('저장'))
+        ], // TODO: 다국어
       ),
       body: Stack(
         children: [
@@ -180,7 +166,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                // V V V --- [추가] 대표 이미지 선택 UI --- V V V
+                // 대표 이미지 선택 UI
                 Center(
                   child: Stack(
                     children: [
@@ -189,8 +175,12 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                         backgroundColor: Colors.grey[200],
                         backgroundImage: _selectedImage != null
                             ? FileImage(File(_selectedImage!.path))
-                            : null,
-                        child: _selectedImage == null
+                            : (_existingImageUrl != null &&
+                                    _existingImageUrl!.isNotEmpty
+                                ? NetworkImage(_existingImageUrl!)
+                                : null) as ImageProvider?,
+                        child: (_selectedImage == null &&
+                                _existingImageUrl == null)
                             ? Icon(Icons.groups,
                                 size: 40, color: Colors.grey[600])
                             : null,
@@ -212,6 +202,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
+
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
@@ -313,13 +304,10 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
               ],
             ),
           ),
-          // 로딩 중일 때 화면 전체에 로딩 인디케이터 표시
           if (_isSaving)
             Container(
-              color: Colors.black54,
-              child: const Center(
-                  child: CircularProgressIndicator(color: Colors.white)),
-            ),
+                color: Colors.black54,
+                child: const Center(child: CircularProgressIndicator())),
         ],
       ),
     );
