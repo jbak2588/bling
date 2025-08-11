@@ -158,6 +158,28 @@ class ClubRepository {
     await batch.commit();
   }
 
+  // V V V --- [추가] 멤버가 스스로 동호회를 탈퇴하는 함수 --- V V V
+  Future<void> leaveClub(String clubId, String memberId) async {
+    final batch = _firestore.batch();
+    final clubRef = _clubs.doc(clubId);
+    final memberRef = clubRef.collection('members').doc(memberId);
+    final userRef = _users.doc(memberId);
+    final chatRoomRef = _chats.doc(clubId);
+
+    // 1. members 하위 컬렉션에서 멤버 삭제
+    batch.delete(memberRef);
+    // 2. membersCount 1 감소
+    batch.update(clubRef, {'membersCount': FieldValue.increment(-1)});
+    // 3. 사용자의 clubs 필드에서 동호회 ID 제거
+    batch.update(userRef, {'clubs': FieldValue.arrayRemove([clubId])});
+    // 4. 채팅방 participants 목록에서 멤버 ID 제거
+    batch.update(chatRoomRef, {'participants': FieldValue.arrayRemove([memberId])});
+    
+    // '강퇴'와 달리 kickedMembers 목록에는 추가하지 않습니다.
+
+    await batch.commit();
+  }
+
   Stream<List<ClubMemberModel>> fetchMembers(String clubId) {
     return _clubs
         .doc(clubId)
@@ -223,6 +245,10 @@ class ClubRepository {
           .toList();
     });
   }
+
+   Stream<DocumentSnapshot> getClubPostStream(String clubId, String postId) {
+    return _clubs.doc(clubId).collection('posts').doc(postId).snapshots();
+  }
   
   // V V V --- [추가] 방장이 게시글을 삭제하는 함수 --- V V V
   Future<void> deleteClubPost(String clubId, String postId) async {
@@ -286,6 +312,28 @@ class ClubRepository {
       'participants': FieldValue.arrayUnion([memberId]),
       'unreadCounts.$memberId': 0,
     });
+
+    await batch.commit();
+  }
+
+  // V V V --- [추가] 동호회 게시글 '좋아요' 토글 함수 --- V V V
+  Future<void> toggleClubPostLike(String clubId, String postId, bool isLiked) async {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId == null) return;
+
+    final batch = _firestore.batch();
+    final postRef = _clubs.doc(clubId).collection('posts').doc(postId);
+    final userRef = _users.doc(currentUserId);
+
+    if (isLiked) {
+      // 좋아요 취소
+      batch.update(postRef, {'likesCount': FieldValue.increment(-1)});
+      batch.update(userRef, {'bookmarkedClubPostIds': FieldValue.arrayRemove([postId])});
+    } else {
+      // 좋아요 누르기
+      batch.update(postRef, {'likesCount': FieldValue.increment(1)});
+      batch.update(userRef, {'bookmarkedClubPostIds': FieldValue.arrayUnion([postId])});
+    }
 
     await batch.commit();
   }
