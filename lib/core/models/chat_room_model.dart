@@ -9,16 +9,17 @@ class ChatRoomModel {
   final Timestamp lastTimestamp;
   final Map<String, int> unreadCounts;
 
-  // V V V --- [수정] 채팅 유형을 구분하기 위한 필드 추가 --- V V V
+  // --- 채팅 유형을 구분하기 위한 필드들 ---
   final bool isGroupChat;
   final String? groupName;
   final String? groupImage;
-  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-
-  // [수정] 상품 정보는 nullable로 변경
+  
   final String? productId;
   final String? productTitle;
   final String? productImage;
+  
+  final String? jobId;
+  final String? jobTitle;
 
   ChatRoomModel({
     required this.id,
@@ -26,16 +27,17 @@ class ChatRoomModel {
     required this.lastMessage,
     required this.lastTimestamp,
     required this.unreadCounts,
-    this.isGroupChat = false, // 기본값은 1:1 채팅
+    this.isGroupChat = false,
     this.groupName,
     this.groupImage,
     this.productId,
     this.productTitle,
     this.productImage,
+    this.jobId,
+    this.jobTitle,
   });
 
-  factory ChatRoomModel.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory ChatRoomModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return ChatRoomModel(
       id: doc.id,
@@ -49,6 +51,8 @@ class ChatRoomModel {
       productId: data['productId'],
       productTitle: data['productTitle'],
       productImage: data['productImage'],
+      jobId: data['jobId'],
+      jobTitle: data['jobTitle'],
     );
   }
 }

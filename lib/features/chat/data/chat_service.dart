@@ -62,31 +62,44 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
     return null;
   }
 
-  // ⭐️ [수정] 구버전의 파라미터 방식을 그대로 사용하여 에러 원천 차단
-  Future<String> createOrGetChatRoom(String otherUserId, String productId,
-      String productTitle, String productImage) async {
+  
+
+  // V V V --- [수정] '구인구직' 채팅도 생성할 수 있도록 함수를 확장합니다 --- V V V
+  Future<String> createOrGetChatRoom({
+    required String otherUserId,
+    String? productId,
+    String? productTitle,
+    String? productImage,
+    String? jobId,
+    String? jobTitle,
+  }) async {
     final myUid = _auth.currentUser?.uid;
-    if (myUid == null) {
-      throw Exception('User not logged in');
-    }
+    if (myUid == null) throw Exception('User not logged in');
 
     List<String> participants = [myUid, otherUserId];
     participants.sort();
+    
+    // [수정] 채팅방 ID 생성 규칙: 상품 ID 또는 구인글 ID를 기반으로 생성
+    String contextId = productId ?? jobId ?? 'direct';
+    String chatId = '${contextId}_${participants.join('_')}';
 
-    String chatId = '${productId}_${participants.join('_')}';
     final chatDocRef = _firestore.collection('chats').doc(chatId);
     final chatDoc = await chatDocRef.get();
 
     if (!chatDoc.exists) {
-      await chatDocRef.set({
+      // [수정] 채팅방 생성 시, 넘어온 정보를 기반으로 데이터를 구성
+      final chatRoomData = {
         'participants': participants,
-        'productId': productId, // 이전 필드명 사용
-        'productTitle': productTitle,
-        'productImage': productImage,
         'lastMessage': '',
         'lastTimestamp': FieldValue.serverTimestamp(),
         'unreadCounts': {myUid: 0, otherUserId: 0},
-      });
+        if (productId != null) 'productId': productId,
+        if (productTitle != null) 'productTitle': productTitle,
+        if (productImage != null) 'productImage': productImage,
+        if (jobId != null) 'jobId': jobId,
+        if (jobTitle != null) 'jobTitle': jobTitle, // productTitle 필드를 공유해서 사용
+      };
+      await chatDocRef.set(chatRoomData);
     }
     return chatId;
   }

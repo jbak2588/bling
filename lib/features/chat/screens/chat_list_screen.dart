@@ -71,53 +71,88 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
                         final otherUser = userSnapshot.data;
 
-                        // V V V --- [핵심 수정] 채팅 유형에 따라 UI와 네비게이션 로직을 분리합니다 --- V V V
+                       // V V V --- [핵심 수정] 채팅 유형에 따라 UI와 네비게이션 로직을 분리합니다 --- V V V
+
+                        // --- 1. 동호회 (그룹 채팅) ---
                         if (chatRoom.isGroupChat) {
-                          // --- 그룹 채팅 UI ---
                           return ListTile(
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            leading: _buildGroupAvatar(chatRoom.groupImage), // 동호회 대표 이미지
+                            leading: _buildGroupAvatar(chatRoom.groupImage),
                             title: Text(chatRoom.groupName ?? 'Group Chat', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                             subtitle: Text(chatRoom.lastMessage, maxLines: 1, overflow: TextOverflow.ellipsis),
                             trailing: _buildTrailing(chatRoom),
                             onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => ChatRoomScreen(
-                                    chatId: chatRoom.id,
-                                    isGroupChat: true,
-                                    groupName: chatRoom.groupName,
-                                    participants: chatRoom.participants,
-                                  ),
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => ChatRoomScreen(
+                                  chatId: chatRoom.id,
+                                  isGroupChat: true,
+                                  groupName: chatRoom.groupName,
+                                  participants: chatRoom.participants,
                                 ),
-                              );
+                              ));
                             },
                           );
-                        } else {
-                          // --- 1:1 채팅 UI (기존 로직) ---
-                          if (otherUser == null) return const SizedBox.shrink();
-                          
-                          final bool isProductChat = chatRoom.productId != null && chatRoom.productId!.isNotEmpty;
+                        } 
+                        
+                        // --- 2. 구인구직 ---
+                        else if (chatRoom.jobId != null && chatRoom.jobId!.isNotEmpty) {
+                           return ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            leading: _buildJobAvatar(), // 구인구직 전용 아바타
+                            title: Text(chatRoom.jobTitle ?? 'Job Posting', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}', maxLines: 1, overflow: TextOverflow.ellipsis),
+                            trailing: _buildTrailing(chatRoom),
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => ChatRoomScreen(
+                                  chatId: chatRoom.id,
+                                  otherUserName: otherUser?.nickname ?? 'User',
+                                  otherUserId: otherUid,
+                                  productTitle: chatRoom.jobTitle, // 제목 필드 재활용
+                                ),
+                              ));
+                            },
+                          );
+                        }
 
+                        // --- 3. 중고거래 ---
+                        else if (chatRoom.productId != null && chatRoom.productId!.isNotEmpty) {
                           return ListTile(
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            leading: isProductChat
-                                ? _buildProductImage(chatRoom.productImage ?? '')
-                                : _buildUserAvatar(otherUser.photoUrl),
-                            title: Text(isProductChat ? chatRoom.productTitle ?? '' : otherUser.nickname, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            leading: _buildProductImage(chatRoom.productImage ?? ''),
+                            title: Text(chatRoom.productTitle ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}', maxLines: 1, overflow: TextOverflow.ellipsis),
+                            trailing: _buildTrailing(chatRoom),
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => ChatRoomScreen(
+                                  chatId: chatRoom.id,
+                                  otherUserName: otherUser?.nickname ?? 'User',
+                                  otherUserId: otherUid,
+                                  productTitle: chatRoom.productTitle,
+                                ),
+                              ));
+                            },
+                          );
+                        }
+
+                        // --- 4. 친구 (1:1 직접 채팅) ---
+                        else {
+                          if (otherUser == null) return const SizedBox.shrink();
+                          return ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            leading: _buildUserAvatar(otherUser.photoUrl),
+                            title: Text(otherUser.nickname, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                             subtitle: Text(chatRoom.lastMessage, maxLines: 1, overflow: TextOverflow.ellipsis),
                             trailing: _buildTrailing(chatRoom),
                             onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => ChatRoomScreen(
-                                    chatId: chatRoom.id,
-                                    otherUserName: otherUser.nickname,
-                                    otherUserId: otherUser.uid,
-                                    productTitle: chatRoom.productTitle,
-                                  ),
+                               Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => ChatRoomScreen(
+                                  chatId: chatRoom.id,
+                                  otherUserName: otherUser.nickname,
+                                  otherUserId: otherUser.uid,
                                 ),
-                              );
+                              ));
                             },
                           );
                         }
@@ -141,6 +176,15 @@ class _ChatListScreenState extends State<ChatListScreen> {
       child: (groupImageUrl == null || groupImageUrl.isEmpty)
           ? const Icon(Icons.groups) // 그룹 기본 아이콘
           : null,
+    );
+  }
+
+  // [추가] 구인구직 아바타 위젯
+  Widget _buildJobAvatar() {
+    return CircleAvatar(
+      radius: 28,
+      backgroundColor: Colors.grey.shade200,
+      child: Icon(Icons.work_outline, color: Colors.grey.shade600),
     );
   }
   

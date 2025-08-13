@@ -1,412 +1,133 @@
-diff --git a/lib/features/clubs/screens/clubs_screen.dart b/lib/features/clubs/screens/clubs_screen.dart
-index e1a0df278ac8286dc1778e0a26916eb67e0dc383..1c7ed7f86e6970a1372d3a82d0476b689613c4e6 100644
---- a/lib/features/clubs/screens/clubs_screen.dart
-+++ b/lib/features/clubs/screens/clubs_screen.dart
-@@ -1,47 +1,92 @@
- // lib/features/clubs/screens/clubs_screen.dart
- 
- import 'package:bling_app/core/models/club_model.dart';
- import 'package:bling_app/core/models/user_model.dart';
- import 'package:bling_app/features/clubs/data/club_repository.dart';
- import 'package:bling_app/features/clubs/widgets/club_card.dart';
-+import 'package:bling_app/features/location/screens/location_filter_screen.dart';
- import 'package:flutter/material.dart';
- import 'package:easy_localization/easy_localization.dart';
- 
--class ClubsScreen extends StatelessWidget {
-+class ClubsScreen extends StatefulWidget {
-   final UserModel? userModel;
-   const ClubsScreen({this.userModel, super.key});
- 
-+  @override
-+  State<ClubsScreen> createState() => _ClubsScreenState();
-+}
-+
-+class _ClubsScreenState extends State<ClubsScreen> {
-+  Map<String, String?>? _locationFilter;
-+
-+  void _openFilter() async {
-+    final result = await Navigator.of(context).push<Map<String, String?>>(
-+      MaterialPageRoute(
-+          builder: (_) => LocationFilterScreen(userModel: widget.userModel)),
-+    );
-+    if (result != null) {
-+      setState(() => _locationFilter = result);
-+    }
-+  }
-+
-+  void _clearFilter() {
-+    setState(() => _locationFilter = null);
-+  }
-+
-   @override
-   Widget build(BuildContext context) {
-     final ClubRepository clubRepository = ClubRepository();
- 
-     return Scaffold(
--      body: StreamBuilder<List<ClubModel>>(
--        stream: clubRepository.fetchClubs(),
--        builder: (context, snapshot) {
--          if (snapshot.connectionState == ConnectionState.waiting) {
--            return const Center(child: CircularProgressIndicator());
--          }
--          if (snapshot.hasError) {
--            return Center(
--                child: Text('clubs.screen.error'
--                    .tr(namedArgs: {'error': snapshot.error.toString()})));
--          }
--          if (!snapshot.hasData || snapshot.data!.isEmpty) {
--            return Center(child: Text('clubs.screen.empty'.tr()));
--          }
--
--          final clubs = snapshot.data!;
--
--          return ListView.builder(
--            itemCount: clubs.length,
--            itemBuilder: (context, index) {
--              final club = clubs[index];
--              return ClubCard(club: club);
--            },
--          );
--        },
-+      body: Column(
-+        children: [
-+          Row(
-+            mainAxisAlignment: MainAxisAlignment.end,
-+            children: [
-+              if (_locationFilter != null)
-+                IconButton(
-+                  icon: const Icon(Icons.clear),
-+                  tooltip: 'Clear',
-+                  onPressed: _clearFilter,
-+                ),
-+              IconButton(
-+                icon: const Icon(Icons.filter_alt_outlined),
-+                tooltip: 'Filter',
-+                onPressed: _openFilter,
-+              ),
-+            ],
-+          ),
-+          Expanded(
-+            child: StreamBuilder<List<ClubModel>>(
-+              stream:
-+                  clubRepository.fetchClubs(locationFilter: _locationFilter),
-+              builder: (context, snapshot) {
-+                if (snapshot.connectionState == ConnectionState.waiting) {
-+                  return const Center(child: CircularProgressIndicator());
-+                }
-+                if (snapshot.hasError) {
-+                  return Center(
-+                      child: Text('clubs.screen.error'
-+                          .tr(namedArgs: {'error': snapshot.error.toString()})));
-+                }
-+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-+                  return Center(child: Text('clubs.screen.empty'.tr()));
-+                }
-+
-+                final clubs = snapshot.data!;
-+
-+                return ListView.builder(
-+                  itemCount: clubs.length,
-+                  itemBuilder: (context, index) {
-+                    final club = clubs[index];
-+                    return ClubCard(club: club);
-+                  },
-+                );
-+              },
-+            ),
-+          ),
-+        ],
+diff --git a/lib/features/find_friends/screens/find_friend_detail_screen.dart b/lib/features/find_friends/screens/find_friend_detail_screen.dart
+index a43b872180fa345aafb02ff77cde2cef4446eded..3d825421a1f2d1e31398539613abe32aaac30680 100644
+--- a/lib/features/find_friends/screens/find_friend_detail_screen.dart
++++ b/lib/features/find_friends/screens/find_friend_detail_screen.dart
+@@ -98,67 +98,70 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
+                   ],
+                   if (user.interests != null && user.interests!.isNotEmpty) ...[
+                     Text("interests.title".tr(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                     const SizedBox(height: 8),
+                     Wrap(
+                       spacing: 8.0,
+                       runSpacing: 4.0,
+                       children: user.interests!.map((interestKey) {
+                         return Chip(label: Text("interests.items.$interestKey".tr()));
+                       }).toList(),
+                     ),
+                   ],
+                 ],
+               ),
+             ),
+           ],
+         ),
        ),
+       floatingActionButton: (currentUser == null || currentUser.uid == user.uid)
+           ? null
+           : StreamBuilder<QuerySnapshot>(
+               stream: FindFriendRepository().getRequestStatus(currentUser.uid, user.uid),
+               builder: (context, snapshot) {
+                 if (currentUser.friends?.contains(user.uid) ?? false) {
+                   return FloatingActionButton.extended(
++                    heroTag: 'friend_detail_fab',
+                     onPressed: null,
+                     label: Text("friendDetail.alreadyFriends".tr()),
+                     icon: const Icon(Icons.check_circle),
+                     backgroundColor: Colors.grey,
+                   );
+                 }
+ 
+                 if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                   return FloatingActionButton.extended(
++                    heroTag: 'friend_detail_fab',
+                     onPressed: null,
+                     label: Text("friendDetail.requestSent".tr()),
+                     icon: const Icon(Icons.hourglass_top),
+                     backgroundColor: Colors.orange,
+                   );
+                 }
+-                
++
+                 return FloatingActionButton.extended(
++                  heroTag: 'friend_detail_fab',
+                   onPressed: () async {
+                     try {
+                       await FindFriendRepository().sendFriendRequest(currentUser.uid, user.uid);
+                       // V V V --- [수정] 화면이 살아있는지(mounted) 확인 후 SnackBar 호출 --- V V V
+                       if (mounted) {
+                         ScaffoldMessenger.of(context).showSnackBar(
+                           SnackBar(content: Text("friendDetail.requestSuccess".tr())),
+                         );
+                       }
+                     } catch (e) {
+                       if (mounted) {
+                         ScaffoldMessenger.of(context).showSnackBar(
+                           SnackBar(content: Text("${"friendDetail.requestFailed".tr()} $e")),
+                         );
+                       }
+                     }
+                   },
+                   label: Text("friendDetail.request".tr()),
+                   icon: const Icon(Icons.person_add_alt_1),
+                 );
+               },
+             ),
+       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
      );
    }
- }
-diff --git a/lib/features/clubs/screens/create_club_screen.dart b/lib/features/clubs/screens/create_club_screen.dart
-index d9b51deaf11e9fccbd162d823d111880dafb439d..00f018f326e278803bd1d9387213cfec8ad13945 100644
---- a/lib/features/clubs/screens/create_club_screen.dart
-+++ b/lib/features/clubs/screens/create_club_screen.dart
-@@ -1,54 +1,56 @@
- // lib/features/clubs/screens/create_club_screen.dart
- 
- import 'dart:io'; // [추가] File 클래스 사용
- import 'package:bling_app/core/models/club_model.dart';
- import 'package:bling_app/core/models/user_model.dart';
- import 'package:bling_app/features/clubs/data/club_repository.dart';
-+import 'package:bling_app/features/location/screens/location_filter_screen.dart';
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:firebase_storage/firebase_storage.dart'; // [추가] Firebase Storage
- import 'package:flutter/material.dart';
- import 'package:image_picker/image_picker.dart'; // [추가] image_picker
- import 'package:uuid/uuid.dart'; // [추가] 고유 파일명 생성
- import 'package:easy_localization/easy_localization.dart';
- 
- class CreateClubScreen extends StatefulWidget {
-   final UserModel userModel;
-   const CreateClubScreen({super.key, required this.userModel});
- 
-   @override
-   State<CreateClubScreen> createState() => _CreateClubScreenState();
- }
- 
- class _CreateClubScreenState extends State<CreateClubScreen> {
-   final _formKey = GlobalKey<FormState>();
-   final _titleController = TextEditingController();
-   final _descriptionController = TextEditingController();
- 
-   final List<String> _selectedInterests = [];
-   bool _isPrivate = false;
-   bool _isSaving = false;
-+  Map<String, String?>? _selectedLocationParts;
- 
-   // V V V --- [추가] 이미지 관련 상태 변수 --- V V V
-   XFile? _selectedImage;
-   final ImagePicker _picker = ImagePicker();
-   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
- 
-   final ClubRepository _repository = ClubRepository();
- 
- // [수정] find_friend와 동일한 전체 관심사 목록을 사용합니다.
-   final Map<String, List<String>> _interestCategories = {
-     'category_creative': [
-       'drawing',
-       'instrument',
-       'photography',
-       'writing',
-       'crafting',
-       'gardening'
-     ],
-     'category_sports': [
-       'soccer',
-       'hiking',
-       'camping',
-       'running',
-       'biking',
-       'golf',
-@@ -63,84 +65,104 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
-       'tea'
-     ],
-     'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
-     'category_growth': ['reading', 'investing', 'language', 'coding'],
-     'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
-   };
- 
-   @override
-   void dispose() {
-     _titleController.dispose();
-     _descriptionController.dispose();
-     super.dispose();
+\ No newline at end of file
+diff --git a/lib/features/main_screen/home_screen.dart b/lib/features/main_screen/home_screen.dart
+index 26b7932977895ffb396fb02b9694fea36ce660f0..a22c9366e6edab95cdf00bab0b53c4674c284c5b 100644
+--- a/lib/features/main_screen/home_screen.dart
++++ b/lib/features/main_screen/home_screen.dart
+@@ -335,50 +335,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+     return Scaffold(
+       appBar: null,
+       drawer: _buildAppDrawer(_userModel),
+       body: IndexedStack(
+         index: effectiveIndex,
+         children: pages,
+       ),
+       bottomNavigationBar: BottomAppBar(
+         shape: const CircularNotchedRectangle(),
+         notchMargin: 8.0,
+         child: Row(
+           mainAxisAlignment: MainAxisAlignment.spaceAround,
+           children: <Widget>[
+             _buildBottomNavItem(icon: Icons.home, index: 0),
+             _buildBottomNavItem(icon: Icons.search, index: 1),
+             const SizedBox(width: 40),
+             _buildBottomNavItem(
+                 icon: Icons.chat_bubble_outline,
+                 index: 3,
+                 badgeCount: _totalUnreadCount),
+             _buildBottomNavItem(icon: Icons.person_outline, index: 4),
+           ],
+         ),
+       ),
+       floatingActionButton: FloatingActionButton(
++        heroTag: 'home_main_fab',
+         onPressed: _onFloatingActionButtonTapped,
+         child: const Icon(Icons.add),
+       ),
+       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+     );
    }
  
-   // [추가] 이미지 선택 함수
-   Future<void> _pickImage() async {
-     final pickedFile =
-         await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-     if (pickedFile != null) {
-       setState(() {
-         _selectedImage = pickedFile;
-       });
+   Widget _buildBottomNavItem(
+       {required IconData icon, required int index, int badgeCount = 0}) {
+     final Map<int, String> tooltipKeys = {
+       0: 'main.bottomNav.home',
+       1: 'main.bottomNav.search',
+       3: 'main.bottomNav.chat',
+       4: 'main.bottomNav.myBling'
+     };
+     final isSelected = _bottomNavIndex == index;
+ 
+     Widget iconWidget = Icon(icon,
+         color: isSelected ? Theme.of(context).primaryColor : Colors.grey);
+ 
+     if (badgeCount > 0) {
+       iconWidget = Badge(label: Text('$badgeCount'), child: iconWidget);
      }
-   }
  
-+  Future<void> _selectLocation() async {
-+    final result = await Navigator.of(context)
-+        .push<Map<String, String?>>(
-+            MaterialPageRoute(builder: (_) => const LocationFilterScreen()));
-+    if (result != null) {
-+      setState(() => _selectedLocationParts = result);
-+    }
-+  }
-+
-   // [수정] 동호회 생성 로직 구현
- 
-   Future<void> _createClub() async {
-     if (!_formKey.currentState!.validate() || _isSaving) {
-       return;
-     }
-     if (_selectedInterests.isEmpty) {
-       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
-             content: Text('clubs.createClub.selectAtLeastOneInterest'.tr())),
-       );
-       return;
-     }
-+    if (_selectedLocationParts == null) {
-+      ScaffoldMessenger.of(context).showSnackBar(
-+        const SnackBar(content: Text('Please select location')),
-+      );
-+      return;
-+    }
- 
-     setState(() => _isSaving = true);
- 
-     try {
-       String? imageUrl;
-       // [수정] 이미지가 선택되었으면 Storage에 업로드
-       if (_selectedImage != null) {
-         final fileName = const Uuid().v4();
-         final ref =
-             FirebaseStorage.instance.ref().child('club_images/$fileName');
-         await ref.putFile(File(_selectedImage!.path));
-         imageUrl = await ref.getDownloadURL();
-       }
- 
-       final newClub = ClubModel(
-         id: '', // ID는 Firestore에서 자동으로 생성됩니다.
-         title: _titleController.text.trim(),
-         description: _descriptionController.text.trim(),
-         ownerId: widget.userModel.uid,
--        location: widget.userModel.locationParts?['kec'] ??
--            'Unknown', // 사용자의 Kecamatan 정보 활용
-+        location: _selectedLocationParts?['kel'] ??
-+            _selectedLocationParts?['kec'] ??
-+            _selectedLocationParts?['kab'] ??
-+            _selectedLocationParts?['kota'] ??
-+            _selectedLocationParts?['prov'] ??
-+            'Unknown',
-+        locationParts: _selectedLocationParts,
-         // interests: _selectedInterests, // Removed or renamed as per ClubModel definition
-         isPrivate: _isPrivate,
-         createdAt: Timestamp.now(),
-         membersCount: 1, // 개설자는 자동으로 멤버 1명이 됩니다.
-         imageUrl: imageUrl, // [수정] 업로드된 이미지 URL 전달
-         mainCategory: _selectedInterests.isNotEmpty
-             ? _interestCategories.entries
-                 .firstWhere(
-                   (entry) => entry.value.contains(_selectedInterests.first),
-                   orElse: () => _interestCategories.entries.first,
-                 )
-                 .key
-             : '', // 첫 번째 선택된 관심사의 카테고리, 없으면 빈 문자열
-         interestTags: _selectedInterests, // 선택된 관심사 리스트
-       );
- 
-       await _repository.createClub(newClub);
- 
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-           content: Text('clubs.createClub.success'.tr()),
-           backgroundColor: Colors.green,
-         ));
-         Navigator.of(context).pop();
-       }
-@@ -219,50 +241,64 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
-                     border: OutlineInputBorder(),
-                   ),
-                   validator: (value) {
-                     if (value == null || value.trim().isEmpty) {
-                       return 'clubs.createClub.nameError'.tr();
-                     }
-                     return null;
-                   },
-                 ),
-                 const SizedBox(height: 16),
-                 TextFormField(
-                   controller: _descriptionController,
-                   decoration: InputDecoration(
-                     labelText: 'clubs.createClub.descriptionLabel'.tr(),
-                     border: OutlineInputBorder(),
-                   ),
-                   maxLines: 5,
-                   validator: (value) {
-                     if (value == null || value.trim().isEmpty) {
-                       return 'clubs.createClub.descriptionError'.tr();
-                     }
-                     return null;
-                   },
-                 ),
-                 const SizedBox(height: 24),
-+                ListTile(
-+                  title: const Text('Location'),
-+                  subtitle: Text(
-+                    _selectedLocationParts?['kel'] ??
-+                        _selectedLocationParts?['kec'] ??
-+                        _selectedLocationParts?['kab'] ??
-+                        _selectedLocationParts?['kota'] ??
-+                        _selectedLocationParts?['prov'] ??
-+                        'Select location',
-+                  ),
-+                  trailing: const Icon(Icons.chevron_right),
-+                  onTap: _selectLocation,
-+                ),
-+                const SizedBox(height: 24),
-                 Row(
-                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                   children: [
-                     Text("interests.title".tr(),
-                         style: const TextStyle(
-                             fontWeight: FontWeight.bold, fontSize: 16)),
-                     Text('${_selectedInterests.length}/3',
-                         style: const TextStyle(
-                             fontWeight: FontWeight.bold,
-                             color: Colors.teal)), // 동호회는 최대 3개로 제한
-                   ],
-                 ),
-                 const SizedBox(height: 8),
-                 ..._interestCategories.entries.map((entry) {
-                   final categoryKey = entry.key;
-                   final interestKeys = entry.value;
-                   return ExpansionTile(
-                     title: Text("interests.$categoryKey".tr(),
-                         style: const TextStyle(fontWeight: FontWeight.w500)),
-                     children: [
-                       Padding(
-                         padding: const EdgeInsets.all(8.0),
-                         child: Wrap(
-                           spacing: 8.0,
-                           runSpacing: 4.0,
-diff --git a/lib/features/clubs/screens/edit_club_screen.dart b/lib/features/clubs/screens/edit_club_screen.dart
-index 59ff1c48d3a93371801c7f50c8bef9723d59056b..6f07938691bae84dad7f1bba3a6972705ccdf0b5 100644
---- a/lib/features/clubs/screens/edit_club_screen.dart
-+++ b/lib/features/clubs/screens/edit_club_screen.dart
-@@ -104,50 +104,51 @@ class _EditClubScreenState extends State<EditClubScreen> {
- 
-     setState(() => _isSaving = true);
- 
-     try {
-       String? imageUrl = _existingImageUrl;
-       // 새 이미지가 선택되었으면 Storage에 업로드
-       if (_selectedImage != null) {
-         final fileName = const Uuid().v4();
-         final ref =
-             FirebaseStorage.instance.ref().child('club_images/$fileName');
-         await ref.putFile(File(_selectedImage!.path));
-         imageUrl = await ref.getDownloadURL();
-       }
- 
-       // ClubModel 객체를 업데이트된 정보로 새로 만듭니다.
-       final updatedClub = ClubModel(
-         id: widget.club.id, // ID는 기존 ID를 그대로 사용
-         title: _titleController.text.trim(),
-         description: _descriptionController.text.trim(),
-         imageUrl: imageUrl,
-         interestTags: _selectedInterests,
-         isPrivate: _isPrivate,
-         // 수정되지 않는 필드들은 기존 값을 그대로 사용
-         ownerId: widget.club.ownerId,
-         location: widget.club.location,
-+        locationParts: widget.club.locationParts,
-         mainCategory: widget.club.mainCategory,
-         membersCount: widget.club.membersCount,
-         createdAt: widget.club.createdAt,
-         kickedMembers: widget.club.kickedMembers,
-         pendingMembers: widget.club.pendingMembers,
-       );
- 
-       await _repository.updateClub(updatedClub);
- 
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-             content: Text('동호회 정보가 수정되었습니다.'), backgroundColor: Colors.green));
-         Navigator.of(context).pop();
-       }
-     } catch (e) {
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-             content: Text('수정에 실패했습니다: $e'), backgroundColor: Colors.red));
-       }
-     } finally {
-       if (mounted) setState(() => _isSaving = false);
-     }
-   }
- 
-   @override
+     return IconButton(

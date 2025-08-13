@@ -4,49 +4,100 @@ import 'package:bling_app/core/models/job_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/jobs/data/job_repository.dart';
 import 'package:bling_app/features/jobs/widgets/job_card.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-// import 'create_job_screen.dart'; // TODO: 나중에 만들 구인글 작성 화면
+import 'package:easy_localization/easy_localization.dart';
+import 'create_job_screen.dart';
 
 class JobsScreen extends StatelessWidget {
   final UserModel? userModel;
-  const JobsScreen({this.userModel, super.key});
+  final Map<String, String?>? locationFilter;
+  const JobsScreen({this.userModel, this.locationFilter, super.key});
+
+  List<JobModel> _applyLocationFilter(List<JobModel> allJobs) {
+    final filter = locationFilter;
+    if (filter == null) return allJobs;
+
+String? key;
+    if (filter['kel'] != null) {
+      key = 'kel';
+    } else if (filter['kec'] != null) {
+      key = 'kec';
+    } else if (filter['kab'] != null) {
+      key = 'kab';
+    } else if (filter['kota'] != null) {
+      key = 'kota';
+    } else if (filter['prov'] != null) {
+      key = 'prov';
+    }
+     if (key == null) return allJobs;
+
+    final value = filter[key]!.toLowerCase();
+    return allJobs
+        .where((job) =>
+            (job.locationParts?[key] ?? '')
+                .toString()
+                .toLowerCase() ==
+            value)
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     final JobRepository jobRepository = JobRepository();
+    final userProvince = userModel?.locationParts?['prov'];
+
+    if (userModel?.locationParts?['prov'] == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Text('jobs.setLocationPrompt'.tr(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Colors.grey)),
+        ),
+      );
+    }
 
     return Scaffold(
-      body: StreamBuilder<List<JobModel>>(
-        stream: jobRepository.fetchJobs(),
+      body: StreamBuilder<List<JobModel>>( // [수정] Stream 타입을 JobModel 리스트로 변경
+        stream: jobRepository.fetchJobs(userProvince), // [수정] 불필요한 .snapshots() 제거
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}')); // TODO: 다국어
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('아직 등록된 구인글이 없습니다.')); // TODO: 다국어
-          }
+          
+          final allJobs = snapshot.data ?? [];
+          // [수정] 2차 필터링 적용
+          final filteredJobs = _applyLocationFilter(allJobs);
 
-          final jobs = snapshot.data!;
+          if (filteredJobs.isEmpty) {
+            return Center(child: Text('아직 등록된 구인글이 없습니다.'.tr())); // TODO: 다국어
+          }
 
           return ListView.builder(
-            itemCount: jobs.length,
+            itemCount: filteredJobs.length,
             itemBuilder: (context, index) {
-              final job = jobs[index];
+              final job = filteredJobs[index]; // [수정]
               return JobCard(job: job);
             },
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'jobs_fab', // HeroTag 추가
         onPressed: () {
-          // TODO: 구인글 작성 화면으로 이동하는 로직
-          // Navigator.of(context).push(MaterialPageRoute(builder: (_) => CreateJobScreen()));
+          if (userModel != null) {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => CreateJobScreen(userModel: userModel!),
+            ));
+          }
         },
         tooltip: '새 구인글 등록', // TODO: 다국어
         child: const Icon(Icons.add),
+        
       ),
     );
   }

@@ -18,6 +18,7 @@ class UserModel {
   final Map<String, dynamic>? privacySettings; // 공개 범위 설정
   final List<String>? postIds; // 작성한 피드 ID 목록
   final List<String>? productIds; // 등록한 마켓 상품 ID 목록
+    final List<String>? jobIds;
   final List<String>? bookmarkedPostIds; // 북마크한 피드 ID 목록
   final List<String>? bookmarkedProductIds; // 북마크한 마켓 상품 ID 목록
   
@@ -64,6 +65,7 @@ class UserModel {
     this.privacySettings,
     this.postIds,
     this.productIds,
+     this.jobIds,
     this.bookmarkedPostIds,
     this.bookmarkedProductIds,
     this.bookmarkedClubPostIds, // [추가]
@@ -108,6 +110,7 @@ class UserModel {
       privacySettings: data['privacySettings'] != null ? Map<String, dynamic>.from(data['privacySettings']) : null,
       postIds: data['postIds'] != null ? List<String>.from(data['postIds']) : null,
       productIds: data['productIds'] != null ? List<String>.from(data['productIds']) : null,
+      jobIds: data['jobIds'] != null ? List<String>.from(data['jobIds']) : null,
       bookmarkedPostIds: data['bookmarkedPostIds'] != null ? List<String>.from(data['bookmarkedPostIds']) : null,
       bookmarkedProductIds: data['bookmarkedProductIds'] != null ? List<String>.from(data['bookmarkedProductIds']) : null,
       bookmarkedClubPostIds: data['bookmarkedClubPostIds'] != null ? List<String>.from(data['bookmarkedClubPostIds']) : null, // [추가]
@@ -152,6 +155,7 @@ class UserModel {
       'privacySettings': privacySettings,
       'postIds': postIds,
       'productIds': productIds,
+      'jobIds': jobIds, // [추가]
       'bookmarkedPostIds': bookmarkedPostIds,
       'bookmarkedProductIds': bookmarkedProductIds,
       'bookmarkedClubPostIds': bookmarkedClubPostIds, // [추가]
