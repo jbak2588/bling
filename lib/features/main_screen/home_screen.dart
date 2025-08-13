@@ -13,13 +13,13 @@ import 'package:bling_app/features/pom/screens/pom_screen.dart';
 import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
 import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
 import 'package:bling_app/features/clubs/screens/create_club_screen.dart';
+import 'package:bling_app/features/jobs/screens/create_job_screen.dart'; // [추가] 구인글 작성 화면 import
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 
 import '../../../core/models/user_model.dart';
 import '../../../core/utils/address_formatter.dart';
@@ -29,8 +29,6 @@ import '../local_news/screens/local_news_screen.dart';
 import '../location/screens/location_filter_screen.dart';
 import '../marketplace/screens/marketplace_screen.dart';
 import '../admin/screens/data_fix_screen.dart';
-
-
 
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
@@ -178,8 +176,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => CreateClubScreen(userModel: _userModel!)));
         break;
+      case 5: // Jobs
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => CreateJobScreen(userModel: _userModel!)));
+        break;
       default:
-        debugPrint('${_topTabs[currentTabIndex]['key']} 탭에서는 생성 기능이 지원되지 않습니다.');
+        debugPrint(
+            '${_topTabs[currentTabIndex]['key']} 탭에서는 생성 기능이 지원되지 않습니다.');
     }
   }
 
@@ -357,6 +360,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'home_main_fab',
         onPressed: _onFloatingActionButtonTapped,
         child: const Icon(Icons.add),
       ),

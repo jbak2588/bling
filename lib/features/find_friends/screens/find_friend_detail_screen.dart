@@ -120,6 +120,7 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
               builder: (context, snapshot) {
                 if (currentUser.friends?.contains(user.uid) ?? false) {
                   return FloatingActionButton.extended(
+                    heroTag: 'friend_detail_fab',
                     onPressed: null,
                     label: Text("friendDetail.alreadyFriends".tr()),
                     icon: const Icon(Icons.check_circle),
@@ -129,14 +130,16 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
 
                 if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
                   return FloatingActionButton.extended(
+                    heroTag: 'friend_detail_fab',
                     onPressed: null,
                     label: Text("friendDetail.requestSent".tr()),
                     icon: const Icon(Icons.hourglass_top),
                     backgroundColor: Colors.orange,
                   );
                 }
-                
+
                 return FloatingActionButton.extended(
+                  heroTag: 'friend_detail_fab',
                   onPressed: () async {
                     try {
                       await FindFriendRepository().sendFriendRequest(currentUser.uid, user.uid);
@@ -161,5 +164,4 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
-  }
-}
+  }}

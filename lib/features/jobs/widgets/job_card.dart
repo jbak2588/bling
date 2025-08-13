@@ -1,8 +1,10 @@
 // lib/features/jobs/widgets/job_card.dart
 
 import 'package:bling_app/core/models/job_model.dart';
+import 'package:bling_app/features/jobs/screens/job_detail_screen.dart'; // [추가]
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+// [추가] 숫자 포맷을 위해
 
 class JobCard extends StatelessWidget {
   final JobModel job;
@@ -10,45 +12,93 @@ class JobCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: '시급', '월급' 등 급여 정보를 모델에 추가하고 표시해야 합니다.
     final NumberFormat currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
+      clipBehavior: Clip.antiAlias, // InkWell 효과가 Card 모서리를 따르도록 함
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              job.title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      child: InkWell(
+        // TODO: onTap에 상세 화면 이동 로직 추가
+         onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => JobDetailScreen(job: job),
             ),
-            const SizedBox(height: 8),
-            Text(
-              // TODO: 회사/가게 이름 필드 추가 필요
-              job.locationName ?? '위치 정보 없음',
-              style: TextStyle(color: Colors.grey[700], fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              // TODO: 급여 정보 표시
-              '시급: ${currencyFormat.format(100000)}', // 예시 데이터
-              style: const TextStyle(fontSize: 16, color: Colors.teal, fontWeight: FontWeight.bold),
-            ),
-            const Divider(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(job.category, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                Text('몇 분 전', style: TextStyle(fontSize: 12, color: Colors.grey[600])), // TODO: 시간 포맷 함수 적용
-              ],
-            )
-          ],
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          // V V V --- [수정] 이미지를 포함하기 위해 Row 위젯으로 구조 변경 --- V V V
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- 1. 대표 이미지 ---
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: (job.imageUrls != null && job.imageUrls!.isNotEmpty)
+                    ? Image.network(
+                        job.imageUrls!.first,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        errorBuilder: (c, e, s) => _buildPlaceholderImage(),
+                      )
+                    : _buildPlaceholderImage(),
+              ),
+              const SizedBox(width: 16),
+              // --- 2. 텍스트 정보 ---
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      job.title,
+                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      job.locationName ?? '위치 정보 없음', // TODO: 다국어
+                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      // 급여 정보 표시
+                      '${'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr()}: ${currencyFormat.format(job.salaryAmount ?? 0)}',
+                      style: const TextStyle(fontSize: 15, color: Colors.teal, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('jobs.categories.${job.category}'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                        Text('몇 분 전', style: TextStyle(fontSize: 12, color: Colors.grey[600])), // TODO: 시간 포맷 함수 적용
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+          // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
         ),
       ),
+    );
+  }
+
+  // [추가] 이미지 플레이스홀더 위젯
+  Widget _buildPlaceholderImage() {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Icon(Icons.work_outline, size: 40, color: Colors.grey.shade400),
     );
   }
 }

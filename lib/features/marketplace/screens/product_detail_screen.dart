@@ -15,7 +15,6 @@ import 'package:bling_app/core/models/product_model.dart';
 import 'package:bling_app/features/marketplace/screens/product_edit_screen.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 
-
 // 카테고리 이름 표시를 위한 별도 위젯
 class CategoryNameWidget extends StatelessWidget {
   final String categoryId;
@@ -354,7 +353,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 const VerticalDivider(
                                     width: 1.0, thickness: 1.0),
                                 const SizedBox(width: 16),
-                              
+
                                 // RichText를 사용하여 두 텍스트를 하나의 위젯으로 통합
                                 Flexible(
                                   child: RichText(
@@ -392,7 +391,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                           ),
                           // 오른쪽: 채팅 버튼
-                       ElevatedButton(
+                          ElevatedButton(
                             // ⭐️ [수정] 여기가 핵심 수정 부분입니다.
                             onPressed: () async {
                               if (myUid == null) return;
@@ -402,10 +401,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               try {
                                 final chatId =
                                     await chatService.createOrGetChatRoom(
-                                  product.userId,
-                                  product.id,
-                                  product.title,
-                                  product.imageUrls.isNotEmpty
+                                  otherUserId: product.userId,
+                                  productId: product.id,
+                                  productTitle: product.title,
+                                  productImage: product.imageUrls.isNotEmpty
                                       ? product.imageUrls.first
                                       : '',
                                 );
@@ -487,7 +486,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     fit: BoxFit.cover,
                                     width: double.infinity,
                                     height: double.infinity,
-                                    loadingBuilder: (context, child, progress) =>
+                                    loadingBuilder: (context, child,
+                                            progress) =>
                                         progress == null
                                             ? child
                                             : const Center(
