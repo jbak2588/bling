@@ -1,133 +1,607 @@
-diff --git a/lib/features/find_friends/screens/find_friend_detail_screen.dart b/lib/features/find_friends/screens/find_friend_detail_screen.dart
-index a43b872180fa345aafb02ff77cde2cef4446eded..3d825421a1f2d1e31398539613abe32aaac30680 100644
---- a/lib/features/find_friends/screens/find_friend_detail_screen.dart
-+++ b/lib/features/find_friends/screens/find_friend_detail_screen.dart
-@@ -98,67 +98,70 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
-                   ],
-                   if (user.interests != null && user.interests!.isNotEmpty) ...[
-                     Text("interests.title".tr(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                     const SizedBox(height: 8),
-                     Wrap(
-                       spacing: 8.0,
-                       runSpacing: 4.0,
-                       children: user.interests!.map((interestKey) {
-                         return Chip(label: Text("interests.items.$interestKey".tr()));
-                       }).toList(),
-                     ),
-                   ],
-                 ],
-               ),
-             ),
-           ],
-         ),
-       ),
-       floatingActionButton: (currentUser == null || currentUser.uid == user.uid)
-           ? null
-           : StreamBuilder<QuerySnapshot>(
-               stream: FindFriendRepository().getRequestStatus(currentUser.uid, user.uid),
-               builder: (context, snapshot) {
-                 if (currentUser.friends?.contains(user.uid) ?? false) {
-                   return FloatingActionButton.extended(
-+                    heroTag: 'friend_detail_fab',
-                     onPressed: null,
-                     label: Text("friendDetail.alreadyFriends".tr()),
-                     icon: const Icon(Icons.check_circle),
-                     backgroundColor: Colors.grey,
-                   );
-                 }
+diff --git a/lib/features/jobs/data/job_repository.dart b/lib/features/jobs/data/job_repository.dart
+index c9c5ca34c6a7b3d7f1f33d5519c616ae0c248439..f6ccaaf8907bda90fdd60e0bd9da0f5f78afbf24 100644
+--- a/lib/features/jobs/data/job_repository.dart
++++ b/lib/features/jobs/data/job_repository.dart
+@@ -1,59 +1,60 @@
+ // lib/features/jobs/data/job_repository.dart
  
-                 if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                   return FloatingActionButton.extended(
-+                    heroTag: 'friend_detail_fab',
-                     onPressed: null,
-                     label: Text("friendDetail.requestSent".tr()),
-                     icon: const Icon(Icons.hourglass_top),
-                     backgroundColor: Colors.orange,
-                   );
-                 }
--                
-+
-                 return FloatingActionButton.extended(
-+                  heroTag: 'friend_detail_fab',
-                   onPressed: () async {
-                     try {
-                       await FindFriendRepository().sendFriendRequest(currentUser.uid, user.uid);
-                       // V V V --- [수정] 화면이 살아있는지(mounted) 확인 후 SnackBar 호출 --- V V V
-                       if (mounted) {
-                         ScaffoldMessenger.of(context).showSnackBar(
-                           SnackBar(content: Text("friendDetail.requestSuccess".tr())),
-                         );
-                       }
-                     } catch (e) {
-                       if (mounted) {
-                         ScaffoldMessenger.of(context).showSnackBar(
-                           SnackBar(content: Text("${"friendDetail.requestFailed".tr()} $e")),
-                         );
-                       }
-                     }
-                   },
-                   label: Text("friendDetail.request".tr()),
-                   icon: const Icon(Icons.person_add_alt_1),
-                 );
-               },
-             ),
-       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-     );
-   }
-\ No newline at end of file
-diff --git a/lib/features/main_screen/home_screen.dart b/lib/features/main_screen/home_screen.dart
-index 26b7932977895ffb396fb02b9694fea36ce660f0..a22c9366e6edab95cdf00bab0b53c4674c284c5b 100644
---- a/lib/features/main_screen/home_screen.dart
-+++ b/lib/features/main_screen/home_screen.dart
-@@ -335,50 +335,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-     return Scaffold(
-       appBar: null,
-       drawer: _buildAppDrawer(_userModel),
-       body: IndexedStack(
-         index: effectiveIndex,
-         children: pages,
-       ),
-       bottomNavigationBar: BottomAppBar(
-         shape: const CircularNotchedRectangle(),
-         notchMargin: 8.0,
-         child: Row(
-           mainAxisAlignment: MainAxisAlignment.spaceAround,
-           children: <Widget>[
-             _buildBottomNavItem(icon: Icons.home, index: 0),
-             _buildBottomNavItem(icon: Icons.search, index: 1),
-             const SizedBox(width: 40),
-             _buildBottomNavItem(
-                 icon: Icons.chat_bubble_outline,
-                 index: 3,
-                 badgeCount: _totalUnreadCount),
-             _buildBottomNavItem(icon: Icons.person_outline, index: 4),
-           ],
-         ),
-       ),
-       floatingActionButton: FloatingActionButton(
-+        heroTag: 'home_main_fab',
-         onPressed: _onFloatingActionButtonTapped,
-         child: const Icon(Icons.add),
-       ),
-       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-     );
-   }
+ import 'package:bling_app/core/models/job_model.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
++import 'package:easy_localization/easy_localization.dart';
  
-   Widget _buildBottomNavItem(
-       {required IconData icon, required int index, int badgeCount = 0}) {
-     final Map<int, String> tooltipKeys = {
-       0: 'main.bottomNav.home',
-       1: 'main.bottomNav.search',
-       3: 'main.bottomNav.chat',
-       4: 'main.bottomNav.myBling'
-     };
-     final isSelected = _bottomNavIndex == index;
+ class JobRepository {
+   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
  
-     Widget iconWidget = Icon(icon,
-         color: isSelected ? Theme.of(context).primaryColor : Colors.grey);
+   /// 'jobs' 컬렉션의 모든 구인글 목록을 실시간으로 가져옵니다.
+   // V V V --- [수정] 사용자의 Province를 기준으로 1차 필터링하도록 변경 --- V V V
+   Stream<List<JobModel>> fetchJobs(String? userProvince) {
+     Query<Map<String, dynamic>> query = _firestore.collection('jobs');
  
-     if (badgeCount > 0) {
-       iconWidget = Badge(label: Text('$badgeCount'), child: iconWidget);
+     // 사용자의 위치 정보(Province)가 있을 경우, 해당 지역의 게시물만 가져오도록 쿼리 필터 추가
+     if (userProvince != null && userProvince.isNotEmpty) {
+       query = query.where('locationParts.prov', isEqualTo: userProvince);
      }
  
-     return IconButton(
+     return query
+         .orderBy('createdAt', descending: true)
+         .snapshots()
+         .map((snapshot) {
+       return snapshot.docs
+           .map((doc) => JobModel.fromFirestore(doc))
+           .toList();
+     });
+   }
+   // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+ 
+ 
+   // V V V --- [추가] 새로운 구인글을 생성하는 함수 --- V V V
+   Future<void> createJob(JobModel job) async {
+     final user = FirebaseAuth.instance.currentUser;
+-    if (user == null) throw Exception("로그인이 필요합니다.");
++    if (user == null) throw Exception(tr('main.errors.loginRequired'));
+     
+     final newJobRef = _firestore.collection('jobs').doc();
+ 
+     // 사용자의 productIds 배열에도 새 상품 ID 추가
+     final userRef = _firestore.collection('users').doc(user.uid);
+ 
+     final batch = _firestore.batch();
+     batch.set(newJobRef, job.toJson());
+     batch.update(userRef, {'jobIds': FieldValue.arrayUnion([newJobRef.id])}); // 'jobIds' 필드에 추가
+ 
+     await batch.commit();
+   }
+   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+ 
+   // V V V --- [추가] ID로 특정 구인글 하나의 정보를 가져오는 함수 --- V V V
+   Future<JobModel?> fetchJob(String jobId) async {
+     final doc = await _firestore.collection('jobs').doc(jobId).get();
+     if (doc.exists) {
+       return JobModel.fromFirestore(doc);
+     }
+     return null;
+   }
+ 
+ }
+\ No newline at end of file
+diff --git a/lib/features/jobs/screens/create_job_screen.dart b/lib/features/jobs/screens/create_job_screen.dart
+index cecdcef74004d2966ebf31bd658d8c45b88da926..9b426f84e2692611eed0a993caff64459d490821 100644
+--- a/lib/features/jobs/screens/create_job_screen.dart
++++ b/lib/features/jobs/screens/create_job_screen.dart
+@@ -76,249 +76,244 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
+         imageUrls.add(await ref.getDownloadURL());
+       }
+ 
+       final newJob = JobModel(
+         id: '',
+         userId: user.uid,
+         title: _titleController.text.trim(),
+         description: _descriptionController.text.trim(),
+         category: _selectedCategory!,
+         locationName: widget.userModel.locationName,
+         locationParts: widget.userModel.locationParts,
+         geoPoint: widget.userModel.geoPoint,
+         createdAt: Timestamp.now(),
+         salaryType: _selectedSalaryType,
+         salaryAmount: int.tryParse(_salaryAmountController.text),
+         isSalaryNegotiable: _isSalaryNegotiable,
+         workPeriod: _selectedWorkPeriod,
+         workHours: _workHoursController.text.trim(),
+         imageUrls: imageUrls, // [수정] 업로드된 이미지 URL 목록 전달
+       );
+       await _repository.createJob(newJob);
+ 
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(
+-              content: Text('구인글이 등록되었습니다.'), backgroundColor: Colors.green),
++              content: Text('jobs.form.submitSuccess'.tr()), backgroundColor: Colors.green),
+         );
+         Navigator.of(context).pop();
+       }
+     } catch (e) {
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(
+-              content: Text('구인글 등록에 실패했습니다: $e'), backgroundColor: Colors.red),
++              content: Text('jobs.form.submitFail'.tr(args: {'error': e.toString()})), backgroundColor: Colors.red),
+         );
+       }
+     } finally {
+       if (mounted) {
+         setState(() => _isSaving = false);
+       }
+     }
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(
+-        title: Text('새 구인글 등록'), // TODO: 다국어
++        title: Text('jobs.form.title'.tr()),
+         actions: [
+           if (!_isSaving)
+             TextButton(
+               onPressed: _submitJob,
+-              child: Text('등록'), // TODO: 다국어
++              child: Text('jobs.form.submit'.tr()),
+             ),
+         ],
+       ),
+       body: Stack(
+         children: [
+           Form(
+             key: _formKey,
+             child: ListView(
+               padding: const EdgeInsets.all(16.0),
+               children: [
+                 // --- 직종 선택 ---
+                 DropdownButtonFormField<String>(
+                   value: _selectedCategory,
+-                  hint: Text('직종을 선택하세요'), // TODO: 다국어
++                  hint: Text('jobs.form.categorySelectHint'.tr()),
+                   items: [
+                     'restaurant',
+                     'cafe',
+                     'retail',
+                     'delivery',
+                     'etc'
+                   ] // 예시 카테고리
+                       .map((String value) {
+                     return DropdownMenuItem<String>(
+                       value: value,
+-                      child: Text(
+-                          'jobs.categories.$value'.tr()), // TODO: 다국어 키 정의 필요
++                      child: Text('jobs.categories.$value'.tr()),
+                     );
+                   }).toList(),
+                   onChanged: (String? newValue) {
+                     setState(() {
+                       _selectedCategory = newValue;
+                     });
+                   },
+                   decoration: InputDecoration(
+                     border: OutlineInputBorder(),
+                   ),
+                   validator: (value) =>
+-                      value == null ? '직종을 선택해주세요.' : null, // TODO: 다국어
++                      value == null ? 'jobs.form.categoryValidator'.tr() : null,
+                 ),
+                 const SizedBox(height: 16),
+ 
+                 // --- 제목 입력 ---
+                 TextFormField(
+                   controller: _titleController,
+                   decoration: InputDecoration(
+-                    labelText: '제목', // TODO: 다국어
++                    labelText: 'jobs.form.titleLabel'.tr(),
+                     border: OutlineInputBorder(),
+                   ),
+                   validator: (value) {
+                     if (value == null || value.trim().isEmpty) {
+-                      return '제목을 입력해주세요.'; // TODO: 다국어
++                      return 'jobs.form.titleValidator'.tr();
+                     }
+                     return null;
+                   },
+                 ),
+                 const SizedBox(height: 24),
+ 
+                 // V V V --- [수정] 급여 정보 입력 UI --- V V V
+-                Text('급여 정보',
+-                    style:
+-                        Theme.of(context).textTheme.titleMedium), // TODO: 다국어
++                Text('jobs.form.salaryInfoTitle'.tr(),
++                    style: Theme.of(context).textTheme.titleMedium),
+                 const SizedBox(height: 12),
+                 // 급여 종류 선택
+                 DropdownButtonFormField<String>(
+                   value: _selectedSalaryType,
+-                  hint: Text('종류'), // TODO: 다국어
++                  hint: Text('jobs.form.salaryTypeHint'.tr()),
+                   items: ['hourly', 'daily', 'monthly', 'per_case']
+                       .map((String value) => DropdownMenuItem<String>(
+                             value: value,
+-                            child: Text(
+-                                'jobs.salaryTypes.$value'.tr()), // TODO: 다국어
++                            child: Text('jobs.salaryTypes.$value'.tr()),
+                           ))
+                       .toList(),
+                   onChanged: (val) => setState(() => _selectedSalaryType = val),
+                   decoration:
+                       const InputDecoration(border: OutlineInputBorder()),
+                 ),
+                 const SizedBox(height: 12),
+                 // 급여액 입력
+                 TextFormField(
+                   controller: _salaryAmountController,
+                   decoration: InputDecoration(
+-                    labelText: '금액 (IDR)', // TODO: 다국어
++                    labelText: 'jobs.form.salaryAmountLabel'.tr(),
+                     border: OutlineInputBorder(),
+                   ),
+                   keyboardType: TextInputType.number,
+                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                 ),
+                 // 급여 협의 가능
+                 CheckboxListTile(
+-                  title: Text('급여 협의 가능'), // TODO: 다국어
++                  title: Text('jobs.form.salaryNegotiable'.tr()),
+                   value: _isSalaryNegotiable,
+                   onChanged: (val) =>
+                       setState(() => _isSalaryNegotiable = val ?? false),
+                   controlAffinity: ListTileControlAffinity.leading,
+                   contentPadding: EdgeInsets.zero,
+                 ),
+                 const SizedBox(height: 24),
+ 
+                 // V V V --- [추가] 근무 조건 입력 UI --- V V V
+-                Text('근무 조건',
+-                    style:
+-                        Theme.of(context).textTheme.titleMedium), // TODO: 다국어
++                Text('jobs.form.workInfoTitle'.tr(),
++                    style: Theme.of(context).textTheme.titleMedium),
+                 const SizedBox(height: 12),
+-                Text('근무 기간',
+-                    style: Theme.of(context).textTheme.titleSmall), // TODO: 다국어
++                Text('jobs.form.workPeriodTitle'.tr(),
++                    style: Theme.of(context).textTheme.titleSmall),
+                 Wrap(
+                   spacing: 8.0,
+                   children:
+                       ['short_term', 'mid_term', 'long_term'].map((period) {
+                     return ChoiceChip(
+-                      label: Text('jobs.workPeriods.$period'.tr()), // TODO: 다국어
++                      label: Text('jobs.workPeriods.$period'.tr()),
+                       selected: _selectedWorkPeriod == period,
+                       onSelected: (selected) {
+                         setState(() {
+                           _selectedWorkPeriod = selected ? period : null;
+                         });
+                       },
+                     );
+                   }).toList(),
+                 ),
+                 const SizedBox(height: 12),
+                 TextFormField(
+                   controller: _workHoursController,
+                   decoration: InputDecoration(
+-                    labelText: '근무 요일/시간', // TODO: 다국어
+-                    hintText: '예: 월-금, 09:00-18:00', // TODO: 다국어
++                    labelText: 'jobs.form.workHoursLabel'.tr(),
++                    hintText: 'jobs.form.workHoursHint'.tr(),
+                     border: OutlineInputBorder(),
+                   ),
+                 ),
+                 const SizedBox(height: 24),
+                     // V V V --- [추가] 이미지 첨부 UI --- V V V
+-                Text('사진 첨부 (선택, 최대 5장)', style: Theme.of(context).textTheme.titleMedium), // TODO: 다국어
++                Text('jobs.form.imageSectionTitle'.tr(), style: Theme.of(context).textTheme.titleMedium),
+                 const SizedBox(height: 12),
+                 SizedBox(
+                   height: 100,
+                   child: ListView(
+                     scrollDirection: Axis.horizontal,
+                     children: [
+                       ..._images.map((xfile) => Padding(
+                         padding: const EdgeInsets.only(right: 8.0),
+                         child: ClipRRect(
+                           borderRadius: BorderRadius.circular(8.0),
+                           child: Image.file(File(xfile.path), width: 100, height: 100, fit: BoxFit.cover),
+                         ),
+                       )),
+                       if (_images.length < 5)
+                         GestureDetector(
+                           onTap: _pickImages,
+                           child: Container(
+                             width: 100,
+                             height: 100,
+                             decoration: BoxDecoration(
+                               color: Colors.grey[200],
+                               borderRadius: BorderRadius.circular(8),
+                               border: Border.all(color: Colors.grey.shade400)
+                             ),
+                             child: Icon(Icons.add_a_photo_outlined, color: Colors.grey.shade600),
+                           ),
+                         ),
+                     ],
+                   ),
+                 ),
+                 const SizedBox(height: 24),
+ 
+                 // --- 상세 설명 ---
+                 TextFormField(
+                   controller: _descriptionController,
+                   decoration: InputDecoration(
+-                    labelText: '상세 설명', // TODO: 다국어
+-                    hintText:
+-                        '예) 주 3회, 오후 5시-10시 파트타임 구합니다. 시급은 협의 가능합니다.', // TODO: 다국어
++                    labelText: 'jobs.form.descriptionLabel'.tr(),
++                    hintText: 'jobs.form.descriptionHint'.tr(),
+                     border: OutlineInputBorder(),
+                   ),
+                   maxLines: 8,
+                   validator: (value) {
+                     if (value == null || value.trim().isEmpty) {
+-                      return '상세 설명을 입력해주세요.'; // TODO: 다국어
++                      return 'jobs.form.descriptionValidator'.tr();
+                     }
+                     return null;
+                   },
+                 ),
+               ],
+             ),
+           ),
+           if (_isSaving)
+             Container(
+               color: Colors.black54,
+               child: const Center(
+                   child: CircularProgressIndicator(color: Colors.white)),
+             ),
+         ],
+       ),
+     );
+   }
+ }
+diff --git a/lib/features/jobs/screens/job_detail_screen.dart b/lib/features/jobs/screens/job_detail_screen.dart
+index 8f14fceee9c730d3652d9ba7de2374236d1d2e1e..2d60286388c52d21bbf9c5b96bea76f0654f7c5f 100644
+--- a/lib/features/jobs/screens/job_detail_screen.dart
++++ b/lib/features/jobs/screens/job_detail_screen.dart
+@@ -22,117 +22,117 @@ class JobDetailScreen extends StatelessWidget {
+         otherUserId: job.userId,
+         jobId: job.id,
+         jobTitle: job.title,
+       );
+       
+       // 2. 채팅 상대방(구인자)의 정보를 가져옵니다.
+       final otherUser = await chatService.getOtherUserInfo(job.userId);
+ 
+       if (!context.mounted) return;
+ 
+       // 3. 채팅방으로 이동합니다.
+       Navigator.of(context).push(
+         MaterialPageRoute(
+           builder: (context) => ChatRoomScreen(
+             chatId: chatId,
+             otherUserName: otherUser.nickname,
+             otherUserId: otherUser.uid,
+             // [수정] 상품 제목 대신 구인글 제목을 전달 (필드명은 재활용)
+             productTitle: job.title,
+           ),
+         ),
+       );
+     } catch (e) {
+       if (context.mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+-          SnackBar(content: Text('채팅을 시작할 수 없습니다: $e'), backgroundColor: Colors.red),
++          SnackBar(content: Text('jobs.detail.chatError'.tr(args: {'error': e.toString()})), backgroundColor: Colors.red),
+         );
+       }
+     }
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     final NumberFormat currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+ 
+     return Scaffold(
+       appBar: AppBar(
+         title: Text(job.title),
+       ),
+       body: ListView(
+         padding: const EdgeInsets.all(16.0),
+         children: [
+           // --- 1. 대표 이미지 ---
+           if (job.imageUrls != null && job.imageUrls!.isNotEmpty)
+             ClipRRect(
+               borderRadius: BorderRadius.circular(12.0),
+               child: Image.network(
+                 job.imageUrls!.first,
+                 height: 250,
+                 width: double.infinity,
+                 fit: BoxFit.cover,
+               ),
+             ),
+           const SizedBox(height: 16),
+ 
+           // --- 2. 제목 및 기본 정보 ---
+           Text(job.title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+           const SizedBox(height: 8),
+           Text(
+             '${'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr()}: ${currencyFormat.format(job.salaryAmount ?? 0)}'
+             '${job.isSalaryNegotiable ? ' (Nego)' : ''}',
+             style: TextStyle(fontSize: 18, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+           ),
+           const SizedBox(height: 4),
+           Text('${'jobs.workPeriods.${job.workPeriod ?? 'etc'}'.tr()} / ${job.workHours ?? ''}'),
+           const Divider(height: 32),
+ 
+           // --- 3. 상세 설명 ---
+-          Text('상세 정보', style: Theme.of(context).textTheme.titleLarge), // TODO: 다국어
++          Text('jobs.detail.infoTitle'.tr(), style: Theme.of(context).textTheme.titleLarge),
+           const SizedBox(height: 8),
+           Text(job.description, style: const TextStyle(fontSize: 16, height: 1.5)),
+           const Divider(height: 32),
+           
+           // --- 4. 작성자 정보 ---
+            _buildSellerInfo(job.userId),
+ 
+         ],
+       ),
+        bottomNavigationBar: Padding(
+         padding: const EdgeInsets.all(16.0),
+         child: ElevatedButton(
+          // V V V --- [수정] onPressed에 _startChat 함수를 연결합니다 --- V V V
+           onPressed: () => _startChat(context),
+           // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+           style: ElevatedButton.styleFrom(
+             padding: const EdgeInsets.symmetric(vertical: 16),
+           ),
+-          child: Text('지원하기'), // TODO: 다국어
++          child: Text('jobs.detail.apply'.tr()),
+         ),
+       ),
+     );
+   }
+ 
+   // 작성자 정보 위젯
+   Widget _buildSellerInfo(String userId) {
+     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+       stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+       builder: (context, snapshot) {
+         if (!snapshot.hasData || !snapshot.data!.exists) {
+-          return const ListTile(title: Text('작성자 정보 없음')); // TODO: 다국어
++          return ListTile(title: Text('jobs.detail.noAuthor'.tr()));
+         }
+         final user = UserModel.fromFirestore(snapshot.data!);
+         return Card(
+           elevation: 0,
+           color: Colors.grey.shade100,
+           child: ListTile(
+             leading: CircleAvatar(
+               backgroundImage: (user.photoUrl != null && user.photoUrl!.isNotEmpty) ? NetworkImage(user.photoUrl!) : null,
+             ),
+             title: Text(user.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
+             subtitle: Text(user.locationName ?? ''),
+           ),
+         );
+       },
+     );
+   }
+ }
+\ No newline at end of file
+diff --git a/lib/features/jobs/screens/jobs_screen.dart b/lib/features/jobs/screens/jobs_screen.dart
+index 6c0e1f05728b08836a3bfe2b2b8fda708e1c9726..c8656a12390f6f1532d17ce4c80be0b581c1d64a 100644
+--- a/lib/features/jobs/screens/jobs_screen.dart
++++ b/lib/features/jobs/screens/jobs_screen.dart
+@@ -52,53 +52,53 @@ String? key;
+         child: Padding(
+           padding: const EdgeInsets.all(24.0),
+           child: Text('jobs.setLocationPrompt'.tr(),
+               textAlign: TextAlign.center,
+               style: const TextStyle(fontSize: 16, color: Colors.grey)),
+         ),
+       );
+     }
+ 
+     return Scaffold(
+       body: StreamBuilder<List<JobModel>>( // [수정] Stream 타입을 JobModel 리스트로 변경
+         stream: jobRepository.fetchJobs(userProvince), // [수정] 불필요한 .snapshots() 제거
+         builder: (context, snapshot) {
+           if (snapshot.connectionState == ConnectionState.waiting) {
+             return const Center(child: CircularProgressIndicator());
+           }
+           if (snapshot.hasError) {
+             return Center(child: Text('Error: ${snapshot.error}'));
+           }
+           
+           final allJobs = snapshot.data ?? [];
+           // [수정] 2차 필터링 적용
+           final filteredJobs = _applyLocationFilter(allJobs);
+ 
+           if (filteredJobs.isEmpty) {
+-            return Center(child: Text('아직 등록된 구인글이 없습니다.'.tr())); // TODO: 다국어
++            return Center(child: Text('jobs.screen.empty'.tr()));
+           }
+ 
+           return ListView.builder(
+             itemCount: filteredJobs.length,
+             itemBuilder: (context, index) {
+               final job = filteredJobs[index]; // [수정]
+               return JobCard(job: job);
+             },
+           );
+         },
+       ),
+       floatingActionButton: FloatingActionButton(
+         heroTag: 'jobs_fab', // HeroTag 추가
+         onPressed: () {
+           if (userModel != null) {
+             Navigator.of(context).push(MaterialPageRoute(
+               builder: (_) => CreateJobScreen(userModel: userModel!),
+             ));
+           }
+         },
+-        tooltip: '새 구인글 등록', // TODO: 다국어
++        tooltip: 'jobs.screen.createTooltip'.tr(),
+         child: const Icon(Icons.add),
+         
+       ),
+     );
+   }
+ }
+\ No newline at end of file
+diff --git a/lib/features/jobs/widgets/job_card.dart b/lib/features/jobs/widgets/job_card.dart
+index cb675f57b50e2f52cfdc08501ccb6370819883b8..23bbc7923c4be70363836f59bb7e88e5231096ab 100644
+--- a/lib/features/jobs/widgets/job_card.dart
++++ b/lib/features/jobs/widgets/job_card.dart
+@@ -39,65 +39,65 @@ class JobCard extends StatelessWidget {
+                 borderRadius: BorderRadius.circular(8.0),
+                 child: (job.imageUrls != null && job.imageUrls!.isNotEmpty)
+                     ? Image.network(
+                         job.imageUrls!.first,
+                         width: 80,
+                         height: 80,
+                         fit: BoxFit.cover,
+                         errorBuilder: (c, e, s) => _buildPlaceholderImage(),
+                       )
+                     : _buildPlaceholderImage(),
+               ),
+               const SizedBox(width: 16),
+               // --- 2. 텍스트 정보 ---
+               Expanded(
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+                     Text(
+                       job.title,
+                       style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                       maxLines: 1,
+                       overflow: TextOverflow.ellipsis,
+                     ),
+                     const SizedBox(height: 4),
+                     Text(
+-                      job.locationName ?? '위치 정보 없음', // TODO: 다국어
++                      job.locationName ?? 'jobs.card.noLocation'.tr(),
+                       style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                     ),
+                     const SizedBox(height: 6),
+                     Text(
+                       // 급여 정보 표시
+                       '${'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr()}: ${currencyFormat.format(job.salaryAmount ?? 0)}',
+                       style: const TextStyle(fontSize: 15, color: Colors.teal, fontWeight: FontWeight.bold),
+                     ),
+                     const SizedBox(height: 8),
+                      Row(
+                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                       children: [
+                         Text('jobs.categories.${job.category}'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+-                        Text('몇 분 전', style: TextStyle(fontSize: 12, color: Colors.grey[600])), // TODO: 시간 포맷 함수 적용
++                        Text('jobs.card.minutesAgo'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                       ],
+                     )
+                   ],
+                 ),
+               ),
+             ],
+           ),
+           // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+         ),
+       ),
+     );
+   }
+ 
+   // [추가] 이미지 플레이스홀더 위젯
+   Widget _buildPlaceholderImage() {
+     return Container(
+       width: 80,
+       height: 80,
+       decoration: BoxDecoration(
+         color: Colors.grey.shade200,
+         borderRadius: BorderRadius.circular(8.0),
+       ),
+       child: Icon(Icons.work_outline, size: 40, color: Colors.grey.shade400),
+     );
+   }

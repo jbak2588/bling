@@ -18,7 +18,7 @@ class JobsScreen extends StatelessWidget {
     final filter = locationFilter;
     if (filter == null) return allJobs;
 
-String? key;
+    String? key;
     if (filter['kel'] != null) {
       key = 'kel';
     } else if (filter['kec'] != null) {
@@ -30,15 +30,12 @@ String? key;
     } else if (filter['prov'] != null) {
       key = 'prov';
     }
-     if (key == null) return allJobs;
+    if (key == null) return allJobs;
 
     final value = filter[key]!.toLowerCase();
     return allJobs
         .where((job) =>
-            (job.locationParts?[key] ?? '')
-                .toString()
-                .toLowerCase() ==
-            value)
+            (job.locationParts?[key] ?? '').toString().toLowerCase() == value)
         .toList();
   }
 
@@ -59,8 +56,10 @@ String? key;
     }
 
     return Scaffold(
-      body: StreamBuilder<List<JobModel>>( // [수정] Stream 타입을 JobModel 리스트로 변경
-        stream: jobRepository.fetchJobs(userProvince), // [수정] 불필요한 .snapshots() 제거
+      body: StreamBuilder<List<JobModel>>(
+        // [수정] Stream 타입을 JobModel 리스트로 변경
+        stream:
+            jobRepository.fetchJobs(userProvince), // [수정] 불필요한 .snapshots() 제거
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -68,13 +67,13 @@ String? key;
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-          
+
           final allJobs = snapshot.data ?? [];
           // [수정] 2차 필터링 적용
           final filteredJobs = _applyLocationFilter(allJobs);
 
           if (filteredJobs.isEmpty) {
-            return Center(child: Text('아직 등록된 구인글이 없습니다.'.tr())); // TODO: 다국어
+            return Center(child: Text('jobs.screen.empty'.tr()));
           }
 
           return ListView.builder(
@@ -95,9 +94,8 @@ String? key;
             ));
           }
         },
-        tooltip: '새 구인글 등록', // TODO: 다국어
+        tooltip: 'jobs.screen.createTooltip'.tr(),
         child: const Icon(Icons.add),
-        
       ),
     );
   }

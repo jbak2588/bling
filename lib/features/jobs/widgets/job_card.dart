@@ -12,7 +12,8 @@ class JobCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final NumberFormat currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final NumberFormat currencyFormat =
+        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -21,7 +22,7 @@ class JobCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         // TODO: onTap에 상세 화면 이동 로직 추가
-         onTap: () {
+        onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => JobDetailScreen(job: job),
@@ -55,27 +56,35 @@ class JobCard extends StatelessWidget {
                   children: [
                     Text(
                       job.title,
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 17, fontWeight: FontWeight.bold),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      job.locationName ?? '위치 정보 없음', // TODO: 다국어
+                      job.locationName ?? 'jobs.card.noLocation'.tr(),
                       style: TextStyle(color: Colors.grey[700], fontSize: 13),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       // 급여 정보 표시
                       '${'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr()}: ${currencyFormat.format(job.salaryAmount ?? 0)}',
-                      style: const TextStyle(fontSize: 15, color: Colors.teal, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 15,
+                          color: Colors.teal,
+                          fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
-                     Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('jobs.categories.${job.category}'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                        Text('몇 분 전', style: TextStyle(fontSize: 12, color: Colors.grey[600])), // TODO: 시간 포맷 함수 적용
+                        Text('jobs.categories.${job.category}'.tr(),
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[600])),
+                        Text('jobs.card.minutesAgo'.tr(),
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[600])),
                       ],
                     )
                   ],

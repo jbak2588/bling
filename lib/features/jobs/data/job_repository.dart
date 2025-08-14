@@ -3,6 +3,7 @@
 import 'package:bling_app/core/models/job_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class JobRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -21,19 +22,16 @@ class JobRepository {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => JobModel.fromFirestore(doc))
-          .toList();
+      return snapshot.docs.map((doc) => JobModel.fromFirestore(doc)).toList();
     });
   }
   // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
-
   // V V V --- [추가] 새로운 구인글을 생성하는 함수 --- V V V
   Future<void> createJob(JobModel job) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw Exception("로그인이 필요합니다.");
-    
+    if (user == null) throw Exception(tr('main.errors.loginRequired'));
+
     final newJobRef = _firestore.collection('jobs').doc();
 
     // 사용자의 productIds 배열에도 새 상품 ID 추가
@@ -41,7 +39,9 @@ class JobRepository {
 
     final batch = _firestore.batch();
     batch.set(newJobRef, job.toJson());
-    batch.update(userRef, {'jobIds': FieldValue.arrayUnion([newJobRef.id])}); // 'jobIds' 필드에 추가
+    batch.update(userRef, {
+      'jobIds': FieldValue.arrayUnion([newJobRef.id])
+    }); // 'jobIds' 필드에 추가
 
     await batch.commit();
   }
@@ -55,5 +55,4 @@ class JobRepository {
     }
     return null;
   }
-
 }

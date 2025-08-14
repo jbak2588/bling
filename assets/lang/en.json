@@ -427,12 +427,66 @@
         "placeholder": "Enter a message..."
     },
     "jobs": {
+        "setLocationPrompt": "Please set your location to see job posts!",
+        "screen": {
+            "empty": "No job posts yet.",
+            "createTooltip": "New Job Post"
+        },
         "form": {
+            "title": "New Job Post",
             "titleHint": "Job title",
-            "descriptionHint": "Describe the position",
+            "descriptionPositionHint": "Describe the position",
             "categoryHint": "Category",
+            "categorySelectHint": "Select a category",
+            "categoryValidator": "Please select a category.",
             "locationHint": "Location",
-            "submit": "Post Job"
+            "submit": "Post Job",
+            "titleLabel": "Title",
+            "titleValidator": "Please enter a title.",
+            "salaryInfoTitle": "Salary Information",
+            "salaryTypeHint": "Type",
+            "salaryAmountLabel": "Amount (IDR)",
+            "salaryNegotiable": "Negotiable salary",
+            "workInfoTitle": "Work Conditions",
+            "workPeriodTitle": "Work Period",
+            "workHoursLabel": "Work Days/Hours",
+            "workHoursHint": "e.g. Mon-Fri, 09:00-18:00",
+            "imageSectionTitle": "Attach Photos (optional, up to 5)",
+            "descriptionLabel": "Description",
+            "descriptionHint": "e.g. Part-time 3 days a week from 5-10pm. Wage negotiable.",
+            "descriptionValidator": "Please enter a description.",
+            "submitSuccess": "Job post created.",
+            "submitFail": "Failed to create job post: {error}"
+        },
+        "categories": {
+            "restaurant": "Restaurant",
+            "cafe": "Cafe",
+            "retail": "Retail",
+            "delivery": "Delivery",
+            "etc": "Others"
+        },
+        "salaryTypes": {
+            "hourly": "Hourly",
+            "daily": "Daily",
+            "monthly": "Monthly",
+            "per_case": "Per case",
+            "etc": "Others"
+        },
+        "workPeriods": {
+            "short_term": "Short term",
+            "mid_term": "Mid term",
+            "long_term": "Long term",
+            "etc": "Other"
+        },
+        "detail": {
+            "infoTitle": "Details",
+            "apply": "Apply",
+            "noAuthor": "No author information",
+            "chatError": "Cannot start chat: {error}"
+        },
+        "card": {
+            "noLocation": "No location info",
+            "minutesAgo": "minutes ago"
         }
     },
     "findFriend": {

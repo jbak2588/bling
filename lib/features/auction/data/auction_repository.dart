@@ -30,20 +30,59 @@ class AuctionRepository {
     return AuctionModel.fromFirestore(doc);
   }
 
+// V V V --- [수정] 마감되지 않은 경매를 마감 임박 순으로 가져오도록 변경 --- V V V
   Stream<List<AuctionModel>> fetchAuctions() {
     return _auctionsCollection
-        .orderBy('startAt', descending: true)
+        .where('endAt', isGreaterThan: Timestamp.now()) // 현재 시간 이후에 마감되는 경매만
+        .orderBy('endAt', descending: false) // 마감 시간이 빠른 순서대로 정렬
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map(AuctionModel.fromFirestore).toList());
   }
+  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
-  Future<String> placeBid(String auctionId, BidModel bid) async {
-    final doc = await _auctionsCollection
+  // V V V --- [추가] 특정 경매 하나의 정보를 실시간으로 가져오는 Stream 함수 --- V V V
+  Stream<AuctionModel> getAuctionStream(String auctionId) {
+    return _auctionsCollection
         .doc(auctionId)
-        .collection('bids')
-        .add(bid.toJson());
-    return doc.id;
+        .snapshots()
+        .map((snapshot) => AuctionModel.fromFirestore(snapshot));
+  }
+  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+
+  
+// V V V --- [수정] Firestore Transaction을 사용하여 안전하게 입찰을 처리합니다 --- V V V
+  Future<void> placeBid(String auctionId, BidModel bid) async {
+    final auctionRef = _auctionsCollection.doc(auctionId);
+    final bidRef = auctionRef.collection('bids').doc();
+
+    await _firestore.runTransaction((transaction) async {
+      final auctionSnapshot = await transaction.get(auctionRef);
+      if (!auctionSnapshot.exists) {
+        throw Exception("경매를 찾을 수 없습니다!");
+      }
+
+      final auction = AuctionModel.fromFirestore(auctionSnapshot);
+
+      // 현재 입찰가보다 높은 금액인지 확인
+      if (bid.bidAmount <= auction.currentBid) {
+        throw Exception("현재 입찰가보다 높은 금액을 입력해야 합니다.");
+      }
+      
+      // 마감 시간이 지났는지 확인
+      if (auction.endAt.toDate().isBefore(DateTime.now())) {
+        throw Exception("이미 마감된 경매입니다.");
+      }
+
+      // 1. auctions 문서 업데이트
+      transaction.update(auctionRef, {
+        'currentBid': bid.bidAmount,
+        'bidHistory': FieldValue.arrayUnion([bid.toJson()]) // 간단한 히스토리 기록
+      });
+
+      // 2. bids 하위 컬렉션에 입찰 기록 추가
+      transaction.set(bidRef, bid.toJson());
+    });
   }
 
   Stream<List<BidModel>> fetchBids(String auctionId) {
