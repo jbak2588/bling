@@ -30,13 +30,18 @@ class ShopRepository {
     return ShopModel.fromFirestore(doc);
   }
 
-  Stream<List<ShopModel>> fetchShops() {
-    return _shopsCollection
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map(ShopModel.fromFirestore).toList());
+// V V V --- [수정] 사용자의 Province를 기준으로 1차 필터링하도록 변경 --- V V V
+  Stream<QuerySnapshot<Map<String, dynamic>>> fetchShops(String? userProvince) {
+    Query<Map<String, dynamic>> query = _shopsCollection;
+
+    if (userProvince != null && userProvince.isNotEmpty) {
+      query = query.where('locationParts.prov', isEqualTo: userProvince);
+    }
+
+    return query.orderBy('createdAt', descending: true).snapshots();
   }
+
+  
 
   Future<String> addReview(String shopId, ShopReviewModel review) async {
     final doc = await _shopsCollection

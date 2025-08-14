@@ -48,12 +48,12 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
 
   Future<void> _pickImages() async {
     if (_images.length >= 5) return; // 최대 5장 제한
-    final pickedFiles = await _picker.pickMultiImage(imageQuality: 70, limit: 5 - _images.length);
+    final pickedFiles = await _picker.pickMultiImage(
+        imageQuality: 70, limit: 5 - _images.length);
     if (pickedFiles.isNotEmpty) {
       setState(() => _images.addAll(pickedFiles));
     }
   }
-
 
   Future<void> _submitJob() async {
     if (!_formKey.currentState!.validate() || _isSaving) return;
@@ -66,12 +66,14 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
       return;
     }
 
-        try {
+    try {
       // [수정] 이미지 업로드 로직 추가
       List<String> imageUrls = [];
       for (var imageFile in _images) {
         final fileName = const Uuid().v4();
-        final ref = FirebaseStorage.instance.ref().child('job_images/${user.uid}/$fileName');
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('job_images/${user.uid}/$fileName');
         await ref.putFile(File(imageFile.path));
         imageUrls.add(await ref.getDownloadURL());
       }
@@ -98,7 +100,8 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('구인글이 등록되었습니다.'), backgroundColor: Colors.green),
+              content: Text('jobs.form.submitSuccess'.tr()),
+              backgroundColor: Colors.green),
         );
         Navigator.of(context).pop();
       }
@@ -106,7 +109,8 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('구인글 등록에 실패했습니다: $e'), backgroundColor: Colors.red),
+              content: Text('jobs.form.submitFail'.tr(args: [e.toString()])),
+              backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -120,12 +124,12 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('새 구인글 등록'), // TODO: 다국어
+        title: Text('jobs.form.title'.tr()),
         actions: [
           if (!_isSaving)
             TextButton(
               onPressed: _submitJob,
-              child: Text('등록'), // TODO: 다국어
+              child: Text('jobs.form.submit'.tr()),
             ),
         ],
       ),
@@ -139,7 +143,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 // --- 직종 선택 ---
                 DropdownButtonFormField<String>(
                   value: _selectedCategory,
-                  hint: Text('직종을 선택하세요'), // TODO: 다국어
+                  hint: Text('jobs.form.categorySelectHint'.tr()),
                   items: [
                     'restaurant',
                     'cafe',
@@ -150,8 +154,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                       .map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(
-                          'jobs.categories.$value'.tr()), // TODO: 다국어 키 정의 필요
+                      child: Text('jobs.categories.$value'.tr()),
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
@@ -163,7 +166,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) =>
-                      value == null ? '직종을 선택해주세요.' : null, // TODO: 다국어
+                      value == null ? 'jobs.form.categoryValidator'.tr() : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -171,12 +174,12 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: '제목', // TODO: 다국어
+                    labelText: 'jobs.form.titleLabel'.tr(),
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return '제목을 입력해주세요.'; // TODO: 다국어
+                      return 'jobs.form.titleValidator'.tr();
                     }
                     return null;
                   },
@@ -184,19 +187,17 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 const SizedBox(height: 24),
 
                 // V V V --- [수정] 급여 정보 입력 UI --- V V V
-                Text('급여 정보',
-                    style:
-                        Theme.of(context).textTheme.titleMedium), // TODO: 다국어
+                Text('jobs.form.salaryInfoTitle'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
                 // 급여 종류 선택
                 DropdownButtonFormField<String>(
                   value: _selectedSalaryType,
-                  hint: Text('종류'), // TODO: 다국어
+                  hint: Text('jobs.form.salaryTypeHint'.tr()),
                   items: ['hourly', 'daily', 'monthly', 'per_case']
                       .map((String value) => DropdownMenuItem<String>(
                             value: value,
-                            child: Text(
-                                'jobs.salaryTypes.$value'.tr()), // TODO: 다국어
+                            child: Text('jobs.salaryTypes.$value'.tr()),
                           ))
                       .toList(),
                   onChanged: (val) => setState(() => _selectedSalaryType = val),
@@ -208,7 +209,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 TextFormField(
                   controller: _salaryAmountController,
                   decoration: InputDecoration(
-                    labelText: '금액 (IDR)', // TODO: 다국어
+                    labelText: 'jobs.form.salaryAmountLabel'.tr(),
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
@@ -216,7 +217,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 ),
                 // 급여 협의 가능
                 CheckboxListTile(
-                  title: Text('급여 협의 가능'), // TODO: 다국어
+                  title: Text('jobs.form.salaryNegotiable'.tr()),
                   value: _isSalaryNegotiable,
                   onChanged: (val) =>
                       setState(() => _isSalaryNegotiable = val ?? false),
@@ -226,18 +227,17 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 const SizedBox(height: 24),
 
                 // V V V --- [추가] 근무 조건 입력 UI --- V V V
-                Text('근무 조건',
-                    style:
-                        Theme.of(context).textTheme.titleMedium), // TODO: 다국어
+                Text('jobs.form.workInfoTitle'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
-                Text('근무 기간',
-                    style: Theme.of(context).textTheme.titleSmall), // TODO: 다국어
+                Text('jobs.form.workPeriodTitle'.tr(),
+                    style: Theme.of(context).textTheme.titleSmall),
                 Wrap(
                   spacing: 8.0,
                   children:
                       ['short_term', 'mid_term', 'long_term'].map((period) {
                     return ChoiceChip(
-                      label: Text('jobs.workPeriods.$period'.tr()), // TODO: 다국어
+                      label: Text('jobs.workPeriods.$period'.tr()),
                       selected: _selectedWorkPeriod == period,
                       onSelected: (selected) {
                         setState(() {
@@ -251,14 +251,15 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 TextFormField(
                   controller: _workHoursController,
                   decoration: InputDecoration(
-                    labelText: '근무 요일/시간', // TODO: 다국어
-                    hintText: '예: 월-금, 09:00-18:00', // TODO: 다국어
+                    labelText: 'jobs.form.workHoursLabel'.tr(),
+                    hintText: 'jobs.form.workHoursHint'.tr(),
                     border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 24),
-                    // V V V --- [추가] 이미지 첨부 UI --- V V V
-                Text('사진 첨부 (선택, 최대 5장)', style: Theme.of(context).textTheme.titleMedium), // TODO: 다국어
+                // V V V --- [추가] 이미지 첨부 UI --- V V V
+                Text('jobs.form.imageSectionTitle'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
                 SizedBox(
                   height: 100,
@@ -266,12 +267,13 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                     scrollDirection: Axis.horizontal,
                     children: [
                       ..._images.map((xfile) => Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.file(File(xfile.path), width: 100, height: 100, fit: BoxFit.cover),
-                        ),
-                      )),
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Image.file(File(xfile.path),
+                                  width: 100, height: 100, fit: BoxFit.cover),
+                            ),
+                          )),
                       if (_images.length < 5)
                         GestureDetector(
                           onTap: _pickImages,
@@ -279,11 +281,12 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                             width: 100,
                             height: 100,
                             decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey.shade400)
-                            ),
-                            child: Icon(Icons.add_a_photo_outlined, color: Colors.grey.shade600),
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8),
+                                border:
+                                    Border.all(color: Colors.grey.shade400)),
+                            child: Icon(Icons.add_a_photo_outlined,
+                                color: Colors.grey.shade600),
                           ),
                         ),
                     ],
@@ -295,15 +298,14 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: '상세 설명', // TODO: 다국어
-                    hintText:
-                        '예) 주 3회, 오후 5시-10시 파트타임 구합니다. 시급은 협의 가능합니다.', // TODO: 다국어
+                    labelText: 'jobs.form.descriptionLabel'.tr(),
+                    hintText: 'jobs.form.descriptionHint'.tr(),
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 8,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return '상세 설명을 입력해주세요.'; // TODO: 다국어
+                      return 'jobs.form.descriptionValidator'.tr();
                     }
                     return null;
                   },

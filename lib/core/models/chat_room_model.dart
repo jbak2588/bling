@@ -13,13 +13,18 @@ class ChatRoomModel {
   final bool isGroupChat;
   final String? groupName;
   final String? groupImage;
-  
+
   final String? productId;
   final String? productTitle;
   final String? productImage;
-  
+
   final String? jobId;
   final String? jobTitle;
+
+// V V V --- [추가] 지역 상점 관련 필드 --- V V V
+  final String? shopId;
+  final String? shopName;
+  final String? shopImage;
 
   ChatRoomModel({
     required this.id,
@@ -35,9 +40,13 @@ class ChatRoomModel {
     this.productImage,
     this.jobId,
     this.jobTitle,
+    this.shopId, // [추가]
+    this.shopName, // [추가]
+    this.shopImage, // [추가]
   });
 
-  factory ChatRoomModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory ChatRoomModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return ChatRoomModel(
       id: doc.id,
@@ -53,6 +62,9 @@ class ChatRoomModel {
       productImage: data['productImage'],
       jobId: data['jobId'],
       jobTitle: data['jobTitle'],
+      shopId: data['shopId'],
+      shopName: data['shopName'],
+      shopImage: data['shopImage'],
     );
   }
 }

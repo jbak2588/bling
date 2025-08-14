@@ -427,12 +427,66 @@
         "placeholder": "Ketik pesan..."
     },
     "jobs": {
+        "setLocationPrompt": "Silakan atur lokasi Anda untuk melihat lowongan!",
+        "screen": {
+            "empty": "Belum ada lowongan.",
+            "createTooltip": "Pasang Lowongan Baru"
+        },
         "form": {
+            "title": "Pasang Lowongan Baru",
             "titleHint": "Judul pekerjaan",
-            "descriptionHint": "Deskripsikan posisi",
+            "descriptionPositionHint": "Deskripsikan posisi",
             "categoryHint": "Kategori",
+            "categorySelectHint": "Pilih kategori",
+            "categoryValidator": "Silakan pilih kategori.",
             "locationHint": "Lokasi",
-            "submit": "Pasang Lowongan"
+            "submit": "Pasang Lowongan",
+            "titleLabel": "Judul",
+            "titleValidator": "Silakan masukkan judul.",
+            "salaryInfoTitle": "Informasi Gaji",
+            "salaryTypeHint": "Jenis",
+            "salaryAmountLabel": "Jumlah (IDR)",
+            "salaryNegotiable": "Gaji bisa dinegosiasikan",
+            "workInfoTitle": "Ketentuan Kerja",
+            "workPeriodTitle": "Periode Kerja",
+            "workHoursLabel": "Hari/Jam Kerja",
+            "workHoursHint": "contoh: Sen-Jum, 09:00-18:00",
+            "imageSectionTitle": "Lampirkan Foto (opsional, maks 5)",
+            "descriptionLabel": "Deskripsi",
+            "descriptionHint": "contoh: Paruh waktu 3 hari seminggu pukul 5-10 sore. Gaji bisa nego.",
+            "descriptionValidator": "Harap isi deskripsi.",
+            "submitSuccess": "Lowongan berhasil dipasang.",
+            "submitFail": "Gagal memasang lowongan: {error}"
+        },
+        "categories": {
+            "restaurant": "Restoran",
+            "cafe": "Kafe",
+            "retail": "Ritel",
+            "delivery": "Pengiriman",
+            "etc": "Lainnya"
+        },
+        "salaryTypes": {
+            "hourly": "Per jam",
+            "daily": "Harian",
+            "monthly": "Bulanan",
+            "per_case": "Per kasus",
+            "etc": "Lainnya"
+        },
+        "workPeriods": {
+            "short_term": "Jangka pendek",
+            "mid_term": "Jangka menengah",
+            "long_term": "Jangka panjang",
+            "etc": "Lainnya"
+        },
+        "detail": {
+            "infoTitle": "Informasi detail",
+            "apply": "Lamar",
+            "noAuthor": "Tidak ada info penulis",
+            "chatError": "Tidak dapat memulai chat: {error}"
+        },
+        "card": {
+            "noLocation": "Tidak ada info lokasi",
+            "minutesAgo": "beberapa menit lalu"
         }
     },
     "findFriend": {

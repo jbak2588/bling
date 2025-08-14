@@ -426,12 +426,66 @@
         "placeholder": "메시지를 입력하세요..."
     },
     "jobs": {
+        "setLocationPrompt": "구인글을 보려면 먼저 내 동네를 설정해주세요!",
+        "screen": {
+            "empty": "아직 등록된 구인글이 없습니다.",
+            "createTooltip": "새 구인글 등록"
+        },
         "form": {
+            "title": "새 구인글 등록",
             "titleHint": "공고 제목",
-            "descriptionHint": "업무 내용을 입력",
+            "descriptionPositionHint": "업무 내용을 입력",
             "categoryHint": "직종 카테고리",
+            "categorySelectHint": "직종을 선택하세요",
+            "categoryValidator": "직종을 선택해주세요.",
             "locationHint": "근무 위치",
-            "submit": "구인 등록"
+            "submit": "구인 등록",
+            "titleLabel": "제목",
+            "titleValidator": "제목을 입력해주세요.",
+            "salaryInfoTitle": "급여 정보",
+            "salaryTypeHint": "종류",
+            "salaryAmountLabel": "금액 (IDR)",
+            "salaryNegotiable": "급여 협의 가능",
+            "workInfoTitle": "근무 조건",
+            "workPeriodTitle": "근무 기간",
+            "workHoursLabel": "근무 요일/시간",
+            "workHoursHint": "예: 월-금, 09:00-18:00",
+            "imageSectionTitle": "사진 첨부 (선택, 최대 5장)",
+            "descriptionLabel": "상세 설명",
+            "descriptionHint": "예) 주 3회, 오후 5시-10시 파트타임 구합니다. 시급은 협의 가능합니다.",
+            "descriptionValidator": "상세 설명을 입력해주세요.",
+            "submitSuccess": "구인글이 등록되었습니다.",
+            "submitFail": "구인글 등록에 실패했습니다: {error}"
+        },
+        "categories": {
+            "restaurant": "식당",
+            "cafe": "카페",
+            "retail": "소매",
+            "delivery": "배달",
+            "etc": "기타"
+        },
+        "salaryTypes": {
+            "hourly": "시급",
+            "daily": "일급",
+            "monthly": "월급",
+            "per_case": "건당",
+            "etc": "기타"
+        },
+        "workPeriods": {
+            "short_term": "단기",
+            "mid_term": "중기",
+            "long_term": "장기",
+            "etc": "기타"
+        },
+        "detail": {
+            "infoTitle": "상세 정보",
+            "apply": "지원하기",
+            "noAuthor": "작성자 정보 없음",
+            "chatError": "채팅을 시작할 수 없습니다: {error}"
+        },
+        "card": {
+            "noLocation": "위치 정보 없음",
+            "minutesAgo": "몇 분 전"
         }
     },
     "findFriend": {

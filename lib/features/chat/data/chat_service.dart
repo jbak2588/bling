@@ -36,6 +36,7 @@ class ChatService {
     return UserModel.fromFirestore(userDoc);
   }
 
+
 // V V V --- [추가] 여러 참여자의 정보를 한 번에 가져오는 함수 --- V V V
   Future<Map<String, UserModel>> getParticipantsInfo(
       List<String> userIds) async {
@@ -64,7 +65,6 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
 
   
 
-  // V V V --- [수정] '구인구직' 채팅도 생성할 수 있도록 함수를 확장합니다 --- V V V
   Future<String> createOrGetChatRoom({
     required String otherUserId,
     String? productId,
@@ -72,6 +72,9 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
     String? productImage,
     String? jobId,
     String? jobTitle,
+    String? shopId,
+    String? shopName,
+    String? shopImage,
   }) async {
     final myUid = _auth.currentUser?.uid;
     if (myUid == null) throw Exception('User not logged in');
@@ -79,8 +82,8 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
     List<String> participants = [myUid, otherUserId];
     participants.sort();
     
-    // [수정] 채팅방 ID 생성 규칙: 상품 ID 또는 구인글 ID를 기반으로 생성
-    String contextId = productId ?? jobId ?? 'direct';
+    // [수정] 채팅방 ID 생성 규칙: 상품, 구인글, 상점 ID 등을 기반으로 생성
+    String contextId = productId ?? jobId ?? shopId ?? 'direct';
     String chatId = '${contextId}_${participants.join('_')}';
 
     final chatDocRef = _firestore.collection('chats').doc(chatId);
@@ -97,7 +100,10 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
         if (productTitle != null) 'productTitle': productTitle,
         if (productImage != null) 'productImage': productImage,
         if (jobId != null) 'jobId': jobId,
-        if (jobTitle != null) 'jobTitle': jobTitle, // productTitle 필드를 공유해서 사용
+        if (jobTitle != null) 'jobTitle': jobTitle,
+        if (shopId != null) 'shopId': shopId,
+        if (shopName != null) 'shopName': shopName, // productTitle 필드를 공유해서 사용 가능
+        if (shopImage != null) 'shopImage': shopImage, // productImage 필드를 공유해서 사용 가능
       };
       await chatDocRef.set(chatRoomData);
     }
