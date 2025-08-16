@@ -21,7 +21,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
-  
+
   List<dynamic> _images = []; // 기존 URL(String)과 새로운 파일(XFile)을 모두 담기 위함
   bool _isSaving = false;
 
@@ -33,7 +33,8 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
     super.initState();
     // 기존 경매 정보로 UI 상태를 초기화합니다.
     _titleController = TextEditingController(text: widget.auction.title);
-    _descriptionController = TextEditingController(text: widget.auction.description);
+    _descriptionController =
+        TextEditingController(text: widget.auction.description);
     _images = List.from(widget.auction.images);
   }
 
@@ -46,12 +47,13 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
 
   Future<void> _pickImages() async {
     if (_images.length >= 10) return;
-    final pickedFiles = await _picker.pickMultiImage(imageQuality: 70, limit: 10 - _images.length);
+    final pickedFiles = await _picker.pickMultiImage(
+        imageQuality: 70, limit: 10 - _images.length);
     if (pickedFiles.isNotEmpty) {
       setState(() => _images.addAll(pickedFiles));
     }
   }
-  
+
   void _removeImage(int index) {
     setState(() {
       _images.removeAt(index);
@@ -64,7 +66,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
       // 이미지 유효성 검사
       return;
     }
-    
+
     setState(() => _isSaving = true);
 
     try {
@@ -73,7 +75,9 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
         if (image is XFile) {
           // 새로운 이미지 파일(XFile)이면 Storage에 업로드
           final fileName = const Uuid().v4();
-          final ref = FirebaseStorage.instance.ref().child('auction_images/${widget.auction.ownerId}/$fileName');
+          final ref = FirebaseStorage.instance
+              .ref()
+              .child('auction_images/${widget.auction.ownerId}/$fileName');
           await ref.putFile(File(image.path));
           imageUrls.add(await ref.getDownloadURL());
         } else if (image is String) {
@@ -101,12 +105,17 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
       await _repository.updateAuction(updatedAuction);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('경매 정보가 수정되었습니다.'), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('auctions.edit.success'.tr()),
+            backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('수정에 실패했습니다: $e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'auctions.edit.fail'.tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -117,10 +126,12 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('경매 정보 수정'), // TODO: 다국어
+        title: Text('auctions.edit.title'.tr()),
         actions: [
           if (!_isSaving)
-            TextButton(onPressed: _updateAuction, child: Text('저장')), // TODO: 다국어
+            TextButton(
+                onPressed: _updateAuction,
+                child: Text('auctions.edit.save'.tr())),
         ],
       ),
       body: Stack(
@@ -131,7 +142,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
               padding: const EdgeInsets.all(16.0),
               children: [
                 // 이미지 선택 및 수정 UI
-                 SizedBox(
+                SizedBox(
                   height: 100,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
@@ -151,13 +162,22 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
-                                child: Image(image: imageProvider, width: 100, height: 100, fit: BoxFit.cover),
+                                child: Image(
+                                    image: imageProvider,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover),
                               ),
                               Positioned(
-                                top: 4, right: 4,
+                                top: 4,
+                                right: 4,
                                 child: InkWell(
                                   onTap: () => _removeImage(index),
-                                  child: const CircleAvatar(radius: 12, backgroundColor: Colors.black54, child: Icon(Icons.close, color: Colors.white, size: 16)),
+                                  child: const CircleAvatar(
+                                      radius: 12,
+                                      backgroundColor: Colors.black54,
+                                      child: Icon(Icons.close,
+                                          color: Colors.white, size: 16)),
                                 ),
                               ),
                             ],
@@ -168,33 +188,47 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
                         GestureDetector(
                           onTap: _pickImages,
                           child: Container(
-                            width: 100, height: 100,
-                            decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
-                            child: const Icon(Icons.add_a_photo_outlined, color: Colors.grey),
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8)),
+                            child: const Icon(Icons.add_a_photo_outlined,
+                                color: Colors.grey),
                           ),
                         ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(labelText: '제목', border: OutlineInputBorder()),
-                  validator: (value) => (value == null || value.trim().isEmpty) ? '제목을 입력해주세요.' : null,
+                  decoration: InputDecoration(
+                      labelText: 'auctions.create.form.title'.tr(),
+                      border: const OutlineInputBorder()),
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'auctions.form.titleRequired'.tr()
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: '상세 설명', border: OutlineInputBorder()),
+                  decoration: InputDecoration(
+                      labelText: 'auctions.create.form.description'.tr(),
+                      border: const OutlineInputBorder()),
                   maxLines: 5,
-                  validator: (value) => (value == null || value.trim().isEmpty) ? '설명을 입력해주세요.' : null,
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'auctions.form.descriptionRequired'.tr()
+                      : null,
                 ),
               ],
             ),
           ),
           if (_isSaving)
-            Container(color: Colors.black.withOpacity(0.5), child: const Center(child: CircularProgressIndicator())),
+            Container(
+                color: Colors.black.withValues(alpha: 0.5),
+                child: const Center(child: CircularProgressIndicator())),
         ],
       ),
     );

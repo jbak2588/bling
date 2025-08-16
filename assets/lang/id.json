@@ -663,6 +663,113 @@
             "chatCreated": "Ruang chat klub telah dibuat."
         }
     },
+      "auctions": {
+        "card": {
+            "currentBid": "Tawaran saat ini",
+            "endTime": "Berakhir"
+        },
+        "errors": {
+            "fetchFailed": "Gagal memuat lelang: {error}",
+            "notFound": "Lelang tidak ditemukan.",
+            "lowerBid": "Anda harus memasukkan tawaran yang lebih tinggi dari tawaran saat ini.",
+            "alreadyEnded": "Lelang ini sudah berakhir."
+        },
+        "empty": "Tidak ada lelang.",
+        "create": {
+            "tooltip": "Buat Lelang",
+            "title": "Buat Lelang",
+            "success": "Lelang berhasil dibuat.",
+            "fail": "Gagal membuat lelang: {error}",
+            "errors": {
+                "noPhoto": "Harap tambahkan minimal satu foto."
+            },
+            "form": {
+                "photoSectionTitle": "Unggah foto (maks 10)",
+                "title": "Judul",
+                "description": "Deskripsi",
+                "startPrice": "Harga awal",
+                "duration": "Durasi",
+                "durationOption": "{days} hari",
+                "location": "Lokasi"
+            }
+        },
+        "edit": {
+            "tooltip": "Ubah lelang",
+            "title": "Ubah Lelang",
+            "save": "Simpan",
+            "success": "Informasi lelang diperbarui.",
+            "fail": "Gagal memperbarui lelang: {error}"
+        },
+        "form": {
+            "titleRequired": "Silakan masukkan judul.",
+            "descriptionRequired": "Silakan masukkan deskripsi.",
+            "startPriceRequired": "Silakan masukkan harga awal."
+        },
+        "delete": {
+            "tooltip": "Hapus lelang",
+            "confirmTitle": "Hapus lelang",
+            "confirmContent": "Apakah Anda yakin ingin menghapus lelang ini?",
+            "success": "Lelang dihapus.",
+            "fail": "Gagal menghapus lelang: {error}"
+        },
+        "detail": {
+            "currentBid": "Tawaran saat ini: {amount}",
+            "endTime": "Waktu berakhir: {time}",
+            "bidsTitle": "Daftar tawaran",
+            "noBids": "Belum ada tawaran.",
+            "unknownBidder": "Penawar tidak diketahui",
+            "bidAmountLabel": "Masukkan tawaran (Rp)",
+            "placeBid": "Tawar",
+            "bidSuccess": "Tawaran berhasil!",
+            "bidFail": "Gagal menawar: {error}",
+            "errors": {
+                "loginRequired": "Harus login.",
+                "invalidAmount": "Masukkan jumlah tawaran yang valid."
+            }
+        }
+    },
+        "localStores": {
+        "setLocationPrompt": "Atur lokasi Anda untuk melihat toko di sekitar.",
+        "empty": "Belum ada toko terdaftar.",
+        "error": "Terjadi kesalahan: {error}",
+        "create": {
+            "tooltip": "Daftarkan tokoku",
+            "title": "Daftarkan Toko Baru",
+            "submit": "Daftar",
+            "success": "Toko berhasil didaftarkan.",
+            "fail": "Gagal mendaftarkan toko: {error}"
+        },
+        "edit": {
+            "title": "Ubah Informasi Toko",
+            "save": "Simpan",
+            "success": "Informasi toko diperbarui.",
+            "fail": "Gagal memperbarui toko: {error}",
+            "tooltip": "Ubah informasi toko"
+        },
+        "form": {
+            "nameLabel": "Nama Toko",
+            "nameError": "Harap masukkan nama toko.",
+            "descriptionLabel": "Deskripsi Toko",
+            "descriptionError": "Harap masukkan deskripsi toko.",
+            "contactLabel": "Kontak",
+            "hoursLabel": "Jam Operasional",
+            "hoursHint": "mis. 09:00 - 18:00"
+        },
+        "detail": {
+            "description": "Deskripsi Toko",
+            "deleteTitle": "Hapus Toko",
+            "deleteContent": "Apakah Anda yakin ingin menghapus toko ini? Tindakan ini tidak dapat dibatalkan.",
+            "deleteTooltip": "Hapus toko",
+            "delete": "Hapus",
+            "cancel": "Batal",
+            "deleteSuccess": "Toko telah dihapus.",
+            "deleteFail": "Gagal menghapus toko: {error}",
+            "inquire": "Hubungi",
+            "noOwnerInfo": "Info pemilik tidak ada",
+            "startChatFail": "Tidak dapat memulai chat: {error}"
+        },
+        "noLocation": "Tidak ada info lokasi"
+    },
     "community": {
         "title": "Halaman Komunitas"
     }

@@ -663,6 +663,113 @@
             "chatCreated": "Club chat room has been created."
         }
     },
+    "auctions": {
+        "card": {
+            "currentBid": "Current bid",
+            "endTime": "Ends"
+        },
+        "errors": {
+            "fetchFailed": "Failed to fetch auctions: {error}",
+            "notFound": "Auction not found.",
+            "lowerBid": "You must enter a bid higher than the current bid.",
+            "alreadyEnded": "This auction has already ended."
+        },
+        "empty": "No auctions available.",
+        "create": {
+            "tooltip": "Create Auction",
+            "title": "Create Auction",
+            "success": "Auction created successfully.",
+            "fail": "Failed to create auction: {error}",
+            "errors": {
+                "noPhoto": "Please add at least one photo."
+            },
+            "form": {
+                "photoSectionTitle": "Upload photos (up to 10)",
+                "title": "Title",
+                "description": "Description",
+                "startPrice": "Starting price",
+                "duration": "Duration",
+                "durationOption": "{days} days",
+                "location": "Location"
+            }
+        },
+        "edit": {
+            "tooltip": "Edit auction",
+            "title": "Edit Auction",
+            "save": "Save",
+            "success": "Auction updated.",
+            "fail": "Failed to update auction: {error}"
+        },
+        "form": {
+            "titleRequired": "Please enter a title.",
+            "descriptionRequired": "Please enter a description.",
+            "startPriceRequired": "Please enter a starting price."
+        },
+        "delete": {
+            "tooltip": "Delete auction",
+            "confirmTitle": "Delete auction",
+            "confirmContent": "Are you sure you want to delete this auction?",
+            "success": "Auction deleted.",
+            "fail": "Failed to delete auction: {error}"
+        },
+        "detail": {
+            "currentBid": "Current bid: {amount}",
+            "endTime": "End time: {time}",
+            "bidsTitle": "Bids",
+            "noBids": "No bids yet.",
+            "unknownBidder": "Unknown bidder",
+            "bidAmountLabel": "Bid amount (Rp)",
+            "placeBid": "Place bid",
+            "bidSuccess": "Bid placed successfully!",
+            "bidFail": "Failed to place bid: {error}",
+            "errors": {
+                "loginRequired": "Login is required.",
+                "invalidAmount": "Please enter a valid bid amount."
+            }
+        }
+    },
+       "localStores": {
+        "setLocationPrompt": "Please set your location to browse local shops.",
+        "empty": "No shops registered yet.",
+        "error": "An error has occurred: {error}",
+        "create": {
+            "tooltip": "Add my shop",
+            "title": "Register New Shop",
+            "submit": "Register",
+            "success": "Shop registered successfully.",
+            "fail": "Failed to register shop: {error}"
+        },
+        "edit": {
+            "title": "Edit Shop Information",
+            "save": "Save",
+            "success": "Shop information updated.",
+            "fail": "Failed to update shop: {error}",
+            "tooltip": "Edit shop info"
+        },
+        "form": {
+            "nameLabel": "Shop Name",
+            "nameError": "Please enter the shop name.",
+            "descriptionLabel": "Shop Description",
+            "descriptionError": "Please enter the shop description.",
+            "contactLabel": "Contact",
+            "hoursLabel": "Business Hours",
+            "hoursHint": "e.g. 09:00 - 18:00"
+        },
+        "detail": {
+            "description": "Shop Description",
+            "deleteTitle": "Delete Shop",
+            "deleteContent": "Are you sure you want to delete this shop? This action cannot be undone.",
+            "deleteTooltip": "Delete shop",
+            "delete": "Delete",
+            "cancel": "Cancel",
+            "deleteSuccess": "Shop deleted.",
+            "deleteFail": "Failed to delete shop: {error}",
+            "inquire": "Contact",
+            "noOwnerInfo": "Owner info not found",
+            "startChatFail": "Could not start chat: {error}"
+        },
+        "noLocation": "No location info"
+    },
     "community": {
         "title": "Community Screen"
     }

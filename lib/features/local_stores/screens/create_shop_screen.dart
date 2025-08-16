@@ -10,6 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CreateShopScreen extends StatefulWidget {
   final UserModel userModel;
@@ -25,7 +26,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   final _descriptionController = TextEditingController();
   final _contactController = TextEditingController();
   final _hoursController = TextEditingController();
-  
+
   XFile? _selectedImage;
   bool _isSaving = false;
 
@@ -42,7 +43,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    final pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (pickedFile != null) {
       setState(() => _selectedImage = pickedFile);
     }
@@ -50,7 +52,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
   Future<void> _submitShop() async {
     if (!_formKey.currentState!.validate() || _isSaving) return;
-    
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
@@ -60,7 +62,9 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
       String? imageUrl;
       if (_selectedImage != null) {
         final fileName = const Uuid().v4();
-        final ref = FirebaseStorage.instance.ref().child('shop_images/${user.uid}/$fileName');
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('shop_images/${user.uid}/$fileName');
         await ref.putFile(File(_selectedImage!.path));
         imageUrl = await ref.getDownloadURL();
       }
@@ -82,12 +86,17 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
       await _repository.createShop(newShop);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('상점이 등록되었습니다.'), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('localStores.create.success'.tr()),
+            backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('상점 등록에 실패했습니다: $e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('localStores.create.fail'
+                .tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -98,10 +107,12 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('새 상점 등록'), // TODO: 다국어
+        title: Text('localStores.create.title'.tr()),
         actions: [
           if (!_isSaving)
-            TextButton(onPressed: _submitShop, child: Text('등록')), // TODO: 다국어
+            TextButton(
+                onPressed: _submitShop,
+                child: Text('localStores.create.submit'.tr())),
         ],
       ),
       body: Stack(
@@ -122,40 +133,58 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                     child: _selectedImage != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.file(File(_selectedImage!.path), fit: BoxFit.cover),
+                            child: Image.file(File(_selectedImage!.path),
+                                fit: BoxFit.cover),
                           )
-                        : const Center(child: Icon(Icons.add_a_photo_outlined, size: 50, color: Colors.grey)),
+                        : const Center(
+                            child: Icon(Icons.add_a_photo_outlined,
+                                size: 50, color: Colors.grey)),
                   ),
                 ),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: '상점 이름', border: OutlineInputBorder()), // TODO: 다국어
-                  validator: (value) => (value == null || value.trim().isEmpty) ? '상점 이름을 입력해주세요.' : null,
+                  decoration: InputDecoration(
+                      labelText: 'localStores.form.nameLabel'.tr(),
+                      border: const OutlineInputBorder()),
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'localStores.form.nameError'.tr()
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: '상점 소개', border: OutlineInputBorder()), // TODO: 다국어
+                  decoration: InputDecoration(
+                      labelText: 'localStores.form.descriptionLabel'.tr(),
+                      border: const OutlineInputBorder()),
                   maxLines: 4,
-                  validator: (value) => (value == null || value.trim().isEmpty) ? '상점 소개를 입력해주세요.' : null,
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'localStores.form.descriptionError'.tr()
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _contactController,
-                  decoration: const InputDecoration(labelText: '연락처', border: OutlineInputBorder()), // TODO: 다국어
+                  decoration: InputDecoration(
+                      labelText: 'localStores.form.contactLabel'.tr(),
+                      border: const OutlineInputBorder()),
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _hoursController,
-                  decoration: const InputDecoration(labelText: '영업 시간', hintText: '예) 09:00 - 18:00', border: OutlineInputBorder()), // TODO: 다국어
+                  decoration: InputDecoration(
+                      labelText: 'localStores.form.hoursLabel'.tr(),
+                      hintText: 'localStores.form.hoursHint'.tr(),
+                      border: const OutlineInputBorder()),
                 ),
               ],
             ),
           ),
           if (_isSaving)
-            Container(color: Colors.black54, child: const Center(child: CircularProgressIndicator())),
+            Container(
+                color: Colors.black54,
+                child: const Center(child: CircularProgressIndicator())),
         ],
       ),
     );

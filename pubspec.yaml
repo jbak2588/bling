@@ -44,6 +44,7 @@ dependencies:
   intl: ^0.20.2
   flutter_chip_tags: ^2.0.2
   provider: ^6.1.5
+  video_player: ^2.10.0
 
 dev_dependencies:
   flutter_test:

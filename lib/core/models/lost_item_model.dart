@@ -2,68 +2,60 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Data model for lost and found posts with optional bounty.
+/// 분실/습득물 정보를 담는 데이터 모델입니다.
+/// Firestore의 `lost_and_found` 컬렉션 문서 구조와 대응됩니다.
 class LostItemModel {
   final String id;
-  final String type;
-  final String title;
-  final Timestamp date;
-  final String locationDescription;
-  final String description;
-  final String? photoUrl;
-  final String contactInfo;
-  final int? reward;
-  final Timestamp expiresAt;
+  final String userId; // 등록자 ID
+  final String type; // 'lost' 또는 'found'
+  final String itemDescription; // 물건 설명
+  final String locationDescription; // 분실/습득 장소 설명
+  final GeoPoint? geoPoint;
+  final List<String> imageUrls;
   final Timestamp createdAt;
-  final String userId;
+  final bool isHunted; // 현상금(Hunted) 여부
+  final int? bountyAmount; // 현상금 금액
 
   LostItemModel({
     required this.id,
-    required this.type,
-    required this.title,
-    required this.date,
-    required this.locationDescription,
-    required this.description,
-    this.photoUrl,
-    required this.contactInfo,
-    this.reward,
-    required this.expiresAt,
-    required this.createdAt,
     required this.userId,
+    required this.type,
+    required this.itemDescription,
+    required this.locationDescription,
+    this.geoPoint,
+    required this.imageUrls,
+    required this.createdAt,
+    this.isHunted = false,
+    this.bountyAmount,
   });
 
-  factory LostItemModel.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory LostItemModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return LostItemModel(
       id: doc.id,
-      type: data['type'] ?? '',
-      title: data['title'] ?? '',
-      date: data['date'] ?? Timestamp.now(),
-      locationDescription: data['locationDescription'] ?? '',
-      description: data['description'] ?? '',
-      photoUrl: data['photoUrl'],
-      contactInfo: data['contactInfo'] ?? '',
-      reward: data['reward'],
-      expiresAt: data['expiresAt'] ?? Timestamp.now(),
-      createdAt: data['createdAt'] ?? Timestamp.now(),
       userId: data['userId'] ?? '',
+      type: data['type'] ?? 'lost',
+      itemDescription: data['itemDescription'] ?? '',
+      locationDescription: data['locationDescription'] ?? '',
+      geoPoint: data['geoPoint'],
+      imageUrls: List<String>.from(data['imageUrls'] ?? []),
+      createdAt: data['createdAt'] ?? Timestamp.now(),
+      isHunted: data['isHunted'] ?? false,
+      bountyAmount: data['bountyAmount'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'type': type,
-      'title': title,
-      'date': date,
-      'locationDescription': locationDescription,
-      'description': description,
-      'photoUrl': photoUrl,
-      'contactInfo': contactInfo,
-      'reward': reward,
-      'expiresAt': expiresAt,
-      'createdAt': createdAt,
       'userId': userId,
+      'type': type,
+      'itemDescription': itemDescription,
+      'locationDescription': locationDescription,
+      'geoPoint': geoPoint,
+      'imageUrls': imageUrls,
+      'createdAt': createdAt,
+      'isHunted': isHunted,
+      'bountyAmount': bountyAmount,
     };
   }
 }

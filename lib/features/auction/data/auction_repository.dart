@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../core/models/auction_model.dart';
 import '../../../core/models/bid_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Provides CRUD operations for auctions and bidding functionality.
 class AuctionRepository {
@@ -50,7 +51,6 @@ class AuctionRepository {
   }
   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
-  
 // V V V --- [수정] Firestore Transaction을 사용하여 안전하게 입찰을 처리합니다 --- V V V
   Future<void> placeBid(String auctionId, BidModel bid) async {
     final auctionRef = _auctionsCollection.doc(auctionId);
@@ -59,19 +59,19 @@ class AuctionRepository {
     await _firestore.runTransaction((transaction) async {
       final auctionSnapshot = await transaction.get(auctionRef);
       if (!auctionSnapshot.exists) {
-        throw Exception("경매를 찾을 수 없습니다!");
+        throw Exception(tr('auctions.errors.notFound'));
       }
 
       final auction = AuctionModel.fromFirestore(auctionSnapshot);
 
       // 현재 입찰가보다 높은 금액인지 확인
       if (bid.bidAmount <= auction.currentBid) {
-        throw Exception("현재 입찰가보다 높은 금액을 입력해야 합니다.");
+        throw Exception(tr('auctions.errors.lowerBid'));
       }
-      
+
       // 마감 시간이 지났는지 확인
       if (auction.endAt.toDate().isBefore(DateTime.now())) {
-        throw Exception("이미 마감된 경매입니다.");
+        throw Exception(tr('auctions.errors.alreadyEnded'));
       }
 
       // 1. auctions 문서 업데이트

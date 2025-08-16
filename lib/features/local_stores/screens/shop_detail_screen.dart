@@ -9,6 +9,7 @@ import 'package:bling_app/features/local_stores/screens/edit_shop_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class ShopDetailScreen extends StatefulWidget {
@@ -31,8 +32,9 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         shopName: widget.shop.name,
         shopImage: widget.shop.imageUrl,
       );
-      
-      final otherUser = await _chatService.getOtherUserInfo(widget.shop.ownerId);
+
+      final otherUser =
+          await _chatService.getOtherUserInfo(widget.shop.ownerId);
 
       if (!context.mounted) return;
 
@@ -49,7 +51,10 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('채팅을 시작할 수 없습니다: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('localStores.detail.startChatFail'
+                  .tr(namedArgs: {'error': e.toString()})),
+              backgroundColor: Colors.red),
         );
       }
     }
@@ -60,11 +65,16 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('상점 삭제'), // TODO: 다국어
-        content: Text('정말로 이 상점을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'), // TODO: 다국어
+        title: Text('localStores.detail.deleteTitle'.tr()),
+        content: Text('localStores.detail.deleteContent'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('취소')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text('삭제', style: TextStyle(color: Colors.red))),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('localStores.detail.cancel'.tr())),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('localStores.detail.delete'.tr(),
+                  style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -73,12 +83,17 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
       try {
         await _repository.deleteShop(widget.shop.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('상점이 삭제되었습니다.'), backgroundColor: Colors.green));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('localStores.detail.deleteSuccess'.tr()),
+              backgroundColor: Colors.green));
           Navigator.of(context).pop();
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('상점 삭제에 실패했습니다: $e'), backgroundColor: Colors.red));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('localStores.detail.deleteFail'
+                  .tr(namedArgs: {'error': e.toString()})),
+              backgroundColor: Colors.red));
         }
       }
     }
@@ -96,23 +111,27 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
           if (isOwner)
             IconButton(
               icon: const Icon(Icons.edit_note_outlined),
-              tooltip: '상점 정보 수정', // TODO: 다국어
+              tooltip: 'localStores.edit.tooltip'.tr(),
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => EditShopScreen(shop: widget.shop)),
-                ).then((_) => setState(() {}));
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                          builder: (_) => EditShopScreen(shop: widget.shop)),
+                    )
+                    .then((_) => setState(() {}));
               },
             ),
           if (isOwner)
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              tooltip: '상점 삭제', // TODO: 다국어
+              tooltip: 'localStores.detail.deleteTooltip'.tr(),
               onPressed: _deleteShop,
             ),
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0), // 하단 버튼과의 여백
+        padding:
+            const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0), // 하단 버튼과의 여백
         children: [
           if (widget.shop.imageUrl != null && widget.shop.imageUrl!.isNotEmpty)
             ClipRRect(
@@ -125,19 +144,28 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
               ),
             ),
           const SizedBox(height: 16),
-          Text(widget.shop.name, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+          Text(widget.shop.name,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          _buildInfoRow(context, Icons.location_on_outlined, widget.shop.locationName ?? '위치 정보 없음'),
+          _buildInfoRow(context, Icons.location_on_outlined,
+              widget.shop.locationName ?? 'localStores.noLocation'.tr()),
           const SizedBox(height: 4),
-          _buildInfoRow(context, Icons.watch_later_outlined, widget.shop.openHours),
+          _buildInfoRow(
+              context, Icons.watch_later_outlined, widget.shop.openHours),
           const SizedBox(height: 4),
-          _buildInfoRow(context, Icons.phone_outlined, widget.shop.contactNumber),
+          _buildInfoRow(
+              context, Icons.phone_outlined, widget.shop.contactNumber),
           const Divider(height: 32),
-          Text('상점 소개', style: Theme.of(context).textTheme.titleLarge),
+          Text('localStores.detail.description'.tr(),
+              style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
-          Text(widget.shop.description, style: const TextStyle(fontSize: 16, height: 1.5)),
+          Text(widget.shop.description,
+              style: const TextStyle(fontSize: 16, height: 1.5)),
           const Divider(height: 32),
-           _buildOwnerInfo(widget.shop.ownerId),
+          _buildOwnerInfo(widget.shop.ownerId),
         ],
       ),
       bottomNavigationBar: isOwner
@@ -149,7 +177,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: Text('문의하기'),
+                child: Text('localStores.detail.inquire'.tr()),
               ),
             ),
     );
@@ -167,10 +195,13 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
 
   Widget _buildOwnerInfo(String userId) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return const ListTile(title: Text('주인 정보 없음'));
+          return ListTile(title: Text('localStores.detail.noOwnerInfo'.tr()));
         }
         final user = UserModel.fromFirestore(snapshot.data!);
         return Card(
@@ -178,10 +209,16 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
           color: Colors.grey.shade100,
           child: ListTile(
             leading: CircleAvatar(
-              backgroundImage: (user.photoUrl != null && user.photoUrl!.isNotEmpty) ? NetworkImage(user.photoUrl!) : null,
-              child: (user.photoUrl == null || user.photoUrl!.isEmpty) ? const Icon(Icons.person) : null,
+              backgroundImage:
+                  (user.photoUrl != null && user.photoUrl!.isNotEmpty)
+                      ? NetworkImage(user.photoUrl!)
+                      : null,
+              child: (user.photoUrl == null || user.photoUrl!.isEmpty)
+                  ? const Icon(Icons.person)
+                  : null,
             ),
-            title: Text(user.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(user.nickname,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(user.locationName ?? ''),
           ),
         );

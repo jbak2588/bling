@@ -43,7 +43,8 @@ class ShopCard extends StatelessWidget {
               ],
               Text(
                 shop.name,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
               Text(
@@ -55,17 +56,18 @@ class ShopCard extends StatelessWidget {
               const Divider(height: 24),
               Row(
                 children: [
-                  Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
+                  Icon(Icons.location_on_outlined,
+                      size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      shop.locationName ?? '위치 정보 없음'.tr(),
-                      overflow: TextOverflow.ellipsis,
+                      shop.locationName ?? 'localStores.noLocation'.tr(),
                       maxLines: 1,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Icon(Icons.watch_later_outlined, size: 16, color: Colors.grey[600]),
+                  Icon(Icons.watch_later_outlined,
+                      size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Text(shop.openHours),
                 ],
