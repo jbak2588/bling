@@ -2,72 +2,80 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Data model representing a room or boarding house listing.
-///
-/// Used for KOS/boarding/real estate listings under the
-/// `rooms_listings` collection as described in the project docs.
+/// 지역 부동산(월세/하숙) 매물 정보를 담는 데이터 모델입니다.
+/// Firestore의 `room_listings` 컬렉션 문서 구조와 대응됩니다.
 class RoomListingModel {
   final String id;
-  final String roomType;
-  final String address;
+  final String userId; // 게시자 ID
+  final String title;
+  final String description;
+  final String type; // 'kos', 'kontrakan', 'sewa' (하숙, 월세 등)
+  
+  final String? locationName;
+  final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
+
   final int price;
-  final int? deposit;
-  final String size;
-  final List<String> amenities;
-  final List<String> photos;
-  final String contactInfo;
-  final String ownerType;
+  final String priceUnit; // 'monthly', 'yearly' (월세/연세)
+  
+  final List<String> imageUrls;
+  final List<String> amenities; // 'wifi', 'ac', 'parking' 등 편의시설 목록
+  
   final Timestamp createdAt;
+  final bool isAvailable;
 
   RoomListingModel({
     required this.id,
-    required this.roomType,
-    required this.address,
+    required this.userId,
+    required this.title,
+    required this.description,
+    required this.type,
+    this.locationName,
+    this.locationParts,
     this.geoPoint,
     required this.price,
-    this.deposit,
-    required this.size,
+    required this.priceUnit,
+    required this.imageUrls,
     required this.amenities,
-    required this.photos,
-    required this.contactInfo,
-    required this.ownerType,
     required this.createdAt,
+    this.isAvailable = true,
   });
 
-  factory RoomListingModel.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory RoomListingModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return RoomListingModel(
       id: doc.id,
-      roomType: data['roomType'] ?? '',
-      address: data['address'] ?? '',
+      userId: data['userId'] ?? '',
+      title: data['title'] ?? '',
+      description: data['description'] ?? '',
+      type: data['type'] ?? 'kos',
+      locationName: data['locationName'],
+      locationParts: data['locationParts'] != null ? Map<String, dynamic>.from(data['locationParts']) : null,
       geoPoint: data['geoPoint'],
       price: data['price'] ?? 0,
-      deposit: data['deposit'],
-      size: data['size'] ?? '',
-      amenities:
-          data['amenities'] != null ? List<String>.from(data['amenities']) : [],
-      photos: data['photos'] != null ? List<String>.from(data['photos']) : [],
-      contactInfo: data['contactInfo'] ?? '',
-      ownerType: data['ownerType'] ?? 'owner',
+      priceUnit: data['priceUnit'] ?? 'monthly',
+      imageUrls: List<String>.from(data['imageUrls'] ?? []),
+      amenities: List<String>.from(data['amenities'] ?? []),
       createdAt: data['createdAt'] ?? Timestamp.now(),
+      isAvailable: data['isAvailable'] ?? true,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'roomType': roomType,
-      'address': address,
+      'userId': userId,
+      'title': title,
+      'description': description,
+      'type': type,
+      'locationName': locationName,
+      'locationParts': locationParts,
       'geoPoint': geoPoint,
       'price': price,
-      'deposit': deposit,
-      'size': size,
+      'priceUnit': priceUnit,
+      'imageUrls': imageUrls,
       'amenities': amenities,
-      'photos': photos,
-      'contactInfo': contactInfo,
-      'ownerType': ownerType,
       'createdAt': createdAt,
+      'isAvailable': isAvailable,
     };
   }
 }

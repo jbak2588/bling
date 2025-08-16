@@ -26,6 +26,9 @@ class ChatRoomModel {
   final String? shopName;
   final String? shopImage;
 
+  final String? lostItemId;
+  final String? contextType;
+
   ChatRoomModel({
     required this.id,
     required this.participants,
@@ -43,6 +46,9 @@ class ChatRoomModel {
     this.shopId, // [추가]
     this.shopName, // [추가]
     this.shopImage, // [추가]
+
+    this.lostItemId,
+    this.contextType, // [추가]
   });
 
   factory ChatRoomModel.fromFirestore(
@@ -65,6 +71,8 @@ class ChatRoomModel {
       shopId: data['shopId'],
       shopName: data['shopName'],
       shopImage: data['shopImage'],
+      lostItemId: data['lostItemId'],
+      contextType: data['contextType'], // [추가]
     );
   }
 }

@@ -10,11 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/auction/screens/edit_auction_screen.dart';
 
-
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
-
-
 
 class AuctionDetailScreen extends StatefulWidget {
   final AuctionModel auction;
@@ -37,17 +34,19 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
     super.dispose();
   }
 
- // V V V --- [수정] 입찰하기 로직 구현 --- V V V
+  // V V V --- [수정] 입찰하기 로직 구현 --- V V V
   Future<void> _placeBid() async {
     final user = FirebaseAuth.instance.currentUser;
     final amount = int.tryParse(_bidAmountController.text);
 
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('로그인이 필요합니다.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('auctions.detail.errors.loginRequired'.tr())));
       return;
     }
     if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('올바른 입찰 금액을 입력해주세요.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('auctions.detail.errors.invalidAmount'.tr())));
       return;
     }
 
@@ -65,12 +64,16 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
       _bidAmountController.clear();
       FocusScope.of(context).unfocus();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('입찰에 성공했습니다!'), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('auctions.detail.bidSuccess'.tr()),
+            backgroundColor: Colors.green));
       }
-
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('입찰 실패: ${e.toString()}'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('auctions.detail.bidFail'
+                .tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isBidding = false);
@@ -85,8 +88,13 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
         title: Text('auctions.delete.confirmTitle'.tr()),
         content: Text('auctions.delete.confirmContent'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('common.cancel'.tr())),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text('common.delete'.tr(), style: const TextStyle(color: Colors.red))),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('common.cancel'.tr())),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('common.delete'.tr(),
+                  style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -95,12 +103,17 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
       try {
         await _repository.deleteAuction(widget.auction.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('auctions.delete.success'.tr()), backgroundColor: Colors.green));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('auctions.delete.success'.tr()),
+              backgroundColor: Colors.green));
           Navigator.of(context).pop();
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('auctions.delete.fail'.tr(namedArgs: {'error': e.toString()})), backgroundColor: Colors.red));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('auctions.delete.fail'
+                  .tr(namedArgs: {'error': e.toString()})),
+              backgroundColor: Colors.red));
         }
       }
     }
@@ -149,12 +162,14 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
               return Container(
                 width: 8.0,
                 height: 8.0,
-                margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                margin:
+                    const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: (Theme.of(context).brightness == Brightness.dark
                           ? Colors.white
                           : Colors.black)
+                      // ignore: deprecated_member_use
                       .withOpacity(_currentImageIndex == entry.key ? 0.9 : 0.4),
                 ),
               );
@@ -167,14 +182,18 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-  final NumberFormat currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final NumberFormat currencyFormat =
+        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
     // [수정] StreamBuilder를 Scaffold 바깥으로 이동하여 AppBar에서도 실시간 데이터를 사용
     return StreamBuilder<AuctionModel>(
       stream: _repository.getAuctionStream(widget.auction.id),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        if (!snapshot.hasData) {
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
+        }
         final auction = snapshot.data!;
         final isOwner = auction.ownerId == currentUserId;
 
@@ -189,7 +208,8 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                   tooltip: 'auctions.edit.tooltip'.tr(),
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => EditAuctionScreen(auction: auction)),
+                      MaterialPageRoute(
+                          builder: (_) => EditAuctionScreen(auction: auction)),
                     );
                   },
                 ),
@@ -214,71 +234,115 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(auction.title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                          Text(auction.title,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 12),
-                          Text('현재 입찰가: ${currencyFormat.format(auction.currentBid)}'),
-                          Text('마감 시간: ${DateFormat('MM/dd HH:mm').format(auction.endAt.toDate())}'),
+                          Text('auctions.detail.currentBid'.tr(namedArgs: {
+                            'amount': currencyFormat.format(auction.currentBid)
+                          })),
+                          Text('auctions.detail.endTime'.tr(namedArgs: {
+                            'time': DateFormat('MM/dd HH:mm')
+                                .format(auction.endAt.toDate())
+                          })),
                           const Divider(height: 32),
-                          Text(auction.description, style: const TextStyle(fontSize: 16, height: 1.5)),
+                          Text(auction.description,
+                              style:
+                                  const TextStyle(fontSize: 16, height: 1.5)),
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
-                 const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Text('입찰 현황', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Text('auctions.detail.bidsTitle'.tr(),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ),
               // V V V --- [수정] 입찰자 정보를 가져오는 로직을 복원합니다 --- V V V
               StreamBuilder<List<BidModel>>(
                 stream: _repository.fetchBids(widget.auction.id),
                 builder: (context, bidSnapshot) {
-                  if (!bidSnapshot.hasData) return const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator()));
+                  if (!bidSnapshot.hasData) {
+                    return const SliverToBoxAdapter(
+                        child: Center(child: CircularProgressIndicator()));
+                  }
                   final bids = bidSnapshot.data!;
-                  if (bids.isEmpty) return const SliverToBoxAdapter(child: Center(child: Padding(padding: EdgeInsets.all(16.0), child: Text('아직 입찰자가 없습니다.'))));
+                  if (bids.isEmpty) {
+                    return SliverToBoxAdapter(
+                        child: Center(
+                            child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text('auctions.detail.noBids'.tr()))));
+                  }
 
                   return SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final bid = bids[index];
-                        return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                          future: FirebaseFirestore.instance.collection('users').doc(bid.userId).get(),
-                          builder: (context, userSnapshot) {
-                            if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-                              return const ListTile(leading: CircleAvatar(child: Icon(Icons.person_off)), title: Text('알 수 없는 입찰자'));
-                            }
-                            final user = UserModel.fromFirestore(userSnapshot.data!);
-                            
-                            return Card(
-                              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                              child: ListTile(
-                                leading: CircleAvatar(
-                                  backgroundImage: (user.photoUrl != null && user.photoUrl!.isNotEmpty) ? NetworkImage(user.photoUrl!) : null,
+                        return FutureBuilder<
+                                DocumentSnapshot<Map<String, dynamic>>>(
+                            future: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(bid.userId)
+                                .get(),
+                            builder: (context, userSnapshot) {
+                              if (!userSnapshot.hasData ||
+                                  !userSnapshot.data!.exists) {
+                                return ListTile(
+                                    leading: const CircleAvatar(
+                                        child: Icon(Icons.person_off)),
+                                    title: Text(
+                                        'auctions.detail.unknownBidder'.tr()));
+                              }
+                              final user =
+                                  UserModel.fromFirestore(userSnapshot.data!);
+
+                              return Card(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 4),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundImage: (user.photoUrl != null &&
+                                            user.photoUrl!.isNotEmpty)
+                                        ? NetworkImage(user.photoUrl!)
+                                        : null,
+                                  ),
+                                  title: Text(user.nickname,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  subtitle: Text(
+                                      currencyFormat.format(bid.bidAmount)),
+                                  trailing: Text(DateFormat('HH:mm')
+                                      .format(bid.bidTime.toDate())),
                                 ),
-                                title: Text(user.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                subtitle: Text(currencyFormat.format(bid.bidAmount)),
-                                trailing: Text(DateFormat('HH:mm').format(bid.bidTime.toDate())),
-                              ),
-                            );
-                          }
-                        );
+                              );
+                            });
                       },
                       childCount: bids.length,
                     ),
                   );
                 },
               ),
-              // 
+              //
             ],
           ),
           // [수정] 경매 주인이 아닐 경우에만 입찰하기 UI 표시
           bottomNavigationBar: isOwner
               ? null
               : Padding(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 8, right: 8, top: 8),
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                      left: 8,
+                      right: 8,
+                      top: 8),
                   child: Row(
                     children: [
                       Expanded(
@@ -286,8 +350,9 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                           controller: _bidAmountController,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            labelText: '입찰가 입력 (Rp)',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            labelText: 'auctions.detail.bidAmountLabel'.tr(),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
@@ -295,10 +360,18 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                       ElevatedButton(
                         onPressed: _isBidding ? null : _placeBid,
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: _isBidding ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('입찰하기'),
+                        child: _isBidding
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 2))
+                            : Text('auctions.detail.placeBid'.tr()),
                       ),
                     ],
                   ),
@@ -308,8 +381,6 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
     );
   }
 }
-
-
 
 // V V V --- [이식] product_detail_screen.dart에서 가져온 전체 화면 이미지 뷰어 --- V V V
 class FullScreenImageViewer extends StatefulWidget {

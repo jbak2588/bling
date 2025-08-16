@@ -72,7 +72,9 @@ class LocalStoresScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+                child: Text('localStores.error'
+                    .tr(namedArgs: {'error': snapshot.error.toString()})));
           }
 
           final allDocs = snapshot.data?.docs ?? [];
@@ -99,13 +101,12 @@ class LocalStoresScreen extends StatelessWidget {
             ));
           } else {
             // 로그인하지 않은 사용자에 대한 처리
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text('로그인이 필요합니다.')));
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('main.errors.loginRequired'.tr())));
           }
           // TODO: 상점 등록 화면으로 이동하는 로직
         },
-
-        tooltip: '내 상점 등록하기', // TODO:
+        tooltip: 'localStores.create.tooltip'.tr(),
         child: const Icon(Icons.add_business_outlined),
       ),
     );

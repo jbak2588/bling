@@ -14,7 +14,8 @@ class AuctionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final NumberFormat currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     // TODO: 남은 시간을 실시간으로 계산하는 로직(Timer) 추가 필요
-    final String timeLeft = '마감: ${DateFormat('MM/dd HH:mm').format(auction.endAt.toDate())}';
+    final String timeLeft = DateFormat('MM/dd HH:mm').format(auction.endAt.toDate());
+
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

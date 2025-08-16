@@ -1,5 +1,7 @@
 // lib/features/auction/screens/create_auction_screen.dart
 
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io';
 import 'package:bling_app/core/models/auction_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
@@ -46,7 +48,8 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
     if (_isPickingImages || _images.length >= 10) return;
     setState(() => _isPickingImages = true);
     try {
-      final pickedFiles = await _picker.pickMultiImage(imageQuality: 70, limit: 10 - _images.length);
+      final pickedFiles = await _picker.pickMultiImage(
+          imageQuality: 70, limit: 10 - _images.length);
       if (pickedFiles.isNotEmpty && mounted) {
         setState(() => _images.addAll(pickedFiles));
       }
@@ -56,7 +59,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
       if (mounted) setState(() => _isPickingImages = false);
     }
   }
-  
+
   // [추가] 선택한 이미지 제거 함수
   void _removeImage(int index) {
     setState(() {
@@ -67,12 +70,13 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
   Future<void> _submitAuction() async {
     if (!_formKey.currentState!.validate() || _isSaving) return;
     if (_images.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('auctions.create.errors.noPhoto'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('auctions.create.errors.noPhoto'.tr())));
       return;
     }
-    
+
     setState(() => _isSaving = true);
-    
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
@@ -81,13 +85,17 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
       for (var imageFile in _images) {
         // [수정] const를 제거하여 매번 새로운 고유 ID를 생성합니다.
         final fileName = const Uuid().v4();
-        final ref = FirebaseStorage.instance.ref().child('auction_images/${user.uid}/$fileName');
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('auction_images/${user.uid}/$fileName');
         await ref.putFile(File(imageFile.path));
         imageUrls.add(await ref.getDownloadURL());
       }
 
       final now = Timestamp.now();
-      final endAt = Timestamp.fromMillisecondsSinceEpoch(now.millisecondsSinceEpoch + Duration(days: _durationInDays).inMilliseconds);
+      final endAt = Timestamp.fromMillisecondsSinceEpoch(
+          now.millisecondsSinceEpoch +
+              Duration(days: _durationInDays).inMilliseconds);
       final startPrice = int.tryParse(_startPriceController.text) ?? 0;
 
       final newAuction = AuctionModel(
@@ -98,7 +106,8 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
         startPrice: startPrice,
         currentBid: startPrice,
         bidHistory: [],
-        location: widget.userModel.locationName ?? 'Unknown',
+        location:
+            widget.userModel.locationName ?? 'postCard.locationNotSet'.tr(),
         geoPoint: widget.userModel.geoPoint,
         startAt: now,
         endAt: endAt,
@@ -108,12 +117,17 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
       await _repository.createAuction(newAuction);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('auctions.create.success'.tr()), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('auctions.create.success'.tr()),
+            backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('auctions.create.fail'.tr(namedArgs: {'error': e.toString()})), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'auctions.create.fail'.tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -125,7 +139,11 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('auctions.create.title'.tr()),
-        actions: [ if (!_isSaving) TextButton(onPressed: _submitAuction, child: Text('common.done'.tr())) ],
+        actions: [
+          if (!_isSaving)
+            TextButton(
+                onPressed: _submitAuction, child: Text('common.done'.tr()))
+        ],
       ),
       body: Stack(
         children: [
@@ -135,7 +153,8 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
               padding: const EdgeInsets.all(16.0),
               children: [
                 // V V V --- [수정] 이미지 선택 및 취소 기능이 포함된 UI --- V V V
-                Text('사진 등록 (최대 10장)', style: Theme.of(context).textTheme.titleMedium),
+                Text('auctions.create.form.photoSectionTitle'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 SizedBox(
                   height: 100,
@@ -151,15 +170,19 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
-                                child: Image.file(File(xfile.path), width: 100, height: 100, fit: BoxFit.cover),
+                                child: Image.file(File(xfile.path),
+                                    width: 100, height: 100, fit: BoxFit.cover),
                               ),
                               Positioned(
-                                top: 4, right: 4,
+                                top: 4,
+                                right: 4,
                                 child: InkWell(
                                   onTap: () => _removeImage(index),
                                   child: const CircleAvatar(
-                                    radius: 12, backgroundColor: Colors.black54,
-                                    child: Icon(Icons.close, color: Colors.white, size: 16),
+                                    radius: 12,
+                                    backgroundColor: Colors.black54,
+                                    child: Icon(Icons.close,
+                                        color: Colors.white, size: 16),
                                   ),
                                 ),
                               ),
@@ -171,43 +194,65 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                         GestureDetector(
                           onTap: _pickImages,
                           child: Container(
-                            width: 100, height: 100,
+                            width: 100,
+                            height: 100,
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(Icons.add_a_photo_outlined, color: Colors.grey),
+                            child: const Icon(Icons.add_a_photo_outlined,
+                                color: Colors.grey),
                           ),
                         ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 TextFormField(
                   controller: _titleController,
-                  decoration: InputDecoration(labelText: 'auctions.create.form.title'.tr(), border: const OutlineInputBorder()),
-                  validator: (value) => (value == null || value.trim().isEmpty) ? '제목을 입력해주세요.' : null,
+                  decoration: InputDecoration(
+                      labelText: 'auctions.create.form.title'.tr(),
+                      border: const OutlineInputBorder()),
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'auctions.form.titleRequired'.tr()
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: InputDecoration(labelText: 'auctions.create.form.description'.tr(), border: const OutlineInputBorder()),
+                  decoration: InputDecoration(
+                      labelText: 'auctions.create.form.description'.tr(),
+                      border: const OutlineInputBorder()),
                   maxLines: 5,
-                  validator: (value) => (value == null || value.trim().isEmpty) ? '설명을 입력해주세요.' : null,
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'auctions.form.descriptionRequired'.tr()
+                      : null,
                 ),
                 const SizedBox(height: 16),
-                 TextFormField(
+                TextFormField(
                   controller: _startPriceController,
-                  decoration: InputDecoration(labelText: 'auctions.create.form.startPrice'.tr(), border: const OutlineInputBorder(), prefixText: 'Rp '),
+                  decoration: InputDecoration(
+                      labelText: 'auctions.create.form.startPrice'.tr(),
+                      border: const OutlineInputBorder(),
+                      prefixText: 'Rp '),
                   keyboardType: TextInputType.number,
-                  validator: (value) => (value == null || value.trim().isEmpty) ? '시작가를 입력해주세요.' : null,
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'auctions.form.startPriceRequired'.tr()
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<int>(
                   value: _durationInDays,
-                  decoration: InputDecoration(labelText: 'auctions.create.form.duration'.tr(), border: const OutlineInputBorder()),
-                  items: [3, 5, 7].map((days) => DropdownMenuItem(value: days, child: Text('$days일'))).toList(),
+                  decoration: InputDecoration(
+                      labelText: 'auctions.create.form.duration'.tr(),
+                      border: const OutlineInputBorder()),
+                  items: [3, 5, 7]
+                      .map((days) => DropdownMenuItem(
+                          value: days,
+                          child: Text('auctions.create.form.durationOption'
+                              .tr(namedArgs: {'days': days.toString()}))))
+                      .toList(),
                   onChanged: (value) {
                     if (value != null) setState(() => _durationInDays = value);
                   },
@@ -215,16 +260,20 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                 const SizedBox(height: 16),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.location_on_outlined, color: Colors.grey[600]),
+                  leading:
+                      Icon(Icons.location_on_outlined, color: Colors.grey[600]),
                   title: Text('auctions.create.form.location'.tr()),
-                  subtitle: Text(widget.userModel.locationName ?? '위치 정보 없음'),
+                  subtitle: Text(widget.userModel.locationName ??
+                      'postCard.locationNotSet'.tr()),
                   dense: true,
                 ),
               ],
             ),
           ),
           if (_isSaving)
-            Container(color: Colors.black.withOpacity(0.5), child: const Center(child: CircularProgressIndicator())),
+            Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(child: CircularProgressIndicator())),
         ],
       ),
     );

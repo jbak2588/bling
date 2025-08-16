@@ -662,6 +662,113 @@
             "chatCreated": "동호회 채팅방이 개설되었습니다."
         }
     },
+       "auctions": {
+        "card": {
+            "currentBid": "현재 입찰가",
+            "endTime": "마감 시간"
+        },
+        "errors": {
+            "fetchFailed": "경매 목록을 불러오지 못했습니다: {error}",
+            "notFound": "경매를 찾을 수 없습니다.",
+            "lowerBid": "현재 입찰가보다 높은 금액을 입력해야 합니다.",
+            "alreadyEnded": "이미 마감된 경매입니다."
+        },
+        "empty": "진행 중인 경매가 없습니다.",
+        "create": {
+            "tooltip": "경매 등록",
+            "title": "경매 등록",
+            "success": "경매가 등록되었습니다.",
+            "fail": "경매 등록에 실패했습니다: {error}",
+            "errors": {
+                "noPhoto": "사진을 최소 한 장 이상 추가해주세요."
+            },
+            "form": {
+                "photoSectionTitle": "사진 등록 (최대 10장)",
+                "title": "제목",
+                "description": "상세 설명",
+                "startPrice": "시작가",
+                "duration": "기간",
+                "durationOption": "{days}일",
+                "location": "위치"
+            }
+        },
+        "edit": {
+            "tooltip": "경매 수정",
+            "title": "경매 정보 수정",
+            "save": "저장",
+            "success": "경매 정보가 수정되었습니다.",
+            "fail": "수정에 실패했습니다: {error}"
+        },
+        "form": {
+            "titleRequired": "제목을 입력해주세요.",
+            "descriptionRequired": "설명을 입력해주세요.",
+            "startPriceRequired": "시작가를 입력해주세요."
+        },
+        "delete": {
+            "tooltip": "경매 삭제",
+            "confirmTitle": "경매 삭제",
+            "confirmContent": "정말 이 경매를 삭제하시겠습니까?",
+            "success": "경매가 삭제되었습니다.",
+            "fail": "삭제에 실패했습니다: {error}"
+        },
+        "detail": {
+            "currentBid": "현재 입찰가: {amount}",
+            "endTime": "마감 시간: {time}",
+            "bidsTitle": "입찰 현황",
+            "noBids": "아직 입찰자가 없습니다.",
+            "unknownBidder": "알 수 없는 입찰자",
+            "bidAmountLabel": "입찰가 입력 (Rp)",
+            "placeBid": "입찰하기",
+            "bidSuccess": "입찰에 성공했습니다!",
+            "bidFail": "입찰 실패: {error}",
+            "errors": {
+                "loginRequired": "로그인이 필요합니다.",
+                "invalidAmount": "올바른 입찰 금액을 입력해주세요."
+            }
+        }
+    },
+       "localStores": {
+        "setLocationPrompt": "위치를 설정하면 동네 상점을 볼 수 있어요.",
+        "empty": "등록된 상점이 없습니다.",
+        "error": "오류가 발생했습니다: {error}",
+        "create": {
+            "tooltip": "내 상점 등록하기",
+            "title": "새 상점 등록",
+            "submit": "등록",
+            "success": "상점이 등록되었습니다.",
+            "fail": "상점 등록에 실패했습니다: {error}"
+        },
+        "edit": {
+            "title": "상점 정보 수정",
+            "save": "저장",
+            "success": "상점 정보가 수정되었습니다.",
+            "fail": "수정에 실패했습니다: {error}",
+            "tooltip": "상점 정보 수정"
+        },
+        "form": {
+            "nameLabel": "상점 이름",
+            "nameError": "상점 이름을 입력해주세요.",
+            "descriptionLabel": "상점 소개",
+            "descriptionError": "상점 소개를 입력해주세요.",
+            "contactLabel": "연락처",
+            "hoursLabel": "영업 시간",
+            "hoursHint": "예) 09:00 - 18:00"
+        },
+        "detail": {
+            "description": "상점 소개",
+            "deleteTitle": "상점 삭제",
+            "deleteContent": "정말로 이 상점을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+            "deleteTooltip": "상점 삭제",
+            "delete": "삭제",
+            "cancel": "취소",
+            "deleteSuccess": "상점이 삭제되었습니다.",
+            "deleteFail": "상점 삭제에 실패했습니다: {error}",
+            "inquire": "문의하기",
+            "noOwnerInfo": "주인 정보 없음",
+            "startChatFail": "채팅을 시작할 수 없습니다: {error}"
+        },
+        "noLocation": "위치 정보 없음"
+    },
     "community": {
         "title": "커뮤니티 화면"
     }

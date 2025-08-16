@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class EditShopScreen extends StatefulWidget {
   final ShopModel shop;
@@ -94,12 +95,12 @@ class _EditShopScreenState extends State<EditShopScreen> {
       await _repository.updateShop(updatedShop);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('상점 정보가 수정되었습니다.'), backgroundColor: Colors.green));
+       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('localStores.edit.success'.tr()), backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('수정에 실패했습니다: $e'), backgroundColor: Colors.red));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('localStores.edit.fail'.tr(namedArgs: {'error': e.toString()})), backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -110,10 +111,10 @@ class _EditShopScreenState extends State<EditShopScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('상점 정보 수정'), // TODO: 다국어
+         title: Text('localStores.edit.title'.tr()),
         actions: [
           if (!_isSaving)
-            TextButton(onPressed: _updateShop, child: Text('저장')), // TODO: 다국어
+           TextButton(onPressed: _updateShop, child: Text('localStores.edit.save'.tr())),
         ],
       ),
       body: Stack(
@@ -148,31 +149,32 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: '상점 이름', border: OutlineInputBorder()),
-                  validator: (value) => (value == null || value.trim().isEmpty) ? '상점 이름을 입력해주세요.' : null,
+                   decoration: InputDecoration(labelText: 'localStores.form.nameLabel'.tr(), border: const OutlineInputBorder()),
+                  validator: (value) => (value == null || value.trim().isEmpty) ? 'localStores.form.nameError'.tr() : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: '상점 소개', border: OutlineInputBorder()),
+                        decoration: InputDecoration(labelText: 'localStores.form.descriptionLabel'.tr(), border: const OutlineInputBorder()),
                   maxLines: 4,
-                  validator: (value) => (value == null || value.trim().isEmpty) ? '상점 소개를 입력해주세요.' : null,
+                  validator: (value) => (value == null || value.trim().isEmpty) ? 'localStores.form.descriptionError'.tr() : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _contactController,
-                  decoration: const InputDecoration(labelText: '연락처', border: OutlineInputBorder()),
+                   decoration: InputDecoration(labelText: 'localStores.form.contactLabel'.tr(), border: const OutlineInputBorder()),
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _hoursController,
-                  decoration: const InputDecoration(labelText: '영업 시간', hintText: '예) 09:00 - 18:00', border: OutlineInputBorder()),
+                 decoration: InputDecoration(labelText: 'localStores.form.hoursLabel'.tr(), hintText: 'localStores.form.hoursHint'.tr(), border: const OutlineInputBorder()),
                 ),
               ],
             ),
           ),
           if (_isSaving)
+            // ignore: deprecated_member_use
             Container(color: Colors.black.withOpacity(0.5), child: const Center(child: CircularProgressIndicator())),
         ],
       ),

@@ -65,6 +65,7 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
 
   
 
+  // V V V --- [수정] '분실물/습득물' 채팅도 생성할 수 있도록 함수를 확장합니다 --- V V V
   Future<String> createOrGetChatRoom({
     required String otherUserId,
     String? productId,
@@ -75,6 +76,10 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
     String? shopId,
     String? shopName,
     String? shopImage,
+    String? lostItemId,
+    String? lostItemTitle,
+    String? lostItemImage,
+    String? contextType, // [추가]
   }) async {
     final myUid = _auth.currentUser?.uid;
     if (myUid == null) throw Exception('User not logged in');
@@ -82,28 +87,30 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
     List<String> participants = [myUid, otherUserId];
     participants.sort();
     
-    // [수정] 채팅방 ID 생성 규칙: 상품, 구인글, 상점 ID 등을 기반으로 생성
-    String contextId = productId ?? jobId ?? shopId ?? 'direct';
+    String contextId = productId ?? jobId ?? shopId ?? lostItemId ?? 'direct';
     String chatId = '${contextId}_${participants.join('_')}';
 
     final chatDocRef = _firestore.collection('chats').doc(chatId);
     final chatDoc = await chatDocRef.get();
 
     if (!chatDoc.exists) {
-      // [수정] 채팅방 생성 시, 넘어온 정보를 기반으로 데이터를 구성
       final chatRoomData = {
-        'participants': participants,
+       'participants': participants,
         'lastMessage': '',
         'lastTimestamp': FieldValue.serverTimestamp(),
         'unreadCounts': {myUid: 0, otherUserId: 0},
+        'contextType': contextType, // [핵심] 전달받은 contextType을 저장
         if (productId != null) 'productId': productId,
         if (productTitle != null) 'productTitle': productTitle,
         if (productImage != null) 'productImage': productImage,
         if (jobId != null) 'jobId': jobId,
         if (jobTitle != null) 'jobTitle': jobTitle,
         if (shopId != null) 'shopId': shopId,
-        if (shopName != null) 'shopName': shopName, // productTitle 필드를 공유해서 사용 가능
-        if (shopImage != null) 'shopImage': shopImage, // productImage 필드를 공유해서 사용 가능
+        if (shopName != null) 'shopName': shopName,
+        if (shopImage != null) 'shopImage': shopImage,
+        if (lostItemId != null) 'lostItemId': lostItemId,
+        if (lostItemTitle != null) 'productTitle': lostItemTitle, // productTitle 필드 재활용
+        if (lostItemImage != null) 'productImage': lostItemImage, // productImage 필드 재활용
       };
       await chatDocRef.set(chatRoomData);
     }

@@ -1,75 +1,30 @@
 // lib/features/real_estate/data/room_repository.dart
 
+import 'package:bling_app/core/models/room_listing_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../core/models/room_listing_model.dart';
-
-/// Repository handling CRUD and favorite operations for room listings.
 class RoomRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  CollectionReference<Map<String, dynamic>> get _listingsCollection =>
-      _firestore.collection('rooms_listings');
-
-  Future<String> createListing(RoomListingModel listing) async {
-    final doc = await _listingsCollection.add(listing.toJson());
-    return doc.id;
-  }
-
-  Future<void> updateListing(RoomListingModel listing) async {
-    await _listingsCollection.doc(listing.id).update(listing.toJson());
-  }
-
-  Future<void> deleteListing(String listingId) async {
-    await _listingsCollection.doc(listingId).delete();
-  }
-
-  Future<RoomListingModel> fetchListing(String listingId) async {
-    final doc = await _listingsCollection.doc(listingId).get();
-    return RoomListingModel.fromFirestore(doc);
-  }
-
-  Stream<List<RoomListingModel>> fetchListings() {
-    return _listingsCollection
+  /// 'room_listings' 컬렉션의 모든 매물 목록을 실시간으로 가져옵니다.
+  Stream<List<RoomListingModel>> fetchRooms() {
+    return _firestore
+        .collection('room_listings')
+        .where('isAvailable', isEqualTo: true) // 거래 가능한 매물만 표시
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((s) => s.docs.map(RoomListingModel.fromFirestore).toList());
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => RoomListingModel.fromFirestore(doc))
+          .toList();
+    });
   }
 
-  Future<void> addFavorite(String userId, String listingId) async {
-    await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('favorites')
-        .doc(listingId)
-        .set({'createdAt': FieldValue.serverTimestamp()});
+  // 새로운 부동산 매물을 생성하는 함수
+
+   Future<void> createRoomListing(RoomListingModel room) async {
+    await _firestore.collection('room_listings').add(room.toJson());
   }
 
-  Future<void> removeFavorite(String userId, String listingId) async {
-    await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('favorites')
-        .doc(listingId)
-        .delete();
-  }
 
-  Future<bool> isFavorite(String userId, String listingId) async {
-    final doc = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('favorites')
-        .doc(listingId)
-        .get();
-    return doc.exists;
-  }
-
-  Stream<List<String>> watchFavorites(String userId) {
-    return _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('favorites')
-        .snapshots()
-        .map((s) => s.docs.map((d) => d.id).toList());
-  }
 }

@@ -51,11 +51,11 @@ class AuctionScreen extends StatelessWidget {
               builder: (_) => CreateAuctionScreen(userModel: userModel!),
             ));
           } else {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text('로그인이 필요합니다.')));
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('main.errors.loginRequired'.tr())));
           }
         },
-        tooltip: 'auctions.create'.tr(),
+        tooltip: 'auctions.create.tooltip'.tr(),
         child: const Icon(Icons.add),
       ),
     );

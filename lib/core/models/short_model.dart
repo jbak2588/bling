@@ -16,9 +16,11 @@ class ShortModel {
   final List<String>? tags;
   final int likesCount;
   final int viewsCount;
+  final int commentsCount;
   final bool trustLevelVerified;
   final bool isAiVerified;
   final Timestamp createdAt;
+
 
   ShortModel({
     required this.id,
@@ -32,6 +34,7 @@ class ShortModel {
     this.tags,
     this.likesCount = 0,
     this.viewsCount = 0,
+    this.commentsCount = 0,
     this.trustLevelVerified = false,
     this.isAiVerified = false,
     required this.createdAt,
@@ -52,6 +55,7 @@ class ShortModel {
       tags: data['tags'] != null ? List<String>.from(data['tags']) : null,
       likesCount: data['likesCount'] ?? 0,
       viewsCount: data['viewsCount'] ?? 0,
+      commentsCount: data['commentsCount'] ?? 0,
       trustLevelVerified: data['trustLevelVerified'] ?? false,
       isAiVerified: data['isAiVerified'] ?? false,
       createdAt: data['createdAt'] ?? Timestamp.now(),
@@ -70,6 +74,7 @@ class ShortModel {
       'tags': tags,
       'likesCount': likesCount,
       'viewsCount': viewsCount,
+      'commentsCount': commentsCount,
       'trustLevelVerified': trustLevelVerified,
       'isAiVerified': isAiVerified,
       'createdAt': createdAt,

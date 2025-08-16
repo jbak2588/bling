@@ -14,6 +14,11 @@ import 'package:bling_app/features/local_news/screens/create_local_news_screen.d
 import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
 import 'package:bling_app/features/clubs/screens/create_club_screen.dart';
 import 'package:bling_app/features/jobs/screens/create_job_screen.dart'; // [추가] 구인글 작성 화면 import
+import 'package:bling_app/features/pom/screens/create_short_screen.dart'; // [추가] POM 등록 화면 import
+import 'package:bling_app/features/lost_and_found/screens/lost_and_found_screen.dart';
+import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart'; // [추가] 부동산 화면 import
+import 'package:bling_app/features/real_estate/screens/create_room_listing_screen.dart'; // [추가]
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,7 +30,7 @@ import '../../../core/models/user_model.dart';
 import '../../../core/utils/address_formatter.dart';
 import '../auth/screens/profile_edit_screen.dart';
 import '../local_news/screens/local_news_screen.dart';
-// import '../location/screens/location_setting_screen.dart';
+
 import '../location/screens/location_filter_screen.dart';
 import '../marketplace/screens/marketplace_screen.dart';
 import '../admin/screens/data_fix_screen.dart';
@@ -73,6 +78,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     },
     {'icon': Icons.gavel_outlined, 'key': 'main.tabs.auction'},
     {'icon': Icons.star_outline, 'key': 'main.tabs.pom'},
+    {'icon': Icons.help_outline, 'key': 'main.tabs.lostAndFound'},
+    {
+      'icon': Icons.house_outlined,
+      'key': 'main.tabs.realEstate'
+    }, // TODO: 다국어 키 추가 필요
   ];
 
   @override
@@ -157,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
-  void _onFloatingActionButtonTapped() {
+  Future<void> _onFloatingActionButtonTapped() async {
     // [수정] 사용자 정보가 로드되기 전에는 버튼이 동작하지 않도록 방어합니다.
     if (_userModel == null) return;
 
@@ -180,6 +190,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (_) => CreateJobScreen(userModel: _userModel!)));
         break;
+      // V V V --- [수정] 'POM' 탭(인덱스 8)에 대한 case를 추가합니다 --- V V V
+      case 8: // POM
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => CreateShortScreen(userModel: _userModel!)));
+        break;
+
+      case 10: // Real Estate
+        final result = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(builder: (_) => CreateRoomListingScreen(userModel: _userModel!)),
+        );
+        // 등록 화면에서 'true' 값이 반환되면 (등록 성공 시)
+        if (result == true) {
+          // '부동산' 탭(인덱스 9)으로 즉시 이동합니다.
+          _tabController.animateTo(9);
+        }
+        break;
+      // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
       default:
         debugPrint(
             '${_topTabs[currentTabIndex]['key']} 탭에서는 생성 기능이 지원되지 않습니다.');
@@ -318,6 +345,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           LocalStoresScreen(userModel: _userModel),
           AuctionScreen(userModel: _userModel),
           PomScreen(userModel: _userModel),
+          LostAndFoundScreen(userModel: _userModel),
+          RealEstateScreen(userModel: _userModel),
         ],
       ),
     );
