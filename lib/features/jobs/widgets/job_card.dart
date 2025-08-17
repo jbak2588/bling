@@ -21,7 +21,7 @@ class JobCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias, // InkWell 효과가 Card 모서리를 따르도록 함
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        // TODO: onTap에 상세 화면 이동 로직 추가
+      
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(

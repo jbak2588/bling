@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CreateShortScreen extends StatefulWidget {
   final UserModel userModel;
@@ -61,7 +62,9 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
     try {
       // 1. 비디오를 Firebase Storage에 업로드
       final fileName = const Uuid().v4();
-      final ref = FirebaseStorage.instance.ref().child('shorts/${user.uid}/$fileName.mp4');
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('shorts/${user.uid}/$fileName.mp4');
       final uploadTask = ref.putFile(File(_videoFile!.path));
       final snapshot = await uploadTask.whenComplete(() {});
       final videoUrl = await snapshot.ref.getDownloadURL();
@@ -71,7 +74,8 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
         id: '',
         userId: user.uid,
         videoUrl: videoUrl,
-        title: _descriptionController.text.trim(), // You may want a separate title field
+        title: _descriptionController.text
+            .trim(), // You may want a separate title field
         thumbnailUrl: '', // Provide a valid thumbnail URL if available
         description: _descriptionController.text.trim(),
         location: widget.userModel.locationName ?? 'Unknown',
@@ -82,12 +86,17 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
       await _repository.createShort(newShort);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('POM이 등록되었습니다.'), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('pom.create.success'.tr()),
+            backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('등록에 실패했습니다: $e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text('pom.create.fail'.tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -98,10 +107,11 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('새 POM 등록'), // TODO: 다국어
+        title: Text('pom.create.title'.tr()),
         actions: [
           if (!_isSaving)
-            TextButton(onPressed: _submitShort, child: Text('등록')), // TODO: 다국어
+            TextButton(
+                onPressed: _submitShort, child: Text('pom.create.submit'.tr())),
         ],
       ),
       body: Stack(
@@ -117,7 +127,8 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
                     border: Border.all(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: (_videoController != null && _videoController!.value.isInitialized)
+                  child: (_videoController != null &&
+                          _videoController!.value.isInitialized)
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: AspectRatio(
@@ -125,22 +136,26 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
                             child: VideoPlayer(_videoController!),
                           ),
                         )
-                      : const Center(child: Icon(Icons.video_call_outlined, size: 60, color: Colors.grey)),
+                      : const Center(
+                          child: Icon(Icons.video_call_outlined,
+                              size: 60, color: Colors.grey)),
                 ),
               ),
               const SizedBox(height: 24),
               TextField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: '영상 설명', // TODO: 다국어
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'pom.create.form.descriptionLabel'.tr(),
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 3,
               ),
             ],
           ),
           if (_isSaving)
-            Container(color: Colors.black.withValues(alpha: 0.5), child: const Center(child: CircularProgressIndicator())),
+            Container(
+                color: Colors.black.withValues(alpha: 0.5),
+                child: const Center(child: CircularProgressIndicator())),
         ],
       ),
     );

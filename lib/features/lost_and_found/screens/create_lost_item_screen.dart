@@ -10,6 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CreateLostItemScreen extends StatefulWidget {
   final UserModel userModel;
@@ -40,35 +41,40 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
 
   Future<void> _pickImages() async {
     if (_images.length >= 5) return;
-    final pickedFiles = await _picker.pickMultiImage(imageQuality: 70, limit: 5 - _images.length);
+    final pickedFiles = await _picker.pickMultiImage(
+        imageQuality: 70, limit: 5 - _images.length);
     if (pickedFiles.isNotEmpty) {
       setState(() => _images.addAll(pickedFiles));
     }
   }
-  
+
   void _removeImage(int index) {
-      setState(() => _images.removeAt(index));
+    setState(() => _images.removeAt(index));
   }
 
   Future<void> _submitItem() async {
     if (!_formKey.currentState!.validate() || _isSaving) return;
     if (_images.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('사진을 1장 이상 첨부해주세요.'))); // TODO: 다국어
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('lostAndFound.form.imageRequired'.tr())));
+
       return;
     }
 
     setState(() => _isSaving = true);
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-        setState(() => _isSaving = false);
-        return;
+      setState(() => _isSaving = false);
+      return;
     }
 
     try {
       List<String> imageUrls = [];
       for (var imageFile in _images) {
         final fileName = const Uuid().v4();
-        final ref = FirebaseStorage.instance.ref().child('lost_and_found/${user.uid}/$fileName');
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('lost_and_found/${user.uid}/$fileName');
         await ref.putFile(File(imageFile.path));
         imageUrls.add(await ref.getDownloadURL());
       }
@@ -88,12 +94,17 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
       await _repository.createItem(newItem);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('등록되었습니다.'), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('lostAndFound.form.success'.tr()),
+            backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('등록에 실패했습니다: $e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('lostAndFound.form.fail'
+                .tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -104,10 +115,12 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('분실/습득물 등록'), // TODO: 다국어
+        title: Text('lostAndFound.form.title'.tr()),
         actions: [
           if (!_isSaving)
-            TextButton(onPressed: _submitItem, child: Text('등록')), // TODO: 다국어
+            TextButton(
+                onPressed: _submitItem,
+                child: Text('lostAndFound.form.submit'.tr())),
         ],
       ),
       body: Stack(
@@ -118,17 +131,23 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
               padding: const EdgeInsets.all(16.0),
               children: [
                 SegmentedButton<String>(
-                  segments: const <ButtonSegment<String>>[
-                    ButtonSegment<String>(value: 'lost', label: Text('분실했어요')), // TODO: 다국어
-                    ButtonSegment<String>(value: 'found', label: Text('주웠어요')), // TODO: 다국어
+                  segments: <ButtonSegment<String>>[
+                    ButtonSegment<String>(
+                        value: 'lost',
+                        label: Text('lostAndFound.form.type.lost'.tr())),
+                    ButtonSegment<String>(
+                        value: 'found',
+                        label: Text('lostAndFound.form.type.found'.tr())),
                   ],
                   selected: {_type},
-                  onSelectionChanged: (newSelection) => setState(() => _type = newSelection.first),
+                  onSelectionChanged: (newSelection) =>
+                      setState(() => _type = newSelection.first),
                 ),
                 const SizedBox(height: 24),
 
                 // V V V --- [복원] 이미지 선택 및 취소 기능이 포함된 UI --- V V V
-                Text('사진 등록 (최대 5장)', style: Theme.of(context).textTheme.titleMedium), // TODO: 다국어
+                Text('lostAndFound.form.photoSectionTitle'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 SizedBox(
                   height: 100,
@@ -144,15 +163,19 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
-                                child: Image.file(File(xfile.path), width: 100, height: 100, fit: BoxFit.cover),
+                                child: Image.file(File(xfile.path),
+                                    width: 100, height: 100, fit: BoxFit.cover),
                               ),
                               Positioned(
-                                top: 4, right: 4,
+                                top: 4,
+                                right: 4,
                                 child: InkWell(
                                   onTap: () => _removeImage(index),
                                   child: const CircleAvatar(
-                                    radius: 12, backgroundColor: Colors.black54,
-                                    child: Icon(Icons.close, color: Colors.white, size: 16),
+                                    radius: 12,
+                                    backgroundColor: Colors.black54,
+                                    child: Icon(Icons.close,
+                                        color: Colors.white, size: 16),
                                   ),
                                 ),
                               ),
@@ -164,12 +187,14 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
                         GestureDetector(
                           onTap: _pickImages,
                           child: Container(
-                            width: 100, height: 100,
+                            width: 100,
+                            height: 100,
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(Icons.add_a_photo_outlined, color: Colors.grey),
+                            child: const Icon(Icons.add_a_photo_outlined,
+                                color: Colors.grey),
                           ),
                         ),
                     ],
@@ -177,24 +202,33 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
                 ),
                 // ^ ^ ^ --- 여기까지 복원 --- ^ ^ ^
                 const SizedBox(height: 24),
-                
-                TextFormField(
-                  controller: _itemDescriptionController,
-                  decoration: const InputDecoration(labelText: '어떤 물건인가요?', border: OutlineInputBorder()),
-                  validator: (value) => (value == null || value.trim().isEmpty) ? '물건 설명을 입력해주세요.' : null,
-                ),
-                const SizedBox(height: 16),
 
                 TextFormField(
+                  controller: _itemDescriptionController,
+                  decoration: InputDecoration(
+                      labelText: 'lostAndFound.form.itemLabel'.tr(),
+                      border: const OutlineInputBorder()),
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'lostAndFound.form.itemError'.tr()
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
                   controller: _locationDescriptionController,
-                  decoration: const InputDecoration(labelText: '어디서 잃어버렸거나 주우셨나요?', border: OutlineInputBorder()),
-                   validator: (value) => (value == null || value.trim().isEmpty) ? '장소 설명을 입력해주세요.' : null,
+                  decoration: InputDecoration(
+                      labelText: 'lostAndFound.form.locationLabel'.tr(),
+                      border: const OutlineInputBorder()),
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'lostAndFound.form.locationError'.tr()
+                      : null,
                 ),
               ],
             ),
           ),
           if (_isSaving)
-            Container(color: Colors.black.withOpacity(0.5), child: const Center(child: CircularProgressIndicator())),
+            Container(
+                color: Colors.black.withValues(alpha: 0.1),
+                child: const Center(child: CircularProgressIndicator())),
         ],
       ),
     );

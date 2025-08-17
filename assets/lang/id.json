@@ -68,7 +68,9 @@
             "jobs": "Lowongan",
             "localStores": "Toko Lokal",
             "auction": "Lelang",
-            "pom": "POM"
+            "pom": "POM",
+            "lostAndFound": "Hilang & Temu",
+            "realEstate": "Properti"
         },
         "bottomNav": {
             "home": "Beranda",
@@ -663,7 +665,7 @@
             "chatCreated": "Ruang chat klub telah dibuat."
         }
     },
-      "auctions": {
+    "auctions": {
         "card": {
             "currentBid": "Tawaran saat ini",
             "endTime": "Berakhir"
@@ -728,7 +730,7 @@
             }
         }
     },
-        "localStores": {
+    "localStores": {
         "setLocationPrompt": "Atur lokasi Anda untuk melihat toko di sekitar.",
         "empty": "Belum ada toko terdaftar.",
         "error": "Terjadi kesalahan: {error}",
@@ -769,6 +771,108 @@
             "startChatFail": "Tidak dapat memulai chat: {error}"
         },
         "noLocation": "Tidak ada info lokasi"
+    },
+    "pom": {
+        "share": "Bagikan",
+        "empty": "Belum ada POM yang diunggah.",
+        "errors": {
+            "fetchFailed": "Terjadi kesalahan: {error}"
+        },
+        "create": {
+            "title": "Unggah POM Baru",
+            "submit": "Unggah",
+            "success": "POM berhasil diunggah.",
+            "fail": "Gagal mengunggah POM: {error}",
+            "form": {
+                "descriptionLabel": "Deskripsi video"
+            }
+        }
+    },
+    "realEstate": {
+        "empty": "Belum ada listing.",
+        "error": "Terjadi kesalahan: {error}",
+        "create": "Tambah listing",
+        "locationUnknown": "Tidak ada info lokasi",
+        "priceUnits": {
+            "monthly": "bulan",
+            "yearly": "tahun"
+        },
+        "form": {
+            "title": "Daftarkan Listing",
+            "submit": "Daftar",
+            "imageRequired": "Harap lampirkan minimal satu foto.",
+            "success": "Listing berhasil dibuat.",
+            "fail": "Gagal membuat listing: {error}",
+            "type": {
+                "kos": "Kos",
+                "kontrakan": "Kontrakan",
+                "sewa": "Sewa"
+            },
+            "priceLabel": "Harga",
+            "priceRequired": "Masukkan harga.",
+            "priceUnit": {
+                "monthly": "/bulan",
+                "yearly": "/tahun"
+            },
+            "titleLabel": "Judul",
+            "titleRequired": "Masukkan judul.",
+            "descriptionLabel": "Deskripsi",
+            "amenities": "Fasilitas",
+            "amenity": {
+                "wifi": "Wi-Fi",
+                "ac": "AC",
+                "parking": "Parkir",
+                "kitchen": "Dapur"
+            }
+        }
+    },
+    "lostAndFound": {
+        "empty": "Belum ada barang hilang/temuan.",
+        "error": "Terjadi kesalahan: {error}",
+        "create": "Tambah barang hilang/temuan",
+        "lost": "Hilang",
+        "found": "Ditemukan",
+        "card": {
+            "location": "Lokasi: {location}"
+        },
+        "form": {
+            "title": "Daftarkan Barang Hilang/Temuan",
+            "submit": "Daftar",
+            "type": {
+                "lost": "Saya kehilangan",
+                "found": "Saya menemukan"
+            },
+            "photoSectionTitle": "Tambah foto (maks 5)",
+            "imageRequired": "Harap lampirkan minimal satu foto.",
+            "itemLabel": "Barang apa itu?",
+            "itemError": "Harap jelaskan barangnya.",
+            "locationLabel": "Di mana hilang atau ditemukan?",
+            "locationError": "Harap jelaskan lokasinya.",
+            "success": "Berhasil didaftarkan.",
+            "fail": "Gagal mendaftarkan barang: {error}"
+        },
+        "edit": {
+            "title": "Ubah Barang Hilang/Temuan",
+            "save": "Simpan",
+            "success": "Berhasil diperbarui.",
+            "fail": "Gagal memperbarui: {error}"
+        },
+        "detail": {
+            "title": "Barang Hilang/Temuan",
+            "location": "Lokasi",
+            "registrant": "Pendaftar",
+            "contact": "Hubungi",
+            "deleteTitle": "Hapus Postingan",
+            "deleteContent": "Yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.",
+            "delete": "Hapus",
+            "cancel": "Batal",
+            "deleteSuccess": "Postingan dihapus.",
+            "deleteFail": "Gagal menghapus postingan: {error}",
+            "editTooltip": "Ubah",
+            "deleteTooltip": "Hapus",
+            "noUser": "Info pengguna tidak ada",
+            "chatError": "Tidak dapat memulai chat: {error}"
+        }
     },
     "community": {
         "title": "Halaman Komunitas"

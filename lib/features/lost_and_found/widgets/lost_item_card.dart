@@ -3,6 +3,7 @@
 import 'package:bling_app/core/models/lost_item_model.dart';
 import 'package:bling_app/features/lost_and_found/screens/lost_item_detail_screen.dart'; // [추가]
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class LostItemCard extends StatelessWidget {
   final LostItemModel item;
@@ -10,7 +11,8 @@ class LostItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color typeColor = item.type == 'lost' ? Colors.redAccent : Colors.blueAccent;
+    final Color typeColor =
+        item.type == 'lost' ? Colors.redAccent : Colors.blueAccent;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -31,13 +33,15 @@ class LostItemCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Chip(
-                label: Text(item.type == 'lost' ? '분실' : '습득'), // TODO: 다국어
-                backgroundColor: typeColor.withOpacity(0.1),
-                labelStyle: TextStyle(color: typeColor, fontWeight: FontWeight.bold),
+                label: Text(item.type == 'lost'
+                    ? 'lostAndFound.lost'.tr()
+                    : 'lostAndFound.found'.tr()),
+                backgroundColor: typeColor.withValues(alpha: 0.1),
+                labelStyle:
+                    TextStyle(color: typeColor, fontWeight: FontWeight.bold),
                 side: BorderSide(color: typeColor),
               ),
               const SizedBox(height: 12),
-              
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -51,21 +55,23 @@ class LostItemCard extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     ),
-                  if (item.imageUrls.isNotEmpty)
-                    const SizedBox(width: 16),
+                  if (item.imageUrls.isNotEmpty) const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           item.itemDescription,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                         const SizedBox(height: 4),
-                         Text(
-                          '장소: ${item.locationDescription}', // TODO: 다국어
+                        const SizedBox(height: 4),
+                        Text(
+                          'lostAndFound.card.location'.tr(namedArgs: {
+                            'location': item.locationDescription
+                          }),
                           style: TextStyle(color: Colors.grey[700]),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

@@ -36,7 +36,6 @@ class ChatService {
     return UserModel.fromFirestore(userDoc);
   }
 
-
 // V V V --- [추가] 여러 참여자의 정보를 한 번에 가져오는 함수 --- V V V
   Future<Map<String, UserModel>> getParticipantsInfo(
       List<String> userIds) async {
@@ -55,7 +54,7 @@ class ChatService {
     return usersMap;
   }
 
-Future<ChatRoomModel?> getChatRoom(String chatId) async {
+  Future<ChatRoomModel?> getChatRoom(String chatId) async {
     final doc = await _chats.doc(chatId).get();
     if (doc.exists) {
       return ChatRoomModel.fromFirestore(doc);
@@ -63,9 +62,7 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
     return null;
   }
 
-  
-
-  // V V V --- [수정] '분실물/습득물' 채팅도 생성할 수 있도록 함수를 확장합니다 --- V V V
+  // V V V --- [수정] '부동산' 채팅도 생성할 수 있도록 함수를 확장합니다 --- V V V
   Future<String> createOrGetChatRoom({
     required String otherUserId,
     String? productId,
@@ -79,15 +76,19 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
     String? lostItemId,
     String? lostItemTitle,
     String? lostItemImage,
-    String? contextType, // [추가]
+    String? contextType,
+    String? roomId,
+    String? roomTitle,
+    String? roomImage,
   }) async {
     final myUid = _auth.currentUser?.uid;
     if (myUid == null) throw Exception('User not logged in');
 
     List<String> participants = [myUid, otherUserId];
     participants.sort();
-    
-    String contextId = productId ?? jobId ?? shopId ?? lostItemId ?? 'direct';
+
+    String contextId =
+        productId ?? jobId ?? shopId ?? lostItemId ?? roomId ?? 'direct';
     String chatId = '${contextId}_${participants.join('_')}';
 
     final chatDocRef = _firestore.collection('chats').doc(chatId);
@@ -95,11 +96,11 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
 
     if (!chatDoc.exists) {
       final chatRoomData = {
-       'participants': participants,
+        'participants': participants,
         'lastMessage': '',
         'lastTimestamp': FieldValue.serverTimestamp(),
         'unreadCounts': {myUid: 0, otherUserId: 0},
-        'contextType': contextType, // [핵심] 전달받은 contextType을 저장
+        'contextType': contextType,
         if (productId != null) 'productId': productId,
         if (productTitle != null) 'productTitle': productTitle,
         if (productImage != null) 'productImage': productImage,
@@ -109,8 +110,17 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
         if (shopName != null) 'shopName': shopName,
         if (shopImage != null) 'shopImage': shopImage,
         if (lostItemId != null) 'lostItemId': lostItemId,
-        if (lostItemTitle != null) 'productTitle': lostItemTitle, // productTitle 필드 재활용
-        if (lostItemImage != null) 'productImage': lostItemImage, // productImage 필드 재활용
+        if (lostItemTitle != null) 'productTitle': lostItemTitle,
+        if (lostItemImage != null) 'productImage': lostItemImage,
+        if (roomId != null) 'roomId': roomId,
+        if (roomTitle != null)
+          'productTitle': roomTitle, // productTitle 필드를 재활용
+        if (roomImage != null)
+          'productImage': roomImage, // productImage 필드를 재활용
+
+        if (roomId != null) 'roomId': roomId,
+        if (roomTitle != null) 'roomTitle': roomTitle,
+        if (roomImage != null) 'roomImage': roomImage,
       };
       await chatDocRef.set(chatRoomData);
     }
@@ -129,13 +139,17 @@ Future<ChatRoomModel?> getChatRoom(String chatId) async {
             .toList());
   }
 
-Future<void> sendMessage(String chatId, String text, {String? otherUserId, List<String>? allParticipantIds}) async {
+  Future<void> sendMessage(String chatId, String text,
+      {String? otherUserId, List<String>? allParticipantIds}) async {
     final myUid = _auth.currentUser?.uid;
     if (myUid == null || text.trim().isEmpty) return;
 
     final messageData = ChatMessageModel(
-      id: '', senderId: myUid, text: text.trim(),
-      timestamp: Timestamp.now(), readBy: [myUid],
+      id: '',
+      senderId: myUid,
+      text: text.trim(),
+      timestamp: Timestamp.now(),
+      readBy: [myUid],
     );
 
     final chatRoomRef = _firestore.collection('chats').doc(chatId);
@@ -143,7 +157,7 @@ Future<void> sendMessage(String chatId, String text, {String? otherUserId, List<
 
     // WriteBatch를 사용하여 여러 작업을 원자적으로 처리
     final batch = _firestore.batch();
-    
+
     // 1. 메시지 추가
     batch.set(messagesColRef.doc(), messageData.toJson());
 
@@ -164,11 +178,11 @@ Future<void> sendMessage(String chatId, String text, {String? otherUserId, List<
       updateData['unreadCounts.$otherUserId'] = FieldValue.increment(1);
     }
     batch.update(chatRoomRef, updateData);
-    
+
     await batch.commit();
   }
 
-    // V V V --- [수정] 복합 색인이 필요 없는, 더 효율적인 읽음 처리 함수 --- V V V
+  // V V V --- [수정] 복합 색인이 필요 없는, 더 효율적인 읽음 처리 함수 --- V V V
   Future<void> markMessagesAsRead(String chatId) async {
     final myUid = _auth.currentUser?.uid;
     if (myUid == null) return;
@@ -185,7 +199,7 @@ Future<void> sendMessage(String chatId, String text, {String? otherUserId, List<
         .limit(50);
 
     final unreadMessagesSnapshot = await messagesQuery.get();
-    
+
     // 3. 가져온 메시지들을 앱(클라이언트)에서 직접 확인하여,
     //    내가 보내지 않았고 아직 내가 읽지 않은 메시지만 골라냅니다.
     final batch = _firestore.batch();
