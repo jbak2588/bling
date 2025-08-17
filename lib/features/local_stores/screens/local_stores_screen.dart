@@ -104,7 +104,7 @@ class LocalStoresScreen extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('main.errors.loginRequired'.tr())));
           }
-          // TODO: 상점 등록 화면으로 이동하는 로직
+         
         },
         tooltip: 'localStores.create.tooltip'.tr(),
         child: const Icon(Icons.add_business_outlined),

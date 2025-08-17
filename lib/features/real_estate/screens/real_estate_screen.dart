@@ -24,7 +24,11 @@ class RealEstateScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'.tr()));
+            return Center(
+              child: Text(
+                'realEstate.error'.tr(namedArgs: {'error': snapshot.error.toString()}),
+              ),
+            );
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text('realEstate.empty'.tr()));
@@ -43,7 +47,6 @@ class RealEstateScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // V V V --- [수정] 부동산 매물 등록 화면으로 이동하는 로직 --- V V V
           if (userModel != null) {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => CreateRoomListingScreen(userModel: userModel!)),
@@ -51,10 +54,9 @@ class RealEstateScreen extends StatelessWidget {
           } else {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('main.errors.loginRequired'.tr())));
           }
-          // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
         },
-        child: const Icon(Icons.add_home_outlined),
         tooltip: 'realEstate.create'.tr(),
+        child: const Icon(Icons.add_home_outlined),
       ),
     );
   }

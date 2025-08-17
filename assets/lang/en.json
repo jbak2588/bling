@@ -68,7 +68,9 @@
             "jobs": "Jobs",
             "localStores": "Local Stores",
             "auction": "Auction",
-            "pom": "POM"
+            "pom": "POM",
+            "lostAndFound": "Lost & Found",
+            "realEstate": "Real Estate"
         },
         "bottomNav": {
             "home": "Home",
@@ -728,7 +730,7 @@
             }
         }
     },
-       "localStores": {
+    "localStores": {
         "setLocationPrompt": "Please set your location to browse local shops.",
         "empty": "No shops registered yet.",
         "error": "An error has occurred: {error}",
@@ -769,6 +771,108 @@
             "startChatFail": "Could not start chat: {error}"
         },
         "noLocation": "No location info"
+    },
+    "pom": {
+        "share": "Share",
+        "empty": "No POMs have been uploaded yet.",
+        "errors": {
+            "fetchFailed": "An error has occurred: {error}"
+        },
+        "create": {
+            "title": "Upload New POM",
+            "submit": "Upload",
+            "success": "POM uploaded.",
+            "fail": "Failed to upload POM: {error}",
+            "form": {
+                "descriptionLabel": "Video description"
+            }
+        }
+    },
+    "realEstate": {
+        "empty": "No listings registered yet.",
+        "error": "An error has occurred: {error}",
+        "create": "Add listing",
+        "locationUnknown": "No location info",
+        "priceUnits": {
+            "monthly": "month",
+            "yearly": "year"
+        },
+        "form": {
+            "title": "New Listing",
+            "submit": "Register",
+            "imageRequired": "Please attach at least one photo.",
+            "success": "Listing created.",
+            "fail": "Failed to create listing: {error}",
+            "type": {
+                "kos": "Boarding",
+                "kontrakan": "Monthly rent",
+                "sewa": "Lease"
+            },
+            "priceLabel": "Price",
+            "priceRequired": "Please enter the price.",
+            "priceUnit": {
+                "monthly": "/month",
+                "yearly": "/year"
+            },
+            "titleLabel": "Title",
+            "titleRequired": "Please enter a title.",
+            "descriptionLabel": "Description",
+            "amenities": "Amenities",
+            "amenity": {
+                "wifi": "Wi-Fi",
+                "ac": "A/C",
+                "parking": "Parking",
+                "kitchen": "Kitchen"
+            }
+        }
+    },
+    "lostAndFound": {
+        "empty": "No items registered yet.",
+        "error": "An error has occurred: {error}",
+        "create": "Add lost/found item",
+        "lost": "Lost",
+        "found": "Found",
+        "card": {
+            "location": "Location: {location}"
+        },
+        "form": {
+            "title": "Register Lost/Found Item",
+            "submit": "Register",
+            "type": {
+                "lost": "I lost it",
+                "found": "I found it"
+            },
+            "photoSectionTitle": "Add photos (up to 5)",
+            "imageRequired": "Please attach at least one photo.",
+            "itemLabel": "What is the item?",
+            "itemError": "Please describe the item.",
+            "locationLabel": "Where was it lost or found?",
+            "locationError": "Please describe the location.",
+            "success": "Item registered.",
+            "fail": "Failed to register item: {error}"
+        },
+        "edit": {
+            "title": "Edit Lost/Found Item",
+            "save": "Save",
+            "success": "Item updated.",
+            "fail": "Failed to update item: {error}"
+        },
+        "detail": {
+            "title": "Lost & Found",
+            "location": "Location",
+            "registrant": "Registrant",
+            "contact": "Contact",
+            "deleteTitle": "Delete Post",
+            "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
+            "delete": "Delete",
+            "cancel": "Cancel",
+            "deleteSuccess": "Post deleted.",
+            "deleteFail": "Failed to delete post: {error}",
+            "editTooltip": "Edit",
+            "deleteTooltip": "Delete",
+            "noUser": "User not found",
+            "chatError": "Could not start chat: {error}"
+        }
     },
     "community": {
         "title": "Community Screen"

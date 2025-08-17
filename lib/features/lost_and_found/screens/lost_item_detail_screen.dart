@@ -30,10 +30,12 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
         otherUserId: widget.item.userId,
         lostItemId: widget.item.id,
         lostItemTitle: widget.item.itemDescription,
-        lostItemImage: widget.item.imageUrls.isNotEmpty ? widget.item.imageUrls.first : null,
+        lostItemImage: widget.item.imageUrls.isNotEmpty
+            ? widget.item.imageUrls.first
+            : null,
         contextType: widget.item.type,
       );
-      
+
       final otherUser = await _chatService.getOtherUserInfo(widget.item.userId);
 
       if (!context.mounted) return;
@@ -50,9 +52,11 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
       );
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('채팅을 시작할 수 없습니다: $e'), backgroundColor: Colors.red),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('lostAndFound.detail.chatError'
+              .tr(namedArgs: {'error': e.toString()})),
+          backgroundColor: Colors.red,
+        ));
       }
     }
   }
@@ -62,11 +66,16 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('게시글 삭제'), // TODO: 다국어
-        content: Text('정말로 이 게시글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'), // TODO: 다국어
+        title: Text('lostAndFound.detail.deleteTitle'.tr()),
+        content: Text('lostAndFound.detail.deleteContent'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('취소')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text('삭제', style: TextStyle(color: Colors.red))),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('lostAndFound.detail.cancel'.tr())),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('lostAndFound.detail.delete'.tr(),
+                  style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -75,12 +84,17 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
       try {
         await _repository.deleteItem(widget.item.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('게시글이 삭제되었습니다.'), backgroundColor: Colors.green));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('lostAndFound.detail.deleteSuccess'.tr()),
+              backgroundColor: Colors.green));
           Navigator.of(context).pop();
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('삭제에 실패했습니다: $e'), backgroundColor: Colors.red));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('lostAndFound.detail.deleteFail'
+                  .tr(namedArgs: {'error': e.toString()})),
+              backgroundColor: Colors.red));
         }
       }
     }
@@ -90,7 +104,8 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
   Widget build(BuildContext context) {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     final isOwner = widget.item.userId == currentUserId;
-    final Color typeColor = widget.item.type == 'lost' ? Colors.redAccent : Colors.blueAccent;
+    final Color typeColor =
+        widget.item.type == 'lost' ? Colors.redAccent : Colors.blueAccent;
 
     return Scaffold(
       appBar: AppBar(
@@ -100,17 +115,21 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           if (isOwner)
             IconButton(
               icon: const Icon(Icons.edit_note_outlined),
-              tooltip: '수정하기', // TODO: 다국어
+              tooltip: 'lostAndFound.detail.editTooltip'.tr(),
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => EditLostItemScreen(item: widget.item)),
-                ).then((_) => setState(() {})); // 수정 후 돌아왔을 때 화면 갱신
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              EditLostItemScreen(item: widget.item)),
+                    )
+                    .then((_) => setState(() {})); // 수정 후 돌아왔을 때 화면 갱신
               },
             ),
           if (isOwner)
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              tooltip: '삭제하기', // TODO: 다국어
+              tooltip: 'lostAndFound.detail.deleteTooltip'.tr(),
               onPressed: _deleteItem,
             ),
         ],
@@ -131,17 +150,29 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
             ),
           const SizedBox(height: 16),
           Chip(
-            label: Text(widget.item.type == 'lost' ? 'lostAndFound.lost'.tr() : 'lostAndFound.found'.tr()),
-            backgroundColor: typeColor.withOpacity(0.1),
-            labelStyle: TextStyle(color: typeColor, fontWeight: FontWeight.bold),
+            label: Text(widget.item.type == 'lost'
+                ? 'lostAndFound.lost'.tr()
+                : 'lostAndFound.found'.tr()),
+            backgroundColor: typeColor.withValues(alpha: 0.1),
+            labelStyle:
+                TextStyle(color: typeColor, fontWeight: FontWeight.bold),
             side: BorderSide(color: typeColor),
           ),
           const SizedBox(height: 8),
-          Text(widget.item.itemDescription, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+          Text(widget.item.itemDescription,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold)),
           const Divider(height: 32),
-          _buildInfoRow(context, Icons.location_on_outlined, 'lostAndFound.detail.location'.tr(), widget.item.locationDescription),
+          _buildInfoRow(
+              context,
+              Icons.location_on_outlined,
+              'lostAndFound.detail.location'.tr(),
+              widget.item.locationDescription),
           const Divider(height: 32),
-          Text('lostAndFound.detail.registrant'.tr(), style: Theme.of(context).textTheme.titleLarge),
+          Text('lostAndFound.detail.registrant'.tr(),
+              style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           _buildOwnerInfo(widget.item.userId),
         ],
@@ -162,7 +193,8 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String text) {
+  Widget _buildInfoRow(
+      BuildContext context, IconData icon, String label, String text) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -184,10 +216,13 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
 
   Widget _buildOwnerInfo(String userId) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return const ListTile(title: Text('사용자 정보 없음'));
+          return ListTile(title: Text('lostAndFound.detail.noUser'.tr()));
         }
         final user = UserModel.fromFirestore(snapshot.data!);
         return Card(
@@ -195,9 +230,13 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           color: Colors.grey.shade100,
           child: ListTile(
             leading: CircleAvatar(
-              backgroundImage: (user.photoUrl != null && user.photoUrl!.isNotEmpty) ? NetworkImage(user.photoUrl!) : null,
+              backgroundImage:
+                  (user.photoUrl != null && user.photoUrl!.isNotEmpty)
+                      ? NetworkImage(user.photoUrl!)
+                      : null,
             ),
-            title: Text(user.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(user.nickname,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(user.locationName ?? ''),
           ),
         );

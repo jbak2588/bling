@@ -17,7 +17,8 @@ class CreateRoomListingScreen extends StatefulWidget {
   const CreateRoomListingScreen({super.key, required this.userModel});
 
   @override
-  State<CreateRoomListingScreen> createState() => _CreateRoomListingScreenState();
+  State<CreateRoomListingScreen> createState() =>
+      _CreateRoomListingScreenState();
 }
 
 class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
@@ -45,7 +46,8 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
 
   Future<void> _pickImages() async {
     if (_images.length >= 10) return;
-    final pickedFiles = await _picker.pickMultiImage(imageQuality: 70, limit: 10 - _images.length);
+    final pickedFiles = await _picker.pickMultiImage(
+        imageQuality: 70, limit: 10 - _images.length);
     if (pickedFiles.isNotEmpty) {
       setState(() => _images.addAll(pickedFiles));
     }
@@ -58,7 +60,8 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
   Future<void> _submitListing() async {
     if (!_formKey.currentState!.validate() || _isSaving) return;
     if (_images.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('사진을 1장 이상 첨부해주세요.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('realEstate.form.imageRequired'.tr())));
       return;
     }
 
@@ -73,7 +76,9 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
       List<String> imageUrls = [];
       for (var imageFile in _images) {
         final fileName = const Uuid().v4();
-        final ref = FirebaseStorage.instance.ref().child('room_listings/${user.uid}/$fileName');
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('room_listings/${user.uid}/$fileName');
         await ref.putFile(File(imageFile.path));
         imageUrls.add(await ref.getDownloadURL());
       }
@@ -97,14 +102,19 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
       await _repository.createRoomListing(newListing);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('매물이 등록되었습니다.'), backgroundColor: Colors.green));
-       // V V V --- [수정] 등록 성공 신호(true)와 함께 화면을 닫습니다 --- V V V
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('realEstate.form.success'.tr()),
+            backgroundColor: Colors.green));
+        // V V V --- [수정] 등록 성공 신호(true)와 함께 화면을 닫습니다 --- V V V
         Navigator.of(context).pop(true);
         // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('등록에 실패했습니다: $e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'realEstate.form.fail'.tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -115,9 +125,12 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('새 매물 등록'), // TODO: 다국어
+        title: Text('realEstate.form.title'.tr()),
         actions: [
-          if (!_isSaving) TextButton(onPressed: _submitListing, child: const Text('등록')), // TODO: 다국어
+          if (!_isSaving)
+            TextButton(
+                onPressed: _submitListing,
+                child: Text('realEstate.form.submit'.tr())),
         ],
       ),
       body: Stack(
@@ -142,7 +155,8 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
-                                child: Image.file(File(image.path), width: 100, height: 100, fit: BoxFit.cover),
+                                child: Image.file(File(image.path),
+                                    width: 100, height: 100, fit: BoxFit.cover),
                               ),
                               Positioned(
                                 top: 4,
@@ -152,7 +166,8 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                                   child: const CircleAvatar(
                                     radius: 12,
                                     backgroundColor: Colors.black54,
-                                    child: Icon(Icons.close, color: Colors.white, size: 16),
+                                    child: Icon(Icons.close,
+                                        color: Colors.white, size: 16),
                                   ),
                                 ),
                               ),
@@ -170,7 +185,8 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                               color: Colors.grey.shade200,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(Icons.add_a_photo_outlined, color: Colors.grey),
+                            child: const Icon(Icons.add_a_photo_outlined,
+                                color: Colors.grey),
                           ),
                         ),
                     ],
@@ -179,13 +195,20 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 const SizedBox(height: 24),
                 // --- 매물 종류 ---
                 SegmentedButton<String>(
-                  segments: const [
-                    ButtonSegment(value: 'kos', label: Text('하숙')), // TODO: 다국어
-                    ButtonSegment(value: 'kontrakan', label: Text('월세')),
-                    ButtonSegment(value: 'sewa', label: Text('임대')),
+                  segments: [
+                    ButtonSegment(
+                        value: 'kos',
+                        label: Text('realEstate.form.type.kos'.tr())),
+                    ButtonSegment(
+                        value: 'kontrakan',
+                        label: Text('realEstate.form.type.kontrakan'.tr())),
+                    ButtonSegment(
+                        value: 'sewa',
+                        label: Text('realEstate.form.type.sewa'.tr())),
                   ],
                   selected: {_type},
-                  onSelectionChanged: (newSelection) => setState(() => _type = newSelection.first),
+                  onSelectionChanged: (newSelection) =>
+                      setState(() => _type = newSelection.first),
                 ),
                 const SizedBox(height: 16),
                 // --- 가격 정보 ---
@@ -194,17 +217,27 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: _priceController,
-                        decoration: const InputDecoration(labelText: '가격', border: OutlineInputBorder()),
+                        decoration: InputDecoration(
+                            labelText: 'realEstate.form.priceLabel'.tr(),
+                            border: const OutlineInputBorder()),
                         keyboardType: TextInputType.number,
-                        validator: (v) => (v == null || v.isEmpty) ? '가격을 입력하세요' : null,
+                        validator: (v) => (v == null || v.isEmpty)
+                            ? 'realEstate.form.priceRequired'.tr()
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 8),
                     DropdownButton<String>(
                       value: _priceUnit,
-                      items: const [
-                        DropdownMenuItem(value: 'monthly', child: Text('/월')),
-                        DropdownMenuItem(value: 'yearly', child: Text('/년')),
+                      items: [
+                        DropdownMenuItem(
+                            value: 'monthly',
+                            child:
+                                Text('realEstate.form.priceUnit.monthly'.tr())),
+                        DropdownMenuItem(
+                            value: 'yearly',
+                            child:
+                                Text('realEstate.form.priceUnit.yearly'.tr())),
                       ],
                       onChanged: (val) => setState(() => _priceUnit = val!),
                     ),
@@ -214,28 +247,38 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 // --- 제목 및 설명 ---
                 TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(labelText: '제목', border: OutlineInputBorder()), // TODO: 다국어
-                  validator: (v) => (v == null || v.isEmpty) ? '제목을 입력하세요' : null,
+                  decoration: InputDecoration(
+                      labelText: 'realEstate.form.titleLabel'.tr(),
+                      border: const OutlineInputBorder()),
+                  validator: (v) => (v == null || v.isEmpty)
+                      ? 'realEstate.form.titleRequired'.tr()
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: '상세 설명', border: OutlineInputBorder()), // TODO: 다국어
+                  decoration: InputDecoration(
+                      labelText: 'realEstate.form.descriptionLabel'.tr(),
+                      border: const OutlineInputBorder()),
                   maxLines: 3,
                 ),
                 const SizedBox(height: 24),
                 // --- 편의시설 ---
-                Text('편의시설', style: Theme.of(context).textTheme.titleMedium), // TODO: 다국어
+                Text('realEstate.form.amenities'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
                 Wrap(
                   spacing: 8.0,
-                  children: ['wifi', 'ac', 'parking', 'kitchen'].map((amenity) { // TODO: 다국어
+                  children: ['wifi', 'ac', 'parking', 'kitchen'].map((amenity) {
                     return FilterChip(
-                      label: Text(amenity),
+                      label: Text('realEstate.form.amenity.$amenity'.tr()),
                       selected: _amenities.contains(amenity),
                       onSelected: (selected) {
                         setState(() {
-                          if (selected) _amenities.add(amenity);
-                          else _amenities.remove(amenity);
+                          if (selected) {
+                            _amenities.add(amenity);
+                          } else {
+                            _amenities.remove(amenity);
+                          }
                         });
                       },
                     );
@@ -245,7 +288,9 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
             ),
           ),
           if (_isSaving)
-            Container(color: Colors.black.withOpacity(0.5), child: const Center(child: CircularProgressIndicator())),
+            Container(
+                color: Colors.black.withValues(alpha: 0.1),
+                child: const Center(child: CircularProgressIndicator())),
         ],
       ),
     );

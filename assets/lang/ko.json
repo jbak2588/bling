@@ -68,7 +68,9 @@
             "jobs": "구인구직",
             "localStores": "동네업체",
             "auction": "경매",
-            "pom": "POM"
+            "pom": "POM",
+            "lostAndFound": "분실물 찾기",
+            "realEstate": "부동산"
         },
         "bottomNav": {
             "home": "홈",
@@ -662,7 +664,7 @@
             "chatCreated": "동호회 채팅방이 개설되었습니다."
         }
     },
-       "auctions": {
+    "auctions": {
         "card": {
             "currentBid": "현재 입찰가",
             "endTime": "마감 시간"
@@ -727,7 +729,7 @@
             }
         }
     },
-       "localStores": {
+    "localStores": {
         "setLocationPrompt": "위치를 설정하면 동네 상점을 볼 수 있어요.",
         "empty": "등록된 상점이 없습니다.",
         "error": "오류가 발생했습니다: {error}",
@@ -768,6 +770,108 @@
             "startChatFail": "채팅을 시작할 수 없습니다: {error}"
         },
         "noLocation": "위치 정보 없음"
+    },
+    "pom": {
+        "share": "공유",
+        "empty": "등록된 POM이 없습니다.",
+        "errors": {
+            "fetchFailed": "오류가 발생했습니다: {error}"
+        },
+        "create": {
+            "title": "새 POM 등록",
+            "submit": "등록",
+            "success": "POM이 등록되었습니다.",
+            "fail": "POM 등록에 실패했습니다: {error}",
+            "form": {
+                "descriptionLabel": "영상 설명"
+            }
+        }
+    },
+    "realEstate": {
+        "empty": "등록된 매물이 없습니다.",
+        "error": "오류가 발생했습니다: {error}",
+        "create": "매물 등록",
+        "locationUnknown": "위치 정보 없음",
+        "priceUnits": {
+            "monthly": "월",
+            "yearly": "년"
+        },
+        "form": {
+            "title": "새 매물 등록",
+            "submit": "등록",
+            "imageRequired": "사진을 1장 이상 첨부해주세요.",
+            "success": "매물이 등록되었습니다.",
+            "fail": "등록에 실패했습니다: {error}",
+            "type": {
+                "kos": "하숙",
+                "kontrakan": "월세",
+                "sewa": "임대"
+            },
+            "priceLabel": "가격",
+            "priceRequired": "가격을 입력하세요",
+            "priceUnit": {
+                "monthly": "/월",
+                "yearly": "/년"
+            },
+            "titleLabel": "제목",
+            "titleRequired": "제목을 입력하세요",
+            "descriptionLabel": "상세 설명",
+            "amenities": "편의시설",
+            "amenity": {
+                "wifi": "와이파이",
+                "ac": "에어컨",
+                "parking": "주차장",
+                "kitchen": "주방"
+            }
+        }
+    },
+    "lostAndFound": {
+        "empty": "아직 등록된 분실/습득물이 없습니다.",
+        "error": "오류가 발생했습니다: {error}",
+        "create": "새 분실/습득물 등록",
+        "lost": "분실",
+        "found": "습득",
+        "card": {
+            "location": "장소: {location}"
+        },
+        "form": {
+            "title": "분실/습득물 등록",
+            "submit": "등록",
+            "type": {
+                "lost": "분실했어요",
+                "found": "주웠어요"
+            },
+            "photoSectionTitle": "사진 등록 (최대 5장)",
+            "imageRequired": "사진을 1장 이상 첨부해주세요.",
+            "itemLabel": "어떤 물건인가요?",
+            "itemError": "물건 설명을 입력해주세요.",
+            "locationLabel": "어디서 잃어버렸거나 주우셨나요?",
+            "locationError": "장소 설명을 입력해주세요.",
+            "success": "등록되었습니다.",
+            "fail": "등록에 실패했습니다: {error}"
+        },
+        "edit": {
+            "title": "분실/습득물 수정",
+            "save": "저장",
+            "success": "수정되었습니다.",
+            "fail": "수정에 실패했습니다: {error}"
+        },
+        "detail": {
+            "title": "분실/습득물",
+            "location": "장소",
+            "registrant": "등록자",
+            "contact": "연락하기",
+            "deleteTitle": "게시글 삭제",
+            "deleteContent": "정말로 이 게시글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+            "delete": "삭제",
+            "cancel": "취소",
+            "deleteSuccess": "게시글이 삭제되었습니다.",
+            "deleteFail": "삭제에 실패했습니다: {error}",
+            "editTooltip": "수정하기",
+            "deleteTooltip": "삭제하기",
+            "noUser": "사용자 정보 없음",
+            "chatError": "채팅을 시작할 수 없습니다: {error}"
+        }
     },
     "community": {
         "title": "커뮤니티 화면"

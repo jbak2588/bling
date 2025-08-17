@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     {
       'icon': Icons.house_outlined,
       'key': 'main.tabs.realEstate'
-    }, // TODO: 다국어 키 추가 필요
+    },  
   ];
 
   @override

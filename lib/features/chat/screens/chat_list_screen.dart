@@ -1,13 +1,12 @@
 // lib/features/chat/screens/chat_list_screen.dart
 
-import 'dart:convert';
-
 import 'package:bling_app/core/models/chat_room_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+// [추가] debugPrint
 
 import 'chat_room_screen.dart';
 
@@ -39,8 +38,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 }
                 if (snapshot.hasError) {
                   return Center(
-                      child: Text('marketplace.error'.tr(
-                          namedArgs: {'error': snapshot.error.toString()})));
+                      child: Text('marketplace.error'
+                          .tr(namedArgs: {'error': snapshot.error.toString()})));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(child: Text('chat_list.empty'.tr()));
@@ -54,99 +53,43 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       const Divider(height: 1, indent: 82),
                   itemBuilder: (context, index) {
                     final chatRoom = chatRooms[index];
-
-                    // V V V --- [추가] 정밀 진단을 위한 로그 출력 --- V V V
-                    final chatRoomJson = {
-                      'id': chatRoom.id,
-                      'contextType': chatRoom.contextType,
-                      'isGroupChat': chatRoom.isGroupChat,
-                      'shopId': chatRoom.shopId,
-                      'jobId': chatRoom.jobId,
-                      'productId': chatRoom.productId,
-                      'lostItemId': chatRoom.lostItemId,
-                    };
-                    debugPrint(
-                        "--- [ChatList] Rendering ChatRoom: ${jsonEncode(chatRoomJson)}");
-                    // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
-
+                    
                     final otherUid = !chatRoom.isGroupChat
-                        ? chatRoom.participants.firstWhere(
-                            (uid) => uid != _myUid,
-                            orElse: () => '')
+                        ? chatRoom.participants.firstWhere((uid) => uid != _myUid, orElse: () => '')
                         : '';
-                    if (!chatRoom.isGroupChat && otherUid.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
+
+                    if (!chatRoom.isGroupChat && otherUid.isEmpty) return const SizedBox.shrink();
 
                     return FutureBuilder<UserModel?>(
-                      future: !chatRoom.isGroupChat
-                          ? _chatService.getOtherUserInfo(otherUid)
-                          : Future.value(null),
+                      future: !chatRoom.isGroupChat ? _chatService.getOtherUserInfo(otherUid) : Future.value(null),
                       builder: (context, userSnapshot) {
-                        if (userSnapshot.connectionState ==
-                                ConnectionState.waiting &&
-                            !chatRoom.isGroupChat) {
+                        if (userSnapshot.connectionState == ConnectionState.waiting && !chatRoom.isGroupChat) {
                           return const ListTile(title: Text("..."));
                         }
 
                         final otherUser = userSnapshot.data;
 
-                        // V V V --- [핵심 수정] 채팅 유형에 따라 UI와 네비게이션 로직을 분리합니다 --- V V V
-
-                        // --- 1. 동호회 (그룹 채팅) ---
                         if (chatRoom.isGroupChat) {
                           return _buildGroupChatItem(context, chatRoom);
-                        } // V V V --- [추가] 분실/습득물 채팅 UI --- V V V
-                        else if (chatRoom.contextType == 'lost' ||
-                            chatRoom.contextType == 'found') {
-                          return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            leading:
-                                _buildLostAndFoundAvatar(chatRoom.contextType),
-                            title: Text(
-                                chatRoom.productTitle ?? 'Lost/Found Item',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 15)),
-                            subtitle: Text(
-                                '${userSnapshot.data?.nickname ?? ''} • ${chatRoom.lastMessage}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis),
-                            trailing: _buildTrailing(chatRoom),
-                            onTap: () => _navigateToChat(context,
-                                chatRoom: chatRoom,
-                                otherUser: userSnapshot.data),
-                          );
+                        } 
+                        else if (chatRoom.roomId != null && chatRoom.roomId!.isNotEmpty) {
+                           return _buildRealEstateChatItem(context, chatRoom, otherUser);
                         }
-
-                        // --- 2. 지역 상점 ---
-                        else if (chatRoom.shopId != null &&
-                            chatRoom.shopId!.isNotEmpty) {
-                          return _buildShopChatItem(
-                              context, chatRoom, otherUser);
+                        else if (chatRoom.contextType == 'lost' || chatRoom.contextType == 'found') {
+                          return _buildLostAndFoundChatItem(context, chatRoom, otherUser);
                         }
-
-                        // --- 3. 구인구직 ---
-                        else if (chatRoom.jobId != null &&
-                            chatRoom.jobId!.isNotEmpty) {
-                          return _buildJobChatItem(
-                              context, chatRoom, otherUser);
+                        else if (chatRoom.shopId != null && chatRoom.shopId!.isNotEmpty) {
+                          return _buildShopChatItem(context, chatRoom, otherUser);
                         }
-
-                        // --- 4. 중고거래 ---
-                        else if (chatRoom.productId != null &&
-                            chatRoom.productId!.isNotEmpty) {
-                          return _buildProductChatItem(
-                              context, chatRoom, otherUser);
+                        else if (chatRoom.jobId != null && chatRoom.jobId!.isNotEmpty) {
+                          return _buildJobChatItem(context, chatRoom, otherUser);
                         }
-
-                     
-                        // --- 5. 친구 (1:1 직접 채팅) ---
+                        else if (chatRoom.productId != null && chatRoom.productId!.isNotEmpty) {
+                          return _buildProductChatItem(context, chatRoom, otherUser);
+                        }
                         else {
-                          return _buildDirectChatItem(
-                              context, chatRoom, otherUser);
+                          return _buildDirectChatItem(context, chatRoom, otherUser);
                         }
-                        // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
                       },
                     );
                   },
@@ -156,138 +99,139 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
-  // [추가] 분실/습득물 유형에 따라 다른 아이콘과 색상을 보여주는 아바타 위젯
-  Widget _buildLostAndFoundAvatar(String? type) {
-    final isLost = type == 'lost';
-    return CircleAvatar(
-      radius: 28,
-      backgroundColor: isLost ? Colors.red.shade50 : Colors.blue.shade50,
-      child: Icon(
-        isLost ? Icons.search_off : Icons.check_circle_outline,
-        color: isLost ? Colors.redAccent : Colors.blueAccent,
-        size: 28,
-      ),
-    );
-  }
-
   // 각 채팅 유형별 ListTile을 만드는 헬퍼 함수들
-
+  
   ListTile _buildGroupChatItem(BuildContext context, ChatRoomModel chatRoom) {
+      return ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          leading: _buildAvatar(imageUrl: chatRoom.groupImage, icon: Icons.groups),
+          title: Text(chatRoom.groupName ?? 'Group Chat', style: const TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: Text(chatRoom.lastMessage, maxLines: 1, overflow: TextOverflow.ellipsis),
+          trailing: _buildTrailing(chatRoom),
+          onTap: () => _navigateToChat(context, chatRoom: chatRoom, type: 'Group'),
+      );
+  }
+
+ListTile _buildRealEstateChatItem(BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: _buildAvatar(imageUrl: chatRoom.groupImage, icon: Icons.groups),
-      title: Text(chatRoom.groupName ?? 'Group Chat',
-          style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(chatRoom.lastMessage,
-          maxLines: 1, overflow: TextOverflow.ellipsis),
+      leading: _buildAvatar(imageUrl: chatRoom.roomImage, icon: Icons.house_outlined),
+      title: Text(chatRoom.roomTitle ?? 'Real Estate', style: const TextStyle(fontWeight: FontWeight.bold)),
+      subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}', maxLines: 1, overflow: TextOverflow.ellipsis),
       trailing: _buildTrailing(chatRoom),
-      onTap: () => _navigateToChat(context, chatRoom: chatRoom),
+      onTap: () => _navigateToChat(context, chatRoom: chatRoom, otherUser: otherUser, type: 'Real Estate'),
     );
   }
 
-  ListTile _buildShopChatItem(
-      BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
+   ListTile _buildLostAndFoundChatItem(BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: _buildAvatar(
-          imageUrl: chatRoom.shopImage, icon: Icons.storefront_outlined),
-      title: Text(chatRoom.shopName ?? 'Shop',
-          style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}',
-          maxLines: 1, overflow: TextOverflow.ellipsis),
+      leading: _buildLostAndFoundAvatar(chatRoom.contextType),
+      title: Text(chatRoom.productTitle ?? 'Lost/Found Item', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+      subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}', maxLines: 1, overflow: TextOverflow.ellipsis),
       trailing: _buildTrailing(chatRoom),
-      onTap: () =>
-          _navigateToChat(context, chatRoom: chatRoom, otherUser: otherUser),
+      onTap: () => _navigateToChat(context, chatRoom: chatRoom, otherUser: otherUser, type: 'Lost & Found'),
     );
   }
 
-  ListTile _buildJobChatItem(
-      BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
+
+  ListTile _buildShopChatItem(BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: _buildAvatar(imageUrl: chatRoom.shopImage, icon: Icons.storefront_outlined),
+      title: Text(chatRoom.shopName ?? 'Shop', style: const TextStyle(fontWeight: FontWeight.bold)),
+      subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}', maxLines: 1, overflow: TextOverflow.ellipsis),
+      trailing: _buildTrailing(chatRoom),
+      onTap: () => _navigateToChat(context, chatRoom: chatRoom, otherUser: otherUser, type: 'Shop'),
+    );
+  }
+
+  ListTile _buildJobChatItem(BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: _buildAvatar(icon: Icons.work_outline),
-      title: Text(chatRoom.jobTitle ?? 'Job Posting',
-          style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}',
-          maxLines: 1, overflow: TextOverflow.ellipsis),
+      title: Text(chatRoom.jobTitle ?? 'Job Posting', style: const TextStyle(fontWeight: FontWeight.bold)),
+      subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}', maxLines: 1, overflow: TextOverflow.ellipsis),
       trailing: _buildTrailing(chatRoom),
-      onTap: () =>
-          _navigateToChat(context, chatRoom: chatRoom, otherUser: otherUser),
+      onTap: () => _navigateToChat(context, chatRoom: chatRoom, otherUser: otherUser, type: 'Job'),
     );
   }
 
-  ListTile _buildProductChatItem(
-      BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
+  ListTile _buildProductChatItem(BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: _buildAvatar(
-          imageUrl: chatRoom.productImage, icon: Icons.shopping_bag_outlined),
-      title: Text(chatRoom.productTitle ?? 'Product',
-          style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}',
-          maxLines: 1, overflow: TextOverflow.ellipsis),
+      leading: _buildAvatar(imageUrl: chatRoom.productImage, icon: Icons.shopping_bag_outlined),
+      title: Text(chatRoom.productTitle ?? 'Product', style: const TextStyle(fontWeight: FontWeight.bold)),
+      subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}', maxLines: 1, overflow: TextOverflow.ellipsis),
       trailing: _buildTrailing(chatRoom),
-      onTap: () =>
-          _navigateToChat(context, chatRoom: chatRoom, otherUser: otherUser),
+      onTap: () => _navigateToChat(context, chatRoom: chatRoom, otherUser: otherUser, type: 'Product'),
     );
   }
-
-  ListTile _buildDirectChatItem(
-      BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
+  
+  ListTile _buildDirectChatItem(BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
     if (otherUser == null) return const ListTile();
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: _buildAvatar(imageUrl: otherUser.photoUrl, icon: Icons.person),
-      title: Text(otherUser.nickname,
-          style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(chatRoom.lastMessage,
-          maxLines: 1, overflow: TextOverflow.ellipsis),
+      title: Text(otherUser.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
+      subtitle: Text(chatRoom.lastMessage, maxLines: 1, overflow: TextOverflow.ellipsis),
       trailing: _buildTrailing(chatRoom),
-      onTap: () =>
-          _navigateToChat(context, chatRoom: chatRoom, otherUser: otherUser),
+      onTap: () => _navigateToChat(context, chatRoom: chatRoom, otherUser: otherUser, type: 'Direct/Friend'),
     );
   }
 
-  void _navigateToChat(BuildContext context,
-      {required ChatRoomModel chatRoom, UserModel? otherUser}) {
+  // V V V --- [수정] 정밀 진단을 위한 로그 출력을 추가합니다 --- V V V
+  void _navigateToChat(BuildContext context, {required ChatRoomModel chatRoom, UserModel? otherUser, required String type}) {
+    debugPrint("--- [ChatList] Tapped on '$type' chat. Navigating to ChatRoom... ---");
+    
+    final otherUid = otherUser?.uid ?? chatRoom.participants.firstWhere((uid) => uid != _myUid, orElse: () => '');
+    
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => ChatRoomScreen(
         chatId: chatRoom.id,
         isGroupChat: chatRoom.isGroupChat,
         groupName: chatRoom.groupName,
         participants: chatRoom.participants,
-        otherUserId: otherUser?.uid,
-        otherUserName: otherUser?.nickname,
-        productTitle:
-            chatRoom.productTitle ?? chatRoom.jobTitle ?? chatRoom.shopName,
+        otherUserId: otherUid,
+        otherUserName: otherUser?.nickname ?? 'User',
+        productTitle: chatRoom.productTitle ?? chatRoom.jobTitle ?? chatRoom.shopName ?? chatRoom.roomTitle,
       ),
     ));
   }
-
-  Widget _buildAvatar({String? imageUrl, required IconData icon}) {
+  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+  
+  Widget _buildLostAndFoundAvatar(String? type) {
+    final isLost = type == 'lost';
     return CircleAvatar(
       radius: 28,
-      backgroundColor: Colors.grey.shade200,
-      backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
-          ? NetworkImage(imageUrl)
-          : null,
-      child: (imageUrl == null || imageUrl.isEmpty)
-          ? Icon(icon, size: 28, color: Colors.grey.shade600)
-          : null,
+      backgroundColor: isLost ? Colors.red.shade50 : Colors.blue.shade50,
+      child: Icon(
+        isLost ? Icons.search_off : Icons.task_alt_outlined,
+        color: isLost ? Colors.redAccent : Colors.blueAccent,
+        size: 28,
+      ),
     );
   }
 
+  Widget _buildAvatar({String? imageUrl, required IconData icon}) {
+      return CircleAvatar(
+          radius: 28,
+          backgroundColor: Colors.grey.shade200,
+          backgroundImage: (imageUrl != null && imageUrl.isNotEmpty) ? NetworkImage(imageUrl) : null,
+          child: (imageUrl == null || imageUrl.isEmpty) ? Icon(icon, size: 28, color: Colors.grey.shade600) : null,
+      );
+  }
+  
   Widget _buildTrailing(ChatRoomModel chatRoom) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(DateFormat('MM/dd').format(chatRoom.lastTimestamp.toDate()),
-            style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        const SizedBox(height: 4),
-        if ((chatRoom.unreadCounts[_myUid] ?? 0) > 0)
-          Badge(label: Text('${chatRoom.unreadCounts[_myUid]}')),
-      ],
-    );
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(DateFormat('MM/dd').format(chatRoom.lastTimestamp.toDate()), style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          const SizedBox(height: 4),
+          if ((chatRoom.unreadCounts[_myUid] ?? 0) > 0)
+            Badge(label: Text('${chatRoom.unreadCounts[_myUid]}')),
+        ],
+      );
   }
 }

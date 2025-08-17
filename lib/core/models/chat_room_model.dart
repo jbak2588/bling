@@ -29,6 +29,11 @@ class ChatRoomModel {
   final String? lostItemId;
   final String? contextType;
 
+  // V V V --- [추가] 부동산 매물 관련 필드 --- V V V
+  final String? roomId;
+  final String? roomTitle;
+  final String? roomImage;
+
   ChatRoomModel({
     required this.id,
     required this.participants,
@@ -49,6 +54,10 @@ class ChatRoomModel {
 
     this.lostItemId,
     this.contextType, // [추가]
+
+    this.roomId, // [추가]
+    this.roomTitle, // [추가]
+    this.roomImage, // [추가]
   });
 
   factory ChatRoomModel.fromFirestore(
@@ -73,6 +82,10 @@ class ChatRoomModel {
       shopImage: data['shopImage'],
       lostItemId: data['lostItemId'],
       contextType: data['contextType'], // [추가]
+      // [추가] Firestore에서 부동산 정보 불러오기
+      roomId: data['roomId'],
+      roomTitle: data['roomTitle'],
+      roomImage: data['roomImage'],
     );
   }
 }
