@@ -667,7 +667,14 @@
     "auctions": {
         "card": {
             "currentBid": "현재 입찰가",
-            "endTime": "마감 시간"
+            "endTime": "남은 시간",
+            "ended": "종료됨",
+            "winningBid": "낙찰가",
+            "winner": "낙찰자",
+            "noBidders": "입찰자가 없습니다",
+            "unknownBidder": "알 수 없는 입찰자",
+            "timeLeft": "{hours}:{minutes}:{seconds} 남음",
+            "timeLeftDays": "{days}일 {hours}:{minutes}:{seconds} 남음"
         },
         "errors": {
             "fetchFailed": "경매 목록을 불러오지 못했습니다: {error}",
@@ -823,6 +830,12 @@
                 "parking": "주차장",
                 "kitchen": "주방"
             }
+        },
+        "edit": {
+            "title": "매물 정보 수정",
+            "save": "저장",
+            "success": "매물 정보가 수정되었습니다.",
+            "fail": "수정에 실패했습니다: {error}"
         }
     },
     "lostAndFound": {

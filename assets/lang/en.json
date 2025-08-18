@@ -668,7 +668,14 @@
     "auctions": {
         "card": {
             "currentBid": "Current bid",
-            "endTime": "Ends"
+            "endTime": "Time left",
+            "ended": "Ended",
+            "winningBid": "Winning bid",
+            "winner": "Winner",
+            "noBidders": "No bidders",
+            "unknownBidder": "Unknown bidder",
+            "timeLeft": "{hours}:{minutes}:{seconds} left",
+            "timeLeftDays": "{days}d {hours}:{minutes}:{seconds} left"
         },
         "errors": {
             "fetchFailed": "Failed to fetch auctions: {error}",
@@ -824,6 +831,12 @@
                 "parking": "Parking",
                 "kitchen": "Kitchen"
             }
+        },
+        "edit": {
+            "title": "Edit Listing",
+            "save": "Save",
+            "success": "Listing updated.",
+            "fail": "Failed to update listing: {error}"
         }
     },
     "lostAndFound": {
