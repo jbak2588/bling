@@ -16,7 +16,6 @@ class ShopCard extends StatelessWidget {
       elevation: 2,
       clipBehavior: Clip.antiAlias, // InkWell 효과가 Card 모서리를 따르도록 함
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      // V V V --- [수정] Card 전체를 탭할 수 있도록 InkWell로 감싸줍니다 --- V V V
       child: InkWell(
         onTap: () {
           // 탭하면 ShopDetailScreen으로 이동하며, 선택된 shop 정보를 전달합니다.
@@ -29,11 +28,12 @@ class ShopCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (shop.imageUrl != null && shop.imageUrl!.isNotEmpty) ...[
+              // V V V --- [수정] imageUrl -> imageUrls.first 로 변경 --- V V V
+              if (shop.imageUrls.isNotEmpty) ...[
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.network(
-                    shop.imageUrl!,
+                    shop.imageUrls.first, // 첫 번째 이미지를 썸네일로 사용
                     height: 150,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -41,6 +41,7 @@ class ShopCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
               ],
+              // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
               Text(
                 shop.name,
                 style:
@@ -62,6 +63,7 @@ class ShopCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       shop.locationName ?? 'localStores.noLocation'.tr(),
+                      overflow: TextOverflow.ellipsis, // 긴 주소는 ... 처리
                       maxLines: 1,
                     ),
                   ),
@@ -76,7 +78,6 @@ class ShopCard extends StatelessWidget {
           ),
         ),
       ),
-      // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
     );
+    }
   }
-}

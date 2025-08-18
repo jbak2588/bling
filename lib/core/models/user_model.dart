@@ -18,12 +18,13 @@ class UserModel {
   final Map<String, dynamic>? privacySettings; // 공개 범위 설정
   final List<String>? postIds; // 작성한 피드 ID 목록
   final List<String>? productIds; // 등록한 마켓 상품 ID 목록
-    final List<String>? jobIds;
+  final List<String>? jobIds;
   final List<String>? bookmarkedPostIds; // 북마크한 피드 ID 목록
   final List<String>? bookmarkedProductIds; // 북마크한 마켓 상품 ID 목록
-  
+
   // V V V --- [추가] 동호회 게시글 좋아요 목록 --- V V V
   final List<String>? bookmarkedClubPostIds;
+  final List<String>? likedShortIds;
   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
   // --- Trust System Fields ---
@@ -65,10 +66,11 @@ class UserModel {
     this.privacySettings,
     this.postIds,
     this.productIds,
-     this.jobIds,
+    this.jobIds,
     this.bookmarkedPostIds,
     this.bookmarkedProductIds,
     this.bookmarkedClubPostIds, // [추가]
+    this.likedShortIds, // [추가]
     this.trustScore = 0,
     this.phoneNumber,
     this.feedThanksReceived = 0,
@@ -104,16 +106,34 @@ class UserModel {
       bio: data['bio'],
       trustLevel: data['trustLevel'] ?? 'normal',
       locationName: data['locationName'],
-      locationParts: data['locationParts'] != null ? Map<String, dynamic>.from(data['locationParts']) : null,
+      locationParts: data['locationParts'] != null
+          ? Map<String, dynamic>.from(data['locationParts'])
+          : null,
       geoPoint: data['geoPoint'],
-      interests: data['interests'] != null ? List<String>.from(data['interests']) : null,
-      privacySettings: data['privacySettings'] != null ? Map<String, dynamic>.from(data['privacySettings']) : null,
-      postIds: data['postIds'] != null ? List<String>.from(data['postIds']) : null,
-      productIds: data['productIds'] != null ? List<String>.from(data['productIds']) : null,
+      interests: data['interests'] != null
+          ? List<String>.from(data['interests'])
+          : null,
+      privacySettings: data['privacySettings'] != null
+          ? Map<String, dynamic>.from(data['privacySettings'])
+          : null,
+      postIds:
+          data['postIds'] != null ? List<String>.from(data['postIds']) : null,
+      productIds: data['productIds'] != null
+          ? List<String>.from(data['productIds'])
+          : null,
       jobIds: data['jobIds'] != null ? List<String>.from(data['jobIds']) : null,
-      bookmarkedPostIds: data['bookmarkedPostIds'] != null ? List<String>.from(data['bookmarkedPostIds']) : null,
-      bookmarkedProductIds: data['bookmarkedProductIds'] != null ? List<String>.from(data['bookmarkedProductIds']) : null,
-      bookmarkedClubPostIds: data['bookmarkedClubPostIds'] != null ? List<String>.from(data['bookmarkedClubPostIds']) : null, // [추가]
+      bookmarkedPostIds: data['bookmarkedPostIds'] != null
+          ? List<String>.from(data['bookmarkedPostIds'])
+          : null,
+      bookmarkedProductIds: data['bookmarkedProductIds'] != null
+          ? List<String>.from(data['bookmarkedProductIds'])
+          : null,
+      bookmarkedClubPostIds: data['bookmarkedClubPostIds'] != null
+          ? List<String>.from(data['bookmarkedClubPostIds'])
+          : null, // [추가]
+      likedShortIds: data['likedShortIds'] != null
+          ? List<String>.from(data['likedShortIds'])
+          : null, // [추가]
       trustScore: data['trustScore'] ?? 0,
       phoneNumber: data['phoneNumber'],
       feedThanksReceived: data['feedThanksReceived'] ?? 0,
@@ -121,22 +141,37 @@ class UserModel {
       thanksReceived: data['thanksReceived'] ?? 0,
       reportCount: data['reportCount'] ?? 0,
       isBanned: data['isBanned'] ?? false,
-      blockedUsers: data['blockedUsers'] != null ? List<String>.from(data['blockedUsers']) : null,
+      blockedUsers: data['blockedUsers'] != null
+          ? List<String>.from(data['blockedUsers'])
+          : null,
       profileCompleted: data['profileCompleted'] ?? false,
       age: data['age'],
       ageRange: data['ageRange'],
       gender: data['gender'],
-      findfriendProfileImages: data['findfriend_profileImages'] != null ? List<String>.from(data['findfriend_profileImages']) : null,
+      findfriendProfileImages: data['findfriend_profileImages'] != null
+          ? List<String>.from(data['findfriend_profileImages'])
+          : null,
       isVisibleInList: data['isVisibleInList'] ?? true,
-      likesGiven: data['likesGiven'] != null ? List<String>.from(data['likesGiven']) : null,
-      likesReceived: data['likesReceived'] != null ? List<String>.from(data['likesReceived']) : null,
-      friendRequests: data['friendRequests'] != null ? List<Map<String, dynamic>>.from(data['friendRequests']) : null,
-      friends: data['friends'] != null ? List<String>.from(data['friends']) : null,
+      likesGiven: data['likesGiven'] != null
+          ? List<String>.from(data['likesGiven'])
+          : null,
+      likesReceived: data['likesReceived'] != null
+          ? List<String>.from(data['likesReceived'])
+          : null,
+      friendRequests: data['friendRequests'] != null
+          ? List<Map<String, dynamic>>.from(data['friendRequests'])
+          : null,
+      friends:
+          data['friends'] != null ? List<String>.from(data['friends']) : null,
       likeCount: data['likeCount'] ?? 0,
       createdAt: data['createdAt'] ?? Timestamp.now(),
       isDatingProfile: data['isDatingProfile'] ?? false,
-      rejectedUsers: data['rejectedUsers'] != null ? List<String>.from(data['rejectedUsers']) : null,
-      clubs: data['clubs'] != null ? List<String>.from(data['clubs']) : null, // [추가]
+      rejectedUsers: data['rejectedUsers'] != null
+          ? List<String>.from(data['rejectedUsers'])
+          : null,
+      clubs: data['clubs'] != null
+          ? List<String>.from(data['clubs'])
+          : null, // [추가]
     );
   }
 
@@ -159,6 +194,7 @@ class UserModel {
       'bookmarkedPostIds': bookmarkedPostIds,
       'bookmarkedProductIds': bookmarkedProductIds,
       'bookmarkedClubPostIds': bookmarkedClubPostIds, // [추가]
+      'likedShortIds': likedShortIds, // [추가]
       'trustScore': trustScore,
       'phoneNumber': phoneNumber,
       'feedThanksReceived': feedThanksReceived,

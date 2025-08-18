@@ -10,8 +10,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 
-// [수정] StatelessWidget -> StatefulWidget으로 변경
 class ShopDetailScreen extends StatefulWidget {
   final ShopModel shop;
   const ShopDetailScreen({super.key, required this.shop});
@@ -23,6 +24,23 @@ class ShopDetailScreen extends StatefulWidget {
 class _ShopDetailScreenState extends State<ShopDetailScreen> {
   final ShopRepository _repository = ShopRepository();
   final ChatService _chatService = ChatService();
+  final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+ // V V V --- [수정] 이미지 슬라이더와 썸네일을 동기화하기 위한 PageController 추가 --- V V V
+  late final PageController _pageController;
+  int _currentImageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose(); // PageController 메모리 해제
+    super.dispose();
+  }
 
   void _startChat(BuildContext context) async {
     try {
@@ -30,11 +48,10 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         otherUserId: widget.shop.ownerId,
         shopId: widget.shop.id,
         shopName: widget.shop.name,
-        shopImage: widget.shop.imageUrl,
+        shopImage: widget.shop.imageUrls.isNotEmpty ? widget.shop.imageUrls.first : null,
       );
 
-      final otherUser =
-          await _chatService.getOtherUserInfo(widget.shop.ownerId);
+      final otherUser = await _chatService.getOtherUserInfo(widget.shop.ownerId);
 
       if (!context.mounted) return;
 
@@ -60,7 +77,6 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
     }
   }
 
-  // [추가] 상점 삭제 로직
   Future<void> _deleteShop() async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
@@ -68,118 +84,192 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         title: Text('localStores.detail.deleteTitle'.tr()),
         content: Text('localStores.detail.deleteContent'.tr()),
         actions: [
-          TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text('localStores.detail.cancel'.tr())),
-          TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text('localStores.detail.delete'.tr(),
-                  style: const TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('common.cancel'.tr())),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text('common.delete'.tr(), style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed == true && mounted) {
       try {
         await _repository.deleteShop(widget.shop.id);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('localStores.detail.deleteSuccess'.tr()),
-              backgroundColor: Colors.green));
-          Navigator.of(context).pop();
-        }
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('localStores.detail.deleteSuccess'.tr()), backgroundColor: Colors.green));
+        Navigator.of(context).pop();
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('localStores.detail.deleteFail'
-                  .tr(namedArgs: {'error': e.toString()})),
-              backgroundColor: Colors.red));
-        }
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('localStores.detail.deleteFail'.tr(namedArgs: {'error': e.toString()})), backgroundColor: Colors.red));
       }
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-    final isOwner = widget.shop.ownerId == currentUserId;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.shop.name),
-        actions: [
-          if (isOwner)
-            IconButton(
-              icon: const Icon(Icons.edit_note_outlined),
-              tooltip: 'localStores.edit.tooltip'.tr(),
-              onPressed: () {
-                Navigator.of(context)
-                    .push(
-                      MaterialPageRoute(
-                          builder: (_) => EditShopScreen(shop: widget.shop)),
-                    )
-                    .then((_) => setState(() {}));
+// V V V --- [수정] 이미지 슬라이더 + 하단 썸네일 UI --- V V V
+  Widget _buildImageSlider(List<String> images) {
+    if (images.isEmpty) {
+      return Container(
+        height: 250,
+        color: Colors.grey.shade200,
+        child: const Icon(Icons.storefront, size: 80, color: Colors.grey),
+      );
+    }
+    return Column(
+      children: [
+        // --- 1. 메인 이미지 슬라이더 ---
+        GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => FullScreenImageViewer(
+                imageUrls: images,
+                initialIndex: _currentImageIndex,
+              ),
+            ));
+          },
+          child: Container(
+            height: 250,
+            color: Colors.black,
+            child: PageView.builder(
+              controller: _pageController, // 컨트롤러 연결
+              itemCount: images.length,
+              onPageChanged: (index) {
+                setState(() => _currentImageIndex = index);
+              },
+              itemBuilder: (context, index) {
+                return Image.network(images[index], fit: BoxFit.contain);
               },
             ),
-          if (isOwner)
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: 'localStores.detail.deleteTooltip'.tr(),
-              onPressed: _deleteShop,
+          ),
+        ),
+        
+        // --- 2. 하단 썸네일 목록 ---
+        if (images.length > 1)
+          Container(
+            height: 80,
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: images.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    // 썸네일을 탭하면 메인 슬라이더가 해당 이미지로 이동
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  child: Container(
+                    width: 70,
+                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: _currentImageIndex == index
+                            ? Theme.of(context).primaryColor
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                      image: DecorationImage(
+                        image: NetworkImage(images[index]),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
-        ],
-      ),
-      body: ListView(
-        padding:
-            const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0), // 하단 버튼과의 여백
-        children: [
-          if (widget.shop.imageUrl != null && widget.shop.imageUrl!.isNotEmpty)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: Image.network(
-                widget.shop.imageUrl!,
-                height: 250,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-          const SizedBox(height: 16),
-          Text(widget.shop.name,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          _buildInfoRow(context, Icons.location_on_outlined,
-              widget.shop.locationName ?? 'localStores.noLocation'.tr()),
-          const SizedBox(height: 4),
-          _buildInfoRow(
-              context, Icons.watch_later_outlined, widget.shop.openHours),
-          const SizedBox(height: 4),
-          _buildInfoRow(
-              context, Icons.phone_outlined, widget.shop.contactNumber),
-          const Divider(height: 32),
-          Text('localStores.detail.description'.tr(),
-              style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          Text(widget.shop.description,
-              style: const TextStyle(fontSize: 16, height: 1.5)),
-          const Divider(height: 32),
-          _buildOwnerInfo(widget.shop.ownerId),
-        ],
-      ),
-      bottomNavigationBar: isOwner
-          ? null
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: () => _startChat(context),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+          ),
+      ],
+    );
+  }
+  // ^ ^ ^ --- 여기까지 이식 --- ^ ^ ^
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<ShopModel>(
+      stream: _repository.getShopStream(widget.shop.id),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        final shop = snapshot.data!;
+        final isOwner = shop.ownerId == _currentUserId;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(shop.name),
+            actions: [
+              if (isOwner)
+                IconButton(
+                  icon: const Icon(Icons.edit_note_outlined),
+                  tooltip: 'localStores.edit.tooltip'.tr(),
+                  onPressed: () {
+                    Navigator.of(context)
+                        .push(
+                          MaterialPageRoute(
+                              builder: (_) => EditShopScreen(shop: shop)),
+                        )
+                        .then((_) => setState(() {}));
+                  },
                 ),
-                child: Text('localStores.detail.inquire'.tr()),
-              ),
-            ),
+              if (isOwner)
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: 'localStores.detail.deleteTooltip'.tr(),
+                  onPressed: _deleteShop,
+                ),
+            ],
+          ),
+          body: ListView(
+            padding:
+                const EdgeInsets.fromLTRB(0, 0, 0, 100.0),
+            children: [
+              // [수정] 기존 Image.network를 새로 이식한 _buildImageSlider로 교체
+              _buildImageSlider(shop.imageUrls),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(shop.name,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    _buildInfoRow(context, Icons.location_on_outlined,
+                        shop.locationName ?? 'localStores.noLocation'.tr()),
+                    const SizedBox(height: 4),
+                    _buildInfoRow(
+                        context, Icons.watch_later_outlined, shop.openHours),
+                    const SizedBox(height: 4),
+                    _buildInfoRow(
+                        context, Icons.phone_outlined, shop.contactNumber),
+                    const Divider(height: 32),
+                    Text('localStores.detail.description'.tr(),
+                        style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 8),
+                    Text(shop.description,
+                        style: const TextStyle(fontSize: 16, height: 1.5)),
+                    const Divider(height: 32),
+                    _buildOwnerInfo(shop.ownerId),
+                  ],
+                ),
+              )
+            ],
+          ),
+          bottomNavigationBar: isOwner
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ElevatedButton(
+                    onPressed: () => _startChat(context),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Text('localStores.detail.inquire'.tr()),
+                  ),
+                ),
+        );
+      },
     );
   }
 
@@ -188,17 +278,14 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
       children: [
         Icon(icon, color: Colors.grey[600], size: 18),
         const SizedBox(width: 8),
-        Text(text, style: TextStyle(fontSize: 15, color: Colors.grey[800])),
+        Expanded(child: Text(text, style: TextStyle(fontSize: 15, color: Colors.grey[800]))),
       ],
     );
   }
 
   Widget _buildOwnerInfo(String userId) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .snapshots(),
+      stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
           return ListTile(title: Text('localStores.detail.noOwnerInfo'.tr()));
@@ -209,16 +296,10 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
           color: Colors.grey.shade100,
           child: ListTile(
             leading: CircleAvatar(
-              backgroundImage:
-                  (user.photoUrl != null && user.photoUrl!.isNotEmpty)
-                      ? NetworkImage(user.photoUrl!)
-                      : null,
-              child: (user.photoUrl == null || user.photoUrl!.isEmpty)
-                  ? const Icon(Icons.person)
-                  : null,
+              backgroundImage: (user.photoUrl != null && user.photoUrl!.isNotEmpty) ? NetworkImage(user.photoUrl!) : null,
+              child: (user.photoUrl == null || user.photoUrl!.isEmpty) ? const Icon(Icons.person) : null,
             ),
-            title: Text(user.nickname,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(user.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(user.locationName ?? ''),
           ),
         );
@@ -226,3 +307,66 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
     );
   }
 }
+
+// V V V --- [이식] 전체 화면 이미지 뷰어 (핀치 앤 줌 기능 포함) --- V V V
+class FullScreenImageViewer extends StatefulWidget {
+  final List<String> imageUrls;
+  final int initialIndex;
+
+  const FullScreenImageViewer({
+    super.key,
+    required this.imageUrls,
+    this.initialIndex = 0,
+  });
+
+  @override
+  State<FullScreenImageViewer> createState() => _FullScreenImageViewerState();
+}
+
+class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
+  late final PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+  
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        title: Text('${_currentIndex + 1} / ${widget.imageUrls.length}'),
+        centerTitle: true,
+      ),
+      body: PhotoViewGallery.builder(
+        pageController: _pageController,
+        itemCount: widget.imageUrls.length,
+        builder: (context, index) {
+          return PhotoViewGalleryPageOptions(
+            imageProvider: NetworkImage(widget.imageUrls[index]),
+            minScale: PhotoViewComputedScale.contained,
+            maxScale: PhotoViewComputedScale.covered * 2,
+          );
+        },
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+      ),
+    );
+  }
+}
+// ^ ^ ^ --- 여기까지 이식 --- ^ ^ ^
