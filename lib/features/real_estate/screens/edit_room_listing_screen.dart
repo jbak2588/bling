@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 
 class EditRoomListingScreen extends StatefulWidget {
@@ -107,12 +108,15 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
       await _repository.updateRoomListing(updatedListing);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('매물 정보가 수정되었습니다.'), backgroundColor: Colors.green));
+         ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('realEstate.edit.success'.tr()), backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('수정에 실패했습니다: $e'), backgroundColor: Colors.red));
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('realEstate.edit.fail'.tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -123,8 +127,11 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('매물 정보 수정'), // TODO: 다국어
-        actions: [ if (!_isSaving) TextButton(onPressed: _updateListing, child: Text('저장')) ],
+          title: Text('realEstate.edit.title'.tr()),
+        actions: [
+          if (!_isSaving)
+            TextButton(onPressed: _updateListing, child: Text('realEstate.edit.save'.tr()))
+        ],
       ),
       body: Stack(
         children: [
@@ -180,10 +187,14 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                 ),
                 const SizedBox(height: 24),
                 SegmentedButton<String>(
-                  segments: const [
-                    ButtonSegment(value: 'kos', label: Text('하숙')),
-                    ButtonSegment(value: 'kontrakan', label: Text('월세')),
-                    ButtonSegment(value: 'sewa', label: Text('임대')),
+                    segments: [
+                    ButtonSegment(
+                        value: 'kos', label: Text('realEstate.form.type.kos'.tr())),
+                    ButtonSegment(
+                        value: 'kontrakan',
+                        label: Text('realEstate.form.type.kontrakan'.tr())),
+                    ButtonSegment(
+                        value: 'sewa', label: Text('realEstate.form.type.sewa'.tr())),
                   ],
                   selected: {_type},
                   onSelectionChanged: (newSelection) => setState(() => _type = newSelection.first),
@@ -194,17 +205,27 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: _priceController,
-                        decoration: const InputDecoration(labelText: '가격', border: OutlineInputBorder()),
+                         decoration: InputDecoration(
+                            labelText: 'realEstate.form.priceLabel'.tr(),
+                            border: const OutlineInputBorder()),
                         keyboardType: TextInputType.number,
-                        validator: (v) => (v == null || v.isEmpty) ? '가격을 입력하세요' : null,
+                          validator: (v) => (v == null || v.isEmpty)
+                            ? 'realEstate.form.priceRequired'.tr()
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 8),
                     DropdownButton<String>(
                       value: _priceUnit,
-                      items: const [
-                        DropdownMenuItem(value: 'monthly', child: Text('/월')),
-                        DropdownMenuItem(value: 'yearly', child: Text('/년')),
+                          items: [
+                        DropdownMenuItem(
+                            value: 'monthly',
+                            child:
+                                Text('realEstate.form.priceUnit.monthly'.tr())),
+                        DropdownMenuItem(
+                            value: 'yearly',
+                            child:
+                                Text('realEstate.form.priceUnit.yearly'.tr())),
                       ],
                       onChanged: (val) => setState(() => _priceUnit = val!),
                     ),
@@ -213,22 +234,29 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(labelText: '제목', border: OutlineInputBorder()),
-                  validator: (v) => (v == null || v.isEmpty) ? '제목을 입력하세요' : null,
+                decoration: InputDecoration(
+                      labelText: 'realEstate.form.titleLabel'.tr(),
+                      border: const OutlineInputBorder()),
+                  validator: (v) => (v == null || v.isEmpty)
+                      ? 'realEstate.form.titleRequired'.tr()
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: '상세 설명', border: OutlineInputBorder()),
+                    decoration: InputDecoration(
+                      labelText: 'realEstate.form.descriptionLabel'.tr(),
+                      border: const OutlineInputBorder()),
                   maxLines: 3,
                 ),
                 const SizedBox(height: 24),
-                Text('편의시설', style: Theme.of(context).textTheme.titleMedium),
+                   Text('realEstate.form.amenities'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
                 Wrap(
                   spacing: 8.0,
                   children: ['wifi', 'ac', 'parking', 'kitchen'].map((amenity) {
                     return FilterChip(
-                      label: Text(amenity),
+                      label: Text('realEstate.form.amenity.$amenity'.tr()),
                       selected: _amenities.contains(amenity),
                       onSelected: (selected) {
                         setState(() {

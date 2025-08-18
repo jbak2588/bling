@@ -668,7 +668,14 @@
     "auctions": {
         "card": {
             "currentBid": "Tawaran saat ini",
-            "endTime": "Berakhir"
+            "endTime": "Sisa waktu",
+            "ended": "Berakhir",
+            "winningBid": "Tawaran menang",
+            "winner": "Pemenang",
+            "noBidders": "Belum ada penawar",
+            "unknownBidder": "Penawar tidak dikenal",
+            "timeLeft": "{hours}:{minutes}:{seconds} lagi",
+            "timeLeftDays": "{days} hari {hours}:{minutes}:{seconds} lagi"
         },
         "errors": {
             "fetchFailed": "Gagal memuat lelang: {error}",
@@ -824,6 +831,12 @@
                 "parking": "Parkir",
                 "kitchen": "Dapur"
             }
+        },
+        "edit": {
+            "title": "Ubah Listing",
+            "save": "Simpan",
+            "success": "Listing diperbarui.",
+            "fail": "Gagal memperbarui listing: {error}"
         }
     },
     "lostAndFound": {

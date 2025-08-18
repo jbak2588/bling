@@ -53,11 +53,24 @@ class _AuctionCardState extends State<AuctionCard> {
       return 'auctions.card.ended'.tr();
     }
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String days = d.inDays > 0 ? '${d.inDays}일 ' : '';
-    String twoDigitHours = twoDigits(d.inHours.remainder(24));
-    String twoDigitMinutes = twoDigits(d.inMinutes.remainder(60));
-    String twoDigitSeconds = twoDigits(d.inSeconds.remainder(60));
-    return '$days$twoDigitHours:$twoDigitMinutes:$twoDigitSeconds 남음'; // TODO: 다국어
+     final days = d.inDays;
+    final hours = twoDigits(d.inHours.remainder(24));
+    final minutes = twoDigits(d.inMinutes.remainder(60));
+    final seconds = twoDigits(d.inSeconds.remainder(60));
+    if (days > 0) {
+      return 'auctions.card.timeLeftDays'
+          .tr(namedArgs: {
+        'days': days.toString(),
+        'hours': hours,
+        'minutes': minutes,
+        'seconds': seconds,
+      });
+    }
+    return 'auctions.card.timeLeft'.tr(namedArgs: {
+      'hours': hours,
+      'minutes': minutes,
+      'seconds': seconds,
+    });
   }
 
   @override
