@@ -24,8 +24,8 @@ class _EditShopScreenState extends State<EditShopScreen> {
   late final TextEditingController _contactController;
   late final TextEditingController _hoursController;
 
-  XFile? _selectedImage;
-  String? _existingImageUrl;
+  // [수정] 기존 URL(String)과 새로운 파일(XFile)을 모두 담는 List
+  final List<dynamic> _images = [];
   bool _isSaving = false;
 
   final ShopRepository _repository = ShopRepository();
@@ -34,12 +34,12 @@ class _EditShopScreenState extends State<EditShopScreen> {
   @override
   void initState() {
     super.initState();
-    // 기존 상점 정보로 UI 상태를 초기화합니다.
     _nameController = TextEditingController(text: widget.shop.name);
     _descriptionController = TextEditingController(text: widget.shop.description);
     _contactController = TextEditingController(text: widget.shop.contactNumber);
     _hoursController = TextEditingController(text: widget.shop.openHours);
-    _existingImageUrl = widget.shop.imageUrl;
+    // [수정] 단일 이미지가 아닌 이미지 목록을 가져옵니다.
+    _images.addAll(widget.shop.imageUrls);
   }
 
   @override
@@ -51,13 +51,19 @@ class _EditShopScreenState extends State<EditShopScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = pickedFile;
-        _existingImageUrl = null; // 새 이미지를 선택하면 기존 이미지는 무시됩니다.
-      });
+  // [수정] 여러 이미지를 선택하는 함수
+  Future<void> _pickImages() async {
+    if (_images.length >= 10) return;
+    final pickedFiles = await _picker.pickMultiImage(imageQuality: 70, limit: 10 - _images.length);
+    if (pickedFiles.isNotEmpty && mounted) {
+      setState(() => _images.addAll(pickedFiles));
+    }
+  }
+
+  // [수정] 선택한 이미지를 제거하는 함수
+  void _removeImage(int index) {
+    if (mounted) {
+      setState(() => _images.removeAt(index));
     }
   }
 
@@ -67,29 +73,34 @@ class _EditShopScreenState extends State<EditShopScreen> {
     setState(() => _isSaving = true);
 
     try {
-      String? imageUrl = _existingImageUrl;
-      // 새 이미지가 선택되었으면 Storage에 업로드합니다.
-      if (_selectedImage != null) {
-        final fileName = const Uuid().v4();
-        final ref = FirebaseStorage.instance.ref().child('shop_images/${widget.shop.ownerId}/$fileName');
-        await ref.putFile(File(_selectedImage!.path));
-        imageUrl = await ref.getDownloadURL();
+      List<String> imageUrls = [];
+      for (var image in _images) {
+        if (image is XFile) {
+          final fileName = Uuid().v4();
+          final ref = FirebaseStorage.instance.ref().child('shop_images/${widget.shop.ownerId}/$fileName');
+          await ref.putFile(File(image.path));
+          imageUrls.add(await ref.getDownloadURL());
+        } else if (image is String) {
+          imageUrls.add(image);
+        }
       }
 
-      // ShopModel 객체를 업데이트된 정보로 새로 만듭니다.
       final updatedShop = ShopModel(
-        id: widget.shop.id, // ID는 기존 ID를 그대로 사용합니다.
+        id: widget.shop.id,
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
         contactNumber: _contactController.text.trim(),
         openHours: _hoursController.text.trim(),
-        imageUrl: imageUrl,
-        // 수정되지 않는 필드들은 기존 값을 그대로 사용합니다.
+        imageUrls: imageUrls, // [수정]
         ownerId: widget.shop.ownerId,
         locationName: widget.shop.locationName,
         locationParts: widget.shop.locationParts,
         geoPoint: widget.shop.geoPoint,
         createdAt: widget.shop.createdAt,
+        products: widget.shop.products,
+        trustLevelVerified: widget.shop.trustLevelVerified,
+        viewsCount: widget.shop.viewsCount,
+        likesCount: widget.shop.likesCount,
       );
 
       await _repository.updateShop(updatedShop);
@@ -100,7 +111,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
       }
     } catch (e) {
       if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('localStores.edit.fail'.tr(namedArgs: {'error': e.toString()})), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('localStores.edit.fail'.tr(namedArgs: {'error': e.toString()})), backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -111,10 +122,10 @@ class _EditShopScreenState extends State<EditShopScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-         title: Text('localStores.edit.title'.tr()),
+        title: Text('localStores.edit.title'.tr()),
         actions: [
           if (!_isSaving)
-           TextButton(onPressed: _updateShop, child: Text('localStores.edit.save'.tr())),
+            TextButton(onPressed: _updateShop, child: Text('localStores.edit.save'.tr())),
         ],
       ),
       body: Stack(
@@ -124,58 +135,84 @@ class _EditShopScreenState extends State<EditShopScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                InkWell(
-                  onTap: _pickImage,
-                  child: Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(12),
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: (_selectedImage != null
-                                ? FileImage(File(_selectedImage!.path))
-                                : (_existingImageUrl != null && _existingImageUrl!.isNotEmpty
-                                    ? NetworkImage(_existingImageUrl!)
-                                    : const AssetImage('assets/placeholder.png'))) // Fallback to a placeholder asset
-                            as ImageProvider,
-                      ),
-                    ),
-                    child: (_selectedImage == null && (_existingImageUrl == null || _existingImageUrl!.isEmpty))
-                        ? const Center(child: Icon(Icons.add_a_photo_outlined, size: 50, color: Colors.grey))
-                        : null,
+                // V V V --- [수정] 다중 이미지 수정 UI --- V V V
+                Text('localStores.form.photoLabel'.tr(namedArgs: {'count': '10'}), style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 100,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      ..._images.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final image = entry.value;
+                        ImageProvider imageProvider;
+                        if (image is XFile) {
+                          imageProvider = FileImage(File(image.path));
+                        } else {
+                          imageProvider = NetworkImage(image as String);
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Image(image: imageProvider, width: 100, height: 100, fit: BoxFit.cover),
+                              ),
+                              Positioned(
+                                top: 4, right: 4,
+                                child: InkWell(
+                                  onTap: () => _removeImage(index),
+                                  child: const CircleAvatar(radius: 12, backgroundColor: Colors.black54, child: Icon(Icons.close, color: Colors.white, size: 16)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                      if (_images.length < 10)
+                        GestureDetector(
+                          onTap: _pickImages,
+                          child: Container(
+                            width: 100, height: 100,
+                            decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
+                            child: const Icon(Icons.add_a_photo_outlined, color: Colors.grey),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
+                // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _nameController,
-                   decoration: InputDecoration(labelText: 'localStores.form.nameLabel'.tr(), border: const OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: 'localStores.form.nameLabel'.tr(), border: const OutlineInputBorder()),
                   validator: (value) => (value == null || value.trim().isEmpty) ? 'localStores.form.nameError'.tr() : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                        decoration: InputDecoration(labelText: 'localStores.form.descriptionLabel'.tr(), border: const OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: 'localStores.form.descriptionLabel'.tr(), border: const OutlineInputBorder()),
                   maxLines: 4,
                   validator: (value) => (value == null || value.trim().isEmpty) ? 'localStores.form.descriptionError'.tr() : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _contactController,
-                   decoration: InputDecoration(labelText: 'localStores.form.contactLabel'.tr(), border: const OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: 'localStores.form.contactLabel'.tr(), border: const OutlineInputBorder()),
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _hoursController,
-                 decoration: InputDecoration(labelText: 'localStores.form.hoursLabel'.tr(), hintText: 'localStores.form.hoursHint'.tr(), border: const OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: 'localStores.form.hoursLabel'.tr(), hintText: 'localStores.form.hoursHint'.tr(), border: const OutlineInputBorder()),
                 ),
               ],
             ),
           ),
           if (_isSaving)
-            // ignore: deprecated_member_use
-            Container(color: Colors.black.withOpacity(0.5), child: const Center(child: CircularProgressIndicator())),
+            Container(color: Colors.black54, child: const Center(child: CircularProgressIndicator())),
         ],
       ),
     );

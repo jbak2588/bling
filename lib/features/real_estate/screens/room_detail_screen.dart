@@ -129,7 +129,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                 margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.black.withOpacity(_currentImageIndex == entry.key ? 0.9 : 0.4),
+                  color: Colors.black.withValues(alpha: _currentImageIndex == entry.key ? 0.9 : 0.4),
                 ),
               );
             }).toList(),

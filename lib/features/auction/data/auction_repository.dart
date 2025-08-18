@@ -31,16 +31,14 @@ class AuctionRepository {
     return AuctionModel.fromFirestore(doc);
   }
 
-// V V V --- [수정] 마감되지 않은 경매를 마감 임박 순으로 가져오도록 변경 --- V V V
+// V V V --- [수정] 마감된 경매도 불러오도록 .where 필터 제거 --- V V V
   Stream<List<AuctionModel>> fetchAuctions() {
     return _auctionsCollection
-        .where('endAt', isGreaterThan: Timestamp.now()) // 현재 시간 이후에 마감되는 경매만
-        .orderBy('endAt', descending: false) // 마감 시간이 빠른 순서대로 정렬
+        .orderBy('endAt', descending: false) // 마감 임박 순으로 정렬
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map(AuctionModel.fromFirestore).toList());
   }
-  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
   // V V V --- [추가] 특정 경매 하나의 정보를 실시간으로 가져오는 Stream 함수 --- V V V
   Stream<AuctionModel> getAuctionStream(String auctionId) {

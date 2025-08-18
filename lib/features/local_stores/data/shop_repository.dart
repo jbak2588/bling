@@ -41,7 +41,13 @@ class ShopRepository {
     return query.orderBy('createdAt', descending: true).snapshots();
   }
 
-  
+  // V V V --- [추가] 특정 상점 정보를 실시간으로 가져오는 Stream 함수 --- V V V
+  Stream<ShopModel> getShopStream(String shopId) {
+    return _shopsCollection
+        .doc(shopId)
+        .snapshots()
+        .map((snapshot) => ShopModel.fromFirestore(snapshot));
+  }
 
   Future<String> addReview(String shopId, ShopReviewModel review) async {
     final doc = await _shopsCollection

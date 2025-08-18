@@ -19,15 +19,18 @@ class ShopModel {
   final Timestamp createdAt;
   final int viewsCount;
   final int likesCount;
-  final String? imageUrl; // 상점 대표 이미지
+  
+  // V V V --- [수정] 단일 이미지(String)에서 이미지 목록(List<String>)으로 변경 --- V V V
+  final List<String> imageUrls; // 상점 대표 이미지
+  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
   ShopModel({
     required this.id,
     required this.name,
     required this.description,
     required this.ownerId,
-    this.locationName, // [수정]
-    this.locationParts, // [수정]
+    this.locationName,
+    this.locationParts,
     this.geoPoint,
     this.products,
     required this.contactNumber,
@@ -36,7 +39,8 @@ class ShopModel {
     required this.createdAt,
     this.viewsCount = 0,
     this.likesCount = 0,
-    this.imageUrl,
+    // [수정] 생성자 필드 변경
+    required this.imageUrls,
   });
 
   factory ShopModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -59,7 +63,8 @@ class ShopModel {
       createdAt: data['createdAt'] ?? Timestamp.now(),
       viewsCount: data['viewsCount'] ?? 0,
       likesCount: data['likesCount'] ?? 0,
-      imageUrl: data['imageUrl'],
+      // [수정] Firestore에서 이미지 목록 불러오기
+      imageUrls: data['imageUrls'] != null ? List<String>.from(data['imageUrls']) : [],
     );
   }
 
@@ -78,7 +83,8 @@ class ShopModel {
       'createdAt': createdAt,
       'viewsCount': viewsCount,
       'likesCount': likesCount,
-      'imageUrl': imageUrl,
+      // [수정] Firestore에 이미지 목록 저장
+      'imageUrls': imageUrls,
     };
   }
 }
