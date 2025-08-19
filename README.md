@@ -31,8 +31,10 @@ lib
 │   │   ├── bid_model.dart
 │   │   ├── chat_message_model.dart
 │   │   ├── chat_room_model.dart
+│   │   ├── club_comment_model.dart
 │   │   ├── club_member_model.dart
 │   │   ├── club_model.dart
+│   │   ├── club_post_model.dart
 │   │   ├── comment_model.dart
 │   │   ├── feed_item_model.dart
 │   │   ├── follow_model.dart
@@ -60,8 +62,13 @@ lib
 │   ├── auction
 │   │   ├── data
 │   │   │   └── auction_repository.dart
-│   │   └── screens
-│   │       └── auction_screen.dart
+│   │   ├── screens
+│   │   │   ├── auction_detail_screen.dart
+│   │   │   ├── auction_screen.dart
+│   │   │   ├── create_auction_screen.dart
+│   │   │   └── edit_auction_screen.dart
+│   │   └── widgets
+│   │       └── auction_card.dart
 │   ├── auth
 │   │   └── screens
 │   │       ├── auth_gate.dart
@@ -86,8 +93,19 @@ lib
 │   ├── clubs
 │   │   ├── data
 │   │   │   └── club_repository.dart
-│   │   └── screens
-│   │       └── clubs_screen.dart
+│   │   ├── screens
+│   │   │   ├── club_detail_screen.dart
+│   │   │   ├── club_member_list.dart
+│   │   │   ├── club_post_detail_screen.dart
+│   │   │   ├── clubs_screen.dart
+│   │   │   ├── create_club_post_screen.dart
+│   │   │   ├── create_club_screen.dart
+│   │   │   └── edit_club_screen.dart
+│   │   └── widgets
+│   │       ├── club_card.dart
+│   │       ├── club_member_card.dart
+│   │       ├── club_post_card.dart
+│   │       └── club_post_list.dart
 │   ├── community
 │   │   └── screens
 │   │       └── community_screen.dart
@@ -102,6 +120,7 @@ lib
 │   │   │   ├── find_friend_repository.dart
 │   │   │   └── follow_repository.dart
 │   │   ├── screens
+│   │   │   ├── find_friend_detail_screen.dart
 │   │   │   ├── find_friends_screen.dart
 │   │   │   ├── findfriend_edit_screen.dart
 │   │   │   └── findfriend_form_screen.dart
@@ -110,8 +129,12 @@ lib
 │   ├── jobs
 │   │   ├── data
 │   │   │   └── job_repository.dart
-│   │   └── screens
-│   │       └── jobs_screen.dart
+│   │   ├── screens
+│   │   │   ├── create_job_screen.dart
+│   │   │   ├── job_detail_screen.dart
+│   │   │   └── jobs_screen.dart
+│   │   └── widgets
+│   │       └── job_card.dart
 │   ├── local_news
 │   │   ├── screens
 │   │   │   ├── create_local_news_screen.dart
@@ -127,16 +150,29 @@ lib
 │   ├── local_stores
 │   │   ├── data
 │   │   │   └── shop_repository.dart
-│   │   └── screens
-│   │       └── local_stores_screen.dart
+│   │   ├── screens
+│   │   │   ├── create_shop_screen.dart
+│   │   │   ├── edit_shop_screen.dart
+│   │   │   ├── local_stores_screen.dart
+│   │   │   └── shop_detail_screen.dart
+│   │   └── widgets
+│   │       └── shop_card.dart
 │   ├── location
 │   │   └── screens
 │   │       ├── location_filter_screen.dart
 │   │       ├── location_setting_screen.dart
 │   │       └── neighborhood_prompt_screen.dart
-│   ├── lost_found
-│   │   └── data
-│   │       └── lost_item_repository.dart
+│   ├── lost_and_found
+│   │   ├── data
+│   │   │   ├── lost_and_found_repository.dart
+│   │   │   └── lost_item_repository.dart
+│   │   ├── screens
+│   │   │   ├── create_lost_item_screen.dart
+│   │   │   ├── edit_lost_item_screen.dart
+│   │   │   ├── lost_and_found_screen.dart
+│   │   │   └── lost_item_detail_screen.dart
+│   │   └── widgets
+│   │       └── lost_item_card.dart
 │   ├── main_feed
 │   │   ├── data
 │   │   │   └── feed_repository.dart
@@ -156,25 +192,39 @@ lib
 │   │       └── product_card.dart
 │   ├── my_bling
 │   │   ├── screens
+│   │   │   ├── blocked_users_screen.dart
+│   │   │   ├── friend_requests_screen.dart
 │   │   │   ├── my_bling_screen.dart
-│   │   │   └── profile_edit_screen.dart
+│   │   │   ├── profile_edit_screen.dart
+│   │   │   ├── sent_friend_requests_screen.dart
+│   │   │   └── settings_screen.dart
 │   │   └── widgets
 │   │       ├── user_bookmark_list.dart
+│   │       ├── user_friend_list.dart
 │   │       ├── user_post_list.dart
 │   │       └── user_product_list.dart
 │   ├── pom
 │   │   ├── data
 │   │   │   └── short_repository.dart
-│   │   └── screens
-│   │       └── pom_screen.dart
+│   │   ├── screens
+│   │   │   ├── create_short_screen.dart
+│   │   │   └── pom_screen.dart
+│   │   └── widgets
+│   │       ├── short_comments_sheet.dart
+│   │       └── short_player.dart
 │   ├── post
 │   │   └── screens
 │   │       └── post_detail_screen.dart
 │   ├── real_estate
 │   │   ├── data
 │   │   │   └── room_repository.dart
-│   │   └── screens
-│   │       └── real_estate_screen.dart
+│   │   ├── screens
+│   │   │   ├── create_room_listing_screen.dart
+│   │   │   ├── edit_room_listing_screen.dart
+│   │   │   ├── real_estate_screen.dart
+│   │   │   └── room_detail_screen.dart
+│   │   └── widgets
+│   │       └── room_card.dart
 │   └── shared
 │       ├── controllers
 │       │   └── locale_controller.dart
@@ -241,11 +291,8 @@ functions-v2
     │   └── google_logo.png
     ├── lang
     │   ├── en.json
-    │   ├── en_old.json
     │   ├── id.json
-    │   ├── id_old.json
     │   ├── ko.json
-    │   └── ko_old.json
     └── sounds
         └── send_sound.mp3
 
