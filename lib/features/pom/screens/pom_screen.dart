@@ -13,6 +13,10 @@ class PomScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    // V V V --- [추가] 정밀 진단을 위한 로그 --- V V V
+    debugPrint("--- [진단] pom_screen.dart (전체 페이지)가 다시 빌드되었습니다! ---");
+
     final ShortRepository shortRepository = ShortRepository();
 
     return Scaffold(
