@@ -19,7 +19,7 @@ Gojek 스타일 런처 UX를 결합한 **하이브리드 로컬 앱**입니다.
 - Lelang(경매), POM(지역 쇼츠)
 - 다국어(Localization) + AppBar GEO 범위 설정
 
-## ✅ 폴더 구조    2025년 7월 11일 Ver 0.4 기준
+## ✅ 폴더 구조    2025년 8월 19일 Ver 0.4.5 기준
 
 lib
 ├── api_keys.dart
@@ -27,30 +27,12 @@ lib
 │   ├── constants
 │   │   └── app_categories.dart
 │   ├── models
-│   │   ├── auction_model.dart
-│   │   ├── bid_model.dart
 │   │   ├── chat_message_model.dart
 │   │   ├── chat_room_model.dart
-│   │   ├── club_comment_model.dart
-│   │   ├── club_member_model.dart
-│   │   ├── club_model.dart
-│   │   ├── club_post_model.dart
 │   │   ├── comment_model.dart
 │   │   ├── feed_item_model.dart
-│   │   ├── follow_model.dart
-│   │   ├── friend_request_model.dart
-│   │   ├── job_model.dart
-│   │   ├── lost_item_model.dart
 │   │   ├── page_data.dart
-│   │   ├── post_category_model.dart
-│   │   ├── post_model.dart
-│   │   ├── product_model.dart
 │   │   ├── reply_model.dart
-│   │   ├── room_listing_model.dart
-│   │   ├── shop_model.dart
-│   │   ├── shop_review_model.dart
-│   │   ├── short_comment_model.dart
-│   │   ├── short_model.dart
 │   │   └── user_model.dart
 │   └── utils
 │       └── address_formatter.dart
@@ -62,6 +44,9 @@ lib
 │   ├── auction
 │   │   ├── data
 │   │   │   └── auction_repository.dart
+│   │   ├── models
+│   │   │   ├── auction_model.dart
+│   │   │   └── bid_model.dart
 │   │   ├── screens
 │   │   │   ├── auction_detail_screen.dart
 │   │   │   ├── auction_screen.dart
@@ -93,6 +78,11 @@ lib
 │   ├── clubs
 │   │   ├── data
 │   │   │   └── club_repository.dart
+│   │   ├── models
+│   │   │   ├── club_comment_model.dart
+│   │   │   ├── club_member_model.dart
+│   │   │   ├── club_model.dart
+│   │   │   └── club_post_model.dart
 │   │   ├── screens
 │   │   │   ├── club_detail_screen.dart
 │   │   │   ├── club_member_list.dart
@@ -119,6 +109,9 @@ lib
 │   │   ├── data
 │   │   │   ├── find_friend_repository.dart
 │   │   │   └── follow_repository.dart
+│   │   ├── models
+│   │   │   ├── follow_model.dart
+│   │   │   └── friend_request_model.dart
 │   │   ├── screens
 │   │   │   ├── find_friend_detail_screen.dart
 │   │   │   ├── find_friends_screen.dart
@@ -129,6 +122,8 @@ lib
 │   ├── jobs
 │   │   ├── data
 │   │   │   └── job_repository.dart
+│   │   ├── models
+│   │   │   └── job_model.dart
 │   │   ├── screens
 │   │   │   ├── create_job_screen.dart
 │   │   │   ├── job_detail_screen.dart
@@ -136,6 +131,9 @@ lib
 │   │   └── widgets
 │   │       └── job_card.dart
 │   ├── local_news
+│   │   ├── models
+│   │   │   ├── post_category_model.dart
+│   │   │   └── post_model.dart
 │   │   ├── screens
 │   │   │   ├── create_local_news_screen.dart
 │   │   │   ├── edit_local_news_screen.dart
@@ -150,6 +148,9 @@ lib
 │   ├── local_stores
 │   │   ├── data
 │   │   │   └── shop_repository.dart
+│   │   ├── models
+│   │   │   ├── shop_model.dart
+│   │   │   └── shop_review_model.dart
 │   │   ├── screens
 │   │   │   ├── create_shop_screen.dart
 │   │   │   ├── edit_shop_screen.dart
@@ -166,6 +167,8 @@ lib
 │   │   ├── data
 │   │   │   ├── lost_and_found_repository.dart
 │   │   │   └── lost_item_repository.dart
+│   │   ├── models
+│   │   │   └── lost_item_model.dart
 │   │   ├── screens
 │   │   │   ├── create_lost_item_screen.dart
 │   │   │   ├── edit_lost_item_screen.dart
@@ -183,6 +186,8 @@ lib
 │   ├── marketplace
 │   │   ├── domain
 │   │   │   └── product_model_old.dart
+│   │   ├── models
+│   │   │   └── product_model.dart
 │   │   ├── screens
 │   │   │   ├── marketplace_screen.dart
 │   │   │   ├── product_detail_screen.dart
@@ -206,18 +211,20 @@ lib
 │   ├── pom
 │   │   ├── data
 │   │   │   └── short_repository.dart
+│   │   ├── models
+│   │   │   ├── short_comment_model.dart
+│   │   │   └── short_model.dart
 │   │   ├── screens
 │   │   │   ├── create_short_screen.dart
 │   │   │   └── pom_screen.dart
 │   │   └── widgets
 │   │       ├── short_comments_sheet.dart
 │   │       └── short_player.dart
-│   ├── post
-│   │   └── screens
-│   │       └── post_detail_screen.dart
 │   ├── real_estate
 │   │   ├── data
 │   │   │   └── room_repository.dart
+│   │   ├── models
+│   │   │   └── room_listing_model.dart
 │   │   ├── screens
 │   │   │   ├── create_room_listing_screen.dart
 │   │   │   ├── edit_room_listing_screen.dart

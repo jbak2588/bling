@@ -1,7 +1,7 @@
 // lib/features/pom/screens/create_short_screen.dart
 
 import 'dart:io';
-import 'package:bling_app/core/models/short_model.dart';
+import 'package:bling_app/features/pom/models/short_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/pom/data/short_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

@@ -6,8 +6,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
 
 import '../../../core/models/feed_item_model.dart';
-import '../../../core/models/post_model.dart';
-import '../../../core/models/product_model.dart';
+import '../../local_news/models/post_model.dart';
+import '../../marketplace/models/product_model.dart';
 import '../data/feed_repository.dart';
 import '../../local_news/widgets/post_card.dart';
 import '../../marketplace/widgets/product_card.dart';

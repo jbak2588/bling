@@ -1,7 +1,7 @@
 // lib/features/clubs/screens/create_club_post_screen.dart
 
 import 'dart:io';
-import 'package:bling_app/core/models/club_post_model.dart';
+import 'package:bling_app/features/clubs/models/club_post_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';

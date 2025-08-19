@@ -1,6 +1,6 @@
 // lib/features/jobs/screens/jobs_screen.dart
 
-import 'package:bling_app/core/models/job_model.dart';
+import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/jobs/data/job_repository.dart';
 import 'package:bling_app/features/jobs/widgets/job_card.dart';

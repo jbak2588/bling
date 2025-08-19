@@ -1,6 +1,6 @@
 // lib/features/jobs/data/job_repository.dart
 
-import 'package:bling_app/core/models/job_model.dart';
+import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';

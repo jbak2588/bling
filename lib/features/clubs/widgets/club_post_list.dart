@@ -1,7 +1,7 @@
 // lib/features/clubs/widgets/club_post_list.dart
 
-import 'package:bling_app/core/models/club_model.dart'; // [추가]
-import 'package:bling_app/core/models/club_post_model.dart';
+import 'package:bling_app/features/clubs/models/club_model.dart'; // [추가]
+import 'package:bling_app/features/clubs/models/club_post_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';

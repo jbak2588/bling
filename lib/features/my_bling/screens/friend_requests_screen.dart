@@ -1,6 +1,6 @@
 // lib/features/my_bling/screens/friend_requests_screen.dart
 
-import 'package:bling_app/core/models/friend_request_model.dart';
+import 'package:bling_app/features/find_friends/models/friend_request_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 // import 'package:bling_app/features/chat/screens/chat_room_screen.dart'; // 더 이상 채팅방으로 바로 이동하지 않으므로 주석 처리하거나 삭제
 import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';

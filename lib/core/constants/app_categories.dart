@@ -1,6 +1,6 @@
 // lib/core/constants/app_categories.dart
 
-import '../models/post_category_model.dart';
+import '../../features/local_news/models/post_category_model.dart';
 
 class AppCategories {
   // ✅ [핵심 수정] name과 description을 다국어 키(key)로 변경합니다.

@@ -1,7 +1,7 @@
 // lib/features/lost_and_found/screens/edit_lost_item_screen.dart
 
 import 'dart:io';
-import 'package:bling_app/core/models/lost_item_model.dart';
+import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/features/lost_and_found/data/lost_and_found_repository.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';

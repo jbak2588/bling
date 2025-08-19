@@ -8,7 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 
 import '../../../core/constants/app_categories.dart';
-import '../../../core/models/post_model.dart';
+import '../models/post_model.dart';
 import '../../../core/models/user_model.dart';
 import '../widgets/comment_input_field.dart';
 import '../widgets/comment_list_view.dart';

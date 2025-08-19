@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import 'package:bling_app/core/models/friend_request_model.dart';
+import 'package:bling_app/features/find_friends/models/friend_request_model.dart';
 import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
 
 import '../../../core/models/user_model.dart';

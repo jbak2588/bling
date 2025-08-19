@@ -1,6 +1,6 @@
 // lib/features/clubs/widgets/club_member_card.dart
 
-import 'package:bling_app/core/models/club_member_model.dart';
+import 'package:bling_app/features/clubs/models/club_member_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart'; // [추가] 상세 프로필 화면 임포트

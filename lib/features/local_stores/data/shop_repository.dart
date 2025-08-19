@@ -2,8 +2,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../core/models/shop_model.dart';
-import '../../../core/models/shop_review_model.dart';
+import '../models/shop_model.dart';
+import '../models/shop_review_model.dart';
 
 /// Handles CRUD operations for shops and reviews in the Local Shops module.
 class ShopRepository {

@@ -1,6 +1,6 @@
 // lib/features/jobs/widgets/job_card.dart
 
-import 'package:bling_app/core/models/job_model.dart';
+import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/features/jobs/screens/job_detail_screen.dart'; // [추가]
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';

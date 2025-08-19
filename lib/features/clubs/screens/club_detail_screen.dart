@@ -1,7 +1,7 @@
 // lib/features/clubs/screens/club_detail_screen.dart
 
-import 'package:bling_app/core/models/club_member_model.dart';
-import 'package:bling_app/core/models/club_model.dart';
+import 'package:bling_app/features/clubs/models/club_member_model.dart';
+import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';

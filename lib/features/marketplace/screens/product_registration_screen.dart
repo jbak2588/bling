@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:bling_app/features/categories/screens/parent_category_screen.dart';
 // import old model is replaced with ProductModel
-import '../../../core/models/product_model.dart';
+import '../models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';

@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/models/post_model.dart';
+import '../../local_news/models/post_model.dart';
 import '../../../core/models/user_model.dart';
 import '../../local_news/widgets/post_card.dart';
 

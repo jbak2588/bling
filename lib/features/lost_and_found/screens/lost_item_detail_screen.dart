@@ -1,6 +1,6 @@
 // lib/features/lost_and_found/screens/lost_item_detail_screen.dart
 
-import 'package:bling_app/core/models/lost_item_model.dart';
+import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
