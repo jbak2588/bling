@@ -2,8 +2,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../core/models/short_model.dart';
-import '../../../core/models/short_comment_model.dart';
+import '../models/short_model.dart';
+import '../models/short_comment_model.dart';
 
 class ShortRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

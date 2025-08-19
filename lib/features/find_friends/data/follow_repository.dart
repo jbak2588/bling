@@ -1,7 +1,7 @@
 // lib/features/find_friends/data/follow_repository.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../core/models/follow_model.dart';
+import '../models/follow_model.dart';
 
 /// Provides CRUD operations for [FollowModel] using Firestore.
 class FollowRepository {

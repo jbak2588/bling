@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/models/product_model.dart';
+import '../../marketplace/models/product_model.dart';
 import '../../../core/models/user_model.dart';
 import '../../marketplace/widgets/product_card.dart'; // 기존 ProductCard 재사용
 

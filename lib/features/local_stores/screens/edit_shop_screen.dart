@@ -1,7 +1,7 @@
 // lib/features/local_stores/screens/edit_shop_screen.dart
 
 import 'dart:io';
-import 'package:bling_app/core/models/shop_model.dart';
+import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:bling_app/features/local_stores/data/shop_repository.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';

@@ -1,7 +1,7 @@
 // lib/features/clubs/screens/edit_club_screen.dart
 
 import 'dart:io';
-import 'package:bling_app/core/models/club_model.dart';
+import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';

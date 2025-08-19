@@ -1,7 +1,7 @@
 // lib/features/auction/screens/edit_auction_screen.dart
 
 import 'dart:io';
-import 'package:bling_app/core/models/auction_model.dart';
+import 'package:bling_app/features/auction/models/auction_model.dart';
 import 'package:bling_app/features/auction/data/auction_repository.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';

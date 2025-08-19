@@ -2,8 +2,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../core/models/auction_model.dart';
-import '../../../core/models/bid_model.dart';
+import '../models/auction_model.dart';
+import '../models/bid_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 /// Provides CRUD operations for auctions and bidding functionality.

@@ -1,6 +1,6 @@
 // lib/features/pom/widgets/short_comments_sheet.dart
 
-import 'package:bling_app/core/models/short_comment_model.dart';
+import 'package:bling_app/features/pom/models/short_comment_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/pom/data/short_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

@@ -1,6 +1,6 @@
 // lib/features/real_estate/widgets/room_card.dart
 
-import 'package:bling_app/core/models/room_listing_model.dart';
+import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/real_estate/screens/room_detail_screen.dart';

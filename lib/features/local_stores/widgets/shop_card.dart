@@ -1,6 +1,6 @@
 // lib/features/local_stores/widgets/shop_card.dart
 
-import 'package:bling_app/core/models/shop_model.dart';
+import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:bling_app/features/local_stores/screens/shop_detail_screen.dart'; // [추가] 상세 화면 임포트
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';

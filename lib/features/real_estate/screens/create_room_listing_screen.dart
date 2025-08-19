@@ -1,7 +1,7 @@
 // lib/features/real_estate/screens/create_room_listing_screen.dart
 
 import 'dart:io';
-import 'package:bling_app/core/models/room_listing_model.dart';
+import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/real_estate/data/room_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

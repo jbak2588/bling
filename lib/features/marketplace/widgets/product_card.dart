@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 // ✅ [수정] UserModel과 최종 ProductModel을 모두 import합니다.
 import '../../../core/models/user_model.dart';
-import '../../../core/models/product_model.dart';
+import '../models/product_model.dart';
 import '../screens/product_detail_screen.dart';
 
 class ProductCard extends StatelessWidget {

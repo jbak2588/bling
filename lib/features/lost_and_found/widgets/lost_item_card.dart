@@ -1,6 +1,6 @@
 // lib/features/lost_and_found/widgets/lost_item_card.dart
 
-import 'package:bling_app/core/models/lost_item_model.dart';
+import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/features/lost_and_found/screens/lost_item_detail_screen.dart'; // [추가]
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';

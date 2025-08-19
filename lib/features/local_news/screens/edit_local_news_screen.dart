@@ -8,8 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../core/constants/app_categories.dart';
-import '../../../core/models/post_category_model.dart';
-import '../../../core/models/post_model.dart';
+import '../models/post_category_model.dart';
+import '../models/post_model.dart';
 
 
 

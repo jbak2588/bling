@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../core/models/friend_request_model.dart';
+import '../models/friend_request_model.dart';
 import '../../../core/models/user_model.dart';
 
 // import 'package:firebase_auth/firebase_auth.dart';

@@ -1,6 +1,6 @@
 // lib/features/lost_and_found/screens/lost_and_found_screen.dart
 
-import 'package:bling_app/core/models/lost_item_model.dart';
+import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/lost_and_found/data/lost_and_found_repository.dart';
 import 'package:bling_app/features/lost_and_found/widgets/lost_item_card.dart';

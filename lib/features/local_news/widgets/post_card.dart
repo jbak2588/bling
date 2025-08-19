@@ -1,6 +1,6 @@
 // lib/features/local_news/widgets/post_card.dart
 
-import 'package:bling_app/core/models/post_model.dart';
+import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/app_categories.dart';
-import '../../../core/models/post_category_model.dart';
+import '../models/post_category_model.dart';
 
 class PostCard extends StatelessWidget {
   final PostModel post;

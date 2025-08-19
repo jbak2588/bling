@@ -1,10 +1,10 @@
 // lib/features/clubs/data/club_repository.dart
 
-import 'package:bling_app/core/models/club_member_model.dart';
-import 'package:bling_app/core/models/club_post_model.dart';
-import 'package:bling_app/core/models/club_model.dart';
+import 'package:bling_app/features/clubs/models/club_member_model.dart';
+import 'package:bling_app/features/clubs/models/club_post_model.dart';
+import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/core/models/club_comment_model.dart';
+import 'package:bling_app/features/clubs/models/club_comment_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';

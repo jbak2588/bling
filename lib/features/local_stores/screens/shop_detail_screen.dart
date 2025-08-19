@@ -1,6 +1,6 @@
 // lib/features/local_stores/screens/shop_detail_screen.dart
 
-import 'package:bling_app/core/models/shop_model.dart';
+import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';

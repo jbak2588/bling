@@ -1,6 +1,6 @@
 // lib/features/pom/widgets/short_player.dart
 
-import 'package:bling_app/core/models/short_model.dart';
+import 'package:bling_app/features/pom/models/short_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 import 'package:bling_app/features/pom/data/short_repository.dart';

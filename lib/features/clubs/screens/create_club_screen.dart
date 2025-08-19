@@ -1,7 +1,7 @@
 // lib/features/clubs/screens/create_club_screen.dart
 
 import 'dart:io'; // [추가] File 클래스 사용
-import 'package:bling_app/core/models/club_model.dart';
+import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:bling_app/features/location/screens/location_filter_screen.dart';

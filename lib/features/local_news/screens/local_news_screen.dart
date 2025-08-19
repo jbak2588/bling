@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/app_categories.dart';
-import '../../../core/models/post_model.dart';
+import '../models/post_model.dart';
 import '../widgets/post_card.dart';
 
 class LocalNewsScreen extends StatefulWidget {

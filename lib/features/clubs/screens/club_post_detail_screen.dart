@@ -1,8 +1,8 @@
 // lib/features/clubs/screens/club_post_detail_screen.dart
 
-import 'package:bling_app/core/models/club_comment_model.dart';
-import 'package:bling_app/core/models/club_model.dart';
-import 'package:bling_app/core/models/club_post_model.dart';
+import 'package:bling_app/features/clubs/models/club_comment_model.dart';
+import 'package:bling_app/features/clubs/models/club_model.dart';
+import 'package:bling_app/features/clubs/models/club_post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

@@ -3,7 +3,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:bling_app/core/models/chat_message_model.dart';
 // import 'package:bling_app/core/models/chat_room_model.dart';
-import 'package:bling_app/core/models/job_model.dart';
+import 'package:bling_app/features/jobs/models/job_model.dart';
 // import 'package:bling_app/core/models/product_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';

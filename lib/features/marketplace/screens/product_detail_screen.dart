@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:photo_view/photo_view.dart';
 
-import 'package:bling_app/core/models/product_model.dart';
+import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:bling_app/features/marketplace/screens/product_edit_screen.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 

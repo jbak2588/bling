@@ -1,6 +1,6 @@
 // lib/features/clubs/screens/clubs_screen.dart
 
-import 'package:bling_app/core/models/club_model.dart';
+import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:bling_app/features/clubs/widgets/club_card.dart';

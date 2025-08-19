@@ -1,7 +1,7 @@
 // lib/features/clubs/widgets/club_member_list.dart
 
-import 'package:bling_app/core/models/club_member_model.dart';
-import 'package:bling_app/core/models/club_model.dart'; // [추가] ClubModel 임포트
+import 'package:bling_app/features/clubs/models/club_member_model.dart';
+import 'package:bling_app/features/clubs/models/club_model.dart'; // [추가] ClubModel 임포트
 import 'package:bling_app/core/models/user_model.dart'; // [추가] UserModel 임포트
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';

@@ -2,7 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../core/models/lost_item_model.dart';
+import '../models/lost_item_model.dart';
 
 /// Provides CRUD operations for lost & found items and removes expired posts.
 class LostItemRepository {

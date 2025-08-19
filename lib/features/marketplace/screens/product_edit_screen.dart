@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../../core/models/product_model.dart';
+import '../models/product_model.dart';
 import '../../../core/models/user_model.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/screens/parent_category_screen.dart';

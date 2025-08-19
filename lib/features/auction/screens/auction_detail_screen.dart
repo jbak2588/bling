@@ -1,7 +1,7 @@
 // lib/features/auction/screens/auction_detail_screen.dart
 
-import 'package:bling_app/core/models/auction_model.dart';
-import 'package:bling_app/core/models/bid_model.dart';
+import 'package:bling_app/features/auction/models/auction_model.dart';
+import 'package:bling_app/features/auction/models/bid_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/auction/data/auction_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

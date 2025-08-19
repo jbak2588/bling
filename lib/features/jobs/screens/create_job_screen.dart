@@ -1,6 +1,6 @@
 // lib/features/jobs/screens/create_job_screen.dart
 import 'dart:io';
-import 'package:bling_app/core/models/job_model.dart';
+import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/jobs/data/job_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
