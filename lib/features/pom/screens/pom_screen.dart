@@ -36,32 +36,31 @@ class _PomScreenState extends State<PomScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SafeArea(
-        child: FutureBuilder<List<ShortModel>>(
-          future: _shortsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(child: Text('pom.errors.fetchFailed'.tr(namedArgs: {'error': snapshot.error.toString()}), style: const TextStyle(color: Colors.white)));
-            }
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text('pom.empty'.tr(), style: const TextStyle(color: Colors.white)));
-            }
-      
-            final shorts = snapshot.data!;
-      
-            return PageView.builder(
-              controller: _pageController,
-              scrollDirection: Axis.vertical,
-              itemCount: shorts.length,
-              itemBuilder: (context, index) {
-                return ShortPlayer(short: shorts[index]);
-              },
-            );
-          },
-        ),
+      // V V V --- [수정] SafeArea 위젯을 제거합니다 --- V V V
+      body: FutureBuilder<List<ShortModel>>(
+        future: _shortsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('pom.errors.fetchFailed'.tr(namedArgs: {'error': snapshot.error.toString()}), style: const TextStyle(color: Colors.white)));
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('pom.empty'.tr(), style: const TextStyle(color: Colors.white)));
+          }
+    
+          final shorts = snapshot.data!;
+    
+          return PageView.builder(
+            controller: _pageController,
+            scrollDirection: Axis.vertical,
+            itemCount: shorts.length,
+            itemBuilder: (context, index) {
+              return ShortPlayer(short: shorts[index]);
+            },
+          );
+        },
       ),
     );
   }
