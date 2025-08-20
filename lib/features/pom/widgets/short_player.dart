@@ -21,63 +21,79 @@ class ShortPlayer extends StatefulWidget {
 
 class _ShortPlayerState extends State<ShortPlayer> {
   late VideoPlayerController _controller;
-  bool _isPlaying = false;
+  final ValueNotifier<bool> _isPlaying = ValueNotifier(false);
   final ShortRepository _repository = ShortRepository();
   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
-  // V V V --- [추가] '좋아요' 상태를 위젯 내부에서 직접 관리하기 위한 변수 --- V V V
   bool _isLiked = false;
   int _likesCount = 0;
+
+  // V V V --- [추가] DB 조회를 최소화하기 위한 상태 변수 --- V V V
+  UserModel? _author;
+  UserModel? _currentUserModel;
   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
   @override
   void initState() {
     super.initState();
-    _likesCount = widget.short.likesCount; // 초기 좋아요 수 설정
-    _checkIfLiked(); // 내가 좋아요를 눌렀는지 확인
+    _likesCount = widget.short.likesCount;
+    _fetchInitialData(); // [수정] 모든 초기 데이터를 한 번에 불러옵니다.
 
     _controller =
         VideoPlayerController.networkUrl(Uri.parse(widget.short.videoUrl))
           ..initialize().then((_) {
-            _controller.play();
-            _controller.setLooping(true);
-            if (mounted) setState(() => _isPlaying = true);
+            if (mounted) {
+              setState(() {
+                _controller.play();
+                _controller.setLooping(true);
+                _isPlaying.value = true;
+              });
+            }
           });
   }
 
-  // [추가] 화면이 처음 로드될 때, 내가 이 영상에 좋아요를 눌렀는지 확인하는 함수
-  Future<void> _checkIfLiked() async {
-    if (_currentUserId == null) return;
-    final userDoc = await FirebaseFirestore.instance.collection('users').doc(_currentUserId).get();
-    if (userDoc.exists && mounted) {
-      final user = UserModel.fromFirestore(userDoc);
+  // [수정] initState에서 필요한 모든 데이터를 한 번만 가져오는 함수
+  Future<void> _fetchInitialData() async {
+    // 1. 동영상 작성자 정보 가져오기
+    final authorDoc = await FirebaseFirestore.instance.collection('users').doc(widget.short.userId).get();
+    if (authorDoc.exists && mounted) {
       setState(() {
-        _isLiked = user.likedShortIds?.contains(widget.short.id) ?? false;
+        _author = UserModel.fromFirestore(authorDoc);
       });
+    }
+    
+    // 2. 현재 로그인한 사용자 정보 가져오기 (좋아요 확인 및 프로필 이동에 사용)
+    if (_currentUserId != null) {
+      final currentUserDoc = await FirebaseFirestore.instance.collection('users').doc(_currentUserId).get();
+      if (currentUserDoc.exists && mounted) {
+        final user = UserModel.fromFirestore(currentUserDoc);
+        setState(() {
+          _currentUserModel = user;
+          _isLiked = user.likedShortIds?.contains(widget.short.id) ?? false;
+        });
+      }
     }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _isPlaying.dispose();
     super.dispose();
   }
 
   void _togglePlayPause() {
-    setState(() {
-      if (_controller.value.isPlaying) {
-        _controller.pause();
-        _isPlaying = false;
-      } else {
-        _controller.play();
-        _isPlaying = true;
-      }
-    });
+    if (_controller.value.isPlaying) {
+      _controller.pause();
+      _isPlaying.value = false;
+    } else {
+      _controller.play();
+      _isPlaying.value = true;
+    }
   }
 
-void _onLikeButtonPressed() {
+  void _onLikeButtonPressed() {
     if (_currentUserId == null) return;
-    // UI를 먼저 즉시 업데이트
     setState(() {
       _isLiked = !_isLiked;
       if (_isLiked) {
@@ -86,16 +102,11 @@ void _onLikeButtonPressed() {
         _likesCount--;
       }
     });
-    // 그 다음, 백그라운드에서 DB 작업 수행
     _repository.toggleShortLike(widget.short.id, !_isLiked);
   }
 
   @override
   Widget build(BuildContext context) {
-    // V V V --- [추가] 정밀 진단을 위한 로그 --- V V V
-    debugPrint(
-        "--- [진단] short_player.dart (ID: ${widget.short.id})가 다시 빌드되었습니다! ---");
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: GestureDetector(
@@ -116,10 +127,16 @@ void _onLikeButtonPressed() {
                     )
                   : const CircularProgressIndicator(color: Colors.white),
             ),
-            if (!_isPlaying)
-              Center(
-                  child: Icon(Icons.play_arrow,
-                      size: 80, color: Colors.white.withValues(alpha: 0.7))),
+            ValueListenableBuilder<bool>(
+              valueListenable: _isPlaying,
+              builder: (context, isPlaying, _) {
+                return !isPlaying
+                    ? Center(
+                        child: Icon(Icons.play_arrow,
+                            size: 80, color: Colors.white.withOpacity(0.7)))
+                    : const SizedBox.shrink();
+              },
+            ),
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
@@ -141,132 +158,101 @@ void _onLikeButtonPressed() {
     );
   }
 
+  // [수정] StreamBuilder -> 일반 위젯으로 변경하여 성능 최적화
   Widget _buildVideoInfo() {
-    return StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(widget.short.userId)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const SizedBox.shrink();
-          }
-          final user = UserModel.fromFirestore(
-              snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('@${user.nickname}',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      shadows: [Shadow(blurRadius: 2)])),
-              const SizedBox(height: 8),
-              Text(widget.short.description,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      shadows: [Shadow(blurRadius: 2)]),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis),
-            ],
-          );
-        });
+    if (_author == null) return const SizedBox.shrink(); // 작성자 정보가 없으면 표시하지 않음
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('@${_author!.nickname}',
+            style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                shadows: [Shadow(blurRadius: 2)])),
+        const SizedBox(height: 8),
+        Text(widget.short.description,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                shadows: [Shadow(blurRadius: 2)]),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis),
+      ],
+    );
   }
 
-  // V V V --- [수정] 좋아요/댓글 카운트를 실시간으로 감시 + 내부 상태 관리 --- V V V
+  // [수정] StreamBuilder를 최소화하여 성능 최적화
   Widget _buildActionButtons() {
-    if (_currentUserId == null) return const SizedBox.shrink();
+    if (_currentUserId == null || _author == null) return const SizedBox.shrink();
 
-    // 이 short 문서 하나만 실시간으로 감시하여 '댓글 수'만 업데이트
-    return StreamBuilder<ShortModel>(
-        stream: _repository.getShortStream(widget.short.id),
-        builder: (context, shortSnapshot) {
-          // 실시간 댓글 수는 shortSnapshot에서 가져오고, 없다면 기존 값을 사용
-          final liveCommentsCount =
-              shortSnapshot.data?.commentsCount ?? widget.short.commentsCount;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // --- 작성자 프로필 보기 ---
+        InkWell(
+          onTap: () {
+            if (_currentUserModel != null) {
+               Navigator.of(context).push(MaterialPageRoute(builder: (_) => FindFriendDetailScreen(user: _author!, currentUserModel: _currentUserModel!)));
+            }
+          },
+          child: CircleAvatar(
+            radius: 24,
+            backgroundImage:
+                (_author!.photoUrl != null && _author!.photoUrl!.isNotEmpty)
+                    ? NetworkImage(_author!.photoUrl!)
+                    : null,
+            child: (_author!.photoUrl == null || _author!.photoUrl!.isEmpty)
+                ? const Icon(Icons.person)
+                : null,
+          ),
+        ),
+        const SizedBox(height: 24),
 
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // --- 작성자 프로필 보기 ---
-              StreamBuilder<DocumentSnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(widget.short.userId)
-                      .snapshots(),
-                  builder: (context, userSnapshot) {
-                    if (!userSnapshot.hasData) {
-                      return const CircleAvatar(radius: 24);
-                    }
-                    final user = UserModel.fromFirestore(userSnapshot.data!
-                        as DocumentSnapshot<Map<String, dynamic>>);
-                    return InkWell(
-                      onTap: () async {
-                        final currentUserDoc = await FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(_currentUserId)
-                            .get();
-                        if (currentUserDoc.exists && mounted) {
-                          final currentUser =
-                              UserModel.fromFirestore(currentUserDoc);
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) => FindFriendDetailScreen(
-                                  user: user, currentUserModel: currentUser)));
-                        }
-                      },
+        // --- 좋아요 기능 ---
+        InkWell(
+          onTap: _onLikeButtonPressed,
+          child: _buildActionButton(
+            icon: _isLiked ? Icons.favorite : Icons.favorite_border,
+            label: _likesCount.toString(),
+            color: _isLiked ? Colors.red : Colors.white,
+          ),
+        ),
+        const SizedBox(height: 20),
 
-                      child: CircleAvatar(
-                        radius: 24,
-                        backgroundImage:
-                            (user.photoUrl != null && user.photoUrl!.isNotEmpty)
-                                ? NetworkImage(user.photoUrl!)
-                                : null,
-                        child: (user.photoUrl == null || user.photoUrl!.isEmpty)
-                            ? const Icon(Icons.person)
-                            : null,
-                      ),
-                    );
-                  }),
-              const SizedBox(height: 24),
+        // --- 댓글 보기 기능 (카운트는 실시간) ---
+        StreamBuilder<ShortModel>(
+          stream: _repository.getShortStream(widget.short.id),
+          builder: (context, shortSnapshot) {
+            final liveCommentsCount = shortSnapshot.data?.commentsCount ?? widget.short.commentsCount;
+            return InkWell(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.white,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  builder: (context) => SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.75,
+                    child: ShortCommentsSheet(shortId: widget.short.id),
+                  ),
+                );
+              },
+              child: _buildActionButton(
+                  icon: Icons.comment,
+                  label: liveCommentsCount.toString()),
+            );
+          }
+        ),
+        const SizedBox(height: 20),
 
-              // --- 좋아요 기능 ---
-              InkWell(
-                onTap: _onLikeButtonPressed,
-                child: _buildActionButton(
-                  icon: _isLiked ? Icons.favorite : Icons.favorite_border,
-                  label: _likesCount.toString(), // 내부 상태(_likesCount)를 사용
-                  color: _isLiked ? Colors.red : Colors.white,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // --- 댓글 보기 기능 ---
-              InkWell(
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (context) => SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.75,
-                      child: ShortCommentsSheet(shortId: widget.short.id),
-                    ),
-                  );
-                },
-                child: _buildActionButton(
-                    icon: Icons.comment,
-                    label: liveCommentsCount.toString()), // 실시간 댓글 수
-              ),
-              const SizedBox(height: 20),
-
-              _buildActionButton(icon: Icons.share, label: 'pom.share'.tr()),
-            ],
-          );
-        });
+        _buildActionButton(icon: Icons.share, label: 'pom.share'.tr()),
+      ],
+    );
   }
-  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
   Widget _buildActionButton(
       {required IconData icon,

@@ -27,6 +27,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
   // [수정] 기존 URL(String)과 새로운 파일(XFile)을 모두 담는 List
   final List<dynamic> _images = [];
   bool _isSaving = false;
+  bool _isPickingImages = false;
 
   final ShopRepository _repository = ShopRepository();
   final ImagePicker _picker = ImagePicker();
@@ -38,7 +39,6 @@ class _EditShopScreenState extends State<EditShopScreen> {
     _descriptionController = TextEditingController(text: widget.shop.description);
     _contactController = TextEditingController(text: widget.shop.contactNumber);
     _hoursController = TextEditingController(text: widget.shop.openHours);
-    // [수정] 단일 이미지가 아닌 이미지 목록을 가져옵니다.
     _images.addAll(widget.shop.imageUrls);
   }
 
@@ -51,12 +51,16 @@ class _EditShopScreenState extends State<EditShopScreen> {
     super.dispose();
   }
 
-  // [수정] 여러 이미지를 선택하는 함수
-  Future<void> _pickImages() async {
-    if (_images.length >= 10) return;
-    final pickedFiles = await _picker.pickMultiImage(imageQuality: 70, limit: 10 - _images.length);
-    if (pickedFiles.isNotEmpty && mounted) {
-      setState(() => _images.addAll(pickedFiles));
+   Future<void> _pickImages() async {
+    if (_isPickingImages || _images.length >= 10) return;
+    setState(() => _isPickingImages = true);
+    try {
+      final pickedFiles = await _picker.pickMultiImage(imageQuality: 70, limit: 10 - _images.length);
+      if (pickedFiles.isNotEmpty && mounted) {
+        setState(() => _images.addAll(pickedFiles));
+      }
+    } finally {
+      if (mounted) setState(() => _isPickingImages = false);
     }
   }
 
@@ -135,9 +139,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                // V V V --- [수정] 다중 이미지 수정 UI --- V V V
-                Text('localStores.form.photoLabel'.tr(namedArgs: {'count': '10'}), style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 8),
+               // --- [수정] 다중 이미지 수정 UI ---
                 SizedBox(
                   height: 100,
                   child: ListView(
@@ -183,24 +185,23 @@ class _EditShopScreenState extends State<EditShopScreen> {
                     ],
                   ),
                 ),
-                // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _nameController,
-                    decoration: InputDecoration(labelText: 'localStores.form.nameLabel'.tr(), border: const OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: 'localStores.form.nameLabel'.tr(), border: const OutlineInputBorder()),
                   validator: (value) => (value == null || value.trim().isEmpty) ? 'localStores.form.nameError'.tr() : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                      decoration: InputDecoration(labelText: 'localStores.form.descriptionLabel'.tr(), border: const OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: 'localStores.form.descriptionLabel'.tr(), border: const OutlineInputBorder()),
                   maxLines: 4,
                   validator: (value) => (value == null || value.trim().isEmpty) ? 'localStores.form.descriptionError'.tr() : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _contactController,
-                    decoration: InputDecoration(labelText: 'localStores.form.contactLabel'.tr(), border: const OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: 'localStores.form.contactLabel'.tr(), border: const OutlineInputBorder()),
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 16),
@@ -212,7 +213,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
             ),
           ),
           if (_isSaving)
-            Container(color: Colors.black54, child: const Center(child: CircularProgressIndicator())),
+            Container(color: Colors.black54, child: const Center(child: CircularProgressIndicator(color: Colors.white))),
         ],
       ),
     );

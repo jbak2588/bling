@@ -77,6 +77,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
                         final otherUser = userSnapshot.data;
 
+                        
+
                         if (chatRoom.isGroupChat) {
                           return _buildGroupChatItem(context, chatRoom);
                         } else if (chatRoom.roomId != null &&
@@ -149,10 +151,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   ListTile _buildLostAndFoundChatItem(
       BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
+    // V V V --- [수정] Lost & Found UI 개선 --- V V V
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: _buildLostAndFoundAvatar(chatRoom.contextType),
-      title: Text(chatRoom.productTitle ?? 'Lost/Found Item',
+      title: Text('Lost & Found', // 제목을 'Lost & Found'로 고정
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
       subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}',
           maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -212,17 +215,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
   ListTile _buildDirectChatItem(
       BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
     if (otherUser == null) return const ListTile();
+     // V V V --- [수정] Find Friend UI 개선 --- V V V
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: _buildAvatar(imageUrl: otherUser.photoUrl, icon: Icons.person),
-      title: Text(otherUser.nickname,
+      leading: _buildAvatar(imageUrl: otherUser.photoUrl, icon: Icons.favorite_border), // 아이콘 변경
+      title: Text('Find Friend', // 제목을 'Find Friend'로 고정
           style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(chatRoom.lastMessage,
+      subtitle: Text('${otherUser.nickname} • ${chatRoom.lastMessage}', // 부제에 상대방 닉네임 추가
           maxLines: 1, overflow: TextOverflow.ellipsis),
       trailing: _buildTrailing(chatRoom),
       onTap: () => _navigateToChat(context,
           chatRoom: chatRoom, otherUser: otherUser, type: 'Direct/Friend'),
     );
+    
   }
 
   // V V V --- [수정] 정밀 진단을 위한 로그 출력을 추가합니다 --- V V V
