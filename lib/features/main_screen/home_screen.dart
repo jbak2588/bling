@@ -1,5 +1,5 @@
 // lib/features/main_screen/home_screen.dart
-
+// git commit -m "home_scree.dart 아이콘 그리드 방식으로 전환하기 위한 최종 커밋"
 import 'dart:async';
 import 'package:bling_app/features/auction/screens/auction_screen.dart';
 import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
@@ -45,6 +45,7 @@ class SearchScreen extends StatelessWidget {
     );
   }
 }
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
