@@ -7,23 +7,38 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../widgets/short_player.dart';
 
-class PomScreen extends StatelessWidget {
+class PomScreen extends StatefulWidget {
   final UserModel? userModel;
   const PomScreen({this.userModel, super.key});
 
   @override
+  State<PomScreen> createState() => _PomScreenState();
+}
+
+class _PomScreenState extends State<PomScreen> {
+  final ShortRepository _shortRepository = ShortRepository();
+  late Future<List<ShortModel>> _shortsFuture;
+  final PageController _pageController = PageController();
+  
+  @override
+  void initState() {
+    super.initState();
+    _shortsFuture = _shortRepository.fetchShortsOnce();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-
-    // V V V --- [추가] 정밀 진단을 위한 로그 --- V V V
-    debugPrint("--- [진단] pom_screen.dart (전체 페이지)가 다시 빌드되었습니다! ---");
-
-    final ShortRepository shortRepository = ShortRepository();
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
         child: FutureBuilder<List<ShortModel>>(
-          future: shortRepository.fetchShortsOnce(),
+          future: _shortsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -38,11 +53,11 @@ class PomScreen extends StatelessWidget {
             final shorts = snapshot.data!;
       
             return PageView.builder(
+              controller: _pageController,
               scrollDirection: Axis.vertical,
               itemCount: shorts.length,
               itemBuilder: (context, index) {
-                final short = shorts[index];
-                return ShortPlayer(short: short);
+                return ShortPlayer(short: shorts[index]);
               },
             );
           },
