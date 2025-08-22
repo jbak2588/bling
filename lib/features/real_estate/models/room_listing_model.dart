@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// 지역 부동산(월세/하숙) 매물 정보를 담는 데이터 모델입니다.
 /// Firestore의 `room_listings` 컬렉션 문서 구조와 대응됩니다.
+/// 
 class RoomListingModel {
   final String id;
   final String userId; // 게시자 ID

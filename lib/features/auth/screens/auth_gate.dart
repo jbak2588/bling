@@ -1,14 +1,14 @@
-// lib/features/auth/presentation/screens/auth_gate.dart
-
+// 파일 경로: lib/features/auth/screens/auth_gate.dart
 import 'package:bling_app/features/location/screens/neighborhood_prompt_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'package:bling_app/features/main_screen/home_screen.dart';
+// [수정] 기존 HomeScreen 대신, '뼈대'와 '가구'를 모두 import 합니다.
+import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
+
 import 'package:bling_app/features/auth/screens/login_screen.dart';
 
-// ▼▼▼▼▼ StatelessWidget -> StatefulWidget으로 변경 ▼▼▼▼▼
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
@@ -28,7 +28,6 @@ class _AuthGateState extends State<AuthGate> {
         }
 
         if (authSnapshot.hasData) {
-          // 로그인 상태일 때, '인증된 사용자 확인' 위젯을 호출
           return AuthenticatedUserChecker(uid: authSnapshot.data!.uid);
         } else {
           return const LoginScreen();
@@ -48,16 +47,12 @@ class AuthenticatedUserChecker extends StatefulWidget {
 }
 
 class _AuthenticatedUserCheckerState extends State<AuthenticatedUserChecker> {
-  // late Future<DocumentSnapshot> _userDocFuture;
   late Stream<DocumentSnapshot> _userDocStream;
 
   @override
   void initState() {
     super.initState();
-
-    //  _userDocFuture =
-    //     FirebaseFirestore.instance.collection('users').doc(widget.uid).get();
-        _userDocStream = FirebaseFirestore.instance
+    _userDocStream = FirebaseFirestore.instance
         .collection('users')
         .doc(widget.uid)
         .snapshots();
@@ -65,12 +60,8 @@ class _AuthenticatedUserCheckerState extends State<AuthenticatedUserChecker> {
 
   @override
   Widget build(BuildContext context) {
-
-    // return FutureBuilder<DocumentSnapshot>(
-    //   future: _userDocFuture,
     return StreamBuilder<DocumentSnapshot>(
       stream: _userDocStream,
-
       builder: (context, userSnapshot) {
         if (userSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -78,6 +69,7 @@ class _AuthenticatedUserCheckerState extends State<AuthenticatedUserChecker> {
         }
 
         if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+          // Firestore에 유저 데이터가 없으면 동네 인증 화면으로 보냅니다.
           return const NeighborhoodPromptScreen();
         }
 
@@ -85,7 +77,9 @@ class _AuthenticatedUserCheckerState extends State<AuthenticatedUserChecker> {
         final bool isVerified = userData?['neighborhoodVerified'] ?? false;
 
         if (isVerified) {
-          return const HomeScreen();
+          // [수정] HomeScreen 대신 '뼈대'인 MainNavigationScreen을 반환합니다.
+          // 이제 child를 전달할 필요가 없습니다.
+          return const MainNavigationScreen();
         } else {
           return const NeighborhoodPromptScreen();
         }

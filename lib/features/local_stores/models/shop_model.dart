@@ -22,7 +22,6 @@ class ShopModel {
   
   // V V V --- [수정] 단일 이미지(String)에서 이미지 목록(List<String>)으로 변경 --- V V V
   final List<String> imageUrls; // 상점 대표 이미지
-  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
   ShopModel({
     required this.id,

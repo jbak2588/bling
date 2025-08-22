@@ -23,9 +23,6 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
     with TickerProviderStateMixin {
   late final TabController _tabController;
 
-  // ✅ [다국어 수정] '전체' 탭 이름을 다국어 키로 변경합니다.
-  // late final List<String> _tabs;
-
   final List<String> _categoryIds = [
     'all',
     ...AppCategories.postCategories.map((c) => c.categoryId)
@@ -49,7 +46,6 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          // ✅ [다국어 수정] 위치 미설정 안내 메시지를 다국어 키로 변경합니다.
           child: Text('localNewsFeed.setLocationPrompt'.tr(),
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16, color: Colors.grey)),
@@ -62,9 +58,10 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
       ...AppCategories.postCategories.map((c) => c.nameKey.tr())
     ];
 
-    return Column(
-      children: [
-        TabBar(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('main.tabs.localNews'.tr()),
+        bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
           tabAlignment: TabAlignment.start,
@@ -76,20 +73,18 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
           unselectedLabelStyle: GoogleFonts.inter(),
           tabs: tabs.map((label) => Tab(text: label)).toList(),
         ),
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: _categoryIds.map((categoryId) {
-              return _FeedCategoryList(
-                key: PageStorageKey('feed_category_\$categoryId'),
-                category: categoryId,
-                userModel: widget.userModel,
-                locationFilter: widget.locationFilter,
-              );
-            }).toList(),
-          ),
-        ),
-      ],
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: _categoryIds.map((categoryId) {
+          return _FeedCategoryList(
+            key: PageStorageKey('feed_category_$categoryId'),
+            category: categoryId,
+            userModel: widget.userModel,
+            locationFilter: widget.locationFilter,
+          );
+        }).toList(),
+      ),
     );
   }
 }

@@ -28,6 +28,7 @@ class LostItemModel {
     this.isHunted = false,
     this.bountyAmount,
   });
+  
 
   factory LostItemModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};

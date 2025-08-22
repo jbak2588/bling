@@ -1,649 +1,201 @@
-// lib/features/main_screen/home_screen.dart
-// git commit -m "home_scree.dart 아이콘 그리드 방식으로 전환하기 위한 최종 커밋"
-import 'dart:async';
-import 'package:bling_app/features/auction/screens/auction_screen.dart';
-import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
+// 파일 경로: lib/features/main_screen/home_screen.dart
+import 'package:bling_app/core/models/feed_item_model.dart';
+import 'package:bling_app/core/models/user_model.dart';
+// [수정] feed_repository.dart의 정확한 경로로 수정합니다.
+import 'package:bling_app/features/main_feed/data/feed_repository.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+
+// 아이콘 그리드에서 사용할 각 기능별 화면을 import 합니다.
+import 'package:bling_app/features/local_news/screens/local_news_screen.dart';
+import 'package:bling_app/features/marketplace/screens/marketplace_screen.dart';
 import 'package:bling_app/features/clubs/screens/clubs_screen.dart';
-import 'package:bling_app/features/main_feed/screens/main_feed_screen.dart';
 import 'package:bling_app/features/find_friends/screens/find_friends_screen.dart';
 import 'package:bling_app/features/jobs/screens/jobs_screen.dart';
 import 'package:bling_app/features/local_stores/screens/local_stores_screen.dart';
-import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
+import 'package:bling_app/features/auction/screens/auction_screen.dart';
 import 'package:bling_app/features/pom/screens/pom_screen.dart';
-import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
-import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
-import 'package:bling_app/features/clubs/screens/create_club_screen.dart';
-import 'package:bling_app/features/jobs/screens/create_job_screen.dart'; // [추가] 구인글 작성 화면 import
-import 'package:bling_app/features/pom/screens/create_short_screen.dart'; // [추가] POM 등록 화면 import
 import 'package:bling_app/features/lost_and_found/screens/lost_and_found_screen.dart';
-import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart'; // [추가] 부동산 화면 import
-import 'package:bling_app/features/real_estate/screens/create_room_listing_screen.dart'; // [추가]
+import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
-import 'package:google_fonts/google_fonts.dart';
-
-import '../../../core/models/user_model.dart';
-import '../../../core/utils/address_formatter.dart';
-import '../auth/screens/profile_edit_screen.dart';
-import '../local_news/screens/local_news_screen.dart';
-
-import '../location/screens/location_filter_screen.dart';
-import '../marketplace/screens/marketplace_screen.dart';
-import '../admin/screens/data_fix_screen.dart';
-
-class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('main.bottomNav.search'.tr())),
-      body: Center(child: Text('main.search.placeholder'.tr())),
-    );
-  }
+// [신규] 아이콘 그리드의 메뉴 아이템을 위한 클래스입니다.
+class MenuItem {
+  final IconData icon;
+  final String labelKey;
+  final Widget screen;
+  MenuItem({required this.icon, required this.labelKey, required this.screen});
 }
 
+// 새로운 '가구' 위젯입니다.
+class HomeScreen extends StatelessWidget {
+  final UserModel? userModel;
+  final Map<String, String?>? activeLocationFilter;
+  final Function(Widget) onIconTap; // [신규] '방'을 바꿔달라고 요청할 함수
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key, 
+    this.userModel, 
+    this.activeLocationFilter, 
+    required this.onIconTap // [신규] 요청 함수를 받도록 생성자 수정
+  });
+  
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  late final TabController _tabController;
-  int _bottomNavIndex = 0;
-
-  UserModel? _userModel;
-  Map<String, String?>? _activeLocationFilter;
-  String _currentAddress = "Loading...";
-  bool _isLocationLoading = true;
-  StreamSubscription? _userSubscription;
-  StreamSubscription? _unreadChatsSubscription;
-  int _totalUnreadCount = 0;
-
-  final List<Map<String, dynamic>> _topTabs = [
-    {'icon': Icons.new_releases_outlined, 'key': 'main.tabs.newFeed'},
-    {'icon': Icons.newspaper_outlined, 'key': 'main.tabs.localNews'},
-    {'icon': Icons.storefront_outlined, 'key': 'main.tabs.marketplace'},
-    {'icon': Icons.favorite_border_outlined, 'key': 'main.tabs.findFriends'},
-    {'icon': Icons.groups_outlined, 'key': 'main.tabs.clubs'},
-    {'icon': Icons.work_outline, 'key': 'main.tabs.jobs'},
-    {
-      'icon': Icons.store_mall_directory_outlined,
-      'key': 'main.tabs.localStores'
-    },
-    {'icon': Icons.gavel_outlined, 'key': 'main.tabs.auction'},
-    {'icon': Icons.star_outline, 'key': 'main.tabs.pom'},
-    {'icon': Icons.help_outline, 'key': 'main.tabs.lostAndFound'},
-    {
-      'icon': Icons.house_outlined,
-      'key': 'main.tabs.realEstate'
-    },  
+  static final List<MenuItem> menuItems = [
+    MenuItem(icon: Icons.newspaper_outlined, labelKey: 'main.tabs.localNews', screen: const LocalNewsScreen()),
+    MenuItem(icon: Icons.storefront_outlined, labelKey: 'main.tabs.marketplace', screen: const MarketplaceScreen()),
+    MenuItem(icon: Icons.groups_outlined, labelKey: 'main.tabs.clubs', screen: const ClubsScreen()),
+    MenuItem(icon: Icons.favorite_border_outlined, labelKey: 'main.tabs.findFriends', screen: const FindFriendsScreen()),
+    MenuItem(icon: Icons.work_outline, labelKey: 'main.tabs.jobs', screen: const JobsScreen()),
+    MenuItem(icon: Icons.store_mall_directory_outlined, labelKey: 'main.tabs.localStores', screen: const LocalStoresScreen()),
+    MenuItem(icon: Icons.gavel_outlined, labelKey: 'main.tabs.auction', screen: const AuctionScreen()),
+    MenuItem(icon: Icons.star_outline, labelKey: 'main.tabs.pom', screen: const PomScreen()),
+    MenuItem(icon: Icons.help_outline, labelKey: 'main.tabs.lostAndFound', screen: const LostAndFoundScreen()),
+    MenuItem(icon: Icons.house_outlined, labelKey: 'main.tabs.realEstate', screen: const RealEstateScreen()),
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: _topTabs.length, vsync: this);
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+          sliver: SliverGrid.count(
+            crossAxisCount: 5,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.85,
+            children: menuItems.map((item) {
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    if (userModel == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('user.notLoggedIn'.tr())));
+                      return;
+                    }
+                    final screen = item.screen;
+                    Widget nextScreen;
+                    if (screen is LocalNewsScreen) {
+                      nextScreen = LocalNewsScreen(userModel: userModel, locationFilter: activeLocationFilter);
+                    } else if (screen is MarketplaceScreen) {
+                      nextScreen = MarketplaceScreen(userModel: userModel, locationFilter: activeLocationFilter);
+                    } else if (screen is ClubsScreen) {
+                      nextScreen = ClubsScreen(userModel: userModel);
+                    } else if (screen is FindFriendsScreen) {
+                      nextScreen = FindFriendsScreen(userModel: userModel);
+                    } else if (screen is JobsScreen) {
+                      nextScreen = JobsScreen(userModel: userModel);
+                    } else if (screen is LocalStoresScreen) {
+                      nextScreen = LocalStoresScreen(userModel: userModel);
+                    } else if (screen is AuctionScreen) {
+                      nextScreen = AuctionScreen(userModel: userModel);
+                    } else if (screen is PomScreen) {
+                      nextScreen = PomScreen(userModel: userModel);
+                    } else if (screen is LostAndFoundScreen) {
+                      nextScreen = LostAndFoundScreen(userModel: userModel);
+                    } else if (screen is RealEstateScreen) {
+                      nextScreen = RealEstateScreen(userModel: userModel);
+                    } else {
+                      nextScreen = screen;
+                    }
+                     onIconTap(nextScreen); 
+                  },
 
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user != null) {
-        _listenToUserData(user.uid);
-        _listenToUnreadChats(user.uid);
-      } else {
-        _userSubscription?.cancel();
-        _unreadChatsSubscription?.cancel();
-        if (mounted) {
-          setState(() {
-            _userModel = null;
-            _currentAddress = 'main.appBar.locationNotSet'.tr();
-            _isLocationLoading = false;
-            _totalUnreadCount = 0;
-          });
-        }
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _userSubscription?.cancel();
-    _unreadChatsSubscription?.cancel();
-    super.dispose();
-  }
-
-  void _listenToUserData(String uid) {
-    _userSubscription?.cancel();
-    _userSubscription = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .snapshots()
-        .listen((userDoc) {
-      if (mounted && userDoc.exists) {
-        setState(() {
-          _userModel = UserModel.fromFirestore(userDoc);
-          _currentAddress =
-              _userModel!.locationName ?? 'main.appBar.locationNotSet'.tr();
-          _isLocationLoading = false;
-        });
-      }
-    });
-  }
-
-  void _listenToUnreadChats(String myUid) {
-    _unreadChatsSubscription?.cancel();
-    final stream = FirebaseFirestore.instance
-        .collection('chats')
-        .where('participants', arrayContains: myUid)
-        .snapshots();
-    _unreadChatsSubscription = stream.listen((snapshot) {
-      if (mounted) {
-        int count = 0;
-        for (var doc in snapshot.docs) {
-          count += (doc.data()['unreadCounts']?[myUid] ?? 0) as int;
-        }
-        setState(() => _totalUnreadCount = count);
-      }
-    });
-  }
-
-  void _onBottomNavItemTapped(int index) {
-    if (index == 2) {
-      _onFloatingActionButtonTapped();
-      return;
-    }
-
-    if (index == 0) {
-      _tabController.animateTo(0);
-    }
-
-    setState(() {
-      _bottomNavIndex = index;
-    });
-  }
-
-  Future<void> _onFloatingActionButtonTapped() async {
-    // [수정] 사용자 정보가 로드되기 전에는 버튼이 동작하지 않도록 방어합니다.
-    if (_userModel == null) return;
-
-    final currentTabIndex = _tabController.index;
-    switch (currentTabIndex) {
-      case 0:
-      case 1:
-        Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const CreateLocalNewsScreen()));
-        break;
-      case 2:
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => const ProductRegistrationScreen()));
-        break;
-      case 4: // Clubs
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => CreateClubScreen(userModel: _userModel!)));
-        break;
-      case 5: // Jobs
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => CreateJobScreen(userModel: _userModel!)));
-        break;
-      // V V V --- [수정] 'POM' 탭(인덱스 8)에 대한 case를 추가합니다 --- V V V
-      case 8: // POM
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => CreateShortScreen(userModel: _userModel!)));
-        break;
-
-      case 10: // Real Estate
-        final result = await Navigator.of(context).push<bool>(
-          MaterialPageRoute(builder: (_) => CreateRoomListingScreen(userModel: _userModel!)),
-        );
-        // 등록 화면에서 'true' 값이 반환되면 (등록 성공 시)
-        if (result == true) {
-          // '부동산' 탭(인덱스 9)으로 즉시 이동합니다.
-          _tabController.animateTo(9);
-        }
-        break;
-      // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-      default:
-        debugPrint(
-            '${_topTabs[currentTabIndex]['key']} 탭에서는 생성 기능이 지원되지 않습니다.');
-    }
-  }
-
-  // ✅ [추가] AppBar 타이틀을 동적으로 생성하는 함수
-  String getAppBarTitle() {
-    if (_isLocationLoading) {
-      return 'main.appBar.locationLoading'.tr();
-    }
-    if (_activeLocationFilter != null) {
-      // 필터 값 중 가장 구체적인 지역 이름만 찾아 반환
-      return (_activeLocationFilter!['kel'] ??
-              _activeLocationFilter!['kec'] ??
-              _activeLocationFilter!['kab'] ??
-              _activeLocationFilter!['kota'] ??
-              _activeLocationFilter!['prov'] ??
-              'Filter Applied')
-          .capitalize();
-    }
-    // 필터가 없으면 기존 주소 반환
-    return AddressFormatter.toSingkatan(_currentAddress);
-  }
-
-  // SliverAppBar로 변경하여 스크롤 최적화 적용
-  SliverAppBar _buildHomeSliverAppBar() {
-    return SliverAppBar(
-      floating: true,
-      snap: true,
-      pinned: true,
-      leading: Builder(
-        builder: (context) => IconButton(
-          icon: CircleAvatar(
-            backgroundImage: (_userModel?.photoUrl != null)
-                ? NetworkImage(_userModel!.photoUrl!)
-                : null,
-            child: (_userModel?.photoUrl == null)
-                ? const Icon(Icons.person)
-                : null,
-          ),
-          onPressed: () => Scaffold.of(context).openDrawer(),
-          tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-        ),
-      ),
-      title: InkWell(
-        onTap: () async {
-          final result = await Navigator.of(context).push<Map<String, String?>>(
-            MaterialPageRoute(
-                builder: (_) => LocationFilterScreen(userModel: _userModel)),
-          );
-          if (result != null && mounted) {
-            setState(() => _activeLocationFilter = result);
-          }
-        },
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('main.myTown'.tr(),
-                style: GoogleFonts.inter(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                // _isLocationLoading
-                //     ? 'main.appBar.locationLoading'.tr()
-                //     : AddressFormatter.toSingkatan(_currentAddress),
-                getAppBarTitle(),
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const Icon(Icons.arrow_drop_down, size: 24),
-          ],
-        ),
-      ),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          tooltip: 'Change Language',
-          icon: const Icon(Icons.language),
-          onPressed: () {
-            final currentLang = context.locale.languageCode;
-            context.setLocale(Locale(currentLang == 'id'
-                ? 'ko'
-                : (currentLang == 'ko' ? 'en' : 'id')));
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.notifications_none),
-          onPressed: () {},
-        ),
-      ],
-      bottom: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        tabAlignment: TabAlignment.start,
-        labelColor: const Color(0xFF00A66C),
-        labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
-        unselectedLabelColor: const Color(0xFF616161),
-        indicatorColor: const Color(0xFF00A66C),
-        indicatorWeight: 3.0,
-        tabs: _topTabs
-            .map((tab) => Tab(
-                  child: Row(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(tab['icon']),
-                      const SizedBox(width: 8),
-                      Text(tab['key'].toString().tr()),
+                      Icon(item.icon, size: 32, color: Theme.of(context).primaryColor),
+                      const SizedBox(height: 8),
+                      Text(item.labelKey.tr(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 12), maxLines: 2, overflow: TextOverflow.ellipsis),
                     ],
                   ),
-                ))
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildHomePage() {
-    return NestedScrollView(
-      headerSliverBuilder: (context, innerBoxIsScrolled) => [
-        _buildHomeSliverAppBar(),
-      ],
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          MainFeedScreen(userModel: _userModel),
-          LocalNewsScreen(
-              userModel: _userModel, locationFilter: _activeLocationFilter),
-          MarketplaceScreen(
-              userModel: _userModel, locationFilter: _activeLocationFilter),
-          FindFriendsScreen(userModel: _userModel),
-          ClubsScreen(userModel: _userModel),
-          JobsScreen(userModel: _userModel),
-          LocalStoresScreen(userModel: _userModel),
-          AuctionScreen(userModel: _userModel),
-          PomScreen(userModel: _userModel),
-          LostAndFoundScreen(userModel: _userModel),
-          RealEstateScreen(userModel: _userModel),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      _buildHomePage(),
-      const SearchScreen(),
-      const ChatListScreen(),
-      const MyBlingScreen(),
-    ];
-
-    int effectiveIndex =
-        _bottomNavIndex > 2 ? _bottomNavIndex - 1 : _bottomNavIndex;
-
-    return Scaffold(
-      appBar: null,
-      drawer: _buildAppDrawer(_userModel),
-      body: IndexedStack(
-        index: effectiveIndex,
-        children: pages,
-      ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            _buildBottomNavItem(icon: Icons.home, index: 0),
-            _buildBottomNavItem(icon: Icons.search, index: 1),
-            const SizedBox(width: 40),
-            _buildBottomNavItem(
-                icon: Icons.chat_bubble_outline,
-                index: 3,
-                badgeCount: _totalUnreadCount),
-            _buildBottomNavItem(icon: Icons.person_outline, index: 4),
-          ],
+                ),
+              );
+            }).toList(),
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'home_main_fab',
-        onPressed: _onFloatingActionButtonTapped,
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
-  }
 
-  Widget _buildBottomNavItem(
-      {required IconData icon, required int index, int badgeCount = 0}) {
-    final Map<int, String> tooltipKeys = {
-      0: 'main.bottomNav.home',
-      1: 'main.bottomNav.search',
-      3: 'main.bottomNav.chat',
-      4: 'main.bottomNav.myBling'
-    };
-    final isSelected = _bottomNavIndex == index;
 
-    Widget iconWidget = Icon(icon,
-        color: isSelected ? Theme.of(context).primaryColor : Colors.grey);
-
-    if (badgeCount > 0) {
-      iconWidget = Badge(label: Text('$badgeCount'), child: iconWidget);
-    }
-
-    return IconButton(
-      tooltip: tooltipKeys[index]?.tr() ?? '',
-      icon: iconWidget,
-      onPressed: () => _onBottomNavItemTapped(index),
-    );
-  }
-
-  Widget _buildAppDrawer(UserModel? userModel) {
-    return Drawer(
-      child: userModel == null
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                // ✅ [수정] 오버플로우 방지를 위해 Row와 Expanded 구조로 변경
-                DrawerHeader(
-                  decoration: const BoxDecoration(color: Color(0xFF6A1B9A)),
-                  margin: EdgeInsets.zero,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundImage: (userModel.photoUrl != null &&
-                                userModel.photoUrl!.startsWith('http'))
-                            ? NetworkImage(userModel.photoUrl!)
-                            : null,
-                        child: (userModel.photoUrl == null ||
-                                !userModel.photoUrl!.startsWith('http'))
-                            ? const Icon(Icons.person, size: 30)
-                            : null,
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        // 남은 공간을 모두 차지하도록 설정
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Wrap(
-                              spacing: 8.0,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                Text(userModel.nickname,
-                                    style: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 18,
-                                        color: Colors.white)),
-                                TrustLevelBadge(
-                                    trustLevel: userModel.trustLevel,
-                                    showText: true),
-                                Text('(${userModel.trustScore})',
-                                    style: GoogleFonts.inter(
-                                        color: Colors.white70,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14)),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              userModel.email,
-                              style: GoogleFonts.inter(
-                                  color: Colors.white70, fontSize: 14),
-                              overflow: TextOverflow.ellipsis, // 긴 이메일은 ... 처리
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.military_tech, color: Colors.brown),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text('drawer.trustDashboard.title'.tr(),
-                            style: GoogleFonts.inter(
-                                fontWeight: FontWeight.bold, fontSize: 16),
-                            overflow: TextOverflow.ellipsis),
-                      ),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          minimumSize: const Size(0, 0),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 0),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        onPressed: () => showDialog(
-                            context: context,
-                            builder: (_) => const TrustScoreBreakdownModal()),
-                        child: Text(
-                            'drawer.trustDashboard.breakdownButton'.tr(),
-                            style: GoogleFonts.inter(
-                                fontSize: 14, fontWeight: FontWeight.w500),
-                            overflow: TextOverflow.ellipsis),
-                      ),
-                    ],
-                  ),
-                ),
-                _buildTrustInfoTile(
-                    icon: Icons.location_city,
-                    titleKey: 'drawer.trustDashboard.kelurahanAuth',
-                    isCompleted: userModel.locationParts?['kel'] != null),
-                _buildTrustInfoTile(
-                    icon: Icons.home_work_outlined,
-                    titleKey: 'drawer.trustDashboard.rtRwAuth',
-                    isCompleted: userModel.locationParts?['rt'] != null),
-                _buildTrustInfoTile(
-                    icon: Icons.phone_android,
-                    titleKey: 'drawer.trustDashboard.phoneAuth',
-                    isCompleted: userModel.phoneNumber != null &&
-                        userModel.phoneNumber!.isNotEmpty),
-                _buildTrustInfoTile(
-                    icon: Icons.verified_user,
-                    titleKey: 'drawer.trustDashboard.profileComplete',
-                    isCompleted: userModel.profileCompleted),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.edit_outlined),
-                  title: Text('drawer.editProfile'.tr()),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const ProfileEditScreen()));
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.build_circle_outlined,
-                      color: Colors.red),
-                  title: Text('drawer.runDataFix'.tr(),
-                      style: const TextStyle(color: Colors.red)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const DataFixScreen()));
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.logout),
-                  title: Text('drawer.logout'.tr()),
-                  onTap: () async {
-                    if (mounted) Navigator.pop(context);
-                    await FirebaseAuth.instance.signOut();
-                  },
-                ),
-              ],
-            ),
-    );
-  }
-
-  Widget _buildTrustInfoTile(
-      {required IconData icon,
-      required String titleKey,
-      required bool isCompleted}) {
-    return ListTile(
-      leading: Icon(icon, color: isCompleted ? Colors.teal : Colors.grey),
-      title: Text(titleKey.tr(), style: GoogleFonts.inter(fontSize: 15)),
-      trailing: Icon(isCompleted ? Icons.check_circle : Icons.cancel,
-          color: isCompleted ? Colors.green : Colors.grey, size: 22),
+        const SliverToBoxAdapter(child: Divider(height: 8, thickness: 8, color: Color(0xFFF0F2F5))),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text("home.newFeedTitle".tr(), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          ),
+        ),
+        FutureBuilder<List<FeedItemModel>>(
+          future: FeedRepository().fetchUnifiedFeed(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+            }
+            if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+              return SliverToBoxAdapter(child: Center(child: Padding(padding: const EdgeInsets.all(20.0), child: Text("mainFeed.empty".tr()))));
+            }
+            final feedItems = snapshot.data!;
+            return SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => FeedItemCard(item: feedItems[index]),
+                childCount: feedItems.length,
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
 
-// ✅ [추가] capitalize 유틸리티 함수
+class FeedItemCard extends StatelessWidget {
+  final FeedItemModel item;
+  const FeedItemCard({super.key, required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (item.imageUrl != null && item.imageUrl!.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  item.imageUrl!,
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const SizedBox(height: 150, child: Center(child: Icon(Icons.broken_image, color: Colors.grey))),
+                ),
+              ),
+            if (item.imageUrl != null && item.imageUrl!.isNotEmpty) const SizedBox(height: 12),
+            Text(item.title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                // [수정] 'capitalize' 에러 해결
+                Text(item.type.name.capitalize(), style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+                const Spacer(),
+                // [수정] Timestamp -> DateTime 변환 에러 해결
+                Text(DateFormat('yy/MM/dd HH:mm').format(item.createdAt.toDate()), style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// [신규] capitalize 에러 해결을 위해 StringExtension을 추가합니다.
 extension StringExtension on String {
   String capitalize() {
     if (isEmpty) return "";
     return "${this[0].toUpperCase()}${substring(1)}";
-  }
-}
-
-class TrustScoreBreakdownModal extends StatelessWidget {
-  const TrustScoreBreakdownModal({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('drawer.trustDashboard.breakdownModalTitle'.tr(),
-          style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _breakdownRow('drawer.trustDashboard.kelurahanAuth',
-                'drawer.trustDashboard.breakdown.kelurahanAuth'),
-            _breakdownRow('drawer.trustDashboard.rtRwAuth',
-                'drawer.trustDashboard.breakdown.rtRwAuth'),
-            _breakdownRow('drawer.trustDashboard.phoneAuth',
-                'drawer.trustDashboard.breakdown.phoneAuth'),
-            _breakdownRow('drawer.trustDashboard.profileComplete',
-                'drawer.trustDashboard.breakdown.profileComplete'),
-            const Divider(),
-            _breakdownRow('drawer.trustDashboard.feedThanks',
-                'drawer.trustDashboard.breakdown.feedThanks'),
-            _breakdownRow('drawer.trustDashboard.marketThanks',
-                'drawer.trustDashboard.breakdown.marketThanks'),
-            _breakdownRow('drawer.trustDashboard.reports',
-                'drawer.trustDashboard.breakdown.reports'),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text('drawer.trustDashboard.breakdownClose'.tr()),
-        ),
-      ],
-    );
-  }
-
-  Widget _breakdownRow(String labelKey, String valueKey) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Expanded(child: Text(labelKey.tr(), style: GoogleFonts.inter())),
-          Text(valueKey.tr(),
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
   }
 }
