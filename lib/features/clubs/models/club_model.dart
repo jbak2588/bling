@@ -20,7 +20,7 @@ class ClubModel {
 
   // V V V --- [추가] 동호회 대표 이미지 URL 필드 --- V V V
   final String? imageUrl;
-  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+
 
   ClubModel({
     required this.id,
