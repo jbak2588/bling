@@ -37,7 +37,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   StreamSubscription? _unreadChatsSubscription;
   int _totalUnreadCount = 0;
 
+ // [신규] 홈 탭 내부에서 보여줄 현재 화면과 제목을 관리하는 상태 변수
    Widget? _currentHomePageContent;
+     String _currentPageTitleKey = 'main.myTown'; // 기본값은 'My Town'
 
   @override
   void initState() {
@@ -56,7 +58,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           _userModel = null; // [수정] userModel을 null로 설정
           _currentAddress = 'main.appBar.locationNotSet'.tr();
           _isLocationLoading = false;
-          // _totalUnreadCount = 0; // 필요하다면 이 부분도 초기화
+          _totalUnreadCount = 0; // 필요하다면 이 부분도 초기화
         });
       }
     }
@@ -97,15 +99,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
-   void _onBottomNavItemTapped(int index) {
+    void _onBottomNavItemTapped(int index) {
     if (index == 2) {
       _onFloatingActionButtonTapped();
       return;
     }
-    // [수정] 홈 탭(index 0)으로 돌아올 때, 아이콘 그리드 화면으로 돌아가도록 _currentHomePageContent를 null로 설정
+    // [수정] 홈 탭(index 0)으로 돌아올 때, 아이콘 그리드와 기본 제목으로 돌아가도록 초기화
     if (index == 0 && _currentHomePageContent != null) {
       setState(() {
         _currentHomePageContent = null;
+        _currentPageTitleKey = 'main.myTown';
       });
     }
     setState(() {
@@ -118,15 +121,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateLocalNewsScreen()));
   }
 
- AppBar _buildAppBar() {
+AppBar _buildAppBar() {
     return AppBar(
-      // [신규] 뒤로가기 버튼 로직 추가: 홈 탭에서 다른 화면을 보고 있을 때만 뒤로가기 버튼 표시
+      // [수정] 뒤로가기 버튼 로직: 홈 탭에서 다른 화면을 보고 있을 때만 뒤로가기 버튼 표시
       leading: (_bottomNavIndex == 0 && _currentHomePageContent != null)
           ? IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
                 setState(() {
                   _currentHomePageContent = null; // 아이콘 그리드 화면으로 복귀
+                  _currentPageTitleKey = 'main.myTown'; // 제목도 원래대로 복귀
                 });
               },
             )
@@ -152,11 +156,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('main.myTown'.tr(), style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
+            // [수정] 상태 변수를 사용하여 AppBar 제목을 동적으로 변경
+            Text(_currentPageTitleKey.tr(), style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                _getAppBarTitle(),
+                _getAppBarSubTitle(),
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -180,7 +185,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  String _getAppBarTitle() {
+  String _getAppBarSubTitle() {
     if (_isLocationLoading) {
       return 'main.appBar.locationLoading'.tr();
     }
@@ -190,33 +195,38 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return AddressFormatter.toSingkatan(_currentAddress);
   }
 
-   void _navigateToPage(Widget page) {
+
+
+  
+
+// [신규] '가구'로부터 요청을 받아 '방'과 '간판'을 교체해주는 함수
+  void _navigateToPage(Widget page, String titleKey) {
     setState(() {
       _currentHomePageContent = page;
+      _currentPageTitleKey = titleKey;
     });
   }
 
-  @override
+
+   @override
   Widget build(BuildContext context) {
-    // [신규] 하단 네비게이션바가 관리할 '방(pages)' 목록을 정의합니다.
     final List<Widget> pages = [
       // 0번 방: _currentHomePageContent가 있으면 해당 화면을, 없으면 HomeScreen(아이콘 그리드)을 보여줍니다.
       _currentHomePageContent ?? HomeScreen(
         userModel: _userModel, 
         activeLocationFilter: _activeLocationFilter, 
-        onIconTap: _navigateToPage, // [신규] '방'을 바꿔달라는 요청 함수를 '가구'에게 전달
+        onIconTap: (page, titleKey) => _navigateToPage(page, titleKey), // [수정] 콜백 시그니처를 맞춤
       ),
       const SearchScreen(),
       const ChatListScreen(),
       const MyBlingScreen(),
     ];
-    // BottomAppBar의 실제 버튼 인덱스(0,1,3,4)를 pages 리스트의 인덱스(0,1,2,3)로 변환합니다.
+    
     int effectiveIndex = _bottomNavIndex > 2 ? _bottomNavIndex - 1 : _bottomNavIndex;
 
     return Scaffold(
       appBar: _buildAppBar(),
       drawer: _buildAppDrawer(_userModel),
-      // [수정] body를 IndexedStack으로 변경하여, _bottomNavIndex에 따라 '방'을 교체하도록 합니다.
       body: IndexedStack(
         index: effectiveIndex,
         children: pages,
@@ -257,6 +267,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       onPressed: () => _onBottomNavItemTapped(index),
     );
   }
+
+
 
   Widget _buildAppDrawer(UserModel? userModel) {
     return Drawer(

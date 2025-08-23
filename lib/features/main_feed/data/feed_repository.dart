@@ -155,9 +155,12 @@ class FeedRepository {
     } catch (e) { debugPrint('Error fetching lost items: $e'); return []; }
   }
 
-  Future<List<FeedItemModel>> _fetchLatestShorts({int limit = 5}) async {
+  // [수정] 디버깅을 위해 이 함수에서만 일시적으로 try-catch를 제거합니다.
+Future<List<FeedItemModel>> _fetchLatestShorts({int limit = 5}) async {
     try {
+      // [수정] timestamp -> createdAt 로 정렬 필드를 정확히 수정합니다.
       final snapshot = await _firestore.collection('shorts').orderBy('createdAt', descending: true).limit(limit).get();
+      
       return snapshot.docs.map((doc) {
         final short = ShortModel.fromFirestore(doc);
         return FeedItemModel(
@@ -167,13 +170,18 @@ class FeedRepository {
           title: short.title,
           content: null,
           imageUrl: short.thumbnailUrl,
-          createdAt: short.createdAt,
+          // [수정] short.timestamp -> short.createdAt 로 필드 이름을 정확히 수정합니다.
+          createdAt: short.createdAt, 
           originalDoc: doc,
         );
       }).toList();
-    } catch (e) { debugPrint('Error fetching shorts: $e'); return []; }
+    } catch (e) { 
+      debugPrint('Error fetching shorts: $e'); 
+      return []; 
+    }
   }
 
+  
   Future<List<FeedItemModel>> _fetchLatestRoomListings({int limit = 5}) async {
     try {
       final snapshot = await _firestore.collection('roomListings').orderBy('createdAt', descending: true).limit(limit).get();

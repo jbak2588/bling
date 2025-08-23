@@ -45,6 +45,8 @@ dependencies:
   flutter_chip_tags: ^2.0.2
   provider: ^6.1.5
   video_player: ^2.10.0
+  visibility_detector: ^0.4.0+2
+  cached_network_image: ^3.4.0
 
 dev_dependencies:
   flutter_test:

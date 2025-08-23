@@ -59,31 +59,34 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('main.tabs.localNews'.tr()),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          labelColor: const Color(0xFF00A66C),
-          unselectedLabelColor: const Color(0xFF616161),
-          indicatorColor: const Color(0xFF00A66C),
-          indicatorWeight: 2.0,
-          labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
-          unselectedLabelStyle: GoogleFonts.inter(),
-          tabs: tabs.map((label) => Tab(text: label)).toList(),
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: _categoryIds.map((categoryId) {
-          return _FeedCategoryList(
-            key: PageStorageKey('feed_category_$categoryId'),
-            category: categoryId,
-            userModel: widget.userModel,
-            locationFilter: widget.locationFilter,
-          );
-        }).toList(),
+      body: Column(
+        children: [
+          TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            labelColor: const Color(0xFF00A66C),
+            unselectedLabelColor: const Color(0xFF616161),
+            indicatorColor: const Color(0xFF00A66C),
+            indicatorWeight: 2.0,
+            labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
+            unselectedLabelStyle: GoogleFonts.inter(),
+            tabs: tabs.map((label) => Tab(text: label)).toList(),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: _categoryIds.map((categoryId) {
+                return _FeedCategoryList(
+                  key: PageStorageKey('feed_category_$categoryId'),
+                  category: categoryId,
+                  userModel: widget.userModel,
+                  locationFilter: widget.locationFilter,
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }

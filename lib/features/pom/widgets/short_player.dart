@@ -1,4 +1,4 @@
-// lib/features/pom/widgets/short_player.dart
+// 파일 경로: lib/features/pom/widgets/short_player.dart
 
 import 'package:bling_app/features/pom/models/short_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
@@ -13,7 +13,10 @@ import 'short_comments_sheet.dart';
 
 class ShortPlayer extends StatefulWidget {
   final ShortModel short;
-  const ShortPlayer({super.key, required this.short});
+  // [신규] pom_screen.dart로부터 현재 사용자 정보를 직접 전달받기 위한 파라미터
+  final UserModel? userModel; 
+  
+  const ShortPlayer({super.key, required this.short, this.userModel}); // [수정] 생성자에 userModel 추가
 
   @override
   State<ShortPlayer> createState() => _ShortPlayerState();
@@ -28,16 +31,21 @@ class _ShortPlayerState extends State<ShortPlayer> {
   bool _isLiked = false;
   int _likesCount = 0;
 
-  // V V V --- [추가] DB 조회를 최소화하기 위한 상태 변수 --- V V V
+  // [유지] DB 조회를 최소화하기 위한 상태 변수는 그대로 유지합니다.
   UserModel? _author;
+  // [수정] _currentUserModel은 이제 외부(widget.userModel)에서 주입받습니다.
   UserModel? _currentUserModel;
-  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
   @override
   void initState() {
     super.initState();
     _likesCount = widget.short.likesCount;
-    _fetchInitialData(); // [수정] 모든 초기 데이터를 한 번에 불러옵니다.
+    
+    // [업그레이드] 
+    // 1. 외부에서 받은 userModel을 현재 사용자 모델로 즉시 설정합니다.
+    _currentUserModel = widget.userModel; 
+    // 2. 나머지 초기 데이터를 불러옵니다.
+    _fetchInitialData(); 
 
     _controller =
         VideoPlayerController.networkUrl(Uri.parse(widget.short.videoUrl))
@@ -52,9 +60,10 @@ class _ShortPlayerState extends State<ShortPlayer> {
           });
   }
 
-  // [수정] initState에서 필요한 모든 데이터를 한 번만 가져오는 함수
+  // [업그레이드] 이제 이 함수는 '작성자' 정보만 불러오거나, 
+  // 외부에서 userModel을 받지 못한 비상시에만 현재 사용자 정보를 불러옵니다.
   Future<void> _fetchInitialData() async {
-    // 1. 동영상 작성자 정보 가져오기
+    // 1. 동영상 작성자 정보 가져오기 (기존 로직 유지)
     final authorDoc = await FirebaseFirestore.instance.collection('users').doc(widget.short.userId).get();
     if (authorDoc.exists && mounted) {
       setState(() {
@@ -62,8 +71,16 @@ class _ShortPlayerState extends State<ShortPlayer> {
       });
     }
     
-    // 2. 현재 로그인한 사용자 정보 가져오기 (좋아요 확인 및 프로필 이동에 사용)
-    if (_currentUserId != null) {
+    // 2. 현재 로그인한 사용자 정보 처리
+    if (_currentUserModel != null) {
+      // 이미 외부에서 userModel을 받았다면, '좋아요' 상태만 갱신합니다.
+      if (mounted) {
+        setState(() {
+          _isLiked = _currentUserModel!.likedShortIds?.contains(widget.short.id) ?? false;
+        });
+      }
+    } else if (_currentUserId != null) {
+      // 외부에서 userModel을 받지 못한 경우에만, 기존 방식대로 DB에서 직접 가져옵니다.
       final currentUserDoc = await FirebaseFirestore.instance.collection('users').doc(_currentUserId).get();
       if (currentUserDoc.exists && mounted) {
         final user = UserModel.fromFirestore(currentUserDoc);
@@ -107,6 +124,7 @@ class _ShortPlayerState extends State<ShortPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    // [유지] build 메서드의 모든 UI 로직은 보스의 최적화된 코드를 그대로 유지합니다.
     return Scaffold(
       backgroundColor: Colors.black,
       body: GestureDetector(
@@ -133,7 +151,7 @@ class _ShortPlayerState extends State<ShortPlayer> {
                 return !isPlaying
                     ? Center(
                         child: Icon(Icons.play_arrow,
-                            size: 80, color: Colors.white.withOpacity(0.7)))
+                            size: 80, color: Colors.white.withValues(alpha:0.7)))
                     : const SizedBox.shrink();
               },
             ),
@@ -157,10 +175,9 @@ class _ShortPlayerState extends State<ShortPlayer> {
       ),
     );
   }
-
-  // [수정] StreamBuilder -> 일반 위젯으로 변경하여 성능 최적화
+  
   Widget _buildVideoInfo() {
-    if (_author == null) return const SizedBox.shrink(); // 작성자 정보가 없으면 표시하지 않음
+    if (_author == null) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -172,7 +189,7 @@ class _ShortPlayerState extends State<ShortPlayer> {
                 fontSize: 16,
                 shadows: [Shadow(blurRadius: 2)])),
         const SizedBox(height: 8),
-        Text(widget.short.description,
+        Text(widget.short.description, // null safety 추가
             style: const TextStyle(
                 color: Colors.white,
                 fontSize: 15,
@@ -182,15 +199,13 @@ class _ShortPlayerState extends State<ShortPlayer> {
       ],
     );
   }
-
-  // [수정] StreamBuilder를 최소화하여 성능 최적화
+  
   Widget _buildActionButtons() {
     if (_currentUserId == null || _author == null) return const SizedBox.shrink();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // --- 작성자 프로필 보기 ---
         InkWell(
           onTap: () {
             if (_currentUserModel != null) {
@@ -209,8 +224,6 @@ class _ShortPlayerState extends State<ShortPlayer> {
           ),
         ),
         const SizedBox(height: 24),
-
-        // --- 좋아요 기능 ---
         InkWell(
           onTap: _onLikeButtonPressed,
           child: _buildActionButton(
@@ -220,8 +233,6 @@ class _ShortPlayerState extends State<ShortPlayer> {
           ),
         ),
         const SizedBox(height: 20),
-
-        // --- 댓글 보기 기능 (카운트는 실시간) ---
         StreamBuilder<ShortModel>(
           stream: _repository.getShortStream(widget.short.id),
           builder: (context, shortSnapshot) {
@@ -248,7 +259,6 @@ class _ShortPlayerState extends State<ShortPlayer> {
           }
         ),
         const SizedBox(height: 20),
-
         _buildActionButton(icon: Icons.share, label: 'pom.share'.tr()),
       ],
     );
