@@ -6,20 +6,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// [유지] 모든 필요한 import 구문을 유지합니다.
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/core/utils/address_formatter.dart';
 import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart';
 import 'package:bling_app/features/location/screens/location_filter_screen.dart';
-
 import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
 import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
-import 'home_screen.dart'; // [신규] '가구' 역할을 할 HomeScreen import
+import 'home_screen.dart';
 
-
-// [수정] MainNavigationScreen은 더 이상 child를 받지 않습니다.
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -37,33 +33,30 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   StreamSubscription? _unreadChatsSubscription;
   int _totalUnreadCount = 0;
 
- // [신규] 홈 탭 내부에서 보여줄 현재 화면과 제목을 관리하는 상태 변수
-   Widget? _currentHomePageContent;
-     String _currentPageTitleKey = 'main.myTown'; // 기본값은 'My Town'
+  Widget? _currentHomePageContent;
+  String _currentPageTitleKey = 'main.myTown';
 
   @override
   void initState() {
-  super.initState();
-  FirebaseAuth.instance.authStateChanges().listen((User? user) {
-    if (user != null) {
-      // 사용자가 로그인 상태일 때: 사용자 데이터를 불러옵니다.
-      _listenToUserData(user.uid);
-      _listenToUnreadChats(user.uid);
-    } else {
-      // 사용자가 로그아웃 상태일 때: 모든 사용자 관련 상태를 초기화합니다.
-      _userSubscription?.cancel();
-      _unreadChatsSubscription?.cancel();
-      if (mounted) {
-        setState(() {
-          _userModel = null; // [수정] userModel을 null로 설정
-          _currentAddress = 'main.appBar.locationNotSet'.tr();
-          _isLocationLoading = false;
-          _totalUnreadCount = 0; // 필요하다면 이 부분도 초기화
-        });
+    super.initState();
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user != null) {
+        _listenToUserData(user.uid);
+        _listenToUnreadChats(user.uid);
+      } else {
+        _userSubscription?.cancel();
+        _unreadChatsSubscription?.cancel();
+        if (mounted) {
+          setState(() {
+            _userModel = null;
+            _currentAddress = 'main.appBar.locationNotSet'.tr();
+            _isLocationLoading = false;
+            _totalUnreadCount = 0;
+          });
+        }
       }
-    }
-  });
-}
+    });
+  }
 
   @override
   void dispose() {
@@ -78,7 +71,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       if (mounted && doc.exists) {
         setState(() {
           _userModel = UserModel.fromFirestore(doc);
-          _currentAddress = _userModel!.locationName ?? 'main.appBar.locationNotSet'.tr();
+          // [수정] _currentAddress를 locationName 대신 locationParts['kab']으로 초기화 시도
+          _currentAddress = _userModel!.locationParts?['kab'] ?? _userModel!.locationName ?? 'main.appBar.locationNotSet'.tr();
           _isLocationLoading = false;
         });
       }
@@ -99,12 +93,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
-    void _onBottomNavItemTapped(int index) {
+  void _onBottomNavItemTapped(int index) {
     if (index == 2) {
       _onFloatingActionButtonTapped();
       return;
     }
-    // [수정] 홈 탭(index 0)으로 돌아올 때, 아이콘 그리드와 기본 제목으로 돌아가도록 초기화
     if (index == 0 && _currentHomePageContent != null) {
       setState(() {
         _currentHomePageContent = null;
@@ -121,16 +114,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateLocalNewsScreen()));
   }
 
-AppBar _buildAppBar() {
+  AppBar _buildAppBar() {
     return AppBar(
-      // [수정] 뒤로가기 버튼 로직: 홈 탭에서 다른 화면을 보고 있을 때만 뒤로가기 버튼 표시
       leading: (_bottomNavIndex == 0 && _currentHomePageContent != null)
           ? IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
                 setState(() {
-                  _currentHomePageContent = null; // 아이콘 그리드 화면으로 복귀
-                  _currentPageTitleKey = 'main.myTown'; // 제목도 원래대로 복귀
+                  _currentHomePageContent = null;
+                  _currentPageTitleKey = 'main.myTown';
                 });
               },
             )
@@ -149,14 +141,29 @@ AppBar _buildAppBar() {
           final result = await Navigator.of(context).push<Map<String, String?>>(
             MaterialPageRoute(builder: (_) => LocationFilterScreen(userModel: _userModel)),
           );
+          
           if (result != null && mounted) {
-            setState(() => _activeLocationFilter = result);
+            final processedFilter = <String, String?>{};
+            if (result['kel'] != null && result['kel']!.isNotEmpty) {
+              processedFilter['kel'] = result['kel'];
+            } else if (result['kec'] != null && result['kec']!.isNotEmpty) {
+              processedFilter['kec'] = result['kec'];
+            } else if (result['kab'] != null && result['kab']!.isNotEmpty) {
+              processedFilter['kab'] = result['kab'];
+            } else if (result['kota'] != null && result['kota']!.isNotEmpty) {
+              processedFilter['kota'] = result['kota'];
+            } else if (result['prov'] != null && result['prov']!.isNotEmpty) {
+              processedFilter['prov'] = result['prov'];
+            }
+
+            setState(() {
+              _activeLocationFilter = processedFilter.isNotEmpty ? processedFilter : null;
+            });
           }
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // [수정] 상태 변수를 사용하여 AppBar 제목을 동적으로 변경
             Text(_currentPageTitleKey.tr(), style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(width: 8),
             Flexible(
@@ -185,21 +192,25 @@ AppBar _buildAppBar() {
     );
   }
 
+  // V V V --- [수정] AppBar 부제목 표시 로직을 '대원칙'에 맞게 변경 --- V V V
   String _getAppBarSubTitle() {
     if (_isLocationLoading) {
       return 'main.appBar.locationLoading'.tr();
     }
-    if (_activeLocationFilter != null) {
-      return StringExtension((_activeLocationFilter!['kel'] ?? _activeLocationFilter!['kec'] ?? _activeLocationFilter!['kab'] ?? _activeLocationFilter!['kota'] ?? _activeLocationFilter!['prov'] ?? 'Filter Applied')).capitalize();
+    // 1. 사용자가 설정한 필터가 있으면, 그 값을 최우선으로 표시
+    if (_activeLocationFilter != null && _activeLocationFilter!.values.first != null) {
+      return StringExtension(_activeLocationFilter!.values.first!).capitalize();
     }
+    // 2. 필터가 없으면, 사용자의 기본 위치 정보에서 'kab' 값을 가져와 표시
+    final userKabupaten = _userModel?.locationParts?['kab'];
+    if (userKabupaten != null && userKabupaten.isNotEmpty) {
+      return StringExtension(userKabupaten).capitalize();
+    }
+    // 3. 'kab' 값도 없으면, 기존의 전체 주소(_currentAddress)를 축약해서 표시
     return AddressFormatter.toSingkatan(_currentAddress);
   }
+  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
-
-
-  
-
-// [신규] '가구'로부터 요청을 받아 '방'과 '간판'을 교체해주는 함수
   void _navigateToPage(Widget page, String titleKey) {
     setState(() {
       _currentHomePageContent = page;
@@ -207,15 +218,13 @@ AppBar _buildAppBar() {
     });
   }
 
-
-   @override
+  @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      // 0번 방: _currentHomePageContent가 있으면 해당 화면을, 없으면 HomeScreen(아이콘 그리드)을 보여줍니다.
       _currentHomePageContent ?? HomeScreen(
         userModel: _userModel, 
         activeLocationFilter: _activeLocationFilter, 
-        onIconTap: (page, titleKey) => _navigateToPage(page, titleKey), // [수정] 콜백 시그니처를 맞춤
+        onIconTap: (page, titleKey) => _navigateToPage(page, titleKey),
       ),
       const SearchScreen(),
       const ChatListScreen(),
@@ -267,8 +276,6 @@ AppBar _buildAppBar() {
       onPressed: () => _onBottomNavItemTapped(index),
     );
   }
-
-
 
   Widget _buildAppDrawer(UserModel? userModel) {
     return Drawer(
@@ -348,15 +355,6 @@ AppBar _buildAppBar() {
                   },
                 ),
                 const Divider(),
-                // if (userModel.role == 'admin')
-                //   ListTile(
-                //     leading: const Icon(Icons.build_circle_outlined, color: Colors.red),
-                //     title: Text('drawer.runDataFix'.tr(), style: const TextStyle(color: Colors.red)),
-                //     onTap: () {
-                //       Navigator.pop(context);
-                //       Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DataFixScreen()));
-                //     },
-                //   ),
                 ListTile(
                   leading: const Icon(Icons.logout),
                   title: Text('drawer.logout'.tr()),
@@ -370,7 +368,7 @@ AppBar _buildAppBar() {
     );
   }
 
-    Widget _buildTrustInfoTile({required IconData icon, required String titleKey, required bool isCompleted}) {
+  Widget _buildTrustInfoTile({required IconData icon, required String titleKey, required bool isCompleted}) {
     return ListTile(
       leading: Icon(icon, color: isCompleted ? Colors.teal : Colors.grey),
       title: Text(titleKey.tr(), style: GoogleFonts.inter(fontSize: 15)),
