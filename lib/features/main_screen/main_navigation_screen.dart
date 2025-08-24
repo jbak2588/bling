@@ -10,7 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/core/utils/address_formatter.dart';
-import 'package:bling_app/features/auth/screens/profile_edit_screen.dart';
+import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart';
 import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 
 import 'package:bling_app/features/chat/screens/chat_list_screen.dart';

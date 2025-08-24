@@ -1,4 +1,5 @@
-// 파일 경로: lib/features/main_screen/home_screen.dart
+// lib/features/main_screen/home_screen.dart
+
 import 'package:bling_app/core/models/feed_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/main_feed/data/feed_repository.dart';
@@ -104,29 +105,34 @@ class HomeScreen extends StatelessWidget {
                     }
                     final screen = item.screen;
                     Widget nextScreen;
+                    
+                    // V V V --- [수정] 모든 화면에 locationFilter를 전달하도록 로직 확장 --- V V V
                     if (screen is LocalNewsScreen) {
                       nextScreen = LocalNewsScreen(userModel: userModel, locationFilter: activeLocationFilter);
                     } else if (screen is MarketplaceScreen) {
                       nextScreen = MarketplaceScreen(userModel: userModel, locationFilter: activeLocationFilter);
                     } else if (screen is ClubsScreen) {
-                      nextScreen = ClubsScreen(userModel: userModel);
+                      nextScreen = ClubsScreen(userModel: userModel, locationFilter: activeLocationFilter);
                     } else if (screen is FindFriendsScreen) {
+                      // FindFriendsScreen은 자체 로직을 사용하므로 필터를 전달하지 않습니다.
                       nextScreen = FindFriendsScreen(userModel: userModel);
                     } else if (screen is JobsScreen) {
-                      nextScreen = JobsScreen(userModel: userModel);
+                      nextScreen = JobsScreen(userModel: userModel, locationFilter: activeLocationFilter);
                     } else if (screen is LocalStoresScreen) {
-                      nextScreen = LocalStoresScreen(userModel: userModel);
+                      nextScreen = LocalStoresScreen(userModel: userModel, locationFilter: activeLocationFilter);
                     } else if (screen is AuctionScreen) {
-                      nextScreen = AuctionScreen(userModel: userModel);
+                      nextScreen = AuctionScreen(userModel: userModel, locationFilter: activeLocationFilter);
                     } else if (screen is PomScreen) {
-                      nextScreen = PomScreen(userModel: userModel);
+                      nextScreen = PomScreen(userModel: userModel, locationFilter: activeLocationFilter);
                     } else if (screen is LostAndFoundScreen) {
-                      nextScreen = LostAndFoundScreen(userModel: userModel);
+                      nextScreen = LostAndFoundScreen(userModel: userModel, locationFilter: activeLocationFilter);
                     } else if (screen is RealEstateScreen) {
-                      nextScreen = RealEstateScreen(userModel: userModel);
+                      nextScreen = RealEstateScreen(userModel: userModel, locationFilter: activeLocationFilter);
                     } else {
                       nextScreen = screen;
                     }
+                    // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+
                     onIconTap(nextScreen, item.labelKey);
                   },
                   borderRadius: BorderRadius.circular(12),
@@ -163,7 +169,7 @@ class HomeScreen extends StatelessWidget {
             // [수정] Provider를 통해 userModel을 하위 위젯에 전달합니다.
             return Provider.value(
               value: userModel,
-           child: SliverList(
+            child: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) => FeedItemCard(
                     item: feedItems[index],
@@ -210,12 +216,12 @@ class FeedItemCard extends StatelessWidget {
         final job = JobModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return JobCard(job: job);
       case FeedItemType.auction:
-         final auction = AuctionModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-         return AuctionCard(auction: auction);
+        final auction = AuctionModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        return AuctionCard(auction: auction);
       case FeedItemType.club:
-         final clubPost = ClubPostModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-         final tempClub = ClubModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-         return ClubPostCard(post: clubPost, club: tempClub);
+        final clubPost = ClubPostModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        final tempClub = ClubModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        return ClubPostCard(post: clubPost, club: tempClub);
       case FeedItemType.lostAndFound:
         final lostItem = LostItemModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return LostItemCard(item: lostItem);
@@ -252,8 +258,8 @@ class FeedItemCard extends StatelessWidget {
         final shop = ShopModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return ShopCard(shop: shop);
       case FeedItemType.findFriends:
-         final user = UserModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-         return FindFriendCard(user: user);
+        final user = UserModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        return FindFriendCard(user: user);
       default:
         return Card(
           child: ListTile(
@@ -266,7 +272,7 @@ class FeedItemCard extends StatelessWidget {
 }
 
 class _ShortFeedCardWithPlayer extends StatefulWidget {
- final ShortModel short;
+  final ShortModel short;
   final VoidCallback onCardTap; // Function(Widget, String) -> VoidCallback
   const _ShortFeedCardWithPlayer({required this.short, required this.onCardTap});
 

@@ -3,12 +3,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Data model representing a local premium auction item.
-///
-/// The Bling app stores auctions under the `auctions` collection as shown in
-/// the project documentation. Each document includes basic item information,
-/// pricing details and verification flags, while individual bids live in the
-/// `bids` subcollection of that auction. This model mirrors that schema so that
-/// premium auctions can easily be managed locally and synced with Firestore.
 class AuctionModel {
   final String id;
   final String title;
@@ -18,6 +12,11 @@ class AuctionModel {
   final int currentBid;
   final List<Map<String, dynamic>> bidHistory;
   final String location;
+  
+  // V V V --- [추가] 지역 필터링을 위한 locationParts 필드 --- V V V
+  final Map<String, dynamic>? locationParts;
+  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+
   final GeoPoint? geoPoint;
   final Timestamp startAt;
   final Timestamp endAt;
@@ -34,6 +33,7 @@ class AuctionModel {
     required this.currentBid,
     required this.bidHistory,
     required this.location,
+    this.locationParts, // [추가]
     this.geoPoint,
     required this.startAt,
     required this.endAt,
@@ -57,6 +57,10 @@ class AuctionModel {
           ? List<Map<String, dynamic>>.from(data['bidHistory'])
           : [],
       location: data['location'] ?? '',
+      // [추가] Firestore에서 locationParts 데이터를 불러옵니다.
+      locationParts: data['locationParts'] != null
+          ? Map<String, dynamic>.from(data['locationParts'])
+          : null,
       geoPoint: data['geoPoint'],
       startAt: data['startAt'] ?? Timestamp.now(),
       endAt: data['endAt'] ?? Timestamp.now(),
@@ -75,6 +79,7 @@ class AuctionModel {
       'currentBid': currentBid,
       'bidHistory': bidHistory,
       'location': location,
+      'locationParts': locationParts, // [추가]
       'geoPoint': geoPoint,
       'startAt': startAt,
       'endAt': endAt,

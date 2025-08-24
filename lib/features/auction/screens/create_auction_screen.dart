@@ -60,7 +60,6 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
     }
   }
 
-  // [추가] 선택한 이미지 제거 함수
   void _removeImage(int index) {
     setState(() {
       _images.removeAt(index);
@@ -83,8 +82,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
     try {
       List<String> imageUrls = [];
       for (var imageFile in _images) {
-        // [수정] const를 제거하여 매번 새로운 고유 ID를 생성합니다.
-        final fileName = const Uuid().v4();
+        final fileName = Uuid().v4(); // [수정] const 제거
         final ref = FirebaseStorage.instance
             .ref()
             .child('auction_images/${user.uid}/$fileName');
@@ -108,6 +106,9 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
         bidHistory: [],
         location:
             widget.userModel.locationName ?? 'postCard.locationNotSet'.tr(),
+        // V V V --- [추가] 사용자의 지역 정보를 경매 데이터에 포함시킵니다 --- V V V
+        locationParts: widget.userModel.locationParts,
+        // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
         geoPoint: widget.userModel.geoPoint,
         startAt: now,
         endAt: endAt,
@@ -152,7 +153,6 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                // V V V --- [수정] 이미지 선택 및 취소 기능이 포함된 UI --- V V V
                 Text('auctions.create.form.photoSectionTitle'.tr(),
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),

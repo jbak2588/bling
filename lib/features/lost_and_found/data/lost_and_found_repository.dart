@@ -10,14 +10,28 @@ class LostAndFoundRepository {
   CollectionReference<Map<String, dynamic>> get _lostAndFoundCollection =>
       _firestore.collection('lost_and_found');
 
-  /// 'lost_and_found' 컬렉션의 모든 게시글 목록을 실시간으로 가져옵니다.
-  Stream<List<LostItemModel>> fetchItems() {
-    return _lostAndFoundCollection // [수정] getter 사용
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) {
+  // V V V --- [수정] fetchItems 함수에 locationFilter를 적용합니다 --- V V V
+  Stream<List<LostItemModel>> fetchItems({Map<String, String?>? locationFilter}) {
+    Query query = _firestore.collection('lost_and_found').orderBy('createdAt', descending: true);
+
+    if (locationFilter != null) {
+      if (locationFilter['prov'] != null && locationFilter['prov']!.isNotEmpty) {
+        query = query.where('locationParts.prov', isEqualTo: locationFilter['prov']);
+      }
+      if (locationFilter['kab'] != null && locationFilter['kab']!.isNotEmpty) {
+        query = query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+      }
+      if (locationFilter['kec'] != null && locationFilter['kec']!.isNotEmpty) {
+        query = query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+      }
+      if (locationFilter['kel'] != null && locationFilter['kel']!.isNotEmpty) {
+        query = query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+      }
+    }
+
+    return query.snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => LostItemModel.fromFirestore(doc))
+          .map((doc) => LostItemModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
           .toList();
     });
   }

@@ -1,4 +1,5 @@
 // lib/features/my_bling/screens/profile_edit_screen.dart
+
 import 'dart:io';
 
 import 'package:bling_app/core/models/user_model.dart';
@@ -11,31 +12,63 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../location/screens/location_setting_screen.dart';
 
-class MyProfileEditScreen extends StatefulWidget {
-  const MyProfileEditScreen({super.key});
+// [수정] 클래스 이름을 표준화합니다.
+class ProfileEditScreen extends StatefulWidget {
+  const ProfileEditScreen({super.key});
 
   @override
-  State<MyProfileEditScreen> createState() => _MyProfileEditScreenState();
+  State<ProfileEditScreen> createState() => _ProfileEditScreenState();
 }
 
-class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
+class _ProfileEditScreenState extends State<ProfileEditScreen> {
+  // --- 모든 컨트롤러를 통합합니다 ---
   final _nicknameController = TextEditingController();
   final _bioController = TextEditingController();
-  final _interestController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _rtController = TextEditingController();
+  final _rwController = TextEditingController();
 
+  // --- 모든 상태 변수를 통합합니다 ---
   UserModel? _userModel;
-
-  String? _locationName;
-
   File? _selectedImage;
   String? _initialPhotoUrl;
   List<String> _interests = [];
   bool _showLocationOnMap = true;
   bool _allowFriendRequests = true;
-
   bool _isLoading = true;
   bool _isSaving = false;
+
+  // [추가] 표준화된 관심사 카테고리
+  final Map<String, List<String>> _interestCategories = {
+    'category_creative': [
+      'drawing',
+      'instrument',
+      'photography',
+      'writing',
+      'crafting',
+      'gardening'
+    ],
+    'category_sports': [
+      'soccer',
+      'hiking',
+      'camping',
+      'running',
+      'biking',
+      'golf',
+      'workout'
+    ],
+    'category_food_drink': [
+      'foodie',
+      'cooking',
+      'baking',
+      'coffee',
+      'wine',
+      'tea'
+    ],
+    'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
+    'category_growth': ['reading', 'investing', 'language', 'coding'],
+    'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
+  };
 
   @override
   void initState() {
@@ -47,11 +80,13 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
   void dispose() {
     _nicknameController.dispose();
     _bioController.dispose();
-    _interestController.dispose();
     _phoneController.dispose();
+    _rtController.dispose();
+    _rwController.dispose();
     super.dispose();
   }
 
+  // [수정] 모든 필드를 불러오도록 로직 통합
   Future<void> _loadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -63,11 +98,13 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
         .doc(user.uid)
         .get();
     if (doc.exists && mounted) {
-      _userModel =
-          UserModel.fromFirestore(doc); // [수정] final을 지우고 멤버 변수에 값을 할당합니다.
+      _userModel = UserModel.fromFirestore(doc);
       setState(() {
         _nicknameController.text = _userModel!.nickname;
         _bioController.text = _userModel!.bio ?? '';
+        _phoneController.text = _userModel!.phoneNumber ?? '';
+        _rtController.text = _userModel!.rt ?? '';
+        _rwController.text = _userModel!.rw ?? '';
         _initialPhotoUrl = _userModel!.photoUrl;
         _interests = List<String>.from(_userModel!.interests ?? []);
         _showLocationOnMap =
@@ -92,33 +129,14 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
     }
   }
 
-  void _addInterest() {
-    final input = _interestController.text;
-    final newItems = input.split(',');
-    setState(() {
-      for (var item in newItems) {
-        final normalized = item.trim().toLowerCase();
-        if (normalized.isNotEmpty && !_interests.contains(normalized)) {
-          _interests.add(normalized);
-        }
-      }
-      _interestController.clear();
-    });
-  }
-
-  void _removeInterest(String interest) {
-    setState(() {
-      _interests.remove(interest);
-    });
-  }
-
   Future<void> _openLocationSetting() async {
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const LocationSettingScreen()),
     );
-    await _loadUserData();
+    await _loadUserData(); // 위치 변경 후 데이터를 다시 불러옵니다.
   }
 
+  // [수정] 모든 필드를 저장하도록 로직 통합
   Future<void> _saveChanges() async {
     if (_isSaving) return;
     setState(() => _isSaving = true);
@@ -144,15 +162,23 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
         newPhotoUrl = await ref.getDownloadURL();
       }
 
-      // V V V --- [수정] 기존 '친구 찾기' 데이터를 보존하도록 로직 변경 --- V V V
+      final Map<String, dynamic> updatedLocationParts =
+          Map<String, dynamic>.from(_userModel?.locationParts ?? {});
+
+      // 2. RT와 RW 값을 추가하거나 업데이트합니다.
+      updatedLocationParts['rt'] = _rtController.text.trim();
+      updatedLocationParts['rw'] = _rwController.text.trim();
+
       final Map<String, dynamic> dataToUpdate = {
         'nickname': _nicknameController.text.trim(),
         'bio': _bioController.text.trim(),
+        'phoneNumber': _phoneController.text.trim(),
         'photoUrl': newPhotoUrl,
         'interests': _interests,
-        // 기존 privacySettings 값을 먼저 불러온 후, 수정된 값만 덮어씁니다.
+        'locationParts':
+            updatedLocationParts, // 3. 수정된 locationParts 맵 전체를 저장합니다.
         'privacySettings': {
-          ...?_userModel?.privacySettings, // 기존 설정값 유지
+          ...?_userModel?.privacySettings,
           'showLocationOnMap': _showLocationOnMap,
           'allowFriendRequests': _allowFriendRequests,
         },
@@ -185,7 +211,6 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('profileEdit.title'.tr()),
@@ -260,56 +285,133 @@ class _MyProfileEditScreenState extends State<MyProfileEditScreen> {
                           maxLines: 3,
                         ),
                         const SizedBox(height: 24),
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            'profileEdit.locationTitle'.tr(),
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          subtitle: Text(
-                              _locationName ?? 'location.locationNotSet'.tr()),
-                          trailing: TextButton(
-                            onPressed: _openLocationSetting,
-                            child: Text('profileEdit.changeLocation'.tr()),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(8)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Alamat Terdaftar", // TODO: 다국어
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black54),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on_outlined,
+                                      color: Colors.grey[600], size: 18),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _userModel?.locationName ??
+                                          "Belum diatur", // TODO: 다국어
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: _openLocationSetting,
+                                    child: const Text("Ubah"), // TODO: 다국어
+                                  )
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _rtController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'RT',
+                                        border: OutlineInputBorder(),
+                                        isDense: true,
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _rwController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'RW',
+                                        border: OutlineInputBorder(),
+                                        isDense: true,
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 16),
                         const SizedBox(height: 24),
-                        // const Divider(),
-                        const SizedBox(height: 16),
-                        Text('profileEdit.interests.title'.tr(),
-                            style: theme.textTheme.titleMedium),
-                        const SizedBox(height: 8),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _interestController,
-                                decoration: InputDecoration(
-                                  hintText: 'profileEdit.interests.hint'.tr(),
-                                  hintStyle:
-                                      const TextStyle(color: Colors.grey),
-                                ),
-                                onSubmitted: (_) => _addInterest(),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.add),
-                              onPressed: _addInterest,
-                            ),
+                            Text("interests.title".tr(),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text('${_interests.length}/10',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.teal)),
                           ],
                         ),
+                        Text("interests.limit_info".tr(),
+                            style: TextStyle(
+                                color: Colors.grey[600], fontSize: 12)),
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8.0,
-                          runSpacing: 4.0,
-                          children: _interests
-                              .map((interest) => Chip(
-                                    label: Text(interest),
-                                    onDeleted: () => _removeInterest(interest),
-                                  ))
-                              .toList(),
-                        ),
+                        ..._interestCategories.entries.map((entry) {
+                          final categoryKey = entry.key;
+                          final interestKeys = entry.value;
+                          return ExpansionTile(
+                            title: Text("interests.$categoryKey".tr(),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500)),
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 4.0,
+                                  children: interestKeys.map((interestKey) {
+                                    final isSelected =
+                                        _interests.contains(interestKey);
+                                    return FilterChip(
+                                      label: Text(
+                                          "interests.items.$interestKey".tr()),
+                                      selected: isSelected,
+                                      onSelected: (selected) {
+                                        setState(() {
+                                          if (selected) {
+                                            if (_interests.length < 10) {
+                                              _interests.add(interestKey);
+                                            } else {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        "interests.limit_reached"
+                                                            .tr())),
+                                              );
+                                            }
+                                          } else {
+                                            _interests.remove(interestKey);
+                                          }
+                                        });
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              )
+                            ],
+                          );
+                        }),
                         const SizedBox(height: 24),
                         const Divider(),
                         const SizedBox(height: 16),

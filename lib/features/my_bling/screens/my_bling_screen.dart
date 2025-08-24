@@ -89,7 +89,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
             icon: const Icon(Icons.edit_outlined),
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const MyProfileEditScreen()),
+                MaterialPageRoute(builder: (_) => const ProfileEditScreen()),
               );
             },
             tooltip: 'myBling.editProfile'.tr(),
