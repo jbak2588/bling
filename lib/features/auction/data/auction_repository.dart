@@ -1,12 +1,10 @@
 // lib/features/auction/data/auction_repository.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../models/auction_model.dart';
 import '../models/bid_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-/// Provides CRUD operations for auctions and bidding functionality.
 class AuctionRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -31,25 +29,35 @@ class AuctionRepository {
     return AuctionModel.fromFirestore(doc);
   }
 
-// V V V --- [수정] 마감된 경매도 불러오도록 .where 필터 제거 --- V V V
-  Stream<List<AuctionModel>> fetchAuctions() {
-    return _auctionsCollection
-        .orderBy('endAt', descending: false) // 마감 임박 순으로 정렬
-        .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map(AuctionModel.fromFirestore).toList());
-  }
+  // V V V --- [수정] locationFilter를 적용하고, 정렬 기준을 'endAt'으로 되돌립니다 --- V V V
+  Stream<List<AuctionModel>> fetchAuctions({Map<String, String?>? locationFilter}) {
+    Query query = _auctionsCollection
+        .orderBy('endAt', descending: false); // [핵심] 마감 임박 순으로 정렬
 
-  // V V V --- [추가] 특정 경매 하나의 정보를 실시간으로 가져오는 Stream 함수 --- V V V
+    // locationFilter가 null이 아닐 경우, 필터링 쿼리를 동적으로 추가합니다.
+    if (locationFilter != null) {
+      final kab = locationFilter['kab'];
+      if (kab != null && kab.isNotEmpty) {
+        query = query.where('locationParts.kab', isEqualTo: kab);
+      }
+      // 다른 지역 단위(kec, kel)에 대한 필터가 필요하면 여기에 추가합니다.
+    }
+
+    return query.snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => AuctionModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
+          .toList();
+    });
+  }
+  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+
   Stream<AuctionModel> getAuctionStream(String auctionId) {
     return _auctionsCollection
         .doc(auctionId)
         .snapshots()
         .map((snapshot) => AuctionModel.fromFirestore(snapshot));
   }
-  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
-// V V V --- [수정] Firestore Transaction을 사용하여 안전하게 입찰을 처리합니다 --- V V V
   Future<void> placeBid(String auctionId, BidModel bid) async {
     final auctionRef = _auctionsCollection.doc(auctionId);
     final bidRef = auctionRef.collection('bids').doc();
@@ -62,23 +70,19 @@ class AuctionRepository {
 
       final auction = AuctionModel.fromFirestore(auctionSnapshot);
 
-      // 현재 입찰가보다 높은 금액인지 확인
       if (bid.bidAmount <= auction.currentBid) {
         throw Exception(tr('auctions.errors.lowerBid'));
       }
 
-      // 마감 시간이 지났는지 확인
       if (auction.endAt.toDate().isBefore(DateTime.now())) {
         throw Exception(tr('auctions.errors.alreadyEnded'));
       }
 
-      // 1. auctions 문서 업데이트
       transaction.update(auctionRef, {
         'currentBid': bid.bidAmount,
-        'bidHistory': FieldValue.arrayUnion([bid.toJson()]) // 간단한 히스토리 기록
+        'bidHistory': FieldValue.arrayUnion([bid.toJson()])
       });
 
-      // 2. bids 하위 컬렉션에 입찰 기록 추가
       transaction.set(bidRef, bid.toJson());
     });
   }

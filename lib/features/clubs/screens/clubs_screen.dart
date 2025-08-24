@@ -10,14 +10,30 @@ import 'package:easy_localization/easy_localization.dart';
 
 class ClubsScreen extends StatefulWidget {
   final UserModel? userModel;
-  const ClubsScreen({this.userModel, super.key});
+  // V V V --- [추가] HomeScreen에서 locationFilter를 전달받습니다 --- V V V
+  final Map<String, String?>? locationFilter;
+  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+
+  const ClubsScreen({
+    this.userModel,
+    this.locationFilter, // [추가]
+    super.key
+  });
 
   @override
   State<ClubsScreen> createState() => _ClubsScreenState();
 }
 
 class _ClubsScreenState extends State<ClubsScreen> {
-  Map<String, String?>? _locationFilter;
+  // [수정] 화면 내부 필터 상태를 late로 선언합니다.
+  late Map<String, String?>? _locationFilter;
+
+  @override
+  void initState() {
+    super.initState();
+    // [수정] 화면이 처음 생성될 때, HomeScreen에서 전달받은 필터 값으로 초기화합니다.
+    _locationFilter = widget.locationFilter;
+  }
 
   void _openFilter() async {
     final result = await Navigator.of(context).push<Map<String, String?>>(
@@ -59,6 +75,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
           Expanded(
             child: StreamBuilder<List<ClubModel>>(
               stream:
+                  // StreamBuilder는 이제 항상 화면의 최신 _locationFilter 상태를 사용합니다.
                   clubRepository.fetchClubs(locationFilter: _locationFilter),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
