@@ -17,13 +17,17 @@
       ]
     },
 
-    { "collectionGroup": "posts", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.prov", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
-    { "collectionGroup": "posts", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.prov", "order": "ASCENDING" },
         { "fieldPath": "category", "order": "ASCENDING" },
@@ -31,43 +35,26 @@
       ]
     },
 
-    { "collectionGroup": "products", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "products",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.prov", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
 
-    { "collectionGroup": "lost_and_found", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "lost_and_found",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
-    { "collectionGroup": "lost_and_found", "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "locationParts.prov", "order": "ASCENDING" },
-        { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
-        { "fieldPath": "locationParts.kec", "order": "ASCENDING" },
-        { "fieldPath": "locationParts.kel", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-
-    { "collectionGroup": "jobs", "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-
-    { "collectionGroup": "shorts", "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    { "collectionGroup": "shorts", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "lost_and_found",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.prov", "order": "ASCENDING" },
         { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
@@ -77,20 +64,55 @@
       ]
     },
 
-    { "collectionGroup": "shops", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "jobs",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
 
-    { "collectionGroup": "room_listings", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "shorts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "shorts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "locationParts.prov", "order": "ASCENDING" },
+        { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
+        { "fieldPath": "locationParts.kec", "order": "ASCENDING" },
+        { "fieldPath": "locationParts.kel", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+
+    {
+      "collectionGroup": "shops",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+
+    {
+      "collectionGroup": "room_listings",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "isAvailable", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
-    { "collectionGroup": "room_listings", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "room_listings",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "isAvailable", "order": "ASCENDING" },
         { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
@@ -98,46 +120,50 @@
       ]
     },
 
-    { "collectionGroup": "auctions", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "auctions",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
         { "fieldPath": "endAt", "order": "ASCENDING" }
       ]
     },
 
-    { "collectionGroup": "clubs", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "clubs",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.kel", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
-    { "collectionGroup": "clubs", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "clubs",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.kec", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
-    { "collectionGroup": "clubs", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "clubs",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
-    { "collectionGroup": "clubs", "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "locationParts.kota", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    { "collectionGroup": "clubs", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "clubs",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.prov", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
-    },
-
-    
-    { "collectionGroup": "users", "queryScope": "COLLECTION",
+    }, 
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "isDatingProfile", "order": "ASCENDING" },
         { "fieldPath": "isVisibleInList", "order": "ASCENDING" },
@@ -146,7 +172,9 @@
         { "fieldPath": "__name__", "order": "ASCENDING" }
       ]
     },
-    { "collectionGroup": "users", "queryScope": "COLLECTION",
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
         { "fieldPath": "__name__", "order": "ASCENDING" }

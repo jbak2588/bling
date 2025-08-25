@@ -34,7 +34,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _totalUnreadCount = 0;
 
   Widget? _currentHomePageContent;
- String _appBarTitle = 'main.myTown'.tr(); 
+  String _appBarTitle = 'main.myTown'.tr();
 
   @override
   void initState() {
@@ -67,12 +67,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   void _listenToUserData(String uid) {
     _userSubscription?.cancel();
-    _userSubscription = FirebaseFirestore.instance.collection('users').doc(uid).snapshots().listen((doc) {
+    _userSubscription = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .snapshots()
+        .listen((doc) {
       if (mounted && doc.exists) {
         setState(() {
           _userModel = UserModel.fromFirestore(doc);
           // [수정] _currentAddress를 locationName 대신 locationParts['kab']으로 초기화 시도
-          _currentAddress = _userModel!.locationParts?['kab'] ?? _userModel!.locationName ?? 'main.appBar.locationNotSet'.tr();
+          _currentAddress = _userModel!.locationParts?['kab'] ??
+              _userModel!.locationName ??
+              'main.appBar.locationNotSet'.tr();
           _isLocationLoading = false;
         });
       }
@@ -81,7 +87,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   void _listenToUnreadChats(String myUid) {
     _unreadChatsSubscription?.cancel();
-    final stream = FirebaseFirestore.instance.collection('chats').where('participants', arrayContains: myUid).snapshots();
+    final stream = FirebaseFirestore.instance
+        .collection('chats')
+        .where('participants', arrayContains: myUid)
+        .snapshots();
     _unreadChatsSubscription = stream.listen((snapshot) {
       if (mounted) {
         int count = 0;
@@ -111,7 +120,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   void _onFloatingActionButtonTapped() {
     if (_userModel == null) return;
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CreateLocalNewsScreen()));
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const CreateLocalNewsScreen()));
   }
 
   AppBar _buildAppBar() {
@@ -122,15 +132,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               onPressed: () {
                 setState(() {
                   _currentHomePageContent = null;
-              _appBarTitle = 'main.myTown'.tr(); // [수정] 통합된 변수 사용
+                  _appBarTitle = 'main.myTown'.tr(); // [수정] 통합된 변수 사용
                 });
               },
             )
           : Builder(
               builder: (context) => IconButton(
                 icon: CircleAvatar(
-                  backgroundImage: (_userModel?.photoUrl != null && _userModel!.photoUrl!.isNotEmpty) ? NetworkImage(_userModel!.photoUrl!) : null,
-                  child: (_userModel?.photoUrl == null || _userModel!.photoUrl!.isEmpty) ? const Icon(Icons.person) : null,
+                  backgroundImage: (_userModel?.photoUrl != null &&
+                          _userModel!.photoUrl!.isNotEmpty)
+                      ? NetworkImage(_userModel!.photoUrl!)
+                      : null,
+                  child: (_userModel?.photoUrl == null ||
+                          _userModel!.photoUrl!.isEmpty)
+                      ? const Icon(Icons.person)
+                      : null,
                 ),
                 onPressed: () => Scaffold.of(context).openDrawer(),
                 tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
@@ -139,10 +155,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       title: InkWell(
         onTap: () async {
           final result = await Navigator.of(context).push<Map<String, String?>>(
-            MaterialPageRoute(builder: (_) => LocationFilterScreen(userModel: _userModel)),
+            MaterialPageRoute(
+                builder: (_) => LocationFilterScreen(userModel: _userModel)),
           );
-          
-                if (result != null && mounted) {
+
+          if (result != null && mounted) {
             final processedFilter = <String, String?>{};
             String newTitle = 'main.myTown'.tr(); // 기본값
 
@@ -164,7 +181,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             }
 
             setState(() {
-              _activeLocationFilter = processedFilter.isNotEmpty ? processedFilter : null;
+              _activeLocationFilter =
+                  processedFilter.isNotEmpty ? processedFilter : null;
               _appBarTitle = newTitle; // [수정] 통합된 변수 사용
             });
           }
@@ -172,14 +190,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-           // V V V --- [수정] _currentPageTitleKey 대신 _appBarTitlePrefix 사용 --- V V V
-            Text(_appBarTitle, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
+            // V V V --- [수정] _currentPageTitleKey 대신 _appBarTitlePrefix 사용 --- V V V
+            Text(_appBarTitle,
+                style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold, fontSize: 16)),
             // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 _getAppBarSubTitle(),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -189,15 +210,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       centerTitle: true,
       actions: [
+        _LanguageMenu(), // ← 아이콘 + 현재 언어 코드 표시 + 팝업 선택
         IconButton(
-          tooltip: 'Change Language',
-          icon: const Icon(Icons.language),
-          onPressed: () {
-            final currentLang = context.locale.languageCode;
-            context.setLocale(Locale(currentLang == 'id' ? 'ko' : (currentLang == 'ko' ? 'en' : 'id')));
-          },
+          icon: const Icon(Icons.notifications_none),
+          onPressed: () {},
         ),
-        IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {}),
       ],
     );
   }
@@ -208,7 +225,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       return 'main.appBar.locationLoading'.tr();
     }
     // 1. 사용자가 설정한 필터가 있으면, 그 값을 최우선으로 표시
-    if (_activeLocationFilter != null && _activeLocationFilter!.values.first != null) {
+    if (_activeLocationFilter != null &&
+        _activeLocationFilter!.values.first != null) {
       return StringExtension(_activeLocationFilter!.values.first!).capitalize();
     }
     // 2. 필터가 없으면, 사용자의 기본 위치 정보에서 'kab' 값을 가져와 표시
@@ -231,17 +249,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      _currentHomePageContent ?? HomeScreen(
-        userModel: _userModel, 
-        activeLocationFilter: _activeLocationFilter, 
-        onIconTap: (page, titleKey) => _navigateToPage(page, titleKey),
-      ),
+      _currentHomePageContent ??
+          HomeScreen(
+            userModel: _userModel,
+            activeLocationFilter: _activeLocationFilter,
+            onIconTap: (page, titleKey) => _navigateToPage(page, titleKey),
+          ),
       const SearchScreen(),
       const ChatListScreen(),
       const MyBlingScreen(),
     ];
-    
-    int effectiveIndex = _bottomNavIndex > 2 ? _bottomNavIndex - 1 : _bottomNavIndex;
+
+    int effectiveIndex =
+        _bottomNavIndex > 2 ? _bottomNavIndex - 1 : _bottomNavIndex;
 
     return Scaffold(
       appBar: _buildAppBar(),
@@ -259,7 +279,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             _buildBottomNavItem(icon: Icons.home, index: 0),
             _buildBottomNavItem(icon: Icons.search, index: 1),
             const SizedBox(width: 40),
-            _buildBottomNavItem(icon: Icons.chat_bubble_outline, index: 3, badgeCount: _totalUnreadCount),
+            _buildBottomNavItem(
+                icon: Icons.chat_bubble_outline,
+                index: 3,
+                badgeCount: _totalUnreadCount),
             _buildBottomNavItem(icon: Icons.person_outline, index: 4),
           ],
         ),
@@ -273,10 +296,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  Widget _buildBottomNavItem({required IconData icon, required int index, int badgeCount = 0}) {
-    final Map<int, String> tooltipKeys = {0: 'main.bottomNav.home', 1: 'main.bottomNav.search', 3: 'main.bottomNav.chat', 4: 'main.bottomNav.myBling'};
+  Widget _buildBottomNavItem(
+      {required IconData icon, required int index, int badgeCount = 0}) {
+    final Map<int, String> tooltipKeys = {
+      0: 'main.bottomNav.home',
+      1: 'main.bottomNav.search',
+      3: 'main.bottomNav.chat',
+      4: 'main.bottomNav.myBling'
+    };
     final isSelected = _bottomNavIndex == index;
-    Widget iconWidget = Icon(icon, color: isSelected ? Theme.of(context).primaryColor : Colors.grey);
+    Widget iconWidget = Icon(icon,
+        color: isSelected ? Theme.of(context).primaryColor : Colors.grey);
     if (badgeCount > 0) {
       iconWidget = Badge(label: Text('$badgeCount'), child: iconWidget);
     }
@@ -297,14 +327,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 DrawerHeader(
                   decoration: const BoxDecoration(color: Color(0xFF6A1B9A)),
                   margin: EdgeInsets.zero,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundImage: (userModel.photoUrl != null && userModel.photoUrl!.startsWith('http')) ? NetworkImage(userModel.photoUrl!) : null,
-                        child: (userModel.photoUrl == null || !userModel.photoUrl!.startsWith('http')) ? const Icon(Icons.person, size: 30) : null,
+                        backgroundImage: (userModel.photoUrl != null &&
+                                userModel.photoUrl!.startsWith('http'))
+                            ? NetworkImage(userModel.photoUrl!)
+                            : null,
+                        child: (userModel.photoUrl == null ||
+                                !userModel.photoUrl!.startsWith('http'))
+                            ? const Icon(Icons.person, size: 30)
+                            : null,
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -316,13 +353,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                               spacing: 8.0,
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                Text(userModel.nickname, style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 18, color: Colors.white)),
-                                TrustLevelBadge(trustLevel: userModel.trustLevel, showText: true),
-                                Text('(${userModel.trustScore})', style: GoogleFonts.inter(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 14)),
+                                Text(userModel.nickname,
+                                    style: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 18,
+                                        color: Colors.white)),
+                                TrustLevelBadge(
+                                    trustLevel: userModel.trustLevel,
+                                    showText: true),
+                                Text('(${userModel.trustScore})',
+                                    style: GoogleFonts.inter(
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14)),
                               ],
                             ),
                             const SizedBox(height: 6),
-                            Text(userModel.email, style: GoogleFonts.inter(color: Colors.white70, fontSize: 14), overflow: TextOverflow.ellipsis),
+                            Text(userModel.email,
+                                style: GoogleFonts.inter(
+                                    color: Colors.white70, fontSize: 14),
+                                overflow: TextOverflow.ellipsis),
                           ],
                         ),
                       ),
@@ -330,38 +380,64 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const Icon(Icons.military_tech, color: Colors.brown),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text('drawer.trustDashboard.title'.tr(), style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16), overflow: TextOverflow.ellipsis),
+                        child: Text('drawer.trustDashboard.title'.tr(),
+                            style: GoogleFonts.inter(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                            overflow: TextOverflow.ellipsis),
                       ),
                       TextButton(
                         style: TextButton.styleFrom(
                           minimumSize: const Size(0, 0),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 0),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        onPressed: () => showDialog(context: context, builder: (_) => TrustScoreBreakdownModal(key: UniqueKey())),
-                        child: Text('drawer.trustDashboard.breakdownButton'.tr(), style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis),
+                        onPressed: () => showDialog(
+                            context: context,
+                            builder: (_) =>
+                                TrustScoreBreakdownModal(key: UniqueKey())),
+                        child: Text(
+                            'drawer.trustDashboard.breakdownButton'.tr(),
+                            style: GoogleFonts.inter(
+                                fontSize: 14, fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.ellipsis),
                       ),
                     ],
                   ),
                 ),
-                _buildTrustInfoTile(icon: Icons.location_city, titleKey: 'drawer.trustDashboard.kelurahanAuth', isCompleted: userModel.locationParts?['kel'] != null),
-                _buildTrustInfoTile(icon: Icons.home_work_outlined, titleKey: 'drawer.trustDashboard.rtRwAuth', isCompleted: userModel.locationParts?['rt'] != null),
-                _buildTrustInfoTile(icon: Icons.phone_android, titleKey: 'drawer.trustDashboard.phoneAuth', isCompleted: userModel.phoneNumber != null && userModel.phoneNumber!.isNotEmpty),
-                _buildTrustInfoTile(icon: Icons.verified_user, titleKey: 'drawer.trustDashboard.profileComplete', isCompleted: userModel.profileCompleted),
+                _buildTrustInfoTile(
+                    icon: Icons.location_city,
+                    titleKey: 'drawer.trustDashboard.kelurahanAuth',
+                    isCompleted: userModel.locationParts?['kel'] != null),
+                _buildTrustInfoTile(
+                    icon: Icons.home_work_outlined,
+                    titleKey: 'drawer.trustDashboard.rtRwAuth',
+                    isCompleted: userModel.locationParts?['rt'] != null),
+                _buildTrustInfoTile(
+                    icon: Icons.phone_android,
+                    titleKey: 'drawer.trustDashboard.phoneAuth',
+                    isCompleted: userModel.phoneNumber != null &&
+                        userModel.phoneNumber!.isNotEmpty),
+                _buildTrustInfoTile(
+                    icon: Icons.verified_user,
+                    titleKey: 'drawer.trustDashboard.profileComplete',
+                    isCompleted: userModel.profileCompleted),
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.edit_outlined),
                   title: Text('drawer.editProfile'.tr()),
                   onTap: () {
                     Navigator.of(context).pop();
-                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileEditScreen()));
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const ProfileEditScreen()));
                   },
                 ),
                 const Divider(),
@@ -378,11 +454,63 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  Widget _buildTrustInfoTile({required IconData icon, required String titleKey, required bool isCompleted}) {
+  Widget _buildTrustInfoTile(
+      {required IconData icon,
+      required String titleKey,
+      required bool isCompleted}) {
     return ListTile(
       leading: Icon(icon, color: isCompleted ? Colors.teal : Colors.grey),
       title: Text(titleKey.tr(), style: GoogleFonts.inter(fontSize: 15)),
-      trailing: Icon(isCompleted ? Icons.check_circle : Icons.cancel, color: isCompleted ? Colors.green : Colors.grey, size: 22),
+      trailing: Icon(isCompleted ? Icons.check_circle : Icons.cancel,
+          color: isCompleted ? Colors.green : Colors.grey, size: 22),
+    );
+  }
+}
+
+class _LanguageMenu extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final code = context.locale.languageCode; // 'id' | 'ko' | 'en'
+    final short = (code == 'id')
+        ? 'ID'
+        : (code == 'ko')
+            ? 'KO'
+            : 'EN';
+
+    return PopupMenuButton<Locale>(
+      tooltip: 'Change Language',
+      onSelected: (loc) => context.setLocale(loc),
+      itemBuilder: (context) => const [
+        PopupMenuItem(
+          value: Locale('id'),
+          child: Text('Bahasa Indonesia'),
+        ),
+        PopupMenuItem(
+          value: Locale('ko'),
+          child: Text('한국어'),
+        ),
+        PopupMenuItem(
+          value: Locale('en'),
+          child: Text('English'),
+        ),
+      ],
+      // icon 대신 child를 써서 "아이콘 + 현재 코드"를 함께 보여줍니다.
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.language),
+            const SizedBox(width: 6),
+            Text(
+              short, // ID/KO/EN
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -411,19 +539,27 @@ class TrustScoreBreakdownModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('drawer.trustDashboard.breakdownModalTitle'.tr(), style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+      title: Text('drawer.trustDashboard.breakdownModalTitle'.tr(),
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _breakdownRow('drawer.trustDashboard.kelurahanAuth', 'drawer.trustDashboard.breakdown.kelurahanAuth'),
-            _breakdownRow('drawer.trustDashboard.rtRwAuth', 'drawer.trustDashboard.breakdown.rtRwAuth'),
-            _breakdownRow('drawer.trustDashboard.phoneAuth', 'drawer.trustDashboard.breakdown.phoneAuth'),
-            _breakdownRow('drawer.trustDashboard.profileComplete', 'drawer.trustDashboard.breakdown.profileComplete'),
+            _breakdownRow('drawer.trustDashboard.kelurahanAuth',
+                'drawer.trustDashboard.breakdown.kelurahanAuth'),
+            _breakdownRow('drawer.trustDashboard.rtRwAuth',
+                'drawer.trustDashboard.breakdown.rtRwAuth'),
+            _breakdownRow('drawer.trustDashboard.phoneAuth',
+                'drawer.trustDashboard.breakdown.phoneAuth'),
+            _breakdownRow('drawer.trustDashboard.profileComplete',
+                'drawer.trustDashboard.breakdown.profileComplete'),
             const Divider(),
-            _breakdownRow('drawer.trustDashboard.feedThanks', 'drawer.trustDashboard.breakdown.feedThanks'),
-            _breakdownRow('drawer.trustDashboard.marketThanks', 'drawer.trustDashboard.breakdown.marketThanks'),
-            _breakdownRow('drawer.trustDashboard.reports', 'drawer.trustDashboard.breakdown.reports'),
+            _breakdownRow('drawer.trustDashboard.feedThanks',
+                'drawer.trustDashboard.breakdown.feedThanks'),
+            _breakdownRow('drawer.trustDashboard.marketThanks',
+                'drawer.trustDashboard.breakdown.marketThanks'),
+            _breakdownRow('drawer.trustDashboard.reports',
+                'drawer.trustDashboard.breakdown.reports'),
           ],
         ),
       ),
@@ -442,7 +578,8 @@ class TrustScoreBreakdownModal extends StatelessWidget {
       child: Row(
         children: [
           Expanded(child: Text(labelKey.tr(), style: GoogleFonts.inter())),
-          Text(valueKey.tr(), style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+          Text(valueKey.tr(),
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
         ],
       ),
     );

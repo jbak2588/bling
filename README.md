@@ -31,9 +31,9 @@ lib
 │   │   ├── chat_room_model.dart
 │   │   ├── comment_model.dart
 │   │   ├── feed_item_model.dart
-│   │   ├── page_data.dart
 │   │   ├── reply_model.dart
 │   │   └── user_model.dart
+│   ├── router
 │   └── utils
 │       └── address_formatter.dart
 ├── features
@@ -58,7 +58,6 @@ lib
 │   │   └── screens
 │   │       ├── auth_gate.dart
 │   │       ├── login_screen.dart
-│   │       ├── profile_edit_screen.dart
 │   │       └── signup_screen.dart
 │   ├── categories
 │   │   ├── domain
@@ -165,8 +164,7 @@ lib
 │   │       └── neighborhood_prompt_screen.dart
 │   ├── lost_and_found
 │   │   ├── data
-│   │   │   ├── lost_and_found_repository.dart
-│   │   │   └── lost_item_repository.dart
+│   │   │   └── lost_and_found_repository.dart
 │   │   ├── models
 │   │   │   └── lost_item_model.dart
 │   │   ├── screens
@@ -182,10 +180,10 @@ lib
 │   │   └── screens
 │   │       └── main_feed_screen.dart
 │   ├── main_screen
-│   │   └── home_screen.dart
+│   │   ├── home_screen.dart
+│   │   └── main_navigation_screen.dart
 │   ├── marketplace
 │   │   ├── domain
-│   │   │   └── product_model_old.dart
 │   │   ├── models
 │   │   │   └── product_model.dart
 │   │   ├── screens
@@ -239,6 +237,17 @@ lib
 │           └── trust_level_badge.dart
 ├── firebase_options.dart
 └── main.dart
+assets
+├── data
+│   └── sample_posts.json
+├── icons
+│   └── google_logo.png
+├── lang
+│   ├── en.json
+│   ├── id.json
+│   └── ko.json
+└── sounds
+    └── send_sound.mp3
 
 pubspec.yaml
 functions-v2
@@ -291,17 +300,7 @@ functions-v2
 │   │   ├── teamF_Design_Privacy_Module_통합_작업문.md
 │   │   └── temE_AI_Moderation_Module_통합_작업문서.md
 │   └── templates 
-└── assets
-    ├── data
-    │   └── sample_posts.json
-    ├── icons
-    │   └── google_logo.png
-    ├── lang
-    │   ├── en.json
-    │   ├── id.json
-    │   ├── ko.json
-    └── sounds
-        └── send_sound.mp3
+
 
 
 
