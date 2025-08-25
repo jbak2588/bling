@@ -576,7 +576,9 @@
         "kota": "Kota",
         "kecamatan": "Kecamatan",
         "kelurahan": "Kelurahan",
-        "apply": "필터 적용하기"
+        "apply": "필터 적용",
+        "all": "전체",
+        "reset": "초기화"
     },
     "clubs": {
         "screen": {

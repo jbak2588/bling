@@ -34,7 +34,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _totalUnreadCount = 0;
 
   Widget? _currentHomePageContent;
-  String _currentPageTitleKey = 'main.myTown';
+ String _appBarTitle = 'main.myTown'.tr(); 
 
   @override
   void initState() {
@@ -101,7 +101,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     if (index == 0 && _currentHomePageContent != null) {
       setState(() {
         _currentHomePageContent = null;
-        _currentPageTitleKey = 'main.myTown';
+        _appBarTitle = 'main.myTown'.tr(); // 홈으로 돌아올 때 접두사 초기화
       });
     }
     setState(() {
@@ -122,7 +122,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               onPressed: () {
                 setState(() {
                   _currentHomePageContent = null;
-                  _currentPageTitleKey = 'main.myTown';
+              _appBarTitle = 'main.myTown'.tr(); // [수정] 통합된 변수 사용
                 });
               },
             )
@@ -142,29 +142,39 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             MaterialPageRoute(builder: (_) => LocationFilterScreen(userModel: _userModel)),
           );
           
-          if (result != null && mounted) {
+                if (result != null && mounted) {
             final processedFilter = <String, String?>{};
+            String newTitle = 'main.myTown'.tr(); // 기본값
+
             if (result['kel'] != null && result['kel']!.isNotEmpty) {
               processedFilter['kel'] = result['kel'];
+              newTitle = "Kel.";
             } else if (result['kec'] != null && result['kec']!.isNotEmpty) {
               processedFilter['kec'] = result['kec'];
-            } else if (result['kab'] != null && result['kab']!.isNotEmpty) {
-              processedFilter['kab'] = result['kab'];
+              newTitle = "Kec.";
             } else if (result['kota'] != null && result['kota']!.isNotEmpty) {
               processedFilter['kota'] = result['kota'];
+              newTitle = "Kota";
+            } else if (result['kab'] != null && result['kab']!.isNotEmpty) {
+              processedFilter['kab'] = result['kab'];
+              newTitle = "Kab.";
             } else if (result['prov'] != null && result['prov']!.isNotEmpty) {
               processedFilter['prov'] = result['prov'];
+              newTitle = "Prov.";
             }
 
             setState(() {
               _activeLocationFilter = processedFilter.isNotEmpty ? processedFilter : null;
+              _appBarTitle = newTitle; // [수정] 통합된 변수 사용
             });
           }
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_currentPageTitleKey.tr(), style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
+           // V V V --- [수정] _currentPageTitleKey 대신 _appBarTitlePrefix 사용 --- V V V
+            Text(_appBarTitle, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
+            // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
             const SizedBox(width: 8),
             Flexible(
               child: Text(
@@ -214,7 +224,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _navigateToPage(Widget page, String titleKey) {
     setState(() {
       _currentHomePageContent = page;
-      _currentPageTitleKey = titleKey;
+      _appBarTitle = titleKey.tr(); // [수정] 통합된 변수 사용
     });
   }
 

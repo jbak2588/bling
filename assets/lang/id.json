@@ -577,7 +577,9 @@
         "kota": "Kota",
         "kecamatan": "Kecamatan",
         "kelurahan": "Kelurahan",
-        "apply": "Terapkan Filter"
+        "apply": "Terapkan Filter",
+        "all": "Semua",
+        "reset": "Reset"
     },
     "clubs": {
         "screen": {
