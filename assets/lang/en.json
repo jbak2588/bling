@@ -577,7 +577,9 @@
         "kota": "City",
         "kecamatan": "District",
         "kelurahan": "Subdistrict",
-        "apply": "Apply Filter"
+        "apply": "Apply Filter",
+        "all": "All",
+        "reset": "Reset"
     },
     "clubs": {
         "screen": {
