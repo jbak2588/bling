@@ -85,6 +85,7 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
         type: _type,
         itemDescription: _itemDescriptionController.text.trim(),
         locationDescription: _locationDescriptionController.text.trim(),
+        locationParts: widget.userModel.locationParts,
         geoPoint: widget.userModel.geoPoint,
         imageUrls: imageUrls,
         createdAt: Timestamp.now(),

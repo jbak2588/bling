@@ -30,15 +30,26 @@ class ShopRepository {
     return ShopModel.fromFirestore(doc);
   }
 
-// V V V --- [수정] 사용자의 Province를 기준으로 1차 필터링하도록 변경 --- V V V
-  Stream<QuerySnapshot<Map<String, dynamic>>> fetchShops(String? userProvince) {
+ Stream<QuerySnapshot<Map<String, dynamic>>> fetchShops(
+      {Map<String, String?>? locationFilter}) {
     Query<Map<String, dynamic>> query = _shopsCollection;
 
-    if (userProvince != null && userProvince.isNotEmpty) {
-      query = query.where('locationParts.prov', isEqualTo: userProvince);
+     final String? kab = locationFilter?['kab'];
+    if (kab != null && kab.isNotEmpty) {
+      query = query.where('locationParts.kab', isEqualTo: kab);
     }
 
-    return query.orderBy('createdAt', descending: true).snapshots();
+   query = query.orderBy('createdAt', descending: true);
+
+    return query.snapshots().asyncMap((snapshot) async {
+      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
+        return await _shopsCollection
+            .where('locationParts.kab', isEqualTo: 'Tangerang')
+            .orderBy('createdAt', descending: true)
+            .get();
+      }
+      return snapshot;
+    });
   }
 
   // V V V --- [추가] 특정 상점 정보를 실시간으로 가져오는 Stream 함수 --- V V V

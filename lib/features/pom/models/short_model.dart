@@ -12,6 +12,7 @@ class ShortModel {
   final String thumbnailUrl;
   final String description;
   final String? location;
+  final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
   final List<String>? tags;
   final int likesCount;
@@ -21,7 +22,6 @@ class ShortModel {
   final bool isAiVerified;
   final Timestamp createdAt;
 
-
   ShortModel({
     required this.id,
     required this.userId,
@@ -30,6 +30,7 @@ class ShortModel {
     required this.thumbnailUrl,
     required this.description,
     this.location,
+    this.locationParts,
     this.geoPoint,
     this.tags,
     this.likesCount = 0,
@@ -40,8 +41,7 @@ class ShortModel {
     required this.createdAt,
   });
 
-  factory ShortModel.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory ShortModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return ShortModel(
       id: doc.id,
@@ -51,6 +51,9 @@ class ShortModel {
       thumbnailUrl: data['thumbnailUrl'] ?? '',
       description: data['description'] ?? '',
       location: data['location'],
+      locationParts: data['locationParts'] != null
+          ? Map<String, dynamic>.from(data['locationParts'])
+          : null,
       geoPoint: data['geoPoint'],
       tags: data['tags'] != null ? List<String>.from(data['tags']) : null,
       likesCount: data['likesCount'] ?? 0,
@@ -62,7 +65,6 @@ class ShortModel {
     );
   }
 
-
   Map<String, dynamic> toJson() {
     return {
       'userId': userId,
@@ -71,6 +73,7 @@ class ShortModel {
       'thumbnailUrl': thumbnailUrl,
       'description': description,
       'location': location,
+      'locationParts': locationParts,
       'geoPoint': geoPoint,
       'tags': tags,
       'likesCount': likesCount,
@@ -82,4 +85,3 @@ class ShortModel {
     };
   }
 }
-

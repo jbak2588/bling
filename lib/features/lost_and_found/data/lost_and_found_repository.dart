@@ -11,27 +11,46 @@ class LostAndFoundRepository {
       _firestore.collection('lost_and_found');
 
   // V V V --- [수정] fetchItems 함수에 locationFilter를 적용합니다 --- V V V
-  Stream<List<LostItemModel>> fetchItems({Map<String, String?>? locationFilter}) {
-    Query query = _firestore.collection('lost_and_found').orderBy('createdAt', descending: true);
+  Stream<List<LostItemModel>> fetchItems(
+      {Map<String, String?>? locationFilter}) {
+    Query<Map<String, dynamic>> query = _firestore
+        .collection('lost_and_found')
+        .orderBy('createdAt', descending: true);
+    final String? kab = locationFilter?['kab'];
 
     if (locationFilter != null) {
-      if (locationFilter['prov'] != null && locationFilter['prov']!.isNotEmpty) {
-        query = query.where('locationParts.prov', isEqualTo: locationFilter['prov']);
+      if (locationFilter['prov'] != null &&
+          locationFilter['prov']!.isNotEmpty) {
+        query = query.where('locationParts.prov',
+            isEqualTo: locationFilter['prov']);
       }
       if (locationFilter['kab'] != null && locationFilter['kab']!.isNotEmpty) {
-        query = query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+        query =
+            query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
       }
       if (locationFilter['kec'] != null && locationFilter['kec']!.isNotEmpty) {
-        query = query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+        query =
+            query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
       }
       if (locationFilter['kel'] != null && locationFilter['kel']!.isNotEmpty) {
-        query = query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+        query =
+            query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
       }
     }
 
-    return query.snapshots().map((snapshot) {
+    return query.snapshots().asyncMap((snapshot) async {
+      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
+        final fallbackSnapshot = await _firestore
+            .collection('lost_and_found')
+            .where('locationParts.kab', isEqualTo: 'Tangerang')
+            .orderBy('createdAt', descending: true)
+            .get();
+        return fallbackSnapshot.docs
+            .map((doc) => LostItemModel.fromFirestore(doc))
+            .toList();
+      }
       return snapshot.docs
-          .map((doc) => LostItemModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
+          .map((doc) => LostItemModel.fromFirestore(doc))
           .toList();
     });
   }

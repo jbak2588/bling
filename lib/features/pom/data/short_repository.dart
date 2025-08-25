@@ -14,48 +14,81 @@ class ShortRepository {
   CollectionReference<Map<String, dynamic>> get _usersCollection =>
       _firestore.collection('users');
 
-
 // V V V --- [추가] 특정 POM 영상 하나만 실시간으로 감시하는 함수 --- V V V
   Stream<ShortModel> getShortStream(String shortId) {
-    return _shortsCollection.doc(shortId).snapshots()
+    return _shortsCollection
+        .doc(shortId)
+        .snapshots()
         .map((snapshot) => ShortModel.fromFirestore(snapshot));
   }
 
+  Stream<List<ShortModel>> fetchShorts({Map<String, String?>? locationFilter}) {
+    Query<Map<String, dynamic>> query = _shortsCollection;
+    final String? kab = locationFilter?['kab'];
+    if (kab != null && kab.isNotEmpty) {
+      query = query.where('locationParts.kab', isEqualTo: kab);
+    }
+    query = query.orderBy('createdAt', descending: true).limit(20);
 
-  Stream<List<ShortModel>> fetchShorts() {
-    return _shortsCollection
-        .orderBy('createdAt', descending: true)
-        .limit(20)
-        .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => ShortModel.fromFirestore(doc)).toList());
+    return query.snapshots().asyncMap((snapshot) async {
+      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
+        final fallbackSnapshot = await _shortsCollection
+            .where('locationParts.kab', isEqualTo: 'Tangerang')
+            .orderBy('createdAt', descending: true)
+            .limit(20)
+            .get();
+        return fallbackSnapshot.docs
+            .map((doc) => ShortModel.fromFirestore(doc))
+            .toList();
+      }
+      return snapshot.docs.map((doc) => ShortModel.fromFirestore(doc)).toList();
+    });
   }
 
 // V V V --- [추가] POM 목록을 한 번만 가져오는 함수 --- V V V
-  Future<List<ShortModel>> fetchShortsOnce({Map<String, String?>? locationFilter}) async {
-    Query query = _firestore.collection('shorts').orderBy('createdAt', descending: true);
+  Future<List<ShortModel>> fetchShortsOnce(
+      {Map<String, String?>? locationFilter}) async {
+    Query<Map<String, dynamic>> query =
+        _firestore.collection('shorts').orderBy('createdAt', descending: true);
+    final String? kab = locationFilter?['kab'];
+
+    if (kab != null && kab.isNotEmpty) {
+      query = query.where('locationParts.kab', isEqualTo: kab);
+    }
 
     if (locationFilter != null) {
-      if (locationFilter['prov'] != null && locationFilter['prov']!.isNotEmpty) {
-        query = query.where('locationParts.prov', isEqualTo: locationFilter['prov']);
+      if (locationFilter['prov'] != null &&
+          locationFilter['prov']!.isNotEmpty) {
+        query = query.where('locationParts.prov',
+            isEqualTo: locationFilter['prov']);
       }
-      if (locationFilter['kab'] != null && locationFilter['kab']!.isNotEmpty) {
-        query = query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
-      }
+
       if (locationFilter['kec'] != null && locationFilter['kec']!.isNotEmpty) {
-        query = query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+        query =
+            query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
       }
       if (locationFilter['kel'] != null && locationFilter['kel']!.isNotEmpty) {
-        query = query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+        query =
+            query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
       }
     }
-    
+
+    query = query.limit(20);
     final snapshot = await query.get();
-    return snapshot.docs
-        .map((doc) => ShortModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
-        .toList();
+    if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
+      final fallbackSnapshot = await _firestore
+          .collection('shorts')
+          .where('locationParts.kab', isEqualTo: 'Tangerang')
+          .orderBy('createdAt', descending: true)
+          .limit(20)
+          .get();
+      return fallbackSnapshot.docs
+          .map((doc) => ShortModel.fromFirestore(doc))
+          .toList();
+    }
+    return snapshot.docs.map((doc) => ShortModel.fromFirestore(doc)).toList();
   }
-  
+
   Future<String> createShort(ShortModel short) async {
     final docRef = await _shortsCollection.add(short.toJson());
     return docRef.id;
@@ -105,7 +138,8 @@ class ShortRepository {
             .toList());
   }
 
-  Future<void> addShortComment(String shortId, ShortCommentModel comment) async {
+  Future<void> addShortComment(
+      String shortId, ShortCommentModel comment) async {
     final shortRef = _shortsCollection.doc(shortId);
     final commentRef = shortRef.collection('comments').doc();
 

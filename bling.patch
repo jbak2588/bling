@@ -1,206 +1,910 @@
-diff --git a/assets/lang/en.json b/assets/lang/en.json
-index 0fd15b32821f069d72e536a64185c6a90c77c3c2..a8a97c748549bc350fd4cfc6d615d0da77737589 100644
---- a/assets/lang/en.json
-+++ b/assets/lang/en.json
-@@ -748,29 +748,45 @@
-         },
-         "form": {
-             "nameLabel": "Shop Name",
-             "nameError": "Please enter the shop name.",
-             "descriptionLabel": "Shop Description",
-             "descriptionError": "Please enter the shop description.",
-             "contactLabel": "Contact",
-             "hoursLabel": "Business Hours",
-             "hoursHint": "e.g. 09:00 - 18:00"
-         },
-         "detail": {
-             "description": "Shop Description",
-             "deleteTitle": "Delete Shop",
-             "deleteContent": "Are you sure you want to delete this shop? This action cannot be undone.",
-             "deleteTooltip": "Delete shop",
-             "delete": "Delete",
-             "cancel": "Cancel",
-             "deleteSuccess": "Shop deleted.",
-             "deleteFail": "Failed to delete shop: {error}",
-             "inquire": "Contact",
-             "noOwnerInfo": "Owner info not found",
-             "startChatFail": "Could not start chat: {error}"
-         },
-         "noLocation": "No location info"
-     },
-+    "pom": {
-+        "share": "Share",
-+        "empty": "No POMs have been uploaded yet.",
-+        "errors": {
-+            "fetchFailed": "An error has occurred: {error}"
-+        },
-+        "create": {
-+            "title": "Upload New POM",
-+            "submit": "Upload",
-+            "success": "POM uploaded.",
-+            "fail": "Failed to upload POM: {error}",
-+            "form": {
-+                "descriptionLabel": "Video description"
-+            }
-+        }
-+    },
-     "community": {
-         "title": "Community Screen"
-     }
- }
-\ No newline at end of file
-diff --git a/assets/lang/id.json b/assets/lang/id.json
-index 0840b46155432642a3ebd28f03b44352b22ced16..b56e3a310a96beea2d7509f081c4895efe83d015 100644
---- a/assets/lang/id.json
-+++ b/assets/lang/id.json
-@@ -748,29 +748,45 @@
-         },
-         "form": {
-             "nameLabel": "Nama Toko",
-             "nameError": "Harap masukkan nama toko.",
-             "descriptionLabel": "Deskripsi Toko",
-             "descriptionError": "Harap masukkan deskripsi toko.",
-             "contactLabel": "Kontak",
-             "hoursLabel": "Jam Operasional",
-             "hoursHint": "mis. 09:00 - 18:00"
-         },
-         "detail": {
-             "description": "Deskripsi Toko",
-             "deleteTitle": "Hapus Toko",
-             "deleteContent": "Apakah Anda yakin ingin menghapus toko ini? Tindakan ini tidak dapat dibatalkan.",
-             "deleteTooltip": "Hapus toko",
-             "delete": "Hapus",
-             "cancel": "Batal",
-             "deleteSuccess": "Toko telah dihapus.",
-             "deleteFail": "Gagal menghapus toko: {error}",
-             "inquire": "Hubungi",
-             "noOwnerInfo": "Info pemilik tidak ada",
-             "startChatFail": "Tidak dapat memulai chat: {error}"
-         },
-         "noLocation": "Tidak ada info lokasi"
-     },
-+    "pom": {
-+        "share": "Bagikan",
-+        "empty": "Belum ada POM yang diunggah.",
-+        "errors": {
-+            "fetchFailed": "Terjadi kesalahan: {error}"
-+        },
-+        "create": {
-+            "title": "Unggah POM Baru",
-+            "submit": "Unggah",
-+            "success": "POM berhasil diunggah.",
-+            "fail": "Gagal mengunggah POM: {error}",
-+            "form": {
-+                "descriptionLabel": "Deskripsi video"
-+            }
-+        }
-+    },
-     "community": {
-         "title": "Halaman Komunitas"
-     }
- }
-\ No newline at end of file
-diff --git a/assets/lang/ko.json b/assets/lang/ko.json
-index 3e71e5df1918b97f8a5655049ab0d24b6f9ee19c..8899b34a8853dc2754cc6034433b0f2486158873 100644
---- a/assets/lang/ko.json
-+++ b/assets/lang/ko.json
-@@ -747,29 +747,45 @@
-         },
-         "form": {
-             "nameLabel": "상점 이름",
-             "nameError": "상점 이름을 입력해주세요.",
-             "descriptionLabel": "상점 소개",
-             "descriptionError": "상점 소개를 입력해주세요.",
-             "contactLabel": "연락처",
-             "hoursLabel": "영업 시간",
-             "hoursHint": "예) 09:00 - 18:00"
-         },
-         "detail": {
-             "description": "상점 소개",
-             "deleteTitle": "상점 삭제",
-             "deleteContent": "정말로 이 상점을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-             "deleteTooltip": "상점 삭제",
-             "delete": "삭제",
-             "cancel": "취소",
-             "deleteSuccess": "상점이 삭제되었습니다.",
-             "deleteFail": "상점 삭제에 실패했습니다: {error}",
-             "inquire": "문의하기",
-             "noOwnerInfo": "주인 정보 없음",
-             "startChatFail": "채팅을 시작할 수 없습니다: {error}"
-         },
-         "noLocation": "위치 정보 없음"
-     },
-+    "pom": {
-+        "share": "공유",
-+        "empty": "등록된 POM이 없습니다.",
-+        "errors": {
-+            "fetchFailed": "오류가 발생했습니다: {error}"
-+        },
-+        "create": {
-+            "title": "새 POM 등록",
-+            "submit": "등록",
-+            "success": "POM이 등록되었습니다.",
-+            "fail": "POM 등록에 실패했습니다: {error}",
-+            "form": {
-+                "descriptionLabel": "영상 설명"
-+            }
-+        }
-+    },
-     "community": {
-         "title": "커뮤니티 화면"
-     }
- }
-\ No newline at end of file
-diff --git a/lib/features/pom/screens/create_short_screen.dart b/lib/features/pom/screens/create_short_screen.dart
-index 51a6cf0ad3136d5b1860e38a63772279d74a96b2..1652639660720b4a39540e02059545047c14150b 100644
---- a/lib/features/pom/screens/create_short_screen.dart
-+++ b/lib/features/pom/screens/create_short_screen.dart
-@@ -1,38 +1,39 @@
- // lib/features/pom/screens/create_short_screen.dart
+diff --git a/lib/features/clubs/data/club_repository.dart b/lib/features/clubs/data/club_repository.dart
+index 8c0ca63afddf44f01ce2263da2b59e6830fc1c87..c42f30fe2d7e319db5d5391e0cff45faf378e7b0 100644
+--- a/lib/features/clubs/data/club_repository.dart
++++ b/lib/features/clubs/data/club_repository.dart
+@@ -59,66 +59,80 @@ class ClubRepository {
+     });
  
- import 'dart:io';
- import 'package:bling_app/core/models/short_model.dart';
- import 'package:bling_app/core/models/user_model.dart';
- import 'package:bling_app/features/pom/data/short_repository.dart';
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:firebase_auth/firebase_auth.dart';
- import 'package:firebase_storage/firebase_storage.dart';
- import 'package:flutter/material.dart';
- import 'package:image_picker/image_picker.dart';
- import 'package:uuid/uuid.dart';
- import 'package:video_player/video_player.dart';
-+import 'package:easy_localization/easy_localization.dart';
+     // 6. 모든 작업을 한 번에 원자적으로 실행합니다.
+     await batch.commit();
  
- class CreateShortScreen extends StatefulWidget {
-   final UserModel userModel;
-   const CreateShortScreen({super.key, required this.userModel});
- 
-   @override
-   State<CreateShortScreen> createState() => _CreateShortScreenState();
- }
- 
- class _CreateShortScreenState extends State<CreateShortScreen> {
-   final _descriptionController = TextEditingController();
-   final ShortRepository _repository = ShortRepository();
-   final ImagePicker _picker = ImagePicker();
- 
-   XFile? _videoFile;
-   VideoPlayerController? _videoController;
-   bool _isSaving = false;
- 
-   @override
-   void dispose() {
-     _descriptionController.dispose();
-     _videoController?.dispose();
-     super.dispose();
+     debugPrint("동호회 및 그룹 채팅방 생성 완료: $clubId");
+     return clubId;
    }
  
-@@ -60,89 +61,90 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
+   Future<void> updateClub(ClubModel club) async {
+     await _clubs.doc(club.id).update(club.toJson());
+   }
+ 
+   Future<void> deleteClub(String clubId) async {
+     await _clubs.doc(clubId).delete();
+   }
+ 
+   Future<ClubModel> fetchClub(String clubId) async {
+     final doc = await _clubs.doc(clubId).get();
+     return ClubModel.fromFirestore(doc);
+   }
+ 
+   Stream<List<ClubModel>> fetchClubs({Map<String, String?>? locationFilter}) {
+     Query<Map<String, dynamic>> query = _clubs;
+     final filter = locationFilter;
++    final String? kab = filter?['kab'];
+     if (filter != null) {
+       if (filter['kel'] != null) {
+         query = query.where('locationParts.kel', isEqualTo: filter['kel']);
+       } else if (filter['kec'] != null) {
+         query = query.where('locationParts.kec', isEqualTo: filter['kec']);
+       } else if (filter['kab'] != null) {
+         query = query.where('locationParts.kab', isEqualTo: filter['kab']);
+       } else if (filter['kota'] != null) {
+         query = query.where('locationParts.kota', isEqualTo: filter['kota']);
+       } else if (filter['prov'] != null) {
+         query = query.where('locationParts.prov', isEqualTo: filter['prov']);
+       }
+     }
+-    return query.orderBy('createdAt', descending: true).snapshots().map(
+-        (snapshot) =>
+-            snapshot.docs.map((doc) => ClubModel.fromFirestore(doc)).toList());
++    query = query.orderBy('createdAt', descending: true);
++
++    return query.snapshots().asyncMap((snapshot) async {
++      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
++        final fallbackSnapshot = await _clubs
++            .where('locationParts.kab', isEqualTo: 'Tangerang')
++            .orderBy('createdAt', descending: true)
++            .get();
++        return fallbackSnapshot.docs
++            .map((doc) => ClubModel.fromFirestore(doc))
++            .toList();
++      }
++      return snapshot.docs
++          .map((doc) => ClubModel.fromFirestore(doc))
++          .toList();
++    });
+   }
+ 
+   // V V V --- [추가] 특정 동호회 정보를 실시간으로 가져오는 Stream 함수 --- V V V
+   Stream<ClubModel> getClubStream(String clubId) {
+     return _clubs
+         .doc(clubId)
+         .snapshots()
+         .map((snapshot) => ClubModel.fromFirestore(snapshot));
+   }
+   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+ 
+   // V V V --- [수정] 가입 신청 시, 강퇴 이력을 확인하는 로직으로 변경 --- V V V
+   Future<String> addMember(String clubId, ClubMemberModel member) async {
+     final clubRef = _clubs.doc(clubId);
+     final clubSnapshot = await clubRef.get();
+ 
+     if (!clubSnapshot.exists) {
+       throw Exception("동호회를 찾을 수 없습니다.");
+     }
+ 
+     final clubData = ClubModel.fromFirestore(clubSnapshot);
+     final kickedMembers = clubData.kickedMembers ?? [];
+ 
+     // 1. 강퇴 이력이 있는지 확인합니다.
+     if (kickedMembers.contains(member.userId)) {
+diff --git a/lib/features/clubs/screens/create_club_screen.dart b/lib/features/clubs/screens/create_club_screen.dart
+index 7ac14ee84c4762129ea994094c958e13de0f5d53..edf82b75514c37b8f1792dcee7d3b93249bac3a7 100644
+--- a/lib/features/clubs/screens/create_club_screen.dart
++++ b/lib/features/clubs/screens/create_club_screen.dart
+@@ -108,62 +108,63 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
+         SnackBar(
+             content: Text('clubs.createClub.selectAtLeastOneInterest'.tr())),
+       );
+       return;
+     }
+       if (_selectedLocationParts == null) {
+       ScaffoldMessenger.of(context).showSnackBar(
+         const SnackBar(content: Text('Please select location')),
+       );
+       return;
+     }
+ 
+     setState(() => _isSaving = true);
+ 
+     try {
+       String? imageUrl;
+       // [수정] 이미지가 선택되었으면 Storage에 업로드
+       if (_selectedImage != null) {
+         final fileName = const Uuid().v4();
+         final ref =
+             FirebaseStorage.instance.ref().child('club_images/$fileName');
+         await ref.putFile(File(_selectedImage!.path));
+         imageUrl = await ref.getDownloadURL();
+       }
+ 
++      final parts = widget.userModel.locationParts;
+       final newClub = ClubModel(
+         id: '', // ID는 Firestore에서 자동으로 생성됩니다.
+         title: _titleController.text.trim(),
+         description: _descriptionController.text.trim(),
+         ownerId: widget.userModel.uid,
+-          location: _selectedLocationParts?['kel'] ??
+-            _selectedLocationParts?['kec'] ??
+-            _selectedLocationParts?['kab'] ??
+-            _selectedLocationParts?['kota'] ??
+-            _selectedLocationParts?['prov'] ??
++        location: parts?['kel'] ??
++            parts?['kec'] ??
++            parts?['kab'] ??
++            parts?['kota'] ??
++            parts?['prov'] ??
+             'Unknown',
+-        locationParts: _selectedLocationParts,
++        locationParts: parts,
+         // interests: _selectedInterests, // Removed or renamed as per ClubModel definition
+         isPrivate: _isPrivate,
+         createdAt: Timestamp.now(),
+         membersCount: 1, // 개설자는 자동으로 멤버 1명이 됩니다.
+         imageUrl: imageUrl, // [수정] 업로드된 이미지 URL 전달
+         mainCategory: _selectedInterests.isNotEmpty
+             ? _interestCategories.entries
+                 .firstWhere(
+                   (entry) => entry.value.contains(_selectedInterests.first),
+                   orElse: () => _interestCategories.entries.first,
+                 )
+                 .key
+             : '', // 첫 번째 선택된 관심사의 카테고리, 없으면 빈 문자열
+         interestTags: _selectedInterests, // 선택된 관심사 리스트
+       );
+ 
+       await _repository.createClub(newClub);
+ 
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+           content: Text('clubs.createClub.success'.tr()),
+           backgroundColor: Colors.green,
+         ));
+         Navigator.of(context).pop();
+       }
+diff --git a/lib/features/jobs/data/job_repository.dart b/lib/features/jobs/data/job_repository.dart
+index 5b760afaf63ef2ba24e605439e270940c7eaf1b3..eb1d1211d0e4b9450fe35fbb88e51b7c80403bc3 100644
+--- a/lib/features/jobs/data/job_repository.dart
++++ b/lib/features/jobs/data/job_repository.dart
+@@ -1,53 +1,59 @@
+ // lib/features/jobs/data/job_repository.dart
+ 
+ import 'package:bling_app/features/jobs/models/job_model.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ 
+ class JobRepository {
+   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+ 
+   /// 'jobs' 컬렉션의 모든 구인글 목록을 실시간으로 가져옵니다.
+-  // V V V --- [수정] 사용자의 Province를 기준으로 1차 필터링하도록 변경 --- V V V
+-  Stream<List<JobModel>> fetchJobs(String? userProvince) {
++  Stream<List<JobModel>> fetchJobs({Map<String, String?>? locationFilter}) {
+     Query<Map<String, dynamic>> query = _firestore.collection('jobs');
+-
+-    // 사용자의 위치 정보(Province)가 있을 경우, 해당 지역의 게시물만 가져오도록 쿼리 필터 추가
+-    if (userProvince != null && userProvince.isNotEmpty) {
+-      query = query.where('locationParts.prov', isEqualTo: userProvince);
++    final String? kab = locationFilter?['kab'];
++    if (kab != null && kab.isNotEmpty) {
++      query = query.where('locationParts.kab', isEqualTo: kab);
+     }
+ 
+-    return query
+-        .orderBy('createdAt', descending: true)
+-        .snapshots()
+-        .map((snapshot) {
++    query = query.orderBy('createdAt', descending: true);
++
++    return query.snapshots().asyncMap((snapshot) async {
++      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
++        final fallbackSnapshot = await _firestore
++            .collection('jobs')
++            .where('locationParts.kab', isEqualTo: 'Tangerang')
++            .orderBy('createdAt', descending: true)
++            .get();
++        return fallbackSnapshot.docs
++            .map((doc) => JobModel.fromFirestore(doc))
++            .toList();
++      }
+       return snapshot.docs.map((doc) => JobModel.fromFirestore(doc)).toList();
+     });
+   }
+-  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+ 
+   // V V V --- [추가] 새로운 구인글을 생성하는 함수 --- V V V
+   Future<void> createJob(JobModel job) async {
+     final user = FirebaseAuth.instance.currentUser;
+     if (user == null) throw Exception(tr('main.errors.loginRequired'));
+ 
+     final newJobRef = _firestore.collection('jobs').doc();
+ 
+     // 사용자의 productIds 배열에도 새 상품 ID 추가
+     final userRef = _firestore.collection('users').doc(user.uid);
+ 
+     final batch = _firestore.batch();
+     batch.set(newJobRef, job.toJson());
+     batch.update(userRef, {
+       'jobIds': FieldValue.arrayUnion([newJobRef.id])
+     }); // 'jobIds' 필드에 추가
+ 
+     await batch.commit();
+   }
+   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+ 
+   // V V V --- [추가] ID로 특정 구인글 하나의 정보를 가져오는 함수 --- V V V
+   Future<JobModel?> fetchJob(String jobId) async {
+     final doc = await _firestore.collection('jobs').doc(jobId).get();
+     if (doc.exists) {
+diff --git a/lib/features/jobs/screens/jobs_screen.dart b/lib/features/jobs/screens/jobs_screen.dart
+index bc0a4102648ea31deb36486f6aad83085cc4e963..0107bf09293b5e53452bc187b1ba8cfb6a135765 100644
+--- a/lib/features/jobs/screens/jobs_screen.dart
++++ b/lib/features/jobs/screens/jobs_screen.dart
+@@ -22,66 +22,66 @@ class JobsScreen extends StatelessWidget {
+     if (filter['kel'] != null) {
+       key = 'kel';
+     } else if (filter['kec'] != null) {
+       key = 'kec';
+     } else if (filter['kab'] != null) {
+       key = 'kab';
+     } else if (filter['kota'] != null) {
+       key = 'kota';
+     } else if (filter['prov'] != null) {
+       key = 'prov';
+     }
+     if (key == null) return allJobs;
+ 
+     final value = filter[key]!.toLowerCase();
+     return allJobs
+         .where((job) =>
+             (job.locationParts?[key] ?? '').toString().toLowerCase() == value)
+         .toList();
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     final JobRepository jobRepository = JobRepository();
+     final userProvince = userModel?.locationParts?['prov'];
+ 
+-    if (userModel?.locationParts?['prov'] == null) {
++    if (userProvince == null) {
+       return Center(
+         child: Padding(
+           padding: const EdgeInsets.all(24.0),
+           child: Text('jobs.setLocationPrompt'.tr(),
+               textAlign: TextAlign.center,
+               style: const TextStyle(fontSize: 16, color: Colors.grey)),
+         ),
+       );
+     }
+ 
+     return Scaffold(
+       body: StreamBuilder<List<JobModel>>(
+         // [수정] Stream 타입을 JobModel 리스트로 변경
+         stream:
+-            jobRepository.fetchJobs(userProvince), // [수정] 불필요한 .snapshots() 제거
++            jobRepository.fetchJobs(locationFilter: locationFilter),
+         builder: (context, snapshot) {
+           if (snapshot.connectionState == ConnectionState.waiting) {
+             return const Center(child: CircularProgressIndicator());
+           }
+           if (snapshot.hasError) {
+             return Center(child: Text('Error: ${snapshot.error}'));
+           }
+ 
+           final allJobs = snapshot.data ?? [];
+           // [수정] 2차 필터링 적용
+           final filteredJobs = _applyLocationFilter(allJobs);
+ 
+           if (filteredJobs.isEmpty) {
+             return Center(child: Text('jobs.screen.empty'.tr()));
+           }
+ 
+           return ListView.builder(
+             itemCount: filteredJobs.length,
+             itemBuilder: (context, index) {
+               final job = filteredJobs[index]; // [수정]
+               return JobCard(job: job);
+             },
+           );
+         },
+       ),
+diff --git a/lib/features/local_stores/data/shop_repository.dart b/lib/features/local_stores/data/shop_repository.dart
+index 1b4ffa46caccbdc11f9b3f7ef14af016f73f0737..691e719f1becb698230eeed386272c76e945bbba 100644
+--- a/lib/features/local_stores/data/shop_repository.dart
++++ b/lib/features/local_stores/data/shop_repository.dart
+@@ -8,59 +8,68 @@ import '../models/shop_review_model.dart';
+ /// Handles CRUD operations for shops and reviews in the Local Shops module.
+ class ShopRepository {
+   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+ 
+   CollectionReference<Map<String, dynamic>> get _shopsCollection =>
+       _firestore.collection('shops');
+ 
+   Future<String> createShop(ShopModel shop) async {
+     final doc = await _shopsCollection.add(shop.toJson());
+     return doc.id;
+   }
+ 
+   Future<void> updateShop(ShopModel shop) async {
+     await _shopsCollection.doc(shop.id).update(shop.toJson());
+   }
+ 
+   Future<void> deleteShop(String shopId) async {
+     await _shopsCollection.doc(shopId).delete();
+   }
+ 
+   Future<ShopModel> fetchShop(String shopId) async {
+     final doc = await _shopsCollection.doc(shopId).get();
+     return ShopModel.fromFirestore(doc);
+   }
+ 
+-// V V V --- [수정] 사용자의 Province를 기준으로 1차 필터링하도록 변경 --- V V V
+-  Stream<QuerySnapshot<Map<String, dynamic>>> fetchShops(String? userProvince) {
++  Stream<QuerySnapshot<Map<String, dynamic>>> fetchShops(
++      {Map<String, String?>? locationFilter}) {
+     Query<Map<String, dynamic>> query = _shopsCollection;
+-
+-    if (userProvince != null && userProvince.isNotEmpty) {
+-      query = query.where('locationParts.prov', isEqualTo: userProvince);
++    final String? kab = locationFilter?['kab'];
++    if (kab != null && kab.isNotEmpty) {
++      query = query.where('locationParts.kab', isEqualTo: kab);
+     }
+-
+-    return query.orderBy('createdAt', descending: true).snapshots();
++    query = query.orderBy('createdAt', descending: true);
++
++    return query.snapshots().asyncMap((snapshot) async {
++      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
++        return await _shopsCollection
++            .where('locationParts.kab', isEqualTo: 'Tangerang')
++            .orderBy('createdAt', descending: true)
++            .get();
++      }
++      return snapshot;
++    });
+   }
+ 
+   // V V V --- [추가] 특정 상점 정보를 실시간으로 가져오는 Stream 함수 --- V V V
+   Stream<ShopModel> getShopStream(String shopId) {
+     return _shopsCollection
+         .doc(shopId)
+         .snapshots()
+         .map((snapshot) => ShopModel.fromFirestore(snapshot));
+   }
+ 
+   Future<String> addReview(String shopId, ShopReviewModel review) async {
+     final doc = await _shopsCollection
+         .doc(shopId)
+         .collection('reviews')
+         .add(review.toJson());
+     return doc.id;
+   }
+ 
+   Future<void> updateReview(String shopId, ShopReviewModel review) async {
+     await _shopsCollection
+         .doc(shopId)
+         .collection('reviews')
+         .doc(review.id)
+         .update(review.toJson());
+   }
+diff --git a/lib/features/local_stores/screens/local_stores_screen.dart b/lib/features/local_stores/screens/local_stores_screen.dart
+index 81c573cfd7f4d5102daa4ab9d2214b37e541b312..26bf720e45273c05ae1f7f62c4c56eaae7d9ab79 100644
+--- a/lib/features/local_stores/screens/local_stores_screen.dart
++++ b/lib/features/local_stores/screens/local_stores_screen.dart
+@@ -31,64 +31,65 @@ class LocalStoresScreen extends StatelessWidget {
+     } else if (filter['kota'] != null) {
+       key = 'kota';
+     } else if (filter['prov'] != null) {
+       key = 'prov';
+     }
+     if (key == null) {
+       return allDocs.map((doc) => ShopModel.fromFirestore(doc)).toList();
+     }
+ 
+     final value = filter[key]!.toLowerCase();
+     return allDocs
+         .where((doc) =>
+             (doc.data()['locationParts']?[key] ?? '')
+                 .toString()
+                 .toLowerCase() ==
+             value)
+         .map((doc) => ShopModel.fromFirestore(doc))
+         .toList();
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     final ShopRepository shopRepository = ShopRepository();
+     final userProvince = userModel?.locationParts?['prov'];
+ 
+-    if (userModel?.locationParts?['prov'] == null) {
++    if (userProvince == null) {
+       return Center(
+         child: Padding(
+           padding: const EdgeInsets.all(24.0),
+           child: Text('localStores.setLocationPrompt'.tr(),
+               textAlign: TextAlign.center,
+               style: const TextStyle(fontSize: 16, color: Colors.grey)),
+         ),
+       );
+     }
+ 
+     return Scaffold(
+       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+-        stream: shopRepository.fetchShops(userProvince),
++        stream:
++            shopRepository.fetchShops(locationFilter: locationFilter),
+         builder: (context, snapshot) {
+           if (snapshot.connectionState == ConnectionState.waiting) {
+             return const Center(child: CircularProgressIndicator());
+           }
+           if (snapshot.hasError) {
+             return Center(
+                 child: Text('localStores.error'
+                     .tr(namedArgs: {'error': snapshot.error.toString()})));
+           }
+ 
+           final allDocs = snapshot.data?.docs ?? [];
+           final shops = _applyLocationFilter(allDocs);
+ 
+           if (shops.isEmpty) {
+             return Center(child: Text('localStores.empty'.tr()));
+           }
+ 
+           return ListView.builder(
+             itemCount: shops.length,
+             itemBuilder: (context, index) {
+               return ShopCard(shop: shops[index]);
+             },
+           );
+         },
+       ),
+diff --git a/lib/features/lost_and_found/data/lost_and_found_repository.dart b/lib/features/lost_and_found/data/lost_and_found_repository.dart
+index 99906f2cd6e1166aeb1ac74b3710576b48c0f15d..67fe238ccb376669194fbe489ac5bfa818ad2d34 100644
+--- a/lib/features/lost_and_found/data/lost_and_found_repository.dart
++++ b/lib/features/lost_and_found/data/lost_and_found_repository.dart
+@@ -1,54 +1,66 @@
+ // lib/features/lost_and_found/data/lost_and_found_repository.dart
+ 
+ import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ 
+ class LostAndFoundRepository {
+   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+ 
+   // [수정] 컬렉션 참조를 위한 getter를 정의하여 코드 일관성을 유지합니다.
+   CollectionReference<Map<String, dynamic>> get _lostAndFoundCollection =>
+       _firestore.collection('lost_and_found');
+ 
+   // V V V --- [수정] fetchItems 함수에 locationFilter를 적용합니다 --- V V V
+   Stream<List<LostItemModel>> fetchItems({Map<String, String?>? locationFilter}) {
+-    Query query = _firestore.collection('lost_and_found').orderBy('createdAt', descending: true);
++    Query<Map<String, dynamic>> query =
++        _firestore.collection('lost_and_found').orderBy('createdAt', descending: true);
++    final String? kab = locationFilter?['kab'];
+ 
+     if (locationFilter != null) {
+       if (locationFilter['prov'] != null && locationFilter['prov']!.isNotEmpty) {
+         query = query.where('locationParts.prov', isEqualTo: locationFilter['prov']);
+       }
+       if (locationFilter['kab'] != null && locationFilter['kab']!.isNotEmpty) {
+         query = query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+       }
+       if (locationFilter['kec'] != null && locationFilter['kec']!.isNotEmpty) {
+         query = query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+       }
+       if (locationFilter['kel'] != null && locationFilter['kel']!.isNotEmpty) {
+         query = query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+       }
+     }
+ 
+-    return query.snapshots().map((snapshot) {
++    return query.snapshots().asyncMap((snapshot) async {
++      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
++        final fallbackSnapshot = await _firestore
++            .collection('lost_and_found')
++            .where('locationParts.kab', isEqualTo: 'Tangerang')
++            .orderBy('createdAt', descending: true)
++            .get();
++        return fallbackSnapshot.docs
++            .map((doc) => LostItemModel.fromFirestore(doc))
++            .toList();
++      }
+       return snapshot.docs
+-          .map((doc) => LostItemModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
++          .map((doc) => LostItemModel.fromFirestore(doc))
+           .toList();
+     });
+   }
+ 
+   /// 새로운 분실/습득물을 생성하는 함수입니다.
+   Future<void> createItem(LostItemModel item) async {
+     await _lostAndFoundCollection.add(item.toJson()); // [수정] getter 사용
+   }
+ 
+   /// 분실/습득물 정보를 수정하는 함수입니다.
+   Future<void> updateItem(LostItemModel item) async {
+     await _lostAndFoundCollection.doc(item.id).update(item.toJson());
+   }
+ 
+   /// 분실/습득물 정보를 삭제하는 함수입니다.
+   Future<void> deleteItem(String itemId) async {
+     // TODO: Storage에 업로드된 관련 이미지도 함께 삭제하는 로직 추가 필요
+     await _lostAndFoundCollection.doc(itemId).delete();
+   }
+ }
+\ No newline at end of file
+diff --git a/lib/features/lost_and_found/models/lost_item_model.dart b/lib/features/lost_and_found/models/lost_item_model.dart
+index 86cadecd0dee9f764c708e350962dcc5d0184a3d..8a0b222395b480dfe66b5b7705ca7d8fa2777e77 100644
+--- a/lib/features/lost_and_found/models/lost_item_model.dart
++++ b/lib/features/lost_and_found/models/lost_item_model.dart
+@@ -1,62 +1,68 @@
+ // lib/core/models/lost_item_model.dart
+ 
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ 
+ /// 분실/습득물 정보를 담는 데이터 모델입니다.
+ /// Firestore의 `lost_and_found` 컬렉션 문서 구조와 대응됩니다.
+ class LostItemModel {
+   final String id;
+   final String userId; // 등록자 ID
+   final String type; // 'lost' 또는 'found'
+   final String itemDescription; // 물건 설명
+   final String locationDescription; // 분실/습득 장소 설명
++  final Map<String, dynamic>? locationParts;
+   final GeoPoint? geoPoint;
+   final List<String> imageUrls;
+   final Timestamp createdAt;
+   final bool isHunted; // 현상금(Hunted) 여부
+   final int? bountyAmount; // 현상금 금액
+ 
+   LostItemModel({
+     required this.id,
+     required this.userId,
+     required this.type,
+     required this.itemDescription,
+     required this.locationDescription,
++    this.locationParts,
+     this.geoPoint,
+     required this.imageUrls,
+     required this.createdAt,
+     this.isHunted = false,
+     this.bountyAmount,
+   });
+   
+ 
+   factory LostItemModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+     final data = doc.data() ?? {};
+     return LostItemModel(
+       id: doc.id,
+       userId: data['userId'] ?? '',
+       type: data['type'] ?? 'lost',
+       itemDescription: data['itemDescription'] ?? '',
+       locationDescription: data['locationDescription'] ?? '',
++      locationParts: data['locationParts'] != null
++          ? Map<String, dynamic>.from(data['locationParts'])
++          : null,
+       geoPoint: data['geoPoint'],
+       imageUrls: List<String>.from(data['imageUrls'] ?? []),
+       createdAt: data['createdAt'] ?? Timestamp.now(),
+       isHunted: data['isHunted'] ?? false,
+       bountyAmount: data['bountyAmount'],
+     );
+   }
+ 
+   Map<String, dynamic> toJson() {
+     return {
+       'userId': userId,
+       'type': type,
+       'itemDescription': itemDescription,
+       'locationDescription': locationDescription,
++      'locationParts': locationParts,
+       'geoPoint': geoPoint,
+       'imageUrls': imageUrls,
+       'createdAt': createdAt,
+       'isHunted': isHunted,
+       'bountyAmount': bountyAmount,
+     };
+   }
+ }
+\ No newline at end of file
+diff --git a/lib/features/lost_and_found/screens/create_lost_item_screen.dart b/lib/features/lost_and_found/screens/create_lost_item_screen.dart
+index cf6b46d9e0e78f4b707ff3460445ec8d154978af..e5c3de90a44b235b6b061ea37457603f1f82b81a 100644
+--- a/lib/features/lost_and_found/screens/create_lost_item_screen.dart
++++ b/lib/features/lost_and_found/screens/create_lost_item_screen.dart
+@@ -63,50 +63,51 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
+ 
+     setState(() => _isSaving = true);
+     final user = FirebaseAuth.instance.currentUser;
+     if (user == null) {
+       setState(() => _isSaving = false);
+       return;
+     }
+ 
+     try {
+       List<String> imageUrls = [];
+       for (var imageFile in _images) {
+         final fileName = const Uuid().v4();
+         final ref = FirebaseStorage.instance
+             .ref()
+             .child('lost_and_found/${user.uid}/$fileName');
+         await ref.putFile(File(imageFile.path));
+         imageUrls.add(await ref.getDownloadURL());
+       }
+ 
+       final newItem = LostItemModel(
+         id: '',
+         userId: user.uid,
+         type: _type,
+         itemDescription: _itemDescriptionController.text.trim(),
+         locationDescription: _locationDescriptionController.text.trim(),
++        locationParts: widget.userModel.locationParts,
+         geoPoint: widget.userModel.geoPoint,
+         imageUrls: imageUrls,
+         createdAt: Timestamp.now(),
+       );
+ 
+       // [수정] 주석을 해제하여 DB 저장 기능을 활성화합니다.
+       await _repository.createItem(newItem);
+ 
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+             content: Text('lostAndFound.form.success'.tr()),
+             backgroundColor: Colors.green));
+         Navigator.of(context).pop();
+       }
+     } catch (e) {
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+             content: Text('lostAndFound.form.fail'
+                 .tr(namedArgs: {'error': e.toString()})),
+             backgroundColor: Colors.red));
+       }
+     } finally {
+       if (mounted) setState(() => _isSaving = false);
+     }
+   }
+diff --git a/lib/features/pom/data/short_repository.dart b/lib/features/pom/data/short_repository.dart
+index 7f3cdffa90b8fc69d8fda56efb9af14e8a25261b..8fa6fb7a24a9ce21334c0a4c8f2ccc9b9c26b258 100644
+--- a/lib/features/pom/data/short_repository.dart
++++ b/lib/features/pom/data/short_repository.dart
+@@ -1,80 +1,110 @@
+ // lib/features/pom/data/short_repository.dart
+ 
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import '../models/short_model.dart';
+ import '../models/short_comment_model.dart';
+ 
+ class ShortRepository {
+   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+   final FirebaseAuth _auth = FirebaseAuth.instance;
+ 
+   CollectionReference<Map<String, dynamic>> get _shortsCollection =>
+       _firestore.collection('shorts');
+   CollectionReference<Map<String, dynamic>> get _usersCollection =>
+       _firestore.collection('users');
+ 
+ 
+ // V V V --- [추가] 특정 POM 영상 하나만 실시간으로 감시하는 함수 --- V V V
+   Stream<ShortModel> getShortStream(String shortId) {
+     return _shortsCollection.doc(shortId).snapshots()
+         .map((snapshot) => ShortModel.fromFirestore(snapshot));
+   }
+ 
+ 
+-  Stream<List<ShortModel>> fetchShorts() {
+-    return _shortsCollection
+-        .orderBy('createdAt', descending: true)
+-        .limit(20)
+-        .snapshots()
+-        .map((snapshot) =>
+-            snapshot.docs.map((doc) => ShortModel.fromFirestore(doc)).toList());
++  Stream<List<ShortModel>> fetchShorts({Map<String, String?>? locationFilter}) {
++    Query<Map<String, dynamic>> query = _shortsCollection;
++    final String? kab = locationFilter?['kab'];
++    if (kab != null && kab.isNotEmpty) {
++      query = query.where('locationParts.kab', isEqualTo: kab);
++    }
++    query = query.orderBy('createdAt', descending: true).limit(20);
++
++    return query.snapshots().asyncMap((snapshot) async {
++      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
++        final fallbackSnapshot = await _shortsCollection
++            .where('locationParts.kab', isEqualTo: 'Tangerang')
++            .orderBy('createdAt', descending: true)
++            .limit(20)
++            .get();
++        return fallbackSnapshot.docs
++            .map((doc) => ShortModel.fromFirestore(doc))
++            .toList();
++      }
++      return snapshot.docs
++          .map((doc) => ShortModel.fromFirestore(doc))
++          .toList();
++    });
+   }
+ 
+ // V V V --- [추가] POM 목록을 한 번만 가져오는 함수 --- V V V
+   Future<List<ShortModel>> fetchShortsOnce({Map<String, String?>? locationFilter}) async {
+-    Query query = _firestore.collection('shorts').orderBy('createdAt', descending: true);
++    Query<Map<String, dynamic>> query =
++        _firestore.collection('shorts').orderBy('createdAt', descending: true);
++    final String? kab = locationFilter?['kab'];
+ 
++    if (kab != null && kab.isNotEmpty) {
++      query = query.where('locationParts.kab', isEqualTo: kab);
++    }
+     if (locationFilter != null) {
+       if (locationFilter['prov'] != null && locationFilter['prov']!.isNotEmpty) {
+         query = query.where('locationParts.prov', isEqualTo: locationFilter['prov']);
+       }
+-      if (locationFilter['kab'] != null && locationFilter['kab']!.isNotEmpty) {
+-        query = query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+-      }
+       if (locationFilter['kec'] != null && locationFilter['kec']!.isNotEmpty) {
+         query = query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+       }
+       if (locationFilter['kel'] != null && locationFilter['kel']!.isNotEmpty) {
+         query = query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+       }
+     }
+-    
++
++    query = query.limit(20);
+     final snapshot = await query.get();
++    if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
++      final fallbackSnapshot = await _firestore
++          .collection('shorts')
++          .where('locationParts.kab', isEqualTo: 'Tangerang')
++          .orderBy('createdAt', descending: true)
++          .limit(20)
++          .get();
++      return fallbackSnapshot.docs
++          .map((doc) => ShortModel.fromFirestore(doc))
++          .toList();
++    }
+     return snapshot.docs
+-        .map((doc) => ShortModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
++        .map((doc) => ShortModel.fromFirestore(doc))
+         .toList();
+   }
+   
+   Future<String> createShort(ShortModel short) async {
+     final docRef = await _shortsCollection.add(short.toJson());
+     return docRef.id;
+   }
+ 
+   // V V V --- [추가] POM '좋아요' 토글 함수 --- V V V
+   Future<void> toggleShortLike(String shortId, bool isLiked) async {
+     final currentUserId = _auth.currentUser?.uid;
+     if (currentUserId == null) return;
+ 
+     final shortRef = _shortsCollection.doc(shortId);
+     final userRef = _usersCollection.doc(currentUserId);
+ 
+     final batch = _firestore.batch();
+ 
+     if (isLiked) {
+       // 좋아요 취소
+       batch.update(shortRef, {
+         'likesCount': FieldValue.increment(-1),
+         'likes': FieldValue.arrayRemove([currentUserId])
+       });
+       batch.update(userRef, {
+diff --git a/lib/features/pom/models/short_model.dart b/lib/features/pom/models/short_model.dart
+index c346cb3f9b8ea803af64c94ca33b82b1e762d29b..dd718041018258a52c18ce931ab5a512007d88ef 100644
+--- a/lib/features/pom/models/short_model.dart
++++ b/lib/features/pom/models/short_model.dart
+@@ -1,85 +1,91 @@
+ // lib/core/models/short_model.dart
+ 
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ 
+ /// Model representing a short video uploaded to the POM (Piece of Moment)
+ /// short-video hub.
+ class ShortModel {
+   final String id;
+   final String userId;
+   final String title;
+   final String videoUrl;
+   final String thumbnailUrl;
+   final String description;
+   final String? location;
++  final Map<String, dynamic>? locationParts;
+   final GeoPoint? geoPoint;
+   final List<String>? tags;
+   final int likesCount;
+   final int viewsCount;
+   final int commentsCount;
+   final bool trustLevelVerified;
+   final bool isAiVerified;
+   final Timestamp createdAt;
+ 
+ 
+   ShortModel({
+     required this.id,
+     required this.userId,
+     required this.title,
+     required this.videoUrl,
+     required this.thumbnailUrl,
+     required this.description,
+     this.location,
++    this.locationParts,
+     this.geoPoint,
+     this.tags,
+     this.likesCount = 0,
+     this.viewsCount = 0,
+     this.commentsCount = 0,
+     this.trustLevelVerified = false,
+     this.isAiVerified = false,
+     required this.createdAt,
+   });
+ 
+   factory ShortModel.fromFirestore(
+       DocumentSnapshot<Map<String, dynamic>> doc) {
+     final data = doc.data() ?? {};
+     return ShortModel(
+       id: doc.id,
+       userId: data['userId'] ?? '',
+       title: data['title'] ?? '',
+       videoUrl: data['videoUrl'] ?? '',
+       thumbnailUrl: data['thumbnailUrl'] ?? '',
+       description: data['description'] ?? '',
+       location: data['location'],
++      locationParts: data['locationParts'] != null
++          ? Map<String, dynamic>.from(data['locationParts'])
++          : null,
+       geoPoint: data['geoPoint'],
+       tags: data['tags'] != null ? List<String>.from(data['tags']) : null,
+       likesCount: data['likesCount'] ?? 0,
+       viewsCount: data['viewsCount'] ?? 0,
+       commentsCount: data['commentsCount'] ?? 0,
+       trustLevelVerified: data['trustLevelVerified'] ?? false,
+       isAiVerified: data['isAiVerified'] ?? false,
+       createdAt: data['createdAt'] ?? Timestamp.now(),
+     );
+   }
+ 
+ 
+   Map<String, dynamic> toJson() {
+     return {
+       'userId': userId,
+       'title': title,
+       'videoUrl': videoUrl,
+       'thumbnailUrl': thumbnailUrl,
+       'description': description,
+       'location': location,
++      'locationParts': locationParts,
+       'geoPoint': geoPoint,
+       'tags': tags,
+       'likesCount': likesCount,
+       'viewsCount': viewsCount,
+       'commentsCount': commentsCount,
+       'trustLevelVerified': trustLevelVerified,
+       'isAiVerified': isAiVerified,
+       'createdAt': createdAt,
+     };
+   }
+ }
+ 
+diff --git a/lib/features/pom/screens/create_short_screen.dart b/lib/features/pom/screens/create_short_screen.dart
+index 9066ae6e29119fbc96a8ae07fb97e9db9548c566..74ad986a049b111911d3ea901262b8e580f517d6 100644
+--- a/lib/features/pom/screens/create_short_screen.dart
++++ b/lib/features/pom/screens/create_short_screen.dart
+@@ -57,50 +57,52 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
+ 
+     setState(() => _isSaving = true);
+     final user = FirebaseAuth.instance.currentUser;
+     if (user == null) return;
  
      try {
        // 1. 비디오를 Firebase Storage에 업로드
        final fileName = const Uuid().v4();
-       final ref = FirebaseStorage.instance.ref().child('shorts/${user.uid}/$fileName.mp4');
+       final ref = FirebaseStorage.instance
+           .ref()
+           .child('shorts/${user.uid}/$fileName.mp4');
        final uploadTask = ref.putFile(File(_videoFile!.path));
        final snapshot = await uploadTask.whenComplete(() {});
        final videoUrl = await snapshot.ref.getDownloadURL();
@@ -210,10 +914,13 @@ index 51a6cf0ad3136d5b1860e38a63772279d74a96b2..1652639660720b4a39540e0205954504
          id: '',
          userId: user.uid,
          videoUrl: videoUrl,
-         title: _descriptionController.text.trim(), // You may want a separate title field
+         title: _descriptionController.text
+             .trim(), // You may want a separate title field
          thumbnailUrl: '', // Provide a valid thumbnail URL if available
          description: _descriptionController.text.trim(),
          location: widget.userModel.locationName ?? 'Unknown',
++        locationParts: widget.userModel.locationParts,
++        geoPoint: widget.userModel.geoPoint,
          createdAt: Timestamp.now(),
        );
  
@@ -221,15 +928,17 @@ index 51a6cf0ad3136d5b1860e38a63772279d74a96b2..1652639660720b4a39540e0205954504
        await _repository.createShort(newShort);
  
        if (mounted) {
--        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('POM이 등록되었습니다.'), backgroundColor: Colors.green));
-+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('pom.create.success'.tr()), backgroundColor: Colors.green));
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+             content: Text('pom.create.success'.tr()),
+             backgroundColor: Colors.green));
          Navigator.of(context).pop();
        }
      } catch (e) {
        if (mounted) {
--        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('등록에 실패했습니다: $e'), backgroundColor: Colors.red));
-+        ScaffoldMessenger.of(context).showSnackBar(
-+            SnackBar(content: Text('pom.create.fail'.tr(namedArgs: {'error': e.toString()})), backgroundColor: Colors.red));
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+             content:
+                 Text('pom.create.fail'.tr(namedArgs: {'error': e.toString()})),
+             backgroundColor: Colors.red));
        }
      } finally {
        if (mounted) setState(() => _isSaving = false);
@@ -237,59 +946,79 @@ index 51a6cf0ad3136d5b1860e38a63772279d74a96b2..1652639660720b4a39540e0205954504
    }
  
    @override
-   Widget build(BuildContext context) {
-     return Scaffold(
-       appBar: AppBar(
--        title: Text('새 POM 등록'), // TODO: 다국어
-+        title: Text('pom.create.title'.tr()),
-         actions: [
-           if (!_isSaving)
--            TextButton(onPressed: _submitShort, child: Text('등록')), // TODO: 다국어
-+            TextButton(onPressed: _submitShort, child: Text('pom.create.submit'.tr())),
-         ],
-       ),
-       body: Stack(
-         children: [
-           ListView(
-             padding: const EdgeInsets.all(16.0),
-             children: [
-               GestureDetector(
-                 onTap: _pickVideo,
-                 child: Container(
-                   height: 300,
-                   decoration: BoxDecoration(
-                     border: Border.all(color: Colors.grey.shade300),
-                     borderRadius: BorderRadius.circular(12),
-                   ),
-                   child: (_videoController != null && _videoController!.value.isInitialized)
-                       ? ClipRRect(
-                           borderRadius: BorderRadius.circular(12),
-                           child: AspectRatio(
-                             aspectRatio: _videoController!.value.aspectRatio,
-                             child: VideoPlayer(_videoController!),
-                           ),
-                         )
-                       : const Center(child: Icon(Icons.video_call_outlined, size: 60, color: Colors.grey)),
-                 ),
-               ),
-               const SizedBox(height: 24),
-               TextField(
-                 controller: _descriptionController,
--                decoration: const InputDecoration(
--                  labelText: '영상 설명', // TODO: 다국어
--                  border: OutlineInputBorder(),
-+                decoration: InputDecoration(
-+                  labelText: 'pom.create.form.descriptionLabel'.tr(),
-+                  border: const OutlineInputBorder(),
-                 ),
-                 maxLines: 3,
-               ),
-             ],
-           ),
-           if (_isSaving)
-             Container(color: Colors.black.withValues(alpha: 0.5), child: const Center(child: CircularProgressIndicator())),
-         ],
-       ),
-     );
+diff --git a/lib/features/real_estate/data/room_repository.dart b/lib/features/real_estate/data/room_repository.dart
+index 686f99593ae2dd2da8ad92047b1da8ef7a848c58..263afc06fb96e316e4b706f16b56c6782bf0b936 100644
+--- a/lib/features/real_estate/data/room_repository.dart
++++ b/lib/features/real_estate/data/room_repository.dart
+@@ -1,54 +1,59 @@
+ // lib/features/real_estate/data/room_repository.dart
+ 
+ import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ 
+ class RoomRepository {
+   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+ 
+   CollectionReference<Map<String, dynamic>> get _roomsCollection =>
+       _firestore.collection('room_listings');
+ 
+   // V V V --- [수정] locationFilter를 적용한 최종 fetchRooms 함수 --- V V V
+   Stream<List<RoomListingModel>> fetchRooms({Map<String, String?>? locationFilter}) {
+-    // 1. 기본 쿼리를 생성합니다.
+-    Query query = _roomsCollection
++    Query<Map<String, dynamic>> query = _roomsCollection
+         .where('isAvailable', isEqualTo: true)
+         .orderBy('createdAt', descending: true);
+ 
+-    // 2. 사용자가 지역 필터를 설정한 경우, 해당 지역으로 쿼리 조건을 추가합니다.
+-    if (locationFilter != null) {
+-      final kab = locationFilter['kab'];
+-      if (kab != null && kab.isNotEmpty) {
+-        query = query.where('locationParts.kab', isEqualTo: kab);
+-      }
+-      // 다른 지역 단위(kec, kel)에 대한 필터가 필요하면 여기에 추가합니다.
++    final String? kab = locationFilter?['kab'];
++    if (kab != null && kab.isNotEmpty) {
++      query = query.where('locationParts.kab', isEqualTo: kab);
+     }
+ 
+-    return query.snapshots().map((snapshot) {
++    return query.snapshots().asyncMap((snapshot) async {
++      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
++        final fallbackSnapshot = await _roomsCollection
++            .where('isAvailable', isEqualTo: true)
++            .where('locationParts.kab', isEqualTo: 'Tangerang')
++            .orderBy('createdAt', descending: true)
++            .get();
++        return fallbackSnapshot.docs
++            .map((doc) => RoomListingModel.fromFirestore(doc))
++            .toList();
++      }
+       return snapshot.docs
+-          .map((doc) => RoomListingModel.fromFirestore(doc as QueryDocumentSnapshot<Map<String, dynamic>>))
++          .map((doc) => RoomListingModel.fromFirestore(doc))
+           .toList();
+     });
+   }
+   // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+ 
+   Future<void> createRoomListing(RoomListingModel room) async {
+     await _roomsCollection.add(room.toJson());
+   }
+ 
+   Future<void> updateRoomListing(RoomListingModel room) async {
+     await _roomsCollection.doc(room.id).update(room.toJson());
+   }
+ 
+   Future<void> deleteRoomListing(String roomId) async {
+     await _roomsCollection.doc(roomId).delete();
+   }
+ 
+   Stream<RoomListingModel> getRoomStream(String roomId) {
+     return _roomsCollection
+         .doc(roomId)
+         .snapshots()
+         .map((snapshot) => RoomListingModel.fromFirestore(snapshot));
    }
  }
+\ No newline at end of file
