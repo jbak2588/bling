@@ -28,7 +28,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   final List<String> _selectedInterests = [];
   bool _isPrivate = false;
   bool _isSaving = false;
-   Map<String, String?>? _selectedLocationParts;
+  Map<String, String?>? _selectedLocationParts;
 
   // V V V --- [추가] 이미지 관련 상태 변수 --- V V V
   XFile? _selectedImage;
@@ -87,15 +87,13 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
     }
   }
 
-    Future<void> _selectLocation() async {
-    final result = await Navigator.of(context)
-        .push<Map<String, String?>>(
-            MaterialPageRoute(builder: (_) => const LocationFilterScreen()));
+  Future<void> _selectLocation() async {
+    final result = await Navigator.of(context).push<Map<String, String?>>(
+        MaterialPageRoute(builder: (_) => const LocationFilterScreen()));
     if (result != null) {
       setState(() => _selectedLocationParts = result);
     }
   }
-
 
   // [수정] 동호회 생성 로직 구현
 
@@ -110,7 +108,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
       );
       return;
     }
-      if (_selectedLocationParts == null) {
+    if (_selectedLocationParts == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select location')),
       );
@@ -130,18 +128,20 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
         imageUrl = await ref.getDownloadURL();
       }
 
+      final parts = widget.userModel.locationParts;
+
       final newClub = ClubModel(
         id: '', // ID는 Firestore에서 자동으로 생성됩니다.
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         ownerId: widget.userModel.uid,
-          location: _selectedLocationParts?['kel'] ??
-            _selectedLocationParts?['kec'] ??
-            _selectedLocationParts?['kab'] ??
-            _selectedLocationParts?['kota'] ??
-            _selectedLocationParts?['prov'] ??
+        location: parts?['kel'] ??
+            parts?['kec'] ??
+            parts?['kab'] ??
+            parts?['kota'] ??
+            parts?['prov'] ??
             'Unknown',
-        locationParts: _selectedLocationParts,
+        locationParts: parts,
         // interests: _selectedInterests, // Removed or renamed as per ClubModel definition
         isPrivate: _isPrivate,
         createdAt: Timestamp.now(),
@@ -264,7 +264,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                   },
                 ),
                 const SizedBox(height: 24),
-                    ListTile(
+                ListTile(
                   title: const Text('Location'),
                   subtitle: Text(
                     _selectedLocationParts?['kel'] ??

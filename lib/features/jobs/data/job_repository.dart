@@ -10,22 +10,30 @@ class JobRepository {
 
   /// 'jobs' 컬렉션의 모든 구인글 목록을 실시간으로 가져옵니다.
   // V V V --- [수정] 사용자의 Province를 기준으로 1차 필터링하도록 변경 --- V V V
-  Stream<List<JobModel>> fetchJobs(String? userProvince) {
+ Stream<List<JobModel>> fetchJobs({Map<String, String?>? locationFilter}) {
     Query<Map<String, dynamic>> query = _firestore.collection('jobs');
 
-    // 사용자의 위치 정보(Province)가 있을 경우, 해당 지역의 게시물만 가져오도록 쿼리 필터 추가
-    if (userProvince != null && userProvince.isNotEmpty) {
-      query = query.where('locationParts.prov', isEqualTo: userProvince);
+     final String? kab = locationFilter?['kab'];
+    if (kab != null && kab.isNotEmpty) {
+      query = query.where('locationParts.kab', isEqualTo: kab);
     }
 
-    return query
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) {
+  query = query.orderBy('createdAt', descending: true);
+
+    return query.snapshots().asyncMap((snapshot) async {
+      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
+        final fallbackSnapshot = await _firestore
+            .collection('jobs')
+            .where('locationParts.kab', isEqualTo: 'Tangerang')
+            .orderBy('createdAt', descending: true)
+            .get();
+        return fallbackSnapshot.docs
+            .map((doc) => JobModel.fromFirestore(doc))
+            .toList();
+      }
       return snapshot.docs.map((doc) => JobModel.fromFirestore(doc)).toList();
     });
   }
-  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
   // V V V --- [추가] 새로운 구인글을 생성하는 함수 --- V V V
   Future<void> createJob(JobModel job) async {

@@ -81,6 +81,8 @@ class ClubRepository {
   Stream<List<ClubModel>> fetchClubs({Map<String, String?>? locationFilter}) {
     Query<Map<String, dynamic>> query = _clubs;
     final filter = locationFilter;
+
+    final String? kab = filter?['kab'];
     if (filter != null) {
       if (filter['kel'] != null) {
         query = query.where('locationParts.kel', isEqualTo: filter['kel']);
@@ -94,9 +96,20 @@ class ClubRepository {
         query = query.where('locationParts.prov', isEqualTo: filter['prov']);
       }
     }
-    return query.orderBy('createdAt', descending: true).snapshots().map(
-        (snapshot) =>
-            snapshot.docs.map((doc) => ClubModel.fromFirestore(doc)).toList());
+    query = query.orderBy('createdAt', descending: true);
+
+    return query.snapshots().asyncMap((snapshot) async {
+      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
+        final fallbackSnapshot = await _clubs
+            .where('locationParts.kab', isEqualTo: 'Tangerang')
+            .orderBy('createdAt', descending: true)
+            .get();
+        return fallbackSnapshot.docs
+            .map((doc) => ClubModel.fromFirestore(doc))
+            .toList();
+      }
+      return snapshot.docs.map((doc) => ClubModel.fromFirestore(doc)).toList();
+    });
   }
 
   // V V V --- [추가] 특정 동호회 정보를 실시간으로 가져오는 Stream 함수 --- V V V

@@ -79,6 +79,8 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
         thumbnailUrl: '', // Provide a valid thumbnail URL if available
         description: _descriptionController.text.trim(),
         location: widget.userModel.locationName ?? 'Unknown',
+        locationParts: widget.userModel.locationParts,
+        geoPoint: widget.userModel.geoPoint,
         createdAt: Timestamp.now(),
       );
 

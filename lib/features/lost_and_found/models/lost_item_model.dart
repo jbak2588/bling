@@ -10,6 +10,7 @@ class LostItemModel {
   final String type; // 'lost' 또는 'found'
   final String itemDescription; // 물건 설명
   final String locationDescription; // 분실/습득 장소 설명
+    final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
   final List<String> imageUrls;
   final Timestamp createdAt;
@@ -22,6 +23,7 @@ class LostItemModel {
     required this.type,
     required this.itemDescription,
     required this.locationDescription,
+     this.locationParts,
     this.geoPoint,
     required this.imageUrls,
     required this.createdAt,
@@ -38,6 +40,9 @@ class LostItemModel {
       type: data['type'] ?? 'lost',
       itemDescription: data['itemDescription'] ?? '',
       locationDescription: data['locationDescription'] ?? '',
+        locationParts: data['locationParts'] != null
+          ? Map<String, dynamic>.from(data['locationParts'])
+          : null,
       geoPoint: data['geoPoint'],
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
       createdAt: data['createdAt'] ?? Timestamp.now(),
@@ -52,6 +57,7 @@ class LostItemModel {
       'type': type,
       'itemDescription': itemDescription,
       'locationDescription': locationDescription,
+        'locationParts': locationParts,
       'geoPoint': geoPoint,
       'imageUrls': imageUrls,
       'createdAt': createdAt,

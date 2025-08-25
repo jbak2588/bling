@@ -53,7 +53,7 @@ class LocalStoresScreen extends StatelessWidget {
     final ShopRepository shopRepository = ShopRepository();
     final userProvince = userModel?.locationParts?['prov'];
 
-    if (userModel?.locationParts?['prov'] == null) {
+  if (userProvince == null) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -66,7 +66,8 @@ class LocalStoresScreen extends StatelessWidget {
 
     return Scaffold(
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: shopRepository.fetchShops(userProvince),
+        stream:
+            shopRepository.fetchShops(locationFilter: locationFilter),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

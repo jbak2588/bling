@@ -44,7 +44,7 @@ class JobsScreen extends StatelessWidget {
     final JobRepository jobRepository = JobRepository();
     final userProvince = userModel?.locationParts?['prov'];
 
-    if (userModel?.locationParts?['prov'] == null) {
+    if (userProvince == null) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -59,7 +59,7 @@ class JobsScreen extends StatelessWidget {
       body: StreamBuilder<List<JobModel>>(
         // [수정] Stream 타입을 JobModel 리스트로 변경
         stream:
-            jobRepository.fetchJobs(userProvince), // [수정] 불필요한 .snapshots() 제거
+          jobRepository.fetchJobs(locationFilter: locationFilter),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
