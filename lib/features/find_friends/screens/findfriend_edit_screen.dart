@@ -14,12 +14,9 @@
 /// I18N          : 키 `findFriend.editTitle` (assets/lang/*.json) - TODO: 키 확인.
 /// Dependencies  : firebase_storage, firebase_auth, cloud_firestore, image_picker
 /// Security/Auth : 프로필 소유자만 수정할 수 있으며 Storage 경로는 UID로 제한됩니다.
-<<<<<<< HEAD
 /// Edge Cases    : 이미지 미선택, 업로드 실패./// 실제 구현 비교 : 나이, 나이 범위, 이미지, 공개 여부 등 모든 필드가 UI/로직에 완비되어 있음. 프로필 수정 정상 동작.
-=======
 /// Edge Cases    : 이미지 미선택, 업로드 실패.
 /// 실제 구현 비교 : 나이, 나이 범위, 이미지, 공개 여부 등 모든 필드가 UI/로직에 완비되어 있음. 프로필 수정 정상 동작.
->>>>>>> 039b98320b865c27dc8be3d24e8ba31540ea21af
 /// 개선 제안     : KPI/통계/프리미엄 기능 실제 구현 필요. 이미지 업로드/공개 여부 UX 강화. 신고/차단/신뢰 등급 UI 노출 및 기능 강화.
 /// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
 /// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md; docs/team/teamF_Design_Privacy_Module_통합_작업문.md

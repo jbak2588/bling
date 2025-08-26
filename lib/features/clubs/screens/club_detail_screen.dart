@@ -21,10 +21,7 @@
 // - 민감한 동호회를 위한 비공개 옵션 및 신뢰 등급 제한 확대.
 // - 멤버 관리 및 가입 UX/UI 개선.
 // =====================================================
-<<<<<<< HEAD
-=======
 
->>>>>>> 039b98320b865c27dc8be3d24e8ba31540ea21af
 
 import 'package:bling_app/features/clubs/models/club_member_model.dart';
 import 'package:bling_app/features/clubs/models/club_model.dart';

@@ -28,10 +28,6 @@
 /// - 향후 개선: 지역 단위별 추천·광고·커뮤니티 연계, UI/UX(지도 시각화, 애니메이션 등) 강화, 데이터 기반 KPI/Analytics 연동
 library;
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 039b98320b865c27dc8be3d24e8ba31540ea21af
 import 'package:bling_app/core/models/feed_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/main_feed/data/feed_repository.dart';

@@ -1,8 +1,4 @@
 // 파일 경로: lib/features/main_screen/main_navigation_screen.dart
-<<<<<<< HEAD
-
-=======
->>>>>>> 039b98320b865c27dc8be3d24e8ba31540ea21af
 /// [기획 문서: 00 Mainscreen & 런처 & Tab & Drawer QA.md]
 /// - 기획 요약: 메인 네비게이션 구조, AppBar/Drawer/BottomNavigationBar, 위치 필터, 사용자 흐름, 반응형 정책 등
 /// - 실제 코드 기능: MainNavigationScreen에서 AppBar, Drawer, BottomNavigationBar, 위치 필터, 사용자 정보, 알림 등 네비게이션 및 메인 화면 관리
