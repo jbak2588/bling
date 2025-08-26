@@ -1,4 +1,10 @@
 // 파일 경로: lib/features/auth/screens/auth_gate.dart
+/// [기획 문서: 00 Mainscreen & 런처 & Tab & Drawer QA.md]
+/// - 기획 요약: 인증 게이트를 통해 사용자 흐름 제어, 로그인/회원 인증 후 메인 네비게이션 진입
+/// - 실제 코드 기능: Firebase 인증 상태에 따라 로그인 또는 메인 네비게이션 화면으로 분기
+/// - 비교: 기획의 사용자 흐름 제어가 실제 코드에서 StreamBuilder와 상태 분기로 구현됨
+library;
+
 import 'package:bling_app/features/location/screens/neighborhood_prompt_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';

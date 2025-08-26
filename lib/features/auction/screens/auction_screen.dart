@@ -1,4 +1,23 @@
 // lib/features/auction/screens/auction_screen.dart
+/// [기획/실제 코드 분석 및 개선 제안]
+/// 1. 기획 문서 요약
+///   - 지역 기반 프리미엄 경매, 위치 인증, 신뢰등급(TrustLevel), AI 검수 등 안전·품질 정책
+///   - 실시간 입찰, 채팅, 프로필 연동, 활동 히스토리 등 상호작용 기능
+///   - 카테고리/조건 기반 필터, 공지/신고/차단 등 운영 기능, KPI/Analytics, 광고/프로모션, 다국어(i18n)
+///
+/// 2. 실제 코드 분석
+///   - 위치 기반 필터로 경매 목록 표시, Firestore auctions 컬렉션, locationParts 기반 정렬/필터
+///   - 신뢰등급, AI 검수, KPI/Analytics, 다국어(i18n) 등 정책 반영, Edge case 처리
+///
+/// 3. 기획과 실제 기능의 차이점
+///   - 기획보다 좋아진 점: 데이터 모델 세분화, 위치·신뢰등급·AI 검수 등 품질·운영 기능 강화, KPI/Analytics, 광고/프로모션, 다국어(i18n) 등 실제 서비스 운영에 필요한 기능 반영
+///   - 기획에 못 미친 점: 실시간 채팅, 활동 히스토리, 광고 슬롯 등 일부 상호작용·운영 기능 미구현, AI 검수·신고/차단·KPI/Analytics 등 추가 구현 필요
+///
+/// 4. 개선 제안
+///   - UI/UX: 실시간 입찰/채팅, 경매 상태 시각화, 신뢰등급/AI 검수 표시 강화, 지도 기반 위치 선택, 광고/프로모션 배너
+///   - 수익화: 프리미엄 경매, 지역 광고, 프로모션, 추천 아이템/판매자 노출, KPI/Analytics 이벤트 로깅
+///   - 코드: Firestore 쿼리 최적화, 비동기 처리/에러 핸들링 강화, 데이터 모델/위젯 분리, 상태 관리 개선
+library;
 
 import 'package:bling_app/features/auction/models/auction_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
