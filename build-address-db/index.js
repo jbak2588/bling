@@ -1,5 +1,11 @@
-// 파일 경로: c:/bling/build-address-db/index.js
+// 파일 경로: c:/bling/bling_app/build-address-db/index.js
 // 기존 파일을 이 코드로 완전히 대체해주십시오.
+
+//
+// 참고 문서: docs/index/피드 관련 위치 검색 규칙과 예시.md
+// - 피드 위치 검색은 Kab. → Kec. → Kel. → RT/RW 순으로 이뤄집니다.
+// - 모든 행정구역 이름은 Singkatan 표기와 함께 name_normalized 필드를 생성해야 합니다.
+// - 이 스크립트는 위 규칙을 따르는 Firestore 주소 DB(provinces_baru)를 구축합니다.
 
 const admin = require('firebase-admin');
 const axios = require('axios');
@@ -24,11 +30,13 @@ function sanitizeDocId(name) {
 }
 
 function normalize(name) {
+  // FeedQueryBuilder에서 대소문자/공백 없이 빠르게 비교할 수 있도록 name_normalized 값을 생성합니다.
   if (typeof name !== 'string') return '';
   return name.toLowerCase().replace(/\s+/g, '').trim();
 }
 
 function cleanKabKota(name) {
+  // Kab./Kota 접두사를 구분해 Feed 검색용 Singkatan 필드에 맞는 컬렉션 이름과 본문을 반환합니다.
   let collectionName = 'kabupaten';
   let clean = name.trim();
 
@@ -54,6 +62,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // ---------- Main ----------
 async function buildAddressDB() {
+    // 피드 위치 검색 규칙에 맞춰 Province → Kabupaten/Kota → Kecamatan → Villages 계층을 생성합니다.
   console.log('🔥 [villages 단일 컬렉션] provinces_baru 구축을 시작합니다...');
 
   const startTime = Date.now();
@@ -75,6 +84,7 @@ async function buildAddressDB() {
       const provDocId = sanitizeDocId(province.name);
       const provRef = db.collection('provinces_baru').doc(provDocId);
 
+      // Province 단계 저장: Feed에서 Kab. 필터를 시작하기 위한 최상위 기준입니다.
       await provRef.set({
         name: province.name,
         name_normalized: normalize(province.name),
@@ -91,7 +101,7 @@ async function buildAddressDB() {
           const { collectionName, cleanName } = cleanKabKota(regency.name);
           const regencyDocId = sanitizeDocId(cleanName);
           const regRef = provRef.collection(collectionName).doc(regencyDocId);
-
+          // Kabupaten/Kota 단계 저장: Singkatan을 제거한 본문과 normalized 필드를 저장합니다.
           await regRef.set({
             name: cleanName,
             name_normalized: normalize(cleanName),
@@ -107,7 +117,7 @@ async function buildAddressDB() {
             for (const district of districts) {
               const kecId = sanitizeDocId(district.name);
               const kecRef = regRef.collection('kecamatan').doc(kecId);
-
+              // Kecamatan 단계 저장: Feed 위치 검색의 두 번째 기준.
               await kecRef.set({
                 name: district.name,
                 name_normalized: normalize(district.name),
@@ -119,7 +129,10 @@ async function buildAddressDB() {
               try {
                 const villagesResponse = await axios.get(`https://wilayah.id/api/villages/${district.code}.json`);
                 const villages = villagesResponse.data.data || [];
+                // docs/index/피드 관련 위치 검색 규칙과 예시.md 기준:
+                // Kota 하위는 kelurahan, Kabupaten 하위는 desa로 분류하여 Feed 필터가 동작하게 합니다.
                 const defaultType = (collectionName === 'kota') ? 'kelurahan' : 'desa';
+                // kelurahan은 도시 지역이므로 반경 검색 시 isUrban 값을 true로 설정합니다.
                 const defaultIsUrban = defaultType === 'kelurahan';
 
                 for (const group of chunk(villages, 400)) {
@@ -127,6 +140,7 @@ async function buildAddressDB() {
                   for (const v of group) {
                     const vId = String(v.code || sanitizeDocId(v.name));
                     const vRef = kecRef.collection('villages').doc(vId);
+                    // Kelurahan/Desa 단계 저장: Feed의 세 번째 기준이며 RT/RW 확장의 기반입니다.
                     batch.set(vRef, {
                       name: v.name,
                       name_normalized: normalize(v.name),

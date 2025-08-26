@@ -1,4 +1,8 @@
 // index.js (최종 방어 코드)
+//
+// 참고 문서: docs/index/피드 관련 위치 검색 규칙과 예시.md
+// - Province → Kabupaten/Kota → Kecamatan → Kelurahan 순으로 계층을 구성합니다.
+// - 모든 이름은 Singkatan 표기와 name_normalized 필드를 저장하여 Feed 검색 규칙에 맞춥니다.
 
 const admin = require('firebase-admin');
 const axios = require('axios');
@@ -16,6 +20,7 @@ const db = admin.firestore();
 // ... (sanitizeDocId, normalize 함수는 이전과 동일)
 
 async function buildAddressDB() {
+  // Feed 위치 검색 규칙을 지원하는 기본 행정구역 DB(provinces 컬렉션)를 생성합니다.
   console.log('🔥 [최종 방어 버전] 새로운 행정구역 DB 구축을 시작합니다...');
 
   try {
@@ -28,12 +33,14 @@ async function buildAddressDB() {
         console.log(`  - ${province.name} 처리 시작...`);
         const provinceId = sanitizeDocId(province.name);
         const provinceRef = db.collection('provinces').doc(provinceId);
+        // Province 단계 저장: Feed 위치 검색의 시작점이 됩니다.
         await provinceRef.set({ name: province.name, name_normalized: normalize(province.name) });
 
         const regenciesResponse = await axios.get(`https://wilayah.id/api/regencies/${province.code}.json`);
         const regencies = regenciesResponse.data.data;
 
         for (const regency of regencies) {
+            // Kab./Kota 접두사를 분리하여 Feed 규칙의 Singkatan 구조를 맞춥니다.
             let collectionName = 'kabupaten';
             let cleanRegencyName = regency.name.trim();
 
@@ -48,6 +55,7 @@ async function buildAddressDB() {
 
             const regencyId = sanitizeDocId(cleanRegencyName);
             const regencyRef = provinceRef.collection(collectionName).doc(regencyId);
+            // Kabupaten/Kota 단계 저장: Feed의 두 번째 필터를 구성합니다.
             await regencyRef.set({ name: cleanRegencyName, name_normalized: normalize(cleanRegencyName) });
 
             const districtsResponse = await axios.get(`https://wilayah.id/api/districts/${regency.code}.json`);
@@ -87,6 +95,7 @@ function sanitizeDocId(name) {
 }
 
 function normalize(name) {
+  // FeedQueryBuilder에서 대소문자/공백 없는 비교를 위해 name_normalized 값을 만듭니다.
   if (typeof name !== 'string') return '';
   return name.toLowerCase().replace(/\s+/g, '').trim();
 }
