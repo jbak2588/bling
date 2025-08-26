@@ -18,7 +18,10 @@
 // * 5. 인기/추천/광고 로직은 KPI(조회수, 클릭률, 사용자 반응 등) 기반으로 설계/튜닝 권장.
 // */
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 039b98320b865c27dc8be3d24e8ba31540ea21af
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bling_app/core/models/feed_item_model.dart';
 
