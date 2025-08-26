@@ -1,4 +1,21 @@
 // lib/core/models/post_model.dart
+/// [기획/실제 코드 분석 및 개선 제안]
+/// 1. 기획 문서 요약
+///   - 위치 기반 동네 소통 피드, 주소 표기는 Singkatan(Kel., Kec., Kab.) 사용
+///   - 카테고리, 태그, 미디어, 신뢰등급 등 다양한 정보 포함
+///
+/// 2. 실제 코드 분석
+///   - Firestore 'posts' 컬렉션과 1:1 대응, 위치 정보(locationName, locationParts, geoPoint), 카테고리, 태그, 미디어, 신뢰등급 등 포함
+///   - 카테고리·위치·신뢰등급 기반 다양한 기능 확장 가능
+///
+/// 3. 기획과 실제 기능의 차이점
+///   - 기획보다 좋아진 점: 데이터 모델 세분화, 위치·카테고리·신뢰등급 등 다양한 확장성 확보
+///   - 기획에 못 미친 점: AI 태그 추천, Marketplace 연동 등 일부 기능 미구현
+///
+/// 4. 개선 제안
+///   - 데이터 모델 확장(활동 히스토리, KPI/Analytics 필드 추가), Firestore 쿼리 최적화, 에러 핸들링 강화
+library;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Bling 앱의 모든 게시물(Feed)에 대한 표준 데이터 모델 클래스입니다.

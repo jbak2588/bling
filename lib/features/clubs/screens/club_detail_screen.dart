@@ -1,4 +1,27 @@
 // lib/features/clubs/screens/club_detail_screen.dart
+// ===================== DocHeader =====================
+// [기획 요약]
+// - 동호회는 Firestore에 제목, 설명, 운영자, 위치, 관심사, 비공개 여부, 신뢰 등급, 멤버 관리 등의 필드로 구성됩니다.
+// - 동호회 내 게시글은 `clubs/{clubId}/posts`에 저장되며, 이미지, 좋아요, 댓글을 지원합니다.
+// - 매칭 및 추천 로직은 위치, 관심사, 연령대, 신뢰 등급을 우선적으로 고려합니다.
+// - 주요 TODO: 프로필 입력(관심사/소개/연령대), 팔로우 구조, GEO 쿼리, 매칭 로직, 데이팅 프로필 옵션, 1:1 채팅 연동 등.
+//
+// [구현 요약]
+// - 동호회 상세 화면, 게시판/멤버 탭, 채팅 및 멤버 관리 기능을 제공합니다.
+// - Firestore 구조를 활용하여 동호회 및 게시글 데이터를 관리하며, 비공개 및 신뢰 등급 제한을 지원합니다.
+// - UI에서 게시글 CRUD, 멤버 목록, 채팅 이동 기능을 제공합니다.
+//
+// [차이점 및 부족한 부분]
+// - 운영자 기능, 통계, 고급 비공개 설정 등이 더 확장될 수 있습니다.
+// - 채팅 및 데이팅 프로필과의 깊은 연동이 필요할 수 있습니다.
+//
+// [개선 제안]
+// - 운영자(방장)를 위한 멤버 관리(강퇴/승인) 및 게시글 관리 기능 강화.
+// - 동호회 활동 및 멤버 참여에 대한 통계 분석 기능 추가.
+// - 민감한 동호회를 위한 비공개 옵션 및 신뢰 등급 제한 확대.
+// - 멤버 관리 및 가입 UX/UI 개선.
+// =====================================================
+
 
 import 'package:bling_app/features/clubs/models/club_member_model.dart';
 import 'package:bling_app/features/clubs/models/club_model.dart';
@@ -67,8 +90,8 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 
     try {
       final newMember = ClubMemberModel(
-        id: _currentUserId!,
-        userId: _currentUserId!,
+        id: _currentUserId ?? '',
+        userId: _currentUserId ?? '',
         joinedAt: Timestamp.now(),
       );
 
