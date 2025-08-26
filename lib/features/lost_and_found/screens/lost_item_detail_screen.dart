@@ -1,4 +1,16 @@
 // lib/features/lost_and_found/screens/lost_item_detail_screen.dart
+// ===================== DocHeader =====================
+// [기획 요약]
+// - 분실/습득물 상세 정보, 이미지, 채팅 연동, 현상금, 위치 등 다양한 필드 지원.
+//
+// [실제 구현 비교]
+// - 상세 정보, 이미지, 채팅 연동, 현상금, 위치 등 모든 주요 기능 정상 동작.
+// - UI/UX 완비, 채팅방 생성 및 분실자/습득자 정보 연동 구현됨.
+//
+// [개선 제안]
+// - KPI/통계/프리미엄 기능 실제 구현 필요(조회수, 현상금, 부스트 등).
+// - 신고/차단/신뢰 등급 UI 노출 및 기능 강화, 알림/현상금 UX 개선.
+// =====================================================
 
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
