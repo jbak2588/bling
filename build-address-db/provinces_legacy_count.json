@@ -1,0 +1,243 @@
+{
+  "rootCollection": "provinces",
+  "counts": {
+    "provinces": 38,
+    "regencies": 514,
+    "districts": 7285,
+    "villages": 83740,
+    "kelurahan": 83740,
+    "desa": 0
+  },
+  "perProvince": [
+    {
+      "provinceId": "Aceh",
+      "regencies": 23,
+      "districts": 290,
+      "villages": 6500
+    },
+    {
+      "provinceId": "Bali",
+      "regencies": 9,
+      "districts": 57,
+      "villages": 716
+    },
+    {
+      "provinceId": "Banten",
+      "regencies": 8,
+      "districts": 155,
+      "villages": 1552
+    },
+    {
+      "provinceId": "Bengkulu",
+      "regencies": 10,
+      "districts": 129,
+      "villages": 1513
+    },
+    {
+      "provinceId": "DKI Jakarta",
+      "regencies": 6,
+      "districts": 44,
+      "villages": 267
+    },
+    {
+      "provinceId": "Daerah Istimewa Yogyakarta",
+      "regencies": 5,
+      "districts": 78,
+      "villages": 438
+    },
+    {
+      "provinceId": "Gorontalo",
+      "regencies": 6,
+      "districts": 77,
+      "villages": 729
+    },
+    {
+      "provinceId": "Jambi",
+      "regencies": 11,
+      "districts": 144,
+      "villages": 1582
+    },
+    {
+      "provinceId": "Jawa Barat",
+      "regencies": 27,
+      "districts": 627,
+      "villages": 5957
+    },
+    {
+      "provinceId": "Jawa Tengah",
+      "regencies": 35,
+      "districts": 576,
+      "villages": 8563
+    },
+    {
+      "provinceId": "Jawa Timur",
+      "regencies": 38,
+      "districts": 666,
+      "villages": 8494
+    },
+    {
+      "provinceId": "Kalimantan Barat",
+      "regencies": 14,
+      "districts": 174,
+      "villages": 2144
+    },
+    {
+      "provinceId": "Kalimantan Selatan",
+      "regencies": 13,
+      "districts": 156,
+      "villages": 2016
+    },
+    {
+      "provinceId": "Kalimantan Tengah",
+      "regencies": 14,
+      "districts": 136,
+      "villages": 1571
+    },
+    {
+      "provinceId": "Kalimantan Timur",
+      "regencies": 10,
+      "districts": 105,
+      "villages": 1038
+    },
+    {
+      "provinceId": "Kalimantan Utara",
+      "regencies": 5,
+      "districts": 55,
+      "villages": 482
+    },
+    {
+      "provinceId": "Kepulauan Bangka Belitung",
+      "regencies": 7,
+      "districts": 47,
+      "villages": 393
+    },
+    {
+      "provinceId": "Kepulauan Riau",
+      "regencies": 7,
+      "districts": 80,
+      "villages": 418
+    },
+    {
+      "provinceId": "Lampung",
+      "regencies": 15,
+      "districts": 229,
+      "villages": 2651
+    },
+    {
+      "provinceId": "Maluku",
+      "regencies": 11,
+      "districts": 119,
+      "villages": 1233
+    },
+    {
+      "provinceId": "Maluku Utara",
+      "regencies": 10,
+      "districts": 118,
+      "villages": 1185
+    },
+    {
+      "provinceId": "Nusa Tenggara Barat",
+      "regencies": 10,
+      "districts": 117,
+      "villages": 1166
+    },
+    {
+      "provinceId": "Nusa Tenggara Timur",
+      "regencies": 22,
+      "districts": 315,
+      "villages": 3440
+    },
+    {
+      "provinceId": "Papua",
+      "regencies": 9,
+      "districts": 105,
+      "villages": 997
+    },
+    {
+      "provinceId": "Papua Barat",
+      "regencies": 7,
+      "districts": 91,
+      "villages": 824
+    },
+    {
+      "provinceId": "Papua Barat Daya",
+      "regencies": 6,
+      "districts": 132,
+      "villages": 1013
+    },
+    {
+      "provinceId": "Papua Pegunungan",
+      "regencies": 8,
+      "districts": 252,
+      "villages": 2627
+    },
+    {
+      "provinceId": "Papua Selatan",
+      "regencies": 4,
+      "districts": 82,
+      "villages": 690
+    },
+    {
+      "provinceId": "Papua Tengah",
+      "regencies": 8,
+      "districts": 131,
+      "villages": 1205
+    },
+    {
+      "provinceId": "Riau",
+      "regencies": 12,
+      "districts": 172,
+      "villages": 1861
+    },
+    {
+      "provinceId": "Sulawesi Barat",
+      "regencies": 6,
+      "districts": 69,
+      "villages": 648
+    },
+    {
+      "provinceId": "Sulawesi Selatan",
+      "regencies": 24,
+      "districts": 313,
+      "villages": 3059
+    },
+    {
+      "provinceId": "Sulawesi Tengah",
+      "regencies": 13,
+      "districts": 177,
+      "villages": 2017
+    },
+    {
+      "provinceId": "Sulawesi Tenggara",
+      "regencies": 17,
+      "districts": 221,
+      "villages": 2284
+    },
+    {
+      "provinceId": "Sulawesi Utara",
+      "regencies": 15,
+      "districts": 171,
+      "villages": 1835
+    },
+    {
+      "provinceId": "Sumatera Barat",
+      "regencies": 19,
+      "districts": 179,
+      "villages": 1265
+    },
+    {
+      "provinceId": "Sumatera Selatan",
+      "regencies": 17,
+      "districts": 241,
+      "villages": 3259
+    },
+    {
+      "provinceId": "Sumatera Utara",
+      "regencies": 33,
+      "districts": 455,
+      "villages": 6108
+    }
+  ],
+  "finishedAt": "2025-08-24T03:21:57.642Z",
+  "elapsedSeconds": 363.6
+}

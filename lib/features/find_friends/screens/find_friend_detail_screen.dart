@@ -1,4 +1,25 @@
-// lib/features/find_friends/screens/find_friend_detail_screen.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Find Friend
+/// File          : lib/features/find_friends/screens/find_friend_detail_screen.dart
+/// Purpose       : 프로필 상세 정보를 보여 주고 친구 요청을 보낼 수 있습니다.
+/// User Impact   : 잠재적 친구를 평가하고 연결하는 데 도움을 줍니다.
+/// Feature Links : lib/features/find_friends/data/find_friend_repository.dart; lib/features/chat/screens/chat_room_screen.dart
+/// Data Model    : Firestore `users` 프로필 필드와 `friendRequests`를 통한 요청 상태.
+/// Location Scope: 사용자 프로필의 `locationName`을 표시하여 지역 매칭에 사용합니다.
+/// Trust Policy  : `trustLevel` 배지를 보여 주며 신고 시 상대방 점수가 감소합니다.
+/// Monetization  : 향후 프리미엄 프로필 강조 예정; TODO: 정의.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_friend_profile`, `send_friend_request`.
+/// Analytics     : 페이지 조회와 요청 전환을 추적합니다.
+/// I18N          : 키 `findFriend.bioLabel`, `interests.title` (assets/lang/*.json)
+/// Dependencies  : cloud_firestore, easy_localization
+/// Security/Auth : 요청은 인증이 필요하며 본인 프로필 조회를 방지합니다.
+/// Edge Cases    : 이미지 누락 또는 차단된 사용자.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md; docs/team/teamF_Design_Privacy_Module_통합_작업문.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
@@ -164,4 +185,5 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
-  }}
+  }
+}

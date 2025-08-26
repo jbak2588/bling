@@ -1,4 +1,25 @@
-// lib/features/find_friends/screens/findfriend_form_screen.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Find Friend
+/// File          : lib/features/find_friends/screens/findfriend_form_screen.dart
+/// Purpose       : 관심사와 인구통계를 포함한 FindFriend 프로필을 생성하거나 업데이트합니다.
+/// User Impact   : 주민이 취미가 비슷한 동료를 찾는 데 도움을 줍니다.
+/// Feature Links : lib/features/find_friends/screens/find_friend_detail_screen.dart; lib/features/find_friends/data/find_friend_repository.dart
+/// Data Model    : Firestore `users` 필드 `bio`, `age`, `gender`, `interests`, `findfriend_profileImages`, `ageRange`, `privacySettings.genderPreference`, `isVisibleInList`.
+/// Location Scope: 사용자 `locationParts`를 활용해 근접 매칭하며 수동 위치 선택은 없습니다.
+/// Trust Policy  : 프로필 공개는 `trustLevel`에 따라 달라지며 부적절한 내용은 신고됩니다.
+/// Monetization  : 프로필 노출을 위한 프리미엄 부스트 가능성; TODO: 가격 책정.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_profile_create`, `complete_profile_create`, `upload_profile_photo`.
+/// Analytics     : 관심사 선택과 공개 여부 토글을 추적합니다.
+/// I18N          : 키 `interests.items.*`, `findFriend.bioLabel` (assets/lang/*.json)
+/// Dependencies  : firebase_storage, cloud_firestore, image_picker, easy_localization, uuid
+/// Security/Auth : 인증된 사용자만 가능하며 Storage 경로는 UID로 제한됩니다.
+/// Edge Cases    : 이미지 제한 초과, 나이 범위 미완성.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md; docs/team/teamF_Design_Privacy_Module_통합_작업문.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'dart:io';
 import 'package:bling_app/core/models/user_model.dart';

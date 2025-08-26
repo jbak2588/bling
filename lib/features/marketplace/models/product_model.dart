@@ -1,11 +1,32 @@
-// lib/core/models/product_model.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Marketplace
+/// File          : lib/features/marketplace/models/product_model.dart
+/// Purpose       : AI 검증과 상태 추적을 포함한 상품 Firestore 스키마입니다.
+/// User Impact   : 구조화된 정보를 통해 안전한 동네 거래를 지원합니다.
+/// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/marketplace/screens/product_registration_screen.dart
+/// Data Model    : Firestore `products/{productId}` 문서; 필드 `price`, `imageUrls`, `locationParts`, `status`, `isAiVerified`, `likesCount`, `chatsCount`, `viewsCount`.
+/// Location Scope: Kabupaten→Kecamatan→Kelurahan을 저장하며 RT/RW는 선택 사항; 없으면 `locationName`을 사용합니다.
+/// Trust Policy  : `isAiVerified` 상품이 우선 노출되며 판매자는 TrustLevel 정책을 따릅니다.
+/// Monetization  : AI 검증 상품은 서비스 수수료를 지불하며 프로모션 배치 가능성이 있습니다.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_product`, `start_chat`, 총거래액(Gross Merchandise Volume, GMV).
+/// Analytics     : `viewsCount`, `chatsCount`, `likesCount` 증가를 추적합니다.
+/// I18N          : 카테고리 이름은 assets/lang 제품 키를 통해 제공합니다.
+/// Dependencies  : cloud_firestore
+/// Security/Auth : 게시물 소유자만 수정할 수 있으며 입력 검증으로 사기를 방지합니다.
+/// Edge Cases    : 필수 이미지나 위치 누락, `status` 불일치.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/011  Marketplace 모듈.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProductModel {
   final String id;
   final String userId;
-  final String title;
+  final String title; 
   final String description;
   final List<String> imageUrls;
   final String categoryId;

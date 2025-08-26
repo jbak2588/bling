@@ -1,4 +1,25 @@
-// lib/features/marketplace/presentation/screens/product_registration_screen.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Marketplace
+/// File          : lib/features/marketplace/screens/product_registration_screen.dart
+/// Purpose       : 판매자가 이미지와 위치를 포함한 새 상품을 등록하는 폼입니다.
+/// User Impact   : 주민이 주변 동네에 판매할 물품을 등록할 수 있습니다.
+/// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/marketplace/widgets/product_card.dart
+/// Data Model    : Firestore `products` 필드 `title`, `description`, `price`, `negotiable`, `imageUrls`, `locationName`, `locationParts`, `geoPoint`, `transactionPlace`, `condition`, `isAiVerified`.
+/// Location Scope: 사용자 `locationParts`(Prov→Kab/Kota→Kec→Kel)를 기본으로 사용하며, 반경 검색을 위해 GeoPoint를 저장합니다.
+/// Trust Policy  : 전화번호 검증 및 trustScore 100 초과 사용자만 등록 가능하며 신고 시 `trustScore`가 감소합니다.
+/// Monetization  : 거래 수수료와 선택형 프로모션 슬롯을 제공합니다.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_product_listing`, `complete_product_listing`, `upload_product_photo`.
+/// Analytics     : 이미지 업로드와 폼 작성 시간을 기록합니다.
+/// I18N          : 키 `marketplace.errors.noPhoto`, `marketplace.errors.noCategory` (assets/lang/*.json)
+/// Dependencies  : firebase_auth, cloud_firestore, firebase_storage, image_picker, uuid, easy_localization
+/// Security/Auth : 인증된 사용자만 가능하며 Storage 규칙이 사용자 UID별 경로를 제한합니다.
+/// Edge Cases    : 업로드 실패, 위치 미입력, 사진 제한 초과.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md; docs/team/teamB_Feed_CRUD_Module_통합 작업문서.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'dart:io';
 import 'package:bling_app/features/categories/domain/category.dart';

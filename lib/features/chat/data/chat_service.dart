@@ -1,4 +1,25 @@
-// lib/features/chat/data/chat_service.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Chat
+/// File          : lib/features/chat/data/chat_service.dart
+/// Purpose       : 모듈 전반의 1:1 대화를 위한 Firestore 채팅과 메시지를 관리합니다.
+/// User Impact   : 이웃, 판매자, 구매자 간 실시간 메시징을 가능하게 합니다.
+/// Feature Links : lib/features/chat/screens/chat_list_screen.dart; lib/features/chat/screens/chat_room_screen.dart
+/// Data Model    : Firestore `chats/{chatId}` 문서 `participants`, `lastMessage`, `unreadCounts`; 하위 컬렉션 `messages/{messageId}`에 `senderId`, `body`, `status`.
+/// Location Scope: 전역; 위치 메타데이터는 저장하지 않습니다.
+/// Trust Policy  : `trustLevel` ≥ verified이고 `blockedUsers`에 없을 때만 채팅 가능합니다.
+/// Monetization  : 거래 협상을 지원하여 마켓 수수료로 이어질 수 있습니다.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_chat`, `send_message`, `message_read`.
+/// Analytics     : 채팅방 생성, 메시지 전송 실패, 읽지 않은 메시지를 기록합니다.
+/// I18N          : 해당 없음
+/// Dependencies  : cloud_firestore, firebase_auth
+/// Security/Auth : 참여자 ID를 검증하고 Firestore 보안 규칙을 적용하며 차단 사용자를 처리합니다.
+/// Edge Cases    : 네트워크 오류, 채팅방 없음, 권한 없음.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'package:bling_app/core/models/chat_message_model.dart';
 import 'package:bling_app/core/models/chat_room_model.dart';

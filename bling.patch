@@ -1,1024 +1,1447 @@
-diff --git a/lib/features/clubs/data/club_repository.dart b/lib/features/clubs/data/club_repository.dart
-index 8c0ca63afddf44f01ce2263da2b59e6830fc1c87..c42f30fe2d7e319db5d5391e0cff45faf378e7b0 100644
---- a/lib/features/clubs/data/club_repository.dart
-+++ b/lib/features/clubs/data/club_repository.dart
-@@ -59,66 +59,80 @@ class ClubRepository {
-     });
- 
-     // 6. 모든 작업을 한 번에 원자적으로 실행합니다.
-     await batch.commit();
- 
-     debugPrint("동호회 및 그룹 채팅방 생성 완료: $clubId");
-     return clubId;
-   }
- 
-   Future<void> updateClub(ClubModel club) async {
-     await _clubs.doc(club.id).update(club.toJson());
-   }
- 
-   Future<void> deleteClub(String clubId) async {
-     await _clubs.doc(clubId).delete();
-   }
- 
-   Future<ClubModel> fetchClub(String clubId) async {
-     final doc = await _clubs.doc(clubId).get();
-     return ClubModel.fromFirestore(doc);
-   }
- 
-   Stream<List<ClubModel>> fetchClubs({Map<String, String?>? locationFilter}) {
-     Query<Map<String, dynamic>> query = _clubs;
-     final filter = locationFilter;
-+    final String? kab = filter?['kab'];
-     if (filter != null) {
-       if (filter['kel'] != null) {
-         query = query.where('locationParts.kel', isEqualTo: filter['kel']);
-       } else if (filter['kec'] != null) {
-         query = query.where('locationParts.kec', isEqualTo: filter['kec']);
-       } else if (filter['kab'] != null) {
-         query = query.where('locationParts.kab', isEqualTo: filter['kab']);
-       } else if (filter['kota'] != null) {
-         query = query.where('locationParts.kota', isEqualTo: filter['kota']);
-       } else if (filter['prov'] != null) {
-         query = query.where('locationParts.prov', isEqualTo: filter['prov']);
-       }
-     }
--    return query.orderBy('createdAt', descending: true).snapshots().map(
--        (snapshot) =>
--            snapshot.docs.map((doc) => ClubModel.fromFirestore(doc)).toList());
-+    query = query.orderBy('createdAt', descending: true);
+diff --git a/docs/_sync/DocHeader_ChangeLog.md b/docs/_sync/DocHeader_ChangeLog.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..d054f643334f8e984ff578e00de0c62997d551cd
+--- /dev/null
++++ b/docs/_sync/DocHeader_ChangeLog.md
+@@ -0,0 +1,15 @@
++# DocHeader Change Log
 +
-+    return query.snapshots().asyncMap((snapshot) async {
-+      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
-+        final fallbackSnapshot = await _clubs
-+            .where('locationParts.kab', isEqualTo: 'Tangerang')
-+            .orderBy('createdAt', descending: true)
-+            .get();
-+        return fallbackSnapshot.docs
-+            .map((doc) => ClubModel.fromFirestore(doc))
-+            .toList();
-+      }
-+      return snapshot.docs
-+          .map((doc) => ClubModel.fromFirestore(doc))
-+          .toList();
-+    });
-   }
++## 2025-08-26
++- Added DocHeaders to user_model.dart, local_news_screen.dart, product_model.dart, location_setting_screen.dart, chat_service.dart, find_friends_screen.dart.
++- Generated DocHeader_Index.md and DocHeader_Mapping_Report.md for Batch 1.
++
++## 2025-08-26
++- Added DocHeaders to feed screens and widgets.
++- Added DocHeaders to marketplace screens, widget, and legacy model.
++- Added DocHeaders to location verification and filter screens.
++- Added DocHeaders to chat room, list, utils, and message models.
++- Added DocHeaders to find friend screens and card widget.
++- Added DocHeader to Cloud Function index.js for trust score.
++\n## 2025-08-26
++- Translated existing DocHeaders to Korean across all modules.
+diff --git a/docs/_sync/DocHeader_Diff.md b/docs/_sync/DocHeader_Diff.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..4c80ae6cac724cc974d2391f2b3d5933378fa463
+--- /dev/null
++++ b/docs/_sync/DocHeader_Diff.md
+@@ -0,0 +1,68 @@
++# DocHeader Diff (Batch 1)
++
++```
++lib/core/models/user_model.dart
+++ DocHeader: Module User & Trust
++
++lib/features/local_news/screens/local_news_screen.dart
+++ DocHeader: Module Local News Feed
++
++lib/features/marketplace/models/product_model.dart
+++ DocHeader: Module Marketplace
++
++lib/features/location/screens/location_setting_screen.dart
+++ DocHeader: Module Location
++
++lib/features/chat/data/chat_service.dart
+++ DocHeader: Module Chat
++
++lib/features/find_friends/screens/find_friends_screen.dart
+++ DocHeader: Module Find Friend
++```
++
++
++## DocHeader Diff (Batch 2)
++```
++lib/features/feed/screens/local_feed_screen.dart
+++ DocHeader: Module Feed
++lib/features/feed/screens/feed_screen.dart
+++ DocHeader: Module Feed
++lib/features/feed/widgets/post_card.dart
+++ DocHeader: Module Feed
++lib/features/marketplace/screens/product_registration_screen.dart
+++ DocHeader: Module Marketplace
++lib/features/marketplace/screens/product_edit_screen.dart
+++ DocHeader: Module Marketplace
++lib/features/marketplace/screens/product_detail_screen.dart
+++ DocHeader: Module Marketplace
++lib/features/marketplace/screens/marketplace_screen.dart
+++ DocHeader: Module Marketplace
++lib/features/marketplace/widgets/product_card.dart
+++ DocHeader: Module Marketplace
++lib/features/marketplace/domain/product_model_old.dart
+++ DocHeader: Module Marketplace
++lib/features/location/screens/neighborhood_prompt_screen.dart
+++ DocHeader: Module Location
++lib/features/location/screens/location_filter_screen.dart
+++ DocHeader: Module Location
++lib/features/chat/screens/chat_room_screen.dart
+++ DocHeader: Module Chat
++lib/features/chat/screens/chat_list_screen.dart
+++ DocHeader: Module Chat
++lib/features/chat/domain/chat_utils.dart
+++ DocHeader: Module Chat
++lib/features/chat/domain/chat_message.dart
+++ DocHeader: Module Chat
++lib/features/find_friends/screens/findfriend_form_screen.dart
+++ DocHeader: Module Find Friend
++lib/features/find_friends/screens/findfriend_edit_screen.dart
+++ DocHeader: Module Find Friend
++lib/features/find_friends/screens/find_friend_detail_screen.dart
+++ DocHeader: Module Find Friend
++lib/features/find_friends/widgets/findfriend_card.dart
+++ DocHeader: Module Find Friend
++functions-v2/index.js
+++ DocHeader: Module Auth & Trust
++```
++
++_2025-08-26: Translated all above DocHeaders to Korean._
+diff --git a/docs/_sync/DocHeader_Index.md b/docs/_sync/DocHeader_Index.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..5947beb34b272c62c7faef0b672cfd20a8fc818d
+--- /dev/null
++++ b/docs/_sync/DocHeader_Index.md
+@@ -0,0 +1,39 @@
++# DocHeader Index & Folder Tree Comparison
++
++_2025-08-26: DocHeaders translated to Korean._
++
++## Folder Tree Comparison
++- README features: admin, auction, auth, categories, chat, clubs, community, feed, find_friends, jobs, local_news, local_stores, location, lost_and_found, main_feed, main_screen, marketplace, my_bling, pom, real_estate, shared.
++- Actual `lib/features` directories match the README listing.
++- No major discrepancies found.
++
++## DocHeader Coverage (Batch 1)
++- lib/core/models/user_model.dart
++- lib/features/local_news/screens/local_news_screen.dart
++- lib/features/marketplace/models/product_model.dart
++- lib/features/location/screens/location_setting_screen.dart
++- lib/features/chat/data/chat_service.dart
++- lib/features/find_friends/screens/find_friends_screen.dart
++
++
++## DocHeader Coverage (Batch 2)
++- lib/features/feed/screens/local_feed_screen.dart
++- lib/features/feed/screens/feed_screen.dart
++- lib/features/feed/widgets/post_card.dart
++- lib/features/marketplace/screens/product_registration_screen.dart
++- lib/features/marketplace/screens/product_edit_screen.dart
++- lib/features/marketplace/screens/product_detail_screen.dart
++- lib/features/marketplace/screens/marketplace_screen.dart
++- lib/features/marketplace/widgets/product_card.dart
++- lib/features/marketplace/domain/product_model_old.dart
++- lib/features/location/screens/neighborhood_prompt_screen.dart
++- lib/features/location/screens/location_filter_screen.dart
++- lib/features/chat/screens/chat_room_screen.dart
++- lib/features/chat/screens/chat_list_screen.dart
++- lib/features/chat/domain/chat_utils.dart
++- lib/features/chat/domain/chat_message.dart
++- lib/features/find_friends/screens/findfriend_form_screen.dart
++- lib/features/find_friends/screens/findfriend_edit_screen.dart
++- lib/features/find_friends/screens/find_friend_detail_screen.dart
++- lib/features/find_friends/widgets/findfriend_card.dart
++- functions-v2/index.js
+diff --git a/docs/_sync/DocHeader_Mapping_Report.md b/docs/_sync/DocHeader_Mapping_Report.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..c595c3bf3dc25b4b0640bc966073b5a9b519221d
+--- /dev/null
++++ b/docs/_sync/DocHeader_Mapping_Report.md
+@@ -0,0 +1,33 @@
++# DocHeader Mapping Report (Batch 1)
++
++_2025-08-26: DocHeaders translated to Korean._
++
++| Code File | Module | Source Docs |
++|-----------|--------|-------------|
++| lib/core/models/user_model.dart | User & Trust | docs/index/03  User 필드 & TrustLever & 프로필정책.md; docs/team/TeamA_Auth_Trust_module_통합 작업문서.md |
++| lib/features/local_news/screens/local_news_screen.dart | Local News Feed | docs/index/010  Post 모듈.md; docs/index/피드 관련 위치 검색 규칙과 예시.md; docs/index/Bling_Location_GeoQuery_Structure.md |
++| lib/features/marketplace/models/product_model.dart | Marketplace | docs/index/011  Marketplace 모듈.md |
++| lib/features/location/screens/location_setting_screen.dart | Location | docs/index/Bling_Location_GeoQuery_Structure.md; docs/index/피드 관련 위치 검색 규칙과 예시.md; docs/team/teamD_GeoQuery_Location_Module_통합_작업문서.md |
++| lib/features/chat/data/chat_service.dart | Chat | docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md |
++| lib/features/find_friends/screens/find_friends_screen.dart | Find Friend | docs/index/012  Find Friend & Club & Jobs & etc 모듈.md; docs/Bling FindFriend DB 구조 설계 문서.md |
++
++| lib/features/feed/screens/local_feed_screen.dart | Feed | docs/index/6 피드 (Local News).md; docs/index/010 Post 모듈.md |
++| lib/features/feed/screens/feed_screen.dart | Feed | docs/index/6 피드 (Local News).md; docs/index/010 Post 모듈.md |
++| lib/features/feed/widgets/post_card.dart | Feed | docs/index/6 피드 (Local News).md; docs/index/010 Post 모듈.md |
++| lib/features/marketplace/screens/product_registration_screen.dart | Marketplace | docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md; docs/team/teamB_Feed_CRUD_Module_통합 작업문서.md |
++| lib/features/marketplace/screens/product_edit_screen.dart | Marketplace | docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md |
++| lib/features/marketplace/screens/product_detail_screen.dart | Marketplace | docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md |
++| lib/features/marketplace/screens/marketplace_screen.dart | Marketplace | docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md |
++| lib/features/marketplace/widgets/product_card.dart | Marketplace | docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md |
++| lib/features/marketplace/domain/product_model_old.dart | Marketplace | docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md |
++| lib/features/location/screens/neighborhood_prompt_screen.dart | Location | docs/index/5 지역-위치-개인정보.md; docs/Bling_Location_GeoQuery_Structure.md; docs/team/teamD_GeoQuery_Location_Module_통합_작업문서.md |
++| lib/features/location/screens/location_filter_screen.dart | Location | docs/index/5 지역-위치-개인정보.md; docs/Bling_Location_GeoQuery_Structure.md |
++| lib/features/chat/screens/chat_room_screen.dart | Chat | docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md |
++| lib/features/chat/screens/chat_list_screen.dart | Chat | docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md |
++| lib/features/chat/domain/chat_utils.dart | Chat | docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md |
++| lib/features/chat/domain/chat_message.dart | Chat | docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md |
++| lib/features/find_friends/screens/findfriend_form_screen.dart | Find Friend | docs/index/012 Find Friend & Club & Jobs & etc 모듈.md; docs/team/teamF_Design_Privacy_Module_통합_작업문.md |
++| lib/features/find_friends/screens/findfriend_edit_screen.dart | Find Friend | docs/index/012 Find Friend & Club & Jobs & etc 모듈.md; docs/team/teamF_Design_Privacy_Module_통합_작업문.md |
++| lib/features/find_friends/screens/find_friend_detail_screen.dart | Find Friend | docs/index/012 Find Friend & Club & Jobs & etc 모듈.md; docs/team/teamF_Design_Privacy_Module_통합_작업문.md |
++| lib/features/find_friends/widgets/findfriend_card.dart | Find Friend | docs/index/012 Find Friend & Club & Jobs & etc 모듈.md |
++| functions-v2/index.js | Auth & Trust | docs/index/3 사용자 DB & 신뢰 등급.md; docs/team/TeamA_Auth_Trust_module_통합 작업문서.md |
+diff --git a/functions-v2/index.js b/functions-v2/index.js
+index c9bd3c1da4d7153d289aace0b4a58867b45915bc..1b5a4ce26a9593bcbc6b408fad4077c4d1990f86 100644
+--- a/functions-v2/index.js
++++ b/functions-v2/index.js
+@@ -1,25 +1,42 @@
++/**
++ * ============================================================================
++ * Bling DocHeader
++ * Module        : Auth & Trust
++ * File          : functions-v2/index.js
++ * Purpose       : 프로필 업데이트 시 사용자 신뢰 점수를 계산합니다.
++ * Triggers      : Firestore onUpdate `users/{userId}`
++ * Data Access   : `users/{userId}`의 `thanksReceived`, `reportCount`, `profileCompleted`, `phoneNumber`, `locationParts`를 읽고 `trustScore`, `trustLevel`을 갱신합니다.
++ * Monetization  : 높은 신뢰도는 마켓플레이스와 광고 참여 자격을 부여합니다.
++ * KPIs          : 분석을 위해 `update_trust_level` 이벤트를 수집합니다.
++ * Observability : `functions.logger`를 사용하며 오류는 Cloud Logging에 의존합니다.
++ * Security      : Admin SDK는 서비스 계정이 필요하며 Firestore 규칙이 쓰기를 보호합니다.
++ * Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++ * Source Docs   : docs/index/3 사용자 DB & 신뢰 등급.md; docs/team/TeamA_Auth_Trust_module_통합 작업문서.md
++ * ============================================================================
++ */
++// 아래부터 실제 코드
+ const functions = require("firebase-functions");
+ const admin = require("firebase-admin");
+ admin.initializeApp();
  
-   // V V V --- [추가] 특정 동호회 정보를 실시간으로 가져오는 Stream 함수 --- V V V
-   Stream<ClubModel> getClubStream(String clubId) {
-     return _clubs
-         .doc(clubId)
-         .snapshots()
-         .map((snapshot) => ClubModel.fromFirestore(snapshot));
-   }
-   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+ exports.calculateTrustScore = functions.firestore
+     .document("users/{userId}")
+     .onUpdate(async (change, context) => {
+       const userData = change.after.data();
+       const previousUserData = change.before.data();
  
-   // V V V --- [수정] 가입 신청 시, 강퇴 이력을 확인하는 로직으로 변경 --- V V V
-   Future<String> addMember(String clubId, ClubMemberModel member) async {
-     final clubRef = _clubs.doc(clubId);
-     final clubSnapshot = await clubRef.get();
+       const mainFieldsUnchanged =
+         userData.thanksReceived === previousUserData.thanksReceived &&
+         userData.reportCount === previousUserData.reportCount &&
+         userData.profileCompleted === previousUserData.profileCompleted &&
+         userData.phoneNumber === previousUserData.phoneNumber &&
+         JSON.stringify(userData.locationParts) ===
+           JSON.stringify(previousUserData.locationParts);
  
-     if (!clubSnapshot.exists) {
-       throw Exception("동호회를 찾을 수 없습니다.");
-     }
- 
-     final clubData = ClubModel.fromFirestore(clubSnapshot);
-     final kickedMembers = clubData.kickedMembers ?? [];
- 
-     // 1. 강퇴 이력이 있는지 확인합니다.
-     if (kickedMembers.contains(member.userId)) {
-diff --git a/lib/features/clubs/screens/create_club_screen.dart b/lib/features/clubs/screens/create_club_screen.dart
-index 7ac14ee84c4762129ea994094c958e13de0f5d53..edf82b75514c37b8f1792dcee7d3b93249bac3a7 100644
---- a/lib/features/clubs/screens/create_club_screen.dart
-+++ b/lib/features/clubs/screens/create_club_screen.dart
-@@ -108,62 +108,63 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
-         SnackBar(
-             content: Text('clubs.createClub.selectAtLeastOneInterest'.tr())),
-       );
-       return;
-     }
-       if (_selectedLocationParts == null) {
-       ScaffoldMessenger.of(context).showSnackBar(
-         const SnackBar(content: Text('Please select location')),
-       );
-       return;
-     }
- 
-     setState(() => _isSaving = true);
- 
-     try {
-       String? imageUrl;
-       // [수정] 이미지가 선택되었으면 Storage에 업로드
-       if (_selectedImage != null) {
-         final fileName = const Uuid().v4();
-         final ref =
-             FirebaseStorage.instance.ref().child('club_images/$fileName');
-         await ref.putFile(File(_selectedImage!.path));
-         imageUrl = await ref.getDownloadURL();
+       if (mainFieldsUnchanged) {
+         functions.logger.info("No score-related changes, exiting.");
+         return null;
        }
  
-+      final parts = widget.userModel.locationParts;
-       final newClub = ClubModel(
-         id: '', // ID는 Firestore에서 자동으로 생성됩니다.
-         title: _titleController.text.trim(),
-         description: _descriptionController.text.trim(),
-         ownerId: widget.userModel.uid,
--          location: _selectedLocationParts?['kel'] ??
--            _selectedLocationParts?['kec'] ??
--            _selectedLocationParts?['kab'] ??
--            _selectedLocationParts?['kota'] ??
--            _selectedLocationParts?['prov'] ??
-+        location: parts?['kel'] ??
-+            parts?['kec'] ??
-+            parts?['kab'] ??
-+            parts?['kota'] ??
-+            parts?['prov'] ??
-             'Unknown',
--        locationParts: _selectedLocationParts,
-+        locationParts: parts,
-         // interests: _selectedInterests, // Removed or renamed as per ClubModel definition
-         isPrivate: _isPrivate,
-         createdAt: Timestamp.now(),
-         membersCount: 1, // 개설자는 자동으로 멤버 1명이 됩니다.
-         imageUrl: imageUrl, // [수정] 업로드된 이미지 URL 전달
-         mainCategory: _selectedInterests.isNotEmpty
-             ? _interestCategories.entries
-                 .firstWhere(
-                   (entry) => entry.value.contains(_selectedInterests.first),
-                   orElse: () => _interestCategories.entries.first,
-                 )
-                 .key
-             : '', // 첫 번째 선택된 관심사의 카테고리, 없으면 빈 문자열
-         interestTags: _selectedInterests, // 선택된 관심사 리스트
-       );
+       let score = 0;
+       if (userData.locationParts && userData.locationParts.kel) score += 50;
+diff --git a/lib/core/models/user_model.dart b/lib/core/models/user_model.dart
+index d8c6b50e40c461226e505e18703da8bd7706f3c2..016a132d56a9f5017d0b64555dc6401f60847419 100644
+--- a/lib/core/models/user_model.dart
++++ b/lib/core/models/user_model.dart
+@@ -1,27 +1,46 @@
+-// lib/core/models/user_model.dart
+-// Bling App v0.8.11
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : User & Trust
++/// File          : lib/core/models/user_model.dart
++/// Purpose       : Firestore 사용자 스키마를 정의하며 신뢰와 프로필 제한을 포함합니다.
++/// User Impact   : 계정 데이터를 중앙에서 관리하여 모듈별 신뢰 기반 접근을 가능하게 합니다.
++/// Feature Links : lib/features/auth/screens/signup_screen.dart; lib/features/find_friends/screens/find_friends_screen.dart; lib/features/marketplace/screens/product_registration_screen.dart
++/// Data Model    : Firestore `users/{uid}` 컬렉션; 필드 `trustLevel`, `locationParts{kabupaten,kecamatan,kelurahan,rt,rw}`, `thanksReceived`, `reportCount`, `blockedUsers`, `profileCompleted`, `isDatingProfile`.
++/// Location Scope: Kelurahan·Kecamatan을 저장하며 RT/RW는 선택 사항; 없으면 `locationName`을 사용합니다.
++/// Trust Policy  : TrustLevel은 normal→verified→trusted로 상승하며 신고는 점수를 낮춥니다; 차단된 사용자는 채팅 불가.
++/// Monetization  : 판매자 신뢰도에 따라 개인화 프로모션과 마켓 수수료가 적용됩니다.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `signup_complete`, `profile_completed`, `trust_upgrade`.
++/// Analytics     : 프로필 완성과 신뢰도 변화를 기록합니다.
++/// I18N          : 해당 없음
++/// Dependencies  : cloud_firestore
++/// Security/Auth : Firestore 규칙이 소유자만 수정하도록 제한하며 인증 세션을 요구합니다.
++/// Edge Cases    : 위치 필드 누락 또는 차단된 계정.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/03  User 필드 & TrustLever & 프로필정책.md; docs/team/TeamA_Auth_Trust_module_통합 작업문서.md
++/// ============================================================================
++// 아래부터 실제 코드
  
-       await _repository.createClub(newClub);
+ import 'package:cloud_firestore/cloud_firestore.dart';
  
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-           content: Text('clubs.createClub.success'.tr()),
-           backgroundColor: Colors.green,
-         ));
-         Navigator.of(context).pop();
-       }
-diff --git a/lib/features/jobs/data/job_repository.dart b/lib/features/jobs/data/job_repository.dart
-index 5b760afaf63ef2ba24e605439e270940c7eaf1b3..eb1d1211d0e4b9450fe35fbb88e51b7c80403bc3 100644
---- a/lib/features/jobs/data/job_repository.dart
-+++ b/lib/features/jobs/data/job_repository.dart
-@@ -1,53 +1,59 @@
- // lib/features/jobs/data/job_repository.dart
+ class UserModel {
+   final String uid; // 유저 고유 ID (Firestore 문서 ID)
+   final String nickname; // 유저 닉네임
+   final String email; // 이메일 주소
+   final String? photoUrl; // 대표 프로필 사진 URL
+   final String? bio; // 자기소개
+   final String trustLevel; // 사용자 신뢰등급 (unverified, verified 등)
+   final String? locationName; // 간략 주소명 (예: "Tangerang, Banten")
+   final Map<String, dynamic>? locationParts; // 주소 분리 (prov, kab, kec, kel)
  
- import 'package:bling_app/features/jobs/models/job_model.dart';
+  final String? rt;
+   final String? rw;
+ 
+   final GeoPoint? geoPoint; // 좌표 (지도 표시 및 거리 계산용)
+   final List<String>? interests; // 관심사 리스트 (hobby 등)
+ 
+   final Map<String, dynamic>? privacySettings; // 공개 범위 설정
+   final List<String>? postIds; // 작성한 피드 ID 목록
+   final List<String>? productIds; // 등록한 마켓 상품 ID 목록
+   final List<String>? jobIds;
+   final List<String>? bookmarkedPostIds; // 북마크한 피드 ID 목록
+   final List<String>? bookmarkedProductIds; // 북마크한 마켓 상품 ID 목록
+diff --git a/lib/features/chat/data/chat_service.dart b/lib/features/chat/data/chat_service.dart
+index bacdb348607bf2fc60a5acc9911356f01ebf4b93..df3f93cac92351af8a5ebcac9438f1d22e98446e 100644
+--- a/lib/features/chat/data/chat_service.dart
++++ b/lib/features/chat/data/chat_service.dart
+@@ -1,26 +1,46 @@
+-// lib/features/chat/data/chat_service.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Chat
++/// File          : lib/features/chat/data/chat_service.dart
++/// Purpose       : 모듈 전반의 1:1 대화를 위한 Firestore 채팅과 메시지를 관리합니다.
++/// User Impact   : 이웃, 판매자, 구매자 간 실시간 메시징을 가능하게 합니다.
++/// Feature Links : lib/features/chat/screens/chat_list_screen.dart; lib/features/chat/screens/chat_room_screen.dart
++/// Data Model    : Firestore `chats/{chatId}` 문서 `participants`, `lastMessage`, `unreadCounts`; 하위 컬렉션 `messages/{messageId}`에 `senderId`, `body`, `status`.
++/// Location Scope: 전역; 위치 메타데이터는 저장하지 않습니다.
++/// Trust Policy  : `trustLevel` ≥ verified이고 `blockedUsers`에 없을 때만 채팅 가능합니다.
++/// Monetization  : 거래 협상을 지원하여 마켓 수수료로 이어질 수 있습니다.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_chat`, `send_message`, `message_read`.
++/// Analytics     : 채팅방 생성, 메시지 전송 실패, 읽지 않은 메시지를 기록합니다.
++/// I18N          : 해당 없음
++/// Dependencies  : cloud_firestore, firebase_auth
++/// Security/Auth : 참여자 ID를 검증하고 Firestore 보안 규칙을 적용하며 차단 사용자를 처리합니다.
++/// Edge Cases    : 네트워크 오류, 채팅방 없음, 권한 없음.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'package:bling_app/core/models/chat_message_model.dart';
+ import 'package:bling_app/core/models/chat_room_model.dart';
+ import 'package:bling_app/core/models/user_model.dart';
  import 'package:cloud_firestore/cloud_firestore.dart';
  import 'package:firebase_auth/firebase_auth.dart';
- import 'package:easy_localization/easy_localization.dart';
  
- class JobRepository {
-   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
- 
-   /// 'jobs' 컬렉션의 모든 구인글 목록을 실시간으로 가져옵니다.
--  // V V V --- [수정] 사용자의 Province를 기준으로 1차 필터링하도록 변경 --- V V V
--  Stream<List<JobModel>> fetchJobs(String? userProvince) {
-+  Stream<List<JobModel>> fetchJobs({Map<String, String?>? locationFilter}) {
-     Query<Map<String, dynamic>> query = _firestore.collection('jobs');
--
--    // 사용자의 위치 정보(Province)가 있을 경우, 해당 지역의 게시물만 가져오도록 쿼리 필터 추가
--    if (userProvince != null && userProvince.isNotEmpty) {
--      query = query.where('locationParts.prov', isEqualTo: userProvince);
-+    final String? kab = locationFilter?['kab'];
-+    if (kab != null && kab.isNotEmpty) {
-+      query = query.where('locationParts.kab', isEqualTo: kab);
-     }
- 
--    return query
--        .orderBy('createdAt', descending: true)
--        .snapshots()
--        .map((snapshot) {
-+    query = query.orderBy('createdAt', descending: true);
-+
-+    return query.snapshots().asyncMap((snapshot) async {
-+      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
-+        final fallbackSnapshot = await _firestore
-+            .collection('jobs')
-+            .where('locationParts.kab', isEqualTo: 'Tangerang')
-+            .orderBy('createdAt', descending: true)
-+            .get();
-+        return fallbackSnapshot.docs
-+            .map((doc) => JobModel.fromFirestore(doc))
-+            .toList();
-+      }
-       return snapshot.docs.map((doc) => JobModel.fromFirestore(doc)).toList();
-     });
-   }
--  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
- 
-   // V V V --- [추가] 새로운 구인글을 생성하는 함수 --- V V V
-   Future<void> createJob(JobModel job) async {
-     final user = FirebaseAuth.instance.currentUser;
-     if (user == null) throw Exception(tr('main.errors.loginRequired'));
- 
-     final newJobRef = _firestore.collection('jobs').doc();
- 
-     // 사용자의 productIds 배열에도 새 상품 ID 추가
-     final userRef = _firestore.collection('users').doc(user.uid);
- 
-     final batch = _firestore.batch();
-     batch.set(newJobRef, job.toJson());
-     batch.update(userRef, {
-       'jobIds': FieldValue.arrayUnion([newJobRef.id])
-     }); // 'jobIds' 필드에 추가
- 
-     await batch.commit();
-   }
-   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
- 
-   // V V V --- [추가] ID로 특정 구인글 하나의 정보를 가져오는 함수 --- V V V
-   Future<JobModel?> fetchJob(String jobId) async {
-     final doc = await _firestore.collection('jobs').doc(jobId).get();
-     if (doc.exists) {
-diff --git a/lib/features/jobs/screens/jobs_screen.dart b/lib/features/jobs/screens/jobs_screen.dart
-index bc0a4102648ea31deb36486f6aad83085cc4e963..0107bf09293b5e53452bc187b1ba8cfb6a135765 100644
---- a/lib/features/jobs/screens/jobs_screen.dart
-+++ b/lib/features/jobs/screens/jobs_screen.dart
-@@ -22,66 +22,66 @@ class JobsScreen extends StatelessWidget {
-     if (filter['kel'] != null) {
-       key = 'kel';
-     } else if (filter['kec'] != null) {
-       key = 'kec';
-     } else if (filter['kab'] != null) {
-       key = 'kab';
-     } else if (filter['kota'] != null) {
-       key = 'kota';
-     } else if (filter['prov'] != null) {
-       key = 'prov';
-     }
-     if (key == null) return allJobs;
- 
-     final value = filter[key]!.toLowerCase();
-     return allJobs
-         .where((job) =>
-             (job.locationParts?[key] ?? '').toString().toLowerCase() == value)
-         .toList();
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     final JobRepository jobRepository = JobRepository();
-     final userProvince = userModel?.locationParts?['prov'];
- 
--    if (userModel?.locationParts?['prov'] == null) {
-+    if (userProvince == null) {
-       return Center(
-         child: Padding(
-           padding: const EdgeInsets.all(24.0),
-           child: Text('jobs.setLocationPrompt'.tr(),
-               textAlign: TextAlign.center,
-               style: const TextStyle(fontSize: 16, color: Colors.grey)),
-         ),
-       );
-     }
- 
-     return Scaffold(
-       body: StreamBuilder<List<JobModel>>(
-         // [수정] Stream 타입을 JobModel 리스트로 변경
-         stream:
--            jobRepository.fetchJobs(userProvince), // [수정] 불필요한 .snapshots() 제거
-+            jobRepository.fetchJobs(locationFilter: locationFilter),
-         builder: (context, snapshot) {
-           if (snapshot.connectionState == ConnectionState.waiting) {
-             return const Center(child: CircularProgressIndicator());
-           }
-           if (snapshot.hasError) {
-             return Center(child: Text('Error: ${snapshot.error}'));
-           }
- 
-           final allJobs = snapshot.data ?? [];
-           // [수정] 2차 필터링 적용
-           final filteredJobs = _applyLocationFilter(allJobs);
- 
-           if (filteredJobs.isEmpty) {
-             return Center(child: Text('jobs.screen.empty'.tr()));
-           }
- 
-           return ListView.builder(
-             itemCount: filteredJobs.length,
-             itemBuilder: (context, index) {
-               final job = filteredJobs[index]; // [수정]
-               return JobCard(job: job);
-             },
-           );
-         },
-       ),
-diff --git a/lib/features/local_stores/data/shop_repository.dart b/lib/features/local_stores/data/shop_repository.dart
-index 1b4ffa46caccbdc11f9b3f7ef14af016f73f0737..691e719f1becb698230eeed386272c76e945bbba 100644
---- a/lib/features/local_stores/data/shop_repository.dart
-+++ b/lib/features/local_stores/data/shop_repository.dart
-@@ -8,59 +8,68 @@ import '../models/shop_review_model.dart';
- /// Handles CRUD operations for shops and reviews in the Local Shops module.
- class ShopRepository {
-   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
- 
-   CollectionReference<Map<String, dynamic>> get _shopsCollection =>
-       _firestore.collection('shops');
- 
-   Future<String> createShop(ShopModel shop) async {
-     final doc = await _shopsCollection.add(shop.toJson());
-     return doc.id;
-   }
- 
-   Future<void> updateShop(ShopModel shop) async {
-     await _shopsCollection.doc(shop.id).update(shop.toJson());
-   }
- 
-   Future<void> deleteShop(String shopId) async {
-     await _shopsCollection.doc(shopId).delete();
-   }
- 
-   Future<ShopModel> fetchShop(String shopId) async {
-     final doc = await _shopsCollection.doc(shopId).get();
-     return ShopModel.fromFirestore(doc);
-   }
- 
--// V V V --- [수정] 사용자의 Province를 기준으로 1차 필터링하도록 변경 --- V V V
--  Stream<QuerySnapshot<Map<String, dynamic>>> fetchShops(String? userProvince) {
-+  Stream<QuerySnapshot<Map<String, dynamic>>> fetchShops(
-+      {Map<String, String?>? locationFilter}) {
-     Query<Map<String, dynamic>> query = _shopsCollection;
--
--    if (userProvince != null && userProvince.isNotEmpty) {
--      query = query.where('locationParts.prov', isEqualTo: userProvince);
-+    final String? kab = locationFilter?['kab'];
-+    if (kab != null && kab.isNotEmpty) {
-+      query = query.where('locationParts.kab', isEqualTo: kab);
-     }
--
--    return query.orderBy('createdAt', descending: true).snapshots();
-+    query = query.orderBy('createdAt', descending: true);
-+
-+    return query.snapshots().asyncMap((snapshot) async {
-+      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
-+        return await _shopsCollection
-+            .where('locationParts.kab', isEqualTo: 'Tangerang')
-+            .orderBy('createdAt', descending: true)
-+            .get();
-+      }
-+      return snapshot;
-+    });
-   }
- 
-   // V V V --- [추가] 특정 상점 정보를 실시간으로 가져오는 Stream 함수 --- V V V
-   Stream<ShopModel> getShopStream(String shopId) {
-     return _shopsCollection
-         .doc(shopId)
-         .snapshots()
-         .map((snapshot) => ShopModel.fromFirestore(snapshot));
-   }
- 
-   Future<String> addReview(String shopId, ShopReviewModel review) async {
-     final doc = await _shopsCollection
-         .doc(shopId)
-         .collection('reviews')
-         .add(review.toJson());
-     return doc.id;
-   }
- 
-   Future<void> updateReview(String shopId, ShopReviewModel review) async {
-     await _shopsCollection
-         .doc(shopId)
-         .collection('reviews')
-         .doc(review.id)
-         .update(review.toJson());
-   }
-diff --git a/lib/features/local_stores/screens/local_stores_screen.dart b/lib/features/local_stores/screens/local_stores_screen.dart
-index 81c573cfd7f4d5102daa4ab9d2214b37e541b312..26bf720e45273c05ae1f7f62c4c56eaae7d9ab79 100644
---- a/lib/features/local_stores/screens/local_stores_screen.dart
-+++ b/lib/features/local_stores/screens/local_stores_screen.dart
-@@ -31,64 +31,65 @@ class LocalStoresScreen extends StatelessWidget {
-     } else if (filter['kota'] != null) {
-       key = 'kota';
-     } else if (filter['prov'] != null) {
-       key = 'prov';
-     }
-     if (key == null) {
-       return allDocs.map((doc) => ShopModel.fromFirestore(doc)).toList();
-     }
- 
-     final value = filter[key]!.toLowerCase();
-     return allDocs
-         .where((doc) =>
-             (doc.data()['locationParts']?[key] ?? '')
-                 .toString()
-                 .toLowerCase() ==
-             value)
-         .map((doc) => ShopModel.fromFirestore(doc))
-         .toList();
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     final ShopRepository shopRepository = ShopRepository();
-     final userProvince = userModel?.locationParts?['prov'];
- 
--    if (userModel?.locationParts?['prov'] == null) {
-+    if (userProvince == null) {
-       return Center(
-         child: Padding(
-           padding: const EdgeInsets.all(24.0),
-           child: Text('localStores.setLocationPrompt'.tr(),
-               textAlign: TextAlign.center,
-               style: const TextStyle(fontSize: 16, color: Colors.grey)),
-         ),
-       );
-     }
- 
-     return Scaffold(
-       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
--        stream: shopRepository.fetchShops(userProvince),
-+        stream:
-+            shopRepository.fetchShops(locationFilter: locationFilter),
-         builder: (context, snapshot) {
-           if (snapshot.connectionState == ConnectionState.waiting) {
-             return const Center(child: CircularProgressIndicator());
-           }
-           if (snapshot.hasError) {
-             return Center(
-                 child: Text('localStores.error'
-                     .tr(namedArgs: {'error': snapshot.error.toString()})));
-           }
- 
-           final allDocs = snapshot.data?.docs ?? [];
-           final shops = _applyLocationFilter(allDocs);
- 
-           if (shops.isEmpty) {
-             return Center(child: Text('localStores.empty'.tr()));
-           }
- 
-           return ListView.builder(
-             itemCount: shops.length,
-             itemBuilder: (context, index) {
-               return ShopCard(shop: shops[index]);
-             },
-           );
-         },
-       ),
-diff --git a/lib/features/lost_and_found/data/lost_and_found_repository.dart b/lib/features/lost_and_found/data/lost_and_found_repository.dart
-index 99906f2cd6e1166aeb1ac74b3710576b48c0f15d..67fe238ccb376669194fbe489ac5bfa818ad2d34 100644
---- a/lib/features/lost_and_found/data/lost_and_found_repository.dart
-+++ b/lib/features/lost_and_found/data/lost_and_found_repository.dart
-@@ -1,54 +1,66 @@
- // lib/features/lost_and_found/data/lost_and_found_repository.dart
- 
- import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
- import 'package:cloud_firestore/cloud_firestore.dart';
- 
- class LostAndFoundRepository {
-   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
- 
-   // [수정] 컬렉션 참조를 위한 getter를 정의하여 코드 일관성을 유지합니다.
-   CollectionReference<Map<String, dynamic>> get _lostAndFoundCollection =>
-       _firestore.collection('lost_and_found');
- 
-   // V V V --- [수정] fetchItems 함수에 locationFilter를 적용합니다 --- V V V
-   Stream<List<LostItemModel>> fetchItems({Map<String, String?>? locationFilter}) {
--    Query query = _firestore.collection('lost_and_found').orderBy('createdAt', descending: true);
-+    Query<Map<String, dynamic>> query =
-+        _firestore.collection('lost_and_found').orderBy('createdAt', descending: true);
-+    final String? kab = locationFilter?['kab'];
- 
-     if (locationFilter != null) {
-       if (locationFilter['prov'] != null && locationFilter['prov']!.isNotEmpty) {
-         query = query.where('locationParts.prov', isEqualTo: locationFilter['prov']);
-       }
-       if (locationFilter['kab'] != null && locationFilter['kab']!.isNotEmpty) {
-         query = query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
-       }
-       if (locationFilter['kec'] != null && locationFilter['kec']!.isNotEmpty) {
-         query = query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
-       }
-       if (locationFilter['kel'] != null && locationFilter['kel']!.isNotEmpty) {
-         query = query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
-       }
-     }
- 
--    return query.snapshots().map((snapshot) {
-+    return query.snapshots().asyncMap((snapshot) async {
-+      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
-+        final fallbackSnapshot = await _firestore
-+            .collection('lost_and_found')
-+            .where('locationParts.kab', isEqualTo: 'Tangerang')
-+            .orderBy('createdAt', descending: true)
-+            .get();
-+        return fallbackSnapshot.docs
-+            .map((doc) => LostItemModel.fromFirestore(doc))
-+            .toList();
-+      }
-       return snapshot.docs
--          .map((doc) => LostItemModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
-+          .map((doc) => LostItemModel.fromFirestore(doc))
-           .toList();
-     });
-   }
- 
-   /// 새로운 분실/습득물을 생성하는 함수입니다.
-   Future<void> createItem(LostItemModel item) async {
-     await _lostAndFoundCollection.add(item.toJson()); // [수정] getter 사용
-   }
- 
-   /// 분실/습득물 정보를 수정하는 함수입니다.
-   Future<void> updateItem(LostItemModel item) async {
-     await _lostAndFoundCollection.doc(item.id).update(item.toJson());
-   }
- 
-   /// 분실/습득물 정보를 삭제하는 함수입니다.
-   Future<void> deleteItem(String itemId) async {
-     // TODO: Storage에 업로드된 관련 이미지도 함께 삭제하는 로직 추가 필요
-     await _lostAndFoundCollection.doc(itemId).delete();
-   }
- }
-\ No newline at end of file
-diff --git a/lib/features/lost_and_found/models/lost_item_model.dart b/lib/features/lost_and_found/models/lost_item_model.dart
-index 86cadecd0dee9f764c708e350962dcc5d0184a3d..8a0b222395b480dfe66b5b7705ca7d8fa2777e77 100644
---- a/lib/features/lost_and_found/models/lost_item_model.dart
-+++ b/lib/features/lost_and_found/models/lost_item_model.dart
-@@ -1,62 +1,68 @@
- // lib/core/models/lost_item_model.dart
- 
- import 'package:cloud_firestore/cloud_firestore.dart';
- 
- /// 분실/습득물 정보를 담는 데이터 모델입니다.
- /// Firestore의 `lost_and_found` 컬렉션 문서 구조와 대응됩니다.
- class LostItemModel {
-   final String id;
-   final String userId; // 등록자 ID
-   final String type; // 'lost' 또는 'found'
-   final String itemDescription; // 물건 설명
-   final String locationDescription; // 분실/습득 장소 설명
-+  final Map<String, dynamic>? locationParts;
-   final GeoPoint? geoPoint;
-   final List<String> imageUrls;
-   final Timestamp createdAt;
-   final bool isHunted; // 현상금(Hunted) 여부
-   final int? bountyAmount; // 현상금 금액
- 
-   LostItemModel({
-     required this.id,
-     required this.userId,
-     required this.type,
-     required this.itemDescription,
-     required this.locationDescription,
-+    this.locationParts,
-     this.geoPoint,
-     required this.imageUrls,
-     required this.createdAt,
-     this.isHunted = false,
-     this.bountyAmount,
-   });
-   
- 
-   factory LostItemModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-     final data = doc.data() ?? {};
-     return LostItemModel(
-       id: doc.id,
-       userId: data['userId'] ?? '',
-       type: data['type'] ?? 'lost',
-       itemDescription: data['itemDescription'] ?? '',
-       locationDescription: data['locationDescription'] ?? '',
-+      locationParts: data['locationParts'] != null
-+          ? Map<String, dynamic>.from(data['locationParts'])
-+          : null,
-       geoPoint: data['geoPoint'],
-       imageUrls: List<String>.from(data['imageUrls'] ?? []),
-       createdAt: data['createdAt'] ?? Timestamp.now(),
-       isHunted: data['isHunted'] ?? false,
-       bountyAmount: data['bountyAmount'],
-     );
-   }
- 
-   Map<String, dynamic> toJson() {
-     return {
-       'userId': userId,
-       'type': type,
-       'itemDescription': itemDescription,
-       'locationDescription': locationDescription,
-+      'locationParts': locationParts,
-       'geoPoint': geoPoint,
-       'imageUrls': imageUrls,
-       'createdAt': createdAt,
-       'isHunted': isHunted,
-       'bountyAmount': bountyAmount,
-     };
-   }
- }
-\ No newline at end of file
-diff --git a/lib/features/lost_and_found/screens/create_lost_item_screen.dart b/lib/features/lost_and_found/screens/create_lost_item_screen.dart
-index cf6b46d9e0e78f4b707ff3460445ec8d154978af..e5c3de90a44b235b6b061ea37457603f1f82b81a 100644
---- a/lib/features/lost_and_found/screens/create_lost_item_screen.dart
-+++ b/lib/features/lost_and_found/screens/create_lost_item_screen.dart
-@@ -63,50 +63,51 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
- 
-     setState(() => _isSaving = true);
-     final user = FirebaseAuth.instance.currentUser;
-     if (user == null) {
-       setState(() => _isSaving = false);
-       return;
-     }
- 
-     try {
-       List<String> imageUrls = [];
-       for (var imageFile in _images) {
-         final fileName = const Uuid().v4();
-         final ref = FirebaseStorage.instance
-             .ref()
-             .child('lost_and_found/${user.uid}/$fileName');
-         await ref.putFile(File(imageFile.path));
-         imageUrls.add(await ref.getDownloadURL());
-       }
- 
-       final newItem = LostItemModel(
-         id: '',
-         userId: user.uid,
-         type: _type,
-         itemDescription: _itemDescriptionController.text.trim(),
-         locationDescription: _locationDescriptionController.text.trim(),
-+        locationParts: widget.userModel.locationParts,
-         geoPoint: widget.userModel.geoPoint,
-         imageUrls: imageUrls,
-         createdAt: Timestamp.now(),
-       );
- 
-       // [수정] 주석을 해제하여 DB 저장 기능을 활성화합니다.
-       await _repository.createItem(newItem);
- 
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-             content: Text('lostAndFound.form.success'.tr()),
-             backgroundColor: Colors.green));
-         Navigator.of(context).pop();
-       }
-     } catch (e) {
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-             content: Text('lostAndFound.form.fail'
-                 .tr(namedArgs: {'error': e.toString()})),
-             backgroundColor: Colors.red));
-       }
-     } finally {
-       if (mounted) setState(() => _isSaving = false);
-     }
-   }
-diff --git a/lib/features/pom/data/short_repository.dart b/lib/features/pom/data/short_repository.dart
-index 7f3cdffa90b8fc69d8fda56efb9af14e8a25261b..8fa6fb7a24a9ce21334c0a4c8f2ccc9b9c26b258 100644
---- a/lib/features/pom/data/short_repository.dart
-+++ b/lib/features/pom/data/short_repository.dart
-@@ -1,80 +1,110 @@
- // lib/features/pom/data/short_repository.dart
- 
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:firebase_auth/firebase_auth.dart';
- import '../models/short_model.dart';
- import '../models/short_comment_model.dart';
- 
- class ShortRepository {
+ class ChatService {
    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
    final FirebaseAuth _auth = FirebaseAuth.instance;
  
-   CollectionReference<Map<String, dynamic>> get _shortsCollection =>
-       _firestore.collection('shorts');
-   CollectionReference<Map<String, dynamic>> get _usersCollection =>
-       _firestore.collection('users');
+   CollectionReference<Map<String, dynamic>> get _chats =>
+       _firestore.collection('chats');
  
- 
- // V V V --- [추가] 특정 POM 영상 하나만 실시간으로 감시하는 함수 --- V V V
-   Stream<ShortModel> getShortStream(String shortId) {
-     return _shortsCollection.doc(shortId).snapshots()
-         .map((snapshot) => ShortModel.fromFirestore(snapshot));
-   }
- 
- 
--  Stream<List<ShortModel>> fetchShorts() {
--    return _shortsCollection
--        .orderBy('createdAt', descending: true)
--        .limit(20)
--        .snapshots()
--        .map((snapshot) =>
--            snapshot.docs.map((doc) => ShortModel.fromFirestore(doc)).toList());
-+  Stream<List<ShortModel>> fetchShorts({Map<String, String?>? locationFilter}) {
-+    Query<Map<String, dynamic>> query = _shortsCollection;
-+    final String? kab = locationFilter?['kab'];
-+    if (kab != null && kab.isNotEmpty) {
-+      query = query.where('locationParts.kab', isEqualTo: kab);
-+    }
-+    query = query.orderBy('createdAt', descending: true).limit(20);
-+
-+    return query.snapshots().asyncMap((snapshot) async {
-+      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
-+        final fallbackSnapshot = await _shortsCollection
-+            .where('locationParts.kab', isEqualTo: 'Tangerang')
-+            .orderBy('createdAt', descending: true)
-+            .limit(20)
-+            .get();
-+        return fallbackSnapshot.docs
-+            .map((doc) => ShortModel.fromFirestore(doc))
-+            .toList();
-+      }
-+      return snapshot.docs
-+          .map((doc) => ShortModel.fromFirestore(doc))
-+          .toList();
-+    });
-   }
- 
- // V V V --- [추가] POM 목록을 한 번만 가져오는 함수 --- V V V
-   Future<List<ShortModel>> fetchShortsOnce({Map<String, String?>? locationFilter}) async {
--    Query query = _firestore.collection('shorts').orderBy('createdAt', descending: true);
-+    Query<Map<String, dynamic>> query =
-+        _firestore.collection('shorts').orderBy('createdAt', descending: true);
-+    final String? kab = locationFilter?['kab'];
- 
-+    if (kab != null && kab.isNotEmpty) {
-+      query = query.where('locationParts.kab', isEqualTo: kab);
-+    }
-     if (locationFilter != null) {
-       if (locationFilter['prov'] != null && locationFilter['prov']!.isNotEmpty) {
-         query = query.where('locationParts.prov', isEqualTo: locationFilter['prov']);
-       }
--      if (locationFilter['kab'] != null && locationFilter['kab']!.isNotEmpty) {
--        query = query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
--      }
-       if (locationFilter['kec'] != null && locationFilter['kec']!.isNotEmpty) {
-         query = query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
-       }
-       if (locationFilter['kel'] != null && locationFilter['kel']!.isNotEmpty) {
-         query = query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
-       }
+   Stream<List<ChatRoomModel>> getChatRoomsStream() {
+     final myUid = _auth.currentUser?.uid;
+     if (myUid == null) {
+       return Stream.value([]);
      }
--    
-+
-+    query = query.limit(20);
-     final snapshot = await query.get();
-+    if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
-+      final fallbackSnapshot = await _firestore
-+          .collection('shorts')
-+          .where('locationParts.kab', isEqualTo: 'Tangerang')
-+          .orderBy('createdAt', descending: true)
-+          .limit(20)
-+          .get();
-+      return fallbackSnapshot.docs
-+          .map((doc) => ShortModel.fromFirestore(doc))
-+          .toList();
-+    }
-     return snapshot.docs
--        .map((doc) => ShortModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
-+        .map((doc) => ShortModel.fromFirestore(doc))
-         .toList();
-   }
-   
-   Future<String> createShort(ShortModel short) async {
-     final docRef = await _shortsCollection.add(short.toJson());
-     return docRef.id;
-   }
- 
-   // V V V --- [추가] POM '좋아요' 토글 함수 --- V V V
-   Future<void> toggleShortLike(String shortId, bool isLiked) async {
-     final currentUserId = _auth.currentUser?.uid;
-     if (currentUserId == null) return;
- 
-     final shortRef = _shortsCollection.doc(shortId);
-     final userRef = _usersCollection.doc(currentUserId);
- 
-     final batch = _firestore.batch();
- 
-     if (isLiked) {
-       // 좋아요 취소
-       batch.update(shortRef, {
-         'likesCount': FieldValue.increment(-1),
-         'likes': FieldValue.arrayRemove([currentUserId])
-       });
-       batch.update(userRef, {
-diff --git a/lib/features/pom/models/short_model.dart b/lib/features/pom/models/short_model.dart
-index c346cb3f9b8ea803af64c94ca33b82b1e762d29b..dd718041018258a52c18ce931ab5a512007d88ef 100644
---- a/lib/features/pom/models/short_model.dart
-+++ b/lib/features/pom/models/short_model.dart
-@@ -1,85 +1,91 @@
- // lib/core/models/short_model.dart
+     return _firestore
+         .collection('chats')
+         .where('participants', arrayContains: myUid)
+         .orderBy('lastTimestamp', descending: true)
+         .snapshots()
+         .map((snapshot) => snapshot.docs
+diff --git a/lib/features/chat/domain/chat_message.dart b/lib/features/chat/domain/chat_message.dart
+index c43701f9b3e87439b0dd20cded4187b300d27f38..166f87f8b78b211c80b2862fc934b791975bd032 100644
+--- a/lib/features/chat/domain/chat_message.dart
++++ b/lib/features/chat/domain/chat_message.dart
+@@ -1,26 +1,46 @@
+-// lib/features/chat/domain/chat_message.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Chat
++/// File          : lib/features/chat/domain/chat_message.dart
++/// Purpose       : 단일 채팅 메시지를 표현하는 데이터 모델입니다.
++/// User Impact   : 모듈 전반에서 메시지 구조를 표준화합니다.
++/// Feature Links : lib/features/chat/data/chat_service.dart; lib/features/chat/screens/chat_room_screen.dart
++/// Data Model    : Firestore `messages` 필드 `senderId`, `text`, `timestamp`, `readBy`.
++/// Location Scope: 없음.
++/// Trust Policy  : 메시지는 신고될 수 있으며 발신자의 신뢰 등급에 영향을 줍니다.
++/// Monetization  : 없음.
++/// KPIs          : `send_message`, `read_message` 이벤트 추적을 가능하게 합니다.
++/// Analytics     : `readBy`에 읽음 확인을 저장합니다.
++/// I18N          : 없음.
++/// Dependencies  : cloud_firestore
++/// Security/Auth : 발신자 ID를 인증된 사용자와 비교하여 검증합니다.
++/// Edge Cases    : 텍스트나 타임스탬프가 없으면 `Timestamp.now()`로 대체합니다.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md
++/// ============================================================================
++// 아래부터 실제 코드
  
  import 'package:cloud_firestore/cloud_firestore.dart';
  
- /// Model representing a short video uploaded to the POM (Piece of Moment)
- /// short-video hub.
- class ShortModel {
+ class ChatMessage {
+   final String id;
+   final String senderId;
+   final String text;
+   final Timestamp timestamp;
+   // 'isRead' -> 'readBy'로 변경. 여러 참여자의 읽음 상태를 기록할 수 있음.
+   final List<String> readBy;
+ 
+   ChatMessage({
+     required this.id,
+     required this.senderId,
+     required this.text,
+     required this.timestamp,
+     required this.readBy,
+   });
+ 
+   factory ChatMessage.fromFirestore(
+     DocumentSnapshot<Map<String, dynamic>> doc,
+   ) {
+     final data = doc.data()!;
+     return ChatMessage(
+       id: doc.id,
+diff --git a/lib/features/chat/domain/chat_utils.dart b/lib/features/chat/domain/chat_utils.dart
+index f1b1b97a80a813a88c54d41614dc39bb7a3b51b0..6326b66f76d3abab9586c6e03a9d424f1dc8fc9a 100644
+--- a/lib/features/chat/domain/chat_utils.dart
++++ b/lib/features/chat/domain/chat_utils.dart
+@@ -1,17 +1,37 @@
+-// lib/features/chat/domain/chat_utils.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Chat
++/// File          : lib/features/chat/domain/chat_utils.dart
++/// Purpose       : 일관된 채팅방 식별자를 생성합니다.
++/// User Impact   : 사용자 간 또는 상품 중심 대화가 고유하게 유지됩니다.
++/// Feature Links : lib/features/chat/data/chat_service.dart
++/// Data Model    : `chatRooms`와 상품 채팅방을 위한 ID를 구성합니다.
++/// Location Scope: 없음.
++/// Trust Policy  : 인증된 UID 입력에 의존합니다.
++/// Monetization  : 없음.
++/// KPIs          : `start_chat` 이벤트 로깅을 지원합니다.
++/// Analytics     : ID 구조가 메시지 추적을 돕습니다.
++/// I18N          : 없음.
++/// Dependencies  : 없음
++/// Security/Auth : 사용자 ID에서 파생된 ID로, 패턴 노출을 피해야 합니다.
++/// Edge Cases    : UID가 동일하거나 누락되면 중복 ID가 발생합니다.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ String makeChatId(String uid1, String uid2) {
+   // 상품 ID가 아닌, 두 사용자 ID만으로 고유 ID를 생성합니다.
+   // 이래야 두 사람 사이의 대화는 항상 하나로 유지됩니다.
+   // 상품 정보는 채팅방 데이터 안에 저장하여 구분합니다.
+   List<String> uids = [uid1, uid2];
+   uids.sort();
+   return uids.join('_');
+ }
+ 
+ // 상품 문의를 위한 별도의 채팅방 ID 생성 규칙
+ String makeProductChatId(String productId, String uid1, String uid2) {
+   List<String> uids = [uid1, uid2];
+   uids.sort();
+   return '${productId}_${uids.join('_')}';
+ }
+diff --git a/lib/features/chat/screens/chat_list_screen.dart b/lib/features/chat/screens/chat_list_screen.dart
+index 190969e0ed4555a4c8866c93633c027391f07f86..b63f7a7a68c5483deeca8380251d80e2d18e8521 100644
+--- a/lib/features/chat/screens/chat_list_screen.dart
++++ b/lib/features/chat/screens/chat_list_screen.dart
+@@ -1,26 +1,46 @@
+-// lib/features/chat/screens/chat_list_screen.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Chat
++/// File          : lib/features/chat/screens/chat_list_screen.dart
++/// Purpose       : 채팅방 목록을 보여 주고 개별 대화로 이동합니다.
++/// User Impact   : 여러 모듈의 진행 중인 대화를 빠르게 접근하게 합니다.
++/// Feature Links : lib/features/chat/screens/chat_room_screen.dart; lib/features/chat/data/chat_service.dart
++/// Data Model    : 참여자 UID로 필터링된 Firestore `chatRooms` 스트림; 각 방은 `messages` 하위 컬렉션과 연결됩니다.
++/// Location Scope: 없음.
++/// Trust Policy  : 인증된 사용자만 채팅 목록을 조회할 수 있으며 신고된 방은 숨겨집니다.
++/// Monetization  : 향후 채팅 내 프로모션 계획; 현재는 없음.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_chat_list`, `open_chat_room`.
++/// Analytics     : 읽지 않은 채팅 수와 열린 대화 수를 추적합니다.
++/// I18N          : 키 `chat_list.empty`, `main.bottomNav.chat` (assets/lang/*.json)
++/// Dependencies  : firebase_auth, easy_localization
++/// Security/Auth : 로그인된 사용자만 가능하며 Firestore 규칙이 참여 여부를 확인합니다.
++/// Edge Cases    : 채팅방이 없거나 사용자가 로그인되지 않은 경우.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'package:bling_app/core/models/chat_room_model.dart';
+ import 'package:bling_app/core/models/user_model.dart';
+ import 'package:bling_app/features/chat/data/chat_service.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:flutter/material.dart';
+ // [추가] debugPrint
+ 
+ import 'chat_room_screen.dart';
+ 
+ class ChatListScreen extends StatefulWidget {
+   const ChatListScreen({super.key});
+ 
+   @override
+   State<ChatListScreen> createState() => _ChatListScreenState();
+ }
+ 
+ class _ChatListScreenState extends State<ChatListScreen> {
+   final ChatService _chatService = ChatService();
+   final String? _myUid = FirebaseAuth.instance.currentUser?.uid;
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+diff --git a/lib/features/chat/screens/chat_room_screen.dart b/lib/features/chat/screens/chat_room_screen.dart
+index 7c7eebc81779f468fae95d7e26ccc894212277de..065fb3a92f4809a9cb65643926cd442484c255c1 100644
+--- a/lib/features/chat/screens/chat_room_screen.dart
++++ b/lib/features/chat/screens/chat_room_screen.dart
+@@ -1,26 +1,46 @@
+-// lib/features/chat/screens/chat_room_screen.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Chat
++/// File          : lib/features/chat/screens/chat_room_screen.dart
++/// Purpose       : 구인·상품 등 컨텍스트 아이템을 포함한 1:1 및 그룹 채팅 실시간 인터페이스입니다.
++/// User Impact   : 이웃 간 안전한 소통과 거래를 가능하게 합니다.
++/// Feature Links : lib/features/chat/screens/chat_list_screen.dart; lib/features/chat/data/chat_service.dart; lib/features/jobs/screens/job_detail_screen.dart
++/// Data Model    : Firestore `chatRooms` 필드 `participants`, `jobId`, `productId`; 하위 컬렉션 `messages`의 `senderId`, `text`, `timestamp`, `readBy`.
++/// Location Scope: 없음; 모더레이션은 참가자 프로필 위치를 참조합니다.
++/// Trust Policy  : `report` 모듈에서 신고된 메시지는 `trustScore`를 감소시키며 인증 사용자만 허용됩니다.
++/// Monetization  : 스폰서 메시지 가능성; TODO: 구현.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `send_message`, `enter_chat_room`, `attach_media`.
++/// Analytics     : 읽음 확인과 컨텍스트 아이템 클릭을 기록합니다.
++/// I18N          : 키 `chat_list.empty`, `chat_room.send` (assets/lang/*.json)
++/// Dependencies  : firebase_auth, chat_service, audioplayers, easy_localization
++/// Security/Auth : 참가자에게만 접근이 제한되며 사용자 UID별로 읽음 표시를 합니다.
++/// Edge Cases    : 컨텍스트 아이템 누락, 참가자 정보 부족, 연결 끊김.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'package:audioplayers/audioplayers.dart';
+ import 'package:bling_app/core/models/chat_message_model.dart';
+ // import 'package:bling_app/core/models/chat_room_model.dart';
+ import 'package:bling_app/features/jobs/models/job_model.dart';
+ // import 'package:bling_app/core/models/product_model.dart';
+ import 'package:bling_app/core/models/user_model.dart';
+ import 'package:bling_app/features/chat/data/chat_service.dart';
+ import 'package:bling_app/features/jobs/data/job_repository.dart';
+ import 'package:bling_app/features/jobs/screens/job_detail_screen.dart';
+ // TODO: ProductRepository 및 ProductDetailScreen import 필요
+ // import 'package:bling_app/features/marketplace/data/product_repository.dart';
+ // import 'package:bling_app/features/marketplace/screens/product_detail_screen.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:flutter/material.dart';
+ 
+ class ChatRoomScreen extends StatefulWidget {
+ final String chatId;
+   // [수정] 그룹/1:1 채팅을 구분하기 위한 파라미터 추가 및 변경
+   final bool isGroupChat;
+   final String? groupName;
+   final String? otherUserName;
+   final String? otherUserId;
+   final String? productTitle; // 구인글 제목 등 컨텍스트 제목으로 재활용
+diff --git a/lib/features/feed/screens/feed_screen.dart b/lib/features/feed/screens/feed_screen.dart
+index e69de29bb2d1d6434b8b29ae775ad8c2e48c5391..a7bc5111fdc5e8c06c71035fe6a0e36d6cc98ab7 100644
+--- a/lib/features/feed/screens/feed_screen.dart
++++ b/lib/features/feed/screens/feed_screen.dart
+@@ -0,0 +1,23 @@
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Feed
++/// File          : lib/features/feed/screens/feed_screen.dart
++/// Purpose       : 동네 게시글과 뉴스를 나열하는 진입 화면입니다.
++/// User Impact   : 사용자가 한 화면에서 지역 소식을 확인합니다.
++/// Feature Links : lib/features/feed/screens/local_feed_screen.dart; lib/features/feed/widgets/post_card.dart
++/// Data Model    : Firestore `posts` 컬렉션의 `category`, `locationParts`, `createdAt` 필드를 사용합니다.
++/// Location Scope: 기본값은 사용자 `locationParts`; Kelurahan부터 RT/RW까지 필터를 허용합니다.
++/// Trust Policy  : 게시글 작성은 전화번호와 위치 검증이 필요합니다.
++/// Monetization  : 스폰서 게시글과 배너 광고; TODO: 요금 규칙 정의.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_feed`, `start_post_create`.
++/// Analytics     : 체류 시간과 게시글 참여도를 측정합니다.
++/// I18N          : 키 `feed.title`, `feed.empty` (assets/lang/*.json)
++/// Dependencies  : cloud_firestore, easy_localization
++/// Security/Auth : 작성은 인증된 사용자만 가능하며 읽기는 모두 허용됩니다.
++/// Edge Cases    : 피드가 비거나 위치가 없으면 프롬프트를 표시합니다.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/6 피드 (Local News).md; docs/index/010 Post 모듈.md
++/// ============================================================================
++// 아래부터 실제 코드
++
++// TODO: implement
+diff --git a/lib/features/feed/screens/local_feed_screen.dart b/lib/features/feed/screens/local_feed_screen.dart
+index e69de29bb2d1d6434b8b29ae775ad8c2e48c5391..364d3197eac38b9a61fa26070ac0db9152d84da1 100644
+--- a/lib/features/feed/screens/local_feed_screen.dart
++++ b/lib/features/feed/screens/local_feed_screen.dart
+@@ -0,0 +1,23 @@
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Feed
++/// File          : lib/features/feed/screens/local_feed_screen.dart
++/// Purpose       : TODO: 지역 피드를 모아 보여주는 화면의 플레이스홀더입니다.
++/// User Impact   : 주민이 메인 피드를 벗어나지 않고 지역 게시글을 볼 수 있습니다.
++/// Feature Links : lib/features/feed/screens/feed_screen.dart; lib/features/feed/widgets/post_card.dart
++/// Data Model    : Firestore `posts` 컬렉션을 `createdAt`으로 정렬하며 `locationParts`, `content` 필드를 사용합니다.
++/// Location Scope: Kecamatan에서 Kelurahan까지 필터하며 사용자 `locationParts`를 기본값으로 사용합니다.
++/// Trust Policy  : Kelurahan 검증된 사용자만 작성 가능; TODO: 신뢰 등급 조건 보완.
++/// Monetization  : 스폰서 게시글이 노출될 수 있음; TODO: 요금 정의.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_feed`, `click_post`.
++/// Analytics     : 스크롤 깊이와 게시글 노출을 추적합니다.
++/// I18N          : 키 `feed.title` (assets/lang/*.json)
++/// Dependencies  : cloud_firestore, easy_localization
++/// Security/Auth : 읽기는 모두 가능하며, 쓰기는 인증이 필요합니다.
++/// Edge Cases    : 피드가 비거나 네트워크 오류가 발생합니다.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/6 피드 (Local News).md; docs/index/010 Post 모듈.md
++/// ============================================================================
++// 아래부터 실제 코드
++
++// TODO: implement
+diff --git a/lib/features/feed/widgets/post_card.dart b/lib/features/feed/widgets/post_card.dart
+index e69de29bb2d1d6434b8b29ae775ad8c2e48c5391..b8041f0e631c8760f9a38797e3146b7da6864458 100644
+--- a/lib/features/feed/widgets/post_card.dart
++++ b/lib/features/feed/widgets/post_card.dart
+@@ -0,0 +1,23 @@
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Feed
++/// File          : lib/features/feed/widgets/post_card.dart
++/// Purpose       : 게시글 요약을 보여주는 UI 카드입니다.
++/// User Impact   : 주변 소식을 빠르게 살펴볼 수 있어 참여를 유도합니다.
++/// Feature Links : lib/features/feed/screens/feed_screen.dart
++/// Data Model    : `posts` 컬렉션의 `title`, `content`, `imageUrls`, `locationParts` 필드를 사용합니다.
++/// Location Scope: `kec`부터 `kel` 태그를 표시하며 프로필 위치를 기본값으로 사용합니다.
++/// Trust Policy  : `users.trustLevel`의 신뢰 배지를 표시합니다.
++/// Monetization  : 스폰서 게시글을 강조할 수 있음; TODO: 배지 스타일.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `click_post_card`.
++/// Analytics     : 렌더링 시 노출을 기록합니다.
++/// I18N          : 키 `postCard.locationNotSet` (assets/lang/*.json)
++/// Dependencies  : flutter, easy_localization
++/// Security/Auth : 없음; 표시 전용입니다.
++/// Edge Cases    : 이미지나 위치 이름이 없을 때.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/6 피드 (Local News).md; docs/index/010 Post 모듈.md
++/// ============================================================================
++// 아래부터 실제 코드
++
++// TODO: implement
+diff --git a/lib/features/find_friends/screens/find_friend_detail_screen.dart b/lib/features/find_friends/screens/find_friend_detail_screen.dart
+index 6a2c2f192defb6684a8f8bec5d71ff80a83cf234..bf18fa4a75ec12af3a6dfdbe72a4cc9f5643e2b5 100644
+--- a/lib/features/find_friends/screens/find_friend_detail_screen.dart
++++ b/lib/features/find_friends/screens/find_friend_detail_screen.dart
+@@ -1,26 +1,46 @@
+-// lib/features/find_friends/screens/find_friend_detail_screen.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Find Friend
++/// File          : lib/features/find_friends/screens/find_friend_detail_screen.dart
++/// Purpose       : 프로필 상세 정보를 보여 주고 친구 요청을 보낼 수 있습니다.
++/// User Impact   : 잠재적 친구를 평가하고 연결하는 데 도움을 줍니다.
++/// Feature Links : lib/features/find_friends/data/find_friend_repository.dart; lib/features/chat/screens/chat_room_screen.dart
++/// Data Model    : Firestore `users` 프로필 필드와 `friendRequests`를 통한 요청 상태.
++/// Location Scope: 사용자 프로필의 `locationName`을 표시하여 지역 매칭에 사용합니다.
++/// Trust Policy  : `trustLevel` 배지를 보여 주며 신고 시 상대방 점수가 감소합니다.
++/// Monetization  : 향후 프리미엄 프로필 강조 예정; TODO: 정의.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_friend_profile`, `send_friend_request`.
++/// Analytics     : 페이지 조회와 요청 전환을 추적합니다.
++/// I18N          : 키 `findFriend.bioLabel`, `interests.title` (assets/lang/*.json)
++/// Dependencies  : cloud_firestore, easy_localization
++/// Security/Auth : 요청은 인증이 필요하며 본인 프로필 조회를 방지합니다.
++/// Edge Cases    : 이미지 누락 또는 차단된 사용자.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md; docs/team/teamF_Design_Privacy_Module_통합_작업문.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'package:bling_app/core/models/user_model.dart';
+ import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:flutter/material.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ 
+ // [수정] StatelessWidget -> StatefulWidget으로 변경
+ class FindFriendDetailScreen extends StatefulWidget {
+   final UserModel user;
+   final UserModel? currentUserModel;
+   const FindFriendDetailScreen({super.key, required this.user, this.currentUserModel});
+ 
+   @override
+   State<FindFriendDetailScreen> createState() => _FindFriendDetailScreenState();
+ }
+ 
+ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
+   @override
+   Widget build(BuildContext context) {
+     final user = widget.user;
+     final allImages = [user.photoUrl, ...?user.findfriendProfileImages]
+         .where((url) => url != null && url.isNotEmpty)
+         .toList();
+     final currentUser = widget.currentUserModel;
+diff --git a/lib/features/find_friends/screens/find_friends_screen.dart b/lib/features/find_friends/screens/find_friends_screen.dart
+index b2e8e90607ba50b6d95c239e25d1ec4b37b08bb3..ce8718c85d0bb012739264d2d777e016f978dcf5 100644
+--- a/lib/features/find_friends/screens/find_friends_screen.dart
++++ b/lib/features/find_friends/screens/find_friends_screen.dart
+@@ -1,26 +1,46 @@
+-// lib/features/find_friends/screens/find_friends_screen.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Find Friend
++/// File          : lib/features/find_friends/screens/find_friends_screen.dart
++/// Purpose       : 관심사와 위치 기반으로 주변 사용자를 탐색하고 연결합니다.
++/// User Impact   : 주민이 1~5km 내 이웃이나 데이팅 매치를 발견하도록 돕습니다.
++/// Feature Links : lib/features/find_friends/screens/find_friend_detail_screen.dart; lib/features/find_friends/screens/findfriend_form_screen.dart; lib/features/find_friends/widgets/findfriend_card.dart
++/// Data Model    : `users/{uid}`와 `/users/{uid}/findfriend_profile/main`을 읽고 관계는 `follows` 컬렉션을 사용합니다.
++/// Location Scope: Province→Kabupaten/Kota→Kecamatan→Kelurahan로 필터링하며 LocationFilterScreen을 통한 선택적 RT/RW; 기본값은 사용자 `locationParts`입니다.
++/// Trust Policy  : `isDatingProfile`이 true이고 TrustLevel 기준을 충족해야 하며 `blockedUsers`를 존중합니다.
++/// Monetization  : 향후 프로필 노출 프리미엄 부스트 예정; TODO.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `profile_view`, `start_follow`, `start_chat`.
++/// Analytics     : 필터 사용과 프로필 노출을 추적합니다.
++/// I18N          : 키 `findFriend.prompt_title`, `findFriend.prompt_button` (assets/lang/*.json)
++/// Dependencies  : easy_localization, lib/features/find_friends/data/find_friend_repository.dart, lib/features/location/screens/location_filter_screen.dart
++/// Security/Auth : 인증된 접근이 필요하며 나이와 개인정보 설정을 적용합니다.
++/// Edge Cases    : 프로필 미완성, 위치 필터 없음, 결과 없음.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/012  Find Friend & Club & Jobs & etc 모듈.md; docs/Bling FindFriend DB 구조 설계 문서.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'package:bling_app/core/models/user_model.dart';
+ import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
+ import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
+ import 'package:bling_app/features/find_friends/widgets/findfriend_card.dart';
+ import 'package:bling_app/features/location/screens/location_filter_screen.dart';
+ import 'package:flutter/material.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ import 'findfriend_form_screen.dart';
+ 
+ class FindFriendsScreen extends StatefulWidget {
+   final UserModel? userModel;
+   const FindFriendsScreen({this.userModel, super.key});
+ 
+   @override
+   State<FindFriendsScreen> createState() => _FindFriendsScreenState();
+ }
+ 
+ class _FindFriendsScreenState extends State<FindFriendsScreen> {
+   Map<String, String?>? _locationFilter;
+ 
+   Future<void> _openLocationFilter() async {
+     final raw = await Navigator.push<Map<String, String?>>(
+       context,
+       MaterialPageRoute(
+diff --git a/lib/features/find_friends/screens/findfriend_edit_screen.dart b/lib/features/find_friends/screens/findfriend_edit_screen.dart
+index 830a48f43239b76ae9917c1c5ddd8a3daafc5be0..464abed17f2f90c24c7c6bcafcc205334dd8fe32 100644
+--- a/lib/features/find_friends/screens/findfriend_edit_screen.dart
++++ b/lib/features/find_friends/screens/findfriend_edit_screen.dart
+@@ -1,27 +1,46 @@
+-// lib/features/find_friends/screens/findfriend_edit_screen.dart
+-
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Find Friend
++/// File          : lib/features/find_friends/screens/findfriend_edit_screen.dart
++/// Purpose       : 기존 FindFriend 프로필의 세부 정보와 공개 여부를 수정합니다.
++/// User Impact   : 사용자가 자신의 탐색 프로필을 최신 상태로 유지할 수 있습니다.
++/// Feature Links : lib/features/find_friends/screens/findfriend_form_screen.dart; lib/features/find_friends/data/find_friend_repository.dart
++/// Data Model    : Firestore `users` 필드 `age`, `ageRange`, `findfriend_profileImages`, `isVisibleInList`.
++/// Location Scope: 저장된 `locationParts`를 사용하며 이 화면에서는 직접 수정하지 않습니다.
++/// Trust Policy  : 수정 내용은 커뮤니티 가이드라인을 기준으로 검토하며 부적절한 이미지는 신고됩니다.
++/// Monetization  : 향후 유료 노출 부스트 예정; TODO: 통합.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_profile_edit`, `complete_profile_edit`.
++/// Analytics     : 이미지 업로드와 공개 여부 토글을 추적합니다.
++/// I18N          : 키 `findFriend.editTitle` (assets/lang/*.json) - TODO: 키 확인.
++/// Dependencies  : firebase_storage, firebase_auth, cloud_firestore, image_picker
++/// Security/Auth : 프로필 소유자만 수정할 수 있으며 Storage 경로는 UID로 제한됩니다.
++/// Edge Cases    : 이미지 미선택, 업로드 실패.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md; docs/team/teamF_Design_Privacy_Module_통합_작업문.md
++/// ============================================================================
++// 아래부터 실제 코드
+ import 'dart:io';
+ 
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:firebase_storage/firebase_storage.dart';
+ import 'package:flutter/material.dart';
+ import 'package:image_picker/image_picker.dart';
+ 
+ import '../../../core/models/user_model.dart';
+ 
+ /// Screen for editing an existing FindFriend profile.
+ class FindFriendEditScreen extends StatefulWidget {
+   final UserModel user;
+   const FindFriendEditScreen({super.key, required this.user});
+ 
+   @override
+   State<FindFriendEditScreen> createState() => _FindFriendEditScreenState();
+ }
+ 
+ class _FindFriendEditScreenState extends State<FindFriendEditScreen> {
+   late TextEditingController _ageController;
+   late TextEditingController _ageRangeController;
+   final List<File> _newImages = [];
+   late List<String> _existingImages;
+   bool _isVisibleInList = true;
+diff --git a/lib/features/find_friends/screens/findfriend_form_screen.dart b/lib/features/find_friends/screens/findfriend_form_screen.dart
+index 645c08024e555f38cb8afe387dedd5986cacbdaa..54a9a4a592c3bf690f499f4dffe429ada373bb97 100644
+--- a/lib/features/find_friends/screens/findfriend_form_screen.dart
++++ b/lib/features/find_friends/screens/findfriend_form_screen.dart
+@@ -1,26 +1,46 @@
+-// lib/features/find_friends/screens/findfriend_form_screen.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Find Friend
++/// File          : lib/features/find_friends/screens/findfriend_form_screen.dart
++/// Purpose       : 관심사와 인구통계를 포함한 FindFriend 프로필을 생성하거나 업데이트합니다.
++/// User Impact   : 주민이 취미가 비슷한 동료를 찾는 데 도움을 줍니다.
++/// Feature Links : lib/features/find_friends/screens/find_friend_detail_screen.dart; lib/features/find_friends/data/find_friend_repository.dart
++/// Data Model    : Firestore `users` 필드 `bio`, `age`, `gender`, `interests`, `findfriend_profileImages`, `ageRange`, `privacySettings.genderPreference`, `isVisibleInList`.
++/// Location Scope: 사용자 `locationParts`를 활용해 근접 매칭하며 수동 위치 선택은 없습니다.
++/// Trust Policy  : 프로필 공개는 `trustLevel`에 따라 달라지며 부적절한 내용은 신고됩니다.
++/// Monetization  : 프로필 노출을 위한 프리미엄 부스트 가능성; TODO: 가격 책정.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_profile_create`, `complete_profile_create`, `upload_profile_photo`.
++/// Analytics     : 관심사 선택과 공개 여부 토글을 추적합니다.
++/// I18N          : 키 `interests.items.*`, `findFriend.bioLabel` (assets/lang/*.json)
++/// Dependencies  : firebase_storage, cloud_firestore, image_picker, easy_localization, uuid
++/// Security/Auth : 인증된 사용자만 가능하며 Storage 경로는 UID로 제한됩니다.
++/// Edge Cases    : 이미지 제한 초과, 나이 범위 미완성.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md; docs/team/teamF_Design_Privacy_Module_통합_작업문.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'dart:io';
+ import 'package:bling_app/core/models/user_model.dart';
+ import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_storage/firebase_storage.dart';
+ import 'package:flutter/material.dart';
+ import 'package:image_picker/image_picker.dart';
+ import 'package:uuid/uuid.dart';
+ import 'package:easy_localization/easy_localization.dart'; // import 추가
+ 
+ class FindFriendFormScreen extends StatefulWidget {
+   // [수정] super.key 문법 적용
+   final UserModel userModel;
+   const FindFriendFormScreen({super.key, required this.userModel});
+ 
+   @override
+   State<FindFriendFormScreen> createState() => _FindFriendFormScreenState();
+ }
+ 
+ class _FindFriendFormScreenState extends State<FindFriendFormScreen> {
+   final _formKey = GlobalKey<FormState>();
+ 
+   // 모든 입력 필드를 위한 컨트롤러 및 상태 변수
+   late TextEditingController _bioController;
+diff --git a/lib/features/find_friends/widgets/findfriend_card.dart b/lib/features/find_friends/widgets/findfriend_card.dart
+index 1325001baa40ce89b1a580f950b2b97d9fd792ab..dffde6e0605bf80475b9ee8944a5e1004ab054fb 100644
+--- a/lib/features/find_friends/widgets/findfriend_card.dart
++++ b/lib/features/find_friends/widgets/findfriend_card.dart
+@@ -1,26 +1,46 @@
+-// lib/features/find_friends/widgets/findfriend_card.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Find Friend
++/// File          : lib/features/find_friends/widgets/findfriend_card.dart
++/// Purpose       : 리스트에서 간단한 프로필 요약을 표시합니다.
++/// User Impact   : 주변 친구 후보를 빠르게 훑어볼 수 있게 합니다.
++/// Feature Links : lib/features/find_friends/screens/find_friend_detail_screen.dart
++/// Data Model    : `users` 필드 `nickname`, `age`, `photoUrl`, `locationName`을 사용합니다.
++/// Location Scope: `locationName`을 표시하며 프로필 위치 계층을 가정합니다.
++/// Trust Policy  : `trustLevel`에 따른 배지를 표시할 수 있음(TODO).
++/// Monetization  : 프로모션 프로필 슬롯을 제공합니다.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `click_findfriend_card`.
++/// Analytics     : 카드 렌더링 시 노출을 기록합니다.
++/// I18N          : 없음.
++/// Dependencies  : flutter
++/// Security/Auth : 없음; 읽기 전용 위젯입니다.
++/// Edge Cases    : 아바타나 나이가 없을 때.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'package:flutter/material.dart';
+ 
+ import '../../../core/models/user_model.dart';
+ 
+ /// Card displaying basic information for a FindFriend profile.
+ class FindFriendCard extends StatelessWidget {
+   final UserModel user;
+   const FindFriendCard({super.key, required this.user});
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Card(
+       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+       child: Padding(
+         padding: const EdgeInsets.all(16.0),
+         child: Row(
+           children: [
+             Hero(
+               tag: 'profile-image-${user.uid}',
+               child: CircleAvatar(
+                 radius: 30,
+                 backgroundImage: user.photoUrl != null
+                     ? NetworkImage(user.photoUrl!)
+                     : null,
+diff --git a/lib/features/local_news/screens/local_news_screen.dart b/lib/features/local_news/screens/local_news_screen.dart
+index 1499f02f7e4e7d5a28f28213714a612f893ff208..cbc2d0978952e8b060d249b924dc16bec7282479 100644
+--- a/lib/features/local_news/screens/local_news_screen.dart
++++ b/lib/features/local_news/screens/local_news_screen.dart
+@@ -1,26 +1,46 @@
+-// lib/features/local_news/screens/local_news_screen.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Local News Feed
++/// File          : lib/features/local_news/screens/local_news_screen.dart
++/// Purpose       : 사용자 위치로 필터된 카테고리별 커뮤니티 게시글을 보여줍니다.
++/// User Impact   : 주민이 동네 소식을 둘러보고 상호작용할 수 있습니다.
++/// Feature Links : lib/features/local_news/screens/create_local_news_screen.dart; lib/features/local_news/screens/edit_local_news_screen.dart; lib/features/local_news/widgets/post_card.dart
++/// Data Model    : Firestore `posts`, `comments`, `replies` 컬렉션; 필드 `category`, `locationParts`, `likesCount`, `viewsCount`.
++/// Location Scope: Kabupaten→Kecamatan→Kelurahan 순으로 조회하며 RT/RW 필터 선택 가능; `locationFilter`가 없으면 사용자 `locationParts`를 사용합니다.
++/// Trust Policy  : Kelurahan 검증 사용자만 게시글 작성 가능하며 신고 시 신뢰 점수가 감소합니다.
++/// Monetization  : 스폰서 게시글과 마켓플레이스 교차 게시를 지원; TODO: 지역 광고 슬롯 정의.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_post`, `click_category_tab`, `create_post`.
++/// Analytics     : 탭 전환과 게시글 노출을 `view_post`로 추적합니다.
++/// I18N          : 키 `localNewsFeed.setLocationPrompt`, `localNewsFeed.allCategory` (assets/lang/*.json)
++/// Dependencies  : cloud_firestore, easy_localization, google_fonts
++/// Security/Auth : 읽기는 모두 허용되며, 작성은 인증된 신뢰 사용자만 가능합니다.
++/// Edge Cases    : 위치가 없는 사용자는 프롬프트를 보고, 네트워크 또는 Firestore 오류가 발생할 수 있습니다.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/010  Post 모듈.md; docs/index/피드 관련 위치 검색 규칙과 예시.md; docs/index/Bling_Location_GeoQuery_Structure.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'package:bling_app/core/models/user_model.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
+ import 'package:flutter/material.dart';
+ import 'package:google_fonts/google_fonts.dart';
+ 
+ import '../../../core/constants/app_categories.dart';
+ import '../models/post_model.dart';
+ import '../widgets/post_card.dart';
+ 
+ class LocalNewsScreen extends StatefulWidget {
+   final UserModel? userModel;
+   final Map<String, String?>? locationFilter;
+   const LocalNewsScreen({this.userModel, this.locationFilter, super.key});
+ 
+   @override
+   State<LocalNewsScreen> createState() => _LocalNewsScreenState();
+ }
+ 
+ class _LocalNewsScreenState extends State<LocalNewsScreen>
+     with TickerProviderStateMixin {
+   late final TabController _tabController;
+ 
+   final List<String> _categoryIds = [
+diff --git a/lib/features/location/screens/location_filter_screen.dart b/lib/features/location/screens/location_filter_screen.dart
+index bc1b5b7057d70b4e2318389d307908895238d3a4..aaf3c32ba9188774587fc0cedcef7343630bce17 100644
+--- a/lib/features/location/screens/location_filter_screen.dart
++++ b/lib/features/location/screens/location_filter_screen.dart
+@@ -1,25 +1,46 @@
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Location
++/// File          : lib/features/location/screens/location_filter_screen.dart
++/// Purpose       : 행정 구역별로 콘텐츠를 필터링할 수 있게 합니다.
++/// User Impact   : 구매자와 이용자가 원하는 지역으로 목록을 좁힐 수 있습니다.
++/// Feature Links : lib/features/marketplace/screens/marketplace_screen.dart; lib/features/local_news/screens/local_news_screen.dart
++/// Data Model    : Firestore `provinces/{prov}/kabupaten`, `kota`, `kecamatan`, `kelurahan`; `locationFilter` 맵을 반환합니다.
++/// Location Scope: Prov→Kabupaten/Kota→Kecamatan→Kelurahan 계층을 사용하며 'all' 옵션과 프로필 기본값을 제공합니다.
++/// Trust Policy  : 없음; 모든 사용자가 필터를 사용할 수 있습니다.
++/// Monetization  : 위치 세그먼트 기반 타깃 광고를 지원합니다.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `apply_location_filter`.
++/// Analytics     : 선택 깊이와 빈도를 기록합니다.
++/// I18N          : 키 `locationFilter.all`, `locationFilter.title` (assets/lang/*.json)
++/// Dependencies  : cloud_firestore, easy_localization
++/// Security/Auth : 공용 위치 컬렉션에 대한 읽기 전용 쿼리입니다.
++/// Edge Cases    : 주 목록이 비거나 Firestore 지연이 발생할 수 있습니다.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/5 지역-위치-개인정보.md; docs/Bling_Location_GeoQuery_Structure.md
++/// ============================================================================
++// 아래부터 실제 코드
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:flutter/material.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ 
+ import '../../../core/models/user_model.dart';
+ 
+ class LocationFilterScreen extends StatefulWidget {
+   final UserModel? userModel;
+   const LocationFilterScreen({this.userModel, super.key});
+ 
+   @override
+   State<LocationFilterScreen> createState() => _LocationFilterScreenState();
+ }
+ 
+ class _LocationFilterScreenState extends State<LocationFilterScreen> {
+   final List<String> _provinsiList = [];
+   final List<String> _kabupatenList = [];
+   final List<String> _kotaList = [];
+   final List<String> _kecamatanList = [];
+   final List<String> _kelurahanList = [];
+ 
+   String? _selectedProvinsi;
+   String? _selectedKabupaten;
+   String? _selectedKota;
+   String? _selectedKecamatan;
+diff --git a/lib/features/location/screens/location_setting_screen.dart b/lib/features/location/screens/location_setting_screen.dart
+index e0fb5ac2a19e94f4a587a3747bcb709f30d83919..87b4251cc0e70d96d99a2ba1e942059276913534 100644
+--- a/lib/features/location/screens/location_setting_screen.dart
++++ b/lib/features/location/screens/location_setting_screen.dart
+@@ -1,26 +1,46 @@
+-// lib/features/location/screens/location_setting_screen.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Location
++/// File          : lib/features/location/screens/location_setting_screen.dart
++/// Purpose       : Google Places와 Firestore를 통해 사용자 위치를 수집하고 검증합니다.
++/// User Impact   : 기능이 올바른 Kelurahan 및 RT/RW에서 동작하도록 보장합니다.
++/// Feature Links : lib/features/location/screens/location_filter_screen.dart; lib/features/location/screens/neighborhood_prompt_screen.dart
++/// Data Model    : `users/{uid}.locationParts{prov,kota/kab,kec,kel,rt,rw}`와 `geoPoint`에 기록하며 `provinces/{prov}/kota/{kota}/kecamatan`을 읽습니다.
++/// Location Scope: Province→Kota/Kabupaten→Kecamatan→Kelurahan이 필요하며 RT/RW는 선택 사항; Google 역지오코딩을 기본값으로 사용합니다.
++/// Trust Policy  : 위치 검증 시 TrustLevel이 상승하며 `privacySettings`로 프라이버시를 보장합니다.
++/// Monetization  : 위치 데이터로 지역 광고 및 프로모션 타깃팅이 가능합니다.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `set_location`, `location_verified`.
++/// Analytics     : 권한 허용과 위치 업데이트를 기록합니다.
++/// I18N          : 키 `location.set` 및 관련 프롬프트 (assets/lang/*.json)
++/// Dependencies  : cloud_firestore, firebase_auth, flutter_google_maps_webservices, geolocator, permission_handler
++/// Security/Auth : 인증된 사용자와 Google API 키가 필요하며 권한 거부를 처리합니다.
++/// Edge Cases    : 행정 구역 누락, GPS 비활성화, Firestore 불일치.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/Bling_Location_GeoQuery_Structure.md; docs/index/피드 관련 위치 검색 규칙과 예시.md; docs/team/teamD_GeoQuery_Location_Module_통합_작업문서.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'package:bling_app/api_keys.dart';
+ // import 'package:bling_app/features/main_screen/home_screen.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:flutter/material.dart';
+ import 'package:flutter_google_maps_webservices/places.dart';
+ import 'package:geolocator/geolocator.dart';
+ import 'package:google_fonts/google_fonts.dart';
+ import 'package:permission_handler/permission_handler.dart';
+ 
+ class LocationSettingScreen extends StatefulWidget {
+   const LocationSettingScreen({super.key});
+ 
+   @override
+   State<LocationSettingScreen> createState() => _LocationSettingScreenState();
+ }
+ 
+ class _LocationSettingScreenState extends State<LocationSettingScreen> {
+   final GoogleMapsPlaces _places =
+       GoogleMapsPlaces(apiKey: ApiKeys.googleApiKey);
+   bool _isLoading = false;
+ 
+   // [최종 해결 버전] DB를 기준으로 주소를 역추적하는 '상향식' 검증 함수
+diff --git a/lib/features/location/screens/neighborhood_prompt_screen.dart b/lib/features/location/screens/neighborhood_prompt_screen.dart
+index 7e8029d0e68130f0bebeda05c1a112ffd0863e93..0d6a4db7303b97153c457ac6d8d54f8e556400fd 100644
+--- a/lib/features/location/screens/neighborhood_prompt_screen.dart
++++ b/lib/features/location/screens/neighborhood_prompt_screen.dart
+@@ -1,26 +1,46 @@
+-// lib/features/location/screens/neighborhood_prompt_screen.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Location
++/// File          : lib/features/location/screens/neighborhood_prompt_screen.dart
++/// Purpose       : Google Places를 통해 사용자의 동네를 검증하고 Firestore를 갱신합니다.
++/// User Impact   : 정확한 RT/RW 소속이 초근접 기능을 활성화합니다.
++/// Feature Links : lib/features/location/screens/location_setting_screen.dart
++/// Data Model    : Firestore `users` 필드 `locationName`, `locationParts`, `geoPoint`, `neighborhoodVerified`; `provinces/{prov}/kota`와 `kabupaten`을 조회합니다.
++/// Location Scope: Prov→Kota/Kabupaten→Kecamatan→Kelurahan을 검증하며 마지막 기기 GPS를 기본값으로 사용합니다.
++/// Trust Policy  : 검증 성공 시 `trustScore`가 상승하고 실패 시 기능이 제한됩니다.
++/// Monetization  : 검증된 위치는 지역 광고와 마켓플레이스 노출을 가능하게 합니다.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `complete_location_verification`.
++/// Analytics     : Google API 호출과 검증 결과를 기록합니다.
++/// I18N          : 키 `location.success`, `location.error` (assets/lang/*.json)
++/// Dependencies  : firebase_auth, cloud_firestore, google_places, geolocator, permission_handler, easy_localization
++/// Security/Auth : 로그인된 사용자가 필요하며 API 키는 `ApiKeys.googleApiKey`에 있습니다.
++/// Edge Cases    : GPS 거부 또는 DB에서 행정 계층을 찾지 못하는 경우.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/5 지역-위치-개인정보.md; docs/Bling_Location_GeoQuery_Structure.md; docs/team/teamD_GeoQuery_Location_Module_통합_작업문서.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'package:bling_app/api_keys.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:flutter/material.dart';
+ import 'package:flutter_google_maps_webservices/places.dart';
+ import 'package:geolocator/geolocator.dart';
+ import 'package:google_fonts/google_fonts.dart';
+ import 'package:permission_handler/permission_handler.dart';
+ 
+ class NeighborhoodPromptScreen extends StatefulWidget {
+   const NeighborhoodPromptScreen({super.key});
+ 
+   @override
+   State<NeighborhoodPromptScreen> createState() =>
+       _NeighborhoodPromptScreenState();
+ }
+ 
+ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
+   bool _isLoading = false;
+   final GoogleMapsPlaces _places =
+       GoogleMapsPlaces(apiKey: ApiKeys.googleApiKey);
+ 
+   // [최종 해결 버전] DB를 기준으로 주소를 역추적하는 '상향식' 검증 함수
+diff --git a/lib/features/marketplace/domain/product_model_old.dart b/lib/features/marketplace/domain/product_model_old.dart
+index 24320983657267b688dd3b36031e5b747dd77867..3938b1215064ea9b316e4a8ea2cb4bdd0fb71d07 100644
+--- a/lib/features/marketplace/domain/product_model_old.dart
++++ b/lib/features/marketplace/domain/product_model_old.dart
+@@ -1,26 +1,46 @@
+-// lib/features/marketplace/domain/product_model.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Marketplace
++/// File          : lib/features/marketplace/domain/product_model_old.dart
++/// Purpose       : 하위 호환을 위해 유지되는 레거시 상품 모델입니다.
++/// User Impact   : 예전 마켓플레이스 데이터 구조를 계속 읽을 수 있게 합니다.
++/// Feature Links : lib/features/marketplace/screens/product_registration_screen.dart
++/// Data Model    : Firestore `products` 필드 `imageUrls`, `title`, `description`, `categoryId`, `price`, `negotiable`, `address`, `transactionPlace`, 중첩 `geo`, `status`, `isAiVerified`, `userId`, `userName`, `likesCount`, `chatsCount`, `viewsCount`, `condition`.
++/// Location Scope: 위도/경도와 주소 문자열을 포함한 `geo`를 사용합니다.
++/// Trust Policy  : `isAiVerified` 플래그가 있으면 상위 노출됩니다.
++/// Monetization  : `status` 값(예: featured)을 통해 프리미엄 노출을 지원합니다.
++/// KPIs          : `viewsCount`, `chatsCount`를 추적하여 참여 지표로 활용합니다.
++/// Analytics     : 해당 없음 (모델 전용).
++/// I18N          : 없음.
++/// Dependencies  : cloud_firestore
++/// Security/Auth : 없음; 데이터 모델 정의입니다.
++/// Edge Cases    : 사용되지 않는 필드가 현재 모델과 다를 수 있습니다.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
++/// ============================================================================
++// 아래부터 실제 코드
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ // import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
+ 
+ // 최종 통합된 Product 데이터 모델
+ class Product {
+   final String id;
+   final List<String> imageUrls;
+   final String title;
+   final String description;
+   final String categoryId;
+   final int price;
+   final bool negotiable;
+   final String address;
+   final String? transactionPlace;
+   final Geo geo;
+ 
+   final String status;
+   final bool isAiVerified;
+ 
+   final String userId;
+   final String userName;
+ 
+   final Timestamp createdAt;
+   final Timestamp updatedAt;
+ 
+diff --git a/lib/features/marketplace/models/product_model.dart b/lib/features/marketplace/models/product_model.dart
+index 4b3e8764eef1db676fa0a1bbc1da439e6fef4438..f2e361d1a0204a5c7fbb31cc7731004c0d83dc47 100644
+--- a/lib/features/marketplace/models/product_model.dart
++++ b/lib/features/marketplace/models/product_model.dart
+@@ -1,26 +1,46 @@
+-// lib/core/models/product_model.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Marketplace
++/// File          : lib/features/marketplace/models/product_model.dart
++/// Purpose       : AI 검증과 상태 추적을 포함한 상품 Firestore 스키마입니다.
++/// User Impact   : 구조화된 정보를 통해 안전한 동네 거래를 지원합니다.
++/// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/marketplace/screens/product_registration_screen.dart
++/// Data Model    : Firestore `products/{productId}` 문서; 필드 `price`, `imageUrls`, `locationParts`, `status`, `isAiVerified`, `likesCount`, `chatsCount`, `viewsCount`.
++/// Location Scope: Kabupaten→Kecamatan→Kelurahan을 저장하며 RT/RW는 선택 사항; 없으면 `locationName`을 사용합니다.
++/// Trust Policy  : `isAiVerified` 상품이 우선 노출되며 판매자는 TrustLevel 정책을 따릅니다.
++/// Monetization  : AI 검증 상품은 서비스 수수료를 지불하며 프로모션 배치 가능성이 있습니다.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_product`, `start_chat`, 총거래액(Gross Merchandise Volume, GMV).
++/// Analytics     : `viewsCount`, `chatsCount`, `likesCount` 증가를 추적합니다.
++/// I18N          : 카테고리 이름은 assets/lang 제품 키를 통해 제공합니다.
++/// Dependencies  : cloud_firestore
++/// Security/Auth : 게시물 소유자만 수정할 수 있으며 입력 검증으로 사기를 방지합니다.
++/// Edge Cases    : 필수 이미지나 위치 누락, `status` 불일치.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/011  Marketplace 모듈.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ 
+ class ProductModel {
    final String id;
    final String userId;
    final String title;
-   final String videoUrl;
-   final String thumbnailUrl;
    final String description;
-   final String? location;
-+  final Map<String, dynamic>? locationParts;
+   final List<String> imageUrls;
+   final String categoryId;
+   final int price;
+   final bool negotiable;
+ 
+   // ✅ [통합] 신규 모델의 정교한 위치 정보 필드를 사용합니다.
+   final String? locationName;
+   final Map<String, dynamic>? locationParts;
    final GeoPoint? geoPoint;
-   final List<String>? tags;
-   final int likesCount;
-   final int viewsCount;
-   final int commentsCount;
-   final bool trustLevelVerified;
+ 
+   // ✅ [통합] 구버전 모델의 상태 관리 필드를 가져옵니다.
+   final String status; // 'selling', 'reserved', 'sold'
    final bool isAiVerified;
-   final Timestamp createdAt;
+   final String condition; // 'new' or 'used'
+   // ✅ [추가] 거래 희망 장소 필드를 추가합니다.
+   final String? transactionPlace;
  
+diff --git a/lib/features/marketplace/screens/marketplace_screen.dart b/lib/features/marketplace/screens/marketplace_screen.dart
+index e864da98362b20de9666b160b2a59737b37cb4f1..32f65a4b0b04a5966ed272fb5f5b25a8381e83c5 100644
+--- a/lib/features/marketplace/screens/marketplace_screen.dart
++++ b/lib/features/marketplace/screens/marketplace_screen.dart
+@@ -1,27 +1,46 @@
+-// lib/features/marketplace/screens/marketplace_screen.dart
+-// Bling App v0.4
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Marketplace
++/// File          : lib/features/marketplace/screens/marketplace_screen.dart
++/// Purpose       : 위치 기반 필터로 상품 목록을 표시합니다.
++/// User Impact   : 구매자가 주변 상품을 둘러보고 상세 페이지를 열 수 있습니다.
++/// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/location/screens/location_filter_screen.dart
++/// Data Model    : Firestore `products`를 `locationParts.prov`로 쿼리하고 `createdAt`으로 정렬합니다.
++/// Location Scope: `locationFilter`를 통해 Prov→Kab/Kota→Kec→Kel 값을 지원합니다.
++/// Trust Policy  : `isAiVerified` 상품만 강조하며 미검증 상품은 검토 대상입니다.
++/// Monetization  : 프로모션 상품과 배너 광고를 지원하며 추후 판매 수수료가 예정되어 있습니다.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_marketplace`, `apply_location_filter`, `click_product`.
++/// Analytics     : 쿼리 결과와 스크롤 깊이를 모니터링합니다.
++/// I18N          : 키 `marketplace.error`, `marketplace.empty`, `time.*` (assets/lang/*.json)
++/// Dependencies  : cloud_firestore, easy_localization, firebase_auth
++/// Security/Auth : 조회는 공개이며 등록은 인증과 신뢰 점수가 필요합니다.
++/// Edge Cases    : 사용자 위치가 없으면 설정 프롬프트를 표시합니다.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
++/// ============================================================================
++// 아래부터 실제 코드
+ import 'package:bling_app/core/models/user_model.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ import 'package:flutter/material.dart';
  
-   ShortModel({
-     required this.id,
-     required this.userId,
-     required this.title,
-     required this.videoUrl,
-     required this.thumbnailUrl,
-     required this.description,
-     this.location,
-+    this.locationParts,
-     this.geoPoint,
-     this.tags,
-     this.likesCount = 0,
-     this.viewsCount = 0,
-     this.commentsCount = 0,
-     this.trustLevelVerified = false,
-     this.isAiVerified = false,
-     required this.createdAt,
-   });
+ import '../models/product_model.dart';
+ import 'product_detail_screen.dart';
  
-   factory ShortModel.fromFirestore(
-       DocumentSnapshot<Map<String, dynamic>> doc) {
-     final data = doc.data() ?? {};
-     return ShortModel(
-       id: doc.id,
-       userId: data['userId'] ?? '',
-       title: data['title'] ?? '',
-       videoUrl: data['videoUrl'] ?? '',
-       thumbnailUrl: data['thumbnailUrl'] ?? '',
-       description: data['description'] ?? '',
-       location: data['location'],
-+      locationParts: data['locationParts'] != null
-+          ? Map<String, dynamic>.from(data['locationParts'])
-+          : null,
-       geoPoint: data['geoPoint'],
-       tags: data['tags'] != null ? List<String>.from(data['tags']) : null,
-       likesCount: data['likesCount'] ?? 0,
-       viewsCount: data['viewsCount'] ?? 0,
-       commentsCount: data['commentsCount'] ?? 0,
-       trustLevelVerified: data['trustLevelVerified'] ?? false,
-       isAiVerified: data['isAiVerified'] ?? false,
-       createdAt: data['createdAt'] ?? Timestamp.now(),
-     );
-   }
- 
- 
-   Map<String, dynamic> toJson() {
-     return {
-       'userId': userId,
-       'title': title,
-       'videoUrl': videoUrl,
-       'thumbnailUrl': thumbnailUrl,
-       'description': description,
-       'location': location,
-+      'locationParts': locationParts,
-       'geoPoint': geoPoint,
-       'tags': tags,
-       'likesCount': likesCount,
-       'viewsCount': viewsCount,
-       'commentsCount': commentsCount,
-       'trustLevelVerified': trustLevelVerified,
-       'isAiVerified': isAiVerified,
-       'createdAt': createdAt,
-     };
-   }
- }
- 
-diff --git a/lib/features/pom/screens/create_short_screen.dart b/lib/features/pom/screens/create_short_screen.dart
-index 9066ae6e29119fbc96a8ae07fb97e9db9548c566..74ad986a049b111911d3ea901262b8e580f517d6 100644
---- a/lib/features/pom/screens/create_short_screen.dart
-+++ b/lib/features/pom/screens/create_short_screen.dart
-@@ -57,50 +57,52 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
- 
-     setState(() => _isSaving = true);
-     final user = FirebaseAuth.instance.currentUser;
-     if (user == null) return;
- 
-     try {
-       // 1. 비디오를 Firebase Storage에 업로드
-       final fileName = const Uuid().v4();
-       final ref = FirebaseStorage.instance
-           .ref()
-           .child('shorts/${user.uid}/$fileName.mp4');
-       final uploadTask = ref.putFile(File(_videoFile!.path));
-       final snapshot = await uploadTask.whenComplete(() {});
-       final videoUrl = await snapshot.ref.getDownloadURL();
- 
-       // 2. ShortModel 생성
-       final newShort = ShortModel(
-         id: '',
-         userId: user.uid,
-         videoUrl: videoUrl,
-         title: _descriptionController.text
-             .trim(), // You may want a separate title field
-         thumbnailUrl: '', // Provide a valid thumbnail URL if available
-         description: _descriptionController.text.trim(),
-         location: widget.userModel.locationName ?? 'Unknown',
-+        locationParts: widget.userModel.locationParts,
-+        geoPoint: widget.userModel.geoPoint,
-         createdAt: Timestamp.now(),
-       );
- 
-       // 3. Firestore에 저장
-       await _repository.createShort(newShort);
- 
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-             content: Text('pom.create.success'.tr()),
-             backgroundColor: Colors.green));
-         Navigator.of(context).pop();
-       }
-     } catch (e) {
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-             content:
-                 Text('pom.create.fail'.tr(namedArgs: {'error': e.toString()})),
-             backgroundColor: Colors.red));
-       }
-     } finally {
-       if (mounted) setState(() => _isSaving = false);
-     }
-   }
+ class MarketplaceScreen extends StatefulWidget {
+   final UserModel? userModel;
+   final Map<String, String?>? locationFilter;
+   const MarketplaceScreen({super.key, this.userModel, this.locationFilter});
  
    @override
-diff --git a/lib/features/real_estate/data/room_repository.dart b/lib/features/real_estate/data/room_repository.dart
-index 686f99593ae2dd2da8ad92047b1da8ef7a848c58..263afc06fb96e316e4b706f16b56c6782bf0b936 100644
---- a/lib/features/real_estate/data/room_repository.dart
-+++ b/lib/features/real_estate/data/room_repository.dart
-@@ -1,54 +1,59 @@
- // lib/features/real_estate/data/room_repository.dart
- 
- import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
- import 'package:cloud_firestore/cloud_firestore.dart';
- 
- class RoomRepository {
-   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
- 
-   CollectionReference<Map<String, dynamic>> get _roomsCollection =>
-       _firestore.collection('room_listings');
- 
-   // V V V --- [수정] locationFilter를 적용한 최종 fetchRooms 함수 --- V V V
-   Stream<List<RoomListingModel>> fetchRooms({Map<String, String?>? locationFilter}) {
--    // 1. 기본 쿼리를 생성합니다.
--    Query query = _roomsCollection
-+    Query<Map<String, dynamic>> query = _roomsCollection
-         .where('isAvailable', isEqualTo: true)
-         .orderBy('createdAt', descending: true);
- 
--    // 2. 사용자가 지역 필터를 설정한 경우, 해당 지역으로 쿼리 조건을 추가합니다.
--    if (locationFilter != null) {
--      final kab = locationFilter['kab'];
--      if (kab != null && kab.isNotEmpty) {
--        query = query.where('locationParts.kab', isEqualTo: kab);
--      }
--      // 다른 지역 단위(kec, kel)에 대한 필터가 필요하면 여기에 추가합니다.
-+    final String? kab = locationFilter?['kab'];
-+    if (kab != null && kab.isNotEmpty) {
-+      query = query.where('locationParts.kab', isEqualTo: kab);
-     }
- 
--    return query.snapshots().map((snapshot) {
-+    return query.snapshots().asyncMap((snapshot) async {
-+      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
-+        final fallbackSnapshot = await _roomsCollection
-+            .where('isAvailable', isEqualTo: true)
-+            .where('locationParts.kab', isEqualTo: 'Tangerang')
-+            .orderBy('createdAt', descending: true)
-+            .get();
-+        return fallbackSnapshot.docs
-+            .map((doc) => RoomListingModel.fromFirestore(doc))
-+            .toList();
-+      }
-       return snapshot.docs
--          .map((doc) => RoomListingModel.fromFirestore(doc as QueryDocumentSnapshot<Map<String, dynamic>>))
-+          .map((doc) => RoomListingModel.fromFirestore(doc))
-           .toList();
-     });
-   }
-   // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
- 
-   Future<void> createRoomListing(RoomListingModel room) async {
-     await _roomsCollection.add(room.toJson());
-   }
- 
-   Future<void> updateRoomListing(RoomListingModel room) async {
-     await _roomsCollection.doc(room.id).update(room.toJson());
-   }
- 
-   Future<void> deleteRoomListing(String roomId) async {
-     await _roomsCollection.doc(roomId).delete();
-   }
- 
-   Stream<RoomListingModel> getRoomStream(String roomId) {
-     return _roomsCollection
-         .doc(roomId)
-         .snapshots()
-         .map((snapshot) => RoomListingModel.fromFirestore(snapshot));
-   }
+   State<MarketplaceScreen> createState() => _MarketplaceScreenState();
  }
-\ No newline at end of file
+ 
+ class _MarketplaceScreenState extends State<MarketplaceScreen> {
+   String _formatTimestamp(Timestamp timestamp) {
+     // ... (내용 변경 없음)
+     final now = DateTime.now();
+     final dt = timestamp.toDate();
+     final diff = now.difference(dt);
+ 
+     if (diff.inMinutes < 1) {
+diff --git a/lib/features/marketplace/screens/product_detail_screen.dart b/lib/features/marketplace/screens/product_detail_screen.dart
+index f4e79c559355485af193ba7a15ac38ce394fac9f..8d089ee774417576239ef3ce75ff6c2694e93603 100644
+--- a/lib/features/marketplace/screens/product_detail_screen.dart
++++ b/lib/features/marketplace/screens/product_detail_screen.dart
+@@ -1,26 +1,46 @@
+-// lib/features/marketplace/presentation/screens/product_detail_screen.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Marketplace
++/// File          : lib/features/marketplace/screens/product_detail_screen.dart
++/// Purpose       : 상품 정보와 판매자 세부 사항, 주요 동작을 제공합니다.
++/// User Impact   : 구매자가 상품을 평가하고 판매자에게 연락하거나 공유할 수 있습니다.
++/// Feature Links : lib/features/marketplace/screens/product_edit_screen.dart; lib/features/chat/screens/chat_room_screen.dart; lib/features/marketplace/screens/marketplace_screen.dart
++/// Data Model    : Firestore `products` 필드 `viewsCount`, `likesCount`; 즐겨찾기는 `users/{uid}/favorites`에 저장됩니다.
++/// Location Scope: `locationParts.kel`→`kec` 순으로 표시하며 위치 기반 추천을 지원합니다.
++/// Trust Policy  : 판매자 `trustLevel`을 표시하고 신고 시 `reportCount`가 증가합니다.
++/// Monetization  : 프로모션 노출 및 공유 보상 추천을 지원합니다.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_product`, `click_chat_seller`, `toggle_favorite`, `share_product`.
++/// Analytics     : 이미지 스와이프와 조회수를 Cloud Firestore로 기록합니다.
++/// I18N          : 키 `time.now`, `marketplace.error`, `marketplace.empty` (assets/lang/*.json)
++/// Dependencies  : cloud_firestore, firebase_auth, share_plus, photo_view, easy_localization
++/// Security/Auth : 즐겨찾기는 인증이 필요하며 Firestore 규칙이 수정 권한을 제한합니다.
++/// Edge Cases    : 이미지 누락, 판매자 삭제 또는 상품 삭제.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'package:bling_app/core/models/user_model.dart';
+ import 'package:bling_app/features/categories/domain/category.dart';
+ import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
+ import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:flutter/material.dart';
+ import 'package:share_plus/share_plus.dart';
+ import 'package:photo_view/photo_view.dart';
+ 
+ import 'package:bling_app/features/marketplace/models/product_model.dart';
+ import 'package:bling_app/features/marketplace/screens/product_edit_screen.dart';
+ import 'package:bling_app/features/chat/data/chat_service.dart';
+ 
+ // 카테고리 이름 표시를 위한 별도 위젯
+ class CategoryNameWidget extends StatelessWidget {
+   final String categoryId;
+   const CategoryNameWidget({super.key, required this.categoryId});
+ 
+   String _getCategoryName(BuildContext context, Category category) {
+     final langCode = context.locale.languageCode;
+     switch (langCode) {
+       case 'ko':
+diff --git a/lib/features/marketplace/screens/product_edit_screen.dart b/lib/features/marketplace/screens/product_edit_screen.dart
+index 7a878eafdd7957392eeceee3b803174d37158e0c..897d17d38bb83dab3af015c8e406cd6e6e6dc990 100644
+--- a/lib/features/marketplace/screens/product_edit_screen.dart
++++ b/lib/features/marketplace/screens/product_edit_screen.dart
+@@ -1,26 +1,46 @@
+-import 'dart:io';
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Marketplace
++/// File          : lib/features/marketplace/screens/product_edit_screen.dart
++/// Purpose       : 기존 상품의 세부 정보, 이미지, 위치를 수정합니다.
++/// User Impact   : 판매자가 정확한 정보를 유지하고 오류를 수정할 수 있습니다.
++/// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/marketplace/widgets/product_card.dart
++/// Data Model    : Firestore `products` 필드 `title`, `description`, `price`, `negotiable`, `imageUrls`, `locationName`, `locationParts`, `geoPoint`, `transactionPlace`, `condition`.
++/// Location Scope: LocationSettingScreen을 통해 Prov→Kec→Kel 재설정을 허용합니다.
++/// Trust Policy  : trustScore 100 초과의 상품 소유자만 수정할 수 있으며 수정 내용은 모더레이션 로그에 기록됩니다.
++/// Monetization  : 수정 후 프리미엄 부스트 적용 가능; TODO: 부스트 과금 정의.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_product_edit`, `complete_product_edit`.
++/// Analytics     : 이미지 삭제와 가격 변화를 추적합니다.
++/// I18N          : 키 `marketplace.error`, `marketplace.success` (assets/lang/*.json)
++/// Dependencies  : firebase_auth, cloud_firestore, firebase_storage, image_picker, easy_localization
++/// Security/Auth : 인증된 사용자가 `product.userId`와 일치해야 합니다.
++/// Edge Cases    : 이미지 업로드 실패, 카테고리 불일치.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
++/// ============================================================================
++// 아래부터 실제 코드
+ // import 'package:bling_app/features/marketplace/domain/product_model_old.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:firebase_storage/firebase_storage.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:flutter/material.dart';
+ import 'package:image_picker/image_picker.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ 
+ import '../models/product_model.dart';
+ import '../../../core/models/user_model.dart';
+ import '../../categories/domain/category.dart';
+ import '../../categories/screens/parent_category_screen.dart';
+ import '../../location/screens/location_setting_screen.dart';
+ 
+ class ProductEditScreen extends StatefulWidget {
+ final ProductModel product;
+   const ProductEditScreen({super.key, required this.product});
+ 
+   @override
+   State<ProductEditScreen> createState() => _ProductEditScreenState();
+ }
+ 
+ class _ProductEditScreenState extends State<ProductEditScreen> {
+   final _formKey = GlobalKey<FormState>();
+   final _titleController = TextEditingController();
+diff --git a/lib/features/marketplace/screens/product_registration_screen.dart b/lib/features/marketplace/screens/product_registration_screen.dart
+index bb2bc1cc6d3ef4c30d63ab0de9efd368203e7c63..3d2461f605527db3be0214e3da46ca5762905327 100644
+--- a/lib/features/marketplace/screens/product_registration_screen.dart
++++ b/lib/features/marketplace/screens/product_registration_screen.dart
+@@ -1,26 +1,46 @@
+-// lib/features/marketplace/presentation/screens/product_registration_screen.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Marketplace
++/// File          : lib/features/marketplace/screens/product_registration_screen.dart
++/// Purpose       : 판매자가 이미지와 위치를 포함한 새 상품을 등록하는 폼입니다.
++/// User Impact   : 주민이 주변 동네에 판매할 물품을 등록할 수 있습니다.
++/// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/marketplace/widgets/product_card.dart
++/// Data Model    : Firestore `products` 필드 `title`, `description`, `price`, `negotiable`, `imageUrls`, `locationName`, `locationParts`, `geoPoint`, `transactionPlace`, `condition`, `isAiVerified`.
++/// Location Scope: 사용자 `locationParts`(Prov→Kab/Kota→Kec→Kel)를 기본으로 사용하며, 반경 검색을 위해 GeoPoint를 저장합니다.
++/// Trust Policy  : 전화번호 검증 및 trustScore 100 초과 사용자만 등록 가능하며 신고 시 `trustScore`가 감소합니다.
++/// Monetization  : 거래 수수료와 선택형 프로모션 슬롯을 제공합니다.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_product_listing`, `complete_product_listing`, `upload_product_photo`.
++/// Analytics     : 이미지 업로드와 폼 작성 시간을 기록합니다.
++/// I18N          : 키 `marketplace.errors.noPhoto`, `marketplace.errors.noCategory` (assets/lang/*.json)
++/// Dependencies  : firebase_auth, cloud_firestore, firebase_storage, image_picker, uuid, easy_localization
++/// Security/Auth : 인증된 사용자만 가능하며 Storage 규칙이 사용자 UID별 경로를 제한합니다.
++/// Edge Cases    : 업로드 실패, 위치 미입력, 사진 제한 초과.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md; docs/team/teamB_Feed_CRUD_Module_통합 작업문서.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ import 'dart:io';
+ import 'package:bling_app/features/categories/domain/category.dart';
+ import 'package:bling_app/features/categories/screens/parent_category_screen.dart';
+ // import old model is replaced with ProductModel
+ import '../models/product_model.dart';
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:firebase_storage/firebase_storage.dart';
+ import 'package:flutter/material.dart';
+ import 'package:image_picker/image_picker.dart';
+ import 'package:uuid/uuid.dart';
+ 
+ // ✅ [추가] UserModel을 사용하기 위해 import 합니다.
+ import '../../../../core/models/user_model.dart';
+ 
+ class ProductRegistrationScreen extends StatefulWidget {
+   const ProductRegistrationScreen({super.key});
+ 
+   @override
+   State<ProductRegistrationScreen> createState() =>
+       _ProductRegistrationScreenState();
+ }
+ 
+diff --git a/lib/features/marketplace/widgets/product_card.dart b/lib/features/marketplace/widgets/product_card.dart
+index 1674896299148e011b364e4805cfafefd64a8225..6b5d117da0ab7f97205117af9213087ad89aa670 100644
+--- a/lib/features/marketplace/widgets/product_card.dart
++++ b/lib/features/marketplace/widgets/product_card.dart
+@@ -1,26 +1,46 @@
+-// lib/features/marketplace/widgets/product_card.dart
++/// ============================================================================
++/// Bling DocHeader
++/// Module        : Marketplace
++/// File          : lib/features/marketplace/widgets/product_card.dart
++/// Purpose       : 이미지, 제목, 가격, 판매자 정보를 포함한 상품 요약 카드를 렌더링합니다.
++/// User Impact   : 주변 상품을 빠르게 살펴보며 전환을 높입니다.
++/// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart
++/// Data Model    : `products` 필드 `title`, `description`, `price`, `imageUrls`, `locationParts`, `createdAt`를 표시하며 판매자 `users/{userId}` 데이터를 가져옵니다.
++/// Location Scope: 타임스탬프 옆에 Kelurahan 또는 Kecamatan 태그를 표시합니다.
++/// Trust Policy  : 판매자의 `trustLevel`에 따른 배지를 아바타 옆에 보여 줍니다.
++/// Monetization  : 프로모션 배지와 가격 강조 슬롯을 제공합니다.
++/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `click_product_card`.
++/// Analytics     : 카드가 뷰포트에 들어올 때 노출을 기록합니다.
++/// I18N          : 키 `time.*`, `postCard.locationNotSet` (assets/lang/*.json)
++/// Dependencies  : cloud_firestore, easy_localization
++/// Security/Auth : 읽기 전용이며 사용자 데이터에 대한 Firestore 규칙을 준수합니다.
++/// Edge Cases    : 이미지 또는 사용자 문서 누락.
++/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
++/// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
++/// ============================================================================
++// 아래부터 실제 코드
+ 
+ // import 'dart:math';
+ 
+ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ import 'package:flutter/material.dart';
+ 
+ // ✅ [수정] UserModel과 최종 ProductModel을 모두 import합니다.
+ import '../../../core/models/user_model.dart';
+ import '../models/product_model.dart';
+ import '../screens/product_detail_screen.dart';
+ 
+ class ProductCard extends StatelessWidget {
+   final ProductModel product;
+ 
+   const ProductCard({super.key, required this.product});
+ 
+   String _formatTimestamp(BuildContext context, Timestamp timestamp) {
+     final now = DateTime.now();
+     final dt = timestamp.toDate();
+     final diff = now.difference(dt);
+ 
+     if (diff.inMinutes < 1) return 'time.now'.tr();
+     if (diff.inHours < 1) {
+       return 'time.minutesAgo'

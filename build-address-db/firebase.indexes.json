@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "kecamatan",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "name",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,25 @@
-// lib/features/chat/screens/chat_list_screen.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Chat
+/// File          : lib/features/chat/screens/chat_list_screen.dart
+/// Purpose       : 채팅방 목록을 보여 주고 개별 대화로 이동합니다.
+/// User Impact   : 여러 모듈의 진행 중인 대화를 빠르게 접근하게 합니다.
+/// Feature Links : lib/features/chat/screens/chat_room_screen.dart; lib/features/chat/data/chat_service.dart
+/// Data Model    : 참여자 UID로 필터링된 Firestore `chatRooms` 스트림; 각 방은 `messages` 하위 컬렉션과 연결됩니다.
+/// Location Scope: 없음.
+/// Trust Policy  : 인증된 사용자만 채팅 목록을 조회할 수 있으며 신고된 방은 숨겨집니다.
+/// Monetization  : 향후 채팅 내 프로모션 계획; 현재는 없음.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_chat_list`, `open_chat_room`.
+/// Analytics     : 읽지 않은 채팅 수와 열린 대화 수를 추적합니다.
+/// I18N          : 키 `chat_list.empty`, `main.bottomNav.chat` (assets/lang/*.json)
+/// Dependencies  : firebase_auth, easy_localization
+/// Security/Auth : 로그인된 사용자만 가능하며 Firestore 규칙이 참여 여부를 확인합니다.
+/// Edge Cases    : 채팅방이 없거나 사용자가 로그인되지 않은 경우.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'package:bling_app/core/models/chat_room_model.dart';
 import 'package:bling_app/core/models/user_model.dart';

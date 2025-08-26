@@ -1,5 +1,25 @@
-// lib/core/models/user_model.dart
-// Bling App v0.8.11
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : User & Trust
+/// File          : lib/core/models/user_model.dart
+/// Purpose       : Firestore 사용자 스키마를 정의하며 신뢰와 프로필 제한을 포함합니다.
+/// User Impact   : 계정 데이터를 중앙에서 관리하여 모듈별 신뢰 기반 접근을 가능하게 합니다.
+/// Feature Links : lib/features/auth/screens/signup_screen.dart; lib/features/find_friends/screens/find_friends_screen.dart; lib/features/marketplace/screens/product_registration_screen.dart
+/// Data Model    : Firestore `users/{uid}` 컬렉션; 필드 `trustLevel`, `locationParts{kabupaten,kecamatan,kelurahan,rt,rw}`, `thanksReceived`, `reportCount`, `blockedUsers`, `profileCompleted`, `isDatingProfile`.
+/// Location Scope: Kelurahan·Kecamatan을 저장하며 RT/RW는 선택 사항; 없으면 `locationName`을 사용합니다.
+/// Trust Policy  : TrustLevel은 normal→verified→trusted로 상승하며 신고는 점수를 낮춥니다; 차단된 사용자는 채팅 불가.
+/// Monetization  : 판매자 신뢰도에 따라 개인화 프로모션과 마켓 수수료가 적용됩니다.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `signup_complete`, `profile_completed`, `trust_upgrade`.
+/// Analytics     : 프로필 완성과 신뢰도 변화를 기록합니다.
+/// I18N          : 해당 없음
+/// Dependencies  : cloud_firestore
+/// Security/Auth : Firestore 규칙이 소유자만 수정하도록 제한하며 인증 세션을 요구합니다.
+/// Edge Cases    : 위치 필드 누락 또는 차단된 계정.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/03  User 필드 & TrustLever & 프로필정책.md; docs/team/TeamA_Auth_Trust_module_통합 작업문서.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 

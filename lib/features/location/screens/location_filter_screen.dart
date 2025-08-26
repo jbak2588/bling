@@ -1,3 +1,26 @@
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Location
+/// File          : lib/features/location/screens/location_setting_screen.dart
+/// Purpose       : Google Places와 Firestore를 통해 사용자 위치를 수집하고 검증합니다.
+/// User Impact   : 기능이 올바른 Kelurahan 및 RT/RW에서 동작하도록 보장합니다.
+/// Feature Links : lib/features/location/screens/location_filter_screen.dart; lib/features/location/screens/neighborhood_prompt_screen.dart
+/// Data Model    : `users/{uid}.locationParts{prov,kota/kab,kec,kel,rt,rw}`와 `geoPoint`에 기록하며 `provinces/{prov}/kota/{kota}/kecamatan`을 읽습니다.
+/// Location Scope: Province→Kota/Kabupaten→Kecamatan→Kelurahan이 필요하며 RT/RW는 선택 사항; Google 역지오코딩을 기본값으로 사용합니다.
+/// Trust Policy  : 위치 검증 시 TrustLevel이 상승하며 `privacySettings`로 프라이버시를 보장합니다.
+/// Monetization  : 위치 데이터로 지역 광고 및 프로모션 타깃팅이 가능합니다.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `set_location`, `location_verified`.
+/// Analytics     : 권한 허용과 위치 업데이트를 기록합니다.
+/// I18N          : 키 `location.set` 및 관련 프롬프트 (assets/lang/*.json)
+/// Dependencies  : cloud_firestore, firebase_auth, flutter_google_maps_webservices, geolocator, permission_handler
+/// Security/Auth : 인증된 사용자와 Google API 키가 필요하며 권한 거부를 처리합니다.
+/// Edge Cases    : 행정 구역 누락, GPS 비활성화, Firestore 불일치.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/Bling_Location_GeoQuery_Structure.md; docs/index/피드 관련 위치 검색 규칙과 예시.md; docs/team/teamD_GeoQuery_Location_Module_통합_작업문서.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';

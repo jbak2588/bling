@@ -1,0 +1,12 @@
+{
+  "startedAt": "2025-08-24T01:55:46.635Z",
+  "finishedAt": "2025-08-24T02:54:40.538Z",
+  "durationMs": 3533903,
+  "counts": {
+    "provinces": 38,
+    "regencies": 514,
+    "districts": 7285,
+    "villages": 83762
+  },
+  "errors": 0
+}

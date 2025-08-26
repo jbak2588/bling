@@ -1,4 +1,25 @@
-// lib/features/find_friends/screens/findfriend_edit_screen.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Find Friend
+/// File          : lib/features/find_friends/screens/findfriend_edit_screen.dart
+/// Purpose       : 기존 FindFriend 프로필의 세부 정보와 공개 여부를 수정합니다.
+/// User Impact   : 사용자가 자신의 탐색 프로필을 최신 상태로 유지할 수 있습니다.
+/// Feature Links : lib/features/find_friends/screens/findfriend_form_screen.dart; lib/features/find_friends/data/find_friend_repository.dart
+/// Data Model    : Firestore `users` 필드 `age`, `ageRange`, `findfriend_profileImages`, `isVisibleInList`.
+/// Location Scope: 저장된 `locationParts`를 사용하며 이 화면에서는 직접 수정하지 않습니다.
+/// Trust Policy  : 수정 내용은 커뮤니티 가이드라인을 기준으로 검토하며 부적절한 이미지는 신고됩니다.
+/// Monetization  : 향후 유료 노출 부스트 예정; TODO: 통합.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_profile_edit`, `complete_profile_edit`.
+/// Analytics     : 이미지 업로드와 공개 여부 토글을 추적합니다.
+/// I18N          : 키 `findFriend.editTitle` (assets/lang/*.json) - TODO: 키 확인.
+/// Dependencies  : firebase_storage, firebase_auth, cloud_firestore, image_picker
+/// Security/Auth : 프로필 소유자만 수정할 수 있으며 Storage 경로는 UID로 제한됩니다.
+/// Edge Cases    : 이미지 미선택, 업로드 실패.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md; docs/team/teamF_Design_Privacy_Module_통합_작업문.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'dart:io';
 
