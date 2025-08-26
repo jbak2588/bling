@@ -1,5 +1,34 @@
 // lib/features/main_screen/home_screen.dart
 
+/// [기획 문서: 00 Mainscreen & 런처 & Tab & Drawer QA.md]
+/// - 기획 요약: 메인 화면의 AppBar, 슬라이드 탭, Drawer, BottomNavigationBar, 주요 컴포넌트(FeedCard, Comment Bubble, Chat Bubble, FAB 등) 구조와 반응형/애니메이션/접근성 정책
+/// - 실제 코드 기능: 다양한 피드/카드/모듈 위젯을 통합하여 메인 홈 화면을 구성, 각 기능별 화면 import, 반응형 UI 및 다양한 카드/버블/버튼 구현
+/// - 비교: 기획의 주요 컴포넌트와 구조가 실제 코드에서 위젯/화면으로 세분화되어 구현됨. 접근성/애니메이션 등은 일부 위젯에서 적용됨
+///
+/// [상세 분석 및 코멘트]
+/// 1. AppBar에 전달되는 주요 파라미터
+///   - userModel: 사용자 맞춤 정보(프로필, 신뢰등급 등) 제공, 지역 기반 서비스와 연동
+///   - activeLocationFilter: Kab/Kec/Kel 등 다양한 지역 단위로 필터링, "My Town" 드롭다운에 직접 반영
+///   - onIconTap: 기능별 아이콘 클릭 시 화면 전환, 네비게이션 UX와 연결
+///   → AppBar는 개인화·지역화·서비스 접근성의 핵심 진입점
+///
+/// 2. My Town의 다변화
+///   - 단순 텍스트가 아닌 드롭다운으로 Kab/Kec/Kel 등 다양한 지역 단위 선택 가능
+///   - 사용자의 활동 범위 세밀 조정, 모든 기능(피드/마켓/친구찾기 등)과 연동
+///   - 다국어 지원과 결합되어 현지화 및 글로벌 확장성 강화
+///
+/// 3. locationParts의 Kab 필터 최초 적용 이유
+///   - Kab(카부파텐)은 인도네시아 지역 서비스의 핵심 단위, 생활권 정보 탐색에 최적
+///   - DB 구조와 연동되어 데이터 일관성·검색 효율성 향상
+///   - 향후 광고·프로모션·추천 등 수익화 전략에 직접 활용 가능
+///
+/// [제안 및 결론]
+/// - AppBar 파라미터 설계는 지역 기반 슈퍼앱의 UX/데이터 구조와 직결, 개인화·지역화·수익화 모두 강화
+/// - Kab 필터 도입은 사용자 경험과 비즈니스 전략 모두에서 매우 중요한 결정
+/// - 향후 개선: 지역 단위별 추천·광고·커뮤니티 연계, UI/UX(지도 시각화, 애니메이션 등) 강화, 데이터 기반 KPI/Analytics 연동
+library;
+
+
 import 'package:bling_app/core/models/feed_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/main_feed/data/feed_repository.dart';

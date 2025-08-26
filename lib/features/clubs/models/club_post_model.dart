@@ -1,4 +1,18 @@
 // lib/core/models/club_post_model.dart
+// ===================== DocHeader =====================
+// [Planning Summary]
+// - Club posts are stored under `clubs/{clubId}/posts` in Firestore, with fields for author, body, images, likes, comments, and timestamps.
+//
+// [Implementation Summary]
+// - Dart model matches Firestore structure: id, clubId, userId, body, imageUrls, createdAt, likesCount, commentsCount.
+// - Used for post creation, display, and interaction in club boards.
+//
+// [Differences & Gaps]
+// - Moderation, analytics, and advanced post controls are not directly implemented in this model.
+//
+// [Improvement Suggestions]
+// - Add fields for moderation status, analytics, and post visibility options.
+// =====================================================
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 

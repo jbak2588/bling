@@ -1,4 +1,19 @@
 // lib/features/auction/widgets/auction_card.dart
+/// [기획/실제 코드 분석 및 개선 제안]
+/// 1. 기획 문서 요약
+///   - 경매 카드 UI, 남은 시간 실시간 표시, 입찰/상세 페이지 연동, 신뢰등급, 위치 정보, KPI/Analytics 이벤트 기록
+///
+/// 2. 실제 코드 분석
+///   - 경매 카드 UI, 남은 시간 실시간 표시, 입찰/상세 페이지 연동, 신뢰등급, 위치 정보, KPI/Analytics 이벤트 기록
+///   - 다국어(i18n), 광고/추천 등 연계 가능
+///
+/// 3. 기획과 실제 기능의 차이점
+///   - 기획보다 좋아진 점: 현지화(i18n), 신뢰등급, KPI/Analytics 등 사용자 경험·운영 기능 강화
+///   - 기획에 못 미친 점: 실시간 채팅, 광고/추천글 노출 등 일부 기능 미구현
+///
+/// 4. 개선 제안
+///   - 실시간 입찰/채팅, 경매 상태 시각화, 신뢰등급/AI 검수 표시 강화, KPI/Analytics 이벤트 로깅, 광고/추천글 연계
+library;
 
 import 'dart:async';
 import 'package:bling_app/features/auction/models/auction_model.dart';

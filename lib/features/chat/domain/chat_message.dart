@@ -18,6 +18,20 @@
 /// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
 /// Source Docs   : docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md
 /// ============================================================================
+///
+/// [기획/실제 코드 분석 및 개선 제안]
+/// 1. 기획 문서 요약
+///   - 메시지 데이터 모델(senderId, text, timestamp, readBy 등), KPI/Analytics, 신뢰등급, Edge case 처리
+///
+/// 2. 실제 코드 분석
+///   - 메시지 데이터 모델, KPI/Analytics(메시지 전송/읽음), 신뢰등급, Edge case 처리
+///
+/// 3. 기획과 실제 기능의 차이점
+///   - 기획보다 좋아진 점: 데이터 모델 세분화, 신뢰등급·Edge case·KPI/Analytics 등 품질·운영 기능 강화
+///   - 기획에 못 미친 점: 활동 히스토리, 광고 슬롯 등 일부 기능 미구현, 신고/차단·KPI/Analytics 등 추가 구현 필요
+///
+/// 4. 개선 제안
+///   - 데이터 모델 확장(활동 히스토리, KPI/Analytics 필드 추가), 에러 핸들링 강화, 광고/추천글 연계
 library;
 // 아래부터 실제 코드
 

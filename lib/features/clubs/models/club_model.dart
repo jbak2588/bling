@@ -1,5 +1,22 @@
 // lib/core/models/club_model.dart
-
+     // ===================== DocHeader =====================
+      // [기획 요약]
+      // - Firestore 동호회 모델은 제목, 설명, 운영자, 위치, 관심사, 비공개 여부, 신뢰 등급, 멤버 관리, 생성일 등의 필드를 포함합니다.
+      // - 위치, 관심사, 연령, 신뢰 등급을 활용한 고급 매칭 및 추천을 지원합니다.
+      //
+      // [구현 요약]
+      // - Dart 모델은 Firestore 구조와 동일하게 id, title, description, ownerId, location, locationParts, mainCategory, interestTags, membersCount, isPrivate, trustLevelRequired, createdAt, kickedMembers, pendingMembers, imageUrl을 포함합니다.
+      // - 동호회 생성, 표시, 멤버 관리에 사용됩니다.
+      //
+      // [차이점 및 부족한 부분]
+      // - 매칭 로직과 통계 기능은 모델에 직접 구현되어 있지 않습니다.
+      // - 운영자 기능과 고급 비공개 설정이 부족합니다.
+      //
+      // [개선 제안]
+      // - 통계, 운영자 상태, 고급 비공개 옵션 필드 추가.
+      // - 더 세분화된 신뢰 등급 및 멤버 역할 지원 고려.
+      // =====================================================
+      
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ClubModel {

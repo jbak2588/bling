@@ -1,4 +1,18 @@
 // lib/features/local_news/widgets/post_card.dart
+/// [기획/실제 코드 분석 및 개선 제안]
+/// 1. 기획 문서 요약
+///   - 위치 기반 동네 소통 피드, 카테고리별 분류, 신뢰등급 뱃지, 미디어, 시간 포맷 등 시각화
+///
+/// 2. 실제 코드 분석
+///   - PostModel 기반 카드 UI, 신뢰등급 뱃지, 다국어 시간 포맷, 상세 화면 연동, 카테고리별 스타일, 위치 정보, 미디어 등 시각화
+///
+/// 3. 기획과 실제 기능의 차이점
+///   - 기획보다 좋아진 점: 현지화(i18n), 신뢰등급 뱃지, 시간 포맷 등 사용자 경험 강화
+///   - 기획에 못 미친 점: AI 태그 추천, 광고/추천글 노출 등 일부 기능 미구현
+///
+/// 4. 개선 제안
+///   - 카테고리별 색상/아이콘, 위치 기반 추천, 미디어 업로드/미리보기, KPI/Analytics 이벤트 로깅, 광고/추천글 연계
+library;
 
 import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';

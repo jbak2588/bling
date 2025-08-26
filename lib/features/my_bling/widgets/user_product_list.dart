@@ -1,4 +1,18 @@
 // lib/features/my_bling/widgets/user_product_list.dart
+/// DocHeader
+/// [기획 요약]
+/// - 내 판매상품 탭은 사용자가 등록한 상품 목록, 통계, 활동 내역을 제공합니다.
+/// - KPI, 활동 통계, 추천/분석 기능 등 사용자 경험 강화가 목표입니다.
+///
+/// [실제 구현 비교]
+/// - 상품 목록, 최신순 정렬, Firestore 연동, 실시간 통계, UI/UX 개선 적용됨.
+///
+/// [차이점 및 개선 제안]
+/// 1. KPI/Analytics 기반 활동 통계, 추천/분석 기능, 프리미엄 기능(뱃지, 광고 등) 도입 검토.
+/// 2. Firestore 연동 로직 분리, 에러 핸들링 강화, 비동기 최적화 등 코드 안정성/성능 개선.
+/// 3. 사용자별 맞춤형 통계/알림/피드백 시스템, 추천 상품 기능 연계 강화 필요.
+/// 4. 활동 내역, KPI 기반 추천/분석 기능 추가 권장.
+library;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
