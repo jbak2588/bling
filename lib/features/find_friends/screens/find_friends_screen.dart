@@ -1,4 +1,25 @@
-// lib/features/find_friends/screens/find_friends_screen.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Find Friend
+/// File          : lib/features/find_friends/screens/find_friends_screen.dart
+/// Purpose       : 관심사와 위치 기반으로 주변 사용자를 탐색하고 연결합니다.
+/// User Impact   : 주민이 1~5km 내 이웃이나 데이팅 매치를 발견하도록 돕습니다.
+/// Feature Links : lib/features/find_friends/screens/find_friend_detail_screen.dart; lib/features/find_friends/screens/findfriend_form_screen.dart; lib/features/find_friends/widgets/findfriend_card.dart
+/// Data Model    : `users/{uid}`와 `/users/{uid}/findfriend_profile/main`을 읽고 관계는 `follows` 컬렉션을 사용합니다.
+/// Location Scope: Province→Kabupaten/Kota→Kecamatan→Kelurahan로 필터링하며 LocationFilterScreen을 통한 선택적 RT/RW; 기본값은 사용자 `locationParts`입니다.
+/// Trust Policy  : `isDatingProfile`이 true이고 TrustLevel 기준을 충족해야 하며 `blockedUsers`를 존중합니다.
+/// Monetization  : 향후 프로필 노출 프리미엄 부스트 예정; TODO.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `profile_view`, `start_follow`, `start_chat`.
+/// Analytics     : 필터 사용과 프로필 노출을 추적합니다.
+/// I18N          : 키 `findFriend.prompt_title`, `findFriend.prompt_button` (assets/lang/*.json)
+/// Dependencies  : easy_localization, lib/features/find_friends/data/find_friend_repository.dart, lib/features/location/screens/location_filter_screen.dart
+/// Security/Auth : 인증된 접근이 필요하며 나이와 개인정보 설정을 적용합니다.
+/// Edge Cases    : 프로필 미완성, 위치 필터 없음, 결과 없음.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/012  Find Friend & Club & Jobs & etc 모듈.md; docs/Bling FindFriend DB 구조 설계 문서.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';

@@ -1,4 +1,25 @@
-// lib/features/location/screens/neighborhood_prompt_screen.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Location
+/// File          : lib/features/location/screens/neighborhood_prompt_screen.dart
+/// Purpose       : Google Places를 통해 사용자의 동네를 검증하고 Firestore를 갱신합니다.
+/// User Impact   : 정확한 RT/RW 소속이 초근접 기능을 활성화합니다.
+/// Feature Links : lib/features/location/screens/location_setting_screen.dart
+/// Data Model    : Firestore `users` 필드 `locationName`, `locationParts`, `geoPoint`, `neighborhoodVerified`; `provinces/{prov}/kota`와 `kabupaten`을 조회합니다.
+/// Location Scope: Prov→Kota/Kabupaten→Kecamatan→Kelurahan을 검증하며 마지막 기기 GPS를 기본값으로 사용합니다.
+/// Trust Policy  : 검증 성공 시 `trustScore`가 상승하고 실패 시 기능이 제한됩니다.
+/// Monetization  : 검증된 위치는 지역 광고와 마켓플레이스 노출을 가능하게 합니다.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `complete_location_verification`.
+/// Analytics     : Google API 호출과 검증 결과를 기록합니다.
+/// I18N          : 키 `location.success`, `location.error` (assets/lang/*.json)
+/// Dependencies  : firebase_auth, cloud_firestore, google_places, geolocator, permission_handler, easy_localization
+/// Security/Auth : 로그인된 사용자가 필요하며 API 키는 `ApiKeys.googleApiKey`에 있습니다.
+/// Edge Cases    : GPS 거부 또는 DB에서 행정 계층을 찾지 못하는 경우.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/5 지역-위치-개인정보.md; docs/Bling_Location_GeoQuery_Structure.md; docs/team/teamD_GeoQuery_Location_Module_통합_작업문서.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'package:bling_app/api_keys.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

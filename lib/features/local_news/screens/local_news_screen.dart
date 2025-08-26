@@ -1,4 +1,26 @@
-// lib/features/local_news/screens/local_news_screen.dart
+/// ============================================================================
+/// Bling 문서헤더
+/// 모듈         : 로컬 뉴스(동네 소식)
+/// 파일         : lib/features/local_news/screens/local_news_screen.dart
+/// 목적         : 사용자의 위치 기반으로 동네 소식 게시글을 조회하고, 카테고리별로 분류된 게시글 목록을 제공합니다.
+/// 사용자 가치  : 사용자는 자신의 지역 소식을 빠르게 확인하고, 다양한 카테고리별로 정보를 얻을 수 있습니다.
+/// 연결 기능    : lib/features/local_news/screens/create_local_news_screen.dart;
+///               lib/features/local_news/screens/edit_local_news_screen.dart
+/// 데이터 모델  : 게시글(PostModel)에는 작성자, 내용, 카테고리, 위치 정보, 생성일, 이미지 등이 포함됩니다.
+/// 위치 범위    : 사용자의 위치 정보(시/군/구/동 등)를 기반으로 게시글을 필터링합니다.
+/// 신뢰/정책    : 부적절한 게시글 신고 시 관리자에 의해 제재될 수 있습니다.
+/// 수익화       : 직접적인 수익화는 없으나, 지역 광고 및 커뮤니티 활성화에 기여할 수 있습니다. 해야할일 : define local ad slots.
+/// 핵심성과지표 : 게시글 작성, 조회, 신고, 카테고리별 조회수 등
+/// 분석/로깅    : 게시글 작성/조회/신고 이벤트를 로깅하여 서비스 품질을 분석합니다.
+/// 다국어(i18n) : 모든 UI 텍스트와 안내 메시지는 다국어 키를 통해 번역 지원됩니다.
+/// 의존성       : cloud_firestore, easy_localization, google_fonts 등
+/// 보안/인증    : 로그인한 사용자만 게시글 작성 및 신고가 가능합니다.
+/// 엣지 케이스  : 위치 미설정, 게시글 없음, 네트워크 오류, 잘못된 카테고리 등
+/// 변경 이력    : 2025-08-26 문서헤더 최초 삽입(자동)
+/// 참조 문서    : docs/index/08  로컬 뉴스 모듈 Core.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

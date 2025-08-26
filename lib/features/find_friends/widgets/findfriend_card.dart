@@ -1,4 +1,25 @@
-// lib/features/find_friends/widgets/findfriend_card.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Find Friend
+/// File          : lib/features/find_friends/widgets/findfriend_card.dart
+/// Purpose       : 리스트에서 간단한 프로필 요약을 표시합니다.
+/// User Impact   : 주변 친구 후보를 빠르게 훑어볼 수 있게 합니다.
+/// Feature Links : lib/features/find_friends/screens/find_friend_detail_screen.dart
+/// Data Model    : `users` 필드 `nickname`, `age`, `photoUrl`, `locationName`을 사용합니다.
+/// Location Scope: `locationName`을 표시하며 프로필 위치 계층을 가정합니다.
+/// Trust Policy  : `trustLevel`에 따른 배지를 표시할 수 있음(TODO).
+/// Monetization  : 프로모션 프로필 슬롯을 제공합니다.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `click_findfriend_card`.
+/// Analytics     : 카드 렌더링 시 노출을 기록합니다.
+/// I18N          : 없음.
+/// Dependencies  : flutter
+/// Security/Auth : 없음; 읽기 전용 위젯입니다.
+/// Edge Cases    : 아바타나 나이가 없을 때.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'package:flutter/material.dart';
 

@@ -1,4 +1,25 @@
-// lib/features/marketplace/widgets/product_card.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Marketplace
+/// File          : lib/features/marketplace/widgets/product_card.dart
+/// Purpose       : 이미지, 제목, 가격, 판매자 정보를 포함한 상품 요약 카드를 렌더링합니다.
+/// User Impact   : 주변 상품을 빠르게 살펴보며 전환을 높입니다.
+/// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart
+/// Data Model    : `products` 필드 `title`, `description`, `price`, `imageUrls`, `locationParts`, `createdAt`를 표시하며 판매자 `users/{userId}` 데이터를 가져옵니다.
+/// Location Scope: 타임스탬프 옆에 Kelurahan 또는 Kecamatan 태그를 표시합니다.
+/// Trust Policy  : 판매자의 `trustLevel`에 따른 배지를 아바타 옆에 보여 줍니다.
+/// Monetization  : 프로모션 배지와 가격 강조 슬롯을 제공합니다.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `click_product_card`.
+/// Analytics     : 카드가 뷰포트에 들어올 때 노출을 기록합니다.
+/// I18N          : 키 `time.*`, `postCard.locationNotSet` (assets/lang/*.json)
+/// Dependencies  : cloud_firestore, easy_localization
+/// Security/Auth : 읽기 전용이며 사용자 데이터에 대한 Firestore 규칙을 준수합니다.
+/// Edge Cases    : 이미지 또는 사용자 문서 누락.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 // import 'dart:math';
 

@@ -1,4 +1,25 @@
-// lib/features/marketplace/presentation/screens/product_detail_screen.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Marketplace
+/// File          : lib/features/marketplace/screens/product_detail_screen.dart
+/// Purpose       : 상품 정보와 판매자 세부 사항, 주요 동작을 제공합니다.
+/// User Impact   : 구매자가 상품을 평가하고 판매자에게 연락하거나 공유할 수 있습니다.
+/// Feature Links : lib/features/marketplace/screens/product_edit_screen.dart; lib/features/chat/screens/chat_room_screen.dart; lib/features/marketplace/screens/marketplace_screen.dart
+/// Data Model    : Firestore `products` 필드 `viewsCount`, `likesCount`; 즐겨찾기는 `users/{uid}/favorites`에 저장됩니다.
+/// Location Scope: `locationParts.kel`→`kec` 순으로 표시하며 위치 기반 추천을 지원합니다.
+/// Trust Policy  : 판매자 `trustLevel`을 표시하고 신고 시 `reportCount`가 증가합니다.
+/// Monetization  : 프로모션 노출 및 공유 보상 추천을 지원합니다.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_product`, `click_chat_seller`, `toggle_favorite`, `share_product`.
+/// Analytics     : 이미지 스와이프와 조회수를 Cloud Firestore로 기록합니다.
+/// I18N          : 키 `time.now`, `marketplace.error`, `marketplace.empty` (assets/lang/*.json)
+/// Dependencies  : cloud_firestore, firebase_auth, share_plus, photo_view, easy_localization
+/// Security/Auth : 즐겨찾기는 인증이 필요하며 Firestore 규칙이 수정 권한을 제한합니다.
+/// Edge Cases    : 이미지 누락, 판매자 삭제 또는 상품 삭제.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
 
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/categories/domain/category.dart';

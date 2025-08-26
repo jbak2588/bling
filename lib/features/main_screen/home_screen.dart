@@ -44,7 +44,6 @@ import 'package:bling_app/features/pom/screens/pom_screen.dart';
 import 'package:bling_app/features/lost_and_found/screens/lost_and_found_screen.dart';
 import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart';
 
-
 class MenuItem {
   final IconData icon;
   final String labelKey;
@@ -69,28 +68,58 @@ class HomeScreen extends StatelessWidget {
     this.currentIndex = 0,
   });
 
-
   static final List<MenuItem> menuItems = [
-    MenuItem(icon: Icons.newspaper_outlined, labelKey: 'main.tabs.localNews', screen: const LocalNewsScreen()),
-    MenuItem(icon: Icons.storefront_outlined, labelKey: 'main.tabs.marketplace', screen: const MarketplaceScreen()),
-    MenuItem(icon: Icons.groups_outlined, labelKey: 'main.tabs.clubs', screen: const ClubsScreen()),
-    MenuItem(icon: Icons.favorite_border_outlined, labelKey: 'main.tabs.findFriends', screen: const FindFriendsScreen()),
-    MenuItem(icon: Icons.work_outline, labelKey: 'main.tabs.jobs', screen: const JobsScreen()),
-    MenuItem(icon: Icons.store_mall_directory_outlined, labelKey: 'main.tabs.localStores', screen: const LocalStoresScreen()),
-    MenuItem(icon: Icons.gavel_outlined, labelKey: 'main.tabs.auction', screen: const AuctionScreen()),
-    MenuItem(icon: Icons.star_outline, labelKey: 'main.tabs.pom', screen: const PomScreen()),
-    MenuItem(icon: Icons.help_outline, labelKey: 'main.tabs.lostAndFound', screen: const LostAndFoundScreen()),
-    MenuItem(icon: Icons.house_outlined, labelKey: 'main.tabs.realEstate', screen: const RealEstateScreen()),
+    MenuItem(
+        icon: Icons.newspaper_outlined,
+        labelKey: 'main.tabs.localNews',
+        screen: const LocalNewsScreen()),
+    MenuItem(
+        icon: Icons.storefront_outlined,
+        labelKey: 'main.tabs.marketplace',
+        screen: const MarketplaceScreen()),
+    MenuItem(
+        icon: Icons.groups_outlined,
+        labelKey: 'main.tabs.clubs',
+        screen: const ClubsScreen()),
+    MenuItem(
+        icon: Icons.favorite_border_outlined,
+        labelKey: 'main.tabs.findFriends',
+        screen: const FindFriendsScreen()),
+    MenuItem(
+        icon: Icons.work_outline,
+        labelKey: 'main.tabs.jobs',
+        screen: const JobsScreen()),
+    MenuItem(
+        icon: Icons.store_mall_directory_outlined,
+        labelKey: 'main.tabs.localStores',
+        screen: const LocalStoresScreen()),
+    MenuItem(
+        icon: Icons.gavel_outlined,
+        labelKey: 'main.tabs.auction',
+        screen: const AuctionScreen()),
+    MenuItem(
+        icon: Icons.star_outline,
+        labelKey: 'main.tabs.pom',
+        screen: const PomScreen()),
+    MenuItem(
+        icon: Icons.help_outline,
+        labelKey: 'main.tabs.lostAndFound',
+        screen: const LostAndFoundScreen()),
+    MenuItem(
+        icon: Icons.house_outlined,
+        labelKey: 'main.tabs.realEstate',
+        screen: const RealEstateScreen()),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final int gridCount = (MediaQuery.of(context).size.width >= 380) ? 5 : 4;
     return CustomScrollView(
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
           sliver: SliverGrid.count(
-            crossAxisCount: 5,
+            crossAxisCount: gridCount,
             crossAxisSpacing: 8,
             mainAxisSpacing: 16,
             childAspectRatio: 0.85,
@@ -100,34 +129,53 @@ class HomeScreen extends StatelessWidget {
                 child: InkWell(
                   onTap: () {
                     if (userModel == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('user.notLoggedIn'.tr())));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('user.notLoggedIn'.tr())));
                       return;
                     }
                     final screen = item.screen;
                     Widget nextScreen;
-                    
+
                     // V V V --- [수정] 모든 화면에 locationFilter를 전달하도록 로직 확장 --- V V V
                     if (screen is LocalNewsScreen) {
-                      nextScreen = LocalNewsScreen(userModel: userModel, locationFilter: activeLocationFilter);
+                      nextScreen = LocalNewsScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter);
                     } else if (screen is MarketplaceScreen) {
-                      nextScreen = MarketplaceScreen(userModel: userModel, locationFilter: activeLocationFilter);
+                      nextScreen = MarketplaceScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter);
                     } else if (screen is ClubsScreen) {
-                      nextScreen = ClubsScreen(userModel: userModel, locationFilter: activeLocationFilter);
+                      nextScreen = ClubsScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter);
                     } else if (screen is FindFriendsScreen) {
                       // FindFriendsScreen은 자체 로직을 사용하므로 필터를 전달하지 않습니다.
                       nextScreen = FindFriendsScreen(userModel: userModel);
                     } else if (screen is JobsScreen) {
-                      nextScreen = JobsScreen(userModel: userModel, locationFilter: activeLocationFilter);
+                      nextScreen = JobsScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter);
                     } else if (screen is LocalStoresScreen) {
-                      nextScreen = LocalStoresScreen(userModel: userModel, locationFilter: activeLocationFilter);
+                      nextScreen = LocalStoresScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter);
                     } else if (screen is AuctionScreen) {
-                      nextScreen = AuctionScreen(userModel: userModel, locationFilter: activeLocationFilter);
+                      nextScreen = AuctionScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter);
                     } else if (screen is PomScreen) {
-                      nextScreen = PomScreen(userModel: userModel, locationFilter: activeLocationFilter);
+                      nextScreen = PomScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter);
                     } else if (screen is LostAndFoundScreen) {
-                      nextScreen = LostAndFoundScreen(userModel: userModel, locationFilter: activeLocationFilter);
+                      nextScreen = LostAndFoundScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter);
                     } else if (screen is RealEstateScreen) {
-                      nextScreen = RealEstateScreen(userModel: userModel, locationFilter: activeLocationFilter);
+                      nextScreen = RealEstateScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter);
                     } else {
                       nextScreen = screen;
                     }
@@ -139,9 +187,14 @@ class HomeScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(item.icon, size: 32, color: Theme.of(context).primaryColor),
+                      Icon(item.icon,
+                          size: 32, color: Theme.of(context).primaryColor),
                       const SizedBox(height: 8),
-                      Text(item.labelKey.tr(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 12), maxLines: 2, overflow: TextOverflow.ellipsis),
+                      Text(item.labelKey.tr(),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 12),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
@@ -149,33 +202,45 @@ class HomeScreen extends StatelessWidget {
             }).toList(),
           ),
         ),
-        const SliverToBoxAdapter(child: Divider(height: 8, thickness: 8, color: Color(0xFFF0F2F5))),
+        const SliverToBoxAdapter(
+            child: Divider(height: 8, thickness: 8, color: Color(0xFFF0F2F5))),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text("main.tabs.newFeed".tr(), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            child: Text("main.tabs.newFeed".tr(),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold)),
           ),
         ),
         FutureBuilder<List<FeedItemModel>>(
           future: FeedRepository().fetchUnifiedFeed(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+              return const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()));
             }
-            if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-              return SliverToBoxAdapter(child: Center(child: Padding(padding: const EdgeInsets.all(20.0), child: Text("mainFeed.empty".tr()))));
+            if (snapshot.hasError ||
+                !snapshot.hasData ||
+                snapshot.data!.isEmpty) {
+              return SliverToBoxAdapter(
+                  child: Center(
+                      child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Text("mainFeed.empty".tr()))));
             }
             final feedItems = snapshot.data!;
             // [수정] Provider를 통해 userModel을 하위 위젯에 전달합니다.
             return Provider.value(
               value: userModel,
-            child: SliverList(
+              child: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) => FeedItemCard(
                     item: feedItems[index],
                     onIconTap: onIconTap,
                     allFeedItems: feedItems, // [신규] 전체 피드 리스트 전달
-                    currentIndex: index,      // [신규] 현재 인덱스 전달
+                    currentIndex: index, // [신규] 현재 인덱스 전달
                   ),
                   childCount: feedItems.length,
                 ),
@@ -207,32 +272,41 @@ class FeedItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (item.type) {
       case FeedItemType.post:
-        final post = PostModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        final post = PostModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return PostCard(post: post);
       case FeedItemType.product:
-        final product = ProductModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        final product = ProductModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return ProductCard(product: product);
       case FeedItemType.job:
-        final job = JobModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        final job = JobModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return JobCard(job: job);
       case FeedItemType.auction:
-        final auction = AuctionModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        final auction = AuctionModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return AuctionCard(auction: auction);
       case FeedItemType.club:
-        final clubPost = ClubPostModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        final tempClub = ClubModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        final clubPost = ClubPostModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        final tempClub = ClubModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return ClubPostCard(post: clubPost, club: tempClub);
       case FeedItemType.lostAndFound:
-        final lostItem = LostItemModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        final lostItem = LostItemModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return LostItemCard(item: lostItem);
       case FeedItemType.pom:
-        final short = ShortModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-              // [신규] 전체 피드에서 POM 영상만 필터링하여 새로운 리스트를 만듭니다.
+        final short = ShortModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        // [신규] 전체 피드에서 POM 영상만 필터링하여 새로운 리스트를 만듭니다.
         final allShorts = allFeedItems
             .where((feedItem) => feedItem.type == FeedItemType.pom)
-            .map((feedItem) => ShortModel.fromFirestore(feedItem.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+            .map((feedItem) => ShortModel.fromFirestore(
+                feedItem.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
             .toList();
-            
+
         // [신규] 현재 POM 영상이 필터링된 리스트에서 몇 번째인지 찾습니다.
         final currentShortIndex = allShorts.indexWhere((s) => s.id == short.id);
 
@@ -252,13 +326,16 @@ class FeedItemCard extends StatelessWidget {
           },
         );
       case FeedItemType.realEstate:
-        final room = RoomListingModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        final room = RoomListingModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return RoomCard(room: room);
       case FeedItemType.localStores:
-        final shop = ShopModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        final shop = ShopModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return ShopCard(shop: shop);
       case FeedItemType.findFriends:
-        final user = UserModel.fromFirestore(item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
+        final user = UserModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
         return FindFriendCard(user: user);
       default:
         return Card(
@@ -274,10 +351,12 @@ class FeedItemCard extends StatelessWidget {
 class _ShortFeedCardWithPlayer extends StatefulWidget {
   final ShortModel short;
   final VoidCallback onCardTap; // Function(Widget, String) -> VoidCallback
-  const _ShortFeedCardWithPlayer({required this.short, required this.onCardTap});
+  const _ShortFeedCardWithPlayer(
+      {required this.short, required this.onCardTap});
 
   @override
-  State<_ShortFeedCardWithPlayer> createState() => _ShortFeedCardWithPlayerState();
+  State<_ShortFeedCardWithPlayer> createState() =>
+      _ShortFeedCardWithPlayerState();
 }
 
 class _ShortFeedCardWithPlayerState extends State<_ShortFeedCardWithPlayer> {
@@ -291,13 +370,14 @@ class _ShortFeedCardWithPlayerState extends State<_ShortFeedCardWithPlayer> {
     if (widget.short.videoUrl.isNotEmpty) {
       final videoUri = Uri.parse(widget.short.videoUrl);
       _controller = VideoPlayerController.networkUrl(videoUri);
-      
+
       _initializeVideoPlayerFuture = _controller!.initialize().then((_) {
         _controller!.setVolume(0);
         _controller!.setLooping(true);
         if (mounted) setState(() {});
       }).catchError((error) {
-        debugPrint("===== VideoPlayer Init Error for short ${widget.short.id}: $error =====");
+        debugPrint(
+            "===== VideoPlayer Init Error for short ${widget.short.id}: $error =====");
         if (mounted) {
           setState(() {
             _hasError = true;
@@ -331,41 +411,49 @@ class _ShortFeedCardWithPlayerState extends State<_ShortFeedCardWithPlayer> {
             child: VisibilityDetector(
               key: Key(widget.short.id),
               onVisibilityChanged: (visibilityInfo) {
-                if (!mounted || _controller == null || !_controller!.value.isInitialized || _hasError) return;
-                
+                if (!mounted ||
+                    _controller == null ||
+                    !_controller!.value.isInitialized ||
+                    _hasError) {
+                  return;
+                }
+
                 var visiblePercentage = visibilityInfo.visibleFraction * 100;
                 if (visiblePercentage > 50 && !_controller!.value.isPlaying) {
                   _controller!.play();
-                } 
-                else if (visiblePercentage < 10 && _controller!.value.isPlaying) {
+                } else if (visiblePercentage < 10 &&
+                    _controller!.value.isPlaying) {
                   _controller!.pause();
                 }
               },
-              child: (_hasError || _controller == null) 
-              ? _buildErrorThumbnail()
-              : FutureBuilder(
-                  future: _initializeVideoPlayerFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done && !_hasError) {
-                      return AspectRatio(
-                        aspectRatio: _controller!.value.aspectRatio,
-                        child: VideoPlayer(_controller!),
-                      );
-                    } else if (snapshot.hasError) {
-                      return _buildErrorThumbnail();
-                    }
-                    else {
-                      return _buildLoadingThumbnail();
-                    }
-                  },
-                ),
+              child: (_hasError || _controller == null)
+                  ? _buildErrorThumbnail()
+                  : FutureBuilder(
+                      future: _initializeVideoPlayerFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done &&
+                            !_hasError) {
+                          return AspectRatio(
+                            aspectRatio: _controller!.value.aspectRatio,
+                            child: VideoPlayer(_controller!),
+                          );
+                        } else if (snapshot.hasError) {
+                          return _buildErrorThumbnail();
+                        } else {
+                          return _buildLoadingThumbnail();
+                        }
+                      },
+                    ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Text(
               widget.short.title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -385,18 +473,20 @@ class _ShortFeedCardWithPlayerState extends State<_ShortFeedCardWithPlayer> {
             height: 200,
             width: double.infinity,
             fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => _buildErrorThumbnail(),
+            errorBuilder: (context, error, stackTrace) =>
+                _buildErrorThumbnail(),
           ),
         const CircularProgressIndicator(),
       ],
     );
   }
 
-  Widget _buildErrorThumbnail(){
+  Widget _buildErrorThumbnail() {
     return const SizedBox(
       height: 200,
       width: double.infinity,
-      child: Center(child: Icon(Icons.error_outline, color: Colors.red, size: 48)),
+      child:
+          Center(child: Icon(Icons.error_outline, color: Colors.red, size: 48)),
     );
   }
 }
@@ -410,17 +500,22 @@ class _UserInfoRow extends StatelessWidget {
     return FutureBuilder<DocumentSnapshot>(
       future: FirebaseFirestore.instance.collection('users').doc(userId).get(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData && snapshot.data!.exists) {
-          final user = UserModel.fromFirestore(snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData &&
+            snapshot.data!.exists) {
+          final user = UserModel.fromFirestore(
+              snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundImage: (user.photoUrl != null && user.photoUrl!.isNotEmpty)
-                      ? CachedNetworkImageProvider(user.photoUrl!)
-                      : null,
+                  backgroundImage:
+                      (user.photoUrl != null && user.photoUrl!.isNotEmpty)
+                          ? CachedNetworkImageProvider(user.photoUrl!)
+                          : null,
                   child: (user.photoUrl == null || user.photoUrl!.isEmpty)
                       ? const Icon(Icons.person, size: 16)
                       : null,

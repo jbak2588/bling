@@ -1,5 +1,28 @@
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Marketplace
+/// File          : lib/features/marketplace/screens/product_edit_screen.dart
+/// Purpose       : 기존 상품의 세부 정보, 이미지, 위치를 수정합니다.
+/// User Impact   : 판매자가 정확한 정보를 유지하고 오류를 수정할 수 있습니다.
+/// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/marketplace/widgets/product_card.dart
+/// Data Model    : Firestore `products` 필드 `title`, `description`, `price`, `negotiable`, `imageUrls`, `locationName`, `locationParts`, `geoPoint`, `transactionPlace`, `condition`.
+/// Location Scope: LocationSettingScreen을 통해 Prov→Kec→Kel 재설정을 허용합니다.
+/// Trust Policy  : trustScore 100 초과의 상품 소유자만 수정할 수 있으며 수정 내용은 모더레이션 로그에 기록됩니다.
+/// Monetization  : 수정 후 프리미엄 부스트 적용 가능; TODO: 부스트 과금 정의.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_product_edit`, `complete_product_edit`.
+/// Analytics     : 이미지 삭제와 가격 변화를 추적합니다.
+/// I18N          : 키 `marketplace.error`, `marketplace.success` (assets/lang/*.json)
+/// Dependencies  : firebase_auth, cloud_firestore, firebase_storage, image_picker, easy_localization
+/// Security/Auth : 인증된 사용자가 `product.userId`와 일치해야 합니다.
+/// Edge Cases    : 이미지 업로드 실패, 카테고리 불일치.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
+
 import 'dart:io';
-// import 'package:bling_app/features/marketplace/domain/product_model_old.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';

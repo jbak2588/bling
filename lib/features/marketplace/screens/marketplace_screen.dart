@@ -1,5 +1,26 @@
-// lib/features/marketplace/screens/marketplace_screen.dart
-// Bling App v0.4
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Marketplace
+/// File          : lib/features/marketplace/screens/marketplace_screen.dart
+/// Purpose       : 위치 기반 필터로 상품 목록을 표시합니다.
+/// User Impact   : 구매자가 주변 상품을 둘러보고 상세 페이지를 열 수 있습니다.
+/// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/location/screens/location_filter_screen.dart
+/// Data Model    : Firestore `products`를 `locationParts.prov`로 쿼리하고 `createdAt`으로 정렬합니다.
+/// Location Scope: `locationFilter`를 통해 Prov→Kab/Kota→Kec→Kel 값을 지원합니다.
+/// Trust Policy  : `isAiVerified` 상품만 강조하며 미검증 상품은 검토 대상입니다.
+/// Monetization  : 프로모션 상품과 배너 광고를 지원하며 추후 판매 수수료가 예정되어 있습니다.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_marketplace`, `apply_location_filter`, `click_product`.
+/// Analytics     : 쿼리 결과와 스크롤 깊이를 모니터링합니다.
+/// I18N          : 키 `marketplace.error`, `marketplace.empty`, `time.*` (assets/lang/*.json)
+/// Dependencies  : cloud_firestore, easy_localization, firebase_auth
+/// Security/Auth : 조회는 공개이며 등록은 인증과 신뢰 점수가 필요합니다.
+/// Edge Cases    : 사용자 위치가 없으면 설정 프롬프트를 표시합니다.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
+/// ============================================================================
+library;
+/// 아래부터 실제 코드
+
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';

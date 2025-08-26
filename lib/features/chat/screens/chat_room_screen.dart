@@ -1,4 +1,26 @@
-// lib/features/chat/screens/chat_room_screen.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Chat
+/// File          : lib/features/chat/screens/chat_room_screen.dart
+/// Purpose       : 구인·상품 등 컨텍스트 아이템을 포함한 1:1 및 그룹 채팅 실시간 인터페이스입니다.
+/// User Impact   : 이웃 간 안전한 소통과 거래를 가능하게 합니다.
+/// Feature Links : lib/features/chat/screens/chat_list_screen.dart; lib/features/chat/data/chat_service.dart; lib/features/jobs/screens/job_detail_screen.dart
+/// Data Model    : Firestore `chatRooms` 필드 `participants`, `jobId`, `productId`; 하위 컬렉션 `messages`의 `senderId`, `text`, `timestamp`, `readBy`.
+/// Location Scope: 없음; 모더레이션은 참가자 프로필 위치를 참조합니다.
+/// Trust Policy  : `report` 모듈에서 신고된 메시지는 `trustScore`를 감소시키며 인증 사용자만 허용됩니다.
+/// Monetization  : 스폰서 메시지 가능성; TODO: 구현.
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `send_message`, `enter_chat_room`, `attach_media`.
+/// Analytics     : 읽음 확인과 컨텍스트 아이템 클릭을 기록합니다.
+/// I18N          : 키 `chat_list.empty`, `chat_room.send` (assets/lang/*.json)
+/// Dependencies  : firebase_auth, chat_service, audioplayers, easy_localization
+/// Security/Auth : 참가자에게만 접근이 제한되며 사용자 UID별로 읽음 표시를 합니다.
+/// Edge Cases    : 컨텍스트 아이템 누락, 참가자 정보 부족, 연결 끊김.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md
+/// ============================================================================
+library;
+
+// 아래부터 실제 코드
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:bling_app/core/models/chat_message_model.dart';

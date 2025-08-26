@@ -1,3 +1,26 @@
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Chat
+/// File          : lib/features/chat/domain/chat_message.dart
+/// Purpose       : 단일 채팅 메시지를 표현하는 데이터 모델입니다.
+/// User Impact   : 모듈 전반에서 메시지 구조를 표준화합니다.
+/// Feature Links : lib/features/chat/data/chat_service.dart; lib/features/chat/screens/chat_room_screen.dart
+/// Data Model    : Firestore `messages` 필드 `senderId`, `text`, `timestamp`, `readBy`.
+/// Location Scope: 없음.
+/// Trust Policy  : 메시지는 신고될 수 있으며 발신자의 신뢰 등급에 영향을 줍니다.
+/// Monetization  : 없음.
+/// KPIs          : `send_message`, `read_message` 이벤트 추적을 가능하게 합니다.
+/// Analytics     : `readBy`에 읽음 확인을 저장합니다.
+/// I18N          : 없음.
+/// Dependencies  : cloud_firestore
+/// Security/Auth : 발신자 ID를 인증된 사용자와 비교하여 검증합니다.
+/// Edge Cases    : 텍스트나 타임스탬프가 없으면 `Timestamp.now()`로 대체합니다.
+/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
+/// Source Docs   : docs/index/07 Chat 모듈 Core.md; docs/team/teamC_Chat & Notification 모듈_통합 작업문서.md
+/// ============================================================================
+library;
+// 아래부터 실제 코드
+
 // lib/features/chat/domain/chat_message.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
