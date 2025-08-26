@@ -14,12 +14,9 @@
 /// I18N          : 없음.
 /// Dependencies  : flutter
 /// Security/Auth : 없음; 읽기 전용 위젯입니다.
-<<<<<<< HEAD
 /// Edge Cases    : 아바타나 나이가 없을 때./// 실제 구현 비교 : 프로필 요약, 아바타, 나이, 위치 등 모든 정보 정상 표시. UI/UX 완비.
-=======
 /// Edge Cases    : 아바타나 나이가 없을 때.
 /// 실제 구현 비교 : 프로필 요약, 아바타, 나이, 위치 등 모든 정보 정상 표시. UI/UX 완비.
->>>>>>> 039b98320b865c27dc8be3d24e8ba31540ea21af
 /// 개선 제안     : KPI/통계/프리미엄 기능 실제 구현 필요. 신뢰 등급/차단/신고 UI 노출 및 기능 강화. 프로모션 슬롯 UX 개선.
 /// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
 /// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md

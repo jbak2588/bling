@@ -11,16 +11,7 @@
 // =====================================================
 // lib/features/pom/widgets/short_comments_sheet.dart
 // ===================== DocHeader =====================
-// [기획 요약]
-// - 숏폼 영상(POM) 댓글 시트. 댓글 목록, 작성, 삭제 등 다양한 기능 지원.
-//
-// [실제 구현 비교]
-// - 댓글 목록, 작성, 삭제 등 모든 주요 기능 정상 동작. UI/UX 완비.
-//
-// [개선 제안]
-// - KPI/통계/프리미엄 기능 실제 구현 필요(댓글 부스트, 신고/차단 등).
-// - 신고/차단/신뢰 등급 UI 노출 및 기능 강화, UX 개선.
-// =====================================================
+
 
 import 'package:bling_app/features/pom/models/short_comment_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
