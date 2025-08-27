@@ -11,7 +11,6 @@
 /// Monetization  : 향후 유료 노출 부스트 예정; TODO: 통합.
 /// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_profile_edit`, `complete_profile_edit`.
 /// Analytics     : 이미지 업로드와 공개 여부 토글을 추적합니다.
-/// I18N          : 키 `findFriend.editTitle` (assets/lang/*.json) - TODO: 키 확인.
 /// Dependencies  : firebase_storage, firebase_auth, cloud_firestore, image_picker
 /// Security/Auth : 프로필 소유자만 수정할 수 있으며 Storage 경로는 UID로 제한됩니다.
 /// Edge Cases    : 이미지 미선택, 업로드 실패./// 실제 구현 비교 : 나이, 나이 범위, 이미지, 공개 여부 등 모든 필드가 UI/로직에 완비되어 있음. 프로필 수정 정상 동작.
@@ -30,6 +29,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/models/user_model.dart';
@@ -106,7 +106,7 @@ class _FindFriendEditScreenState extends State<FindFriendEditScreen> {
         (_newImages.isNotEmpty || _existingImages.isNotEmpty);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit FindFriend Profile')),
+      appBar: AppBar(title: Text('findFriend.editTitle'.tr())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -166,7 +166,7 @@ class _FindFriendEditScreenState extends State<FindFriendEditScreen> {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : const Text('Save'),
+              : Text('findFriend.save'.tr()),
         ),
       ),
     );

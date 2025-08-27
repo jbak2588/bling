@@ -5,6 +5,8 @@
 /// - 비교: 기획의 네비게이션/레이아웃 구조가 실제 코드에서 State 관리와 위젯 조합으로 구현됨. 반응형/접근성/애니메이션 등은 일부 적용됨
 library;
 
+import 'package:bling_app/features/shared/grab_widgets.dart'; // GrabAppBarShell
+
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -130,100 +132,107 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         .push(MaterialPageRoute(builder: (_) => const CreateLocalNewsScreen()));
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      leading: (_bottomNavIndex == 0 && _currentHomePageContent != null)
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                setState(() {
-                  _currentHomePageContent = null;
-                  _appBarTitle = 'main.myTown'.tr(); // [수정] 통합된 변수 사용
-                });
-              },
-            )
-          : Builder(
-              builder: (context) => IconButton(
-                icon: CircleAvatar(
-                  backgroundImage: (_userModel?.photoUrl != null &&
-                          _userModel!.photoUrl!.isNotEmpty)
-                      ? NetworkImage(_userModel!.photoUrl!)
-                      : null,
-                  child: (_userModel?.photoUrl == null ||
-                          _userModel!.photoUrl!.isEmpty)
-                      ? const Icon(Icons.person)
-                      : null,
-                ),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+  PreferredSizeWidget _buildAppBar() {
+  return GrabAppBarShell(
+    // ↓↓↓ 기존 leading 로직 그대로
+    leading: (_bottomNavIndex == 0 && _currentHomePageContent != null)
+        ? IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              setState(() {
+                _currentHomePageContent = null;
+                _appBarTitle = 'main.myTown'.tr(); // 통합된 변수 사용
+              });
+            },
+          )
+        : Builder(
+            builder: (context) => IconButton(
+              icon: CircleAvatar(
+                backgroundImage: (_userModel?.photoUrl != null &&
+                        _userModel!.photoUrl!.isNotEmpty)
+                    ? NetworkImage(_userModel!.photoUrl!)
+                    : null,
+                child: (_userModel?.photoUrl == null ||
+                        _userModel!.photoUrl!.isEmpty)
+                    ? const Icon(Icons.person)
+                    : null,
               ),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+              tooltip:
+                  MaterialLocalizations.of(context).openAppDrawerTooltip,
             ),
-      title: InkWell(
-        onTap: () async {
-          final result = await Navigator.of(context).push<Map<String, String?>>(
-            MaterialPageRoute(
-                builder: (_) => LocationFilterScreen(userModel: _userModel)),
-          );
+          ),
 
-          if (result != null && mounted) {
-            final processedFilter = <String, String?>{};
-            String newTitle = 'main.myTown'.tr(); // 기본값
+    // ↓↓↓ 기존 title 로직 그대로 (위치 필터 열기/타이틀 텍스트 구성 등)
+    title: InkWell(
+      onTap: () async {
+        final result =
+            await Navigator.of(context).push<Map<String, String?>>(
+          MaterialPageRoute(
+              builder: (_) => LocationFilterScreen(userModel: _userModel)),
+        );
 
-            if (result['kel'] != null && result['kel']!.isNotEmpty) {
-              processedFilter['kel'] = result['kel'];
-              newTitle = "Kel.";
-            } else if (result['kec'] != null && result['kec']!.isNotEmpty) {
-              processedFilter['kec'] = result['kec'];
-              newTitle = "Kec.";
-            } else if (result['kota'] != null && result['kota']!.isNotEmpty) {
-              processedFilter['kota'] = result['kota'];
-              newTitle = "Kota";
-            } else if (result['kab'] != null && result['kab']!.isNotEmpty) {
-              processedFilter['kab'] = result['kab'];
-              newTitle = "Kab.";
-            } else if (result['prov'] != null && result['prov']!.isNotEmpty) {
-              processedFilter['prov'] = result['prov'];
-              newTitle = "Prov.";
-            }
+        if (result != null && mounted) {
+          final processedFilter = <String, String?>{};
+          String newTitle = 'main.myTown'.tr(); // 기본값
 
-            setState(() {
-              _activeLocationFilter =
-                  processedFilter.isNotEmpty ? processedFilter : null;
-              _appBarTitle = newTitle; // [수정] 통합된 변수 사용
-            });
+          if (result['kel'] != null && result['kel']!.isNotEmpty) {
+            processedFilter['kel'] = result['kel'];
+            newTitle = "Kel.";
+          } else if (result['kec'] != null && result['kec']!.isNotEmpty) {
+            processedFilter['kec'] = result['kec'];
+            newTitle = "Kec.";
+          } else if (result['kota'] != null && result['kota']!.isNotEmpty) {
+            processedFilter['kota'] = result['kota'];
+            newTitle = "Kota";
+          } else if (result['kab'] != null && result['kab']!.isNotEmpty) {
+            processedFilter['kab'] = result['kab'];
+            newTitle = "Kab.";
+          } else if (result['prov'] != null && result['prov']!.isNotEmpty) {
+            processedFilter['prov'] = result['prov'];
+            newTitle = "Prov.";
           }
-        },
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // V V V --- [수정] _currentPageTitleKey 대신 _appBarTitlePrefix 사용 --- V V V
-            Text(_appBarTitle,
-                style: GoogleFonts.inter(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
-            // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                _getAppBarSubTitle(),
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
-              ),
+
+          setState(() {
+            _activeLocationFilter =
+                processedFilter.isNotEmpty ? processedFilter : null;
+            _appBarTitle = newTitle; // 통합된 변수 사용
+          });
+        }
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(_appBarTitle,
+              style:
+                  GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              _getAppBarSubTitle(),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              overflow: TextOverflow.ellipsis,
             ),
-            const Icon(Icons.arrow_drop_down, size: 24),
-          ],
-        ),
+          ),
+          const Icon(Icons.arrow_drop_down, size: 24),
+        ],
       ),
-      centerTitle: true,
-      actions: [
-        _LanguageMenu(), // ← 아이콘 + 현재 언어 코드 표시 + 팝업 선택
-        IconButton(
-          icon: const Icon(Icons.notifications_none),
-          onPressed: () {},
-        ),
-      ],
-    );
-  }
+    ),
+
+    centerTitle: true, // 기존과 동일하게 가운데 정렬
+    // ↓↓↓ 기존 actions 그대로
+    actions: [
+      _LanguageMenu(),
+      IconButton(
+        icon: const Icon(Icons.notifications_none),
+        onPressed: () {},
+      ),
+    ],
+
+    // 선택 옵션: 액션 버튼을 흰색 동글칩으로 감쌀지 여부 (원하면 true 유지)
+    pillActions: true,
+  );
+}
 
   // V V V --- [수정] AppBar 부제목 표시 로직을 '대원칙'에 맞게 변경 --- V V V
   String _getAppBarSubTitle() {
@@ -526,7 +535,7 @@ class SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('main.bottomNav.search'.tr())),
+     appBar: GrabAppBarShell(title: Text('main.bottomNav.search'.tr())),
       body: Center(child: Text('main.search.placeholder'.tr())),
     );
   }

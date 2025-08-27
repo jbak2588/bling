@@ -85,12 +85,12 @@ class _AuctionScreenState extends State<AuctionScreen> {
               if (_locationFilter != null)
                 IconButton(
                   icon: const Icon(Icons.clear),
-                  tooltip: 'Clear Filter', // TODO: 다국어
+                  tooltip: 'auctions.filter.clearTooltip'.tr(),
                   onPressed: _clearFilter,
                 ),
               IconButton(
                 icon: const Icon(Icons.filter_alt_outlined),
-                tooltip: 'Filter', // TODO: 다국어
+                tooltip: 'auctions.filter.tooltip'.tr(),
                 onPressed: _openFilter,
               ),
             ],

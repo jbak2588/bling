@@ -270,6 +270,7 @@
         "bioHint": "소개 (Bio)",
         "locationTitle": "지역",
         "changeLocation": "변경",
+        "locationNotSet": "미설정",
         "interests": {
             "title": "관심사",
             "hint": "쉼표와 Enter로 여러개 동시 추가"
@@ -492,6 +493,7 @@
     },
     "findFriend": {
         "title": "친구 찾기",
+        "editTitle": "친구 찾기 프로필 수정",
         "editProfileTitle": "프로필 수정",
         "save": "저장",
         "profileImagesLabel": "프로필 이미지 (최대 6장)",
@@ -685,6 +687,10 @@
             "alreadyEnded": "이미 마감된 경매입니다."
         },
         "empty": "진행 중인 경매가 없습니다.",
+        "filter": {
+            "tooltip": "필터",
+            "clearTooltip": "필터 지우기"
+        },
         "create": {
             "tooltip": "경매 등록",
             "title": "경매 등록",
