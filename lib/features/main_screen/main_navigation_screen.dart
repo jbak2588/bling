@@ -43,22 +43,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   static const int kSearchTabIndex = 1; // 예: 0=Home, 1=Search, 2=Chat, 3=Profile
 
- void goToSearchTab() {
-  if (!mounted) return;
+  void goToSearchTab() {
+    if (!mounted) return;
 
-  // 홈에서 서브뷰를 띄웠다면 정리(프로젝트에 있다면 유지)
-  setState(() {
-    try {
-      _currentHomePageContent = null; // 해당 변수가 있는 경우만
-    } catch (_) {}
-
-    _bottomNavIndex = kSearchTabIndex; // IndexedStack 방식
-  });
-
-}
+    setState(() {
+      try {
+        _currentHomePageContent = null; // 해당 변수가 있는 경우만
+      } catch (_) {}
+      _bottomNavIndex = kSearchTabIndex; // IndexedStack 방식
+    });
+  }
 
   Widget? _currentHomePageContent;
-  String _appBarTitle = 'main.myTown'.tr();
+
+  // ✅ 번역된 문자열이 아닌 "키"를 상태로 보관
+  String _appBarTitleKey = 'main.myTown';
 
   @override
   void initState() {
@@ -134,7 +133,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     if (index == 0 && _currentHomePageContent != null) {
       setState(() {
         _currentHomePageContent = null;
-        _appBarTitle = 'main.myTown'.tr(); // 홈으로 돌아올 때 접두사 초기화
+        _appBarTitleKey = 'main.myTown'; // 홈으로 돌아올 때 키 초기화
       });
     }
     setState(() {
@@ -149,6 +148,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   PreferredSizeWidget _buildAppBar() {
+    // ✅ locale 의존성만 생성(교체X, 리빌드O)
+    final _ = context.locale;
     return GrabAppBarShell(
       // ↓↓↓ 기존 leading 로직 그대로
       leading: (_bottomNavIndex == 0 && _currentHomePageContent != null)
@@ -157,7 +158,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               onPressed: () {
                 setState(() {
                   _currentHomePageContent = null;
-                  _appBarTitle = 'main.myTown'.tr(); // 통합된 변수 사용
+                  _appBarTitleKey = 'main.myTown'; // 키로 저장
                 });
               },
             )
@@ -178,7 +179,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               ),
             ),
 
-      // ↓↓↓ 기존 title 로직 그대로 (위치 필터 열기/타이틀 텍스트 구성 등)
+      // ↓↓↓ 기존 title 로직 (위치 필터 열기/타이틀 텍스트 구성 등)
       title: InkWell(
         onTap: () async {
           final result = await Navigator.of(context).push<Map<String, String?>>(
@@ -188,38 +189,43 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
           if (result != null && mounted) {
             final processedFilter = <String, String?>{};
-            String newTitle = 'main.myTown'.tr(); // 기본값
+            // ✅ 타이틀은 키만 유지하고, 화면에서 .tr()로 번역합니다.
+            String newTitleKey = 'main.myTown';
 
             if (result['kel'] != null && result['kel']!.isNotEmpty) {
               processedFilter['kel'] = result['kel'];
-              newTitle = "Kel.";
+              newTitleKey = 'main.myTown';
             } else if (result['kec'] != null && result['kec']!.isNotEmpty) {
               processedFilter['kec'] = result['kec'];
-              newTitle = "Kec.";
+              newTitleKey = 'main.myTown';
             } else if (result['kota'] != null && result['kota']!.isNotEmpty) {
               processedFilter['kota'] = result['kota'];
-              newTitle = "Kota";
+              newTitleKey = 'main.myTown';
             } else if (result['kab'] != null && result['kab']!.isNotEmpty) {
               processedFilter['kab'] = result['kab'];
-              newTitle = "Kab.";
+              newTitleKey = 'main.myTown';
             } else if (result['prov'] != null && result['prov']!.isNotEmpty) {
               processedFilter['prov'] = result['prov'];
-              newTitle = "Prov.";
+              newTitleKey = 'main.myTown';
             }
 
             setState(() {
               _activeLocationFilter =
                   processedFilter.isNotEmpty ? processedFilter : null;
-              _appBarTitle = newTitle; // 통합된 변수 사용
+              _appBarTitleKey = newTitleKey; // 키 저장
             });
           }
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_appBarTitle,
-                style: GoogleFonts.inter(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
+            // ✅ 항상 build 시점에 번역되도록 .tr() 호출
+            Text(
+              _appBarTitleKey.tr(),
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.bold, fontSize: 16
+              ),
+            ),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
@@ -249,7 +255,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  // V V V --- [수정] AppBar 부제목 표시 로직을 '대원칙'에 맞게 변경 --- V V V
+  // --- AppBar 부제목 표시 로직 ---
   String _getAppBarSubTitle() {
     if (_isLocationLoading) {
       return 'main.appBar.locationLoading'.tr();
@@ -267,12 +273,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     // 3. 'kab' 값도 없으면, 기존의 전체 주소(_currentAddress)를 축약해서 표시
     return AddressFormatter.toSingkatan(_currentAddress);
   }
-  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
   void _navigateToPage(Widget page, String titleKey) {
     setState(() {
       _currentHomePageContent = page;
-      _appBarTitle = titleKey.tr(); // [수정] 통합된 변수 사용
+      _appBarTitleKey = titleKey; // 키 그대로 저장
     });
   }
 
@@ -510,7 +515,13 @@ class _LanguageMenu extends StatelessWidget {
 
     return PopupMenuButton<Locale>(
       tooltip: 'Change Language',
-      onSelected: (loc) => context.setLocale(loc),
+       onSelected: (loc) {
+        // 팝업 닫힘(라우트 pop) 이후 프레임에 로케일 변경
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final el = EasyLocalization.of(context);
+          if (el != null) el.setLocale(loc);
+        });
+      },
       itemBuilder: (context) => const [
         PopupMenuItem(
           value: Locale('id'),
@@ -525,7 +536,7 @@ class _LanguageMenu extends StatelessWidget {
           child: Text('English'),
         ),
       ],
-      // icon 대신 child를 써서 "아이콘 + 현재 코드"를 함께 보여줍니다.
+      // 아이콘 + 현재 코드(ID/KO/EN)
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Row(
@@ -534,7 +545,7 @@ class _LanguageMenu extends StatelessWidget {
             const Icon(Icons.language),
             const SizedBox(width: 6),
             Text(
-              short, // ID/KO/EN
+              short,
               style: Theme.of(context).textTheme.labelLarge,
             ),
             const SizedBox(width: 4),
