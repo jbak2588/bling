@@ -321,7 +321,7 @@ class _FloatingCircleIconState extends State<_FloatingCircleIcon> {
           shape: const CircleBorder(),
           color: widget.bg, // 연한 틴트 배경
           elevation: elev, // ✅ 핵심: 그림자
-          shadowColor: Colors.black.withValues(alpha: 0.34),
+          shadowColor: Colors.black.withValues(alpha: 1.00),
           child: Padding(
             padding: EdgeInsets.all(widget.pad),
             child: Icon(widget.icon, size: widget.size, color: widget.fg),
