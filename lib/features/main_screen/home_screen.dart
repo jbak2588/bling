@@ -108,7 +108,7 @@ class HomeScreen extends StatelessWidget {
               SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '이웃, 소식, 장터, 일자리… 검색',
+                  '이웃 , 소식, 장터, 일자리… 검색',  //TODO : 다국어 
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
