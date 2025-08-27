@@ -41,6 +41,22 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   StreamSubscription? _unreadChatsSubscription;
   int _totalUnreadCount = 0;
 
+  static const int kSearchTabIndex = 1; // 예: 0=Home, 1=Search, 2=Chat, 3=Profile
+
+ void goToSearchTab() {
+  if (!mounted) return;
+
+  // 홈에서 서브뷰를 띄웠다면 정리(프로젝트에 있다면 유지)
+  setState(() {
+    try {
+      _currentHomePageContent = null; // 해당 변수가 있는 경우만
+    } catch (_) {}
+
+    _bottomNavIndex = kSearchTabIndex; // IndexedStack 방식
+  });
+
+}
+
   Widget? _currentHomePageContent;
   String _appBarTitle = 'main.myTown'.tr();
 
@@ -133,106 +149,105 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   PreferredSizeWidget _buildAppBar() {
-  return GrabAppBarShell(
-    // ↓↓↓ 기존 leading 로직 그대로
-    leading: (_bottomNavIndex == 0 && _currentHomePageContent != null)
-        ? IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              setState(() {
-                _currentHomePageContent = null;
-                _appBarTitle = 'main.myTown'.tr(); // 통합된 변수 사용
-              });
-            },
-          )
-        : Builder(
-            builder: (context) => IconButton(
-              icon: CircleAvatar(
-                backgroundImage: (_userModel?.photoUrl != null &&
-                        _userModel!.photoUrl!.isNotEmpty)
-                    ? NetworkImage(_userModel!.photoUrl!)
-                    : null,
-                child: (_userModel?.photoUrl == null ||
-                        _userModel!.photoUrl!.isEmpty)
-                    ? const Icon(Icons.person)
-                    : null,
+    return GrabAppBarShell(
+      // ↓↓↓ 기존 leading 로직 그대로
+      leading: (_bottomNavIndex == 0 && _currentHomePageContent != null)
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                setState(() {
+                  _currentHomePageContent = null;
+                  _appBarTitle = 'main.myTown'.tr(); // 통합된 변수 사용
+                });
+              },
+            )
+          : Builder(
+              builder: (context) => IconButton(
+                icon: CircleAvatar(
+                  backgroundImage: (_userModel?.photoUrl != null &&
+                          _userModel!.photoUrl!.isNotEmpty)
+                      ? NetworkImage(_userModel!.photoUrl!)
+                      : null,
+                  child: (_userModel?.photoUrl == null ||
+                          _userModel!.photoUrl!.isEmpty)
+                      ? const Icon(Icons.person)
+                      : null,
+                ),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
               ),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-              tooltip:
-                  MaterialLocalizations.of(context).openAppDrawerTooltip,
             ),
-          ),
 
-    // ↓↓↓ 기존 title 로직 그대로 (위치 필터 열기/타이틀 텍스트 구성 등)
-    title: InkWell(
-      onTap: () async {
-        final result =
-            await Navigator.of(context).push<Map<String, String?>>(
-          MaterialPageRoute(
-              builder: (_) => LocationFilterScreen(userModel: _userModel)),
-        );
+      // ↓↓↓ 기존 title 로직 그대로 (위치 필터 열기/타이틀 텍스트 구성 등)
+      title: InkWell(
+        onTap: () async {
+          final result = await Navigator.of(context).push<Map<String, String?>>(
+            MaterialPageRoute(
+                builder: (_) => LocationFilterScreen(userModel: _userModel)),
+          );
 
-        if (result != null && mounted) {
-          final processedFilter = <String, String?>{};
-          String newTitle = 'main.myTown'.tr(); // 기본값
+          if (result != null && mounted) {
+            final processedFilter = <String, String?>{};
+            String newTitle = 'main.myTown'.tr(); // 기본값
 
-          if (result['kel'] != null && result['kel']!.isNotEmpty) {
-            processedFilter['kel'] = result['kel'];
-            newTitle = "Kel.";
-          } else if (result['kec'] != null && result['kec']!.isNotEmpty) {
-            processedFilter['kec'] = result['kec'];
-            newTitle = "Kec.";
-          } else if (result['kota'] != null && result['kota']!.isNotEmpty) {
-            processedFilter['kota'] = result['kota'];
-            newTitle = "Kota";
-          } else if (result['kab'] != null && result['kab']!.isNotEmpty) {
-            processedFilter['kab'] = result['kab'];
-            newTitle = "Kab.";
-          } else if (result['prov'] != null && result['prov']!.isNotEmpty) {
-            processedFilter['prov'] = result['prov'];
-            newTitle = "Prov.";
+            if (result['kel'] != null && result['kel']!.isNotEmpty) {
+              processedFilter['kel'] = result['kel'];
+              newTitle = "Kel.";
+            } else if (result['kec'] != null && result['kec']!.isNotEmpty) {
+              processedFilter['kec'] = result['kec'];
+              newTitle = "Kec.";
+            } else if (result['kota'] != null && result['kota']!.isNotEmpty) {
+              processedFilter['kota'] = result['kota'];
+              newTitle = "Kota";
+            } else if (result['kab'] != null && result['kab']!.isNotEmpty) {
+              processedFilter['kab'] = result['kab'];
+              newTitle = "Kab.";
+            } else if (result['prov'] != null && result['prov']!.isNotEmpty) {
+              processedFilter['prov'] = result['prov'];
+              newTitle = "Prov.";
+            }
+
+            setState(() {
+              _activeLocationFilter =
+                  processedFilter.isNotEmpty ? processedFilter : null;
+              _appBarTitle = newTitle; // 통합된 변수 사용
+            });
           }
-
-          setState(() {
-            _activeLocationFilter =
-                processedFilter.isNotEmpty ? processedFilter : null;
-            _appBarTitle = newTitle; // 통합된 변수 사용
-          });
-        }
-      },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(_appBarTitle,
-              style:
-                  GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              _getAppBarSubTitle(),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
+        },
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(_appBarTitle,
+                style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                _getAppBarSubTitle(),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-          const Icon(Icons.arrow_drop_down, size: 24),
-        ],
+            const Icon(Icons.arrow_drop_down, size: 24),
+          ],
+        ),
       ),
-    ),
 
-    centerTitle: true, // 기존과 동일하게 가운데 정렬
-    // ↓↓↓ 기존 actions 그대로
-    actions: [
-      _LanguageMenu(),
-      IconButton(
-        icon: const Icon(Icons.notifications_none),
-        onPressed: () {},
-      ),
-    ],
+      centerTitle: true, // 기존과 동일하게 가운데 정렬
+      // ↓↓↓ 기존 actions 그대로
+      actions: [
+        _LanguageMenu(),
+        IconButton(
+          icon: const Icon(Icons.notifications_none),
+          onPressed: () {},
+        ),
+      ],
 
-    // 선택 옵션: 액션 버튼을 흰색 동글칩으로 감쌀지 여부 (원하면 true 유지)
-    pillActions: true,
-  );
-}
+      // 선택 옵션: 액션 버튼을 흰색 동글칩으로 감쌀지 여부 (원하면 true 유지)
+      pillActions: true,
+    );
+  }
 
   // V V V --- [수정] AppBar 부제목 표시 로직을 '대원칙'에 맞게 변경 --- V V V
   String _getAppBarSubTitle() {
@@ -269,6 +284,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             userModel: _userModel,
             activeLocationFilter: _activeLocationFilter,
             onIconTap: (page, titleKey) => _navigateToPage(page, titleKey),
+            onSearchChipTap: goToSearchTab, // ✅ 추가
           ),
       const SearchScreen(),
       const ChatListScreen(),
@@ -535,7 +551,7 @@ class SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     appBar: GrabAppBarShell(title: Text('main.bottomNav.search'.tr())),
+      appBar: GrabAppBarShell(title: Text('main.bottomNav.search'.tr())),
       body: Center(child: Text('main.search.placeholder'.tr())),
     );
   }

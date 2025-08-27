@@ -82,11 +82,49 @@ class MenuItem {
 }
 
 class HomeScreen extends StatelessWidget {
+  // (2) 검색 칩 위젯 헬퍼 - 디자인/텍스트 최신화
+  Widget _searchChip(VoidCallback? onTap) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(999),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: const Row(
+            children: [
+              Icon(Icons.search),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '이웃, 소식, 장터, 일자리… 검색',
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // 접근성 대응: textScalerOf 기반 스케일 추출 유틸
   double effectiveTextScale(BuildContext context, {double basis = 16}) {
     final s = MediaQuery.textScalerOf(context);
     return s.scale(basis) / basis;
   }
+
   final UserModel? userModel;
   final Map<String, String?>? activeLocationFilter;
   final Function(Widget, String) onIconTap;
@@ -101,7 +139,10 @@ class HomeScreen extends StatelessWidget {
     required this.onIconTap,
     this.allFeedItems = const [],
     this.currentIndex = 0,
+    required this.onSearchChipTap,
   });
+
+  final VoidCallback? onSearchChipTap;
 
   static final List<MenuItem> menuItems = [
     MenuItem(
@@ -148,34 +189,37 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  // ===== 반응형 그리드/타일 사이즈 계산 (textScalerOf 사용) =====
-  final size  = MediaQuery.of(context).size;
-  final width = size.width;
-  final double tsFactor = effectiveTextScale(context); // ≈ textScaleFactor
-  final String lang = context.locale.languageCode; // 'id' | 'ko' | 'en'
-  final bool longLabelLang = (lang == 'id');
+    // ===== 반응형 그리드/타일 사이즈 계산 (textScalerOf 사용) =====
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final double tsFactor = effectiveTextScale(context); // ≈ textScaleFactor
+    final String lang = context.locale.languageCode; // 'id' | 'ko' | 'en'
+    final bool longLabelLang = (lang == 'id');
 
-  // 5열 사용 조건: 화면폭 충분 + 텍스트가 너무 크지 않음(언어별 임계값)
-  final bool force4   = width < 360 || tsFactor > (longLabelLang ? 1.10 : 1.15);
-  final int  gridCount = force4 ? 4 : 5;
+    // 5열 사용 조건: 화면폭 충분 + 텍스트가 너무 크지 않음(언어별 임계값)
+    final bool force4 = width < 360 || tsFactor > (longLabelLang ? 1.10 : 1.15);
+    final int gridCount = force4 ? 4 : 5;
 
-  // SliverPadding/간격 기준으로 셀 폭 계산
-  const double outerPad = 16;     // 좌우 패딩
-  const double crossGap = 8;      // 열 간격
-  final double tileWidth =
-    (width - (outerPad * 2) - (crossGap * (gridCount - 1))) / gridCount;
+    // SliverPadding/간격 기준으로 셀 폭 계산
+    const double outerPad = 16; // 좌우 패딩
+    const double crossGap = 8; // 열 간격
+    final double tileWidth =
+        (width - (outerPad * 2) - (crossGap * (gridCount - 1))) / gridCount;
 
-  // 타일 높이: 5열일 때 낮게, 긴 라벨/큰 글자면 여유 +2dp
-  double tileHeight = gridCount == 5 ? 98 : 104;
-  if (longLabelLang) tileHeight += 2;
-  if (tsFactor > 1.15) tileHeight += 2;
+    // 타일 높이: 5열일 때 낮게, 긴 라벨/큰 글자면 여유 +2dp
+    double tileHeight = gridCount == 5 ? 98 : 104;
+    if (longLabelLang) tileHeight += 2;
+    if (tsFactor > 1.15) tileHeight += 2;
 
-  final double childAspectRatio = tileWidth / tileHeight;
+    final double childAspectRatio = tileWidth / tileHeight;
+
+    // ✅ 탭 전환 콜백 준비: 주입받았으면 그걸 쓰고, 없으면 기존 플레이스홀더로 Fallback
+    final VoidCallback? searchAction = onSearchChipTap;
 
     return CustomScrollView(
       slivers: [
-        // (상단 AppBar는 main_navigation_screen.dart에서 이미 처리)
-        // 필요 시 검색바 Sliver를 두시고…
+        // ✅ AppBar 바로 아래, 얇은 검색 칩만 노출(입력은 Search 탭에서)
+        SliverToBoxAdapter(child: _searchChip(searchAction)),
 
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -297,8 +341,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-
 
 class FeedItemCard extends StatelessWidget {
   final FeedItemModel item;
