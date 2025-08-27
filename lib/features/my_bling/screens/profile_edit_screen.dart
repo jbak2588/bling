@@ -310,7 +310,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Alamat Terdaftar", // TODO: 다국어
+                                'profileEdit.locationTitle'.tr(),
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black54),
@@ -324,13 +324,13 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                                   Expanded(
                                     child: Text(
                                       _userModel?.locationName ??
-                                          "Belum diatur", // TODO: 다국어
+                                          'profileEdit.locationNotSet'.tr(),
                                       style: const TextStyle(fontSize: 16),
                                     ),
                                   ),
                                   TextButton(
                                     onPressed: _openLocationSetting,
-                                    child: const Text("Ubah"), // TODO: 다국어
+                                    child: Text('profileEdit.changeLocation'.tr()),
                                   )
                                 ],
                               ),

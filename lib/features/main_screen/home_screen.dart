@@ -28,6 +28,8 @@
 /// - 향후 개선: 지역 단위별 추천·광고·커뮤니티 연계, UI/UX(지도 시각화, 애니메이션 등) 강화, 데이터 기반 KPI/Analytics 연동
 library;
 
+import 'package:bling_app/features/shared/grab_widgets.dart';
+
 import 'package:bling_app/core/models/feed_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/main_feed/data/feed_repository.dart';
@@ -80,6 +82,11 @@ class MenuItem {
 }
 
 class HomeScreen extends StatelessWidget {
+  // 접근성 대응: textScalerOf 기반 스케일 추출 유틸
+  double effectiveTextScale(BuildContext context, {double basis = 16}) {
+    final s = MediaQuery.textScalerOf(context);
+    return s.scale(basis) / basis;
+  }
   final UserModel? userModel;
   final Map<String, String?>? activeLocationFilter;
   final Function(Widget, String) onIconTap;
@@ -141,91 +148,101 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int gridCount = (MediaQuery.of(context).size.width >= 380) ? 5 : 4;
+  // ===== 반응형 그리드/타일 사이즈 계산 (textScalerOf 사용) =====
+  final size  = MediaQuery.of(context).size;
+  final width = size.width;
+  final double tsFactor = effectiveTextScale(context); // ≈ textScaleFactor
+  final String lang = context.locale.languageCode; // 'id' | 'ko' | 'en'
+  final bool longLabelLang = (lang == 'id');
+
+  // 5열 사용 조건: 화면폭 충분 + 텍스트가 너무 크지 않음(언어별 임계값)
+  final bool force4   = width < 360 || tsFactor > (longLabelLang ? 1.10 : 1.15);
+  final int  gridCount = force4 ? 4 : 5;
+
+  // SliverPadding/간격 기준으로 셀 폭 계산
+  const double outerPad = 16;     // 좌우 패딩
+  const double crossGap = 8;      // 열 간격
+  final double tileWidth =
+    (width - (outerPad * 2) - (crossGap * (gridCount - 1))) / gridCount;
+
+  // 타일 높이: 5열일 때 낮게, 긴 라벨/큰 글자면 여유 +2dp
+  double tileHeight = gridCount == 5 ? 98 : 104;
+  if (longLabelLang) tileHeight += 2;
+  if (tsFactor > 1.15) tileHeight += 2;
+
+  final double childAspectRatio = tileWidth / tileHeight;
+
     return CustomScrollView(
       slivers: [
+        // (상단 AppBar는 main_navigation_screen.dart에서 이미 처리)
+        // 필요 시 검색바 Sliver를 두시고…
+
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           sliver: SliverGrid.count(
             crossAxisCount: gridCount,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.85,
+            crossAxisSpacing: crossGap,
+            mainAxisSpacing: 12,
+            childAspectRatio: childAspectRatio,
             children: menuItems.map((item) {
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    if (userModel == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('user.notLoggedIn'.tr())));
-                      return;
-                    }
-                    final screen = item.screen;
-                    Widget nextScreen;
-
-                    // V V V --- [수정] 모든 화면에 locationFilter를 전달하도록 로직 확장 --- V V V
-                    if (screen is LocalNewsScreen) {
-                      nextScreen = LocalNewsScreen(
-                          userModel: userModel,
-                          locationFilter: activeLocationFilter);
-                    } else if (screen is MarketplaceScreen) {
-                      nextScreen = MarketplaceScreen(
-                          userModel: userModel,
-                          locationFilter: activeLocationFilter);
-                    } else if (screen is ClubsScreen) {
-                      nextScreen = ClubsScreen(
-                          userModel: userModel,
-                          locationFilter: activeLocationFilter);
-                    } else if (screen is FindFriendsScreen) {
-                      // FindFriendsScreen은 자체 로직을 사용하므로 필터를 전달하지 않습니다.
-                      nextScreen = FindFriendsScreen(userModel: userModel);
-                    } else if (screen is JobsScreen) {
-                      nextScreen = JobsScreen(
-                          userModel: userModel,
-                          locationFilter: activeLocationFilter);
-                    } else if (screen is LocalStoresScreen) {
-                      nextScreen = LocalStoresScreen(
-                          userModel: userModel,
-                          locationFilter: activeLocationFilter);
-                    } else if (screen is AuctionScreen) {
-                      nextScreen = AuctionScreen(
-                          userModel: userModel,
-                          locationFilter: activeLocationFilter);
-                    } else if (screen is PomScreen) {
-                      nextScreen = PomScreen(
-                          userModel: userModel,
-                          locationFilter: activeLocationFilter);
-                    } else if (screen is LostAndFoundScreen) {
-                      nextScreen = LostAndFoundScreen(
-                          userModel: userModel,
-                          locationFilter: activeLocationFilter);
-                    } else if (screen is RealEstateScreen) {
-                      nextScreen = RealEstateScreen(
-                          userModel: userModel,
-                          locationFilter: activeLocationFilter);
-                    } else {
-                      nextScreen = screen;
-                    }
-                    // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-
-                    onIconTap(nextScreen, item.labelKey);
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(item.icon,
-                          size: 32, color: Theme.of(context).primaryColor),
-                      const SizedBox(height: 8),
-                      Text(item.labelKey.tr(),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 12),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis),
-                    ],
-                  ),
-                ),
+              return GrabIconTile(
+                compact: gridCount == 5,
+                icon: item.icon,
+                label: item.labelKey.tr(),
+                onTap: () {
+                  // ⬇️ 기존 onTap 로직 그대로 (절대 수정 X)
+                  if (userModel == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('user.notLoggedIn'.tr())),
+                    );
+                    return;
+                  }
+                  final screen = item.screen;
+                  late Widget nextScreen;
+                  if (screen is LocalNewsScreen) {
+                    nextScreen = LocalNewsScreen(
+                        userModel: userModel,
+                        locationFilter: activeLocationFilter);
+                  } else if (screen is MarketplaceScreen) {
+                    nextScreen = MarketplaceScreen(
+                        userModel: userModel,
+                        locationFilter: activeLocationFilter);
+                  } else if (screen is ClubsScreen) {
+                    nextScreen = ClubsScreen(
+                        userModel: userModel,
+                        locationFilter: activeLocationFilter);
+                  } else if (screen is FindFriendsScreen) {
+                    nextScreen = FindFriendsScreen(userModel: userModel);
+                  } else if (screen is JobsScreen) {
+                    nextScreen = JobsScreen(
+                        userModel: userModel,
+                        locationFilter: activeLocationFilter);
+                  } else if (screen is LocalStoresScreen) {
+                    nextScreen = LocalStoresScreen(
+                        userModel: userModel,
+                        locationFilter: activeLocationFilter);
+                  } else if (screen is AuctionScreen) {
+                    nextScreen = AuctionScreen(
+                        userModel: userModel,
+                        locationFilter: activeLocationFilter);
+                  } else if (screen is PomScreen) {
+                    nextScreen = PomScreen(
+                        userModel: userModel,
+                        initialShorts: null,
+                        initialIndex: 0);
+                  } else if (screen is LostAndFoundScreen) {
+                    nextScreen = LostAndFoundScreen(
+                        userModel: userModel,
+                        locationFilter: activeLocationFilter);
+                  } else if (screen is RealEstateScreen) {
+                    nextScreen = RealEstateScreen(
+                        userModel: userModel,
+                        locationFilter: activeLocationFilter);
+                  } else {
+                    nextScreen = screen;
+                  }
+                  onIconTap(nextScreen, item.labelKey);
+                },
               );
             }).toList(),
           ),
@@ -280,6 +297,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
+
 
 class FeedItemCard extends StatelessWidget {
   final FeedItemModel item;

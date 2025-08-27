@@ -271,6 +271,7 @@
         "bioHint": "Bio (Perkenalan Diri)",
         "locationTitle": "Lokasi",
         "changeLocation": "Ubah",
+        "locationNotSet": "Belum diatur",
         "interests": {
             "title": "Minat",
             "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
@@ -493,6 +494,7 @@
     },
     "findFriend": {
         "title": "Cari Teman",
+        "editTitle": "Ubah Profil FindFriend",
         "editProfileTitle": "Ubah Profil",
         "save": "Simpan",
         "profileImagesLabel": "Foto Profil (Maks 6)",
@@ -686,6 +688,10 @@
             "alreadyEnded": "Lelang ini sudah berakhir."
         },
         "empty": "Tidak ada lelang.",
+        "filter": {
+            "tooltip": "Filter",
+            "clearTooltip": "Hapus filter"
+        },
         "create": {
             "tooltip": "Buat Lelang",
             "title": "Buat Lelang",

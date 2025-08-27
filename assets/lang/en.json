@@ -271,6 +271,7 @@
         "bioHint": "Bio (Introduction)",
         "locationTitle": "Location",
         "changeLocation": "Change",
+        "locationNotSet": "Not set",
         "interests": {
             "title": "Interests",
             "hint": "Use comma and Enter to add multiple"
@@ -493,6 +494,7 @@
     },
     "findFriend": {
         "title": "Find Friends",
+        "editTitle": "Edit FindFriend Profile",
         "editProfileTitle": "Edit Profile",
         "save": "Save",
         "profileImagesLabel": "Profile Images (Max 6)",
@@ -686,6 +688,10 @@
             "alreadyEnded": "This auction has already ended."
         },
         "empty": "No auctions available.",
+        "filter": {
+            "tooltip": "Filter",
+            "clearTooltip": "Clear filter"
+        },
         "create": {
             "tooltip": "Create Auction",
             "title": "Create Auction",
