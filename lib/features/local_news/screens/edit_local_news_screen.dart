@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+
+// 🗑️ 문제가 발생한 외부 패키지 import를 모두 제거합니다.
+
 import '../../../core/constants/app_categories.dart';
 import '../models/post_category_model.dart';
 import '../models/post_model.dart';
-
 
 
 class EditLocalNewsScreen extends StatefulWidget {
@@ -24,7 +26,10 @@ class EditLocalNewsScreen extends StatefulWidget {
 class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _tagsController = TextEditingController();
+  
+  // ✅ 커스텀 태그 입력을 위한 컨트롤러
+  final _tagInputController = TextEditingController();
+  List<String> _tags = [];
 
   final List<XFile> _newSelectedImages = [];
   final List<String> _existingImageUrls = [];
@@ -38,28 +43,24 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
     super.initState();
     _titleController.text = widget.post.title ?? '';
     _contentController.text = widget.post.body;
+    _tags = List<String>.from(widget.post.tags);
 
-    // Convert List<String> tags to a comma-separated String for the controller
-    // ignore: unnecessary_type_check
-    _tagsController.text = (widget.post.tags is List)
-        ? widget.post.tags.join(', ')
-        : '';
-
-    // Handle mediaUrl being either a List or a single String
     if (widget.post.mediaUrl != null) {
-      if (widget.post.mediaUrl is List) {
-        _existingImageUrls.addAll(
-          List<String>.from(widget.post.mediaUrl as List),
-        );
-      } else if (widget.post.mediaUrl is String) {
-        _existingImageUrls.add(widget.post.mediaUrl as String);
-      }
+        _existingImageUrls.addAll(widget.post.mediaUrl!);
     }
 
     _selectedCategory = AppCategories.postCategories.firstWhere(
       (c) => c.categoryId == widget.post.category,
       orElse: () => AppCategories.postCategories.first,
     );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    _tagInputController.dispose(); // ✅ 컨트롤러 해제
+    super.dispose();
   }
 
   Future<void> _pickImages() async {
@@ -97,14 +98,14 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   }
 
   Future<void> _updatePost() async {
-     if (_contentController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('localNewsCreate.alerts.contentRequired'.tr())));
+    if (_contentController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('localNewsCreate.alerts.contentRequired'.tr())));
       return;
     }
     if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
       return;
     }
 
@@ -112,13 +113,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
 
     try {
       final newImageUrls = await _uploadImages();
-      // 이제 mediaUrl은 항상 List<String> 타입으로 저장됩니다.
       final finalImageUrls = [..._existingImageUrls, ...newImageUrls];
-      final tags = _tagsController.text
-          .split(',')
-          .map((tag) => tag.trim())
-          .where((tag) => tag.isNotEmpty)
-          .toList();
 
       final updatedData = {
         'title': _titleController.text.trim(),
@@ -126,7 +121,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
         'mediaUrl': finalImageUrls,
         'mediaType': finalImageUrls.isNotEmpty ? 'image' : null,
         'category': _selectedCategory!.categoryId,
-        'tags': tags,
+        'tags': _tags,
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
@@ -149,11 +144,64 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
     }
   }
 
+  // ✅ 커스텀 태그 위젯을 빌드하는 함수
+  Widget _buildCustomChipsInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 칩들을 보여주는 부분
+        Wrap(
+          spacing: 8.0,
+          runSpacing: 4.0,
+          children: _tags.map((tag) {
+            return Chip(
+              label: Text(tag),
+              onDeleted: () {
+                setState(() {
+                  _tags.remove(tag);
+                });
+              },
+            );
+          }).toList(),
+        ),
+        // 새 태그를 입력하는 텍스트 필드
+        TextField(
+          controller: _tagInputController,
+          decoration: InputDecoration(
+            labelText: '태그 입력 후 스페이스바 또는 완료',
+            border: const OutlineInputBorder(),
+          ),
+          onChanged: (value) {
+            // 스페이스바를 누르면 태그 추가
+            if (value.endsWith(' ') && value.trim().isNotEmpty) {
+              final newTag = value.trim();
+              if (!_tags.contains(newTag)) {
+                setState(() {
+                  _tags.add(newTag);
+                });
+              }
+              _tagInputController.clear();
+            }
+          },
+          onSubmitted: (value) {
+            // 키보드에서 완료(엔터)를 누르면 태그 추가
+            final newTag = value.trim();
+            if (newTag.isNotEmpty && !_tags.contains(newTag)) {
+              setState(() {
+                _tags.add(newTag);
+              });
+            }
+            _tagInputController.clear();
+          },
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // UI 코드는 이전과 동일합니다.
     return Scaffold(
-       appBar: AppBar(title: Text('localNewsEdit.appBarTitle'.tr())),
+      appBar: AppBar(title: Text('localNewsEdit.appBarTitle'.tr())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -161,7 +209,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
           children: [
             DropdownButtonFormField<PostCategoryModel>(
               value: _selectedCategory,
-               decoration: InputDecoration(
+              decoration: InputDecoration(
                   labelText: 'localNewsCreate.form.categoryLabel'.tr(),
                   border: const OutlineInputBorder()),
               items: AppCategories.postCategories.map((category) {
@@ -182,18 +230,20 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
             TextField(
                 controller: _titleController,
                 decoration: const InputDecoration(
-                    labelText: '제목', border: OutlineInputBorder())),
+                    labelText: '제목',
+                    border: OutlineInputBorder())),
             const SizedBox(height: 16),
             TextField(
                 controller: _contentController,
                 maxLines: 8,
                 decoration: const InputDecoration(
-                    labelText: '내용', border: OutlineInputBorder())),
+                    labelText: '내용',
+                    border: OutlineInputBorder())),
             const SizedBox(height: 16),
-            TextField(
-                controller: _tagsController,
-                decoration: const InputDecoration(
-                    labelText: '태그 (쉼표로 구분)', border: OutlineInputBorder())),
+            
+            // ✅ 직접 만든 커스텀 태그 입력 위젯을 사용합니다.
+            _buildCustomChipsInput(),
+
             const SizedBox(height: 16),
             _buildImagePicker(),
             const SizedBox(height: 24),
@@ -201,7 +251,6 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
               style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50)),
               onPressed: _isSubmitting ? null : _updatePost,
-              // ✅ [다국어 수정] 수정하기 버튼
               child: _isSubmitting
                   ? const CircularProgressIndicator(color: Colors.white)
                   : Text('localNewsEdit.buttons.submit'.tr()),
@@ -213,59 +262,72 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   }
 
   Widget _buildImagePicker() {
-    final allImages = <Widget>[
-      ..._existingImageUrls.asMap().entries.map((entry) =>
-          _buildImageThumbnail(entry.key, entry.value, isExisting: true)),
-      ..._newSelectedImages.asMap().entries.map((entry) =>
-          _buildImageThumbnail(entry.key, entry.value, isExisting: false)),
-    ];
+    final existingImageCount = _existingImageUrls.length;
+    final newImageCount = _newSelectedImages.length;
+    final totalImageCount = existingImageCount + newImageCount;
 
-        return Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         OutlinedButton.icon(
-            onPressed: _pickImages,
-            icon: const Icon(Icons.camera_alt),
-            label: Text('localNewsCreate.buttons.addImage'.tr())),
+          onPressed: _pickImages,
+          icon: const Icon(Icons.camera_alt),
+          label: Text('localNewsCreate.buttons.addImage'.tr()),
+        ),
         const SizedBox(height: 8),
-        if (allImages.isNotEmpty)
-          SizedBox(
-              height: 100,
-              child: ListView(
-                  scrollDirection: Axis.horizontal, children: allImages)),
-      ],
-    );
-  }
-
-  Widget _buildImageThumbnail(int index, dynamic imageData,
-      {required bool isExisting}) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: isExisting
-                ? Image.network(imageData,
-                    width: 100, height: 100, fit: BoxFit.cover)
-                : Image.file(File(imageData.path),
-                    width: 100, height: 100, fit: BoxFit.cover),
-          ),
-          Positioned(
-            top: 4,
-            right: 4,
-            child: InkWell(
-              onTap: () => isExisting
-                  ? _removeExistingImage(index)
-                  : _removeNewImage(index),
-              child: const CircleAvatar(
-                  radius: 12,
-                  backgroundColor: Colors.black54,
-                  child: Icon(Icons.close, color: Colors.white, size: 16)),
+        if (totalImageCount > 0)
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
             ),
+            itemCount: totalImageCount,
+            itemBuilder: (context, index) {
+              Widget imageWidget;
+              bool isExisting;
+              int imageIndex;
+
+              if (index < existingImageCount) {
+                isExisting = true;
+                imageIndex = index;
+                imageWidget = Image.network(_existingImageUrls[index], fit: BoxFit.cover);
+              } else {
+                isExisting = false;
+                imageIndex = index - existingImageCount;
+                imageWidget =
+                    Image.file(File(_newSelectedImages[imageIndex].path), fit: BoxFit.cover);
+              }
+
+              return Stack(
+                children: [
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: imageWidget,
+                    ),
+                  ),
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: InkWell(
+                      onTap: () => isExisting
+                          ? _removeExistingImage(imageIndex)
+                          : _removeNewImage(imageIndex),
+                      child: const CircleAvatar(
+                        radius: 12,
+                        backgroundColor: Colors.black54,
+                        child: Icon(Icons.close, color: Colors.white, size: 16),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
-        ],
-      ),
+      ],
     );
   }
 }

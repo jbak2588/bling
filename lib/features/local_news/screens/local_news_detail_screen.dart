@@ -4,17 +4,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
-
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import '../../../core/constants/app_categories.dart';
 import '../models/post_model.dart';
 import '../../../core/models/user_model.dart';
 import '../widgets/comment_input_field.dart';
 import '../widgets/comment_list_view.dart';
-// ✅ [추가] 방금 만든 EditLocalNewsScreen을 import 합니다.
 import 'edit_local_news_screen.dart';
-
 
 
 class LocalNewsDetailScreen extends StatefulWidget {
@@ -26,7 +25,8 @@ class LocalNewsDetailScreen extends StatefulWidget {
 }
 
 class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
-  // 기존 상태 변수들은 그대로 유지합니다.
+  final PageController _pageController = PageController();
+  
   bool _isLiked = false;
   late int _likesCount;
   bool _likeLoading = false;
@@ -34,16 +34,12 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
   late int _commentCount;
   late int _thanksCount;
   bool _isThanksProcessing = false;
-
-  // ✅ [추가] 수정 후 데이터를 새로고침하기 위한 상태 변수
   late PostModel _currentPost;
 
   @override
   void initState() {
     super.initState();
-    // ✅ [추가] 초기 게시물 상태를 저장합니다.
     _currentPost = widget.post;
-
     _likesCount = _currentPost.likesCount;
     _commentCount = _currentPost.commentsCount;
     _thanksCount = _currentPost.thanksCount;
@@ -51,7 +47,12 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     _increaseViewsCount();
   }
 
-  // ✅ [추가] Firestore에서 최신 게시물 데이터를 가져와 화면을 갱신하는 함수
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   Future<void> _refreshPostData() async {
     final postDoc = await FirebaseFirestore.instance
         .collection('posts')
@@ -183,42 +184,20 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     }
   }
 
-  // 1. 이미지 위젯 반환 함수 추가
-  List<Widget> _buildPostImageWidget(dynamic mediaUrl) {
-    String? imageUrl;
-    if (mediaUrl is List && mediaUrl.isNotEmpty) {
-      imageUrl = mediaUrl.first;
-    } else if (mediaUrl is String && mediaUrl.isNotEmpty) {
-      imageUrl = mediaUrl;
-    }
-    if (imageUrl != null && imageUrl.isNotEmpty) {
-      return [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(imageUrl),
-        ),
-        const SizedBox(height: 16),
-      ];
-    }
-    return [];
-  }
-
   @override
   Widget build(BuildContext context) {
-    // ✅ [핵심] 현재 로그인한 사용자의 ID를 가져옵니다.
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-
     final category = AppCategories.postCategories.firstWhere(
       (cat) => cat.categoryId == _currentPost.category,
       orElse: () =>
           AppCategories.postCategories.firstWhere((c) => c.categoryId == 'etc'),
     );
+    final hasImages = _currentPost.mediaUrl != null && _currentPost.mediaUrl!.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(_currentPost.title ?? 'localNewsDetail.appBarTitle'.tr()),
         actions: [
-          // ✅ [핵심] 현재 사용자가 게시물 작성자일 경우에만 수정 버튼을 보여줍니다.
           if (currentUserId != null && currentUserId == _currentPost.userId)
             IconButton(
               icon: const Icon(Icons.edit_outlined),
@@ -229,7 +208,6 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                     builder: (_) => EditLocalNewsScreen(post: _currentPost),
                   ),
                 );
-                // ✅ [핵심] 수정 화면에서 true를 반환하면 (수정 성공) 데이터를 새로고침합니다.
                 if (result == true) {
                   _refreshPostData();
                 }
@@ -274,7 +252,11 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                         .bodyLarge
                         ?.copyWith(height: 1.5)),
                 const SizedBox(height: 16),
-                ..._buildPostImageWidget(_currentPost.mediaUrl),
+                
+                // ✅ build 메서드에서 함수를 호출합니다.
+                if (hasImages)
+                  _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
+
                 const Divider(height: 32),
                 _buildPostStats(),
               ],
@@ -295,7 +277,6 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
         child: Padding(
           padding: EdgeInsets.fromLTRB(
               8, 8, 8, MediaQuery.of(context).viewInsets.bottom + 8),
-          // ✅ [다국어 수정] 댓글 입력 필드
           child: CommentInputField(
             postId: _currentPost.id,
             onCommentAdded: _handleCommentAdded,
@@ -303,6 +284,74 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildImageSliderWithIndicator(List<String> imageUrls) {
+    if (imageUrls.length <= 1) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ImageGalleryScreen(
+                imageUrls: imageUrls,
+                initialIndex: 0,
+              ),
+            ),
+          );
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(imageUrls.first, fit: BoxFit.cover),
+        ),
+      );
+    }
+    
+    return Column(
+      children: [
+        SizedBox(
+          height: 220,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: imageUrls.length,
+            itemBuilder: (context, index) {
+              final imageUrl = imageUrls[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ImageGalleryScreen(
+                        imageUrls: imageUrls,
+                        initialIndex: index,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(imageUrl, fit: BoxFit.cover),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        SmoothPageIndicator(
+          controller: _pageController,
+          count: imageUrls.length,
+          effect: WormEffect(
+            dotHeight: 8,
+            dotWidth: 8,
+            activeDotColor: Theme.of(context).colorScheme.primary,
+            paintStyle: PaintingStyle.stroke,
+          ),
+        ),
+      ],
     );
   }
 

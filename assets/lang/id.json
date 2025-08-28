@@ -84,7 +84,8 @@
         },
         "myTown": "Kota Saya",
         "search": {
-            "placeholder": "Halaman Pencarian"
+            "placeholder": "Halaman Pencarian",
+            "chipPlaceholder": "Cari tetangga, berita, pasar, pekerjaan…"
         }
     },
     "drawer": {

@@ -19,18 +19,43 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/app_categories.dart';
 import '../models/post_category_model.dart';
 
-class PostCard extends StatelessWidget {
+class PostCard extends StatefulWidget {
   final PostModel post;
   const PostCard({super.key, required this.post});
 
-  // ✅ [다국어 수정] 시간 포맷 함수가 다국어 키를 사용하도록 변경
+  @override
+  State<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _currentPage = _pageController.page?.round() ?? 0;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   String _formatTimestamp(BuildContext context, Timestamp timestamp) {
     final now = DateTime.now();
     final dt = timestamp.toDate();
@@ -48,64 +73,6 @@ class PostCard extends StatelessWidget {
       return 'time.daysAgo'.tr(namedArgs: {'days': diff.inDays.toString()});
     }
     return DateFormat('time.dateFormat'.tr()).format(dt);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final category = AppCategories.postCategories.firstWhere(
-        (c) => c.categoryId == post.category,
-        orElse: () => AppCategories.postCategories.first);
-
-    // ✅ [다국어 수정] mediaUrl을 안전하게 처리
-    String? firstImageUrl;
-    if (post.mediaUrl != null && post.mediaUrl!.isNotEmpty) {
-      firstImageUrl = post.mediaUrl!.first;
-    }
-
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => LocalNewsDetailScreen(post: post),
-          ));
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildAuthorInfo(context, post.userId, post.createdAt),
-              const SizedBox(height: 12),
-              _buildTitleAndCategory(context, post, category, firstImageUrl),
-              if (firstImageUrl != null) ...[
-                const SizedBox(height: 12),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    firstImageUrl,
-                    width: double.infinity,
-                    height: 180,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Container(color: Colors.grey.shade100),
-                  ),
-                ),
-              ],
-              if (post.tags.isNotEmpty) _buildTags(post.tags),
-              const Divider(height: 24),
-              _buildActionButtons(post),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildAuthorInfo(
@@ -147,9 +114,7 @@ class PostCard extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    // ✅ [다국어 수정] '지역 미설정' 텍스트에 다국어 키 적용
                     '${user.locationParts?['kel'] ?? user.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $timeAgo',
-                   
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                   ),
                 ],
@@ -164,7 +129,7 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildTitleAndCategory(BuildContext context, PostModel post,
-      PostCategoryModel category, String? imageUrl) {
+      PostCategoryModel category) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -183,8 +148,6 @@ class PostCard extends StatelessWidget {
             ),
           ],
         ),
-        // ✅ [핵심 수정] imageUrl == null 조건을 제거하여,
-        // 제목이 있는 게시물은 항상 본문 요약을 표시하도록 수정합니다.
         if (post.title != null && post.body.isNotEmpty) ...[
           const SizedBox(height: 6),
           Text(
@@ -195,6 +158,62 @@ class PostCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildImageCarousel(BuildContext context, List<String> imageUrls) {
+    if (imageUrls.length <= 1) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          imageUrls.first,
+          width: double.infinity,
+          height: 180,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              Container(color: Colors.grey.shade100),
+        ),
+      );
+    }
+
+    return Stack(
+      alignment: Alignment.bottomRight,
+      children: [
+        SizedBox(
+          height: 180,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: imageUrls.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    imageUrls[index],
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Container(color: Colors.grey.shade100),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Text(
+            '${_currentPage + 1} / ${imageUrls.length}',
+            style: const TextStyle(color: Colors.white, fontSize: 12),
+          ),
+        ),
       ],
     );
   }
@@ -220,6 +239,20 @@ class PostCard extends StatelessWidget {
     );
   }
 
+  Widget _actionButton({required IconData icon, int? count}) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey.shade700),
+        if (count != null) ...[
+          const SizedBox(width: 6),
+          Text('$count',
+              style: TextStyle(
+                  color: Colors.grey.shade800, fontWeight: FontWeight.w500)),
+        ],
+      ],
+    );
+  }
+
   Widget _buildActionButtons(PostModel post) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -234,17 +267,49 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _actionButton({required IconData icon, int? count}) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.grey.shade700),
-        if (count != null) ...[
-          const SizedBox(width: 6),
-          Text('$count',
-              style: TextStyle(
-                  color: Colors.grey.shade800, fontWeight: FontWeight.w500)),
-        ],
-      ],
+  @override
+  Widget build(BuildContext context) {
+    // ✅ State 클래스 안에서는 widget.post로 접근해야 합니다.
+    final post = widget.post;
+    final hasImages = post.mediaUrl != null && post.mediaUrl!.isNotEmpty;
+
+    final category = AppCategories.postCategories.firstWhere(
+        (c) => c.categoryId == post.category,
+        orElse: () => AppCategories.postCategories.first);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => LocalNewsDetailScreen(post: post),
+          ));
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildAuthorInfo(context, post.userId, post.createdAt),
+              const SizedBox(height: 12),
+              _buildTitleAndCategory(context, post, category),
+              if (hasImages) ...[
+                const SizedBox(height: 12),
+                _buildImageCarousel(context, post.mediaUrl!),
+              ],
+              if (post.tags.isNotEmpty) _buildTags(post.tags),
+              const Divider(height: 24),
+              _buildActionButtons(post),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

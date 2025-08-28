@@ -84,7 +84,8 @@
         },
         "myTown": "우리 동네",
         "search": {
-            "placeholder": "검색 화면"
+            "placeholder": "검색 화면",
+            "chipPlaceholder": "동네ㅔ 이웃, 소식, 마켓플레이스, 일자리… 검색"
         }
     },
     "drawer": {

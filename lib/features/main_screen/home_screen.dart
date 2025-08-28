@@ -26,6 +26,7 @@
 /// - AppBar 파라미터 설계는 지역 기반 슈퍼앱의 UX/데이터 구조와 직결, 개인화·지역화·수익화 모두 강화
 /// - Kab 필터 도입은 사용자 경험과 비즈니스 전략 모두에서 매우 중요한 결정
 /// - 향후 개선: 지역 단위별 추천·광고·커뮤니티 연계, UI/UX(지도 시각화, 애니메이션 등) 강화, 데이터 기반 KPI/Analytics 연동
+/// - Todo: 통합 피드 스크롤 다운 후 즉시 화면 맨 위로 이동 기능 필요
 library;
 
 import 'package:bling_app/features/shared/grab_widgets.dart';
@@ -102,13 +103,13 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.search),
-              SizedBox(width: 8),
+              const Icon(Icons.search),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '이웃 , 소식, 장터, 일자리… 검색',  //TODO : 다국어 
+                  'main.search.chipPlaceholder'.tr(),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
