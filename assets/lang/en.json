@@ -80,7 +80,8 @@
         },
         "myTown": "My Town",
         "search": {
-            "placeholder": "Search Screen"
+            "placeholder": "Search Screen",
+            "chipPlaceholder": "Search neighbors, news, marketplace, jobs…"
         },
         "errors": {
             "loginRequired": "Login is required.",
