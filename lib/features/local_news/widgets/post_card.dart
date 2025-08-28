@@ -23,6 +23,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// ✅ 새로 만든 프로필 스크린 import
+import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
+
 import '../../../core/constants/app_categories.dart';
 import '../models/post_category_model.dart';
 
@@ -63,8 +66,7 @@ class _PostCardState extends State<PostCard> {
 
     if (diff.inMinutes < 1) return 'time.now'.tr();
     if (diff.inHours < 1) {
-      return 'time.minutesAgo'
-          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+      return 'time.minutesAgo'.tr(namedArgs: {'minutes': diff.inMinutes.toString()});
     }
     if (diff.inDays < 1) {
       return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
@@ -75,61 +77,59 @@ class _PostCardState extends State<PostCard> {
     return DateFormat('time.dateFormat'.tr()).format(dt);
   }
 
-  Widget _buildAuthorInfo(
-      BuildContext context, String userId, Timestamp createdAt) {
+  Widget _buildAuthorInfo(BuildContext context, String userId, Timestamp createdAt) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .snapshots(),
+      stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const SizedBox(height: 40); // 로딩 중 높이 유지
+          return const SizedBox(height: 40);
         }
         final user = UserModel.fromFirestore(snapshot.data!);
         final timeAgo = _formatTimestamp(context, createdAt);
 
-        return Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundImage:
-                  user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-              child: user.photoUrl == null
-                  ? const Icon(Icons.person, size: 20)
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(user.nickname,
-                          style:
-                              GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                      const SizedBox(width: 4),
-                      TrustLevelBadge(trustLevel: user.trustLevel),
-                    ],
-                  ),
-                  Text(
-                    '${user.locationParts?['kel'] ?? user.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $timeAgo',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                  ),
-                ],
+        // ✅ GestureDetector로 감싸서 탭 이벤트를 추가합니다.
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => UserProfileScreen(userId: userId),
+            ));
+          },
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                child: user.photoUrl == null ? const Icon(Icons.person, size: 20) : null,
               ),
-            ),
-            IconButton(
-                onPressed: () {}, icon: const Icon(Icons.more_horiz_outlined)),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(user.nickname, style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 4),
+                        TrustLevelBadge(trustLevel: user.trustLevel),
+                      ],
+                    ),
+                    Text(
+                      '${user.locationParts?['kel'] ?? user.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $timeAgo',
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz_outlined)),
+            ],
+          ),
         );
       },
     );
   }
 
-  Widget _buildTitleAndCategory(BuildContext context, PostModel post,
-      PostCategoryModel category) {
+  // ... (나머지 함수들은 기존과 동일)
+  Widget _buildTitleAndCategory(BuildContext context, PostModel post, PostCategoryModel category) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -140,8 +140,7 @@ class _PostCardState extends State<PostCard> {
             Expanded(
               child: Text(
                 post.title ?? post.body,
-                style: GoogleFonts.inter(
-                    fontSize: 16, fontWeight: FontWeight.w600),
+                style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -152,8 +151,7 @@ class _PostCardState extends State<PostCard> {
           const SizedBox(height: 6),
           Text(
             post.body,
-            style: TextStyle(
-                fontSize: 14, color: Colors.grey.shade800, height: 1.4),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade800, height: 1.4),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -171,8 +169,7 @@ class _PostCardState extends State<PostCard> {
           width: double.infinity,
           height: 180,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) =>
-              Container(color: Colors.grey.shade100),
+          errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey.shade100),
         ),
       );
     }
@@ -194,8 +191,7 @@ class _PostCardState extends State<PostCard> {
                     imageUrls[index],
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Container(color: Colors.grey.shade100),
+                    errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey.shade100),
                   ),
                 ),
               );
@@ -227,10 +223,8 @@ class _PostCardState extends State<PostCard> {
         children: tags
             .map((tag) => Chip(
                   label: Text('#$tag'),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-                  labelStyle:
-                      TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                  labelStyle: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                   backgroundColor: Colors.grey.shade100,
                   visualDensity: VisualDensity.compact,
                 ))
@@ -245,9 +239,7 @@ class _PostCardState extends State<PostCard> {
         Icon(icon, size: 20, color: Colors.grey.shade700),
         if (count != null) ...[
           const SizedBox(width: 6),
-          Text('$count',
-              style: TextStyle(
-                  color: Colors.grey.shade800, fontWeight: FontWeight.w500)),
+          Text('$count', style: TextStyle(color: Colors.grey.shade800, fontWeight: FontWeight.w500)),
         ],
       ],
     );
@@ -258,10 +250,8 @@ class _PostCardState extends State<PostCard> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _actionButton(icon: Icons.favorite_border, count: post.likesCount),
-        _actionButton(
-            icon: Icons.chat_bubble_outline, count: post.commentsCount),
-        _actionButton(
-            icon: Icons.card_giftcard_outlined, count: post.thanksCount),
+        _actionButton(icon: Icons.chat_bubble_outline, count: post.commentsCount),
+        _actionButton(icon: Icons.card_giftcard_outlined, count: post.thanksCount),
         _actionButton(icon: Icons.share_outlined, count: null),
       ],
     );
@@ -269,13 +259,13 @@ class _PostCardState extends State<PostCard> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ State 클래스 안에서는 widget.post로 접근해야 합니다.
-    final post = widget.post;
+    final post = widget.post; 
     final hasImages = post.mediaUrl != null && post.mediaUrl!.isNotEmpty;
 
     final category = AppCategories.postCategories.firstWhere(
-        (c) => c.categoryId == post.category,
-        orElse: () => AppCategories.postCategories.first);
+      (c) => c.categoryId == post.category,
+      orElse: () => AppCategories.postCategories.first,
+    );
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
