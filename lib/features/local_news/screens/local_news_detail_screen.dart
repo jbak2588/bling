@@ -7,7 +7,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
-import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart'; 
+// ✅ 새로 만든 프로필 스크린 import
+import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
 import '../../../core/constants/app_categories.dart';
 import '../models/post_model.dart';
 import '../../../core/models/user_model.dart';
@@ -27,6 +29,7 @@ class LocalNewsDetailScreen extends StatefulWidget {
 class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
   final PageController _pageController = PageController();
   
+  // ... (initState, dispose 및 다른 함수들은 기존과 동일)
   bool _isLiked = false;
   late int _likesCount;
   bool _likeLoading = false;
@@ -183,7 +186,60 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
       if (mounted) setState(() => _isThanksProcessing = false);
     }
   }
+  
+  // ✅ _buildAuthorInfo 함수 수정
+  Widget _buildAuthorInfo(String userId) {
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const SizedBox();
+          final user = UserModel.fromFirestore(snapshot.data!);
+          // ✅ GestureDetector로 감싸서 탭 이벤트를 추가합니다.
+          return GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => UserProfileScreen(userId: userId),
+              ));
+            },
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage:
+                      user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                  child: user.photoUrl == null ? const Icon(Icons.person) : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(user.nickname,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(width: 4),
+                          TrustLevelBadge(
+                              trustLevel: user.trustLevel, showText: true),
+                        ],
+                      ),
+                      Text(
+                        user.locationName ?? 'postCard.locationNotSet'.tr(),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          );
+        });
+  }
 
+  // ... (나머지 함수들은 기존과 동일)
   @override
   Widget build(BuildContext context) {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
@@ -253,7 +309,6 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                         ?.copyWith(height: 1.5)),
                 const SizedBox(height: 16),
                 
-                // ✅ build 메서드에서 함수를 호출합니다.
                 if (hasImages)
                   _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
 
@@ -353,49 +408,6 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
         ),
       ],
     );
-  }
-
-  Widget _buildAuthorInfo(String userId) {
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return const SizedBox();
-          final user = UserModel.fromFirestore(snapshot.data!);
-          return Row(
-            children: [
-              CircleAvatar(
-                backgroundImage:
-                    user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-                child: user.photoUrl == null ? const Icon(Icons.person) : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(user.nickname,
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(width: 4),
-                        TrustLevelBadge(
-                            trustLevel: user.trustLevel, showText: true),
-                      ],
-                    ),
-                    Text(
-                      user.locationName ?? 'postCard.locationNotSet'.tr(),
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              )
-            ],
-          );
-        });
   }
 
   Widget _buildPostStats() {
