@@ -25,6 +25,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 // ✅ 새로 만든 프로필 스크린 import
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
+import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
+
 
 import '../../../core/constants/app_categories.dart';
 import '../models/post_category_model.dart';
@@ -87,7 +89,6 @@ class _PostCardState extends State<PostCard> {
         final user = UserModel.fromFirestore(snapshot.data!);
         final timeAgo = _formatTimestamp(context, createdAt);
 
-        // ✅ GestureDetector로 감싸서 탭 이벤트를 추가합니다.
         return GestureDetector(
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
@@ -128,7 +129,6 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  // ... (나머지 함수들은 기존과 동일)
   Widget _buildTitleAndCategory(BuildContext context, PostModel post, PostCategoryModel category) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,21 +214,30 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  Widget _buildTags(List<String> tags) {
+  // ✅ _buildTags 함수를 수정하여 탭 이벤트를 추가합니다.
+  Widget _buildTags(BuildContext context, List<String> tags) {
     return Padding(
       padding: const EdgeInsets.only(top: 12.0),
       child: Wrap(
         spacing: 8,
         runSpacing: 4,
-        children: tags
-            .map((tag) => Chip(
-                  label: Text('#$tag'),
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-                  labelStyle: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-                  backgroundColor: Colors.grey.shade100,
-                  visualDensity: VisualDensity.compact,
-                ))
-            .toList(),
+        children: tags.map((tag) {
+          return InkWell(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => TagSearchResultScreen(tag: tag),
+              ));
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Chip(
+              label: Text('#$tag'),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+              labelStyle: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+              backgroundColor: Colors.grey.shade100,
+              visualDensity: VisualDensity.compact,
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -293,7 +302,8 @@ class _PostCardState extends State<PostCard> {
                 const SizedBox(height: 12),
                 _buildImageCarousel(context, post.mediaUrl!),
               ],
-              if (post.tags.isNotEmpty) _buildTags(post.tags),
+              // ✅ build 메서드에서 _buildTags를 호출할 때 context를 전달합니다.
+              if (post.tags.isNotEmpty) _buildTags(context, post.tags),
               const Divider(height: 24),
               _buildActionButtons(post),
             ],

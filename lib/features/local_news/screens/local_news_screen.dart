@@ -69,7 +69,7 @@ library;
 
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -120,9 +120,32 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
       );
     }
 
-    final List<String> tabs = [
-      'localNewsFeed.allCategory'.tr(),
-      ...AppCategories.postCategories.map((c) => c.nameKey.tr())
+    // ✅ Tab 위젯 리스트를 직접 생성합니다.
+    final List<Widget> tabs = [
+      // '전체' 탭
+      Tab(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('📰', style: TextStyle(fontSize: 18)), // 대표 이모지
+            const SizedBox(width: 8),
+            Text('localNewsFeed.allCategory'.tr()),
+          ],
+        ),
+      ),
+      // 나머지 카테고리 탭
+      ...AppCategories.postCategories.map((category) {
+        return Tab(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(category.emoji, style: const TextStyle(fontSize: 18)),
+              const SizedBox(width: 8),
+              Text(category.nameKey.tr()),
+            ],
+          ),
+        );
+      }).toList(),
     ];
 
     return Scaffold(
@@ -138,7 +161,8 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
             indicatorWeight: 2.0,
             labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
             unselectedLabelStyle: GoogleFonts.inter(),
-            tabs: tabs.map((label) => Tab(text: label)).toList(),
+            // ✅ 생성된 tabs 리스트를 사용합니다.
+            tabs: tabs,
           ),
           Expanded(
             child: TabBarView(
