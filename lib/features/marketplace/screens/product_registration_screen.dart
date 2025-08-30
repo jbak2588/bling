@@ -17,6 +17,8 @@
 /// Edge Cases    : 업로드 실패, 위치 미입력, 사진 제한 초과.
 /// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
 /// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md; docs/team/teamB_Feed_CRUD_Module_통합 작업문서.md
+///
+/// 2025년 8월 30일 : 공용위젯인 테그 위젯, 검색화 도입 및 이미지 갤러리 위젯 작업 진행
 /// ============================================================================
 library;
 // 아래부터 실제 코드
@@ -24,7 +26,6 @@ library;
 import 'dart:io';
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:bling_app/features/categories/screens/parent_category_screen.dart';
-// import old model is replaced with ProductModel
 import '../models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -36,6 +37,8 @@ import 'package:uuid/uuid.dart';
 
 // ✅ [추가] UserModel을 사용하기 위해 import 합니다.
 import '../../../../core/models/user_model.dart';
+// ✅ 공용 태그 위젯 import
+import '../../shared/widgets/custom_tag_input_field.dart'; // 2025년 8월 30일
 
 class ProductRegistrationScreen extends StatefulWidget {
   const ProductRegistrationScreen({super.key});
@@ -56,6 +59,9 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   List<XFile> _images = [];
   bool _isNegotiable = false;
   bool _isLoading = false;
+
+  // ✅ 태그 목록을 관리할 상태 변수 추가  : 2025년 8월 30일
+  List<String> _tags = [];
 
   Category? _selectedCategory;
   // Position? _currentPosition;
@@ -120,15 +126,13 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
 
   Future<void> _submitProduct() async {
     if (_images.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-              SnackBar(content: Text('marketplace.errors.noPhoto'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('marketplace.errors.noPhoto'.tr())));
       return;
     }
     if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-              SnackBar(content: Text('marketplace.errors.noCategory'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('marketplace.errors.noCategory'.tr())));
       return;
     }
     if (!_formKey.currentState!.validate()) {
@@ -149,7 +153,9 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
           .collection('users')
           .doc(user.uid)
           .get();
-      if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
+      if (!userDoc.exists) {
+        throw Exception("사용자 정보를 찾을 수 없습니다."); // TODO : 다국어 작업
+      }
       final userModel = UserModel.fromFirestore(userDoc);
 
       // 이미지 업로드
@@ -174,6 +180,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         categoryId: _selectedCategory!.id,
         price: int.tryParse(_priceController.text) ?? 0,
         negotiable: _isNegotiable,
+        tags: _tags, // ✅ _tags 상태를 모델에 전달  // 2025년 8월 30일
         locationName: userModel.locationName,
         locationParts: userModel.locationParts,
         geoPoint: userModel.geoPoint,
@@ -306,9 +313,8 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               const SizedBox(height: 24),
               TextFormField(
                 controller: _titleController,
-                decoration:
-                    InputDecoration(
-                        labelText: 'marketplace.registration.titleHint'.tr()),
+                decoration: InputDecoration(
+                    labelText: 'marketplace.registration.titleHint'.tr()),
                 validator: (value) => (value == null || value.isEmpty)
                     ? 'marketplace.errors.requiredField'.tr()
                     : null,
@@ -344,9 +350,8 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _priceController,
-                decoration:
-                    InputDecoration(
-                        labelText: 'marketplace.registration.priceHint'.tr()),
+                decoration: InputDecoration(
+                    labelText: 'marketplace.registration.priceHint'.tr()),
                 keyboardType: TextInputType.number,
                 validator: (value) => (value == null || value.isEmpty)
                     ? 'marketplace.errors.requiredField'.tr()
@@ -361,8 +366,8 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _condition,
-                decoration:
-                    InputDecoration(labelText: 'marketplace.condition.label'.tr()),
+                decoration: InputDecoration(
+                    labelText: 'marketplace.condition.label'.tr()),
                 items: [
                   DropdownMenuItem(
                       value: 'new',
@@ -378,8 +383,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
-                  labelText:
-                      'marketplace.registration.descriptionHint'.tr(),
+                  labelText: 'marketplace.registration.descriptionHint'.tr(),
                   alignLabelWithHint: true,
                   border: const OutlineInputBorder(),
                 ),
@@ -388,6 +392,16 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                     ? 'marketplace.errors.requiredField'.tr()
                     : null,
               ),
+// ✅ 공용 태그 위젯 추가
+              CustomTagInputField(
+                hintText: 'marketplace.registration.tagsHint'.tr(),
+                onTagsChanged: (tags) {
+                  setState(() {
+                    _tags = tags;
+                  });
+                },
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

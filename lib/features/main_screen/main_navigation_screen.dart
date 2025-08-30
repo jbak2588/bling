@@ -3,7 +3,22 @@
 /// - 기획 요약: 메인 네비게이션 구조, AppBar/Drawer/BottomNavigationBar, 위치 필터, 사용자 흐름, 반응형 정책 등
 /// - 실제 코드 기능: MainNavigationScreen에서 AppBar, Drawer, BottomNavigationBar, 위치 필터, 사용자 정보, 알림 등 네비게이션 및 메인 화면 관리
 /// - 비교: 기획의 네비게이션/레이아웃 구조가 실제 코드에서 State 관리와 위젯 조합으로 구현됨. 반응형/접근성/애니메이션 등은 일부 적용됨
+// ===== 생성(등록) 화면: 각 Feature의 create 스크린들 =====
 library;
+
+// [추가] 문맥 자동분기용: 인디프렌드/동네가게 생성 화면
+import 'package:bling_app/features/find_friends/screens/findfriend_form_screen.dart';
+import 'package:bling_app/features/local_stores/screens/create_shop_screen.dart';
+
+import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
+import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
+import 'package:bling_app/features/clubs/screens/create_club_screen.dart';
+import 'package:bling_app/features/jobs/screens/create_job_screen.dart';
+import 'package:bling_app/features/pom/screens/create_short_screen.dart';
+import 'package:bling_app/features/lost_and_found/screens/create_lost_item_screen.dart';
+import 'package:bling_app/features/auction/screens/create_auction_screen.dart';
+import 'package:bling_app/features/real_estate/screens/create_room_listing_screen.dart';
+
 
 import 'package:bling_app/features/shared/grab_widgets.dart'; // GrabAppBarShell
 
@@ -21,7 +36,6 @@ import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart';
 import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
-import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
 import 'home_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -141,12 +155,116 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
-  void _onFloatingActionButtonTapped() {
+  Future<void> _onFloatingActionButtonTapped() async {
     if (_userModel == null) return;
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => const CreateLocalNewsScreen()));
+
+    // 홈 루트(아이콘 그리드/탭 진입 전)에서는 전역 시트 노출
+    if (_bottomNavIndex == 0 && _currentHomePageContent == null) {
+      _showGlobalCreateSheet();
+      return;
+    }
+
+    // 섹션 내부: 현재 섹션 키 기준으로 분기
+    final sectionKey = _appBarTitleKey;
+  late Widget target;
+
+    switch (sectionKey) {
+      case 'main.tabs.localNews':
+        target = const CreateLocalNewsScreen();
+        break;
+      case 'main.tabs.marketplace':
+        target = const ProductRegistrationScreen();
+        break;
+      case 'main.tabs.findFriends':
+        target = FindFriendFormScreen(userModel: _userModel!);
+        break;
+      case 'main.tabs.clubs':
+        target = CreateClubScreen(userModel: _userModel!);
+        break;
+      case 'main.tabs.jobs':
+        target = CreateJobScreen(userModel: _userModel!);
+        break;
+      case 'main.tabs.localStores':
+        target = CreateShopScreen(userModel: _userModel!);
+        break;
+      case 'main.tabs.auction':
+        target = CreateAuctionScreen(userModel: _userModel!);
+        break;
+      case 'main.tabs.pom':
+        target = CreateShortScreen(userModel: _userModel!);
+        break;
+      case 'main.tabs.lostAndFound':
+        target = CreateLostItemScreen(userModel: _userModel!);
+        break;
+      case 'main.tabs.realEstate':
+        await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (_) => CreateRoomListingScreen(userModel: _userModel!),
+          ),
+        );
+        return;
+      default:
+        target = const CreateLocalNewsScreen();
+    }
+
+    // ignore: use_build_context_synchronously
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => target));
   }
 
+  /// 메인(홈 루트)에서만 사용되는 전역 생성 시트
+  void _showGlobalCreateSheet() {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              _sheetItem(Icons.article_rounded,   'main.tabs.localNews'.tr(),     'localNewsCreate.appBarTitle'.tr(),
+                  () => const CreateLocalNewsScreen()),
+              _sheetItem(Icons.store_mall_directory_rounded, 'main.tabs.marketplace'.tr(), 'marketplace.registration.title'.tr(),
+                  () => const ProductRegistrationScreen()),
+        _sheetItem(Icons.sentiment_satisfied_alt_rounded, 'main.tabs.findFriends'.tr(), 'findfriend.form.title'.tr(),
+          () => FindFriendFormScreen(userModel: _userModel!)),
+              _sheetItem(Icons.groups_rounded,    'main.tabs.clubs'.tr(),         'clubs.create.title'.tr(),
+                  () => CreateClubScreen(userModel: _userModel!)),
+              _sheetItem(Icons.work_outline_rounded, 'main.tabs.jobs'.tr(),      'jobs.form.title'.tr(),
+                  () => CreateJobScreen(userModel: _userModel!)),
+              _sheetItem(Icons.storefront_rounded, 'main.tabs.localStores'.tr(), 'localStores.create.title'.tr(),
+                  () => CreateShopScreen(userModel: _userModel!)),
+              _sheetItem(Icons.gavel_rounded,     'main.tabs.auction'.tr(),      'auctions.create.title'.tr(),
+                  () => CreateAuctionScreen(userModel: _userModel!)),
+              _sheetItem(Icons.video_camera_back_rounded, 'main.tabs.pom'.tr(),  'pom.create.title'.tr(),
+                  () => CreateShortScreen(userModel: _userModel!)),
+              _sheetItem(Icons.report_gmailerrorred_rounded, 'main.tabs.lostAndFound'.tr(), 'lostAndFound.form.title'.tr(),
+                  () => CreateLostItemScreen(userModel: _userModel!)),
+              _sheetItem(Icons.house_rounded,     'main.tabs.realEstate'.tr(),   'realEstate.form.title'.tr(),
+                  () => CreateRoomListingScreen(userModel: _userModel!)),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _sheetItem(IconData icon, String title, String sub, Widget Function() builder) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(sub),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: () {
+        Navigator.of(context).pop();
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => builder()));
+      },
+    );
+  }
   PreferredSizeWidget _buildAppBar() {
     // ✅ locale 의존성만 생성(교체X, 리빌드O)
     final _ = context.locale;

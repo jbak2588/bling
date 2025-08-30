@@ -17,6 +17,7 @@
 /// Edge Cases    : 이미지 업로드 실패, 카테고리 불일치.
 /// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
 /// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
+/// 2025년 8월 30일 : 공용위젯인 테그 위젯, 검색화 도입 및 이미지 갤러리 위젯 작업 진행
 /// ============================================================================
 library;
 // 아래부터 실제 코드
@@ -36,8 +37,11 @@ import '../../categories/domain/category.dart';
 import '../../categories/screens/parent_category_screen.dart';
 import '../../location/screens/location_setting_screen.dart';
 
+// ✅ 공용 태그 위젯 import  : 2025년 8월 30일
+import '../../shared/widgets/custom_tag_input_field.dart';
+
 class ProductEditScreen extends StatefulWidget {
-final ProductModel product;
+  final ProductModel product;
   const ProductEditScreen({super.key, required this.product});
 
   @override
@@ -59,17 +63,24 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   Category? _selectedCategory;
   String _condition = 'used';
 
+  // ✅ 태그 목록을 관리할 상태 변수 추가 : 2025년 8월 30일
+  List<String> _tags = [];
+
   @override
   void initState() {
     super.initState();
     _titleController.text = widget.product.title;
     _priceController.text = widget.product.price.toString();
     _descriptionController.text = widget.product.description;
-  _addressController.text = widget.product.locationName ?? '';
+    _addressController.text = widget.product.locationName ?? '';
     _transactionPlaceController.text = widget.product.transactionPlace ?? '';
     _isNegotiable = widget.product.negotiable;
     _existingImageUrls = List<String>.from(widget.product.imageUrls);
     _condition = widget.product.condition;
+
+    // ✅ 기존 상품의 태그를 초기값으로 설정
+    _tags = List<String>.from(widget.product.tags);
+
     _loadInitialCategory();
   }
 
@@ -183,7 +194,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       List<String> uploadedUrls = [];
       for (var image in _images) {
         final fileName = DateTime.now().millisecondsSinceEpoch.toString();
-        final ref = FirebaseStorage.instance.ref().child('product_images/$fileName');
+        final ref =
+            FirebaseStorage.instance.ref().child('product_images/$fileName');
         final uploadTask = ref.putFile(File(image.path));
         final snapshot = await uploadTask;
         uploadedUrls.add(await snapshot.ref.getDownloadURL());
@@ -192,31 +204,17 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       // 기존 이미지 + 새로 업로드된 이미지 합치기
       final allImageUrls = [..._existingImageUrls, ...uploadedUrls];
 
-      // final updatedProduct = widget.product.copyWith(
-      //   title: _titleController.text,
-      //   price: int.tryParse(_priceController.text) ?? 0,
-      //   description: _descriptionController.text,
-      //   address: _addressController.text,
-      //   transactionPlace: _transactionPlaceController.text,
-      //   negotiable: _isNegotiable,
-      //   imageUrls: allImageUrls,
-      //   updatedAt: Timestamp.fromDate(DateTime.now()),
-      // );
-
-      // await FirebaseFirestore.instance
-      //     .collection('products')
-      //     .doc(widget.product.id)
-      //     .update(updatedProduct.toJson());
-// ✅ [핵심 수정] 사용자의 최신 정보를 가져와서 위치 정보를 업데이트합니다.
+      // ✅ [핵심 수정] 사용자의 최신 정보를 가져와서 위치 정보를 업데이트합니다.
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception("로그인이 필요합니다.");
+      if (user == null) throw Exception("로그인이 필요합니다."); // TODO: 다국어 작업
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
-      if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
+      if (!userDoc.exists) {
+        throw Exception("사용자 정보를 찾을 수 없습니다."); // TODO: 다국어 작업
+      }
       final userModel = UserModel.fromFirestore(userDoc);
-
 
       // ✅ [핵심 수정] copyWith 대신, Map을 직접 만들어 업데이트합니다.
       final updatedData = {
@@ -228,7 +226,10 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         'imageUrls': allImageUrls,
         'categoryId': _selectedCategory?.id ?? widget.product.categoryId,
         'condition': _condition,
+
+        'tags': _tags, // ✅ 수정된 태그를 업데이트 데이터에 포함 : 2025년 8월 30일
         'updatedAt': Timestamp.now(),
+
         // ✅ 구버전 address 대신, 사용자의 최신 위치 정보로 덮어씁니다.
         'locationName': userModel.locationName,
         'locationParts': userModel.locationParts,
@@ -243,15 +244,15 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('marketplace.edit.success'.tr())),
+          SnackBar(content: Text('marketplace.edit.success'.tr())),
         );
         Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('marketplace.edit.fail'.tr(args: [e.toString()]))),
+          SnackBar(
+              content: Text('marketplace.edit.fail'.tr(args: [e.toString()]))),
         );
       }
     } finally {
@@ -323,7 +324,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                                   color: Colors.black54,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.close, color: Colors.white, size: 20),
+                                child: const Icon(Icons.close,
+                                    color: Colors.white, size: 20),
                               ),
                             ),
                           ),
@@ -354,7 +356,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                                   color: Colors.black54,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.close, color: Colors.white, size: 20),
+                                child: const Icon(Icons.close,
+                                    color: Colors.white, size: 20),
                               ),
                             ),
                           ),
@@ -374,7 +377,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: Colors.grey[400]!),
                           ),
-                          child: const Icon(Icons.add_a_photo, size: 32, color: Colors.grey),
+                          child: const Icon(Icons.add_a_photo,
+                              size: 32, color: Colors.grey),
                         ),
                       ),
                     ),
@@ -386,10 +390,9 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 controller: _titleController,
                 decoration: InputDecoration(
                     labelText: 'marketplace.edit.titleHint'.tr()),
-                validator: (value) =>
-                    value == null || value.isEmpty
-                        ? 'marketplace.errors.requiredField'.tr()
-                        : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'marketplace.errors.requiredField'.tr()
+                    : null,
               ),
               const SizedBox(height: 16),
               ListTile(
@@ -409,10 +412,9 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                     labelText: 'marketplace.edit.priceHint'.tr()),
-                validator: (value) =>
-                    value == null || value.isEmpty
-                        ? 'marketplace.errors.requiredField'.tr()
-                        : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'marketplace.errors.requiredField'.tr()
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -420,10 +422,9 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 maxLines: 5,
                 decoration: InputDecoration(
                     labelText: 'marketplace.edit.descriptionHint'.tr()),
-                validator: (value) =>
-                    value == null || value.isEmpty
-                        ? 'marketplace.errors.requiredField'.tr()
-                        : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'marketplace.errors.requiredField'.tr()
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -441,7 +442,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _transactionPlaceController,
-                decoration: InputDecoration(labelText: 'address_detail_hint'.tr()),
+                decoration:
+                    InputDecoration(labelText: 'address_detail_hint'.tr()),
               ),
               const SizedBox(height: 16),
               Row(
@@ -460,8 +462,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _condition,
-                decoration:
-                    InputDecoration(labelText: 'marketplace.condition.label'.tr()),
+                decoration: InputDecoration(
+                    labelText: 'marketplace.condition.label'.tr()),
                 items: [
                   DropdownMenuItem(
                       value: 'new',
@@ -473,6 +475,17 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 onChanged: (value) =>
                     setState(() => _condition = value ?? 'used'),
               ),
+             // ✅ 공용 태그 위젯 추가 (초기값 전달)
+              CustomTagInputField(
+                initialTags: _tags,
+                hintText: 'marketplace.registration.tagsHint'.tr(),
+                onTagsChanged: (tags) {
+                  setState(() {
+                    _tags = tags;
+                  });
+                },
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

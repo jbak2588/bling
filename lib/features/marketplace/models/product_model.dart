@@ -34,6 +34,9 @@
 ///
 /// 4. 개선 제안
 ///   - 데이터 모델 확장(활동 히스토리, KPI/Analytics 필드 추가), Firestore 쿼리 최적화, 에러 핸들링 강화
+///   - 거래 희망 장소 미니맵화
+/// 2025년 8월 30일 : 공용위젯인 테그 위젯, 검색화 도입 및 이미지 갤러리 위젯 작업 진행
+/// 
 library;
 // 아래부터 실제 코드
 
@@ -42,12 +45,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ProductModel {
   final String id;
   final String userId;
-  final String title; 
+  final String title;
   final String description;
   final List<String> imageUrls;
   final String categoryId;
   final int price;
   final bool negotiable;
+
+  // ✅ [추가] 태그 필드를 추가합니다.
+  final List<String> tags;
 
   // ✅ [통합] 신규 모델의 정교한 위치 정보 필드를 사용합니다.
   final String? locationName;
@@ -78,13 +84,14 @@ class ProductModel {
     required this.categoryId,
     required this.price,
     required this.negotiable,
+    this.tags = const [], // ✅ 생성자에 tags 추가
     this.locationName,
     this.locationParts,
     this.geoPoint,
     this.status = 'selling',
     this.isAiVerified = false,
     this.condition = 'used',
-      // ✅ [추가] 생성자에 transactionPlace를 추가합니다.
+    // ✅ [추가] 생성자에 transactionPlace를 추가합니다.
     this.transactionPlace,
     this.likesCount = 0,
     this.chatsCount = 0,
@@ -106,6 +113,8 @@ class ProductModel {
       categoryId: data['categoryId'] ?? '',
       price: data['price'] ?? 0,
       negotiable: data['negotiable'] ?? false,
+      // ✅ Firestore에서 tags 필드를 가져옵니다.
+      tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
       locationName: data['locationName'],
       locationParts: data['locationParts'] != null
           ? Map<String, dynamic>.from(data['locationParts'])
@@ -133,13 +142,14 @@ class ProductModel {
       'categoryId': categoryId,
       'price': price,
       'negotiable': negotiable,
+      'tags': tags, // ✅ toJson 맵에 tags 추가
       'locationName': locationName,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
       'status': status,
       'isAiVerified': isAiVerified,
       'condition': condition,
-       // ✅ [추가] toJson 맵에 transactionPlace를 추가합니다.
+      // ✅ [추가] toJson 맵에 transactionPlace를 추가합니다.
       'transactionPlace': transactionPlace,
       'likesCount': likesCount,
       'chatsCount': chatsCount,
