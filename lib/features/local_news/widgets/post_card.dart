@@ -145,7 +145,7 @@ class _PostCardState extends State<PostCard> {
           const SizedBox(width: 8),
           Flexible(
             child: Text(
-              locationName ?? '위치 정보 있음',
+              locationName ?? 'localNews.locationAvailable'.tr(),
               style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
               overflow: TextOverflow.ellipsis,
             ),

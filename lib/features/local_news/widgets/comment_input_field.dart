@@ -60,8 +60,11 @@ class _CommentInputFieldState extends State<CommentInputField> {
       if (widget.onCommentAdded != null) widget.onCommentAdded!(commentData);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('댓글 등록 실패: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('commentInputField.alerts.failure'
+                .tr(namedArgs: {'error': e.toString()}))),
+      );
     } finally {
       if (mounted) setState(() => _isSending = false);
     }

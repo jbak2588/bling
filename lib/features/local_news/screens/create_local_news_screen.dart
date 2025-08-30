@@ -79,13 +79,17 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception("로그인이 필요합니다.");
+      if (user == null) {
+        throw Exception('main.errors.loginRequired'.tr());
+      }
 
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
-      if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
+      if (!userDoc.exists) {
+        throw Exception('main.errors.userNotFound'.tr());
+      }
       final userModel = UserModel.fromFirestore(userDoc);
 
       final imageUrls = await _uploadImages();

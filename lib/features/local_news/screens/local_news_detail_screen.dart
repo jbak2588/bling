@@ -102,7 +102,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('로그인이 필요합니다.')));
+          .showSnackBar(SnackBar(content: Text('main.errors.loginRequired'.tr())));
       setState(() => _likeLoading = false);
       return;
     }
@@ -154,7 +154,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     }
     if (currentUserUid == _currentPost.userId) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('자신의 글에는 감사를 표시할 수 없습니다.')));
+          SnackBar(content: Text('localNewsDetail.alerts.cannotThankOwnPost'.tr())));
       setState(() => _isThanksProcessing = false);
       return;
     }

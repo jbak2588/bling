@@ -266,7 +266,7 @@ class _FeedMapViewState extends State<_FeedMapView> {
         widget.userModel?.geoPoint?.longitude ?? 106.8456,
       );
     }
-    debugPrint('[지도 디버그] 초기 카메라 위치 설정: $target');
+    debugPrint('[Map Debug] Initial camera position: $target');
     return CameraPosition(target: target, zoom: 14);
   }
 
@@ -295,7 +295,7 @@ class _FeedMapViewState extends State<_FeedMapView> {
     if (widget.category != 'all') {
       query = query.where('category', isEqualTo: widget.category);
     }
-    debugPrint('[지도 디버그] 카메라 위치 쿼리: ${query.parameters}');
+    debugPrint('[Map Debug] Camera position query: ${query.parameters}');
     return query.orderBy('createdAt', descending: true);
   }
 
@@ -311,18 +311,18 @@ class _FeedMapViewState extends State<_FeedMapView> {
     if (widget.category != 'all') {
       query = query.where('category', isEqualTo: widget.category);
     }
-    debugPrint('[지도 디버그] 마커 생성 쿼리: ${query.parameters}');
+    debugPrint('[Map Debug] Marker creation query: ${query.parameters}');
     return query.orderBy('createdAt', descending: true);
   }
 
   Set<Marker> _createMarkers(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
-    debugPrint('[지도 디버그] 마커 생성을 위해 ${docs.length}개의 문서를 받았습니다.');
+    debugPrint('[Map Debug] Received ${docs.length} documents for markers.');
     final Set<Marker> markers = {};
     for (var doc in docs) {
       final post = PostModel.fromFirestore(doc);
       if (post.geoPoint != null) {
-        debugPrint('[지도 디버그] 핀 생성: ${post.id} at ${post.geoPoint!.latitude}, ${post.geoPoint!.longitude}');
+        debugPrint('[Map Debug] Created pin: ${post.id} at ${post.geoPoint!.latitude}, ${post.geoPoint!.longitude}');
         markers.add(Marker(
           markerId: MarkerId(post.id),
           position: LatLng(post.geoPoint!.latitude, post.geoPoint!.longitude),
@@ -337,10 +337,10 @@ class _FeedMapViewState extends State<_FeedMapView> {
           ),
         ));
       } else {
-        debugPrint('[지도 디버그] 핀 생성 실패 (geoPoint 없음): ${post.id}');
+        debugPrint('[Map Debug] Failed to create pin (no geoPoint): ${post.id}');
       }
     }
-    debugPrint('[지도 디버그] 총 ${markers.length}개의 마커를 생성했습니다.');
+    debugPrint('[Map Debug] Created total of ${markers.length} markers.');
     return markers;
   }
 
@@ -361,15 +361,15 @@ class _FeedMapViewState extends State<_FeedMapView> {
           stream: _buildAllMarkersQuery().snapshots(),
           builder: (context, postSnapshot) {
             if (postSnapshot.connectionState == ConnectionState.waiting) {
-              debugPrint('[지도 디버그] 게시물 데이터 로딩 중...');
+              debugPrint('[Map Debug] Loading post data...');
               return const Center(child: CircularProgressIndicator());
             }
              if (postSnapshot.hasError) {
-              debugPrint('[지도 디버그] 게시물 데이터 로딩 에러: ${postSnapshot.error}');
+              debugPrint('[Map Debug] Error loading post data: ${postSnapshot.error}');
               return Center(child: Text('Error: ${postSnapshot.error}'));
             }
             if (!postSnapshot.hasData) {
-              debugPrint('[지도 디버그] 게시물 데이터 없음.');
+              debugPrint('[Map Debug] No post data.');
               return Center(child: Text('No posts found.'));
             }
 

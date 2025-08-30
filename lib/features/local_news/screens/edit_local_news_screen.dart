@@ -132,12 +132,15 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('게시글이 수정되었습니다')));
+          .showSnackBar(
+              SnackBar(content: Text('localNewsEdit.alerts.success'.tr())));
       Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('수정 실패: $e')));
+            .showSnackBar(SnackBar(
+                content: Text('localNewsEdit.alerts.failure'
+                    .tr(namedArgs: {'error': e.toString()}))));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -168,7 +171,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
         TextField(
           controller: _tagInputController,
           decoration: InputDecoration(
-            labelText: '태그 입력 후 스페이스바 또는 완료',
+            labelText: 'localNewsEdit.form.tagInputLabel'.tr(),
             border: const OutlineInputBorder(),
           ),
           onChanged: (value) {
@@ -229,16 +232,16 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
             const SizedBox(height: 16),
             TextField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                    labelText: '제목',
-                    border: OutlineInputBorder())),
+                decoration: InputDecoration(
+                    labelText: 'localNewsCreate.form.titleLabel'.tr(),
+                    border: const OutlineInputBorder())),
             const SizedBox(height: 16),
             TextField(
                 controller: _contentController,
                 maxLines: 8,
-                decoration: const InputDecoration(
-                    labelText: '내용',
-                    border: OutlineInputBorder())),
+                decoration: InputDecoration(
+                    labelText: 'localNewsCreate.form.contentLabel'.tr(),
+                    border: const OutlineInputBorder())),
             const SizedBox(height: 16),
             
             // ✅ 직접 만든 커스텀 태그 입력 위젯을 사용합니다.
