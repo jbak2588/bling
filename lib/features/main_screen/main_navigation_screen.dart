@@ -38,6 +38,21 @@ import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
 import 'home_screen.dart';
 
+/// 현재 보고 있는 섹션을 타입 세이프하게 관리하기 위한 enum
+enum AppSection {
+  home,
+  localNews,
+  marketplace,
+  findFriends,
+  clubs,
+  jobs,
+  localStores,
+  auction,
+  pom,
+  lostAndFound,
+  realEstate,
+}
+
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -72,6 +87,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   // ✅ 번역된 문자열이 아닌 "키"를 상태로 보관
   String _appBarTitleKey = 'main.myTown';
+  AppSection _currentSection = AppSection.home;
 
   @override
   void initState() {
@@ -148,6 +164,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       setState(() {
         _currentHomePageContent = null;
         _appBarTitleKey = 'main.myTown'; // 홈으로 돌아올 때 키 초기화
+  _currentSection = AppSection.home; // 섹션도 홈으로 복원
       });
     }
     setState(() {
@@ -164,50 +181,51 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       return;
     }
 
-    // 섹션 내부: 현재 섹션 키 기준으로 분기
-    final sectionKey = _appBarTitleKey;
+    // 섹션 내부: enum 기준으로 안전 분기
   late Widget target;
 
-    switch (sectionKey) {
-      case 'main.tabs.localNews':
+    switch (_currentSection) {
+      case AppSection.localNews:
         target = const CreateLocalNewsScreen();
         break;
-      case 'main.tabs.marketplace':
+      case AppSection.marketplace:
         target = const ProductRegistrationScreen();
         break;
-      case 'main.tabs.findFriends':
+      case AppSection.findFriends:
         target = FindFriendFormScreen(userModel: _userModel!);
         break;
-      case 'main.tabs.clubs':
+      case AppSection.clubs:
         target = CreateClubScreen(userModel: _userModel!);
         break;
-      case 'main.tabs.jobs':
+      case AppSection.jobs:
         target = CreateJobScreen(userModel: _userModel!);
         break;
-      case 'main.tabs.localStores':
+      case AppSection.localStores:
         target = CreateShopScreen(userModel: _userModel!);
         break;
-      case 'main.tabs.auction':
+      case AppSection.auction:
         target = CreateAuctionScreen(userModel: _userModel!);
         break;
-      case 'main.tabs.pom':
+      case AppSection.pom:
         target = CreateShortScreen(userModel: _userModel!);
         break;
-      case 'main.tabs.lostAndFound':
+      case AppSection.lostAndFound:
         target = CreateLostItemScreen(userModel: _userModel!);
         break;
-      case 'main.tabs.realEstate':
+      case AppSection.realEstate:
         await Navigator.of(context).push<bool>(
           MaterialPageRoute(
             builder: (_) => CreateRoomListingScreen(userModel: _userModel!),
           ),
         );
+        if (!mounted) return;
         return;
-      default:
-        target = const CreateLocalNewsScreen();
+      case AppSection.home:
+        // 홈 루트로 오면 이미 위에서 전역 시트를 띄우므로 여기선 기본값 처리 없음
+        return;
     }
 
-    // ignore: use_build_context_synchronously
+    if (!mounted) return;
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => target));
   }
 
@@ -396,7 +414,36 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     setState(() {
       _currentHomePageContent = page;
       _appBarTitleKey = titleKey; // 키 그대로 저장
+      _currentSection = _sectionFromTitleKey(titleKey);
     });
+  }
+
+  /// i18n 키를 enum으로 매핑 (기존 데이터/문서의 키를 바꾸지 않고 안전하게 분기)
+  AppSection _sectionFromTitleKey(String key) {
+    switch (key) {
+      case 'main.tabs.localNews':
+        return AppSection.localNews;
+      case 'main.tabs.marketplace':
+        return AppSection.marketplace;
+      case 'main.tabs.findFriends':
+        return AppSection.findFriends;
+      case 'main.tabs.clubs':
+        return AppSection.clubs;
+      case 'main.tabs.jobs':
+        return AppSection.jobs;
+      case 'main.tabs.localStores':
+        return AppSection.localStores;
+      case 'main.tabs.auction':
+        return AppSection.auction;
+      case 'main.tabs.pom':
+        return AppSection.pom;
+      case 'main.tabs.lostAndFound':
+        return AppSection.lostAndFound;
+      case 'main.tabs.realEstate':
+        return AppSection.realEstate;
+      default:
+        return AppSection.home;
+    }
   }
 
   @override
@@ -452,18 +499,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Widget _buildBottomNavItem(
       {required IconData icon, required int index, int badgeCount = 0}) {
-    final Map<int, String> tooltipKeys = {
+  const Map<int, String> tooltipKeys = {
       0: 'main.bottomNav.home',
       1: 'main.bottomNav.search',
       3: 'main.bottomNav.chat',
       4: 'main.bottomNav.myBling'
     };
     final isSelected = _bottomNavIndex == index;
-    Widget iconWidget = Icon(icon,
-        color: isSelected ? Theme.of(context).primaryColor : Colors.grey);
-    if (badgeCount > 0) {
-      iconWidget = Badge(label: Text('$badgeCount'), child: iconWidget);
-    }
+    Widget iconWidget = Icon(
+      icon,
+      color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+    );
+    iconWidget = badgeCount > 0
+        ? Badge(label: Text('$badgeCount'), child: iconWidget)
+        : iconWidget;
     return IconButton(
       tooltip: tooltipKeys[index]?.tr() ?? '',
       icon: iconWidget,
