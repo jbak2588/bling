@@ -1,773 +1,687 @@
-diff --git a/assets/lang/en.json b/assets/lang/en.json
-index 1e442914832112e9aa57300c9a99b9bc1451c989..bb012817e317674d3045ade4d25fbfd5cc75fee5 100644
---- a/assets/lang/en.json
-+++ b/assets/lang/en.json
-@@ -249,50 +249,51 @@
-         },
-         "unrejectSuccess": "You have undone the rejection for {nickname}.",
-         "unrejectFailure": "Failed to undo rejection: {error}"
-     },
-     "prompt": {
-         "title": "Welcome to Bling!",
-         "subtitle": "To see interesting news and items around you, please set your neighborhood first.",
-         "button": "Set My Neighborhood"
-     },
-     "location": {
-         "title": "Set Neighborhood",
-         "searchHint": "Search by neighborhood, e.g., Serpong",
-         "gpsButton": "Find with current location",
-         "success": "Neighborhood has been set.",
-         "error": "Failed to set neighborhood: {error}",
-         "empty": "Please enter a neighborhood name.",
-         "permissionDenied": "Location permission is required to find your neighborhood."
-     },
-     "profileEdit": {
-         "title": "Edit Profile",
-         "nicknameHint": "Nickname",
-         "phoneHint": "Phone Number",
-         "bioHint": "Bio (Introduction)",
-         "locationTitle": "Location",
-         "changeLocation": "Change",
-+        "locationNotSet": "Not set",
-         "interests": {
-             "title": "Interests",
-             "hint": "Use comma and Enter to add multiple"
-         },
-         "privacy": {
-             "title": "Privacy Settings",
-             "showLocation": "Show my location on map",
-             "allowRequests": "Allow friend requests"
-         },
-         "saveButton": "Save Changes",
-         "successMessage": "Profile updated successfully.",
-         "errors": {
-             "noUser": "User not logged in.",
-             "updateFailed": "Failed to update profile: {error}"
-         }
-     },
-     "mainFeed": {
-         "error": "An error occurred: {error}",
-         "empty": "No new posts."
-     },
-     "postCard": {
-         "locationNotSet": "Location not set"
-     },
-     "time": {
-         "now": "Just now",
-@@ -471,50 +472,51 @@
-             "hourly": "Hourly",
-             "daily": "Daily",
-             "monthly": "Monthly",
-             "per_case": "Per case",
-             "etc": "Others"
-         },
-         "workPeriods": {
-             "short_term": "Short term",
-             "mid_term": "Mid term",
-             "long_term": "Long term",
-             "etc": "Other"
-         },
-         "detail": {
-             "infoTitle": "Details",
-             "apply": "Apply",
-             "noAuthor": "No author information",
-             "chatError": "Cannot start chat: {error}"
-         },
-         "card": {
-             "noLocation": "No location info",
-             "minutesAgo": "minutes ago"
-         }
-     },
-     "findFriend": {
-         "title": "Find Friends",
-+        "editTitle": "Edit FindFriend Profile",
-         "editProfileTitle": "Edit Profile",
-         "save": "Save",
-         "profileImagesLabel": "Profile Images (Max 6)",
-         "bioLabel": "Bio",
-         "bioHint": "Introduce yourself to others.",
-         "bioValidator": "Please enter your bio.",
-         "ageLabel": "Age",
-         "ageHint": "Please enter your age.",
-         "genderLabel": "Gender",
-         "genderMale": "Male",
-         "genderFemale": "Female",
-         "genderHint": "Select your gender",
-         "interestsLabel": "Interests",
-         "preferredAgeLabel": "Preferred Friend's Age",
-         "preferredAgeUnit": "",
-         "preferredGenderLabel": "Preferred Friend's Gender",
-         "preferredGenderAll": "All",
-         "showProfileLabel": "Show my profile in the list",
-         "showProfileSubtitle": "If turned off, others cannot find you.",
-         "saveSuccess": "Profile saved successfully!",
-         "saveFailed": "Failed to save profile:",
-         "loginRequired": "Login is required.",
-         "noFriendsFound": "No friends found nearby.",
-         "prompt_title": "To meet new friends,\nplease create your profile first!",
-         "prompt_button": "Create My Profile"
-@@ -664,50 +666,54 @@
-             "fail": "Failed to update club: {error}"
-         },
-         "repository": {
-             "chatCreated": "Club chat room has been created."
-         }
-     },
-     "auctions": {
-         "card": {
-             "currentBid": "Current bid",
-             "endTime": "Time left",
-             "ended": "Ended",
-             "winningBid": "Winning bid",
-             "winner": "Winner",
-             "noBidders": "No bidders",
-             "unknownBidder": "Unknown bidder",
-             "timeLeft": "{hours}:{minutes}:{seconds} left",
-             "timeLeftDays": "{days}d {hours}:{minutes}:{seconds} left"
-         },
-         "errors": {
-             "fetchFailed": "Failed to fetch auctions: {error}",
-             "notFound": "Auction not found.",
-             "lowerBid": "You must enter a bid higher than the current bid.",
-             "alreadyEnded": "This auction has already ended."
-         },
-         "empty": "No auctions available.",
-+        "filter": {
-+            "tooltip": "Filter",
-+            "clearTooltip": "Clear filter"
-+        },
-         "create": {
-             "tooltip": "Create Auction",
-             "title": "Create Auction",
-             "success": "Auction created successfully.",
-             "fail": "Failed to create auction: {error}",
-             "errors": {
-                 "noPhoto": "Please add at least one photo."
-             },
-             "form": {
-                 "photoSectionTitle": "Upload photos (up to 10)",
-                 "title": "Title",
-                 "description": "Description",
-                 "startPrice": "Starting price",
-                 "duration": "Duration",
-                 "durationOption": "{days} days",
-                 "location": "Location"
-             }
-         },
-         "edit": {
-             "tooltip": "Edit auction",
-             "title": "Edit Auction",
-             "save": "Save",
-             "success": "Auction updated.",
-             "fail": "Failed to update auction: {error}"
-         },
-diff --git a/assets/lang/id.json b/assets/lang/id.json
-index a8ee6608685e7718c4d327379935681c0c81da1f..c5f6f2f74dd8424223beacdf397b1f69435f6244 100644
---- a/assets/lang/id.json
-+++ b/assets/lang/id.json
-@@ -249,50 +249,51 @@
-         },
-         "unrejectSuccess": "Penolakan terhadap {nickname} telah dibatalkan.",
-         "unrejectFailure": "Gagal membatalkan penolakan: {error}"
-     },
-     "prompt": {
-         "title": "Selamat datang di Bling!",
-         "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
-         "button": "Atur Lingkungan Saya"
-     },
-     "location": {
-         "title": "Atur Lingkungan",
-         "searchHint": "Cari berdasarkan lingkungan, cth., Serpong",
-         "gpsButton": "Cari dengan lokasi saat ini",
-         "success": "Lingkungan telah diatur.",
-         "error": "Gagal mengatur lingkungan: {error}",
-         "empty": "Silakan masukkan nama lingkungan.",
-         "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
-     },
-     "profileEdit": {
-         "title": "Pengaturan Profil",
-         "nicknameHint": "Nama Panggilan",
-         "phoneHint": "Nomor Telepon",
-         "bioHint": "Bio (Perkenalan Diri)",
-         "locationTitle": "Lokasi",
-         "changeLocation": "Ubah",
-+        "locationNotSet": "Belum diatur",
-         "interests": {
-             "title": "Minat",
-             "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
-         },
-         "privacy": {
-             "title": "Pengaturan Privasi",
-             "showLocation": "Tampilkan lokasi saya di peta",
-             "allowRequests": "Izinkan permintaan pertemanan"
-         },
-         "saveButton": "Simpan Perubahan",
-         "successMessage": "Profil berhasil diperbarui.",
-         "errors": {
-             "noUser": "Pengguna belum login.",
-             "updateFailed": "Gagal memperbarui profil: {error}"
-         }
-     },
-     "mainFeed": {
-         "error": "Terjadi kesalahan: {error}",
-         "empty": "Tidak ada berita baru."
-     },
-     "postCard": {
-         "locationNotSet": "Lokasi belum diatur"
-     },
-     "time": {
-         "now": "Baru saja",
-@@ -471,50 +472,51 @@
-             "hourly": "Per jam",
-             "daily": "Harian",
-             "monthly": "Bulanan",
-             "per_case": "Per kasus",
-             "etc": "Lainnya"
-         },
-         "workPeriods": {
-             "short_term": "Jangka pendek",
-             "mid_term": "Jangka menengah",
-             "long_term": "Jangka panjang",
-             "etc": "Lainnya"
-         },
-         "detail": {
-             "infoTitle": "Informasi detail",
-             "apply": "Lamar",
-             "noAuthor": "Tidak ada info penulis",
-             "chatError": "Tidak dapat memulai chat: {error}"
-         },
-         "card": {
-             "noLocation": "Tidak ada info lokasi",
-             "minutesAgo": "beberapa menit lalu"
-         }
-     },
-     "findFriend": {
-         "title": "Cari Teman",
-+        "editTitle": "Ubah Profil FindFriend",
-         "editProfileTitle": "Ubah Profil",
-         "save": "Simpan",
-         "profileImagesLabel": "Foto Profil (Maks 6)",
-         "bioLabel": "Bio",
-         "bioHint": "Perkenalkan dirimu kepada orang lain.",
-         "bioValidator": "Harap isi bio Anda.",
-         "ageLabel": "Umur",
-         "ageHint": "Masukkan umur Anda.",
-         "genderLabel": "Jenis Kelamin",
-         "genderMale": "Pria",
-         "genderFemale": "Wanita",
-         "genderHint": "Pilih jenis kelamin Anda",
-         "interestsLabel": "Minat",
-         "preferredAgeLabel": "Preferensi Umur Teman",
-         "preferredAgeUnit": "thn",
-         "preferredGenderLabel": "Preferensi Jenis Kelamin Teman",
-         "preferredGenderAll": "Semua",
-         "showProfileLabel": "Tampilkan profil saya di daftar",
-         "showProfileSubtitle": "Jika dimatikan, orang lain tidak dapat menemukan Anda.",
-         "saveSuccess": "Profil berhasil disimpan!",
-         "saveFailed": "Gagal menyimpan profil:",
-         "loginRequired": "Diperlukan login.",
-         "noFriendsFound": "Tidak ada teman yang ditemukan di sekitar.",
-         "prompt_title": "Untuk bertemu teman baru,\nsilakan buat profil Anda terlebih dahulu!",
-         "prompt_button": "Buat Profil Saya"
-@@ -664,50 +666,54 @@
-             "fail": "Gagal memperbarui klub: {error}"
-         },
-         "repository": {
-             "chatCreated": "Ruang chat klub telah dibuat."
-         }
-     },
-     "auctions": {
-         "card": {
-             "currentBid": "Tawaran saat ini",
-             "endTime": "Sisa waktu",
-             "ended": "Berakhir",
-             "winningBid": "Tawaran menang",
-             "winner": "Pemenang",
-             "noBidders": "Belum ada penawar",
-             "unknownBidder": "Penawar tidak dikenal",
-             "timeLeft": "{hours}:{minutes}:{seconds} lagi",
-             "timeLeftDays": "{days} hari {hours}:{minutes}:{seconds} lagi"
-         },
-         "errors": {
-             "fetchFailed": "Gagal memuat lelang: {error}",
-             "notFound": "Lelang tidak ditemukan.",
-             "lowerBid": "Anda harus memasukkan tawaran yang lebih tinggi dari tawaran saat ini.",
-             "alreadyEnded": "Lelang ini sudah berakhir."
-         },
-         "empty": "Tidak ada lelang.",
-+        "filter": {
-+            "tooltip": "Filter",
-+            "clearTooltip": "Hapus filter"
-+        },
-         "create": {
-             "tooltip": "Buat Lelang",
-             "title": "Buat Lelang",
-             "success": "Lelang berhasil dibuat.",
-             "fail": "Gagal membuat lelang: {error}",
-             "errors": {
-                 "noPhoto": "Harap tambahkan minimal satu foto."
-             },
-             "form": {
-                 "photoSectionTitle": "Unggah foto (maks 10)",
-                 "title": "Judul",
-                 "description": "Deskripsi",
-                 "startPrice": "Harga awal",
-                 "duration": "Durasi",
-                 "durationOption": "{days} hari",
-                 "location": "Lokasi"
-             }
-         },
-         "edit": {
-             "tooltip": "Ubah lelang",
-             "title": "Ubah Lelang",
-             "save": "Simpan",
-             "success": "Informasi lelang diperbarui.",
-             "fail": "Gagal memperbarui lelang: {error}"
-         },
-diff --git a/assets/lang/ko.json b/assets/lang/ko.json
-index 2d39bb9857a0ebab387ab680c334b9f169962a15..200b30809cce9ceda2e97bbd6f6c9ab6089e0775 100644
---- a/assets/lang/ko.json
-+++ b/assets/lang/ko.json
-@@ -248,50 +248,51 @@
-         },
-         "unrejectSuccess": "{nickname} 님에 대한 거절을 취소했습니다.",
-         "unrejectFailure": "거절 취소에 실패했습니다: {error}"
-     },
-     "prompt": {
-         "title": "블링에 오신 것을 환영합니다!",
-         "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
-         "button": "내 동네 설정하기"
-     },
-     "location": {
-         "title": "동네 설정",
-         "searchHint": "동네 이름으로 검색 (예: 세르퐁)",
-         "gpsButton": "현재 위치로 찾기",
-         "success": "동네가 설정되었습니다.",
-         "error": "동네 설정에 실패했습니다: {error}",
-         "empty": "동네 이름을 입력해주세요.",
-         "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
-     },
-     "profileEdit": {
-         "title": "프로필 설정",
-         "nicknameHint": "닉네임",
-         "phoneHint": "전화번호",
-         "bioHint": "소개 (Bio)",
-         "locationTitle": "지역",
-         "changeLocation": "변경",
-+        "locationNotSet": "미설정",
-         "interests": {
-             "title": "관심사",
-             "hint": "쉼표와 Enter로 여러개 동시 추가"
-         },
-         "privacy": {
-             "title": "개인정보 설정",
-             "showLocation": "지도에 내 위치 표시",
-             "allowRequests": "친구 추가 요청 허용"
-         },
-         "saveButton": "변경사항 저장",
-         "successMessage": "프로필이 성공적으로 업데이트되었습니다.",
-         "errors": {
-             "noUser": "로그인된 사용자가 없습니다.",
-             "updateFailed": "프로필 업데이트에 실패했습니다: {error}"
-         }
-     },
-     "mainFeed": {
-         "error": "오류가 발생했습니다: {error}",
-         "empty": "새로운 소식이 없습니다."
-     },
-     "postCard": {
-         "locationNotSet": "지역 미설정"
-     },
-     "time": {
-         "now": "방금 전",
-@@ -470,50 +471,51 @@
-             "hourly": "시급",
-             "daily": "일급",
-             "monthly": "월급",
-             "per_case": "건당",
-             "etc": "기타"
-         },
-         "workPeriods": {
-             "short_term": "단기",
-             "mid_term": "중기",
-             "long_term": "장기",
-             "etc": "기타"
-         },
-         "detail": {
-             "infoTitle": "상세 정보",
-             "apply": "지원하기",
-             "noAuthor": "작성자 정보 없음",
-             "chatError": "채팅을 시작할 수 없습니다: {error}"
-         },
-         "card": {
-             "noLocation": "위치 정보 없음",
-             "minutesAgo": "몇 분 전"
-         }
-     },
-     "findFriend": {
-         "title": "친구 찾기",
-+        "editTitle": "친구 찾기 프로필 수정",
-         "editProfileTitle": "프로필 수정",
-         "save": "저장",
-         "profileImagesLabel": "프로필 이미지 (최대 6장)",
-         "bioLabel": "자기소개",
-         "bioHint": "자신을 다른 사람에게 소개해보세요.",
-         "bioValidator": "자기소개를 입력해주세요.",
-         "ageLabel": "나이",
-         "ageHint": "만 나이를 숫자로만 입력해주세요.",
-         "genderLabel": "성별",
-         "genderMale": "남성",
-         "genderFemale": "여성",
-         "genderHint": "성별을 선택하세요",
-         "interestsLabel": "관심사",
-         "preferredAgeLabel": "찾고 싶은 친구 연령대",
-         "preferredAgeUnit": "세",
-         "preferredGenderLabel": "찾고 싶은 친구 성별",
-         "preferredGenderAll": "상관없음",
-         "showProfileLabel": "친구 찾기 리스트에 내 프로필 노출",
-         "showProfileSubtitle": "끄면 다른 사람이 나를 찾을 수 없습니다.",
-         "saveSuccess": "프로필이 성공적으로 저장되었습니다!",
-         "saveFailed": "프로필 저장에 실패했습니다:",
-         "loginRequired": "로그인이 필요합니다.",
-         "noFriendsFound": "주변에 등록된 친구가 없습니다.",
-         "prompt_title": "새로운 친구들을 만나려면\n먼저 프로필을 만들어주세요!",
-         "prompt_button": "내 프로필 만들기"
-@@ -663,50 +665,54 @@
-             "fail": "수정에 실패했습니다: {error}"
-         },
-         "repository": {
-             "chatCreated": "동호회 채팅방이 개설되었습니다."
-         }
-     },
-     "auctions": {
-         "card": {
-             "currentBid": "현재 입찰가",
-             "endTime": "남은 시간",
-             "ended": "종료됨",
-             "winningBid": "낙찰가",
-             "winner": "낙찰자",
-             "noBidders": "입찰자가 없습니다",
-             "unknownBidder": "알 수 없는 입찰자",
-             "timeLeft": "{hours}:{minutes}:{seconds} 남음",
-             "timeLeftDays": "{days}일 {hours}:{minutes}:{seconds} 남음"
-         },
-         "errors": {
-             "fetchFailed": "경매 목록을 불러오지 못했습니다: {error}",
-             "notFound": "경매를 찾을 수 없습니다.",
-             "lowerBid": "현재 입찰가보다 높은 금액을 입력해야 합니다.",
-             "alreadyEnded": "이미 마감된 경매입니다."
-         },
-         "empty": "진행 중인 경매가 없습니다.",
-+        "filter": {
-+            "tooltip": "필터",
-+            "clearTooltip": "필터 지우기"
-+        },
-         "create": {
-             "tooltip": "경매 등록",
-             "title": "경매 등록",
-             "success": "경매가 등록되었습니다.",
-             "fail": "경매 등록에 실패했습니다: {error}",
-             "errors": {
-                 "noPhoto": "사진을 최소 한 장 이상 추가해주세요."
-             },
-             "form": {
-                 "photoSectionTitle": "사진 등록 (최대 10장)",
-                 "title": "제목",
-                 "description": "상세 설명",
-                 "startPrice": "시작가",
-                 "duration": "기간",
-                 "durationOption": "{days}일",
-                 "location": "위치"
-             }
-         },
-         "edit": {
-             "tooltip": "경매 수정",
-             "title": "경매 정보 수정",
-             "save": "저장",
-             "success": "경매 정보가 수정되었습니다.",
-             "fail": "수정에 실패했습니다: {error}"
-         },
-diff --git a/lib/features/auction/screens/auction_screen.dart b/lib/features/auction/screens/auction_screen.dart
-index 6cb3d62f14cd6fb295b52b19e2d5345502f2c2a4..fed4be80d53a6ddc72e7868955df866af10699ea 100644
---- a/lib/features/auction/screens/auction_screen.dart
-+++ b/lib/features/auction/screens/auction_screen.dart
-@@ -63,56 +63,56 @@ class _AuctionScreenState extends State<AuctionScreen> {
-     );
-     if (result != null) {
-       setState(() => _locationFilter = result);
+diff --git a/lib/features/local_news/screens/create_local_news_screen.dart b/lib/features/local_news/screens/create_local_news_screen.dart
+index 6b65ea00115dde25aa3f75f0c3947f311bc1632d..fc7b92e0798e74c801bf4d2895f59f5f1e118f5d 100644
+--- a/lib/features/local_news/screens/create_local_news_screen.dart
++++ b/lib/features/local_news/screens/create_local_news_screen.dart
+@@ -57,57 +57,61 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
+     for (var image in _selectedImages) {
+       final ref = FirebaseStorage.instance.ref(
+           'post_images/${DateTime.now().millisecondsSinceEpoch}_${image.name}');
+       final uploadTask = await ref.putFile(File(image.path));
+       downloadUrls.add(await uploadTask.ref.getDownloadURL());
+     }
+     return downloadUrls;
+   }
+ 
+   Future<void> _submitPost() async {
+     if (_contentController.text.trim().isEmpty) {
+       ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('localNewsCreate.alerts.contentRequired'.tr())));
+       return;
+     }
+     if (_selectedCategory == null) {
+       ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
+       return;
+     }
+ 
+     setState(() => _isSubmitting = true);
+ 
+     try {
+       final user = FirebaseAuth.instance.currentUser;
+-      if (user == null) throw Exception("로그인이 필요합니다.");
++      if (user == null) {
++        throw Exception('main.errors.loginRequired'.tr());
++      }
+ 
+       final userDoc = await FirebaseFirestore.instance
+           .collection('users')
+           .doc(user.uid)
+           .get();
+-      if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
++      if (!userDoc.exists) {
++        throw Exception('main.errors.userNotFound'.tr());
++      }
+       final userModel = UserModel.fromFirestore(userDoc);
+ 
+       final imageUrls = await _uploadImages();
+       final tags = _tagsController.text
+           .split(',')
+           .map((tag) => tag.trim())
+           .where((tag) => tag.isNotEmpty)
+           .toList();
+ 
+       final postData = {
+         'userId': user.uid,
+         'title': _titleController.text.trim(),
+         'body': _contentController.text.trim(),
+         'mediaUrl': imageUrls,
+         'mediaType': imageUrls.isNotEmpty ? 'image' : null,
+         'category': _selectedCategory!.categoryId,
+         'tags': tags,
+         'locationName': userModel.locationName,
+         'locationParts': userModel.locationParts,
+         'geoPoint': userModel.geoPoint,
+         'createdAt': FieldValue.serverTimestamp(),
+         'likesCount': 0,
+         'commentsCount': 0,
+         'viewsCount': 0,
+         'thanksCount': 0,
+diff --git a/lib/features/local_news/screens/edit_local_news_screen.dart b/lib/features/local_news/screens/edit_local_news_screen.dart
+index ead36741df754c309be07157ea7444418a7454f3..cd93d08ce4da4c9feedea8839930c10b9d4c2739 100644
+--- a/lib/features/local_news/screens/edit_local_news_screen.dart
++++ b/lib/features/local_news/screens/edit_local_news_screen.dart
+@@ -110,87 +110,90 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
+     }
+ 
+     setState(() => _isSubmitting = true);
+ 
+     try {
+       final newImageUrls = await _uploadImages();
+       final finalImageUrls = [..._existingImageUrls, ...newImageUrls];
+ 
+       final updatedData = {
+         'title': _titleController.text.trim(),
+         'body': _contentController.text.trim(),
+         'mediaUrl': finalImageUrls,
+         'mediaType': finalImageUrls.isNotEmpty ? 'image' : null,
+         'category': _selectedCategory!.categoryId,
+         'tags': _tags,
+         'updatedAt': FieldValue.serverTimestamp(),
+       };
+ 
+       await FirebaseFirestore.instance
+           .collection('posts')
+           .doc(widget.post.id)
+           .update(updatedData);
+ 
+       if (!mounted) return;
+       ScaffoldMessenger.of(context)
+-          .showSnackBar(const SnackBar(content: Text('게시글이 수정되었습니다')));
++          .showSnackBar(
++              SnackBar(content: Text('localNewsEdit.alerts.success'.tr())));
+       Navigator.of(context).pop(true);
+     } catch (e) {
+       if (mounted) {
+         ScaffoldMessenger.of(context)
+-            .showSnackBar(SnackBar(content: Text('수정 실패: $e')));
++            .showSnackBar(SnackBar(
++                content: Text('localNewsEdit.alerts.failure'
++                    .tr(namedArgs: {'error': e.toString()}))));
+       }
+     } finally {
+       if (mounted) setState(() => _isSubmitting = false);
      }
    }
  
-   // [추가] 필터를 제거하는 함수
-   void _clearFilter() {
-     setState(() => _locationFilter = null);
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     final AuctionRepository auctionRepository = AuctionRepository();
- 
-     return Scaffold(
-       body: Column(
-         children: [
-           // [추가] 필터 관리 UI
-           Row(
-             mainAxisAlignment: MainAxisAlignment.end,
-             children: [
-               if (_locationFilter != null)
-                 IconButton(
-                   icon: const Icon(Icons.clear),
--                  tooltip: 'Clear Filter', // TODO: 다국어
-+                  tooltip: 'auctions.filter.clearTooltip'.tr(),
-                   onPressed: _clearFilter,
-                 ),
-               IconButton(
-                 icon: const Icon(Icons.filter_alt_outlined),
--                tooltip: 'Filter', // TODO: 다국어
-+                tooltip: 'auctions.filter.tooltip'.tr(),
-                 onPressed: _openFilter,
-               ),
-             ],
+   // ✅ 커스텀 태그 위젯을 빌드하는 함수
+   Widget _buildCustomChipsInput() {
+     return Column(
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: [
+         // 칩들을 보여주는 부분
+         Wrap(
+           spacing: 8.0,
+           runSpacing: 4.0,
+           children: _tags.map((tag) {
+             return Chip(
+               label: Text(tag),
+               onDeleted: () {
+                 setState(() {
+                   _tags.remove(tag);
+                 });
+               },
+             );
+           }).toList(),
+         ),
+         // 새 태그를 입력하는 텍스트 필드
+         TextField(
+           controller: _tagInputController,
+           decoration: InputDecoration(
+-            labelText: '태그 입력 후 스페이스바 또는 완료',
++            labelText: 'localNewsEdit.form.tagInputLabel'.tr(),
+             border: const OutlineInputBorder(),
            ),
-           Expanded(
-             child: StreamBuilder<List<AuctionModel>>(
-               // [수정] fetchAuctions 함수에 현재 필터 상태를 전달합니다.
-               stream: auctionRepository.fetchAuctions(locationFilter: _locationFilter),
-               builder: (context, snapshot) {
-                 if (snapshot.connectionState == ConnectionState.waiting) {
-                   return const Center(child: CircularProgressIndicator());
-                 }
-                 if (snapshot.hasError) {
-                   return Center(
-                       child: Text('auctions.errors.fetchFailed'
-                           .tr(namedArgs: {'error': snapshot.error.toString()})));
-                 }
-                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                   return Center(child: Text('auctions.empty'.tr()));
-                 }
- 
-                 final auctions = snapshot.data!;
- 
-                 return ListView.builder(
-                   padding: const EdgeInsets.only(bottom: 80), // FAB와의 여백 확보
-diff --git a/lib/features/find_friends/screens/findfriend_edit_screen.dart b/lib/features/find_friends/screens/findfriend_edit_screen.dart
-index c3604f721055c9d59459e1f771d5254b97d85a22..276a7a304fd383819fb064229c3b64b322a20e0e 100644
---- a/lib/features/find_friends/screens/findfriend_edit_screen.dart
-+++ b/lib/features/find_friends/screens/findfriend_edit_screen.dart
-@@ -8,50 +8,51 @@
- /// Data Model    : Firestore `users` 필드 `age`, `ageRange`, `findfriend_profileImages`, `isVisibleInList`.
- /// Location Scope: 저장된 `locationParts`를 사용하며 이 화면에서는 직접 수정하지 않습니다.
- /// Trust Policy  : 수정 내용은 커뮤니티 가이드라인을 기준으로 검토하며 부적절한 이미지는 신고됩니다.
- /// Monetization  : 향후 유료 노출 부스트 예정; TODO: 통합.
- /// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_profile_edit`, `complete_profile_edit`.
- /// Analytics     : 이미지 업로드와 공개 여부 토글을 추적합니다.
- /// I18N          : 키 `findFriend.editTitle` (assets/lang/*.json) - TODO: 키 확인.
- /// Dependencies  : firebase_storage, firebase_auth, cloud_firestore, image_picker
- /// Security/Auth : 프로필 소유자만 수정할 수 있으며 Storage 경로는 UID로 제한됩니다.
- /// Edge Cases    : 이미지 미선택, 업로드 실패./// 실제 구현 비교 : 나이, 나이 범위, 이미지, 공개 여부 등 모든 필드가 UI/로직에 완비되어 있음. 프로필 수정 정상 동작.
- /// Edge Cases    : 이미지 미선택, 업로드 실패.
- /// 실제 구현 비교 : 나이, 나이 범위, 이미지, 공개 여부 등 모든 필드가 UI/로직에 완비되어 있음. 프로필 수정 정상 동작.
- /// 개선 제안     : KPI/통계/프리미엄 기능 실제 구현 필요. 이미지 업로드/공개 여부 UX 강화. 신고/차단/신뢰 등급 UI 노출 및 기능 강화.
- /// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
- /// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md; docs/team/teamF_Design_Privacy_Module_통합_작업문.md
- /// ============================================================================
- library;
- // 아래부터 실제 코드
- 
- import 'dart:io';
- 
- import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:firebase_auth/firebase_auth.dart';
- import 'package:firebase_storage/firebase_storage.dart';
- import 'package:flutter/material.dart';
-+import 'package:easy_localization/easy_localization.dart';
- import 'package:image_picker/image_picker.dart';
- 
- import '../../../core/models/user_model.dart';
- 
- /// Screen for editing an existing FindFriend profile.
- class FindFriendEditScreen extends StatefulWidget {
-   final UserModel user;
-   const FindFriendEditScreen({super.key, required this.user});
- 
-   @override
-   State<FindFriendEditScreen> createState() => _FindFriendEditScreenState();
- }
- 
- class _FindFriendEditScreenState extends State<FindFriendEditScreen> {
-   late TextEditingController _ageController;
-   late TextEditingController _ageRangeController;
-   final List<File> _newImages = [];
-   late List<String> _existingImages;
-   bool _isVisibleInList = true;
-   bool _saving = false;
- 
-   @override
-   void initState() {
-     super.initState();
-     _ageController = TextEditingController(
-@@ -84,51 +85,51 @@ class _FindFriendEditScreenState extends State<FindFriendEditScreen> {
-           .ref()
-           .child('findfriend_profiles')
-           .child(user.uid)
-           .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
-       await ref.putFile(file);
-       urls.add(await ref.getDownloadURL());
-     }
- 
-     await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-       'age': int.tryParse(_ageController.text),
-       'ageRange': _ageRangeController.text.trim(),
-       'findfriend_profileImages': urls,
-       'isVisibleInList': _isVisibleInList,
-     });
- 
-     if (mounted) Navigator.of(context).pop();
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     final enable = _ageController.text.isNotEmpty &&
-         _ageRangeController.text.isNotEmpty &&
-         (_newImages.isNotEmpty || _existingImages.isNotEmpty);
- 
-     return Scaffold(
--      appBar: AppBar(title: const Text('Edit FindFriend Profile')),
-+      appBar: AppBar(title: Text('findFriend.editTitle'.tr())),
-       body: SingleChildScrollView(
-         padding: const EdgeInsets.all(16),
+           onChanged: (value) {
+             // 스페이스바를 누르면 태그 추가
+             if (value.endsWith(' ') && value.trim().isNotEmpty) {
+               final newTag = value.trim();
+               if (!_tags.contains(newTag)) {
+                 setState(() {
+                   _tags.add(newTag);
+                 });
+               }
+               _tagInputController.clear();
+             }
+           },
+           onSubmitted: (value) {
+             // 키보드에서 완료(엔터)를 누르면 태그 추가
+             final newTag = value.trim();
+             if (newTag.isNotEmpty && !_tags.contains(newTag)) {
+               setState(() {
+                 _tags.add(newTag);
+               });
+             }
+             _tagInputController.clear();
+           },
+         ),
+@@ -207,60 +210,60 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
          child: Column(
-           crossAxisAlignment: CrossAxisAlignment.start,
+           crossAxisAlignment: CrossAxisAlignment.stretch,
            children: [
+             DropdownButtonFormField<PostCategoryModel>(
+               value: _selectedCategory,
+               decoration: InputDecoration(
+                   labelText: 'localNewsCreate.form.categoryLabel'.tr(),
+                   border: const OutlineInputBorder()),
+               items: AppCategories.postCategories.map((category) {
+                 return DropdownMenuItem<PostCategoryModel>(
+                   value: category,
+                   child: Row(children: [
+                     Text(category.emoji, style: const TextStyle(fontSize: 20)),
+                     const SizedBox(width: 10),
+                     Text(category.nameKey.tr()),
+                   ]),
+                 );
+               }).toList(),
+               onChanged: (value) {
+                 if (value != null) setState(() => _selectedCategory = value);
+               },
+             ),
+             const SizedBox(height: 16),
              TextField(
-               controller: _ageController,
-               keyboardType: TextInputType.number,
-               decoration: const InputDecoration(labelText: 'Age'),
-             ),
-             const SizedBox(height: 12),
+                 controller: _titleController,
+-                decoration: const InputDecoration(
+-                    labelText: '제목',
+-                    border: OutlineInputBorder())),
++                decoration: InputDecoration(
++                    labelText: 'localNewsCreate.form.titleLabel'.tr(),
++                    border: const OutlineInputBorder())),
+             const SizedBox(height: 16),
              TextField(
-               controller: _ageRangeController,
-               decoration: const InputDecoration(labelText: 'Age Range'),
-             ),
-             const SizedBox(height: 12),
-             SwitchListTile(
-               title: const Text('Hide my profile from list'),
-               value: !_isVisibleInList,
-               onChanged: (val) => setState(() => _isVisibleInList = !val),
-             ),
-             const SizedBox(height: 12),
-             Wrap(
-               spacing: 8,
-               children: [
-@@ -144,31 +145,31 @@ class _FindFriendEditScreenState extends State<FindFriendEditScreen> {
-                           onPressed: () {
-                             setState(() => _existingImages.remove(url));
-                           },
-                         ),
-                       ),
-                     ],
-                   ),
-                 ),
-                 ..._newImages.map((f) => Image.file(f, width: 80, height: 80, fit: BoxFit.cover)),
-                 if (_existingImages.length + _newImages.length < 9)
-                   IconButton(onPressed: _pickImage, icon: const Icon(Icons.add_a_photo)),
-               ],
+                 controller: _contentController,
+                 maxLines: 8,
+-                decoration: const InputDecoration(
+-                    labelText: '내용',
+-                    border: OutlineInputBorder())),
++                decoration: InputDecoration(
++                    labelText: 'localNewsCreate.form.contentLabel'.tr(),
++                    border: const OutlineInputBorder())),
+             const SizedBox(height: 16),
+             
+             // ✅ 직접 만든 커스텀 태그 입력 위젯을 사용합니다.
+             _buildCustomChipsInput(),
+ 
+             const SizedBox(height: 16),
+             _buildImagePicker(),
+             const SizedBox(height: 24),
+             ElevatedButton(
+               style: ElevatedButton.styleFrom(
+                   minimumSize: const Size(double.infinity, 50)),
+               onPressed: _isSubmitting ? null : _updatePost,
+               child: _isSubmitting
+                   ? const CircularProgressIndicator(color: Colors.white)
+                   : Text('localNewsEdit.buttons.submit'.tr()),
              ),
            ],
          ),
        ),
-       bottomNavigationBar: Padding(
-         padding: const EdgeInsets.all(16),
-         child: ElevatedButton(
-           onPressed: enable ? _save : null,
-           child: _saving
-               ? const SizedBox(
-                   width: 20,
-                   height: 20,
-                   child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
--              : const Text('Save'),
-+              : Text('findFriend.save'.tr()),
-         ),
+     );
+   }
+ 
+   Widget _buildImagePicker() {
+     final existingImageCount = _existingImageUrls.length;
+     final newImageCount = _newSelectedImages.length;
+diff --git a/lib/features/local_news/screens/local_news_detail_screen.dart b/lib/features/local_news/screens/local_news_detail_screen.dart
+index c144a23753637aafd24732a8c12a54332f53a4df..2e9d76f761b31772c7cb77fe24e889bdc3e213aa 100644
+--- a/lib/features/local_news/screens/local_news_detail_screen.dart
++++ b/lib/features/local_news/screens/local_news_detail_screen.dart
+@@ -80,51 +80,51 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
+     await _refreshPostData();
+   }
+ 
+   Future<void> _checkLiked() async {
+     final user = FirebaseAuth.instance.currentUser;
+     if (user == null) return;
+     final doc = await FirebaseFirestore.instance
+         .collection('users')
+         .doc(user.uid)
+         .get();
+     if (mounted && doc.exists) {
+       final userModel = UserModel.fromFirestore(doc);
+       setState(() {
+         _isLiked =
+             userModel.bookmarkedPostIds?.contains(_currentPost.id) ?? false;
+       });
+     }
+   }
+ 
+   Future<void> _toggleLike() async {
+     if (_likeLoading) return;
+     setState(() => _likeLoading = true);
+     final user = FirebaseAuth.instance.currentUser;
+     if (user == null) {
+       ScaffoldMessenger.of(context)
+-          .showSnackBar(const SnackBar(content: Text('로그인이 필요합니다.')));
++          .showSnackBar(SnackBar(content: Text('main.errors.loginRequired'.tr())));
+       setState(() => _likeLoading = false);
+       return;
+     }
+     final postRef =
+         FirebaseFirestore.instance.collection('posts').doc(_currentPost.id);
+     final userRef =
+         FirebaseFirestore.instance.collection('users').doc(user.uid);
+     try {
+       if (_isLiked) {
+         await postRef.update({'likesCount': FieldValue.increment(-1)});
+         await userRef.update({
+           'bookmarkedPostIds': FieldValue.arrayRemove([_currentPost.id])
+         });
+         if (mounted) setState(() => _likesCount--);
+       } else {
+         await postRef.update({'likesCount': FieldValue.increment(1)});
+         await userRef.update({
+           'bookmarkedPostIds': FieldValue.arrayUnion([_currentPost.id])
+         });
+         if (mounted) setState(() => _likesCount++);
+       }
+       if (mounted) setState(() => _isLiked = !_isLiked);
+     } finally {
+       if (mounted) setState(() => _likeLoading = false);
+     }
+@@ -132,51 +132,51 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
+ 
+   Future<void> _increaseViewsCount() async {
+     await FirebaseFirestore.instance
+         .collection('posts')
+         .doc(_currentPost.id)
+         .update({'viewsCount': FieldValue.increment(1)});
+   }
+ 
+   void _handleReplyTap(String commentId) {
+     setState(() {
+       _activeReplyCommentId =
+           (_activeReplyCommentId == commentId) ? null : commentId;
+     });
+   }
+ 
+   Future<void> _toggleThanks() async {
+     if (_isThanksProcessing) return;
+     setState(() => _isThanksProcessing = true);
+     final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
+     if (currentUserUid == null) {
+       setState(() => _isThanksProcessing = false);
+       return;
+     }
+     if (currentUserUid == _currentPost.userId) {
+       ScaffoldMessenger.of(context).showSnackBar(
+-          const SnackBar(content: Text('자신의 글에는 감사를 표시할 수 없습니다.')));
++          SnackBar(content: Text('localNewsDetail.alerts.cannotThankOwnPost'.tr())));
+       setState(() => _isThanksProcessing = false);
+       return;
+     }
+     final postRef =
+         FirebaseFirestore.instance.collection('posts').doc(_currentPost.id);
+     final authorRef =
+         FirebaseFirestore.instance.collection('users').doc(_currentPost.userId);
+     final thanksRef = postRef.collection('thanks').doc(currentUserUid);
+ 
+     try {
+       await FirebaseFirestore.instance.runTransaction((transaction) async {
+         final thanksDoc = await transaction.get(thanksRef);
+         if (thanksDoc.exists) {
+           transaction
+               .update(postRef, {'thanksCount': FieldValue.increment(-1)});
+           transaction.update(
+               authorRef, {'feedThanksReceived': FieldValue.increment(-1)});
+           transaction.delete(thanksRef);
+           if (mounted) setState(() => _thanksCount--);
+         } else {
+           transaction.update(postRef, {'thanksCount': FieldValue.increment(1)});
+           transaction.update(
+               authorRef, {'feedThanksReceived': FieldValue.increment(1)});
+           transaction
+               .set(thanksRef, {'thankedAt': FieldValue.serverTimestamp()});
+diff --git a/lib/features/local_news/screens/local_news_screen.dart b/lib/features/local_news/screens/local_news_screen.dart
+index 51c38577d75188992a1ac4870f3489090e34ce15..9366543f093b08f743c0d490646526ddfa674c2d 100644
+--- a/lib/features/local_news/screens/local_news_screen.dart
++++ b/lib/features/local_news/screens/local_news_screen.dart
+@@ -244,149 +244,149 @@ class _FeedMapView extends StatefulWidget {
+   final UserModel? userModel;
+   final Map<String, String?>? locationFilter;
+   const _FeedMapView(
+       {super.key, required this.category, this.userModel, this.locationFilter});
+ 
+   @override
+   State<_FeedMapView> createState() => _FeedMapViewState();
+ }
+ 
+ class _FeedMapViewState extends State<_FeedMapView> {
+   final Completer<GoogleMapController> _controller = Completer();
+ 
+   Future<CameraPosition> _getInitialCameraPosition() async {
+     final snapshot = await _buildInitialCameraQuery().limit(1).get();
+     LatLng target;
+     if (snapshot.docs.isNotEmpty &&
+         snapshot.docs.first.data()['geoPoint'] != null) {
+       final geoPoint = snapshot.docs.first.data()['geoPoint'] as GeoPoint;
+       target = LatLng(geoPoint.latitude, geoPoint.longitude);
+     } else {
+       target = LatLng(
+         widget.userModel?.geoPoint?.latitude ?? -6.2088,
+         widget.userModel?.geoPoint?.longitude ?? 106.8456,
+       );
+     }
+-    debugPrint('[지도 디버그] 초기 카메라 위치 설정: $target');
++    debugPrint('[Map Debug] Initial camera position: $target');
+     return CameraPosition(target: target, zoom: 14);
+   }
+ 
+   Query<Map<String, dynamic>> _buildInitialCameraQuery() {
+     Query<Map<String, dynamic>> query =
+         FirebaseFirestore.instance.collection('posts');
+     final filter = widget.locationFilter;
+ 
+     if (filter != null) {
+       if (filter['kel'] != null) {
+         query = query.where('locationParts.kel', isEqualTo: filter['kel']);
+       } else if (filter['kec'] != null) {
+         query = query.where('locationParts.kec', isEqualTo: filter['kec']);
+       } else if (filter['kab'] != null) {
+         query = query.where('locationParts.kab', isEqualTo: filter['kab']);
+       } else if (filter['kota'] != null) {
+         query = query.where('locationParts.kota', isEqualTo: filter['kota']);
+       } else if (filter['prov'] != null) {
+         query = query.where('locationParts.prov', isEqualTo: filter['prov']);
+       }
+     } else if (widget.userModel?.locationParts?['prov'] != null) {
+       query = query.where('locationParts.prov',
+           isEqualTo: widget.userModel!.locationParts!['prov']);
+     }
+ 
+     if (widget.category != 'all') {
+       query = query.where('category', isEqualTo: widget.category);
+     }
+-    debugPrint('[지도 디버그] 카메라 위치 쿼리: ${query.parameters}');
++    debugPrint('[Map Debug] Camera position query: ${query.parameters}');
+     return query.orderBy('createdAt', descending: true);
+   }
+ 
+   Query<Map<String, dynamic>> _buildAllMarkersQuery() {
+     Query<Map<String, dynamic>> query =
+         FirebaseFirestore.instance.collection('posts');
+     
+     if (widget.userModel?.locationParts?['prov'] != null) {
+       query = query.where('locationParts.prov',
+           isEqualTo: widget.userModel!.locationParts!['prov']);
+     }
+ 
+     if (widget.category != 'all') {
+       query = query.where('category', isEqualTo: widget.category);
+     }
+-    debugPrint('[지도 디버그] 마커 생성 쿼리: ${query.parameters}');
++    debugPrint('[Map Debug] Marker creation query: ${query.parameters}');
+     return query.orderBy('createdAt', descending: true);
+   }
+ 
+   Set<Marker> _createMarkers(
+       List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
+-    debugPrint('[지도 디버그] 마커 생성을 위해 ${docs.length}개의 문서를 받았습니다.');
++    debugPrint('[Map Debug] Received ${docs.length} documents for markers.');
+     final Set<Marker> markers = {};
+     for (var doc in docs) {
+       final post = PostModel.fromFirestore(doc);
+       if (post.geoPoint != null) {
+-        debugPrint('[지도 디버그] 핀 생성: ${post.id} at ${post.geoPoint!.latitude}, ${post.geoPoint!.longitude}');
++        debugPrint('[Map Debug] Created pin: ${post.id} at ${post.geoPoint!.latitude}, ${post.geoPoint!.longitude}');
+         markers.add(Marker(
+           markerId: MarkerId(post.id),
+           position: LatLng(post.geoPoint!.latitude, post.geoPoint!.longitude),
+           infoWindow: InfoWindow(
+             title: post.title ?? post.body,
+             snippet: post.locationName,
+             onTap: () {
+               Navigator.of(context).push(MaterialPageRoute(
+                 builder: (_) => LocalNewsDetailScreen(post: post),
+               ));
+             },
+           ),
+         ));
+       } else {
+-        debugPrint('[지도 디버그] 핀 생성 실패 (geoPoint 없음): ${post.id}');
++        debugPrint('[Map Debug] Failed to create pin (no geoPoint): ${post.id}');
+       }
+     }
+-    debugPrint('[지도 디버그] 총 ${markers.length}개의 마커를 생성했습니다.');
++    debugPrint('[Map Debug] Created total of ${markers.length} markers.');
+     return markers;
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return FutureBuilder<CameraPosition>(
+       future: _getInitialCameraPosition(),
+       builder: (context, cameraSnapshot) {
+         if (cameraSnapshot.connectionState == ConnectionState.waiting) {
+           return const Center(child: CircularProgressIndicator());
+         }
+         if (!cameraSnapshot.hasData) {
+           return GoogleMap(
+               initialCameraPosition: const CameraPosition(
+                   target: LatLng(-6.2088, 106.8456), zoom: 11));
+         }
+         return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+           stream: _buildAllMarkersQuery().snapshots(),
+           builder: (context, postSnapshot) {
+             if (postSnapshot.connectionState == ConnectionState.waiting) {
+-              debugPrint('[지도 디버그] 게시물 데이터 로딩 중...');
++              debugPrint('[Map Debug] Loading post data...');
+               return const Center(child: CircularProgressIndicator());
+             }
+              if (postSnapshot.hasError) {
+-              debugPrint('[지도 디버그] 게시물 데이터 로딩 에러: ${postSnapshot.error}');
++              debugPrint('[Map Debug] Error loading post data: ${postSnapshot.error}');
+               return Center(child: Text('Error: ${postSnapshot.error}'));
+             }
+             if (!postSnapshot.hasData) {
+-              debugPrint('[지도 디버그] 게시물 데이터 없음.');
++              debugPrint('[Map Debug] No post data.');
+               return Center(child: Text('No posts found.'));
+             }
+ 
+             final markers = _createMarkers(postSnapshot.data!.docs);
+ 
+             return GoogleMap(
+               initialCameraPosition: cameraSnapshot.data!,
+               onMapCreated: (GoogleMapController controller) {
+                 if (!_controller.isCompleted) {
+                   _controller.complete(controller);
+                 }
+               },
+               markers: markers,
+             );
+           },
+         );
+       },
+     );
+   }
+ }
+\ No newline at end of file
+diff --git a/lib/features/local_news/screens/tag_search_result_screen.dart b/lib/features/local_news/screens/tag_search_result_screen.dart
+index e22156813c69b974919832dd0f854e7e74aa01ec..4fbe65141d0ac5d692a4fdbf25cd2817490c321f 100644
+--- a/lib/features/local_news/screens/tag_search_result_screen.dart
++++ b/lib/features/local_news/screens/tag_search_result_screen.dart
+@@ -5,45 +5,53 @@ import 'package:cloud_firestore/cloud_firestore.dart';
+ import 'package:flutter/material.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ 
+ class TagSearchResultScreen extends StatelessWidget {
+   final String tag;
+   const TagSearchResultScreen({super.key, required this.tag});
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(
+         title: Text('#$tag', style: const TextStyle(fontWeight: FontWeight.bold)),
+       ),
+       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+         // Firestore의 array-contains 쿼리를 사용하여 해당 태그를 포함하는 문서를 찾습니다.
+         stream: FirebaseFirestore.instance
+             .collection('posts')
+             .where('tags', arrayContains: tag)
+             .orderBy('createdAt', descending: true)
+             .snapshots(),
+         builder: (context, snapshot) {
+           if (snapshot.connectionState == ConnectionState.waiting) {
+             return const Center(child: CircularProgressIndicator());
+           }
+           if (snapshot.hasError) {
+-            return Center(child: Text('검색 중 오류가 발생했습니다: ${snapshot.error}'));
++            return Center(
++              child: Text(
++                'localNewsTagSearch.errors.fetch'
++                    .tr(namedArgs: {'error': snapshot.error.toString()}),
++              ),
++            );
+           }
+           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+-            return Center(child: Text('\'#$tag\' 태그가 포함된 게시물이 없습니다.'));
++            return Center(
++              child:
++                  Text('localNewsTagSearch.empty'.tr(namedArgs: {'tag': tag})),
++            );
+           }
+ 
+           final postDocs = snapshot.data!.docs;
+           return ListView.builder(
+             padding: const EdgeInsets.all(8.0),
+             itemCount: postDocs.length,
+             itemBuilder: (context, index) {
+               final post = PostModel.fromFirestore(postDocs[index]);
+               return PostCard(post: post);
+             },
+           );
+         },
        ),
      );
    }
  }
-diff --git a/lib/features/my_bling/screens/profile_edit_screen.dart b/lib/features/my_bling/screens/profile_edit_screen.dart
-index 7e2f8167ca9219723e91f8ca2b62e43c299516d3..5fe63f54a73ca9b97d28f65c6daed8fb4ed54acd 100644
---- a/lib/features/my_bling/screens/profile_edit_screen.dart
-+++ b/lib/features/my_bling/screens/profile_edit_screen.dart
-@@ -288,71 +288,71 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
-                         ),
-                         const SizedBox(height: 16),
-                         TextField(
-                           controller: _phoneController,
-                           keyboardType: TextInputType.phone,
-                           decoration: InputDecoration(
-                               labelText: 'profileEdit.phoneHint'.tr()),
-                         ),
-                         const SizedBox(height: 16),
-                         TextField(
-                           controller: _bioController,
-                           decoration: InputDecoration(
-                               labelText: 'profileEdit.bioHint'.tr()),
-                           maxLines: 3,
-                         ),
-                         const SizedBox(height: 24),
-                         Container(
-                           padding: const EdgeInsets.all(12),
-                           decoration: BoxDecoration(
-                               color: Colors.grey[100],
-                               borderRadius: BorderRadius.circular(8)),
-                           child: Column(
-                             crossAxisAlignment: CrossAxisAlignment.start,
-                             children: [
-                               Text(
--                                "Alamat Terdaftar", // TODO: 다국어
-+                                'profileEdit.locationTitle'.tr(),
-                                 style: TextStyle(
-                                     fontWeight: FontWeight.bold,
-                                     color: Colors.black54),
-                               ),
-                               const SizedBox(height: 4),
-                               Row(
-                                 children: [
-                                   Icon(Icons.location_on_outlined,
-                                       color: Colors.grey[600], size: 18),
-                                   const SizedBox(width: 8),
-                                   Expanded(
-                                     child: Text(
-                                       _userModel?.locationName ??
--                                          "Belum diatur", // TODO: 다국어
-+                                          'profileEdit.locationNotSet'.tr(),
-                                       style: const TextStyle(fontSize: 16),
-                                     ),
-                                   ),
-                                   TextButton(
-                                     onPressed: _openLocationSetting,
--                                    child: const Text("Ubah"), // TODO: 다국어
-+                                    child: Text('profileEdit.changeLocation'.tr()),
-                                   )
-                                 ],
-                               ),
-                               const SizedBox(height: 12),
-                               Row(
-                                 children: [
-                                   Expanded(
-                                     child: TextField(
-                                       controller: _rtController,
-                                       decoration: const InputDecoration(
-                                         labelText: 'RT',
-                                         border: OutlineInputBorder(),
-                                         isDense: true,
-                                       ),
-                                       keyboardType: TextInputType.number,
-                                     ),
-                                   ),
-                                   const SizedBox(width: 16),
-                                   Expanded(
-                                     child: TextField(
-                                       controller: _rwController,
-                                       decoration: const InputDecoration(
-                                         labelText: 'RW',
-                                         border: OutlineInputBorder(),
-                                         isDense: true,
+diff --git a/lib/features/local_news/widgets/comment_input_field.dart b/lib/features/local_news/widgets/comment_input_field.dart
+index b7f5b96be9307976eb266ae4f273cea40d644498..68f5010b95ae503426a656060d089254e5fd4b42 100644
+--- a/lib/features/local_news/widgets/comment_input_field.dart
++++ b/lib/features/local_news/widgets/comment_input_field.dart
+@@ -38,52 +38,55 @@ class _CommentInputFieldState extends State<CommentInputField> {
+       'isSecret': _isSecret,
+       'parentCommentId': null,
+     };
+ 
+     try {
+       final postRef =
+           FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+ 
+       // [수정] Firestore 트랜잭션 로직을 올바른 문법으로 수정합니다.
+       await FirebaseFirestore.instance.runTransaction((transaction) async {
+         // 1. 새로운 댓글이 추가될 DocumentReference를 먼저 생성합니다.
+         final newCommentRef = postRef.collection('comments').doc();
+ 
+         // 2. 게시물의 commentCount를 1 증가시킵니다.
+         transaction.update(postRef, {'commentsCount': FieldValue.increment(1)});
+ 
+         // 3. 생성된 참조에 댓글 데이터를 set 합니다.
+         transaction.set(newCommentRef, commentData);
+       });
+ 
+       _controller.clear();
+       setState(() => _isSecret = false);
+       if (widget.onCommentAdded != null) widget.onCommentAdded!(commentData);
+     } catch (e) {
+       if (!mounted) return;
+-      ScaffoldMessenger.of(context)
+-          .showSnackBar(SnackBar(content: Text('댓글 등록 실패: $e')));
++      ScaffoldMessenger.of(context).showSnackBar(
++        SnackBar(
++            content: Text('commentInputField.alerts.failure'
++                .tr(namedArgs: {'error': e.toString()}))),
++      );
+     } finally {
+       if (mounted) setState(() => _isSending = false);
+     }
+   }
+ 
+   // build 메소드는 기존과 동일하게 유지됩니다.
+   @override
+   Widget build(BuildContext context) {
+     return Padding(
+       padding: EdgeInsets.fromLTRB(
+           8, 8, 8, MediaQuery.of(context).viewInsets.bottom + 8),
+       child: Row(
+         children: [
+           // 비밀댓글 체크박스 (UI 예시)
+           Checkbox(
+             value: _isSecret,
+             onChanged: (value) {
+               setState(() {
+                 _isSecret = value ?? false;
+               });
+             },
+             visualDensity: VisualDensity.compact,
+           ),
+          Text('commentInputField.secretCommentLabel'.tr()),
+           Expanded(
+diff --git a/lib/features/local_news/widgets/post_card.dart b/lib/features/local_news/widgets/post_card.dart
+index 308f5e752dd005489f9a128daec3f1d07ef35225..254b0ed9535763ab879584c4059c1928efc96d9e 100644
+--- a/lib/features/local_news/widgets/post_card.dart
++++ b/lib/features/local_news/widgets/post_card.dart
+@@ -123,51 +123,51 @@ class _PostCardState extends State<PostCard> {
+               ),
+               IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz_outlined)),
+             ],
+           ),
+         );
+       },
+     );
+   }
+ 
+   // ✅ _buildLocationInfo 함수 추가
+   Widget _buildLocationInfo(BuildContext context, String? locationName) {
+     return Container(
+       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+       decoration: BoxDecoration(
+         color: Colors.grey.shade100,
+         borderRadius: BorderRadius.circular(8),
+         border: Border.all(color: Colors.grey.shade200),
+       ),
+       child: Row(
+         mainAxisSize: MainAxisSize.min,
+         children: [
+           Icon(Icons.location_on_outlined, color: Colors.grey.shade600, size: 16),
+           const SizedBox(width: 8),
+           Flexible(
+             child: Text(
+-              locationName ?? '위치 정보 있음',
++              locationName ?? 'localNews.locationAvailable'.tr(),
+               style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
+               overflow: TextOverflow.ellipsis,
+             ),
+           ),
+         ],
+       ),
+     );
+   }
+ 
+   Widget _buildTitleAndCategory(BuildContext context, PostModel post, PostCategoryModel category) {
+     return Column(
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: [
+         Row(
+           children: [
+             Text(category.emoji, style: const TextStyle(fontSize: 18)),
+             const SizedBox(width: 8),
+             Expanded(
+               child: Text(
+                 post.title ?? post.body,
+                 style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
+                 maxLines: 1,
+                 overflow: TextOverflow.ellipsis,
+               ),
+             ),
