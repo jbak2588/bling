@@ -34,6 +34,8 @@ lib
 │   │   ├── reply_model.dart
 │   │   └── user_model.dart
 │   ├── router
+│   ├── theme
+│   │   └── grab_theme.dart
 │   └── utils
 │       └── address_formatter.dart
 ├── features
@@ -98,12 +100,6 @@ lib
 │   ├── community
 │   │   └── screens
 │   │       └── community_screen.dart
-│   ├── feed
-│   │   ├── screens
-│   │   │   ├── feed_screen.dart
-│   │   │   └── local_feed_screen.dart
-│   │   └── widgets
-│   │       └── post_card.dart
 │   ├── find_friends
 │   │   ├── data
 │   │   │   ├── find_friend_repository.dart
@@ -137,7 +133,8 @@ lib
 │   │   │   ├── create_local_news_screen.dart
 │   │   │   ├── edit_local_news_screen.dart
 │   │   │   ├── local_news_detail_screen.dart
-│   │   │   └── local_news_screen.dart
+│   │   │   ├── local_news_screen.dart
+│   │   │   └── tag_search_result_screen.dart
 │   │   └── widgets
 │   │       ├── comment_input_field.dart
 │   │       ├── comment_list_view.dart
@@ -183,7 +180,6 @@ lib
 │   │   ├── home_screen.dart
 │   │   └── main_navigation_screen.dart
 │   ├── marketplace
-│   │   ├── domain
 │   │   ├── models
 │   │   │   └── product_model.dart
 │   │   ├── screens
@@ -230,11 +226,18 @@ lib
 │   │   │   └── room_detail_screen.dart
 │   │   └── widgets
 │   │       └── room_card.dart
-│   └── shared
-│       ├── controllers
-│       │   └── locale_controller.dart
-│       └── widgets
-│           └── trust_level_badge.dart
+│   ├── shared
+│   │   ├── controllers
+│   │   │   └── locale_controller.dart
+│   │   ├── grab_widgets.dart
+│   │   ├── screens
+│   │   │   └── image_gallery_screen.dart
+│   │   └── widgets
+│   │       ├── custom_tag_input_field.dart
+│   │       └── trust_level_badge.dart
+│   └── user_profile
+│       └── screens
+│           └── user_profile_screen.dart
 ├── firebase_options.dart
 └── main.dart
 assets

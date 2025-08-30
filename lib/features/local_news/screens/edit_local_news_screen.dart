@@ -1,4 +1,4 @@
-// lib/features/local_news/screens/edit_local_news_screen.dart
+// lib/features/local_news/views/edit_local_news_screen.dart
 
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-
-// 🗑️ 문제가 발생한 외부 패키지 import를 모두 제거합니다.
+// ✅ 새로 만든 공용 위젯을 import 합니다.
+import '../../shared/widgets/custom_tag_input_field.dart';
 
 import '../../../core/constants/app_categories.dart';
 import '../models/post_category_model.dart';
@@ -27,8 +27,10 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   
-  // ✅ 커스텀 태그 입력을 위한 컨트롤러
-  final _tagInputController = TextEditingController();
+  // ❌ 공용 위젯으로 대체되었으므로 기존 태그 컨트롤러는 제거합니다.
+  // final _tagInputController = TextEditingController(); 
+  
+  // ✅ 태그 목록 상태는 그대로 유지합니다. 공용 위젯이 이 상태를 업데이트합니다.
   List<String> _tags = [];
 
   final List<XFile> _newSelectedImages = [];
@@ -59,7 +61,8 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
-    _tagInputController.dispose(); // ✅ 컨트롤러 해제
+    // ❌ 더 이상 사용하지 않으므로 dispose 호출도 제거합니다.
+    // _tagInputController.dispose(); 
     super.dispose();
   }
 
@@ -121,7 +124,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
         'mediaUrl': finalImageUrls,
         'mediaType': finalImageUrls.isNotEmpty ? 'image' : null,
         'category': _selectedCategory!.categoryId,
-        'tags': _tags,
+        'tags': _tags, // ✅ _tags 상태는 그대로 사용됩니다.
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
@@ -132,71 +135,20 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('게시글이 수정되었습니다')));
+          .showSnackBar(const SnackBar(content: Text('게시글이 수정되었습니다')));   // TODO : 다국어 작업
       Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('수정 실패: $e')));
+            .showSnackBar(SnackBar(content: Text('수정 실패: $e')));   // TODO : 다국어 작업
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
-  // ✅ 커스텀 태그 위젯을 빌드하는 함수
-  Widget _buildCustomChipsInput() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 칩들을 보여주는 부분
-        Wrap(
-          spacing: 8.0,
-          runSpacing: 4.0,
-          children: _tags.map((tag) {
-            return Chip(
-              label: Text(tag),
-              onDeleted: () {
-                setState(() {
-                  _tags.remove(tag);
-                });
-              },
-            );
-          }).toList(),
-        ),
-        // 새 태그를 입력하는 텍스트 필드
-        TextField(
-          controller: _tagInputController,
-          decoration: InputDecoration(
-            labelText: '태그 입력 후 스페이스바 또는 완료',
-            border: const OutlineInputBorder(),
-          ),
-          onChanged: (value) {
-            // 스페이스바를 누르면 태그 추가
-            if (value.endsWith(' ') && value.trim().isNotEmpty) {
-              final newTag = value.trim();
-              if (!_tags.contains(newTag)) {
-                setState(() {
-                  _tags.add(newTag);
-                });
-              }
-              _tagInputController.clear();
-            }
-          },
-          onSubmitted: (value) {
-            // 키보드에서 완료(엔터)를 누르면 태그 추가
-            final newTag = value.trim();
-            if (newTag.isNotEmpty && !_tags.contains(newTag)) {
-              setState(() {
-                _tags.add(newTag);
-              });
-            }
-            _tagInputController.clear();
-          },
-        ),
-      ],
-    );
-  }
+  // ❌ 기존 커스텀 태그 위젯 빌드 함수는 완전히 제거합니다.
+  // Widget _buildCustomChipsInput() { ... }
 
   @override
   Widget build(BuildContext context) {
@@ -229,20 +181,29 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
             const SizedBox(height: 16),
             TextField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                    labelText: '제목',
-                    border: OutlineInputBorder())),
+                decoration: InputDecoration(
+                    labelText: 'localNewsCreate.form.titleLabel'.tr(),
+                    border: const OutlineInputBorder())),
             const SizedBox(height: 16),
             TextField(
                 controller: _contentController,
                 maxLines: 8,
-                decoration: const InputDecoration(
-                    labelText: '내용',
-                    border: OutlineInputBorder())),
+                decoration: InputDecoration(
+                    labelText: 'localNewsCreate.form.contentLabel'.tr(),
+                    border: const OutlineInputBorder())),
             const SizedBox(height: 16),
             
-            // ✅ 직접 만든 커스텀 태그 입력 위젯을 사용합니다.
-            _buildCustomChipsInput(),
+            // ✅ 교체된 공용 커스텀 태그 위젯을 사용합니다.
+            CustomTagInputField(
+              initialTags: _tags, // 초기 태그 목록을 전달합니다.
+              hintText: 'localNewsCreate.form.tagsHint'.tr(), // 다국어 힌트 텍스트
+              onTagsChanged: (tags) {
+                // 태그가 변경될 때마다 화면의 상태(_tags)를 업데이트합니다.
+                setState(() {
+                  _tags = tags;
+                });
+              },
+            ),
 
             const SizedBox(height: 16),
             _buildImagePicker(),
@@ -262,6 +223,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   }
 
   Widget _buildImagePicker() {
+    // ... (이 부분은 기존 코드와 동일하여 생략하지 않고 그대로 둡니다)
     final existingImageCount = _existingImageUrls.length;
     final newImageCount = _newSelectedImages.length;
     final totalImageCount = existingImageCount + newImageCount;
@@ -270,9 +232,9 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         OutlinedButton.icon(
-          onPressed: _pickImages,
+          onPressed: totalImageCount >= 10 ? null : _pickImages,
           icon: const Icon(Icons.camera_alt),
-          label: Text('localNewsCreate.buttons.addImage'.tr()),
+          label: Text('${'localNewsCreate.buttons.addImage'.tr()} ($totalImageCount/10)'),
         ),
         const SizedBox(height: 8),
         if (totalImageCount > 0)
