@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
 
+// ✅ 공용 태그 위젯 import
+import '../../shared/widgets/custom_tag_input_field.dart';
+
 import '../../../core/constants/app_categories.dart';
 import '../models/post_category_model.dart';
 import '../../../core/models/user_model.dart';
@@ -22,7 +25,10 @@ class CreateLocalNewsScreen extends StatefulWidget {
 class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _tagsController = TextEditingController();
+  // final _tagsController = TextEditingController();
+// ✅ 태그 목록을 관리할 상태 변수를 추가합니다.
+  List<String> _tags = [];
+
   final List<XFile> _selectedImages = [];
   final _picker = ImagePicker();
   PostCategoryModel? _selectedCategory;
@@ -34,6 +40,14 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
     if (AppCategories.postCategories.isNotEmpty) {
       _selectedCategory = AppCategories.postCategories.first;
     }
+  }
+
+  // ✅ dispose도 잊지 않고 정리합니다.
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickImages() async {
@@ -79,21 +93,21 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception("로그인이 필요합니다.");
+      if (user == null) throw Exception("로그인이 필요합니다.");   // TODO : 다국어 작업
 
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
-      if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
+      if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");   // TODO : 다국어 작업
       final userModel = UserModel.fromFirestore(userDoc);
 
       final imageUrls = await _uploadImages();
-      final tags = _tagsController.text
-          .split(',')
-          .map((tag) => tag.trim())
-          .where((tag) => tag.isNotEmpty)
-          .toList();
+      // final tags = _tagsController.text
+      //     .split(',')
+      //     .map((tag) => tag.trim())
+      //     .where((tag) => tag.isNotEmpty)
+      //     .toList();
 
       final postData = {
         'userId': user.uid,
@@ -102,7 +116,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
         'mediaUrl': imageUrls,
         'mediaType': imageUrls.isNotEmpty ? 'image' : null,
         'category': _selectedCategory!.categoryId,
-        'tags': tags,
+        'tags': _tags, // ✅ 공용 위젯과 연결된 _tags 상태 사용
         'locationName': userModel.locationName,
         'locationParts': userModel.locationParts,
         'geoPoint': userModel.geoPoint,
@@ -195,12 +209,15 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                     labelText: 'localNewsCreate.form.contentLabel'.tr(),
                     border: const OutlineInputBorder())),
             const SizedBox(height: 16),
-            TextField(
-                controller: _tagsController,
-                decoration: InputDecoration(
-                    labelText: 'localNewsCreate.form.tagsLabel'.tr(),
-                    hintText: 'localNewsCreate.form.tagsHint'.tr(),
-                    border: const OutlineInputBorder())),
+            CustomTagInputField(
+              hintText: 'localNewsCreate.form.tagsHint'.tr(),
+              onTagsChanged: (tags) {
+                setState(() {
+                  _tags = tags;
+                });
+              },
+            ),
+            
             const SizedBox(height: 16),
             _buildImagePicker(),
             const SizedBox(height: 24),

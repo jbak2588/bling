@@ -27,10 +27,10 @@ class TagSearchResultScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('검색 중 오류가 발생했습니다: ${snapshot.error}'));
+            return Center(child: Text('검색 중 오류가 발생했습니다: ${snapshot.error}'));   // TODO : 다국어 작업
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('\'#$tag\' 태그가 포함된 게시물이 없습니다.'));
+            return Center(child: Text('\'#$tag\' 태그가 포함된 게시물이 없습니다.'));   // TODO : 다국어 작업
           }
 
           final postDocs = snapshot.data!.docs;

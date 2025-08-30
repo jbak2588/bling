@@ -17,6 +17,7 @@ import '../../../core/models/user_model.dart';
 import '../widgets/comment_input_field.dart';
 import '../widgets/comment_list_view.dart';
 import 'edit_local_news_screen.dart';
+import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
 
 
 class LocalNewsDetailScreen extends StatefulWidget {
@@ -102,7 +103,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('로그인이 필요합니다.')));
+          .showSnackBar(const SnackBar(content: Text('로그인이 필요합니다.')));  // TODO : 다국어 작업
       setState(() => _likeLoading = false);
       return;
     }
@@ -154,7 +155,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     }
     if (currentUserUid == _currentPost.userId) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('자신의 글에는 감사를 표시할 수 없습니다.')));
+          const SnackBar(content: Text('자신의 글에는 감사를 표시할 수 없습니다.')));     // TODO : 다국어 작업
       setState(() => _isThanksProcessing = false);
       return;
     }
@@ -312,6 +313,12 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                           .bodyLarge
                           ?.copyWith(height: 1.5)),
                   const SizedBox(height: 16),
+
+                  // ✅ 누락되었던 태그 표시 위젯을 추가합니다.
+                  if (_currentPost.tags.isNotEmpty) ...[
+                    _buildTags(context, _currentPost.tags),
+                    const SizedBox(height: 16),
+                  ],
                   
                   if (hasImages)
                     _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
@@ -346,6 +353,30 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           ),
         ),
       ),
+    );
+  }
+
+   // ✅ 태그를 표시하고 탭 이벤트를 처리하는 위젯 함수를 새로 추가합니다.
+  Widget _buildTags(BuildContext context, List<String> tags) {
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 4.0,
+      children: tags.map((tag) {
+        return InkWell(
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => TagSearchResultScreen(tag: tag),
+            ));
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Chip(
+            label: Text('#$tag', style: const TextStyle(fontSize: 12)),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            visualDensity: VisualDensity.compact,
+            backgroundColor: Colors.grey[200],
+          ),
+        );
+      }).toList(),
     );
   }
 
