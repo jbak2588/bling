@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -249,7 +250,8 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           AppCategories.postCategories.firstWhere((c) => c.categoryId == 'etc'),
     );
     final hasImages = _currentPost.mediaUrl != null && _currentPost.mediaUrl!.isNotEmpty;
-
+    // ✅ 상세 화면에서도 위치 정보 유무 확인
+    final hasLocation = _currentPost.geoPoint != null && _currentPost.geoPoint?.latitude != null && _currentPost.geoPoint?.longitude != null;
     return Scaffold(
       appBar: AppBar(
         title: Text(_currentPost.title ?? 'localNewsDetail.appBarTitle'.tr()),
@@ -280,54 +282,59 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           ),
         ],
       ),
-      body: CustomScrollView(slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildAuthorInfo(_currentPost.userId),
-                const SizedBox(height: 16),
-                Chip(
-                  avatar: Text(category.emoji,
-                      style: const TextStyle(fontSize: 16)),
-                  label: Text(category.nameKey.tr()),
-                  visualDensity: VisualDensity.compact,
-                ),
-                const SizedBox(height: 8),
-                Text(_currentPost.title ?? '',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-                Text(_currentPost.body,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge
-                        ?.copyWith(height: 1.5)),
-                const SizedBox(height: 16),
-                
-                if (hasImages)
-                  _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
-
-                const Divider(height: 32),
-                _buildPostStats(),
-              ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildAuthorInfo(_currentPost.userId),
+                  const SizedBox(height: 16),
+                  Chip(
+                    avatar: Text(category.emoji,
+                        style: const TextStyle(fontSize: 16)),
+                    label: Text(category.nameKey.tr()),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(_currentPost.title ?? '',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  Text(_currentPost.body,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(height: 1.5)),
+                  const SizedBox(height: 16),
+                  
+                  if (hasImages)
+                    _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
+                  // ✅ 상세 화면에 미니맵 위젯 추가
+                  if (hasLocation) ...[
+                    const SizedBox(height: 16),
+                    _buildMiniMap(context, _currentPost),
+                  ],
+                  const Divider(height: 32),
+                  _buildPostStats(),
+                ],
+              ),
             ),
-          ),
+            CommentListView(
+              postId: _currentPost.id,
+              postOwnerId: _currentPost.userId,
+              activeReplyCommentId: _activeReplyCommentId,
+              onReplyTap: _handleReplyTap,
+              onCommentDeleted: _handleCommentDeleted,
+            ),
+          ],
         ),
-        SliverToBoxAdapter(
-          child: CommentListView(
-            postId: _currentPost.id,
-            postOwnerId: _currentPost.userId,
-            activeReplyCommentId: _activeReplyCommentId,
-            onReplyTap: _handleReplyTap,
-            onCommentDeleted: _handleCommentDeleted,
-          ),
-        ),
-      ]),
+      ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: EdgeInsets.fromLTRB(
@@ -446,6 +453,39 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           ],
         ),
       ],
+    );
+  }
+
+  // ✅ 상세 화면에 미니맵을 그리는 함수 추가
+  Widget _buildMiniMap(BuildContext context, PostModel post) {
+    if (post.geoPoint == null || post.geoPoint?.latitude == null || post.geoPoint?.longitude == null) {
+      return SizedBox.shrink();
+    }
+    final target = LatLng(post.geoPoint!.latitude, post.geoPoint!.longitude);
+    return SizedBox(
+      height: 180,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: target,
+            zoom: 15,
+          ),
+          markers: {
+            Marker(
+              markerId: MarkerId(post.id),
+              position: target,
+            ),
+          },
+          myLocationEnabled: false,
+          myLocationButtonEnabled: false,
+          zoomControlsEnabled: true,
+          scrollGesturesEnabled: true,
+          zoomGesturesEnabled: true,
+          tiltGesturesEnabled: false,
+          rotateGesturesEnabled: false,
+        ),
+      ),
     );
   }
 }
