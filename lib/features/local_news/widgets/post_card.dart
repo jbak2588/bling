@@ -13,20 +13,19 @@
 /// 4. 개선 제안
 ///   - 카테고리별 색상/아이콘, 위치 기반 추천, 미디어 업로드/미리보기, KPI/Analytics 이벤트 로깅, 광고/추천글 연계
 library;
-
-import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
+import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
+import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
+import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// ✅ 새로 만든 프로필 스크린 import
-import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
-import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
-
+// ✅ Google Maps import 추가
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../core/constants/app_categories.dart';
 import '../models/post_category_model.dart';
@@ -68,7 +67,8 @@ class _PostCardState extends State<PostCard> {
 
     if (diff.inMinutes < 1) return 'time.now'.tr();
     if (diff.inHours < 1) {
-      return 'time.minutesAgo'.tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+      return 'time.minutesAgo'
+          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
     }
     if (diff.inDays < 1) {
       return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
@@ -79,9 +79,99 @@ class _PostCardState extends State<PostCard> {
     return DateFormat('time.dateFormat'.tr()).format(dt);
   }
 
-  Widget _buildAuthorInfo(BuildContext context, String userId, Timestamp createdAt) {
+  @override
+  Widget build(BuildContext context) {
+    final post = widget.post;
+    final hasImages = post.mediaUrl != null && post.mediaUrl!.isNotEmpty;
+    // ✅ 위치 정보 유무를 확인하는 변수 추가
+    final hasLocation = post.geoPoint != null;
+
+    final category = AppCategories.postCategories.firstWhere(
+      (c) => c.categoryId == post.category,
+      orElse: () => AppCategories.postCategories.first,
+    );
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => LocalNewsDetailScreen(post: post),
+          ));
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildAuthorInfo(context, post.userId, post.createdAt),
+              const SizedBox(height: 12),
+              _buildTitleAndContent(context, post, category),
+              if (hasImages) ...[
+                const SizedBox(height: 12),
+                _buildImageCarousel(context, post.mediaUrl!),
+              ],
+              
+              // ✅ 위치 정보(geoPoint)가 있을 때만 미니맵을 표시합니다.
+              if (hasLocation) ...[
+                const SizedBox(height: 12),
+                _buildMiniMap(context, post),
+              ],
+
+              if (post.tags.isNotEmpty) _buildTags(context, post.tags),
+              const Divider(height: 24),
+              _buildActionButtons(post),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ✅ 게시물 카드 내에 작은 지도를 표시하는 위젯 (새로 추가된 함수)
+  Widget _buildMiniMap(BuildContext context, PostModel post) {
+    final target = LatLng(post.geoPoint!.latitude, post.geoPoint!.longitude);
+
+    return SizedBox(
+      height: 150,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: AbsorbPointer( // 모든 터치 이벤트를 무시하여 스크롤 충돌 방지
+          child: GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: target,
+              zoom: 15,
+            ),
+            markers: {
+              Marker(
+                markerId: MarkerId(post.id),
+                position: target,
+              ),
+            },
+            myLocationEnabled: false,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+            scrollGesturesEnabled: false,
+            zoomGesturesEnabled: false,
+            tiltGesturesEnabled: false,
+            rotateGesturesEnabled: false,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAuthorInfo(
+      BuildContext context, String userId, Timestamp createdAt) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+      stream:
+          FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox(height: 40);
@@ -99,8 +189,11 @@ class _PostCardState extends State<PostCard> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-                child: user.photoUrl == null ? const Icon(Icons.person, size: 20) : null,
+                backgroundImage:
+                    user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                child: user.photoUrl == null
+                    ? const Icon(Icons.person, size: 20)
+                    : null,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -109,27 +202,33 @@ class _PostCardState extends State<PostCard> {
                   children: [
                     Row(
                       children: [
-                        Text(user.nickname, style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                        Text(user.nickname,
+                            style:
+                                GoogleFonts.inter(fontWeight: FontWeight.bold)),
                         const SizedBox(width: 4),
                         TrustLevelBadge(trustLevel: user.trustLevel),
                       ],
                     ),
                     Text(
                       '${user.locationParts?['kel'] ?? user.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $timeAgo',
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                      style:
+                          TextStyle(color: Colors.grey.shade600, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz_outlined)),
+              IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.more_horiz_outlined)),
             ],
           ),
         );
       },
     );
   }
-
-  Widget _buildTitleAndCategory(BuildContext context, PostModel post, PostCategoryModel category) {
+  
+  Widget _buildTitleAndContent(
+      BuildContext context, PostModel post, PostCategoryModel category) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -140,7 +239,8 @@ class _PostCardState extends State<PostCard> {
             Expanded(
               child: Text(
                 post.title ?? post.body,
-                style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
+                style: GoogleFonts.inter(
+                    fontSize: 16, fontWeight: FontWeight.w600),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -151,7 +251,8 @@ class _PostCardState extends State<PostCard> {
           const SizedBox(height: 6),
           Text(
             post.body,
-            style: TextStyle(fontSize: 14, color: Colors.grey.shade800, height: 1.4),
+            style: TextStyle(
+                fontSize: 14, color: Colors.grey.shade800, height: 1.4),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -161,7 +262,8 @@ class _PostCardState extends State<PostCard> {
   }
 
   Widget _buildImageCarousel(BuildContext context, List<String> imageUrls) {
-    if (imageUrls.length <= 1) {
+    if (imageUrls.isEmpty) return const SizedBox.shrink();
+    if (imageUrls.length == 1) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Image.network(
@@ -169,11 +271,11 @@ class _PostCardState extends State<PostCard> {
           width: double.infinity,
           height: 180,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey.shade100),
+          errorBuilder: (context, error, stackTrace) =>
+              Container(color: Colors.grey.shade100),
         ),
       );
     }
-
     return Stack(
       alignment: Alignment.bottomRight,
       children: [
@@ -191,7 +293,8 @@ class _PostCardState extends State<PostCard> {
                     imageUrls[index],
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey.shade100),
+                    errorBuilder: (context, error, stackTrace) =>
+                        Container(color: Colors.grey.shade100),
                   ),
                 ),
               );
@@ -214,7 +317,6 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  // ✅ _buildTags 함수를 수정하여 탭 이벤트를 추가합니다.
   Widget _buildTags(BuildContext context, List<String> tags) {
     return Padding(
       padding: const EdgeInsets.only(top: 12.0),
@@ -248,7 +350,9 @@ class _PostCardState extends State<PostCard> {
         Icon(icon, size: 20, color: Colors.grey.shade700),
         if (count != null) ...[
           const SizedBox(width: 6),
-          Text('$count', style: TextStyle(color: Colors.grey.shade800, fontWeight: FontWeight.w500)),
+          Text('$count',
+              style: TextStyle(
+                  color: Colors.grey.shade800, fontWeight: FontWeight.w500)),
         ],
       ],
     );
@@ -259,57 +363,12 @@ class _PostCardState extends State<PostCard> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _actionButton(icon: Icons.favorite_border, count: post.likesCount),
-        _actionButton(icon: Icons.chat_bubble_outline, count: post.commentsCount),
-        _actionButton(icon: Icons.card_giftcard_outlined, count: post.thanksCount),
+        _actionButton(
+            icon: Icons.chat_bubble_outline, count: post.commentsCount),
+        _actionButton(
+            icon: Icons.card_giftcard_outlined, count: post.thanksCount),
         _actionButton(icon: Icons.share_outlined, count: null),
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final post = widget.post; 
-    final hasImages = post.mediaUrl != null && post.mediaUrl!.isNotEmpty;
-
-    final category = AppCategories.postCategories.firstWhere(
-      (c) => c.categoryId == post.category,
-      orElse: () => AppCategories.postCategories.first,
-    );
-
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => LocalNewsDetailScreen(post: post),
-          ));
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildAuthorInfo(context, post.userId, post.createdAt),
-              const SizedBox(height: 12),
-              _buildTitleAndCategory(context, post, category),
-              if (hasImages) ...[
-                const SizedBox(height: 12),
-                _buildImageCarousel(context, post.mediaUrl!),
-              ],
-              // ✅ build 메서드에서 _buildTags를 호출할 때 context를 전달합니다.
-              if (post.tags.isNotEmpty) _buildTags(context, post.tags),
-              const Divider(height: 24),
-              _buildActionButtons(post),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

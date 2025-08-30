@@ -12,9 +12,21 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+// ✅ 지도 렌더러를 최신 버전으로 강제하는 코드를 추가합니다.
+  // 이 코드는 다른 초기화 코드보다 먼저 실행될 수 있습니다.
+  final GoogleMapsFlutterPlatform mapsImplementation = GoogleMapsFlutterPlatform.instance;
+  if (mapsImplementation is GoogleMapsFlutterAndroid) {
+    mapsImplementation.initializeWithRenderer(AndroidMapRenderer.latest);
+  }
+
   await EasyLocalization.ensureInitialized();
   await Firebase.initializeApp();
 

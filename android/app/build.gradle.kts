@@ -1,3 +1,19 @@
+import java.util.regex.Pattern
+
+// api_keys.dart 파일에서 API 키를 파싱하는 로직
+val keysFile = rootProject.file("../lib/api_keys.dart")
+var apiKey = ""
+if (keysFile.exists()) {
+    val content = keysFile.readText(Charsets.UTF_8)
+    // ✅ class 구조를 정확히 읽을 수 있도록 정규식을 수정합니다.
+    val pattern = Pattern.compile("static const googleApiKey\\s*=\\s*'([^']*)'")
+    val matcher = pattern.matcher(content)
+    if (matcher.find()) {
+        apiKey = matcher.group(1)
+    }
+}
+
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -16,7 +32,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+       jvmTarget = "11"
     }
 
     sourceSets {
@@ -29,6 +45,9 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        
+        // ✅ 위에서 제대로 읽어온 apiKey 변수를 사용하여 플레이스홀더를 설정합니다.
+        manifestPlaceholders["googleMapsApiKey"] = apiKey
     }
 
     buildTypes {
@@ -49,9 +68,8 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
 }
 
-// ▼▼▼▼▼ 모든 코틀린 컴파일 작업의 자바 버전을 11로 강제합니다 ▼▼▼▼▼
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
