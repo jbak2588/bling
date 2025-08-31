@@ -46,6 +46,7 @@ class JobModel {
   final String? workPeriod; // 'short_term', 'long_term' 등
   final String? workHours; // '월-금, 09:00-18:00' 등
   final List<String>? imageUrls;
+    final List<String> tags;
 
   JobModel({
     required this.id,
@@ -68,6 +69,7 @@ class JobModel {
     this.workPeriod,
     this.workHours,
     this.imageUrls,
+    this.tags = const [], // ✅ 생성자에 추가
   });
 
   factory JobModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -95,6 +97,7 @@ class JobModel {
       workHours: data['workHours'],
       imageUrls:
           data['imageUrls'] != null ? List<String>.from(data['imageUrls']) : [],
+      tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
     );
   }
 
@@ -118,6 +121,7 @@ class JobModel {
       'workPeriod': workPeriod,
       'workHours': workHours,
       'imageUrls': imageUrls,
+      'tags': tags,
     };
   }
 }

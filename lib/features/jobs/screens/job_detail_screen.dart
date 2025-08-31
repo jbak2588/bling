@@ -25,12 +25,16 @@
 // =====================================================
 
 import 'package:bling_app/features/jobs/models/job_model.dart';
-import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart'; // [추가]
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart'; // [추가]
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+
+import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
+import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 
 class JobDetailScreen extends StatelessWidget {
   final JobModel job;
@@ -89,18 +93,21 @@ class JobDetailScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // --- 1. 대표 이미지 ---
-          if (job.imageUrls != null && job.imageUrls!.isNotEmpty)
-            ClipRRect(
+          // ✅ 1. 대표 이미지를 공용 이미지 캐러셀로 교체
+         if (job.imageUrls != null && job.imageUrls!.isNotEmpty)
+          GestureDetector(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => ImageGalleryScreen(imageUrls: job.imageUrls!),
+            )),
+            child: ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
-              child: Image.network(
-                job.imageUrls!.first,
+              child: ImageCarouselCard(
+                imageUrls: job.imageUrls!,
                 height: 250,
-                width: double.infinity,
-                fit: BoxFit.cover,
               ),
             ),
-          const SizedBox(height: 16),
+          ),
+        const SizedBox(height: 16),
 
           // --- 2. 제목 및 기본 정보 ---
           Text(job.title,
@@ -130,10 +137,24 @@ class JobDetailScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 16, height: 1.5)),
           const Divider(height: 32),
 
-          // --- 4. 작성자 정보 ---
-          _buildSellerInfo(job.userId),
+          // ✅ 2. 공용 태그 리스트 위젯 추가
+        ClickableTagList(tags: job.tags),
+        const Divider(height: 32),
+
+        // ✅ 3. 공용 미니맵 위젯 추가
+        if (job.geoPoint != null) ...[
+          Text('jobs.detail.locationTitle'.tr(), style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          MiniMapView(location: job.geoPoint!, markerId: job.id),
+          const Divider(height: 32),
         ],
-      ),
+
+        // ✅ 4. 작성자 정보를 공용 프로필 타일로 교체
+        Text('jobs.detail.authorTitle'.tr(), style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 12),
+        AuthorProfileTile(userId: job.userId),
+      ],
+    ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
@@ -150,33 +171,5 @@ class JobDetailScreen extends StatelessWidget {
   }
 
   // 작성자 정보 위젯
-  Widget _buildSellerInfo(String userId) {
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return ListTile(title: Text('jobs.detail.noAuthor'.tr()));
-        }
-        final user = UserModel.fromFirestore(snapshot.data!);
-        return Card(
-          elevation: 0,
-          color: Colors.grey.shade100,
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundImage:
-                  (user.photoUrl != null && user.photoUrl!.isNotEmpty)
-                      ? NetworkImage(user.photoUrl!)
-                      : null,
-            ),
-            title: Text(user.nickname,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(user.locationName ?? ''),
-          ),
-        );
-      },
-    );
-  }
+  
 }

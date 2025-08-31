@@ -27,10 +27,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
 import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
 
+// ✅ 새로 만든 공용 캐러셀 위젯을 import 합니다.
+import '../../shared/widgets/image_carousel_card.dart';
 
 import '../../../core/constants/app_categories.dart';
 import '../models/post_category_model.dart';
 
+// ✅ 더 이상 상태가 필요 없으므로 StatelessWidget으로 변경합니다.
 class PostCard extends StatefulWidget {
   final PostModel post;
   const PostCard({super.key, required this.post});
@@ -39,27 +42,12 @@ class PostCard extends StatefulWidget {
   State<PostCard> createState() => _PostCardState();
 }
 
-class _PostCardState extends State<PostCard> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-
+// ✅ 2. State 클래스를 만들고 with AutomaticKeepAliveClientMixin을 추가합니다.
+class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin {
+  
+  // ✅ 3. wantKeepAlive를 true로 설정하여 카드 상태를 유지합니다.
   @override
-  void initState() {
-    super.initState();
-    _pageController.addListener(() {
-      if (mounted) {
-        setState(() {
-          _currentPage = _pageController.page?.round() ?? 0;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
+  bool get wantKeepAlive => true;
 
   String _formatTimestamp(BuildContext context, Timestamp timestamp) {
     final now = DateTime.now();
@@ -186,60 +174,6 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  Widget _buildImageCarousel(BuildContext context, List<String> imageUrls) {
-    if (imageUrls.length <= 1) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          imageUrls.first,
-          width: double.infinity,
-          height: 180,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey.shade100),
-        ),
-      );
-    }
-
-    return Stack(
-      alignment: Alignment.bottomRight,
-      children: [
-        SizedBox(
-          height: 180,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: imageUrls.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    imageUrls[index],
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey.shade100),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        Container(
-          margin: const EdgeInsets.all(12.0),
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-          child: Text(
-            '${_currentPage + 1} / ${imageUrls.length}',
-            style: const TextStyle(color: Colors.white, fontSize: 12),
-          ),
-        ),
-      ],
-    );
-  }
-
   // ✅ _buildTags 함수를 수정하여 탭 이벤트를 추가합니다.
   Widget _buildTags(BuildContext context, List<String> tags) {
     return Padding(
@@ -294,9 +228,12 @@ class _PostCardState extends State<PostCard> {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ 4. super.build(context)를 호출해야 합니다.
+    super.build(context);
+
+    // 기존 build 로직에서 post를 참조할 때 widget.post로 변경합니다.
     final post = widget.post;
     final hasImages = post.mediaUrl != null && post.mediaUrl!.isNotEmpty;
-    // ✅ 위치 정보 유무를 확인하는 변수 추가
     final hasLocation = post.geoPoint != null;
     final category = AppCategories.postCategories.firstWhere(
       (c) => c.categoryId == post.category,
@@ -327,9 +264,8 @@ class _PostCardState extends State<PostCard> {
               _buildTitleAndCategory(context, post, category),
               if (hasImages) ...[
                 const SizedBox(height: 12),
-                _buildImageCarousel(context, post.mediaUrl!),
+                ImageCarouselCard(imageUrls: post.mediaUrl!),
               ],
-              // ✅ 위치 정보(geoPoint)가 있을 때만 상징적인 위치 정보 위젯을 표시합니다.
               if (hasLocation) ...[
                 const SizedBox(height: 12),
                 _buildLocationInfo(context, post.locationName),

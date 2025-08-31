@@ -23,27 +23,45 @@
 // =====================================================
 
 import 'package:bling_app/features/jobs/models/job_model.dart';
-import 'package:bling_app/features/jobs/screens/job_detail_screen.dart'; // [추가]
+import 'package:bling_app/features/jobs/screens/job_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-// [추가] 숫자 포맷을 위해
 
-class JobCard extends StatelessWidget {
+// ✅ 공용 이미지 캐러셀 위젯을 import 합니다.
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+
+// ✅ 1. StatelessWidget을 StatefulWidget으로 변경합니다.
+class JobCard extends StatefulWidget {
   final JobModel job;
   const JobCard({super.key, required this.job});
 
   @override
+  State<JobCard> createState() => _JobCardState();
+}
+
+// ✅ 2. State 클래스를 만들고 with AutomaticKeepAliveClientMixin을 추가합니다.
+class _JobCardState extends State<JobCard> with AutomaticKeepAliveClientMixin {
+
+  // ✅ 3. wantKeepAlive를 true로 설정하여 카드 상태를 유지합니다.
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    // ✅ 4. super.build(context)를 호출해야 합니다.
+    super.build(context);
+    
+    // State 클래스 내에서는 widget.job으로 데이터에 접근합니다.
+    final job = widget.job; 
     final NumberFormat currencyFormat =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
-      clipBehavior: Clip.antiAlias, // InkWell 효과가 Card 모서리를 따르도록 함
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-      
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -53,25 +71,22 @@ class JobCard extends StatelessWidget {
         },
         child: Padding(
           padding: const EdgeInsets.all(12.0),
-          // V V V --- [수정] 이미지를 포함하기 위해 Row 위젯으로 구조 변경 --- V V V
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- 1. 대표 이미지 ---
+              // ✅ 5. 대표 이미지를 공용 ImageCarouselCard 위젯으로 교체합니다.
               ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
                 child: (job.imageUrls != null && job.imageUrls!.isNotEmpty)
-                    ? Image.network(
-                        job.imageUrls!.first,
+                    ? ImageCarouselCard(
+                        imageUrls: job.imageUrls!,
                         width: 80,
                         height: 80,
-                        fit: BoxFit.cover,
-                        errorBuilder: (c, e, s) => _buildPlaceholderImage(),
                       )
                     : _buildPlaceholderImage(),
               ),
               const SizedBox(width: 16),
-              // --- 2. 텍스트 정보 ---
+              // --- 2. 텍스트 정보 (기존과 동일) ---
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,7 +105,6 @@ class JobCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      // 급여 정보 표시
                       '${'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr()}: ${currencyFormat.format(job.salaryAmount ?? 0)}',
                       style: const TextStyle(
                           fontSize: 15,
@@ -114,13 +128,12 @@ class JobCard extends StatelessWidget {
               ),
             ],
           ),
-          // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
         ),
       ),
     );
   }
 
-  // [추가] 이미지 플레이스홀더 위젯
+  // State 클래스 내부의 헬퍼 메서드로 유지합니다.
   Widget _buildPlaceholderImage() {
     return Container(
       width: 80,
