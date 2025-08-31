@@ -36,6 +36,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
 class CreateJobScreen extends StatefulWidget {
   final UserModel userModel;
@@ -51,6 +52,9 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
   final _descriptionController = TextEditingController();
   final _workHoursController = TextEditingController();
   String? _selectedWorkPeriod;
+
+  // ✅ 태그 상태 변수 추가
+  List<String> _tags = [];
 
   final _salaryAmountController = TextEditingController();
   String? _selectedSalaryType;
@@ -119,6 +123,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         workPeriod: _selectedWorkPeriod,
         workHours: _workHoursController.text.trim(),
         imageUrls: imageUrls, // [수정] 업로드된 이미지 URL 목록 전달
+        tags: _tags, // ✅ 저장 시 태그 목록을 전달합니다.
       );
       await _repository.createJob(newJob);
 
@@ -333,6 +338,20 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                       return 'jobs.form.descriptionValidator'.tr();
                     }
                     return null;
+                  },
+                ),
+                const SizedBox(height: 24),
+
+                // ✅ 공용 태그 입력 위젯을 추가합니다.
+                Text('jobs.form.tagsTitle'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 12),
+                CustomTagInputField(
+                  hintText: 'jobs.form.tagsHint'.tr(),
+                  onTagsChanged: (tags) {
+                    setState(() {
+                      _tags = tags;
+                    });
                   },
                 ),
               ],

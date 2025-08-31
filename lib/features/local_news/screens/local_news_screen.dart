@@ -57,15 +57,11 @@ class LocalNewsScreen extends StatefulWidget {
   State<LocalNewsScreen> createState() => _LocalNewsScreenState();
 }
 
-class _LocalNewsScreenState extends State<LocalNewsScreen>
-    with TickerProviderStateMixin {
+class _LocalNewsScreenState extends State<LocalNewsScreen> with TickerProviderStateMixin {
+  // ... 이 클래스의 모든 코드는 원본과 동일하게 유지됩니다 ...
   late final TabController _tabController;
   bool _isMapView = false;
-
-  final List<String> _categoryIds = [
-    'all',
-    ...AppCategories.postCategories.map((c) => c.categoryId)
-  ];
+  final List<String> _categoryIds = ['all', ...AppCategories.postCategories.map((c) => c.categoryId)];
 
   @override
   void initState() {
@@ -172,28 +168,44 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
   }
 }
 
-class _FeedListView extends StatelessWidget {
+// ✅✅✅ 이 아랫부분이 핵심 수정 영역입니다 ✅✅✅
+
+// ✅ 1. StatelessWidget을 StatefulWidget으로 변경합니다.
+class _FeedListView extends StatefulWidget {
   final String category;
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
   const _FeedListView(
       {super.key, required this.category, this.userModel, this.locationFilter});
 
- Query<Map<String, dynamic>> _buildQuery() {
-    final userProv = userModel?.locationParts?['prov'];
+  @override
+  State<_FeedListView> createState() => _FeedListViewState();
+}
+
+// ✅ 2. with AutomaticKeepAliveClientMixin을 추가합니다.
+class _FeedListViewState extends State<_FeedListView> with AutomaticKeepAliveClientMixin {
+  
+  // ✅ 3. wantKeepAlive를 true로 설정하여 탭이 전환되어도 이 목록의 상태를 유지시킵니다.
+  @override
+  bool get wantKeepAlive => true;
+
+  // 기존 _buildQuery와 _applyLocationFilter 함수를 State 안으로 이동
+  Query<Map<String, dynamic>> _buildQuery() {
+    // widget.userModel 과 같이 widget.을 붙여서 상위 StatefulWidget의 프로퍼티에 접근합니다.
+    final userProv = widget.userModel?.locationParts?['prov'];
     Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection('posts');
     if (userProv != null && userProv.isNotEmpty) {
       query = query.where('locationParts.prov', isEqualTo: userProv);
     }
-    if (category != 'all') {
-      query = query.where('category', isEqualTo: category);
+    if (widget.category != 'all') {
+      query = query.where('category', isEqualTo: widget.category);
     }
     return query.orderBy('createdAt', descending: true);
   }
 
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyLocationFilter(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
-    final filter = locationFilter;
+    final filter = widget.locationFilter;
     if (filter == null) return allDocs;
     String? key;
     if (filter['kel'] != null) { key = 'kel'; }
@@ -210,6 +222,9 @@ class _FeedListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ 4. super.build(context)를 호출해야 합니다.
+    super.build(context); 
+
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _buildQuery().snapshots(),
       builder: (context, snapshot) {
@@ -231,7 +246,7 @@ class _FeedListView extends StatelessWidget {
           itemCount: postsDocs.length,
           itemBuilder: (context, index) {
             final post = PostModel.fromFirestore(postsDocs[index]);
-            return PostCard(post: post);
+            return PostCard(key: ValueKey(post.id), post: post);
           },
         );
       },

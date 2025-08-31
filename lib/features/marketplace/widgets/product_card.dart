@@ -40,6 +40,7 @@ library;
 
 // import 'dart:math';
 
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -49,10 +50,22 @@ import '../../../core/models/user_model.dart';
 import '../models/product_model.dart';
 import '../screens/product_detail_screen.dart';
 
-class ProductCard extends StatelessWidget {
-  final ProductModel product;
 
+// ✅ 1. StatelessWidget을 StatefulWidget으로 변경합니다.
+class ProductCard extends StatefulWidget {
+  final ProductModel product;
   const ProductCard({super.key, required this.product});
+
+  @override
+  State<ProductCard> createState() => _ProductCardState();
+}
+
+// ✅ 2. State 클래스를 만들고 with AutomaticKeepAliveClientMixin을 추가합니다.
+class _ProductCardState extends State<ProductCard> with AutomaticKeepAliveClientMixin {
+  
+  // ✅ 3. wantKeepAlive를 true로 설정하여 카드 상태를 유지합니다.
+  @override
+  bool get wantKeepAlive => true;
 
   String _formatTimestamp(BuildContext context, Timestamp timestamp) {
     final now = DateTime.now();
@@ -73,30 +86,28 @@ class ProductCard extends StatelessWidget {
     return DateFormat('time.dateFormat'.tr()).format(dt);
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
+    // ✅ 4. super.build(context)를 호출해야 합니다.
+    super.build(context);
+
+    // 기존 build 로직에서 product를 참조할 때 widget.product로 변경합니다.
+    final product = widget.product;
     final String registeredAt = _formatTimestamp(context, product.createdAt);
 
     return InkWell(
       onTap: () {
-        // ✅ ProductDetailScreen으로 ProductModel 타입의 product를 전달합니다.
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => ProductDetailScreen(product: product),
         ));
       },
-      child: Padding(
+     child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        // ✅ [수정] 작성자 정보를 표시하기 위해 StreamBuilder를 다시 추가합니다.
         child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            stream: FirebaseFirestore.instance
-                .collection('users')
-                .doc(product.userId)
-                .snapshots(),
+            stream: FirebaseFirestore.instance.collection('users').doc(product.userId).snapshots(),
             builder: (context, userSnapshot) {
               if (!userSnapshot.hasData) {
-                return const SizedBox(
-                    height: 100,
-                    child: Center(child: CircularProgressIndicator()));
+                return const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()));
               }
               final user = UserModel.fromFirestore(userSnapshot.data!);
 
@@ -106,11 +117,10 @@ class ProductCard extends StatelessWidget {
                   if (product.imageUrls.isNotEmpty)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
-                      child: Image.network(
-                        product.imageUrls.first,
+                      child: ImageCarouselCard(
+                        imageUrls: product.imageUrls,
                         width: 100,
                         height: 100,
-                        fit: BoxFit.cover,
                       ),
                     ),
                   const SizedBox(width: 16.0),
@@ -132,10 +142,8 @@ class ProductCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                                
                         const SizedBox(height: 4.0),
                         Text(
-
                           '${product.locationParts?['kel'] ?? product.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $registeredAt',
                           style: TextStyle(
                               fontSize: 12.0, color: Colors.grey[600]),

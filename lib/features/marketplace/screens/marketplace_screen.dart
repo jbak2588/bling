@@ -17,7 +17,6 @@
 /// Edge Cases    : 사용자 위치가 없으면 설정 프롬프트를 표시합니다.
 /// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
 /// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
-/// ============================================================================///
 /// ============================================================================
 ///
 /// [기획/실제 코드 분석 및 개선 제안]
@@ -48,6 +47,7 @@ import 'package:flutter/material.dart';
 
 import '../models/product_model.dart';
 import 'product_detail_screen.dart';
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 
 class MarketplaceScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -194,20 +194,10 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       if (product.imageUrls.isNotEmpty)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: Image.network(
-                            product.imageUrls.first,
+                          child: ImageCarouselCard(
+                            imageUrls: product.imageUrls,
                             width: 100,
                             height: 100,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: 100,
-                                height: 100,
-                                color: Colors.grey[200],
-                                child: Icon(Icons.broken_image,
-                                    color: Colors.grey[400]),
-                              );
-                            },
                           ),
                         ),
                       const SizedBox(width: 16.0),
