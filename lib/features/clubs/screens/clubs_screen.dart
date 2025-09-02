@@ -133,7 +133,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   itemCount: clubs.length,
                   itemBuilder: (context, index) {
                     final club = clubs[index];
-                    return ClubCard(club: club);
+                    // ✅ 각 카드에 고유한 ValueKey를 부여합니다.
+                    return ClubCard(key: ValueKey(club.id), club: club);
                   },
                 );
               },

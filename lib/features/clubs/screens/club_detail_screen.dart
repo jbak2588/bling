@@ -22,7 +22,6 @@
 // - 멤버 관리 및 가입 UX/UI 개선.
 // =====================================================
 
-
 import 'package:bling_app/features/clubs/models/club_member_model.dart';
 import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
@@ -35,6 +34,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/clubs/screens/club_member_list.dart';
+
+import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
+import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
+
+import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 
 class ClubDetailScreen extends StatefulWidget {
   final ClubModel club;
@@ -279,23 +284,28 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
       children: [
         if (club.imageUrl != null && club.imageUrl!.isNotEmpty)
-          // V V V --- [추가] 동호회 대표 이미지 --- V V V
-          if (club.imageUrl != null && club.imageUrl!.isNotEmpty)
-            Image.network(
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => ImageGalleryScreen(imageUrls: [club.imageUrl!]),
+              ));
+            },
+            child: Image.network(
               club.imageUrl!,
               height: 220,
               width: double.infinity,
               fit: BoxFit.cover,
               errorBuilder: (c, e, s) =>
                   const SizedBox(height: 220, child: Icon(Icons.error)),
-            )
-          else
-            Container(
-              height: 220,
-              color: Colors.grey.shade200,
-              child: Icon(Icons.groups, size: 80, color: Colors.grey.shade400),
             ),
-        // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+          )
+        else
+          Container(
+            height: 220,
+            color: Colors.grey.shade200,
+            child: Icon(Icons.groups, size: 80, color: Colors.grey.shade400),
+          ),
+
         Text(club.title,
             style: Theme.of(context)
                 .textTheme
@@ -320,19 +330,33 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           ],
         ),
         const Divider(height: 32),
+        // ✅ geoPoint 데이터가 있을 경우 MiniMapView를 추가합니다.
+        if (club.geoPoint != null) ...[
+          Text("clubs.detail.location".tr(),
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          MiniMapView(
+            location: club.geoPoint!,
+            markerId: club.id,
+            height: 150,
+          ),
+          const Divider(height: 32),
+        ],
+
+        // ✅ 개설자 정보 표시를 위해 AuthorProfileTile 추가
+        Text("clubs.detail.owner".tr(),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        AuthorProfileTile(userId: club.ownerId),
+        const SizedBox(height: 16),
+
         Text("interests.title".tr(),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8.0,
-          runSpacing: 4.0,
-          children: club.interestTags.map((interestKey) {
-            return Chip(
-              avatar: const Icon(Icons.tag, size: 16),
-              label: Text("interests.items.$interestKey".tr()),
-            );
-          }).toList(),
-        ),
+
+        // ✅ 기존 Wrap을 ClickableTagList 공용 위젯으로 교체
+        ClickableTagList(tags: club.interestTags),
       ],
     );
   }

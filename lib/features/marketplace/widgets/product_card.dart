@@ -50,7 +50,6 @@ import '../../../core/models/user_model.dart';
 import '../models/product_model.dart';
 import '../screens/product_detail_screen.dart';
 
-
 // ✅ 1. StatelessWidget을 StatefulWidget으로 변경합니다.
 class ProductCard extends StatefulWidget {
   final ProductModel product;
@@ -61,8 +60,8 @@ class ProductCard extends StatefulWidget {
 }
 
 // ✅ 2. State 클래스를 만들고 with AutomaticKeepAliveClientMixin을 추가합니다.
-class _ProductCardState extends State<ProductCard> with AutomaticKeepAliveClientMixin {
-  
+class _ProductCardState extends State<ProductCard>
+    with AutomaticKeepAliveClientMixin {
   // ✅ 3. wantKeepAlive를 true로 설정하여 카드 상태를 유지합니다.
   @override
   bool get wantKeepAlive => true;
@@ -86,7 +85,7 @@ class _ProductCardState extends State<ProductCard> with AutomaticKeepAliveClient
     return DateFormat('time.dateFormat'.tr()).format(dt);
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     // ✅ 4. super.build(context)를 호출해야 합니다.
     super.build(context);
@@ -101,13 +100,18 @@ class _ProductCardState extends State<ProductCard> with AutomaticKeepAliveClient
           builder: (context) => ProductDetailScreen(product: product),
         ));
       },
-     child: Padding(
+      child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            stream: FirebaseFirestore.instance.collection('users').doc(product.userId).snapshots(),
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(product.userId)
+                .snapshots(),
             builder: (context, userSnapshot) {
               if (!userSnapshot.hasData) {
-                return const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()));
+                return const SizedBox(
+                    height: 100,
+                    child: Center(child: CircularProgressIndicator()));
               }
               final user = UserModel.fromFirestore(userSnapshot.data!);
 
@@ -119,6 +123,8 @@ class _ProductCardState extends State<ProductCard> with AutomaticKeepAliveClient
                       borderRadius: BorderRadius.circular(8.0),
                       child: ImageCarouselCard(
                         imageUrls: product.imageUrls,
+                        // ✅ product.id를 storageId로 전달하여 에러를 해결합니다.
+                        storageId: product.id,
                         width: 100,
                         height: 100,
                       ),
@@ -128,11 +134,12 @@ class _ProductCardState extends State<ProductCard> with AutomaticKeepAliveClient
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(product.title,
-                            style: const TextStyle(
-                                fontSize: 16.0, fontWeight: FontWeight.bold),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                        Text(
+                          product.title,
+                          style: const TextStyle(
+                              fontSize: 16.0, fontWeight: FontWeight.bold),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4.0),
                         Text(
@@ -150,7 +157,7 @@ class _ProductCardState extends State<ProductCard> with AutomaticKeepAliveClient
                         ),
                         const SizedBox(height: 8.0),
                         Text(
-                            NumberFormat.currency(
+                          NumberFormat.currency(
                             locale: 'id_ID',
                             symbol: 'Rp ',
                             decimalDigits: 0,

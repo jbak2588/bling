@@ -264,7 +264,10 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
               _buildTitleAndCategory(context, post, category),
               if (hasImages) ...[
                 const SizedBox(height: 12),
-                ImageCarouselCard(imageUrls: post.mediaUrl!),
+                ImageCarouselCard(
+                  imageUrls: post.mediaUrl!,
+                  storageId: post.id, // 캐러셀 고유키
+                ),
               ],
               if (hasLocation) ...[
                 const SizedBox(height: 12),

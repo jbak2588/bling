@@ -9,6 +9,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+// ✅ 1. GeoPoint 클래스 사용을 위해 cloud_firestore를 import 합니다.
+import 'package:cloud_firestore/cloud_firestore.dart';
+// ✅ 공용 태그 입력 위젯을 import 합니다.
+import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+// ✅ 위치 설정을 위해 LocationSettingScreen을 import 합니다.
+import 'package:bling_app/features/location/screens/location_setting_screen.dart';
+
 class EditClubScreen extends StatefulWidget {
   final ClubModel club;
   const EditClubScreen({super.key, required this.club});
@@ -22,7 +29,8 @@ class _EditClubScreenState extends State<EditClubScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
 
-  late List<String> _selectedInterests;
+  // late List<String> _selectedInterests;
+  late List<String> _interestTags;
   late bool _isPrivate;
   bool _isSaving = false;
 
@@ -31,36 +39,41 @@ class _EditClubScreenState extends State<EditClubScreen> {
   final ImagePicker _picker = ImagePicker();
 
   final ClubRepository _repository = ClubRepository();
-  final Map<String, List<String>> _interestCategories = {
-    'category_creative': [
-      'drawing',
-      'instrument',
-      'photography',
-      'writing',
-      'crafting',
-      'gardening'
-    ],
-    'category_sports': [
-      'soccer',
-      'hiking',
-      'camping',
-      'running',
-      'biking',
-      'golf',
-      'workout'
-    ],
-    'category_food_drink': [
-      'foodie',
-      'cooking',
-      'baking',
-      'coffee',
-      'wine',
-      'tea'
-    ],
-    'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
-    'category_growth': ['reading', 'investing', 'language', 'coding'],
-    'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
-  };
+// ✅ 위치 정보를 관리할 상태 변수들을 추가합니다.
+  late String _locationName;
+  late Map<String, dynamic>? _locationParts;
+  late GeoPoint? _geoPoint;
+
+  // final Map<String, List<String>> _interestCategories = {
+  //   'category_creative': [
+  //     'drawing',
+  //     'instrument',
+  //     'photography',
+  //     'writing',
+  //     'crafting',
+  //     'gardening'
+  //   ],
+  //   'category_sports': [
+  //     'soccer',
+  //     'hiking',
+  //     'camping',
+  //     'running',
+  //     'biking',
+  //     'golf',
+  //     'workout'
+  //   ],
+  //   'category_food_drink': [
+  //     'foodie',
+  //     'cooking',
+  //     'baking',
+  //     'coffee',
+  //     'wine',
+  //     'tea'
+  //   ],
+  //   'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
+  //   'category_growth': ['reading', 'investing', 'language', 'coding'],
+  //   'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
+  // };
 
   @override
   void initState() {
@@ -69,9 +82,16 @@ class _EditClubScreenState extends State<EditClubScreen> {
     _titleController = TextEditingController(text: widget.club.title);
     _descriptionController =
         TextEditingController(text: widget.club.description);
-    _selectedInterests = List<String>.from(widget.club.interestTags);
+    // _selectedInterests = List<String>.from(widget.club.interestTags);
+    // ✅ interestTags를 사용하도록 초기화
+    _interestTags = List<String>.from(widget.club.interestTags);
     _isPrivate = widget.club.isPrivate;
     _existingImageUrl = widget.club.imageUrl;
+
+    // ✅ 기존 클럽의 위치 정보로 상태를 초기화합니다.
+    _locationName = widget.club.location;
+    _locationParts = widget.club.locationParts;
+    _geoPoint = widget.club.geoPoint;
   }
 
   @override
@@ -92,9 +112,25 @@ class _EditClubScreenState extends State<EditClubScreen> {
     }
   }
 
+  // ✅ 위치를 새로 선택하는 함수를 추가합니다.
+  Future<void> _selectLocation() async {
+    final result = await Navigator.of(context).push<Map<String, dynamic>?>(
+      MaterialPageRoute(builder: (_) => const LocationSettingScreen()),
+    );
+    if (result != null && mounted) {
+      setState(() {
+        _locationName = result['locationName'] ?? _locationName;
+        _locationParts = result['locationParts'] ?? _locationParts;
+        _geoPoint = result['geoPoint'] ?? _geoPoint;
+      });
+    }
+  }
+
   Future<void> _updateClub() async {
     if (!_formKey.currentState!.validate() || _isSaving) return;
-    if (_selectedInterests.isEmpty) {
+    // if (_selectedInterests.isEmpty) {
+    // ✅ _interestTags로 유효성 검사
+    if (_interestTags.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('clubs.createClub.selectAtLeastOneInterest'.tr())),
@@ -116,18 +152,20 @@ class _EditClubScreenState extends State<EditClubScreen> {
       }
 
       // ClubModel 객체를 업데이트된 정보로 새로 만듭니다.
-      final updatedClub = ClubModel(
-        id: widget.club.id, // ID는 기존 ID를 그대로 사용
+     final updatedClub = ClubModel(
+        id: widget.club.id,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         imageUrl: imageUrl,
-        interestTags: _selectedInterests,
+        interestTags: _interestTags,
         isPrivate: _isPrivate,
-        // 수정되지 않는 필드들은 기존 값을 그대로 사용
         ownerId: widget.club.ownerId,
-        location: widget.club.location,
-        locationParts: widget.club.locationParts,
-        mainCategory: widget.club.mainCategory,
+        // 새로 선택된 위치 정보로 업데이트
+        location: _locationName,
+        locationParts: _locationParts,
+        geoPoint: _geoPoint,
+        // 수정되지 않는 나머지 필드들은 기존 값을 그대로 사용
+        mainCategory: _interestTags.isNotEmpty ? _interestTags.first : widget.club.mainCategory,
         membersCount: widget.club.membersCount,
         createdAt: widget.club.createdAt,
         kickedMembers: widget.club.kickedMembers,
@@ -237,65 +275,37 @@ class _EditClubScreenState extends State<EditClubScreen> {
                     return null;
                   },
                 ),
+
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("interests.title".tr(),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text('${_selectedInterests.length}/3',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.teal)), // 동호회는 최대 3개로 제한
-                  ],
+                // ✅ 위치 선택 UI를 추가합니다.
+                ListTile(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  leading: const Icon(Icons.location_on_outlined),
+                  title: Text('clubs.createClub.locationLabel'.tr()),
+                  subtitle: Text(_locationName),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _selectLocation,
+                ),
+                const SizedBox(height: 24),
+
+                Text(
+                  "interests.title".tr(), /* ... */
                 ),
                 const SizedBox(height: 8),
-                ..._interestCategories.entries.map((entry) {
-                  final categoryKey = entry.key;
-                  final interestKeys = entry.value;
-                  return ExpansionTile(
-                    title: Text("interests.$categoryKey".tr(),
-                        style: const TextStyle(fontWeight: FontWeight.w500)),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Wrap(
-                          spacing: 8.0,
-                          runSpacing: 4.0,
-                          children: interestKeys.map((interestKey) {
-                            final isSelected =
-                                _selectedInterests.contains(interestKey);
-                            return FilterChip(
-                              label: Text("interests.items.$interestKey".tr()),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                setState(() {
-                                  if (selected) {
-                                    if (_selectedInterests.length < 3) {
-                                      // 최대 3개 제한
-                                      _selectedInterests.add(interestKey);
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                            content: Text(
-                                                'clubs.createClub.maxInterests'
-                                                    .tr())),
-                                      );
-                                    }
-                                  } else {
-                                    _selectedInterests.remove(interestKey);
-                                  }
-                                });
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      )
-                    ],
-                  );
-                }),
+                CustomTagInputField(
+                  initialTags: _interestTags,
+                  hintText: 'clubs.createClub.tagsHint'.tr(),
+                  onTagsChanged: (tags) {
+                    setState(() {
+                      _interestTags = tags;
+                    });
+                  },
+                ),
                 const SizedBox(height: 24),
                 SwitchListTile(
                   title: Text('clubs.createClub.privateClub'.tr()),

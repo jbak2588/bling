@@ -47,7 +47,6 @@ import '../../../core/constants/app_categories.dart';
 import '../widgets/post_card.dart';
 import 'local_news_detail_screen.dart';
 
-
 class LocalNewsScreen extends StatefulWidget {
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
@@ -57,16 +56,56 @@ class LocalNewsScreen extends StatefulWidget {
   State<LocalNewsScreen> createState() => _LocalNewsScreenState();
 }
 
-class _LocalNewsScreenState extends State<LocalNewsScreen> with TickerProviderStateMixin {
+class _LocalNewsScreenState extends State<LocalNewsScreen>
+    with TickerProviderStateMixin {
   // ... 이 클래스의 모든 코드는 원본과 동일하게 유지됩니다 ...
   late final TabController _tabController;
   bool _isMapView = false;
-  final List<String> _categoryIds = ['all', ...AppCategories.postCategories.map((c) => c.categoryId)];
+  final List<String> _categoryIds = [
+    'all',
+    ...AppCategories.postCategories.map((c) => c.categoryId)
+  ];
+
+  late final List<Widget> _tabViews;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: _categoryIds.length, vsync: this);
+    // ✅ 2. initState에서 탭 페이지 위젯 리스트를 '딱 한 번만' 생성합니다.
+    _tabViews = _categoryIds.map((categoryId) {
+      // _isMapView 상태가 변경되어도 이 위젯들은 재사용되므로,
+      // _FeedListView와 _FeedMapView가 모두 포함된 Stack을 사용하고 Visibility로 제어합니다.
+      return Stack(
+        children: [
+          Visibility(
+            // key를 사용하여 각 목록의 상태를 명확히 구분합니다.
+            // key: PageStorageKey('list_view_$categoryId'),
+            visible: !_isMapView,
+            // maintainState: true를 추가하여 위젯이 숨겨져도 상태를 유지하도록 합니다.
+            maintainState: true,
+            child: _FeedListView(
+              key: PageStorageKey('list_view_$categoryId'), // ✅ 여기에 추가
+              category: categoryId,
+              userModel: widget.userModel,
+              locationFilter: widget.locationFilter,
+            ),
+          ),
+          Visibility(
+            // key: PageStorageKey('map_view_$categoryId'),
+
+            visible: _isMapView,
+            maintainState: true,
+            child: _FeedMapView(
+              key: PageStorageKey('map_view_$categoryId'), // ✅ 여기에 추가
+              category: categoryId,
+              userModel: widget.userModel,
+              locationFilter: widget.locationFilter,
+            ),
+          ),
+        ],
+      );
+    }).toList();
   }
 
   @override
@@ -132,7 +171,8 @@ class _LocalNewsScreenState extends State<LocalNewsScreen> with TickerProviderSt
                   ),
                 ),
                 IconButton(
-                  icon: Icon(_isMapView ? Icons.list : Icons.map_outlined, color: Colors.grey.shade700),
+                  icon: Icon(_isMapView ? Icons.list : Icons.map_outlined,
+                      color: Colors.grey.shade700),
                   onPressed: () {
                     setState(() {
                       _isMapView = !_isMapView;
@@ -145,21 +185,8 @@ class _LocalNewsScreenState extends State<LocalNewsScreen> with TickerProviderSt
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: _categoryIds.map((categoryId) {
-                return _isMapView
-                    ? _FeedMapView(
-                        key: PageStorageKey('map_view_$categoryId'),
-                        category: categoryId,
-                        userModel: widget.userModel,
-                        locationFilter: widget.locationFilter,
-                      )
-                    : _FeedListView(
-                        key: PageStorageKey('list_view_$categoryId'),
-                        category: categoryId,
-                        userModel: widget.userModel,
-                        locationFilter: widget.locationFilter,
-                      );
-              }).toList(),
+              // ✅ 3. 매번 새로 생성하는 대신, initState에서 만들어 둔 _tabViews 변수를 사용합니다.
+              children: _tabViews,
             ),
           ),
         ],
@@ -183,8 +210,8 @@ class _FeedListView extends StatefulWidget {
 }
 
 // ✅ 2. with AutomaticKeepAliveClientMixin을 추가합니다.
-class _FeedListViewState extends State<_FeedListView> with AutomaticKeepAliveClientMixin {
-  
+class _FeedListViewState extends State<_FeedListView>
+    with AutomaticKeepAliveClientMixin {
   // ✅ 3. wantKeepAlive를 true로 설정하여 탭이 전환되어도 이 목록의 상태를 유지시킵니다.
   @override
   bool get wantKeepAlive => true;
@@ -193,7 +220,8 @@ class _FeedListViewState extends State<_FeedListView> with AutomaticKeepAliveCli
   Query<Map<String, dynamic>> _buildQuery() {
     // widget.userModel 과 같이 widget.을 붙여서 상위 StatefulWidget의 프로퍼티에 접근합니다.
     final userProv = widget.userModel?.locationParts?['prov'];
-    Query<Map<String, dynamic>> query = FirebaseFirestore.instance.collection('posts');
+    Query<Map<String, dynamic>> query =
+        FirebaseFirestore.instance.collection('posts');
     if (userProv != null && userProv.isNotEmpty) {
       query = query.where('locationParts.prov', isEqualTo: userProv);
     }
@@ -208,22 +236,34 @@ class _FeedListViewState extends State<_FeedListView> with AutomaticKeepAliveCli
     final filter = widget.locationFilter;
     if (filter == null) return allDocs;
     String? key;
-    if (filter['kel'] != null) { key = 'kel'; }
-    else if (filter['kec'] != null) { key = 'kec'; }
-    else if (filter['kab'] != null) { key = 'kab'; }
-    else if (filter['kota'] != null) { key = 'kota'; }
-    else if (filter['prov'] != null) {key = 'prov'; }
-    if (key == null) { return allDocs; }
+    if (filter['kel'] != null) {
+      key = 'kel';
+    } else if (filter['kec'] != null) {
+      key = 'kec';
+    } else if (filter['kab'] != null) {
+      key = 'kab';
+    } else if (filter['kota'] != null) {
+      key = 'kota';
+    } else if (filter['prov'] != null) {
+      key = 'prov';
+    }
+    if (key == null) {
+      return allDocs;
+    }
     final value = filter[key]!.toLowerCase();
     return allDocs
-        .where((doc) => (doc.data()['locationParts']?[key] ?? '').toString().toLowerCase() == value)
+        .where((doc) =>
+            (doc.data()['locationParts']?[key] ?? '')
+                .toString()
+                .toLowerCase() ==
+            value)
         .toList();
   }
 
   @override
   Widget build(BuildContext context) {
     // ✅ 4. super.build(context)를 호출해야 합니다.
-    super.build(context); 
+    super.build(context);
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _buildQuery().snapshots(),
@@ -317,7 +357,7 @@ class _FeedMapViewState extends State<_FeedMapView> {
   Query<Map<String, dynamic>> _buildAllMarkersQuery() {
     Query<Map<String, dynamic>> query =
         FirebaseFirestore.instance.collection('posts');
-    
+
     if (widget.userModel?.locationParts?['prov'] != null) {
       query = query.where('locationParts.prov',
           isEqualTo: widget.userModel!.locationParts!['prov']);
@@ -337,7 +377,8 @@ class _FeedMapViewState extends State<_FeedMapView> {
     for (var doc in docs) {
       final post = PostModel.fromFirestore(doc);
       if (post.geoPoint != null) {
-        debugPrint('[지도 디버그] 핀 생성: ${post.id} at ${post.geoPoint!.latitude}, ${post.geoPoint!.longitude}');
+        debugPrint(
+            '[지도 디버그] 핀 생성: ${post.id} at ${post.geoPoint!.latitude}, ${post.geoPoint!.longitude}');
         markers.add(Marker(
           markerId: MarkerId(post.id),
           position: LatLng(post.geoPoint!.latitude, post.geoPoint!.longitude),
@@ -379,7 +420,7 @@ class _FeedMapViewState extends State<_FeedMapView> {
               debugPrint('[지도 디버그] 게시물 데이터 로딩 중...');
               return const Center(child: CircularProgressIndicator());
             }
-             if (postSnapshot.hasError) {
+            if (postSnapshot.hasError) {
               debugPrint('[지도 디버그] 게시물 데이터 로딩 에러: ${postSnapshot.error}');
               return Center(child: Text('Error: ${postSnapshot.error}'));
             }
