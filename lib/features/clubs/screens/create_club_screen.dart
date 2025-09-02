@@ -12,6 +12,9 @@ import 'package:image_picker/image_picker.dart'; // [추가] image_picker
 import 'package:uuid/uuid.dart'; // [추가] 고유 파일명 생성
 import 'package:easy_localization/easy_localization.dart';
 
+// ✅ 공용 태그 입력 위젯을 import 합니다.
+import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+
 class CreateClubScreen extends StatefulWidget {
   final UserModel userModel;
   const CreateClubScreen({super.key, required this.userModel});
@@ -25,49 +28,51 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  final List<String> _selectedInterests = [];
+  // final List<String> _selectedInterests = [];
+
+  // ✅ 새로운 태그 상태 변수를 추가합니다.
+  List<String> _interestTags = [];
+
   bool _isPrivate = false;
   bool _isSaving = false;
   Map<String, String?>? _selectedLocationParts;
 
-  // V V V --- [추가] 이미지 관련 상태 변수 --- V V V
   XFile? _selectedImage;
   final ImagePicker _picker = ImagePicker();
-  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
   final ClubRepository _repository = ClubRepository();
 
-// [수정] find_friend와 동일한 전체 관심사 목록을 사용합니다.
-  final Map<String, List<String>> _interestCategories = {
-    'category_creative': [
-      'drawing',
-      'instrument',
-      'photography',
-      'writing',
-      'crafting',
-      'gardening'
-    ],
-    'category_sports': [
-      'soccer',
-      'hiking',
-      'camping',
-      'running',
-      'biking',
-      'golf',
-      'workout'
-    ],
-    'category_food_drink': [
-      'foodie',
-      'cooking',
-      'baking',
-      'coffee',
-      'wine',
-      'tea'
-    ],
-    'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
-    'category_growth': ['reading', 'investing', 'language', 'coding'],
-    'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
-  };
+  // [수정] find_friend와 동일한 전체 관심사 목록을 사용합니다.
+  // final Map<String, List<String>> _interestCategories = {
+  //   'category_creative': [
+  //     'drawing',
+  //     'instrument',
+  //     'photography',
+  //     'writing',
+  //     'crafting',
+  //     'gardening'
+  //   ],
+  //   'category_sports': [
+  //     'soccer',
+  //     'hiking',
+  //     'camping',
+  //     'running',
+  //     'biking',
+  //     'golf',
+  //     'workout'
+  //   ],
+  //   'category_food_drink': [
+  //     'foodie',
+  //     'cooking',
+  //     'baking',
+  //     'coffee',
+  //     'wine',
+  //     'tea'
+  //   ],
+  //   'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
+  //   'category_growth': ['reading', 'investing', 'language', 'coding'],
+  //   'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
+  // };
 
   @override
   void dispose() {
@@ -101,7 +106,10 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
     if (!_formKey.currentState!.validate() || _isSaving) {
       return;
     }
-    if (_selectedInterests.isEmpty) {
+    // if (_selectedInterests.isEmpty) {
+
+    // ✅ 태그(관심사)를 1개 이상 입력했는지 검사합니다.
+    if (_interestTags.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('clubs.createClub.selectAtLeastOneInterest'.tr())),
@@ -142,20 +150,27 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
             parts?['prov'] ??
             'Unknown',
         locationParts: parts,
+        // ✅ 개설자의 geoPoint를 동호회 위치 정보로 저장합니다.
+        geoPoint: widget.userModel.geoPoint,
+
         // interests: _selectedInterests, // Removed or renamed as per ClubModel definition
         isPrivate: _isPrivate,
         createdAt: Timestamp.now(),
         membersCount: 1, // 개설자는 자동으로 멤버 1명이 됩니다.
         imageUrl: imageUrl, // [수정] 업로드된 이미지 URL 전달
-        mainCategory: _selectedInterests.isNotEmpty
-            ? _interestCategories.entries
-                .firstWhere(
-                  (entry) => entry.value.contains(_selectedInterests.first),
-                  orElse: () => _interestCategories.entries.first,
-                )
-                .key
-            : '', // 첫 번째 선택된 관심사의 카테고리, 없으면 빈 문자열
-        interestTags: _selectedInterests, // 선택된 관심사 리스트
+        // mainCategory: _selectedInterests.isNotEmpty
+        //     ? _interestCategories.entries
+        //         .firstWhere(
+        //           (entry) => entry.value.contains(_selectedInterests.first),
+        //           orElse: () => _interestCategories.entries.first,
+        //         )
+        //         .key
+        //     : '', // 첫 번째 선택된 관심사의 카테고리, 없으면 빈 문자열
+        // interestTags: _selectedInterests, // 선택된 관심사 리스트
+        // ✅ mainCategory는 첫 번째 태그를 기반으로 임시 지정하거나, 별도 UI를 통해 받을 수 있습니다.
+        mainCategory: _interestTags.isNotEmpty ? _interestTags.first : 'etc',
+        // ✅ 새로운 태그 상태 변수를 사용합니다.
+        interestTags: _interestTags,
       );
 
       await _repository.createClub(newClub);
@@ -278,64 +293,79 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                   onTap: _selectLocation,
                 ),
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("interests.title".tr(),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text('${_selectedInterests.length}/3',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.teal)), // 동호회는 최대 3개로 제한
-                  ],
-                ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: [
+                //     Text("interests.title".tr(),
+                //         style: const TextStyle(
+                //             fontWeight: FontWeight.bold, fontSize: 16)),
+                //     Text('${_selectedInterests.length}/3',
+                //         style: const TextStyle(
+                //             fontWeight: FontWeight.bold,
+                //             color: Colors.teal)), // 동호회는 최대 3개로 제한
+                //   ],
+                // ),
+                // const SizedBox(height: 8),
+                // ..._interestCategories.entries.map((entry) {
+                //   final categoryKey = entry.key;
+                //   final interestKeys = entry.value;
+                //   return ExpansionTile(
+                //     title: Text("interests.$categoryKey".tr(),
+                //         style: const TextStyle(fontWeight: FontWeight.w500)),
+                //     children: [
+                //       Padding(
+                //         padding: const EdgeInsets.all(8.0),
+                //         child: Wrap(
+                //           spacing: 8.0,
+                //           runSpacing: 4.0,
+                //           children: interestKeys.map((interestKey) {
+                //             final isSelected =
+                //                 _selectedInterests.contains(interestKey);
+                //             return FilterChip(
+                //               label: Text("interests.items.$interestKey".tr()),
+                //               selected: isSelected,
+                //               onSelected: (selected) {
+                //                 setState(() {
+                //                   if (selected) {
+                //                     if (_selectedInterests.length < 3) {
+                //                       // 최대 3개 제한
+                //                       _selectedInterests.add(interestKey);
+                //                     } else {
+                //                       ScaffoldMessenger.of(context)
+                //                           .showSnackBar(
+                //                         SnackBar(
+                //                             content: Text(
+                //                                 'clubs.createClub.maxInterests'
+                //                                     .tr())),
+                //                       );
+                //                     }
+                //                   } else {
+                //                     _selectedInterests.remove(interestKey);
+                //                   }
+                //                 });
+                //               },
+                //             );
+                //           }).toList(),
+                //         ),
+                //       )
+                //     ],
+                //   );
+                // }),
+
+                // ✅ 기존의 복잡한 관심사 선택 UI를 공용 태그 위젯으로 교체합니다.
+                Text("interests.title".tr(),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 8),
-                ..._interestCategories.entries.map((entry) {
-                  final categoryKey = entry.key;
-                  final interestKeys = entry.value;
-                  return ExpansionTile(
-                    title: Text("interests.$categoryKey".tr(),
-                        style: const TextStyle(fontWeight: FontWeight.w500)),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Wrap(
-                          spacing: 8.0,
-                          runSpacing: 4.0,
-                          children: interestKeys.map((interestKey) {
-                            final isSelected =
-                                _selectedInterests.contains(interestKey);
-                            return FilterChip(
-                              label: Text("interests.items.$interestKey".tr()),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                setState(() {
-                                  if (selected) {
-                                    if (_selectedInterests.length < 3) {
-                                      // 최대 3개 제한
-                                      _selectedInterests.add(interestKey);
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                            content: Text(
-                                                'clubs.createClub.maxInterests'
-                                                    .tr())),
-                                      );
-                                    }
-                                  } else {
-                                    _selectedInterests.remove(interestKey);
-                                  }
-                                });
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      )
-                    ],
-                  );
-                }),
+                CustomTagInputField(
+                  hintText: 'clubs.createClub.tagsHint'.tr(),
+                  onTagsChanged: (tags) {
+                    setState(() {
+                      _interestTags = tags;
+                    });
+                  },
+                ),
+
                 const SizedBox(height: 24),
                 SwitchListTile(
                   title: Text('clubs.createClub.privateClub'.tr()),

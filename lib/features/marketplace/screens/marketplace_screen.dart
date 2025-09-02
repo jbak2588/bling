@@ -46,8 +46,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../models/product_model.dart';
-import 'product_detail_screen.dart';
-import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+import '../widgets/product_card.dart';
 
 class MarketplaceScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -57,29 +56,8 @@ class MarketplaceScreen extends StatefulWidget {
   @override
   State<MarketplaceScreen> createState() => _MarketplaceScreenState();
 }
-
 class _MarketplaceScreenState extends State<MarketplaceScreen> {
-  String _formatTimestamp(Timestamp timestamp) {
-    // ... (내용 변경 없음)
-    final now = DateTime.now();
-    final dt = timestamp.toDate();
-    final diff = now.difference(dt);
-
-    if (diff.inMinutes < 1) {
-      return 'time.now'.tr();
-    } else if (diff.inHours < 1) {
-      return 'time.minutesAgo'
-          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
-    } else if (diff.inDays < 1) {
-      return 'time.hoursAgo'
-          .tr(namedArgs: {'hours': diff.inHours.toString()});
-    } else if (diff.inDays < 7) {
-      return 'time.daysAgo'
-          .tr(namedArgs: {'days': diff.inDays.toString()});
-    } else {
-      return DateFormat('time.dateFormat'.tr()).format(dt);
-    }
-  }
+ 
 
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyLocationFilter(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
@@ -140,28 +118,23 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
       );
     }
 
-    return Scaffold(
+     return Scaffold(
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        // ✅ [수정] 수정된 쿼리 빌더 함수를 사용
         stream: buildQuery().snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(
-                child: Text('marketplace.error'
-                    .tr(namedArgs: {'error': snapshot.error.toString()})));
+            return Center(child: Text('marketplace.error'.tr(namedArgs: {'error': snapshot.error.toString()})));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(
-              child:
-                  Text('marketplace.empty'.tr(), textAlign: TextAlign.center),
-            );
+            return Center(child: Text('marketplace.empty'.tr(), textAlign: TextAlign.center));
           }
 
           final allDocs = snapshot.data!.docs;
           final productsDocs = _applyLocationFilter(allDocs);
+
           return ListView.separated(
             itemCount: productsDocs.length,
             separatorBuilder: (context, index) => const Divider(
@@ -170,95 +143,14 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
               indent: 16,
               endIndent: 16,
             ),
+            // ✅✅✅ 핵심 수정: 복잡한 UI 로직을 ProductCard 호출로 대체합니다. ✅✅✅
             itemBuilder: (context, index) {
-             final product = ProductModel.fromFirestore(productsDocs[index]);
-              final String registeredAt = _formatTimestamp(product.createdAt);
-
-              return InkWell(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ProductDetailScreen(product: product),
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 12.0,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (product.imageUrls.isNotEmpty)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: ImageCarouselCard(
-                            imageUrls: product.imageUrls,
-                            width: 100,
-                            height: 100,
-                          ),
-                        ),
-                      const SizedBox(width: 16.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              product.title,
-                              style: const TextStyle(
-                                  fontSize: 16.0, fontWeight: FontWeight.bold),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4.0),
-                            Text(
-                              product.description,
-                              style: TextStyle(
-                                  fontSize: 14.0, color: Colors.grey[800]),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4.0),
-                            Text(
-                              '${product.locationParts?['kel'] ?? product.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $registeredAt',
-                              style: TextStyle(
-                                  fontSize: 12.0, color: Colors.grey[600]),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 8.0),
-                            Row(
-                              children: [
-                                Text(
-                                  NumberFormat.currency(
-                                    locale: 'id_ID',
-                                    symbol: 'Rp ',
-                                    decimalDigits: 0,
-                                  ).format(product.price),
-                                  style: const TextStyle(
-                                      fontSize: 15.0,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const Spacer(),
-                                const Icon(Icons.chat_bubble_outline,
-                                    size: 16.0, color: Colors.grey),
-                                const SizedBox(width: 4.0),
-                                Text('${product.chatsCount}'),
-                                const SizedBox(width: 12.0),
-                                const Icon(Icons.favorite_outline,
-                                    size: 16.0, color: Colors.grey),
-                                const SizedBox(width: 4.0),
-                                Text('${product.likesCount}'),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              final product = ProductModel.fromFirestore(productsDocs[index]);
+              
+              // StreamBuilder 환경이므로, 상태 유지를 위해 Key를 전달합니다.
+              return ProductCard(
+                key: ValueKey(product.id), 
+                product: product
               );
             },
           );

@@ -20,16 +20,33 @@ import 'package:bling_app/features/clubs/screens/club_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class ClubCard extends StatelessWidget {
+// ✅ 1. StatelessWidget을 StatefulWidget으로 변경합니다.
+class ClubCard extends StatefulWidget {
   final ClubModel club;
   const ClubCard({super.key, required this.club});
 
   @override
+  State<ClubCard> createState() => _ClubCardState();
+}
+
+class _ClubCardState extends State<ClubCard>
+    with AutomaticKeepAliveClientMixin {
+  // ✅ 3. wantKeepAlive를 true로 설정하여 카드 상태를 유지합니다.
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    // ✅ 4. super.build(context)를 호출합니다.
+    super.build(context); // ✅ KeepAlive를 위해 호출
+
+    // State 클래스 내에서는 widget.club으로 데이터에 접근합니다.
+    final club = widget.club;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
-      clipBehavior: Clip.antiAlias, // InkWell 효과가 Card 모서리를 따르도록 함
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
@@ -39,11 +56,10 @@ class ClubCard extends StatelessWidget {
         },
         child: Padding(
           padding: const EdgeInsets.all(12.0),
-          // V V V --- [수정] 이미지를 포함하기 위해 Row 위젯으로 구조 변경 --- V V V
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- 1. 대표 이미지 ---
+              // --- 1. 대표 이미지 (기존과 동일) ---
               ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
                 child: club.imageUrl != null && club.imageUrl!.isNotEmpty
@@ -57,14 +73,15 @@ class ClubCard extends StatelessWidget {
                     : _buildPlaceholderImage(),
               ),
               const SizedBox(width: 16),
-              // --- 2. 텍스트 정보 ---
+              // --- 2. 텍스트 정보 (기존과 동일) ---
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       club.title,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -76,11 +93,20 @@ class ClubCard extends StatelessWidget {
                       style: TextStyle(color: Colors.grey[700], fontSize: 14),
                     ),
                     const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 4,
                       children: [
-                        _buildInfoChip(Icons.group_outlined, 'clubs.card.membersCount'.tr(namedArgs: {'count': club.membersCount.toString()})),
-                        _buildInfoChip(Icons.location_on_outlined, club.location),
+                        _buildInfoChip(
+                          Icons.group_outlined,
+                          'clubs.card.membersCount'.tr(namedArgs: {
+                            'count': club.membersCount.toString()
+                          }),
+                        ),
+                        _buildInfoChip(
+                          Icons.location_on_outlined,
+                          club.location,
+                        ),
                       ],
                     )
                   ],
@@ -106,7 +132,7 @@ class ClubCard extends StatelessWidget {
       child: Icon(Icons.groups, size: 40, color: Colors.grey.shade400),
     );
   }
-  
+
   // [추가] 정보 칩 위젯
   Widget _buildInfoChip(IconData icon, String label) {
     return Row(
