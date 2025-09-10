@@ -10,8 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/auction/screens/edit_auction_screen.dart';
 
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
+import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
+import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
+import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 
 class AuctionDetailScreen extends StatefulWidget {
   final AuctionModel auction;
@@ -24,7 +27,7 @@ class AuctionDetailScreen extends StatefulWidget {
 class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
   final AuctionRepository _repository = AuctionRepository();
   final _bidAmountController = TextEditingController();
-  int _currentImageIndex = 0; // [추가] 현재 보이는 이미지 인덱스
+  // int _currentImageIndex = 0; // [추가] 현재 보이는 이미지 인덱스
 
   bool _isBidding = false; // [추가] 입찰 중 상태
 
@@ -120,64 +123,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
   }
 
   // V V V --- [이식] product_detail_screen.dart에서 가져온 이미지 슬라이더 --- V V V
-  Widget _buildImageSlider(List<String> images) {
-    if (images.isEmpty) {
-      return Container(
-        height: 250,
-        color: Colors.grey.shade200,
-        child: const Icon(Icons.gavel_outlined, size: 80, color: Colors.grey),
-      );
-    }
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => FullScreenImageViewer(
-                imageUrls: images,
-                initialIndex: _currentImageIndex,
-              ),
-            ));
-          },
-          child: Container(
-            height: 250,
-            color: Colors.black,
-            child: PageView.builder(
-              itemCount: images.length,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentImageIndex = index;
-                });
-              },
-              itemBuilder: (context, index) {
-                return Image.network(images[index], fit: BoxFit.contain);
-              },
-            ),
-          ),
-        ),
-        if (images.length > 1)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: images.asMap().entries.map((entry) {
-              return Container(
-                width: 8.0,
-                height: 8.0,
-                margin:
-                    const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: (Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black)
-                      // ignore: deprecated_member_use
-                      .withOpacity(_currentImageIndex == entry.key ? 0.9 : 0.4),
-                ),
-              );
-            }).toList(),
-          ),
-      ],
-    );
-  }
+
   // ^ ^ ^ --- 여기까지 이식 --- ^ ^ ^
 
   @override
@@ -228,7 +174,18 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildImageSlider(auction.images),
+                    // ✅ 기존 이미지 슬라이더를 공용 위젯으로 교체
+                    if (auction.images.isNotEmpty)
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => ImageGalleryScreen(imageUrls: auction.images),
+                        )),
+                        child: ImageCarouselCard(
+                          storageId: auction.id,
+                          imageUrls: auction.images,
+                          height: 250,
+                        ),
+                      ),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -251,6 +208,22 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                           Text(auction.description,
                               style:
                                   const TextStyle(fontSize: 16, height: 1.5)),
+                          const SizedBox(height: 16),
+                          
+                          // ✅ 태그, 지도, 작성자 정보 공용 위젯 추가
+                          ClickableTagList(tags: auction.tags),
+                          if (auction.geoPoint != null) ...[
+                            const Divider(height: 32),
+                            Text('auctions.detail.location'.tr(), style: Theme.of(context).textTheme.titleLarge),
+                            const SizedBox(height: 12),
+                            MiniMapView(location: auction.geoPoint!, markerId: auction.id),
+                          ],
+                          const Divider(height: 32),
+                          Text('auctions.detail.seller'.tr(), style: Theme.of(context).textTheme.titleLarge),
+                          const SizedBox(height: 12),
+                          AuthorProfileTile(userId: auction.ownerId),
+
+
                         ],
                       ),
                     ),
@@ -382,59 +355,3 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
   }
 }
 
-// V V V --- [이식] product_detail_screen.dart에서 가져온 전체 화면 이미지 뷰어 --- V V V
-class FullScreenImageViewer extends StatefulWidget {
-  final List<String> imageUrls;
-  final int initialIndex;
-
-  const FullScreenImageViewer({
-    super.key,
-    required this.imageUrls,
-    this.initialIndex = 0,
-  });
-
-  @override
-  State<FullScreenImageViewer> createState() => _FullScreenImageViewerState();
-}
-
-class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
-  late final PageController _pageController;
-  late int _currentIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: _currentIndex);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: Text('${_currentIndex + 1} / ${widget.imageUrls.length}'),
-        centerTitle: true,
-      ),
-      body: PhotoViewGallery.builder(
-        pageController: _pageController,
-        itemCount: widget.imageUrls.length,
-        builder: (context, index) {
-          return PhotoViewGalleryPageOptions(
-            imageProvider: NetworkImage(widget.imageUrls[index]),
-            minScale: PhotoViewComputedScale.contained,
-            maxScale: PhotoViewComputedScale.covered * 2,
-          );
-        },
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
-    );
-  }
-}
-// ^ ^ ^ --- 여기까지 이식 --- ^ ^ ^

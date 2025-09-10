@@ -45,6 +45,7 @@
             "nicknameInUse": "This nickname is already in use.",
             "nicknameAvailable": "This nickname is available.",
             "nicknameNotChecked": "Please check for nickname duplication.",
+            "signupSuccessLoginNotice": "Registration complete! Please log in to continue.",
             "unknownError": "An unknown error occurred. Please try again."
         },
         "policy": {
@@ -126,7 +127,10 @@
             "titleHint": "Title",
             "priceHint": "Price (Rp)",
             "negotiable": "Allow Offers",
+            "addressHint": "Location",
+            "addressDetailHint": "Meet-up location",
             "descriptionHint": "Detailed Description",
+            "tagsHint": "e.g. dog, freeshare",
             "success": "Product has been successfully listed!",
             "fail": "Failed to register product: {error}"
         },
@@ -139,7 +143,8 @@
             "negotiable": "Edit Price Negotiable",
             "descriptionHint": "Edit Description",
             "success": "Product successfully updated!",
-            "fail": "Failed to update product: {error}"
+            "fail": "Failed to update product: {error}",
+            "resetLocation": "Reset location"
         },
         "detail": {
             "makeOffer": "Make an offer",
@@ -160,7 +165,8 @@
             "chats": "Chats",
             "noSeller": "Seller info unavailable",
             "noLocation": "Location info unavailable",
-            "seller": "Seller"
+            "seller": "Seller",
+            "dealLocation": "Deal location"
         },
         "dialog": {
             "deleteTitle": "Delete Post",
@@ -179,7 +185,8 @@
             "label": "Condition",
             "new": "New",
             "used": "Used"
-        }
+        },
+        "setLocationPrompt": "Please set your neighborhood first to see marketplace items!"
     },
     "myBling": {
         "title": "My Bling",
@@ -263,7 +270,17 @@
         "success": "Neighborhood has been set.",
         "error": "Failed to set neighborhood: {error}",
         "empty": "Please enter a neighborhood name.",
-        "permissionDenied": "Location permission is required to find your neighborhood."
+        "permissionDenied": "Location permission is required to find your neighborhood.",
+        "rtLabel": "RT",
+        "rwLabel": "RW",
+        "rtHint": "e.g. 003",
+        "rwHint": "e.g. 007",
+        "rtRequired": "Please enter RT.",
+        "rwRequired": "Please enter RW.",
+        "rtRwInfo": "Your RT/RW will not be public. It helps improve trust and local features.",
+        "saveThisLocation": "Save this location",
+        "manualSelect": "Manual select",
+        "refreshFromGps": "Refresh from GPS"
     },
     "profileEdit": {
         "title": "Edit Profile",
@@ -732,6 +749,8 @@
         },
         "detail": {
             "currentBid": "Current bid: {amount}",
+            "location": "Location",
+            "seller": "Seller",
             "endTime": "End time: {time}",
             "bidsTitle": "Bids",
             "noBids": "No bids yet.",
@@ -898,5 +917,12 @@
     },
     "community": {
         "title": "Community Screen"
+    },
+    "selectCategory": "Select category",
+    "address_neighborhood": "Neighborhood",
+    "address_detail_hint": "Address details",
+    "localNewsTagResult": {
+        "error": "An error occurred during search: {error}",
+        "empty": "No posts found with '#{tag}'."
     }
 }

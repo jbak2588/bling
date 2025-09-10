@@ -33,8 +33,8 @@ class UserModel {
   final String? locationName; // 간략 주소명 (예: "Tangerang, Banten")
   final Map<String, dynamic>? locationParts; // 주소 분리 (prov, kab, kec, kel)
 
- final String? rt;
-  final String? rw;
+//  final String? rt;
+//   final String? rw;
 
   final GeoPoint? geoPoint; // 좌표 (지도 표시 및 거리 계산용)
   final List<String>? interests; // 관심사 리스트 (hobby 등)
@@ -94,8 +94,8 @@ class UserModel {
     this.bookmarkedPostIds,
     this.bookmarkedProductIds,
     this.bookmarkedClubPostIds, // [추가]
-    this.rt,
-    this.rw,
+    // this.rt,
+    // this.rw,
     this.likedShortIds, // [추가]
     this.trustScore = 0,
     this.phoneNumber,
@@ -135,8 +135,8 @@ class UserModel {
       locationParts: data['locationParts'] != null
           ? Map<String, dynamic>.from(data['locationParts'])
           : null,
-      rt: data['rt'],
-      rw: data['rw'],
+      // rt: data['rt'],
+      // rw: data['rw'],
 
       geoPoint: data['geoPoint'],
       interests: data['interests'] != null
@@ -223,8 +223,8 @@ class UserModel {
       'bookmarkedPostIds': bookmarkedPostIds,
       'bookmarkedProductIds': bookmarkedProductIds,
       'bookmarkedClubPostIds': bookmarkedClubPostIds, // [추가]
-      'rt': rt,
-      'rw': rw,
+      // 'rt': rt,
+      // 'rw': rw,
       'likedShortIds': likedShortIds, // [추가]
       'trustScore': trustScore,
       'phoneNumber': phoneNumber,

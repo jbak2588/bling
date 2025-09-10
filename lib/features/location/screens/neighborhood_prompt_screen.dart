@@ -1,321 +1,597 @@
 /// ============================================================================
+/// Bling 문서헤더
+/// 모듈         : 회원가입 위치 확인 (Neighborhood Prompt)
+/// 파일         : lib/features/location/screens/neighborhood_prompt_screen.dart
+/// 목적         : GeoPoint(현재 위치) → Google Geocoding(Reverse) → 인도네시아 행정구역
+///               (Provinsi → Kabupaten/Kota → Kecamatan → Kelurahan/Desa) 파싱 및 저장
+/// 사용자 가치  : 사용자가 현재 위치 기반으로 자신의 동네(케루라한/데사)를 손쉽게 설정
+/// 연결 기능    : (선택) 수동 선택 화면 location_filter_screen.dart 로 폴백 가능
+/// 의존성       : http, geolocator, cloud_firestore, firebase_auth
+/// 주의         : GOOGLE_MAPS_API_KEY 설정 필요(환경변수 또는 상수)
+///
+/// 변경 이력    : 2025-09-09 최초 작성 (http + Reverse Geocoding 최종본)
+/// ============================================================================
+
+/// ============================================================================
 /// Bling DocHeader
 /// Module        : Location
 /// File          : lib/features/location/screens/neighborhood_prompt_screen.dart
-/// Purpose       : Google Places를 통해 사용자의 동네를 검증하고 Firestore를 갱신합니다.
+/// Purpose       : Google **Geocoding(Reverse)** + Firestore 행정DB 검증을 통해 사용자의 동네를 저장
 /// User Impact   : 정확한 RT/RW 소속이 초근접 기능을 활성화합니다.
 /// Feature Links : lib/features/location/screens/location_setting_screen.dart
-/// Data Model    : Firestore `users` 필드 `locationName`, `locationParts`, `geoPoint`, `neighborhoodVerified`; `provinces/{prov}/kota`와 `kabupaten`을 조회합니다.
-/// Location Scope: Prov→Kota/Kabupaten→Kecamatan→Kelurahan을 검증하며 마지막 기기 GPS를 기본값으로 사용합니다.
-/// Trust Policy  : 검증 성공 시 `trustScore`가 상승하고 실패 시 기능이 제한됩니다.
-/// Monetization  : 검증된 위치는 지역 광고와 마켓플레이스 노출을 가능하게 합니다.
-/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `complete_location_verification`.
-/// Analytics     : Google API 호출과 검증 결과를 기록합니다.
-/// I18N          : 키 `location.success`, `location.error` (assets/lang/*.json)
-/// Dependencies  : firebase_auth, cloud_firestore, google_places, geolocator, permission_handler, easy_localization
-/// Security/Auth : 로그인된 사용자가 필요하며 API 키는 `ApiKeys.googleApiKey`에 있습니다.
-/// Edge Cases    : GPS 거부 또는 DB에서 행정 계층을 찾지 못하는 경우.
-/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
-/// Source Docs   : docs/index/5 지역-위치-개인정보.md; docs/Bling_Location_GeoQuery_Structure.md; docs/team/teamD_GeoQuery_Location_Module_통합_작업문서.md
+/// Data Model    : Firestore `users` 필드 `locationName`, `locationParts`, `geoPoint`, `neighborhoodVerified`
+/// Location Scope: Prov → Kota/Kabupaten → Kecamatan → Kelurahan 검증, GPS를 기본값으로 사용
+/// Trust Policy  : 검증 성공 시 `neighborhoodVerified = true` (신뢰도 시스템 연계는 별도)
+/// KPI/Analytics : I18N 키 `location.success`, `location.error` 사용 (assets/lang/*.json)
+/// Dependencies  : firebase_auth, cloud_firestore, geolocator, permission_handler, easy_localization, http
+/// Security/Auth : 로그인 필요, API 키는 `ApiKeys.googleApiKey` 사용
+/// Changelog     : 2025-09-09 기존 Places 기반 → http Reverse Geocoding 기반으로 교체
 /// ============================================================================
-/// [기획의도 요약]
-/// - 동네 인증을 통해 사용자의 정확한 위치를 검증하고, 신뢰등급(TrustScore) 및 지역 기반 서비스(광고, 마켓플레이스 등)를 활성화한다.
-/// - KPI, Analytics, 보안, I18N 등 다양한 정책을 반영한다.
-/// [실제 구현 기능]
-/// - Google Places API와 Firestore DB를 연동하여, GPS 기반 위치 검증 및 DB 행정구역 매칭을 수행.
-/// - 검증된 위치 정보는 Firestore에 저장되고, UI에서 인증 성공/실패 메시지 및 권한 안내를 제공.
-/// - 위치 인증 실패 시 사용자에게 안내 및 재시도 기능 제공.
-/// [기획의도와 실제 기능의 차이점]
-/// - 기획의도보다 좋아진 점: DB 행정구역 검증 로직이 추가되어, 실제 위치와 DB의 일치도를 높임. 인증 실패 시 사용자 경험 개선(재시도, 안내).
-/// - 기획의도에 못 미친 점: KPI/Analytics/수익화(광고 노출, 마켓플레이스 연계) 기능은 코드상에서 일부만 구현되어 있음. UI/UX 세부 안내 및 다국어 메시지 다양성은 추가 개선 필요.
-/// [UI/UX 기능개선 제안]
-/// - 인증 실패/성공 시 더 다양한 피드백(애니메이션, 상세 안내, 위치 재설정 옵션 등) 제공
-/// - 위치 인증 과정에서 지도 시각화 및 선택 UI 추가
-/// [수익화 제안]
-/// - 인증된 위치 기반으로 지역 광고, 마켓플레이스 추천, 프로모션 배너 노출 기능 연계
-/// [코드 안정성 및 실행 속도 개선 제안]
-/// - 위치 권한/서비스 체크 로직을 별도 함수로 분리하여 재사용성 및 유지보수성 강화
-/// - Firestore/Google API 호출 시 에러 핸들링 및 로딩 상태 관리 강화
-/// - 인증 성공/실패 이벤트를 별도 로깅하여 KPI/Analytics 연동 강화
 library;
-// 아래부터 실제 코드
+// ============================================================================
+// FILE: lib/features/location/screens/neighborhood_prompt_screen.dart
+// DESC: Reverse Geocoding (http) + ID admin parsing + RT/RW form + Firestore save
+// NOTE: returns `Navigator.pop(true)` on success so caller controls next route
+// ============================================================================
 
-import 'package:bling_app/api_keys.dart';
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:http/http.dart' as http;
+import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/api_keys.dart';
+import 'package:bling_app/features/location/screens/location_manual_select_screen.dart';
 
-class NeighborhoodPromptScreen extends StatefulWidget {
-  const NeighborhoodPromptScreen({super.key});
+class AdminAddress {
+  final String province;
+  final String regency;
+  final String district;
+  final String village;
+  final String villageType; // 'kelurahan' | 'desa' | 'unknown'
+  final String formattedAddress;
+  final Map<String, String> components;
 
-  @override
-  State<NeighborhoodPromptScreen> createState() =>
-      _NeighborhoodPromptScreenState();
+  const AdminAddress({
+    required this.province,
+    required this.regency,
+    required this.district,
+    required this.village,
+    required this.villageType,
+    required this.formattedAddress,
+    required this.components,
+  });
+
+  String get displayName {
+    final parts = [village, district, regency, province]
+        .where((e) => e.trim().isNotEmpty)
+        .toList();
+    return parts.join(', ');
+  }
+
+  Map<String, dynamic> toLocationParts() => {
+        'prov': province,
+        'kab': regency,
+        'kota': regency, // keep both keys for backward-compat
+        'kec': district,
+        'kel': village,
+      };
 }
 
-class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
-  bool _isLoading = false;
-  final GoogleMapsPlaces _places =
-      GoogleMapsPlaces(apiKey: ApiKeys.googleApiKey);
+class GoogleGeocodingService {
+  GoogleGeocodingService(this.apiKey);
+  final String apiKey;
 
-  // [최종 해결 버전] DB를 기준으로 주소를 역추적하는 '상향식' 검증 함수
-  Future<Map<String, String?>?> _buildCorrectLocationParts(
-      List<AddressComponent> components) async {
-    // 1. Google API에서 필요한 최소 정보(prov, kec, kel)를 추출합니다.
-    String? provName;
-    String? kecName;
-    String? kelName;
-
-    for (var component in components) {
-      final types = component.types;
-      if (types.contains('administrative_area_level_1')) {
-        provName = component.longName;
-      } else if (types.contains('administrative_area_level_3') ||
-          types.contains('locality') ||
-          types.contains('sublocality_level_1')) {
-        kecName = component.longName;
-      } else if (types.contains('administrative_area_level_4') ||
-          types.contains('sublocality_level_2')) {
-        kelName = component.longName;
-      }
+  Future<AdminAddress> reverseGeocode({
+    required double lat,
+    required double lng,
+    Duration timeout = const Duration(seconds: 10),
+    int retries = 2,
+  }) async {
+    if (apiKey.trim().isEmpty) {
+      throw Exception('GOOGLE_MAPS_API_KEY missing');
     }
 
-    // 2. 필수 정보가 없으면 진행할 수 없으므로 null을 반환합니다.
-    if (provName == null || kecName == null) {
-      debugPrint("Provinsi 또는 Kecamatan 정보를 찾을 수 없습니다.");
+    final uri = Uri.parse(
+      'https://maps.googleapis.com/maps/api/geocode/json'
+      '?latlng=$lat,$lng&language=id&region=ID&result_type='
+      'administrative_area_level_1|administrative_area_level_2|'
+      'administrative_area_level_3|administrative_area_level_4|'
+      'sublocality|political&key=$apiKey',
+    );
+
+    int attempt = 0;
+    while (true) {
+      attempt++;
+      try {
+        final resp = await http.get(uri).timeout(timeout);
+        if (resp.statusCode != 200) {
+          throw Exception('HTTP ${resp.statusCode}: ${resp.body}');
+        }
+        final data = json.decode(resp.body) as Map<String, dynamic>;
+        final status = data['status'] as String? ?? 'UNKNOWN';
+        if (status != 'OK') throw Exception('Geocoding status=$status');
+
+        final results = (data['results'] as List).cast<Map<String, dynamic>>();
+        if (results.isEmpty) throw Exception('ZERO_RESULTS');
+
+        results.sort((a, b) {
+          int score(Map<String, dynamic> r) {
+            final types = (r['types'] as List).cast<String>();
+            int s = 0;
+            for (final t in types) {
+              if (t.startsWith('administrative_area_level_')) s += 3;
+              if (t.startsWith('sublocality')) s += 2;
+              if (t == 'political') s += 1;
+            }
+            return s;
+          }
+
+          return score(b).compareTo(score(a));
+        });
+
+        final best = results.first;
+        final comps = (best['address_components'] as List)
+            .cast<Map<String, dynamic>>();
+        final formatted = best['formatted_address'] as String? ?? '';
+
+        final parsed = _parseIndoAdmin(comps);
+        return AdminAddress(
+          province: parsed['province'] ?? '',
+          regency: parsed['regency'] ?? '',
+          district: parsed['district'] ?? '',
+          village: parsed['village'] ?? '',
+          villageType: parsed['villageType'] ?? 'unknown',
+          formattedAddress: formatted,
+          components: parsed,
+        );
+      } on TimeoutException {
+        if (attempt > retries) rethrow;
+        await Future.delayed(Duration(milliseconds: 400 * attempt));
+      } catch (_) {
+        if (attempt > retries) rethrow;
+        await Future.delayed(Duration(milliseconds: 400 * attempt));
+      }
+    }
+  }
+
+  Map<String, String> _parseIndoAdmin(List<Map<String, dynamic>> comps) {
+    String? byTypes(List<String> wantTypes) {
+      for (final c in comps) {
+        final types = (c['types'] as List).cast<String>();
+        final longName = (c['long_name'] as String?)?.trim();
+        if (longName == null || longName.isEmpty) continue;
+        if (wantTypes.any((w) => types.contains(w))) return longName;
+      }
       return null;
     }
 
-    // [핵심 수정] kecName에서도 "Kecamatan " 접두사를 제거합니다.
-    final cleanKecName = kecName.replaceFirst('Kecamatan ', '').trim();
+    String norm(String s) => s.replaceAll(RegExp(r'\s+'), ' ').trim();
 
-    final provDocRef =
-        FirebaseFirestore.instance.collection('provinces').doc(provName);
-
-    // 3. 'kota' 컬렉션을 먼저 탐색합니다.
-    final kotaSnapshot = await provDocRef.collection('kota').get();
-    for (final kotaDoc in kotaSnapshot.docs) {
-      final kecSnapshot = await kotaDoc.reference
-          .collection('kecamatan')
-          .doc(cleanKecName)
-          .get();
-      if (kecSnapshot.exists) {
-        debugPrint(
-            "DB 검증: Kota '${kotaDoc.id}'에서 Kecamatan '$cleanKecName'을 찾았습니다.");
-        return {
-          'prov': provName,
-          'kota': kotaDoc.id,
-          'kab': null,
-          'kec': cleanKecName,
-          'kel': kelName,
-        };
-      }
-    }
-
-    // 4. 'kota'에 없으면, 'kabupaten' 컬렉션을 탐색합니다.
-    final kabSnapshot = await provDocRef.collection('kabupaten').get();
-    for (final kabDoc in kabSnapshot.docs) {
-      final kecSnapshot = await kabDoc.reference
-          .collection('kecamatan')
-          .doc(cleanKecName)
-          .get();
-      if (kecSnapshot.exists) {
-        debugPrint(
-            "DB 검증: Kabupaten '${kabDoc.id}'에서 Kecamatan '$cleanKecName'을 찾았습니다.");
-        return {
-          'prov': provName,
-          'kota': null,
-          'kab': kabDoc.id,
-          'kec': cleanKecName,
-          'kel': kelName,
-        };
-      }
-    }
-
-    // 5. 우리 DB 어디에서도 해당 Kecamatan을 찾지 못한 경우
-    debugPrint("DB 오류: '$provName' 주에서 '$cleanKecName' Kecamatan을 찾을 수 없습니다.");
-    return null;
-  }
-
-  // [핵심 추가] Firestore에 사용자 위치 정보를 저장하는 함수가 누락되어 있었습니다.
-  Future<void> _updateUserLocation(String locationName,
-      Map<String, String> locationParts, GeoPoint geoPoint) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-      'locationName': locationName,
-      'locationParts': locationParts,
-      'geoPoint': geoPoint,
-      'neighborhoodVerified': true,
-    }, SetOptions(merge: true));
-
-    if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('location.success'.tr())));
-    }
-  }
-
-  // 버튼 클릭 시, GPS 위치를 가져와 DB에 저장하는 모든 로직을 이 함수 하나에서 처리
-  Future<void> _setNeighborhoodWithGPS() async {
-    setState(() => _isLoading = true);
-
-    try {
-      // 1. 위치 서비스 활성화 여부 확인
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('location.error'
-                .tr(namedArgs: {'error': 'GPS service is disabled'}))));
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      // 2. 위치 권한 요청
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.deniedForever) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('location.permissionDenied'.tr())));
-        }
-        openAppSettings();
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      if (permission == LocationPermission.whileInUse ||
-          permission == LocationPermission.always) {
-        // 3. 현재 위치 가져오기
-        final position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high);
-
-        // 4. 좌표를 주소로 변환
-        final response = await _places.searchNearbyWithRadius(
-            Location(lat: position.latitude, lng: position.longitude), 100,
-            language: context.locale.languageCode);
-
-        if (mounted && response.isOkay && response.results.isNotEmpty) {
-          final place = response.results.first;
-          final detailResult = await _places.getDetailsByPlaceId(place.placeId);
-
-          if (mounted &&
-              detailResult.isOkay &&
-              detailResult.result.geometry != null) {
-            final user = FirebaseAuth.instance.currentUser;
-            if (user == null) return;
-
-            final location = detailResult.result.geometry!.location;
-            final components = detailResult.result.addressComponents;
-            // final locationMap = _createLocationParts(components);
-
-            // [핵심 수정] 새로운 DB 검증 함수를 호출하여 정확한 locationParts를 생성합니다.
-            final Map<String, String?>? locationMap =
-                await _buildCorrectLocationParts(components);
-
-            // 만약 DB에서 정확한 주소를 찾지 못하면, 사용자에게 알리고 중단합니다.
-            if (locationMap == null) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("정확한 주소를 찾을 수 없습니다. 다른 위치에서 시도해주세요.")));
-              }
-              setState(() => _isLoading = false);
-              return;
-            }
-
-            // [핵심 수정] 검증된 locationMap을 기반으로 직접 fullAddress를 생성합니다.
-            final addressParts = [
-              locationMap['kel'],
-              locationMap['kec'],
-              locationMap['kab'] ??
-                  locationMap['kota'], // kab이나 kota 중 null이 아닌 값 사용
-              locationMap['prov'],
-            ];
-            // null이 아닌 주소 부분만 합쳐서 문자열로 만듭니다.
-            final fullAddress = addressParts.where((p) => p != null).join(', ');
-
-            final geoPoint = GeoPoint(location.lat, location.lng);
-
-            // ✅ [수정] Map<String, String?>을 Map<String, String>으로 변환합니다.
-            final filteredLocationMap = <String, String>{};
-            locationMap.forEach((key, value) {
-              if (value != null) {
-                filteredLocationMap[key] = value;
-              }
-            });
-
-            // ✅ [수정] 다시 _updateUserLocation 함수를 호출하도록 변경하여 코드 중복을 없애고 에러를 해결합니다.
-            await _updateUserLocation(
-                fullAddress, filteredLocationMap, geoPoint);
-          }
-        } else {
-          throw Exception("Could not find address for current location.");
+    String stripPrefix(String s, List<String> prefixes) {
+      for (final p in prefixes) {
+        if (s.toLowerCase().startsWith(p.toLowerCase())) {
+          return s.substring(p.length).trim();
         }
       }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content:
-                Text('location.error'.tr(namedArgs: {'error': e.toString()}))));
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      return s;
     }
+
+    final prov = byTypes(['administrative_area_level_1']) ?? '';
+
+    String reg = byTypes(['administrative_area_level_2']) ??
+        byTypes(['locality']) ??
+        '';
+    reg = stripPrefix(reg, ['Kabupaten ', 'Kota ']);
+
+    String kec = byTypes(['administrative_area_level_3']) ??
+        byTypes(['sublocality_level_2']) ??
+        '';
+    kec = stripPrefix(kec, ['Kecamatan ']);
+
+    String kel = byTypes(['administrative_area_level_4']) ??
+        byTypes(['sublocality_level_1', 'sublocality', 'neighborhood']) ??
+        '';
+
+    String kelType = 'unknown';
+    final lowerKel = kel.toLowerCase();
+    if (lowerKel.startsWith('kelurahan ')) {
+      kel = stripPrefix(kel, ['Kelurahan ']);
+      kelType = 'kelurahan';
+    } else if (lowerKel.startsWith('desa ')) {
+      kel = stripPrefix(kel, ['Desa ']);
+      kelType = 'desa';
+    } else {
+      final rawKel = byTypes(['administrative_area_level_4']) ?? '';
+      final rawSub = byTypes(['sublocality_level_1', 'sublocality']) ?? '';
+      if (rawKel.toLowerCase().contains('kelurahan')) kelType = 'kelurahan';
+      if (rawKel.toLowerCase().contains('desa')) kelType = 'desa';
+      if (kelType == 'unknown') {
+        if (rawSub.toLowerCase().contains('kelurahan')) kelType = 'kelurahan';
+        if (rawSub.toLowerCase().contains('desa')) kelType = 'desa';
+      }
+    }
+
+    return {
+      'province': norm(prov),
+      'regency': norm(reg),
+      'district': norm(kec),
+      'village': norm(kel),
+      'villageType': kelType,
+    };
+  }
+}
+
+class NeighborhoodPromptScreen extends StatefulWidget {
+  const NeighborhoodPromptScreen({super.key});
+  @override
+  State<NeighborhoodPromptScreen> createState() => _NeighborhoodPromptScreenState();
+}
+
+class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
+  bool _loading = false;
+  String? _error;
+  Position? _position;
+  AdminAddress? _address;
+
+  // ✅ ApiKeys.googleApiKey 직접 사용
+  final _geocoder = GoogleGeocodingService(ApiKeys.googleApiKey);
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+
+  final _formKey = GlobalKey<FormState>();
+  final _rtCtl = TextEditingController();
+  final _rwCtl = TextEditingController();
+
+  void _safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    setState(fn);
   }
 
   @override
+  void initState() {
+    super.initState();
+    _bootstrap();
+  }
+
+  @override
+  void dispose() {
+    _rtCtl.dispose();
+    _rwCtl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _bootstrap() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      final pos = await _getCurrentPosition();
+      final addr = await _geocoder.reverseGeocode(lat: pos.latitude, lng: pos.longitude);
+
+      // Prefill RT/RW from existing user doc (backward-compat: locationParts.rt/rw or top-level rt/rw)
+      final user = _auth.currentUser;
+      if (user != null) {
+        final snap = await _firestore.collection('users').doc(user.uid).get();
+        final data = snap.data(); // Map<String, dynamic>?
+        final parts = (data?['locationParts'] as Map?)?.cast<String, dynamic>();
+        final rt0 = (parts?['rt'] ?? data?['rt']) as String?;
+        final rw0 = (parts?['rw'] ?? data?['rw']) as String?;
+        if (rt0 != null && rt0.isNotEmpty) _rtCtl.text = _normDigits(rt0);
+        if (rw0 != null && rw0.isNotEmpty) _rwCtl.text = _normDigits(rw0);
+      }
+
+      setState(() {
+        _position = pos;
+        _address = addr;
+      });
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      _safeSetState(() => _loading = false); // <- dispose 이후면 실행 안 됨
+    }
+  }
+
+  Future<Position> _getCurrentPosition() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      throw Exception('Location service is disabled');
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception('Location permission denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception('Location permission permanently denied');
+    }
+
+    return Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  }
+
+  String _normDigits(String raw) {
+    final only = raw.replaceAll(RegExp(r'[^0-9]'), '');
+    if (only.isEmpty) return '';
+    // Canonical: 3-digit zero-pad (e.g., 3 -> 003)
+    return only.length >= 3 ? only.substring(0, 3) : only.padLeft(3, '0');
+  }
+
+  Future<void> _saveAndContinue() async {
+    if (_address == null || _position == null) return;
+
+    // Validate RT/RW
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('Login required');
+
+      final rt = _normDigits(_rtCtl.text);
+      final rw = _normDigits(_rwCtl.text);
+
+      final docRef = _firestore.collection('users').doc(user.uid);
+
+      final geo = GeoPoint(_position!.latitude, _position!.longitude);
+      final locName = _address!.displayName;
+      final baseParts = _address!.toLocationParts();
+
+      await docRef.update({
+        'locationName': locName,
+        'locationParts': {
+          ...baseParts,
+          'rt': rt,
+          'rw': rw,
+        },
+        'geoPoint': geo,
+        'neighborhoodVerified': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('location.success'.tr())),
+      );
+
+      // IMPORTANT: keep original navigation contract — pop(true)
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      _safeSetState(() => _error = e.toString());
+    } finally {
+     _safeSetState(() => _loading = false);
+    }
+  }
+
+ void _goManualSelect() async {
+  final ok = await Navigator.of(context).push<bool>(
+    MaterialPageRoute(builder: (_) => const LocationManualSelectScreen()),
+  );
+
+  // 수동 저장 성공 시, 이 화면도 성공 종료(pop(true))
+  if (ok == true && mounted) {
+    Navigator.of(context).pop(true);
+  }
+}
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      appBar: AppBar(title: const Text('Set Neighborhood')),
+      body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // const Icon(Icons.my_location, size: 80, color: Color(0xFF00A66C)),
-              const Icon(Icons.location_on_rounded,
-                  size: 80, color: Color(0xFF00A66C)),
+          padding: const EdgeInsets.all(16.0),
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : (_error != null)
+                  ? _ErrorView(
+                      message: _error!,
+                      onRetry: _bootstrap,
+                      onManual: _goManualSelect,
+                    )
+                  : _Content(
+                      formKey: _formKey,
+                      address: _address!,
+                      position: _position!,
+                      rtCtl: _rtCtl,
+                      rwCtl: _rwCtl,
+                      onSave: _saveAndContinue,
+                      onManual: _goManualSelect,
+                      onRefresh: _bootstrap,
+                    ),
+        ),
+      ),
+    );
+  }
+}
 
-              const SizedBox(height: 24),
-              Text('prompt.title'.tr(),
-                  style: GoogleFonts.inter(
-                      fontSize: 22, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              Text('prompt.subtitle'.tr(),
-                  style:
-                      GoogleFonts.inter(fontSize: 16, color: Colors.grey[700]),
-                  textAlign: TextAlign.center),
-              const SizedBox(height: 48),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _setNeighborhoodWithGPS,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: const Color(0xFFFF6B00),
-                  foregroundColor: Colors.white,
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text('prompt.button'.tr(),
-                        style: GoogleFonts.inter(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
+class _ErrorView extends StatelessWidget {
+  const _ErrorView({
+    required this.message,
+    required this.onRetry,
+    required this.onManual,
+  });
+  final String message;
+  final VoidCallback onRetry;
+  final VoidCallback onManual;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Something went wrong', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        Text(message, style: Theme.of(context).textTheme.bodyMedium),
+        const Spacer(),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: onManual,
+                icon: const Icon(Icons.edit_location_alt_outlined),
+                label: const Text('Manual select'),
               ),
-              TextButton(
-                onPressed: () => FirebaseAuth.instance.signOut(),
-                child: Text('drawer.logout'.tr(),
-                    style: TextStyle(color: Colors.grey[600])),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _Content extends StatelessWidget {
+  const _Content({
+    required this.formKey,
+    required this.address,
+    required this.position,
+    required this.rtCtl,
+    required this.rwCtl,
+    required this.onSave,
+    required this.onManual,
+    required this.onRefresh,
+  });
+
+  final GlobalKey<FormState> formKey;
+  final AdminAddress address;
+  final Position position;
+  final TextEditingController rtCtl;
+  final TextEditingController rwCtl;
+  final VoidCallback onSave;
+  final VoidCallback onManual;
+  final VoidCallback onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Detected neighborhood', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          _InfoRow(label: 'Display', value: address.displayName),
+          _InfoRow(label: 'Province', value: address.province),
+          _InfoRow(label: 'Kab/Kota', value: address.regency),
+          _InfoRow(label: 'Kecamatan', value: address.district),
+          _InfoRow(label: 'Kel/Desa', value: '${address.village} (${address.villageType})'),
+          const SizedBox(height: 12),
+          _InfoRow(label: 'Lat/Lng', value: '${position.latitude}, ${position.longitude}'),
+          const SizedBox(height: 16),
+          Text('Add detailed address (RT/RW)', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: rtCtl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'RT',
+                    hintText: 'e.g. 003',
+                    prefixIcon: Icon(Icons.house_siding_outlined),
+                  ),
+                  validator: (v) {
+                    final s = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                    if (s.isEmpty) return 'Please enter RT';
+                    if (s.length > 3) return 'Max 3 digits';
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextFormField(
+                  controller: rwCtl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'RW',
+                    hintText: 'e.g. 007',
+                    prefixIcon: Icon(Icons.groups_outlined),
+                  ),
+                  validator: (v) {
+                    final s = (v ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                    if (s.isEmpty) return 'Please enter RW';
+                    if (s.length > 3) return 'Max 3 digits';
+                    return null;
+                  },
+                ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 6),
+          Text(
+            'RT/RW will not be public. They help boost trust and enable hyperlocal features.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const Spacer(),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: onManual,
+                  icon: const Icon(Icons.edit_location_alt_outlined),
+                  label: const Text('Manual select'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: onSave,
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('Save this location'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: TextButton.icon(
+              onPressed: onRefresh,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh from GPS'),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.label, required this.value});
+  final String label;
+  final String value;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 90, child: Text(label, style: Theme.of(context).textTheme.bodyMedium)),
+          const SizedBox(width: 8),
+          Expanded(child: Text(value, style: Theme.of(context).textTheme.titleSmall)),
+        ],
       ),
     );
   }

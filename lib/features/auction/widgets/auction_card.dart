@@ -22,6 +22,7 @@ import 'package:bling_app/features/auction/screens/auction_detail_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경하여 Timer를 관리
 class AuctionCard extends StatefulWidget {
@@ -32,9 +33,12 @@ class AuctionCard extends StatefulWidget {
   State<AuctionCard> createState() => _AuctionCardState();
 }
 
-class _AuctionCardState extends State<AuctionCard> {
+class _AuctionCardState extends State<AuctionCard> with AutomaticKeepAliveClientMixin { // ✅ KeepAlive 추가
   Timer? _timer;
   Duration _timeLeft = Duration.zero;
+
+   @override
+  bool get wantKeepAlive => true; // ✅ 상태 유지
 
   @override
   void initState() {
@@ -90,6 +94,7 @@ class _AuctionCardState extends State<AuctionCard> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // ✅ KeepAlive를 위해 추가
     final NumberFormat currencyFormat =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     
@@ -114,16 +119,12 @@ class _AuctionCardState extends State<AuctionCard> {
           children: [
             Stack(
               children: [
+                       // ✅ 기존 Image.network를 공용 ImageCarouselCard로 교체
                 if (widget.auction.images.isNotEmpty)
-                  Image.network(
-                    widget.auction.images.first,
+                  ImageCarouselCard(
+                    storageId: widget.auction.id,
+                    imageUrls: widget.auction.images,
                     height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (c, e, s) => Container(
-                        height: 200,
-                        color: Colors.grey.shade200,
-                        child: const Icon(Icons.error)),
                   )
                 else
                   Container(

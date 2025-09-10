@@ -1,15 +1,16 @@
 // lib/features/local_news/screens/local_news_detail_screen.dart
 
+import 'package:bling_app/api_keys.dart'; // ✅ Maps Static API 키를 위해 추가
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+// ❌ 리소스 충돌을 일으키는 google_maps_flutter 패키지는 더 이상 필요 없으므로 삭제합니다.
+// import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
-import 'package:bling_app/features/shared/screens/image_gallery_screen.dart'; 
-// ✅ 새로 만든 프로필 스크린 import
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
 import '../../../core/constants/app_categories.dart';
 import '../models/post_model.dart';
@@ -17,7 +18,7 @@ import '../../../core/models/user_model.dart';
 import '../widgets/comment_input_field.dart';
 import '../widgets/comment_list_view.dart';
 import 'edit_local_news_screen.dart';
-import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
+import 'tag_search_result_screen.dart';
 
 
 class LocalNewsDetailScreen extends StatefulWidget {
@@ -30,8 +31,7 @@ class LocalNewsDetailScreen extends StatefulWidget {
 
 class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
   final PageController _pageController = PageController();
-  
-  // ... (initState, dispose 및 다른 함수들은 기존과 동일)
+
   bool _isLiked = false;
   late int _likesCount;
   bool _likeLoading = false;
@@ -103,7 +103,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('로그인이 필요합니다.')));  // TODO : 다국어 작업
+          .showSnackBar(const SnackBar(content: Text('로그인이 필요합니다.')));
       setState(() => _likeLoading = false);
       return;
     }
@@ -155,7 +155,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     }
     if (currentUserUid == _currentPost.userId) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('자신의 글에는 감사를 표시할 수 없습니다.')));     // TODO : 다국어 작업
+          const SnackBar(content: Text('자신의 글에는 감사를 표시할 수 없습니다.')));
       setState(() => _isThanksProcessing = false);
       return;
     }
@@ -189,7 +189,6 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     }
   }
   
-  // ✅ _buildAuthorInfo 함수 수정
   Widget _buildAuthorInfo(String userId) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
@@ -199,7 +198,6 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const SizedBox();
           final user = UserModel.fromFirestore(snapshot.data!);
-          // ✅ GestureDetector로 감싸서 탭 이벤트를 추가합니다.
           return GestureDetector(
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
@@ -241,7 +239,6 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
         });
   }
 
-  // ... (나머지 함수들은 기존과 동일)
   @override
   Widget build(BuildContext context) {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
@@ -251,8 +248,8 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           AppCategories.postCategories.firstWhere((c) => c.categoryId == 'etc'),
     );
     final hasImages = _currentPost.mediaUrl != null && _currentPost.mediaUrl!.isNotEmpty;
-    // ✅ 상세 화면에서도 위치 정보 유무 확인
-    final hasLocation = _currentPost.geoPoint != null && _currentPost.geoPoint?.latitude != null && _currentPost.geoPoint?.longitude != null;
+    final hasLocation = _currentPost.geoPoint != null;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_currentPost.title ?? 'localNewsDetail.appBarTitle'.tr()),
@@ -313,8 +310,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                           .bodyLarge
                           ?.copyWith(height: 1.5)),
                   const SizedBox(height: 16),
-
-                  // ✅ 누락되었던 태그 표시 위젯을 추가합니다.
+                  
                   if (_currentPost.tags.isNotEmpty) ...[
                     _buildTags(context, _currentPost.tags),
                     const SizedBox(height: 16),
@@ -322,7 +318,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                   
                   if (hasImages)
                     _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
-                  // ✅ 상세 화면에 미니맵 위젯 추가
+                  
                   if (hasLocation) ...[
                     const SizedBox(height: 16),
                     _buildMiniMap(context, _currentPost),
@@ -356,7 +352,6 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     );
   }
 
-   // ✅ 태그를 표시하고 탭 이벤트를 처리하는 위젯 함수를 새로 추가합니다.
   Widget _buildTags(BuildContext context, List<String> tags) {
     return Wrap(
       spacing: 8.0,
@@ -487,36 +482,47 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     );
   }
 
-  // ✅ 상세 화면에 미니맵을 그리는 함수 추가
   Widget _buildMiniMap(BuildContext context, PostModel post) {
-    if (post.geoPoint == null || post.geoPoint?.latitude == null || post.geoPoint?.longitude == null) {
-      return SizedBox.shrink();
+    if (post.geoPoint == null) {
+      return const SizedBox.shrink();
     }
-    final target = LatLng(post.geoPoint!.latitude, post.geoPoint!.longitude);
-    return SizedBox(
-      height: 180,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: GoogleMap(
-          initialCameraPosition: CameraPosition(
-            target: target,
-            zoom: 15,
+    
+    final lat = post.geoPoint!.latitude;
+    final lng = post.geoPoint!.longitude;
+    final apiKey = ApiKeys.googleApiKey;
+    
+    final staticMapUrl = 'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lng&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C$lat,$lng&key=$apiKey';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('postCard.location'.tr(), style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            staticMapUrl,
+            height: 180,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                height: 180,
+                color: Colors.grey[200],
+                child: const Center(child: CircularProgressIndicator()),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                height: 180,
+                color: Colors.grey[200],
+                child: const Center(child: Icon(Icons.error_outline)),
+              );
+            },
           ),
-          markers: {
-            Marker(
-              markerId: MarkerId(post.id),
-              position: target,
-            ),
-          },
-          myLocationEnabled: false,
-          myLocationButtonEnabled: false,
-          zoomControlsEnabled: true,
-          scrollGesturesEnabled: true,
-          zoomGesturesEnabled: true,
-          tiltGesturesEnabled: false,
-          rotateGesturesEnabled: false,
         ),
-      ),
+      ],
     );
   }
 }

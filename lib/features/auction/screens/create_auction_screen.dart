@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
 class CreateAuctionScreen extends StatefulWidget {
   final UserModel userModel;
@@ -27,6 +28,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _startPriceController = TextEditingController();
+  List<String> _tags = []; // ✅ 태그 상태 변수 추가
 
   final List<XFile> _images = [];
   int _durationInDays = 3;
@@ -113,6 +115,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
         startAt: now,
         endAt: endAt,
         ownerId: user.uid,
+        tags: _tags, // ✅ 저장 시 태그 목록을 전달
       );
 
       await _repository.createAuction(newAuction);
@@ -208,7 +211,6 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
@@ -240,6 +242,16 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                   validator: (value) => (value == null || value.trim().isEmpty)
                       ? 'auctions.form.startPriceRequired'.tr()
                       : null,
+                ),
+                // ✅ 상세 설명 다음, 기간 설정 전에 태그 입력 필드를 추가합니다.
+                const SizedBox(height: 16),
+                CustomTagInputField(
+                  hintText: 'auctions.create.form.tagsHint'.tr(),
+                  onTagsChanged: (tags) {
+                    setState(() {
+                      _tags = tags;
+                    });
+                  },
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<int>(

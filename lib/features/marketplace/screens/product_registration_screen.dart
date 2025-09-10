@@ -336,7 +336,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                 controller: _addressController,
                 readOnly: true, // 사용자가 직접 수정하지 못하도록 설정
                 decoration: InputDecoration(
-                  labelText: 'address_neighborhood'.tr(),
+                  labelText: 'marketplace.registration.addressHint'.tr(),
                   prefixIcon: const Icon(Icons.location_on_outlined),
                 ),
                 // validator 제거 (자동으로 가져오므로)
@@ -344,8 +344,9 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _transactionPlaceController,
-                decoration:
-                    InputDecoration(labelText: 'address_detail_hint'.tr()),
+                decoration: InputDecoration(
+                    labelText:
+                        'marketplace.registration.addressDetailHint'.tr()),
               ),
               const SizedBox(height: 16),
               TextFormField(

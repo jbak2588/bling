@@ -45,6 +45,7 @@
             "nicknameInUse": "Nama panggilan ini sudah digunakan.",
             "nicknameAvailable": "Nama panggilan ini tersedia.",
             "nicknameNotChecked": "Silakan periksa duplikasi nama panggilan.",
+            "signupSuccessLoginNotice": "Pendaftaran berhasil! Silakan masuk untuk melanjutkan.",
             "unknownError": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
         },
         "policy": {
@@ -126,7 +127,10 @@
             "titleHint": "Judul",
             "priceHint": "Harga (Rp)",
             "negotiable": "Izinkan Penawaran",
+            "addressHint": "Lokasi",
+            "addressDetailHint": "Detail lokasi pertemuan",
             "descriptionHint": "Deskripsi Lengkap",
+            "tagsHint": "cth. anjing, gratisan",
             "success": "Produk berhasil didaftarkan!",
             "fail": "Gagal mendaftarkan produk: {error}"
         },
@@ -139,7 +143,8 @@
             "negotiable": "Ubah Tawaran Harga",
             "descriptionHint": "Ubah Deskripsi Lengkap",
             "success": "Produk berhasil diedit!",
-            "fail": "Gagal memperbarui produk: {error}"
+            "fail": "Gagal memperbarui produk: {error}",
+            "resetLocation": "Atur ulang lokasi"
         },
         "detail": {
             "makeOffer": "Tawarkan harga",
@@ -160,7 +165,8 @@
             "chats": "Chat",
             "noSeller": "Info penjual tidak tersedia",
             "noLocation": "Info lokasi tidak tersedia",
-            "seller": "Penjual"
+            "seller": "Penjual",
+            "dealLocation": "Lokasi transaksi"
         },
         "dialog": {
             "deleteTitle": "Hapus Postingan",
@@ -179,7 +185,8 @@
             "label": "Kondisi",
             "new": "Baru",
             "used": "Bekas"
-        }
+        },
+        "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!"
     },
     "myBling": {
         "title": "Bling Saya",
@@ -263,7 +270,17 @@
         "success": "Lingkungan telah diatur.",
         "error": "Gagal mengatur lingkungan: {error}",
         "empty": "Silakan masukkan nama lingkungan.",
-        "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda."
+        "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda.",
+        "rtLabel": "RT",
+        "rwLabel": "RW",
+        "rtHint": "cth. 003",
+        "rwHint": "cth. 007",
+        "rtRequired": "Silakan masukkan RT.",
+        "rwRequired": "Silakan masukkan RW.",
+        "rtRwInfo": "RT/RW Anda tidak akan dipublikasikan. Data ini membantu meningkatkan kepercayaan dan fitur lokal.",
+        "saveThisLocation": "Simpan lokasi ini",
+        "manualSelect": "Pilih secara manual",
+        "refreshFromGps": "Perbarui dari GPS"
     },
     "profileEdit": {
         "title": "Pengaturan Profil",
@@ -732,6 +749,8 @@
         },
         "detail": {
             "currentBid": "Tawaran saat ini: {amount}",
+            "location": "Lokasi",
+            "seller": "Penjual",
             "endTime": "Waktu berakhir: {time}",
             "bidsTitle": "Daftar tawaran",
             "noBids": "Belum ada tawaran.",
@@ -898,5 +917,12 @@
     },
     "community": {
         "title": "Halaman Komunitas"
+    },
+    "selectCategory": "Pilih kategori",
+    "address_neighborhood": "Lingkungan",
+    "address_detail_hint": "Alamat detail",
+    "localNewsTagResult": {
+        "error": "Terjadi kesalahan saat mencari: {error}",
+        "empty": "Tidak ada postingan dengan tag '#{tag}'."
     }
 }
