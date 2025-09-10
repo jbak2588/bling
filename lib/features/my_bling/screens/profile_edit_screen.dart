@@ -16,6 +16,7 @@
 /// 5. 신뢰등급 변화, KPI 기반 추천/분석 기능 추가 권장.
 library;
 
+
 import 'dart:io';
 
 import 'package:bling_app/core/models/user_model.dart';
@@ -28,7 +29,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../location/screens/location_setting_screen.dart';
 
-// [수정] 클래스 이름을 표준화합니다.
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
 
@@ -37,14 +37,12 @@ class ProfileEditScreen extends StatefulWidget {
 }
 
 class _ProfileEditScreenState extends State<ProfileEditScreen> {
-  // --- 모든 컨트롤러를 통합합니다 ---
   final _nicknameController = TextEditingController();
   final _bioController = TextEditingController();
   final _phoneController = TextEditingController();
   final _rtController = TextEditingController();
   final _rwController = TextEditingController();
 
-  // --- 모든 상태 변수를 통합합니다 ---
   UserModel? _userModel;
   File? _selectedImage;
   String? _initialPhotoUrl;
@@ -54,33 +52,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
 
-  // [추가] 표준화된 관심사 카테고리
   final Map<String, List<String>> _interestCategories = {
-    'category_creative': [
-      'drawing',
-      'instrument',
-      'photography',
-      'writing',
-      'crafting',
-      'gardening'
-    ],
-    'category_sports': [
-      'soccer',
-      'hiking',
-      'camping',
-      'running',
-      'biking',
-      'golf',
-      'workout'
-    ],
-    'category_food_drink': [
-      'foodie',
-      'cooking',
-      'baking',
-      'coffee',
-      'wine',
-      'tea'
-    ],
+    'category_creative': ['drawing', 'instrument', 'photography', 'writing', 'crafting', 'gardening'],
+    'category_sports': ['soccer', 'hiking', 'camping', 'running', 'biking', 'golf', 'workout'],
+    'category_food_drink': ['foodie', 'cooking', 'baking', 'coffee', 'wine', 'tea'],
     'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
     'category_growth': ['reading', 'investing', 'language', 'coding'],
     'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
@@ -102,31 +77,26 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     super.dispose();
   }
 
-  // [수정] 모든 필드를 불러오도록 로직 통합
   Future<void> _loadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       if (mounted) setState(() => _isLoading = false);
       return;
     }
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
+    final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
     if (doc.exists && mounted) {
       _userModel = UserModel.fromFirestore(doc);
       setState(() {
         _nicknameController.text = _userModel!.nickname;
         _bioController.text = _userModel!.bio ?? '';
         _phoneController.text = _userModel!.phoneNumber ?? '';
-        _rtController.text = _userModel!.rt ?? '';
-        _rwController.text = _userModel!.rw ?? '';
+        // ✅✅✅ 핵심 수정: locationParts 맵에서 rt와 rw 값을 가져옵니다. ✅✅✅
+        _rtController.text = _userModel!.locationParts?['rt'] ?? '';
+        _rwController.text = _userModel!.locationParts?['rw'] ?? '';
         _initialPhotoUrl = _userModel!.photoUrl;
         _interests = List<String>.from(_userModel!.interests ?? []);
-        _showLocationOnMap =
-            _userModel!.privacySettings?['showLocationOnMap'] ?? true;
-        _allowFriendRequests =
-            _userModel!.privacySettings?['allowFriendRequests'] ?? true;
+        _showLocationOnMap = _userModel!.privacySettings?['showLocationOnMap'] ?? true;
+        _allowFriendRequests = _userModel!.privacySettings?['allowFriendRequests'] ?? true;
         _isLoading = false;
       });
     } else {
@@ -136,8 +106,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
@@ -149,10 +118,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const LocationSettingScreen()),
     );
-    await _loadUserData(); // 위치 변경 후 데이터를 다시 불러옵니다.
+    await _loadUserData();
   }
 
-  // [수정] 모든 필드를 저장하도록 로직 통합
   Future<void> _saveChanges() async {
     if (_isSaving) return;
     setState(() => _isSaving = true);
@@ -160,8 +128,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('profileEdit.errors.noUser'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('profileEdit.errors.noUser'.tr())));
         setState(() => _isSaving = false);
       }
       return;
@@ -170,18 +137,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     try {
       String? newPhotoUrl = _initialPhotoUrl;
       if (_selectedImage != null) {
-        final ref = FirebaseStorage.instance
-            .ref()
-            .child('profile_pictures')
-            .child(user.uid);
+        final ref = FirebaseStorage.instance.ref().child('profile_pictures').child(user.uid);
         await ref.putFile(_selectedImage!);
         newPhotoUrl = await ref.getDownloadURL();
       }
 
-      final Map<String, dynamic> updatedLocationParts =
-          Map<String, dynamic>.from(_userModel?.locationParts ?? {});
-
-      // 2. RT와 RW 값을 추가하거나 업데이트합니다.
+      final Map<String, dynamic> updatedLocationParts = Map<String, dynamic>.from(_userModel?.locationParts ?? {});
       updatedLocationParts['rt'] = _rtController.text.trim();
       updatedLocationParts['rw'] = _rwController.text.trim();
 
@@ -191,8 +152,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         'phoneNumber': _phoneController.text.trim(),
         'photoUrl': newPhotoUrl,
         'interests': _interests,
-        'locationParts':
-            updatedLocationParts, // 3. 수정된 locationParts 맵 전체를 저장합니다.
+        'locationParts': updatedLocationParts,
         'privacySettings': {
           ...?_userModel?.privacySettings,
           'showLocationOnMap': _showLocationOnMap,
@@ -201,23 +161,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         'profileCompleted': true,
         'updatedAt': FieldValue.serverTimestamp(),
       };
-      // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update(dataToUpdate);
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(dataToUpdate);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('profileEdit.successMessage'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('profileEdit.successMessage'.tr())));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-                'profileEdit.errors.updateFailed'.tr(args: [e.toString()]))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('profileEdit.errors.updateFailed'.tr(args: [e.toString()]))));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -330,7 +283,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                                   ),
                                   TextButton(
                                     onPressed: _openLocationSetting,
-                                    child: Text('profileEdit.changeLocation'.tr()),
+                                    child:
+                                        Text('profileEdit.changeLocation'.tr()),
                                   )
                                 ],
                               ),

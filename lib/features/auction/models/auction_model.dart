@@ -28,7 +28,7 @@ class AuctionModel {
   final int currentBid;
   final List<Map<String, dynamic>> bidHistory;
   final String location;
-  
+
   // V V V --- [추가] 지역 필터링을 위한 locationParts 필드 --- V V V
   final Map<String, dynamic>? locationParts;
   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
@@ -39,6 +39,8 @@ class AuctionModel {
   final String ownerId;
   final bool trustLevelVerified;
   final bool isAiVerified;
+  // ✅ tags 필드를 추가합니다.
+  final List<String> tags;
 
   AuctionModel({
     required this.id,
@@ -56,6 +58,7 @@ class AuctionModel {
     required this.ownerId,
     this.trustLevelVerified = false,
     this.isAiVerified = false,
+    this.tags = const [], // ✅ 생성자에 추가
   });
 
   factory AuctionModel.fromFirestore(
@@ -65,8 +68,7 @@ class AuctionModel {
       id: doc.id,
       title: data['title'] ?? '',
       description: data['description'] ?? '',
-      images:
-          data['images'] != null ? List<String>.from(data['images']) : [],
+      images: data['images'] != null ? List<String>.from(data['images']) : [],
       startPrice: data['startPrice'] ?? 0,
       currentBid: data['currentBid'] ?? 0,
       bidHistory: data['bidHistory'] != null
@@ -83,6 +85,8 @@ class AuctionModel {
       ownerId: data['ownerId'] ?? '',
       trustLevelVerified: data['trustLevelVerified'] ?? false,
       isAiVerified: data['isAiVerified'] ?? false,
+      // ✅ Firestore 데이터로부터 tags 필드를 읽어옵니다.
+      tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
     );
   }
 
@@ -102,6 +106,7 @@ class AuctionModel {
       'ownerId': ownerId,
       'trustLevelVerified': trustLevelVerified,
       'isAiVerified': isAiVerified,
+      'tags': tags, // ✅ JSON 변환 시 tags 필드를 포함합니다.
     };
   }
 }

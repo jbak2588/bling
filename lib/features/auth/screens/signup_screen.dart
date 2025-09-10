@@ -174,7 +174,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('signupSuccessLoginNotice'.tr())));
+              SnackBar(content: Text('signup.alerts.signupSuccessLoginNotice'.tr())));
         Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {

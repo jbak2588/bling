@@ -45,6 +45,7 @@
             "nicknameInUse": "이미 사용 중인 닉네임입니다.",
             "nicknameAvailable": "사용 가능한 닉네임입니다.",
             "nicknameNotChecked": "닉네임 중복 확인을 해주세요.",
+            "signupSuccessLoginNotice": "회원가입이 완료되었습니다! 로그인 후 계속 이용해 주세요.",
             "unknownError": "알 수 없는 오류가 발생했습니다. 다시 시도해주세요."
         },
         "policy": {
@@ -126,6 +127,8 @@
             "titleHint": "상품명",
             "priceHint": "가격 (Rp)",
             "negotiable": "가격 제안 가능",
+            "addressHint": "동네",
+            "addressDetailHint": "거래 장소",
             "descriptionHint": "상세 설명",
             "success": "상품이 성공적으로 등록되었습니다!"
         },
@@ -137,8 +140,10 @@
             "priceHint": "가격 수정 (Rp)",
             "negotiable": "가격 제안 수정",
             "descriptionHint": "상세 설명 수정",
-            "success": "상품이 성공적으로 수정되었습니다!",
-            "fail": "상품 수정 실패: {error}"
+            "tagsHint": "예: 강아지, 무료나눔",
+            "success": "상품이 성공적으로 등록되었습니다!",
+            "fail": "상품 수정 실패: {error}",
+            "resetLocation": "위치 초기화"
         },
         "detail": {
             "makeOffer": "가격 제안하기",
@@ -159,7 +164,8 @@
             "chats": "채팅",
             "noSeller": "판매자 정보 없음",
             "noLocation": "지역 정보 없음",
-            "seller": "판매자"
+            "seller": "판매자",
+            "dealLocation": "거래 장소"
         },
         "dialog": {
             "deleteTitle": "게시물 삭제",
@@ -178,7 +184,8 @@
             "label": "상태",
             "new": "새것",
             "used": "중고"
-        }
+        },
+        "setLocationPrompt": "중고거래 상품을 보려면 먼저 내 동네를 설정해주세요!"
     },
     "myBling": {
         "title": "나의 Bling",
@@ -262,7 +269,17 @@
         "success": "동네가 설정되었습니다.",
         "error": "동네 설정에 실패했습니다: {error}",
         "empty": "동네 이름을 입력해주세요.",
-        "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다."
+        "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다.",
+        "rtLabel": "RT",
+        "rwLabel": "RW",
+        "rtHint": "cth. 003",
+        "rwHint": "cth. 007",
+        "rtRequired": "Silakan masukkan RT.",
+        "rwRequired": "Silakan masukkan RW.",
+        "rtRwInfo": "RT/RW Anda tidak akan dipublikasikan. Data ini membantu meningkatkan kepercayaan dan fitur lokal.",
+        "saveThisLocation": "Simpan lokasi ini",
+        "manualSelect": "Pilih secara manual",
+        "refreshFromGps": "Perbarui dari GPS"
     },
     "profileEdit": {
         "title": "프로필 설정",
@@ -731,6 +748,8 @@
         },
         "detail": {
             "currentBid": "현재 입찰가: {amount}",
+            "location": "위치",
+            "seller": "판매자",
             "endTime": "마감 시간: {time}",
             "bidsTitle": "입찰 현황",
             "noBids": "아직 입찰자가 없습니다.",
@@ -897,5 +916,12 @@
     },
     "community": {
         "title": "커뮤니티 화면"
+    },
+    "selectCategory": "카테고리 선택",
+    "address_neighborhood": "동네",
+    "address_detail_hint": "상세 주소",
+    "localNewsTagResult": {
+        "error": "검색 중 오류가 발생했습니다: {error}",
+        "empty": "'#{tag}' 태그가 포함된 게시물이 없습니다."
     }
 }

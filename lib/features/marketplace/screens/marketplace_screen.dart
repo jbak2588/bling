@@ -106,13 +106,13 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
     // ✅ [수정] 위치 정보가 없는 경우를 위한 UI 처리
     if (widget.userModel?.locationParts?['prov'] == null) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(24.0),
+           padding: const EdgeInsets.all(24.0),
           child: Text(
-            '중고거래 상품을 보려면 먼저 내 동네를 설정해주세요!',
+              'marketplace.setLocationPrompt'.tr(),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
         ),
       );

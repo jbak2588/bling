@@ -206,14 +206,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(appBarTitle)),
-      body: _isLoadingParticipants
+       body: _isLoadingParticipants
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-// V V V --- [추가] 컨텍스트 헤더 UI --- V V V
-          if (!_isContextLoading && _contextItem != null)
-            _buildContextHeader(),
-
+                if (!_isContextLoading && _contextItem != null)
+                  _buildContextHeader(),
                 Expanded(
                   child: StreamBuilder<List<ChatMessageModel>>(
                     stream: _chatService.getMessagesStream(widget.chatId),
@@ -236,23 +234,41 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     },
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 8, right: 8, top: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _messageController,
-                          decoration: InputDecoration(hintText: 'chat_room.placeholder'.tr(), border: OutlineInputBorder(borderRadius: BorderRadius.circular(20))),
-                          onSubmitted: (_) => _sendMessage(),
-                        ),
-                      ),
-                      IconButton(icon: const Icon(Icons.send, color: Colors.teal), onPressed: _sendMessage),
-                    ],
-                  ),
-                ),
+                // ❌ 기존에 있던 메시지 입력창(Padding 위젯)을 여기서 삭제합니다.
               ],
             ),
+      // ✅ bottomNavigationBar에 메시지 입력창을 배치합니다.
+      bottomNavigationBar: SafeArea(
+        child: _buildMessageInputField(),
+      ),
+    );
+  }
+
+  // ✅ 메시지 입력창 UI를 별도의 함수로 분리합니다.
+  Widget _buildMessageInputField() {
+    return Padding(
+      // viewInsets.bottom은 bottomNavigationBar가 자동으로 처리하므로 제거합니다.
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              decoration: InputDecoration(
+                  hintText: 'chat_room.placeholder'.tr(),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16)
+              ),
+              onSubmitted: (_) => _sendMessage(),
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.send, color: Colors.teal),
+            onPressed: _sendMessage,
+          ),
+        ],
+      ),
     );
   }
 

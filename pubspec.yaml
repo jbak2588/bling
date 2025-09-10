@@ -50,6 +50,7 @@ dependencies:
   smooth_page_indicator: ^1.2.1
   google_maps_flutter_platform_interface: ^2.14.0
   google_maps_flutter_android: ^2.18.2
+  http: ^1.5.0
  
  
   

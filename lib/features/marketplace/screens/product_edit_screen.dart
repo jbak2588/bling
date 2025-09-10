@@ -442,8 +442,9 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _transactionPlaceController,
-                decoration:
-                    InputDecoration(labelText: 'address_detail_hint'.tr()),
+                 decoration: InputDecoration(
+                    labelText:
+                        'marketplace.registration.addressDetailHint'.tr()),
               ),
               const SizedBox(height: 16),
               Row(
