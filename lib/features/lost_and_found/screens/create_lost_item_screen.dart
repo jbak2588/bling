@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
 class CreateLostItemScreen extends StatefulWidget {
   final UserModel userModel;
@@ -36,6 +37,7 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
   final _formKey = GlobalKey<FormState>();
   final _itemDescriptionController = TextEditingController();
   final _locationDescriptionController = TextEditingController();
+  List<String> _tags = []; // ✅ 태그 상태 변수 추가
 
   String _type = 'lost';
   final List<XFile> _images = [];
@@ -101,6 +103,7 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
         geoPoint: widget.userModel.geoPoint,
         imageUrls: imageUrls,
         createdAt: Timestamp.now(),
+        tags: _tags, // ✅ 저장 시 태그 목록을 전달
       );
 
       // [수정] 주석을 해제하여 DB 저장 기능을 활성화합니다.
@@ -234,6 +237,17 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
                   validator: (value) => (value == null || value.trim().isEmpty)
                       ? 'lostAndFound.form.locationError'.tr()
                       : null,
+                ),
+                const SizedBox(height: 24),
+
+                // ✅ 태그 입력 필드를 추가합니다.
+                CustomTagInputField(
+                  hintText: 'lostAndFound.form.tagsHint'.tr(),
+                  onTagsChanged: (tags) {
+                    setState(() {
+                      _tags = tags;
+                    });
+                  },
                 ),
               ],
             ),

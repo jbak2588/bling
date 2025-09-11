@@ -27,12 +27,26 @@ import 'package:bling_app/features/lost_and_found/screens/lost_item_detail_scree
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class LostItemCard extends StatelessWidget {
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+
+// ✅ StatelessWidget을 StatefulWidget으로 변경
+class LostItemCard extends StatefulWidget {
   final LostItemModel item;
   const LostItemCard({super.key, required this.item});
 
   @override
+  State<LostItemCard> createState() => _LostItemCardState();
+}
+
+class _LostItemCardState extends State<LostItemCard> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true; // ✅ 상태 유지
+
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // ✅ KeepAlive를 위해 호출
+    final item = widget.item; // ✅ item 참조 방식 변경
     final Color typeColor =
         item.type == 'lost' ? Colors.redAccent : Colors.blueAccent;
 
@@ -67,14 +81,15 @@ class LostItemCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // ✅ 기존 이미지를 공용 이미지 캐러셀로 교체
                   if (item.imageUrls.isNotEmpty)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
-                      child: Image.network(
-                        item.imageUrls.first,
+                      child: ImageCarouselCard(
+                        imageUrls: item.imageUrls,
+                        storageId: item.id,
                         width: 80,
                         height: 80,
-                        fit: BoxFit.cover,
                       ),
                     ),
                   if (item.imageUrls.isNotEmpty) const SizedBox(width: 16),
