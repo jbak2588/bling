@@ -315,7 +315,9 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
       throw Exception('Location permission permanently denied');
     }
 
-    return Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    return Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+    );
   }
 
   String _normDigits(String raw) {

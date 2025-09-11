@@ -164,7 +164,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             DropdownButtonFormField<PostCategoryModel>(
-              value: _selectedCategory,
+              initialValue: _selectedCategory,
               decoration: InputDecoration(
                   labelText: 'localNewsCreate.form.categoryLabel'.tr(),
                   border: const OutlineInputBorder()),

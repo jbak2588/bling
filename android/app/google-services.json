@@ -39,10 +39,10 @@
               "client_type": 3
             },
             {
-              "client_id": "1075298230474-r8c9o68f6al2ak4f1825njq7ontq3c5n.apps.googleusercontent.com",
+              "client_id": "1075298230474-8qtdn75qbjlle3slodi1kq2ik9st4f7b.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.company.blingbling-app"
+                "bundle_id": "com.example.blingApp.RunnerTests"
               }
             }
           ]

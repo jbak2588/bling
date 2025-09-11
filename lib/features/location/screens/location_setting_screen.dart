@@ -123,7 +123,8 @@ class _LocationSettingScreenState extends State<LocationSettingScreen> {
       }
 
       final position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      );
 
       // ✅ DEBUG: 1. 기기에서 GPS 좌표를 제대로 받아왔는지 확인
 
