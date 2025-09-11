@@ -287,7 +287,7 @@ class _FindFriendFormScreenState extends State<FindFriendFormScreen> {
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: _selectedGender,
+                  initialValue: _selectedGender,
                   items: ['male', 'female']
                       .map((label) => DropdownMenuItem(
                             value: label,

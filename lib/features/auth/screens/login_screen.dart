@@ -22,8 +22,11 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool _isLoading = false;
   bool _showPassword = false;
+
+  // GoogleSignIn 7.x: singleton 사용
 
   @override
   void dispose() {
@@ -73,27 +76,35 @@ class _LoginScreenState extends State<LoginScreen> {
     if (mounted) setState(() => _isLoading = false);
   }
 
-  // 구글 로그인 로직 (변경 없음)
+  // ✅✅✅ 핵심 수정: 최신 google_sign_in 패키지 사용법으로 변경 ✅✅✅
   Future<void> _loginWithGoogle() async {
     setState(() => _isLoading = true);
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
+      // 1. google_sign_in 7.x: 반드시 initialize()를 먼저 호출
+      await GoogleSignIn.instance.initialize();
+
+      // 2. authenticate()로 로그인 플로우 시작
+
+
+      final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate();
+
+      // idToken 추출 (authentication.idToken)
+      final googleAuth = googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null) {
         if (mounted) setState(() => _isLoading = false);
         return;
       }
-      final googleAuth = await googleUser.authentication;
+
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+        idToken: idToken,
       );
-      final result =
-          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final result = await FirebaseAuth.instance.signInWithCredential(credential);
+
       if (result.user != null) {
         // 신규 가입자일 경우 UserModel 생성
-        final userDocRef = FirebaseFirestore.instance
-            .collection('users')
-            .doc(result.user!.uid);
+        final userDocRef = FirebaseFirestore.instance.collection('users').doc(result.user!.uid);
         final userDoc = await userDocRef.get();
 
         if (!userDoc.exists) {
@@ -103,11 +114,10 @@ class _LoginScreenState extends State<LoginScreen> {
             email: result.user!.email ?? '',
             photoUrl: result.user!.photoURL,
             createdAt: Timestamp.now(),
-            isDatingProfile: false, // 추가된 필수 매개변수
+            isDatingProfile: false,
           );
           await userDocRef.set(newUser.toJson());
         }
-        // 로그인 성공 후 별도 라우팅 없이 AuthGate에 위임
       }
     } catch (e) {
       if (mounted) {

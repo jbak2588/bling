@@ -430,23 +430,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ),
                 actions: [
-                  IconButton(
-                      icon: const Icon(Icons.share),
-                      onPressed: () => Share.share(
-                          'Check out this product: ${product.title}')),
-                  if (isMyProduct)
-                    IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    ProductEditScreen(product: product)))),
-                  if (isMyProduct)
-                    IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: _showDeleteDialog),
-                ],
-              ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () => SharePlus.instance.share(
+              ShareParams(text: 'Check out this product: ${product.title}'),
+            ),
+          ),
+          if (isMyProduct)
+            IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            ProductEditScreen(product: product)))),
+          if (isMyProduct)
+            IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: _showDeleteDialog),
+              ],
+            ),
               SliverList(
                 delegate: SliverChildListDelegate([
                   Padding(
