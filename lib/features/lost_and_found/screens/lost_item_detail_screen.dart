@@ -25,15 +25,21 @@
 // =====================================================
 
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
-import 'package:bling_app/core/models/user_model.dart';
+// import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:bling_app/features/lost_and_found/data/lost_and_found_repository.dart';
 import 'package:bling_app/features/lost_and_found/screens/edit_lost_item_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+
+import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
+import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
+import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class LostItemDetailScreen extends StatefulWidget {
@@ -162,14 +168,17 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
         children: [
+          // ✅ 기존 이미지를 공용 이미지 캐러셀로 교체
           if (widget.item.imageUrls.isNotEmpty)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: Image.network(
-                widget.item.imageUrls.first,
+            GestureDetector(
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) =>
+                    ImageGalleryScreen(imageUrls: widget.item.imageUrls),
+              )),
+              child: ImageCarouselCard(
+                storageId: widget.item.id,
+                imageUrls: widget.item.imageUrls,
                 height: 250,
-                width: double.infinity,
-                fit: BoxFit.cover,
               ),
             ),
           const SizedBox(height: 16),
@@ -194,11 +203,21 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
               Icons.location_on_outlined,
               'lostAndFound.detail.location'.tr(),
               widget.item.locationDescription),
+
+              const SizedBox(height: 16),
+
+          // ✅ 태그, 지도, 작성자 정보 공용 위젯 추가
+          ClickableTagList(tags: widget.item.tags),
+          if (widget.item.geoPoint != null) ...[
+            const SizedBox(height: 16),
+            MiniMapView(location: widget.item.geoPoint!, markerId: widget.item.id),
+          ],
           const Divider(height: 32),
           Text('lostAndFound.detail.registrant'.tr(),
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
-          _buildOwnerInfo(widget.item.userId),
+        // ✅ 기존 _buildOwnerInfo를 공용 AuthorProfileTile로 교체
+          AuthorProfileTile(userId: widget.item.userId),
         ],
       ),
       // [수정] 작성자에게는 '연락하기' 버튼이 보이지 않도록 처리
@@ -238,33 +257,4 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
     );
   }
 
-  Widget _buildOwnerInfo(String userId) {
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return ListTile(title: Text('lostAndFound.detail.noUser'.tr()));
-        }
-        final user = UserModel.fromFirestore(snapshot.data!);
-        return Card(
-          elevation: 0,
-          color: Colors.grey.shade100,
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundImage:
-                  (user.photoUrl != null && user.photoUrl!.isNotEmpty)
-                      ? NetworkImage(user.photoUrl!)
-                      : null,
-            ),
-            title: Text(user.nickname,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(user.locationName ?? ''),
-          ),
-        );
-      },
-    );
-  }
 }

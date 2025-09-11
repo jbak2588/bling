@@ -21,12 +21,14 @@ class LostItemModel {
   final String type; // 'lost' 또는 'found'
   final String itemDescription; // 물건 설명
   final String locationDescription; // 분실/습득 장소 설명
-    final Map<String, dynamic>? locationParts;
+  final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
   final List<String> imageUrls;
   final Timestamp createdAt;
   final bool isHunted; // 현상금(Hunted) 여부
   final int? bountyAmount; // 현상금 금액
+  // ✅ tags 필드를 추가합니다.
+  final List<String> tags;
 
   LostItemModel({
     required this.id,
@@ -34,16 +36,17 @@ class LostItemModel {
     required this.type,
     required this.itemDescription,
     required this.locationDescription,
-     this.locationParts,
+    this.locationParts,
     this.geoPoint,
     required this.imageUrls,
     required this.createdAt,
     this.isHunted = false,
     this.bountyAmount,
+    this.tags = const [], // ✅ 생성자 추가
   });
-  
 
-  factory LostItemModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory LostItemModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return LostItemModel(
       id: doc.id,
@@ -51,7 +54,7 @@ class LostItemModel {
       type: data['type'] ?? 'lost',
       itemDescription: data['itemDescription'] ?? '',
       locationDescription: data['locationDescription'] ?? '',
-        locationParts: data['locationParts'] != null
+      locationParts: data['locationParts'] != null
           ? Map<String, dynamic>.from(data['locationParts'])
           : null,
       geoPoint: data['geoPoint'],
@@ -59,6 +62,8 @@ class LostItemModel {
       createdAt: data['createdAt'] ?? Timestamp.now(),
       isHunted: data['isHunted'] ?? false,
       bountyAmount: data['bountyAmount'],
+      // ✅ Firestore 데이터로부터 tags 필드를 읽어옵니다.
+      tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
     );
   }
 
@@ -68,12 +73,13 @@ class LostItemModel {
       'type': type,
       'itemDescription': itemDescription,
       'locationDescription': locationDescription,
-        'locationParts': locationParts,
+      'locationParts': locationParts,
       'geoPoint': geoPoint,
       'imageUrls': imageUrls,
       'createdAt': createdAt,
       'isHunted': isHunted,
       'bountyAmount': bountyAmount,
+      'tags': tags, // ✅ JSON 변환 시 tags 필드를 포함합니다.
     };
   }
 }
