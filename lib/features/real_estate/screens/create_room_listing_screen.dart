@@ -25,6 +25,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+
 class CreateRoomListingScreen extends StatefulWidget {
   final UserModel userModel;
   const CreateRoomListingScreen({super.key, required this.userModel});
@@ -45,6 +47,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
   final List<XFile> _images = [];
   final Set<String> _amenities = {};
   bool _isSaving = false;
+   List<String> _tags = []; // ✅ 태그 상태 변수 추가
 
   final RoomRepository _repository = RoomRepository();
   final ImagePicker _picker = ImagePicker();
@@ -110,6 +113,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         imageUrls: imageUrls,
         amenities: _amenities.toList(),
         createdAt: Timestamp.now(),
+           tags: _tags, // ✅ 저장 시 태그 목록을 전달
       );
 
       await _repository.createRoomListing(newListing);
@@ -296,6 +300,18 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                       },
                     );
                   }).toList(),
+                ),
+// ✅ 편의시설 다음에 태그 입력 필드를 추가합니다.
+                const SizedBox(height: 24),
+                Text('Tags', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                CustomTagInputField(
+                  hintText: 'e.g. furnished, near_station, quiet',
+                  onTagsChanged: (tags) {
+                    setState(() {
+                      _tags = tags;
+                    });
+                  },
                 ),
               ],
             ),

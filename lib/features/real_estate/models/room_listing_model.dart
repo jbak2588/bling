@@ -11,31 +11,32 @@
 // =====================================================
 // lib/core/models/room_listing_model.dart
 
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// 지역 부동산(월세/하숙) 매물 정보를 담는 데이터 모델입니다.
 /// Firestore의 `room_listings` 컬렉션 문서 구조와 대응됩니다.
-/// 
+///
 class RoomListingModel {
   final String id;
   final String userId; // 게시자 ID
   final String title;
   final String description;
   final String type; // 'kos', 'kontrakan', 'sewa' (하숙, 월세 등)
-  
+
   final String? locationName;
   final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
 
   final int price;
   final String priceUnit; // 'monthly', 'yearly' (월세/연세)
-  
+
   final List<String> imageUrls;
   final List<String> amenities; // 'wifi', 'ac', 'parking' 등 편의시설 목록
-  
+
   final Timestamp createdAt;
   final bool isAvailable;
+  // ✅ tags 필드를 추가합니다.
+  final List<String> tags;
 
   RoomListingModel({
     required this.id,
@@ -52,9 +53,11 @@ class RoomListingModel {
     required this.amenities,
     required this.createdAt,
     this.isAvailable = true,
+    this.tags = const [], // ✅ 생성자에 추가
   });
 
-  factory RoomListingModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory RoomListingModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return RoomListingModel(
       id: doc.id,
@@ -63,7 +66,9 @@ class RoomListingModel {
       description: data['description'] ?? '',
       type: data['type'] ?? 'kos',
       locationName: data['locationName'],
-      locationParts: data['locationParts'] != null ? Map<String, dynamic>.from(data['locationParts']) : null,
+      locationParts: data['locationParts'] != null
+          ? Map<String, dynamic>.from(data['locationParts'])
+          : null,
       geoPoint: data['geoPoint'],
       price: data['price'] ?? 0,
       priceUnit: data['priceUnit'] ?? 'monthly',
@@ -71,6 +76,8 @@ class RoomListingModel {
       amenities: List<String>.from(data['amenities'] ?? []),
       createdAt: data['createdAt'] ?? Timestamp.now(),
       isAvailable: data['isAvailable'] ?? true,
+      // ✅ Firestore 데이터로부터 tags 필드를 읽어옵니다.
+      tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
     );
   }
 
@@ -89,6 +96,7 @@ class RoomListingModel {
       'amenities': amenities,
       'createdAt': createdAt,
       'isAvailable': isAvailable,
+      'tags': tags, // ✅ JSON 변환 시 tags 필드를 포함합니다.
     };
   }
 }

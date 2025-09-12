@@ -65,7 +65,7 @@
             "localNews": "Cerita Lokal",
             "marketplace": "Marketplace",
             "findFriends": "Cari Teman",
-            "clubs": "Klub",
+            "clubs": "Grup",
             "jobs": "Lowongan",
             "localStores": "Toko Lokal",
             "auction": "Lelang",
@@ -604,7 +604,7 @@
     "clubs": {
         "screen": {
             "error": "Kesalahan: {error}",
-            "empty": "Belum ada klub."
+            "empty": "Belum ada Grup."
         },
         "postList": {
             "empty": "Belum ada postingan. Jadilah yang pertama!",
@@ -612,7 +612,7 @@
         },
         "memberCard": {
             "kickConfirmTitle": "Hapus {memberName}?",
-            "kickConfirmContent": "Anggota yang dihapus tidak dapat lagi berpartisipasi dalam kegiatan klub.",
+            "kickConfirmContent": "Anggota yang dihapus tidak dapat lagi berpartisipasi dalam kegiatan Grup.",
             "kick": "Hapus",
             "kickedSuccess": "{memberName} telah dihapus.",
             "kickFail": "Gagal menghapus anggota: {error}"
@@ -638,7 +638,7 @@
             "unknownUser": "Pengguna tidak diketahui"
         },
         "detail": {
-            "joined": "Bergabung dengan klub '{title}'!",
+            "joined": "Bergabung dengan Grup '{title}'!",
             "pendingApproval": "Menunggu persetujuan pemilik. Anda dapat berpartisipasi setelah disetujui.",
             "joinFail": "Gagal meminta bergabung: {error}",
             "tabs": {
@@ -647,7 +647,7 @@
                 "members": "Anggota"
             },
             "joinChat": "Gabung chat",
-            "joinClub": "Gabung klub",
+            "joinClub": "Gabung Grup",
             "info": {
                 "members": "Anggota",
                 "location": "Lokasi"
@@ -666,25 +666,25 @@
         },
         "createClub": {
             "selectAtLeastOneInterest": "Pilih setidaknya satu minat.",
-            "success": "Klub berhasil dibuat!",
-            "fail": "Gagal membuat klub: {error}",
-            "title": "Buat Klub",
-            "nameLabel": "Nama Klub",
-            "nameError": "Silakan masukkan nama klub.",
-            "descriptionLabel": "Deskripsi Klub",
-            "descriptionError": "Silakan masukkan deskripsi klub.",
+            "success": "Grup berhasil dibuat!",
+            "fail": "Gagal membuat Grup: {error}",
+            "title": "Buat Grup",
+            "nameLabel": "Nama Grup",
+            "nameError": "Silakan masukkan nama Grup.",
+            "descriptionLabel": "Deskripsi Grup",
+            "descriptionError": "Silakan masukkan deskripsi Grup.",
             "maxInterests": "Anda dapat memilih hingga 3 minat.",
-            "privateClub": "Klub Privat",
+            "privateClub": "Grup Privat",
             "privateDescription": "Hanya bisa bergabung lewat undangan."
         },
         "editClub": {
-            "title": "Edit Informasi Klub",
+            "title": "Edit Informasi Grup",
             "save": "Simpan",
-            "success": "Informasi klub diperbarui.",
-            "fail": "Gagal memperbarui klub: {error}"
+            "success": "Informasi Grup diperbarui.",
+            "fail": "Gagal memperbarui Grup: {error}"
         },
         "repository": {
-            "chatCreated": "Ruang chat klub telah dibuat."
+            "chatCreated": "Ruang chat Grup telah dibuat."
         }
     },
     "auctions": {

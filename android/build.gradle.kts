@@ -22,5 +22,5 @@ tasks.register<Delete>("clean") {
 
 // ▼▼▼▼▼ 구버전과 동일하게, 플러그인을 파일 하단에配置합니다 ▼▼▼▼▼
 plugins {
-    id("com.google.gms.google-services") version "4.4.1" apply false
+   id("com.google.gms.google-services") version "4.3.15" apply false
 }
