@@ -16,12 +16,25 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/real_estate/screens/room_detail_screen.dart';
 
-class RoomCard extends StatelessWidget {
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+
+// ✅ StatelessWidget을 StatefulWidget으로 변경
+class RoomCard extends StatefulWidget {
   final RoomListingModel room;
   const RoomCard({super.key, required this.room});
 
   @override
+  State<RoomCard> createState() => _RoomCardState();
+}
+
+class _RoomCardState extends State<RoomCard> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true; // ✅ 상태 유지
+
+    @override
   Widget build(BuildContext context) {
+    super.build(context); // ✅ KeepAlive를 위해 호출
+    final room = widget.room; // ✅ room 참조 방식 변경
     final NumberFormat currencyFormat =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
@@ -41,18 +54,13 @@ class RoomCard extends StatelessWidget {
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+              children: [
+            // ✅ 기존 Image.network를 공용 ImageCarouselCard로 교체
             if (room.imageUrls.isNotEmpty)
-              Image.network(
-                room.imageUrls.first,
+              ImageCarouselCard(
+                storageId: room.id,
+                imageUrls: room.imageUrls,
                 height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (c, e, s) => Container(
-                    height: 200,
-                    color: Colors.grey.shade200,
-                    child: const Icon(Icons.house_outlined,
-                        size: 60, color: Colors.grey)),
               )
             else
               Container(

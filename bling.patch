@@ -1,687 +1,251 @@
-diff --git a/lib/features/local_news/screens/create_local_news_screen.dart b/lib/features/local_news/screens/create_local_news_screen.dart
-index 6b65ea00115dde25aa3f75f0c3947f311bc1632d..fc7b92e0798e74c801bf4d2895f59f5f1e118f5d 100644
---- a/lib/features/local_news/screens/create_local_news_screen.dart
-+++ b/lib/features/local_news/screens/create_local_news_screen.dart
-@@ -57,57 +57,61 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
-     for (var image in _selectedImages) {
-       final ref = FirebaseStorage.instance.ref(
-           'post_images/${DateTime.now().millisecondsSinceEpoch}_${image.name}');
-       final uploadTask = await ref.putFile(File(image.path));
-       downloadUrls.add(await uploadTask.ref.getDownloadURL());
-     }
-     return downloadUrls;
-   }
+diff --git a/.gitignore b/.gitignore
+index 81112c902351e18dd7398f145689d0f32d4f524d..fbcda005fdb5701baade7a80a3abf3bc752d2787 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -26,27 +26,27 @@ android/build/
  
-   Future<void> _submitPost() async {
-     if (_contentController.text.trim().isEmpty) {
-       ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text('localNewsCreate.alerts.contentRequired'.tr())));
-       return;
-     }
-     if (_selectedCategory == null) {
-       ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
-       return;
-     }
+ # Firebase
+ .firebase/
  
-     setState(() => _isSubmitting = true);
+ # VS Code & IntelliJ/Android Studio
+ .vscode/
+ .idea/
+ *.iml
  
-     try {
-       final user = FirebaseAuth.instance.currentUser;
--      if (user == null) throw Exception("로그인이 필요합니다.");
-+      if (user == null) {
-+        throw Exception('main.errors.loginRequired'.tr());
-+      }
+ # 기타 캐시/임시 파일
+ *.log
+ *.tmp
+ *.lock
+ .DS_Store
  
-       final userDoc = await FirebaseFirestore.instance
-           .collection('users')
-           .doc(user.uid)
-           .get();
--      if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");
-+      if (!userDoc.exists) {
-+        throw Exception('main.errors.userNotFound'.tr());
-+      }
-       final userModel = UserModel.fromFirestore(userDoc);
+ # Node dependencies (if exists)
+ node_modules/
  
-       final imageUrls = await _uploadImages();
-       final tags = _tagsController.text
-           .split(',')
-           .map((tag) => tag.trim())
-           .where((tag) => tag.isNotEmpty)
-           .toList();
+ # Google Service Account Key
+ serviceAccountKey.json
+ *.key.json
  
-       final postData = {
-         'userId': user.uid,
-         'title': _titleController.text.trim(),
-         'body': _contentController.text.trim(),
-         'mediaUrl': imageUrls,
-         'mediaType': imageUrls.isNotEmpty ? 'image' : null,
-         'category': _selectedCategory!.categoryId,
-         'tags': tags,
-         'locationName': userModel.locationName,
-         'locationParts': userModel.locationParts,
-         'geoPoint': userModel.geoPoint,
-         'createdAt': FieldValue.serverTimestamp(),
-         'likesCount': 0,
-         'commentsCount': 0,
-         'viewsCount': 0,
-         'thanksCount': 0,
-diff --git a/lib/features/local_news/screens/edit_local_news_screen.dart b/lib/features/local_news/screens/edit_local_news_screen.dart
-index ead36741df754c309be07157ea7444418a7454f3..cd93d08ce4da4c9feedea8839930c10b9d4c2739 100644
---- a/lib/features/local_news/screens/edit_local_news_screen.dart
-+++ b/lib/features/local_news/screens/edit_local_news_screen.dart
-@@ -110,87 +110,90 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
-     }
+ # Secret API keys
+ lib/api_keys.dart
  
-     setState(() => _isSubmitting = true);
- 
-     try {
-       final newImageUrls = await _uploadImages();
-       final finalImageUrls = [..._existingImageUrls, ...newImageUrls];
- 
-       final updatedData = {
-         'title': _titleController.text.trim(),
-         'body': _contentController.text.trim(),
-         'mediaUrl': finalImageUrls,
-         'mediaType': finalImageUrls.isNotEmpty ? 'image' : null,
-         'category': _selectedCategory!.categoryId,
-         'tags': _tags,
-         'updatedAt': FieldValue.serverTimestamp(),
-       };
- 
-       await FirebaseFirestore.instance
-           .collection('posts')
-           .doc(widget.post.id)
-           .update(updatedData);
- 
-       if (!mounted) return;
-       ScaffoldMessenger.of(context)
--          .showSnackBar(const SnackBar(content: Text('게시글이 수정되었습니다')));
-+          .showSnackBar(
-+              SnackBar(content: Text('localNewsEdit.alerts.success'.tr())));
-       Navigator.of(context).pop(true);
-     } catch (e) {
-       if (mounted) {
-         ScaffoldMessenger.of(context)
--            .showSnackBar(SnackBar(content: Text('수정 실패: $e')));
-+            .showSnackBar(SnackBar(
-+                content: Text('localNewsEdit.alerts.failure'
-+                    .tr(namedArgs: {'error': e.toString()}))));
-       }
-     } finally {
-       if (mounted) setState(() => _isSubmitting = false);
-     }
-   }
- 
-   // ✅ 커스텀 태그 위젯을 빌드하는 함수
-   Widget _buildCustomChipsInput() {
-     return Column(
-       crossAxisAlignment: CrossAxisAlignment.start,
-       children: [
-         // 칩들을 보여주는 부분
-         Wrap(
-           spacing: 8.0,
-           runSpacing: 4.0,
-           children: _tags.map((tag) {
-             return Chip(
-               label: Text(tag),
-               onDeleted: () {
-                 setState(() {
-                   _tags.remove(tag);
-                 });
-               },
-             );
-           }).toList(),
-         ),
-         // 새 태그를 입력하는 텍스트 필드
-         TextField(
-           controller: _tagInputController,
-           decoration: InputDecoration(
--            labelText: '태그 입력 후 스페이스바 또는 완료',
-+            labelText: 'localNewsEdit.form.tagInputLabel'.tr(),
-             border: const OutlineInputBorder(),
-           ),
-           onChanged: (value) {
-             // 스페이스바를 누르면 태그 추가
-             if (value.endsWith(' ') && value.trim().isNotEmpty) {
-               final newTag = value.trim();
-               if (!_tags.contains(newTag)) {
-                 setState(() {
-                   _tags.add(newTag);
-                 });
-               }
-               _tagInputController.clear();
-             }
-           },
-           onSubmitted: (value) {
-             // 키보드에서 완료(엔터)를 누르면 태그 추가
-             final newTag = value.trim();
-             if (newTag.isNotEmpty && !_tags.contains(newTag)) {
-               setState(() {
-                 _tags.add(newTag);
-               });
-             }
-             _tagInputController.clear();
-           },
-         ),
-@@ -207,60 +210,60 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
-         child: Column(
-           crossAxisAlignment: CrossAxisAlignment.stretch,
-           children: [
-             DropdownButtonFormField<PostCategoryModel>(
-               value: _selectedCategory,
-               decoration: InputDecoration(
-                   labelText: 'localNewsCreate.form.categoryLabel'.tr(),
-                   border: const OutlineInputBorder()),
-               items: AppCategories.postCategories.map((category) {
-                 return DropdownMenuItem<PostCategoryModel>(
-                   value: category,
-                   child: Row(children: [
-                     Text(category.emoji, style: const TextStyle(fontSize: 20)),
-                     const SizedBox(width: 10),
-                     Text(category.nameKey.tr()),
-                   ]),
-                 );
-               }).toList(),
-               onChanged: (value) {
-                 if (value != null) setState(() => _selectedCategory = value);
-               },
-             ),
-             const SizedBox(height: 16),
-             TextField(
-                 controller: _titleController,
--                decoration: const InputDecoration(
--                    labelText: '제목',
--                    border: OutlineInputBorder())),
-+                decoration: InputDecoration(
-+                    labelText: 'localNewsCreate.form.titleLabel'.tr(),
-+                    border: const OutlineInputBorder())),
-             const SizedBox(height: 16),
-             TextField(
-                 controller: _contentController,
-                 maxLines: 8,
--                decoration: const InputDecoration(
--                    labelText: '내용',
--                    border: OutlineInputBorder())),
-+                decoration: InputDecoration(
-+                    labelText: 'localNewsCreate.form.contentLabel'.tr(),
-+                    border: const OutlineInputBorder())),
-             const SizedBox(height: 16),
-             
-             // ✅ 직접 만든 커스텀 태그 입력 위젯을 사용합니다.
-             _buildCustomChipsInput(),
- 
-             const SizedBox(height: 16),
-             _buildImagePicker(),
-             const SizedBox(height: 24),
-             ElevatedButton(
-               style: ElevatedButton.styleFrom(
-                   minimumSize: const Size(double.infinity, 50)),
-               onPressed: _isSubmitting ? null : _updatePost,
-               child: _isSubmitting
-                   ? const CircularProgressIndicator(color: Colors.white)
-                   : Text('localNewsEdit.buttons.submit'.tr()),
-             ),
-           ],
-         ),
-       ),
-     );
-   }
- 
-   Widget _buildImagePicker() {
-     final existingImageCount = _existingImageUrls.length;
-     final newImageCount = _newSelectedImages.length;
-diff --git a/lib/features/local_news/screens/local_news_detail_screen.dart b/lib/features/local_news/screens/local_news_detail_screen.dart
-index c144a23753637aafd24732a8c12a54332f53a4df..2e9d76f761b31772c7cb77fe24e889bdc3e213aa 100644
---- a/lib/features/local_news/screens/local_news_detail_screen.dart
-+++ b/lib/features/local_news/screens/local_news_detail_screen.dart
-@@ -80,51 +80,51 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
-     await _refreshPostData();
-   }
- 
-   Future<void> _checkLiked() async {
-     final user = FirebaseAuth.instance.currentUser;
-     if (user == null) return;
-     final doc = await FirebaseFirestore.instance
-         .collection('users')
-         .doc(user.uid)
-         .get();
-     if (mounted && doc.exists) {
-       final userModel = UserModel.fromFirestore(doc);
-       setState(() {
-         _isLiked =
-             userModel.bookmarkedPostIds?.contains(_currentPost.id) ?? false;
-       });
-     }
-   }
- 
-   Future<void> _toggleLike() async {
-     if (_likeLoading) return;
-     setState(() => _likeLoading = true);
-     final user = FirebaseAuth.instance.currentUser;
-     if (user == null) {
-       ScaffoldMessenger.of(context)
--          .showSnackBar(const SnackBar(content: Text('로그인이 필요합니다.')));
-+          .showSnackBar(SnackBar(content: Text('main.errors.loginRequired'.tr())));
-       setState(() => _likeLoading = false);
-       return;
-     }
-     final postRef =
-         FirebaseFirestore.instance.collection('posts').doc(_currentPost.id);
-     final userRef =
-         FirebaseFirestore.instance.collection('users').doc(user.uid);
-     try {
-       if (_isLiked) {
-         await postRef.update({'likesCount': FieldValue.increment(-1)});
-         await userRef.update({
-           'bookmarkedPostIds': FieldValue.arrayRemove([_currentPost.id])
-         });
-         if (mounted) setState(() => _likesCount--);
-       } else {
-         await postRef.update({'likesCount': FieldValue.increment(1)});
-         await userRef.update({
-           'bookmarkedPostIds': FieldValue.arrayUnion([_currentPost.id])
-         });
-         if (mounted) setState(() => _likesCount++);
-       }
-       if (mounted) setState(() => _isLiked = !_isLiked);
-     } finally {
-       if (mounted) setState(() => _likeLoading = false);
-     }
-@@ -132,51 +132,51 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
- 
-   Future<void> _increaseViewsCount() async {
-     await FirebaseFirestore.instance
-         .collection('posts')
-         .doc(_currentPost.id)
-         .update({'viewsCount': FieldValue.increment(1)});
-   }
- 
-   void _handleReplyTap(String commentId) {
-     setState(() {
-       _activeReplyCommentId =
-           (_activeReplyCommentId == commentId) ? null : commentId;
-     });
-   }
- 
-   Future<void> _toggleThanks() async {
-     if (_isThanksProcessing) return;
-     setState(() => _isThanksProcessing = true);
-     final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
-     if (currentUserUid == null) {
-       setState(() => _isThanksProcessing = false);
-       return;
-     }
-     if (currentUserUid == _currentPost.userId) {
-       ScaffoldMessenger.of(context).showSnackBar(
--          const SnackBar(content: Text('자신의 글에는 감사를 표시할 수 없습니다.')));
-+          SnackBar(content: Text('localNewsDetail.alerts.cannotThankOwnPost'.tr())));
-       setState(() => _isThanksProcessing = false);
-       return;
-     }
-     final postRef =
-         FirebaseFirestore.instance.collection('posts').doc(_currentPost.id);
-     final authorRef =
-         FirebaseFirestore.instance.collection('users').doc(_currentPost.userId);
-     final thanksRef = postRef.collection('thanks').doc(currentUserUid);
- 
-     try {
-       await FirebaseFirestore.instance.runTransaction((transaction) async {
-         final thanksDoc = await transaction.get(thanksRef);
-         if (thanksDoc.exists) {
-           transaction
-               .update(postRef, {'thanksCount': FieldValue.increment(-1)});
-           transaction.update(
-               authorRef, {'feedThanksReceived': FieldValue.increment(-1)});
-           transaction.delete(thanksRef);
-           if (mounted) setState(() => _thanksCount--);
-         } else {
-           transaction.update(postRef, {'thanksCount': FieldValue.increment(1)});
-           transaction.update(
-               authorRef, {'feedThanksReceived': FieldValue.increment(1)});
-           transaction
-               .set(thanksRef, {'thankedAt': FieldValue.serverTimestamp()});
-diff --git a/lib/features/local_news/screens/local_news_screen.dart b/lib/features/local_news/screens/local_news_screen.dart
-index 51c38577d75188992a1ac4870f3489090e34ce15..9366543f093b08f743c0d490646526ddfa674c2d 100644
---- a/lib/features/local_news/screens/local_news_screen.dart
-+++ b/lib/features/local_news/screens/local_news_screen.dart
-@@ -244,149 +244,149 @@ class _FeedMapView extends StatefulWidget {
-   final UserModel? userModel;
-   final Map<String, String?>? locationFilter;
-   const _FeedMapView(
-       {super.key, required this.category, this.userModel, this.locationFilter});
- 
-   @override
-   State<_FeedMapView> createState() => _FeedMapViewState();
- }
- 
- class _FeedMapViewState extends State<_FeedMapView> {
-   final Completer<GoogleMapController> _controller = Completer();
- 
-   Future<CameraPosition> _getInitialCameraPosition() async {
-     final snapshot = await _buildInitialCameraQuery().limit(1).get();
-     LatLng target;
-     if (snapshot.docs.isNotEmpty &&
-         snapshot.docs.first.data()['geoPoint'] != null) {
-       final geoPoint = snapshot.docs.first.data()['geoPoint'] as GeoPoint;
-       target = LatLng(geoPoint.latitude, geoPoint.longitude);
-     } else {
-       target = LatLng(
-         widget.userModel?.geoPoint?.latitude ?? -6.2088,
-         widget.userModel?.geoPoint?.longitude ?? 106.8456,
-       );
-     }
--    debugPrint('[지도 디버그] 초기 카메라 위치 설정: $target');
-+    debugPrint('[Map Debug] Initial camera position: $target');
-     return CameraPosition(target: target, zoom: 14);
-   }
- 
-   Query<Map<String, dynamic>> _buildInitialCameraQuery() {
-     Query<Map<String, dynamic>> query =
-         FirebaseFirestore.instance.collection('posts');
-     final filter = widget.locationFilter;
- 
-     if (filter != null) {
-       if (filter['kel'] != null) {
-         query = query.where('locationParts.kel', isEqualTo: filter['kel']);
-       } else if (filter['kec'] != null) {
-         query = query.where('locationParts.kec', isEqualTo: filter['kec']);
-       } else if (filter['kab'] != null) {
-         query = query.where('locationParts.kab', isEqualTo: filter['kab']);
-       } else if (filter['kota'] != null) {
-         query = query.where('locationParts.kota', isEqualTo: filter['kota']);
-       } else if (filter['prov'] != null) {
-         query = query.where('locationParts.prov', isEqualTo: filter['prov']);
-       }
-     } else if (widget.userModel?.locationParts?['prov'] != null) {
-       query = query.where('locationParts.prov',
-           isEqualTo: widget.userModel!.locationParts!['prov']);
-     }
- 
-     if (widget.category != 'all') {
-       query = query.where('category', isEqualTo: widget.category);
-     }
--    debugPrint('[지도 디버그] 카메라 위치 쿼리: ${query.parameters}');
-+    debugPrint('[Map Debug] Camera position query: ${query.parameters}');
-     return query.orderBy('createdAt', descending: true);
-   }
- 
-   Query<Map<String, dynamic>> _buildAllMarkersQuery() {
-     Query<Map<String, dynamic>> query =
-         FirebaseFirestore.instance.collection('posts');
-     
-     if (widget.userModel?.locationParts?['prov'] != null) {
-       query = query.where('locationParts.prov',
-           isEqualTo: widget.userModel!.locationParts!['prov']);
-     }
- 
-     if (widget.category != 'all') {
-       query = query.where('category', isEqualTo: widget.category);
-     }
--    debugPrint('[지도 디버그] 마커 생성 쿼리: ${query.parameters}');
-+    debugPrint('[Map Debug] Marker creation query: ${query.parameters}');
-     return query.orderBy('createdAt', descending: true);
-   }
- 
-   Set<Marker> _createMarkers(
-       List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
--    debugPrint('[지도 디버그] 마커 생성을 위해 ${docs.length}개의 문서를 받았습니다.');
-+    debugPrint('[Map Debug] Received ${docs.length} documents for markers.');
-     final Set<Marker> markers = {};
-     for (var doc in docs) {
-       final post = PostModel.fromFirestore(doc);
-       if (post.geoPoint != null) {
--        debugPrint('[지도 디버그] 핀 생성: ${post.id} at ${post.geoPoint!.latitude}, ${post.geoPoint!.longitude}');
-+        debugPrint('[Map Debug] Created pin: ${post.id} at ${post.geoPoint!.latitude}, ${post.geoPoint!.longitude}');
-         markers.add(Marker(
-           markerId: MarkerId(post.id),
-           position: LatLng(post.geoPoint!.latitude, post.geoPoint!.longitude),
-           infoWindow: InfoWindow(
-             title: post.title ?? post.body,
-             snippet: post.locationName,
-             onTap: () {
-               Navigator.of(context).push(MaterialPageRoute(
-                 builder: (_) => LocalNewsDetailScreen(post: post),
-               ));
-             },
-           ),
-         ));
-       } else {
--        debugPrint('[지도 디버그] 핀 생성 실패 (geoPoint 없음): ${post.id}');
-+        debugPrint('[Map Debug] Failed to create pin (no geoPoint): ${post.id}');
-       }
-     }
--    debugPrint('[지도 디버그] 총 ${markers.length}개의 마커를 생성했습니다.');
-+    debugPrint('[Map Debug] Created total of ${markers.length} markers.');
-     return markers;
-   }
- 
-   @override
-   Widget build(BuildContext context) {
-     return FutureBuilder<CameraPosition>(
-       future: _getInitialCameraPosition(),
-       builder: (context, cameraSnapshot) {
-         if (cameraSnapshot.connectionState == ConnectionState.waiting) {
-           return const Center(child: CircularProgressIndicator());
-         }
-         if (!cameraSnapshot.hasData) {
-           return GoogleMap(
-               initialCameraPosition: const CameraPosition(
-                   target: LatLng(-6.2088, 106.8456), zoom: 11));
-         }
-         return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-           stream: _buildAllMarkersQuery().snapshots(),
-           builder: (context, postSnapshot) {
-             if (postSnapshot.connectionState == ConnectionState.waiting) {
--              debugPrint('[지도 디버그] 게시물 데이터 로딩 중...');
-+              debugPrint('[Map Debug] Loading post data...');
-               return const Center(child: CircularProgressIndicator());
-             }
-              if (postSnapshot.hasError) {
--              debugPrint('[지도 디버그] 게시물 데이터 로딩 에러: ${postSnapshot.error}');
-+              debugPrint('[Map Debug] Error loading post data: ${postSnapshot.error}');
-               return Center(child: Text('Error: ${postSnapshot.error}'));
-             }
-             if (!postSnapshot.hasData) {
--              debugPrint('[지도 디버그] 게시물 데이터 없음.');
-+              debugPrint('[Map Debug] No post data.');
-               return Center(child: Text('No posts found.'));
-             }
- 
-             final markers = _createMarkers(postSnapshot.data!.docs);
- 
-             return GoogleMap(
-               initialCameraPosition: cameraSnapshot.data!,
-               onMapCreated: (GoogleMapController controller) {
-                 if (!_controller.isCompleted) {
-                   _controller.complete(controller);
-                 }
-               },
-               markers: markers,
-             );
-           },
-         );
-       },
-     );
-   }
- }
+-# Android Manifest 파일 제외 (API 키 노출 방지용 임시 조치)
+-android/app/src/main/AndroidManifest.xml
 \ No newline at end of file
-diff --git a/lib/features/local_news/screens/tag_search_result_screen.dart b/lib/features/local_news/screens/tag_search_result_screen.dart
-index e22156813c69b974919832dd0f854e7e74aa01ec..4fbe65141d0ac5d692a4fdbf25cd2817490c321f 100644
---- a/lib/features/local_news/screens/tag_search_result_screen.dart
-+++ b/lib/features/local_news/screens/tag_search_result_screen.dart
-@@ -5,45 +5,53 @@ import 'package:cloud_firestore/cloud_firestore.dart';
- import 'package:flutter/material.dart';
++# Android Manifest was previously ignored to prevent API key leaks.
++# It is now tracked with placeholder values.
+diff --git a/android/app/src/main/AndroidManifest.xml b/android/app/src/main/AndroidManifest.xml
+new file mode 100644
+index 0000000000000000000000000000000000000000..6a175041ed3f8f9ed16659db59e3f17c03305c51
+--- /dev/null
++++ b/android/app/src/main/AndroidManifest.xml
+@@ -0,0 +1,36 @@
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.example.bling_app">
++    <uses-permission android:name="android.permission.INTERNET" />
++    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
++    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
++    <uses-permission android:name="android.permission.CAMERA" />
++    <uses-permission android:name="android.permission.RECORD_AUDIO" />
++
++    <application
++        android:label="Bling App"
++        android:name="${applicationName}"
++        android:icon="@mipmap/ic_launcher">
++        <activity
++            android:name=".MainActivity"
++            android:exported="true"
++            android:launchMode="singleTop"
++            android:theme="@style/LaunchTheme"
++            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
++            android:hardwareAccelerated="true"
++            android:windowSoftInputMode="adjustResize">
++            <meta-data
++                android:name="io.flutter.embedding.android.NormalTheme"
++                android:resource="@style/NormalTheme" />
++            <meta-data
++                android:name="flutterEmbedding"
++                android:value="2" />
++            <intent-filter>
++                <action android:name="android.intent.action.MAIN" />
++                <category android:name="android.intent.category.LAUNCHER" />
++            </intent-filter>
++        </activity>
++        <meta-data
++            android:name="com.google.android.geo.API_KEY"
++            android:value="${googleMapsApiKey}" />
++    </application>
++</manifest>
+diff --git a/ios/Runner/Info.plist b/ios/Runner/Info.plist
+index d73713b67219da8f5f29ebd5d5f13fc6886fb913..db8ff050a9aa81bad06bb52bcb1e7aaf9d811019 100644
+--- a/ios/Runner/Info.plist
++++ b/ios/Runner/Info.plist
+@@ -16,34 +16,44 @@
+ 	<string>6.0</string>
+ 	<key>CFBundleName</key>
+ 	<string>bling_app</string>
+ 	<key>CFBundlePackageType</key>
+ 	<string>APPL</string>
+ 	<key>CFBundleShortVersionString</key>
+ 	<string>$(FLUTTER_BUILD_NAME)</string>
+ 	<key>CFBundleSignature</key>
+ 	<string>????</string>
+ 	<key>CFBundleVersion</key>
+ 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+ 	<key>LSRequiresIPhoneOS</key>
+ 	<true/>
+ 	<key>UIApplicationSupportsIndirectInputEvents</key>
+ 	<true/>
+ 	<key>UILaunchStoryboardName</key>
+ 	<string>LaunchScreen</string>
+ 	<key>UIMainStoryboardFile</key>
+ 	<string>Main</string>
+ 	<key>UISupportedInterfaceOrientations</key>
+ 	<array>
+ 		<string>UIInterfaceOrientationPortrait</string>
+ 		<string>UIInterfaceOrientationLandscapeLeft</string>
+ 		<string>UIInterfaceOrientationLandscapeRight</string>
+ 	</array>
+-	<key>UISupportedInterfaceOrientations~ipad</key>
+-	<array>
+-		<string>UIInterfaceOrientationPortrait</string>
+-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+-		<string>UIInterfaceOrientationLandscapeLeft</string>
+-		<string>UIInterfaceOrientationLandscapeRight</string>
+-	</array>
++        <key>UISupportedInterfaceOrientations~ipad</key>
++        <array>
++                <string>UIInterfaceOrientationPortrait</string>
++                <string>UIInterfaceOrientationPortraitUpsideDown</string>
++                <string>UIInterfaceOrientationLandscapeLeft</string>
++                <string>UIInterfaceOrientationLandscapeRight</string>
++        </array>
++        <key>NSCameraUsageDescription</key>
++        <string>Camera access is required to capture photos and videos.</string>
++        <key>NSMicrophoneUsageDescription</key>
++        <string>Microphone access is required to record audio.</string>
++        <key>NSPhotoLibraryUsageDescription</key>
++        <string>Photo library access is required to select pictures.</string>
++        <key>NSLocationWhenInUseUsageDescription</key>
++        <string>Location access is required to show nearby services.</string>
++        <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
++        <string>Location access is required while the app runs in the background.</string>
+ </dict>
+ </plist>
+diff --git a/lib/main.dart b/lib/main.dart
+index 12d4d770cc77f4709346274f671b1f81fa4e0176..6da830763d588dc0baca80601a29d9db42f13997 100644
+--- a/lib/main.dart
++++ b/lib/main.dart
+@@ -1,54 +1,59 @@
+ // lib/main.dart
+ 
+ /// [기획 문서: 00 Mainscreen & 런처 & Tab & Drawer QA.md]
+ /// - 기획 요약: Keluharan 기반 지역 슈퍼앱의 메인 레이아웃, Gojek 런처 UX, 직관적 인터페이스, 상단 AppBar/슬라이드탭/Drawer/BottomNavigationBar 구조
+ /// - 실제 코드 기능: BlingApp의 MaterialApp, 다국어 지원, AuthGate 진입점, 메인 화면 구조는 별도 위젯에서 구현
+ /// - 비교: 기획의 전체 레이아웃/UX 구조는 main.dart에서 직접 구현되지 않고, 각 화면/네비게이션 위젯에서 분리 관리됨. 다국어, 초기화, 진입점 등은 기획과 일치
+ library;
+ 
++import 'dart:io' show Platform;
++
+ import 'package:bling_app/features/auth/screens/auth_gate.dart';
  import 'package:easy_localization/easy_localization.dart';
+ import 'package:firebase_core/firebase_core.dart';
+ import 'package:flutter/material.dart';
+ import 'package:google_fonts/google_fonts.dart';
  
- class TagSearchResultScreen extends StatelessWidget {
-   final String tag;
-   const TagSearchResultScreen({super.key, required this.tag});
+ import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
++import 'package:google_maps_flutter_ios/google_maps_flutter_ios.dart';
  
-   @override
-   Widget build(BuildContext context) {
-     return Scaffold(
-       appBar: AppBar(
-         title: Text('#$tag', style: const TextStyle(fontWeight: FontWeight.bold)),
-       ),
-       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-         // Firestore의 array-contains 쿼리를 사용하여 해당 태그를 포함하는 문서를 찾습니다.
-         stream: FirebaseFirestore.instance
-             .collection('posts')
-             .where('tags', arrayContains: tag)
-             .orderBy('createdAt', descending: true)
-             .snapshots(),
-         builder: (context, snapshot) {
-           if (snapshot.connectionState == ConnectionState.waiting) {
-             return const Center(child: CircularProgressIndicator());
-           }
-           if (snapshot.hasError) {
--            return Center(child: Text('검색 중 오류가 발생했습니다: ${snapshot.error}'));
-+            return Center(
-+              child: Text(
-+                'localNewsTagSearch.errors.fetch'
-+                    .tr(namedArgs: {'error': snapshot.error.toString()}),
-+              ),
-+            );
-           }
-           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
--            return Center(child: Text('\'#$tag\' 태그가 포함된 게시물이 없습니다.'));
-+            return Center(
-+              child:
-+                  Text('localNewsTagSearch.empty'.tr(namedArgs: {'tag': tag})),
-+            );
-           }
+ import 'package:bling_app/firebase_options.dart';
+ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
  
-           final postDocs = snapshot.data!.docs;
-           return ListView.builder(
-             padding: const EdgeInsets.all(8.0),
-             itemCount: postDocs.length,
-             itemBuilder: (context, index) {
-               final post = PostModel.fromFirestore(postDocs[index]);
-               return PostCard(post: post);
-             },
-           );
-         },
-       ),
-     );
+ 
+ 
+ void main() async {
+   WidgetsFlutterBinding.ensureInitialized();
+ 
+-// ✅ 지도 렌더러를 최신 버전으로 강제하는 코드를 추가합니다.
+-  // 이 코드는 다른 초기화 코드보다 먼저 실행될 수 있습니다.
+-  final GoogleMapsFlutterPlatform mapsImplementation = GoogleMapsFlutterPlatform.instance;
+-  if (mapsImplementation is GoogleMapsFlutterAndroid) {
++  // ✅ 플랫폼별 Google Maps 초기화
++  final GoogleMapsFlutterPlatform mapsImplementation =
++      GoogleMapsFlutterPlatform.instance;
++  if (Platform.isAndroid && mapsImplementation is GoogleMapsFlutterAndroid) {
+     mapsImplementation.initializeWithRenderer(AndroidMapRenderer.latest);
++  } else if (Platform.isIOS && mapsImplementation is GoogleMapsFlutterIOS) {
++    // iOS-specific renderer configuration can go here if needed
    }
+ 
+   await EasyLocalization.ensureInitialized();
+   await Firebase.initializeApp(
+     options: DefaultFirebaseOptions.currentPlatform,
+   );
+ 
+   runApp(
+     EasyLocalization(
+       supportedLocales: const [Locale('id'), Locale('en'), Locale('ko')],
+       path: 'assets/lang',
+       fallbackLocale: const Locale('id'),
+       startLocale: const Locale('id'),
+       child: const BlingApp(),
+     ),
+   );
  }
-diff --git a/lib/features/local_news/widgets/comment_input_field.dart b/lib/features/local_news/widgets/comment_input_field.dart
-index b7f5b96be9307976eb266ae4f273cea40d644498..68f5010b95ae503426a656060d089254e5fd4b42 100644
---- a/lib/features/local_news/widgets/comment_input_field.dart
-+++ b/lib/features/local_news/widgets/comment_input_field.dart
-@@ -38,52 +38,55 @@ class _CommentInputFieldState extends State<CommentInputField> {
-       'isSecret': _isSecret,
-       'parentCommentId': null,
-     };
  
-     try {
-       final postRef =
-           FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+ class BlingApp extends StatelessWidget {
+   const BlingApp({super.key});
  
-       // [수정] Firestore 트랜잭션 로직을 올바른 문법으로 수정합니다.
-       await FirebaseFirestore.instance.runTransaction((transaction) async {
-         // 1. 새로운 댓글이 추가될 DocumentReference를 먼저 생성합니다.
-         final newCommentRef = postRef.collection('comments').doc();
- 
-         // 2. 게시물의 commentCount를 1 증가시킵니다.
-         transaction.update(postRef, {'commentsCount': FieldValue.increment(1)});
- 
-         // 3. 생성된 참조에 댓글 데이터를 set 합니다.
-         transaction.set(newCommentRef, commentData);
-       });
- 
-       _controller.clear();
-       setState(() => _isSecret = false);
-       if (widget.onCommentAdded != null) widget.onCommentAdded!(commentData);
-     } catch (e) {
-       if (!mounted) return;
--      ScaffoldMessenger.of(context)
--          .showSnackBar(SnackBar(content: Text('댓글 등록 실패: $e')));
-+      ScaffoldMessenger.of(context).showSnackBar(
-+        SnackBar(
-+            content: Text('commentInputField.alerts.failure'
-+                .tr(namedArgs: {'error': e.toString()}))),
-+      );
-     } finally {
-       if (mounted) setState(() => _isSending = false);
-     }
-   }
- 
-   // build 메소드는 기존과 동일하게 유지됩니다.
    @override
    Widget build(BuildContext context) {
-     return Padding(
-       padding: EdgeInsets.fromLTRB(
-           8, 8, 8, MediaQuery.of(context).viewInsets.bottom + 8),
-       child: Row(
-         children: [
-           // 비밀댓글 체크박스 (UI 예시)
-           Checkbox(
-             value: _isSecret,
-             onChanged: (value) {
-               setState(() {
-                 _isSecret = value ?? false;
-               });
-             },
-             visualDensity: VisualDensity.compact,
-           ),
-          Text('commentInputField.secretCommentLabel'.tr()),
-           Expanded(
-diff --git a/lib/features/local_news/widgets/post_card.dart b/lib/features/local_news/widgets/post_card.dart
-index 308f5e752dd005489f9a128daec3f1d07ef35225..254b0ed9535763ab879584c4059c1928efc96d9e 100644
---- a/lib/features/local_news/widgets/post_card.dart
-+++ b/lib/features/local_news/widgets/post_card.dart
-@@ -123,51 +123,51 @@ class _PostCardState extends State<PostCard> {
-               ),
-               IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz_outlined)),
-             ],
-           ),
-         );
-       },
-     );
-   }
+     return MaterialApp(
+       localizationsDelegates: context.localizationDelegates,
+diff --git a/pubspec.yaml b/pubspec.yaml
+index e996a81715f992b6331cb3eae667ab102ce47597..bd9411f3a46af64eccfd3e42f48b77591c3b702c 100644
+--- a/pubspec.yaml
++++ b/pubspec.yaml
+@@ -28,43 +28,44 @@ dependencies:
+   geolocator: ^14.0.2
+   geocoding: ^4.0.0
+   permission_handler: ^12.0.1
+   geoflutterfire_plus: ^0.0.21
  
-   // ✅ _buildLocationInfo 함수 추가
-   Widget _buildLocationInfo(BuildContext context, String? locationName) {
-     return Container(
-       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-       decoration: BoxDecoration(
-         color: Colors.grey.shade100,
-         borderRadius: BorderRadius.circular(8),
-         border: Border.all(color: Colors.grey.shade200),
-       ),
-       child: Row(
-         mainAxisSize: MainAxisSize.min,
-         children: [
-           Icon(Icons.location_on_outlined, color: Colors.grey.shade600, size: 16),
-           const SizedBox(width: 8),
-           Flexible(
-             child: Text(
--              locationName ?? '위치 정보 있음',
-+              locationName ?? 'localNews.locationAvailable'.tr(),
-               style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
-               overflow: TextOverflow.ellipsis,
-             ),
-           ),
-         ],
-       ),
-     );
-   }
+   get: ^4.6.6
+   uuid: ^4.3.3
  
-   Widget _buildTitleAndCategory(BuildContext context, PostModel post, PostCategoryModel category) {
-     return Column(
-       crossAxisAlignment: CrossAxisAlignment.start,
-       children: [
-         Row(
-           children: [
-             Text(category.emoji, style: const TextStyle(fontSize: 18)),
-             const SizedBox(width: 8),
-             Expanded(
-               child: Text(
-                 post.title ?? post.body,
-                 style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
-                 maxLines: 1,
-                 overflow: TextOverflow.ellipsis,
-               ),
-             ),
+   # ▼▼▼▼▼ Google Places API를 위한 패키지 추가 ▼▼▼▼▼
+   flutter_google_maps_webservices: ^1.1.1
+   
+   
+   # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+ 
+   cupertino_icons: ^1.0.8
+   google_maps_flutter: ^2.12.3
+   intl: ^0.20.2
+   flutter_chip_tags: ^2.0.2
+   provider: ^6.1.5
+   video_player: ^2.10.0
+   visibility_detector: ^0.4.0+2
+   cached_network_image: ^3.4.0
+   smooth_page_indicator: ^1.2.1
+   google_maps_flutter_platform_interface: ^2.14.0
+   google_maps_flutter_android: ^2.18.2
++  google_maps_flutter_ios: ^2.18.2
+   http: ^1.5.0
+  
+  
+   
+ 
+ 
+ dev_dependencies:
+   flutter_test:
+     sdk: flutter
+   flutter_lints: ^6.0.0
+ 
+ flutter:
+   uses-material-design: true
+   assets:
+     - assets/lang/
+     - assets/icons/
+     - assets/sounds/
+     - assets/data/
+\ No newline at end of file

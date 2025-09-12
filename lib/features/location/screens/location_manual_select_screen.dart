@@ -281,7 +281,7 @@ class _LocationManualSelectScreenState
                 children: [
                   // Province
                   DropdownButtonFormField<String>(
-                    initialValue: _selProv,
+                    value: _selProv,
                     items: _provinces
                         .map((p) => DropdownMenuItem(value: p, child: Text(p)))
                         .toList(),
@@ -296,7 +296,7 @@ class _LocationManualSelectScreenState
 
                   // Kab/Kota
                   DropdownButtonFormField<_Regency>(
-                    initialValue: _selReg,
+                    value: _selReg,
                     items: _regencies
                         .map((r) => DropdownMenuItem(
                               value: r,
@@ -316,7 +316,7 @@ class _LocationManualSelectScreenState
 
                   // Kecamatan
                   DropdownButtonFormField<String>(
-                    initialValue: _selKec,
+                    value: _selKec,
                     items: _kecamatans
                         .map((k) =>
                             DropdownMenuItem(value: k, child: Text(k)))

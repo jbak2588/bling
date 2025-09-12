@@ -13,17 +13,23 @@
 // =====================================================
 
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
-import 'package:bling_app/core/models/user_model.dart';
+// import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:bling_app/features/real_estate/data/room_repository.dart';
 import 'package:bling_app/features/real_estate/screens/edit_room_listing_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
+// import 'package:photo_view/photo_view.dart';
+// import 'package:photo_view/photo_view_gallery.dart';
+
+import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
+import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
+import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 
 class RoomDetailScreen extends StatefulWidget {
   final RoomListingModel room;
@@ -36,7 +42,7 @@ class RoomDetailScreen extends StatefulWidget {
 class _RoomDetailScreenState extends State<RoomDetailScreen> {
   final RoomRepository _repository = RoomRepository();
   final ChatService _chatService = ChatService();
-  int _currentImageIndex = 0;
+  // int _currentImageIndex = 0;
 
   void _startChat(BuildContext context, String ownerId) async {
     try {
@@ -98,57 +104,6 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
     }
   }
 
-  Widget _buildImageSlider(List<String> images) {
-    if (images.isEmpty) {
-      return Container(
-        height: 250,
-        color: Colors.grey.shade200,
-        child: const Icon(Icons.house_outlined, size: 80, color: Colors.grey),
-      );
-    }
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => FullScreenImageViewer(
-                imageUrls: images,
-                initialIndex: _currentImageIndex,
-              ),
-            ));
-          },
-          child: Container(
-            height: 250,
-            color: Colors.black,
-            child: PageView.builder(
-              itemCount: images.length,
-              onPageChanged: (index) {
-                setState(() => _currentImageIndex = index);
-              },
-              itemBuilder: (context, index) {
-                return Image.network(images[index], fit: BoxFit.contain);
-              },
-            ),
-          ),
-        ),
-        if (images.length > 1)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: images.asMap().entries.map((entry) {
-              return Container(
-                width: 8.0,
-                height: 8.0,
-                margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.black.withValues(alpha: _currentImageIndex == entry.key ? 0.9 : 0.4),
-                ),
-              );
-            }).toList(),
-          ),
-      ],
-    );
-  }
   
   @override
   Widget build(BuildContext context) {
@@ -187,7 +142,18 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
           body: ListView(
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 100.0),
             children: [
-              _buildImageSlider(room.imageUrls),
+             // ✅ 기존 이미지 슬라이더를 공용 위젯으로 교체
+              if (room.imageUrls.isNotEmpty)
+                GestureDetector(
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => ImageGalleryScreen(imageUrls: room.imageUrls),
+                  )),
+                  child: ImageCarouselCard(
+                    storageId: room.id,
+                    imageUrls: room.imageUrls,
+                    height: 250,
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -203,8 +169,22 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                     Text('상세 정보', style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 8),
                     Text(room.description, style: const TextStyle(fontSize: 16, height: 1.5)),
-                    const Divider(height: 32),
-                    _buildOwnerInfo(room.userId),
+const SizedBox(height: 16),
+
+                    // ✅ 태그, 지도, 작성자 정보 공용 위젯 추가
+                    ClickableTagList(tags: room.tags),
+                    if (room.geoPoint != null) ...[
+                      const Divider(height: 32),
+                      Text('위치', style: Theme.of(context).textTheme.titleLarge),
+                      const SizedBox(height: 12),
+                      MiniMapView(location: room.geoPoint!, markerId: room.id),
+                    ],
+ const Divider(height: 32),
+
+                    Text('게시자 정보', style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 12),
+                    // ✅ 기존 _buildOwnerInfo를 공용 AuthorProfileTile로 교체
+                    AuthorProfileTile(userId: room.userId),
                   ],
                 ),
               )
@@ -225,88 +205,8 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
     );
   }
 
-  Widget _buildOwnerInfo(String userId) {
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return const ListTile(title: Text('게시자 정보 없음'));
-        }
-        final user = UserModel.fromFirestore(snapshot.data!);
-        return Card(
-          elevation: 0,
-          color: Colors.grey.shade100,
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundImage: (user.photoUrl != null && user.photoUrl!.isNotEmpty) ? NetworkImage(user.photoUrl!) : null,
-              child: (user.photoUrl == null || user.photoUrl!.isEmpty) ? const Icon(Icons.person) : null,
-            ),
-            title: Text(user.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(user.locationName ?? ''),
-          ),
-        );
-      },
-    );
-  }
+
 }
 
-class FullScreenImageViewer extends StatefulWidget {
-  final List<String> imageUrls;
-  final int initialIndex;
 
-  const FullScreenImageViewer({
-    super.key,
-    required this.imageUrls,
-    this.initialIndex = 0,
-  });
 
-  @override
-  State<FullScreenImageViewer> createState() => _FullScreenImageViewerState();
-}
-
-class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
-  late final PageController _pageController;
-  late int _currentIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: _currentIndex);
-  }
-  
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        title: Text('${_currentIndex + 1} / ${widget.imageUrls.length}'),
-        centerTitle: true,
-      ),
-      body: PhotoViewGallery.builder(
-        pageController: _pageController,
-        itemCount: widget.imageUrls.length,
-        builder: (context, index) {
-          return PhotoViewGalleryPageOptions(
-            imageProvider: NetworkImage(widget.imageUrls[index]),
-            minScale: PhotoViewComputedScale.contained,
-            maxScale: PhotoViewComputedScale.covered * 2,
-          );
-        },
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
-    );
-  }
-}

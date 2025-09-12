@@ -290,7 +290,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
               child: Column(
                 children: [
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedProvinsi,
+                    value: _selectedProvinsi,
                     hint: Text('locationFilter.provinsi'.tr()),
                     isExpanded: true,
                     items: _buildDropdownItems(_provinsiList),
@@ -298,7 +298,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedKabupaten,
+                    value: _selectedKabupaten,
                     hint: Text('locationFilter.kabupaten'.tr()),
                     isExpanded: true,
                     items: _buildDropdownItems(_kabupatenList, addAllOption: true),
@@ -306,7 +306,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedKota,
+                    value: _selectedKota,
                     hint: Text('locationFilter.kota'.tr()),
                     isExpanded: true,
                     items: _buildDropdownItems(_kotaList, addAllOption: true),
@@ -314,7 +314,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedKecamatan,
+                    value: _selectedKecamatan,
                     hint: Text('locationFilter.kecamatan'.tr()),
                     isExpanded: true,
                     items: _buildDropdownItems(_kecamatanList, addAllOption: true),
@@ -322,7 +322,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedKelurahan,
+                    value: _selectedKelurahan,
                     hint: Text('locationFilter.kelurahan'.tr()),
                     isExpanded: true,
                     items: _buildDropdownItems(_kelurahanList, addAllOption: true),

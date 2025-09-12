@@ -366,7 +366,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                initialValue: _condition,
+                value: _condition,
                 decoration: InputDecoration(
                     labelText: 'marketplace.condition.label'.tr()),
                 items: [
@@ -393,7 +393,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                     ? 'marketplace.errors.requiredField'.tr()
                     : null,
               ),
-// ✅ 공용 태그 위젯 추가
+              // ✅ 공용 태그 위젯 추가
               CustomTagInputField(
                 hintText: 'marketplace.registration.tagsHint'.tr(),
                 onTagsChanged: (tags) {
