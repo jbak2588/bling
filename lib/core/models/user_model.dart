@@ -58,6 +58,10 @@ class UserModel {
   final int marketThanksReceived;
   final int thanksReceived;
   final int reportCount;
+
+// ✅ [신규] 관리자 여부를 나타내는 isAdmin 필드를 추가합니다.
+  final bool isAdmin;
+
   final bool isBanned; // 차단 여부 (true 시 계정 제한)
   final List<String>? blockedUsers; // 차단 유저 목록 (uid 리스트)
   final bool profileCompleted; // 기본 프로필 완성 여부
@@ -103,6 +107,9 @@ class UserModel {
     this.marketThanksReceived = 0,
     this.thanksReceived = 0,
     this.reportCount = 0,
+
+    // ✅ 생성자에 isAdmin을 추가하고, 기본값은 false로 설정합니다.
+    this.isAdmin = false,
     this.isBanned = false,
     this.blockedUsers,
     this.profileCompleted = false,
@@ -169,6 +176,10 @@ class UserModel {
       marketThanksReceived: data['marketThanksReceived'] ?? 0,
       thanksReceived: data['thanksReceived'] ?? 0,
       reportCount: data['reportCount'] ?? 0,
+
+      // ✅ Firestore 문서에서 isAdmin 필드를 읽어옵니다.
+      isAdmin: data['isAdmin'] ?? false,
+
       isBanned: data['isBanned'] ?? false,
       blockedUsers: data['blockedUsers'] != null
           ? List<String>.from(data['blockedUsers'])
@@ -232,6 +243,10 @@ class UserModel {
       'marketThanksReceived': marketThanksReceived,
       'thanksReceived': thanksReceived,
       'reportCount': reportCount,
+
+      // ✅ toJson 맵에 isAdmin 필드를 추가합니다.
+      'isAdmin': isAdmin,
+
       'isBanned': isBanned,
       'blockedUsers': blockedUsers,
       'profileCompleted': profileCompleted,

@@ -82,7 +82,15 @@ class FeedRepository {
 
   Future<List<FeedItemModel>> _fetchLatestProducts({int limit = 5}) async {
     try {
-      final snapshot = await _firestore.collection('products').orderBy('createdAt', descending: true).limit(limit).get();
+     // ✅ [수정 시작]
+      final snapshot = await _firestore
+          .collection('products')
+          // ✅ [핵심 수정] 'approved'(승인됨)와 'none'(일반 상품) 상태의 상품만 허용합니다.
+          .where('aiVerificationStatus', whereIn: ['approved', 'none'])
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
+      // ✅ [수정 끝]
       return snapshot.docs.map((doc) {
         final product = ProductModel.fromFirestore(doc);
         return FeedItemModel(

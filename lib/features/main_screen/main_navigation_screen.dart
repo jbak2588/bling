@@ -11,14 +11,14 @@ import 'package:bling_app/features/find_friends/screens/findfriend_form_screen.d
 import 'package:bling_app/features/local_stores/screens/create_shop_screen.dart';
 
 import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
-import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
+// import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
+import 'package:bling_app/features/marketplace/screens/registration_type_screen.dart';
 import 'package:bling_app/features/clubs/screens/create_club_screen.dart';
 import 'package:bling_app/features/jobs/screens/create_job_screen.dart';
 import 'package:bling_app/features/pom/screens/create_short_screen.dart';
 import 'package:bling_app/features/lost_and_found/screens/create_lost_item_screen.dart';
 import 'package:bling_app/features/auction/screens/create_auction_screen.dart';
 import 'package:bling_app/features/real_estate/screens/create_room_listing_screen.dart';
-
 
 import 'package:bling_app/features/shared/grab_widgets.dart'; // GrabAppBarShell
 
@@ -37,6 +37,9 @@ import 'package:bling_app/features/location/screens/location_filter_screen.dart'
 import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
 import 'home_screen.dart';
+
+
+import 'package:bling_app/features/admin/screens/admin_screen.dart'; // ✅ 관리자 화면 import
 
 /// 현재 보고 있는 섹션을 타입 세이프하게 관리하기 위한 enum
 enum AppSection {
@@ -173,7 +176,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Future<void> _onFloatingActionButtonTapped() async {
-    if (_userModel == null) return;
+    // ✅ [핵심 수정] 기존의 _userModel 검사 대신,
+    // Firebase의 현재 인증 상태를 직접 확인하는 로직으로 변경합니다.
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // 만약 이 순간에 로그인이 풀려있다면, 사용자에게 알리고 즉시 종료합니다.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다. 다시 시도해주세요.')),
+      );
+      return;
+    }
+
+    if (_userModel == null) return; // _userModel이 로드될 때까지 기다리는 방어 코드
 
     // 홈 루트(아이콘 그리드/탭 진입 전)에서는 전역 시트 노출
     if (_bottomNavIndex == 0 && _currentHomePageContent == null) {
@@ -189,7 +203,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         target = const CreateLocalNewsScreen();
         break;
       case AppSection.marketplace:
-        target = const ProductRegistrationScreen();
+        target = const RegistrationTypeScreen();
         break;
       case AppSection.findFriends:
         target = FindFriendFormScreen(userModel: _userModel!);
@@ -246,7 +260,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               _sheetItem(Icons.article_rounded,   'main.tabs.localNews'.tr(),     'localNewsCreate.appBarTitle'.tr(),
                   () => const CreateLocalNewsScreen()),
               _sheetItem(Icons.store_mall_directory_rounded, 'main.tabs.marketplace'.tr(), 'marketplace.registration.title'.tr(),
-                  () => const ProductRegistrationScreen()),
+                  () => const RegistrationTypeScreen()),
         _sheetItem(Icons.sentiment_satisfied_alt_rounded, 'main.tabs.findFriends'.tr(), 'findfriend.form.title'.tr(),
           () => FindFriendFormScreen(userModel: _userModel!)),
               _sheetItem(Icons.groups_rounded,    'main.tabs.clubs'.tr(),         'clubs.create.title'.tr(),
@@ -643,6 +657,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                         builder: (_) => const ProfileEditScreen()));
                   },
                 ),
+
+                // ✅ [신규] userModel의 isAdmin 플래그를 확인하여 관리자 메뉴를 표시합니다.
+                if (userModel.isAdmin) ...[
+                  ListTile(
+                    leading: const Icon(Icons.admin_panel_settings),
+                    title: const Text('관리자 페이지'),
+                    onTap: () {
+                      Navigator.of(context).pop(); // Drawer를 닫고
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const AdminScreen())); // 관리자 페이지로 이동
+                    },
+                  ),
+                ],
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.logout),

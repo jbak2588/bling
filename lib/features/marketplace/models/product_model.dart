@@ -36,7 +36,7 @@
 ///   - 데이터 모델 확장(활동 히스토리, KPI/Analytics 필드 추가), Firestore 쿼리 최적화, 에러 핸들링 강화
 ///   - 거래 희망 장소 미니맵화
 /// 2025년 8월 30일 : 공용위젯인 테그 위젯, 검색화 도입 및 이미지 갤러리 위젯 작업 진행
-/// 
+///
 library;
 // 아래부터 실제 코드
 
@@ -62,10 +62,16 @@ class ProductModel {
 
   // ✅ [통합] 구버전 모델의 상태 관리 필드를 가져옵니다.
   final String status; // 'selling', 'reserved', 'sold'
-  final bool isAiVerified;
+
   final String condition; // 'new' or 'used'
   // ✅ [추가] 거래 희망 장소 필드를 추가합니다.
   final String? transactionPlace;
+
+  final bool isAiVerified;
+  final String
+      aiVerificationStatus; // 'pending', 'approved', 'rejected', 'none'
+  final Map<String, dynamic>? aiReport;
+  final String? rejectionReason;
 
   // 카운트 필드
   final int likesCount;
@@ -89,7 +95,6 @@ class ProductModel {
     this.locationParts,
     this.geoPoint,
     this.status = 'selling',
-    this.isAiVerified = false,
     this.condition = 'used',
     // ✅ [추가] 생성자에 transactionPlace를 추가합니다.
     this.transactionPlace,
@@ -98,6 +103,10 @@ class ProductModel {
     this.viewsCount = 0,
     required this.createdAt,
     required this.updatedAt,
+    this.isAiVerified = false,
+    this.aiVerificationStatus = 'none',
+    this.aiReport,
+    this.rejectionReason,
   });
 
   factory ProductModel.fromFirestore(
@@ -121,7 +130,7 @@ class ProductModel {
           : null,
       geoPoint: data['geoPoint'],
       status: data['status'] ?? 'selling',
-      isAiVerified: data['isAiVerified'] ?? false,
+
       condition: data['condition'] ?? 'used',
       // ✅ [추가] Firestore에서 transactionPlace 필드를 가져옵니다.
       transactionPlace: data['transactionPlace'],
@@ -130,6 +139,11 @@ class ProductModel {
       viewsCount: data['viewsCount'] ?? 0,
       createdAt: data['createdAt'] ?? Timestamp.now(),
       updatedAt: data['updatedAt'] ?? Timestamp.now(),
+      // ✅ [핵심 수정] AI 관련 필드들을 안전하게 불러옵니다.
+      isAiVerified: data['isAiVerified'] ?? false,
+      aiVerificationStatus: data['aiVerificationStatus'] ?? 'none',
+      aiReport: data['aiReport'] != null ? Map<String, dynamic>.from(data['aiReport']) : null,
+      rejectionReason: data['rejectionReason'],
     );
   }
 
@@ -147,7 +161,6 @@ class ProductModel {
       'locationParts': locationParts,
       'geoPoint': geoPoint,
       'status': status,
-      'isAiVerified': isAiVerified,
       'condition': condition,
       // ✅ [추가] toJson 맵에 transactionPlace를 추가합니다.
       'transactionPlace': transactionPlace,
@@ -156,6 +169,65 @@ class ProductModel {
       'viewsCount': viewsCount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      // ✅ [추가] AI 검수 관련 필드를 모두 추가하여 데이터 누락을 방지합니다.
+      'isAiVerified': isAiVerified,
+      'aiVerificationStatus': aiVerificationStatus,
+      'aiReport': aiReport,
+      'rejectionReason': rejectionReason,
     };
+  }
+
+  ProductModel copyWith({
+    String? id,
+    String? userId,
+    String? title,
+    String? description,
+    List<String>? imageUrls,
+    String? categoryId,
+    int? price,
+    bool? negotiable,
+    List<String>? tags,
+    String? locationName,
+    Map<String, dynamic>? locationParts,
+    GeoPoint? geoPoint,
+    String? status,
+    String? condition,
+    String? transactionPlace,
+    int? likesCount,
+    int? chatsCount,
+    int? viewsCount,
+    Timestamp? createdAt,
+    Timestamp? updatedAt,
+    bool? isAiVerified,
+    String? aiVerificationStatus,
+    Map<String, dynamic>? aiReport,
+    String? rejectionReason,
+  }) {
+    return ProductModel(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      imageUrls: imageUrls ?? this.imageUrls,
+      categoryId: categoryId ?? this.categoryId,
+      price: price ?? this.price,
+      negotiable: negotiable ?? this.negotiable,
+      tags: tags ?? this.tags,
+      locationName: locationName ?? this.locationName,
+      locationParts: locationParts ?? this.locationParts,
+      geoPoint: geoPoint ?? this.geoPoint,
+      status: status ?? this.status,
+      condition: condition ?? this.condition,
+      transactionPlace: transactionPlace ?? this.transactionPlace,
+      likesCount: likesCount ?? this.likesCount,
+      chatsCount: chatsCount ?? this.chatsCount,
+      viewsCount: viewsCount ?? this.viewsCount,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isAiVerified: isAiVerified ?? this.isAiVerified,
+      aiVerificationStatus: aiVerificationStatus ?? this.aiVerificationStatus,
+      aiReport: aiReport ?? this.aiReport,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
+    );
   }
 }

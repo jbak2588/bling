@@ -50,6 +50,8 @@ import '../../../core/models/user_model.dart';
 import '../models/product_model.dart';
 import '../screens/product_detail_screen.dart';
 
+import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart'; // ✅ 배지 위젯 import
+
 // ✅ 1. StatelessWidget을 StatefulWidget으로 변경합니다.
 class ProductCard extends StatefulWidget {
   final ProductModel product;
@@ -134,12 +136,27 @@ class _ProductCardState extends State<ProductCard>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          product.title,
-                          style: const TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        // ✅ [핵심 수정] 기존 Text 위젯을 Row로 감싸 배지를 추가합니다.
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 제목이 길어질 경우를 대비해 Expanded로 감쌉니다.
+                            Expanded(
+                              child: Text(
+                                product.title,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 4), // 제목과 배지 사이의 간격
+
+                            // AiVerificationBadge 위젯을 호출합니다.
+                            AiVerificationBadge(status: product.aiVerificationStatus),
+                          ],
                         ),
                         const SizedBox(height: 4.0),
                         Text(
