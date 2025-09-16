@@ -78,62 +78,6 @@
             }
           },
           {
-            "id": "1f0818bf7e51721d",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Fuetures 개선안.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Fuetures 개선안"
-            }
-          },
-          {
-            "id": "d0efbab41dee72f6",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "자동 슬라이딩 문제 해결의 위한 디버깅 터미널 로그.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "자동 슬라이딩 문제 해결의 위한 디버깅 터미널 로그"
-            }
-          },
-          {
-            "id": "6c2991af5f5a323b",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "flutter_google_maps_webservices.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "flutter_google_maps_webservices"
-            }
-          },
-          {
-            "id": "923ec3eae5b024bf",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "http.dart' as http.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "http.dart' as http"
-            }
-          },
-          {
             "id": "7b652fb3f452f1ce",
             "type": "leaf",
             "state": {
@@ -160,9 +104,107 @@
               "icon": "lucide-file",
               "title": "Bling App UI UX 패턴 확장 및 시스템 안정화 DevLog 2025년 9월 12일"
             }
+          },
+          {
+            "id": "c1df528e0fb542f8",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "AI 검수 등록 및 인수 시스템' 완성을 위한 구체적인 위젯 개발 및 백엔드 연동 계획.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "AI 검수 등록 및 인수 시스템' 완성을 위한 구체적인 위젯 개발 및 백엔드 연동 계획"
+            }
+          },
+          {
+            "id": "7a28e691f5ab1740",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "개발과정 백업/main.dart 백업 2025년 9월 15일 오전 7시 28분.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "main.dart 백업 2025년 9월 15일 오전 7시 28분"
+            }
+          },
+          {
+            "id": "638a3c6a6dbf9f99",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "AndroidDebugKey.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "AndroidDebugKey"
+            }
+          },
+          {
+            "id": "17824f2d186a193b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "디버그 토큰 복사.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "디버그 토큰 복사"
+            }
+          },
+          {
+            "id": "ea96c646fa695442",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "앱체크 debug 토큰.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "앱체크 debug 토큰"
+            }
+          },
+          {
+            "id": "f0b6e58a0c502ecb",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Ai 분석 관련 최종 수정후 터미널 로그.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Ai 분석 관련 최종 수정후 터미널 로그"
+            }
+          },
+          {
+            "id": "4d4c5265872c2511",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "ChatGPT 대화 내용.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "ChatGPT 대화 내용"
+            }
           }
         ],
-        "currentTab": 10
+        "currentTab": 13
       }
     ],
     "direction": "vertical"
@@ -310,20 +352,32 @@
       "bases:Create new base": false
     }
   },
-  "active": "5dcc7b29cf97e5fd",
+  "active": "4d4c5265872c2511",
   "lastOpenFiles": [
-    "Bling App UI UX 패턴 확장 및 시스템 안정화 DevLog 2025년 9월 12일.md",
+    "ChatGPT 대화 내용.md",
+    "앱체크 debug 토큰.md",
+    "디버그 토큰 복사.md",
+    "Ai 분석 관련 최종 수정후 터미널 로그.md",
+    "개발과정 백업/main.dart 백업 2025년 9월 15일 오전 7시 28분.md",
+    "AndroidDebugKey.md",
+    "Features 개선안.md",
+    "Untitled",
+    "개발일지/feature local_news UI UX 개선 작업 DevLog.md",
+    "Ai 분설실패관련 터미널 로그.md",
+    "자주 사용하는 git  명령어.md",
+    "개발일지/자동 슬라이딩 문제 해결의 위한 디버깅 터미널 로그.md",
+    "개발일지/Bling App UI UX 패턴 확장 및 시스템 안정화 DevLog 2025년 9월 12일.md",
+    "개발일지/AI 검수 등록 및 인수 시스템' 완성을 위한 구체적인 위젯 개발 및 백엔드 연동 계획.md",
+    "개발일지/블링 0.9 버전 개발 완료 보고서.md",
+    "개발일지",
+    "개발과정 백업",
+    "Ai 검수 시스템 완료 후 발생한 exception 발생 터미널 로그.md",
+    "flutter_google_maps_webservices.md",
+    "http.dart' as http.md",
     "local_newe  개선안.md",
     "local_news_screen.dart 예외 발생.md",
     "RT RW 까지 찾아낸 neighboorhood_prompt_screen.dart.md",
-    "http.dart' as http.md",
-    "flutter_google_maps_webservices.md",
-    "자동 슬라이딩 문제 해결의 위한 디버깅 터미널 로그.md",
-    "Fuetures 개선안.md",
-    "feature local_news UI UX 개선 작업 DevLog.md",
     "main.dart 코드 수정후 터미널 로그.md",
-    "자주 사용하는 git  명령어.md",
-    "블링 0.9 버전 개발 완료 보고서.md",
     "Welcome.md"
   ]
 }

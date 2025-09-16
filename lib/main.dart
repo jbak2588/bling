@@ -6,33 +6,108 @@
 /// - 비교: 기획의 전체 레이아웃/UX 구조는 main.dart에서 직접 구현되지 않고, 각 화면/네비게이션 위젯에서 분리 관리됨. 다국어, 초기화, 진입점 등은 기획과 일치
 library;
 
-import 'package:bling_app/features/auth/screens/auth_gate.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_core/firebase_core.dart';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
-
-import 'package:bling_app/firebase_options.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:bling_app/firebase_options.dart';
+import 'package:bling_app/features/auth/screens/auth_gate.dart';
+
+// App Check 토큰이 처음 발급될 때까지 잠깐 대기 (최대 6초)
+Future<void> _waitForAppCheckToken({Duration timeout = const Duration(seconds: 6)}) async {
+  try {
+    final token = await FirebaseAppCheck.instance.onTokenChange
+        .firstWhere((t) => t != null)
+        .timeout(timeout);
+    debugPrint('[AppCheck] first token ready: ${token!.substring(0, 12)}...');
+  } catch (_) {
+    // 개발 중엔 타임아웃이 나더라도 일단 진행(서버에서 막힐 수 있음)
+    debugPrint('[AppCheck] token wait timed out; proceeding anyway.');
+  }
+}
+
+
+Future<void> _ensureGoogleMapRenderer() async {
+  // 안드로이드 지도의 최신 렌더러를 강제
+  final mapsImplementation = GoogleMapsFlutterPlatform.instance;
+  if (mapsImplementation is GoogleMapsFlutterAndroid) {
+    mapsImplementation.initializeWithRenderer(AndroidMapRenderer.latest);
+  }
+}
+
+Future<void> _initFirebaseAndAppCheck() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // 개발 중에는 Debug Provider, 배포에선 Play Integrity / App Attest 사용
+  // await FirebaseAppCheck.instance.activate(
+  //   androidProvider:
+  //       kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
+  //   appleProvider:
+  //       kReleaseMode ? AppleProvider.appAttest : AppleProvider.debug,
+  // );
+
+
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: AndroidProvider.debug,
+    appleProvider: AppleProvider.debug,
+  );
+  FirebaseAppCheck.instance.onTokenChange.listen((t) {
+    debugPrint('[AppCheck] token ready? ${t != null}');
+  });
+  // 최초 토큰 1회 대기(<=6s) – 첫 호출 403 방지
+  try {
+    await FirebaseAppCheck.instance.onTokenChange
+        .firstWhere((t) => t != null)
+        .timeout(const Duration(seconds: 6));
+    debugPrint('[AppCheck] first token ready');
+  } catch (_) {
+    debugPrint('[AppCheck] token wait timeout; proceeding');
+  }
+
+  // (선택) 디버그에서 토큰 변화를 로깅 — 콘솔 Debug Token 등록용
+  if (kDebugMode) {
+    await FirebaseAppCheck.instance.setTokenAutoRefreshEnabled(true);
+    FirebaseAppCheck.instance.onTokenChange.listen((token) {
+      if (token != null) {
+        debugPrint('[AppCheck] token length=${token.length}');
+      }
+    });
+  }
+}
+
+Future<void> _ensureSignedIn() async {
+  // AI 함수 onCall은 request.auth를 요구하므로 최소 익명 로그인 보장
+  final auth = FirebaseAuth.instance;
+  if (auth.currentUser == null) {
+    await auth.signInAnonymously();
+    debugPrint('[Auth] Signed in anonymously for AI verification flow.');
+  } else {
+    debugPrint('[Auth] Already signed in: ${auth.currentUser?.uid}');
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-// ✅ 지도 렌더러를 최신 버전으로 강제하는 코드를 추가합니다.
-  // 이 코드는 다른 초기화 코드보다 먼저 실행될 수 있습니다.
-  final GoogleMapsFlutterPlatform mapsImplementation = GoogleMapsFlutterPlatform.instance;
-  if (mapsImplementation is GoogleMapsFlutterAndroid) {
-    mapsImplementation.initializeWithRenderer(AndroidMapRenderer.latest);
-  }
-
+  await _ensureGoogleMapRenderer();
   await EasyLocalization.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  await _initFirebaseAndAppCheck();
+  // App Check 토큰이 한 번이라도 발급될 때까지 잠깐 대기(<=6s)
+  await _waitForAppCheckToken();
+  await _ensureSignedIn(); // (순서 동일)
 
   runApp(
     EasyLocalization(
@@ -51,10 +126,14 @@ class BlingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Bling App',
+      debugShowCheckedModeBanner: false,
+
+      // 다국어
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
-      title: 'Bling App',
+
       theme: ThemeData(
         primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -62,7 +141,8 @@ class BlingApp extends StatelessWidget {
           Theme.of(context).textTheme,
         ),
       ),
-      debugShowCheckedModeBanner: false,
+
+      // 기존 진입점 유지
       home: const AuthGate(),
     );
   }

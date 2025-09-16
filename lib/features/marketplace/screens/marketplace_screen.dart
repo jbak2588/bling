@@ -38,6 +38,7 @@
 ///   - 수익화: 지역 광고, 프로모션, 추천 상품/판매자 노출, 프리미엄 기능 연계, KPI/Analytics 이벤트 로깅
 ///   - 코드: Firestore 쿼리 최적화, 비동기 처리/에러 핸들링 강화, 데이터 모델/위젯 분리, 상태 관리 개선
 library;
+
 /// 아래부터 실제 코드
 
 import 'package:bling_app/core/models/user_model.dart';
@@ -56,9 +57,8 @@ class MarketplaceScreen extends StatefulWidget {
   @override
   State<MarketplaceScreen> createState() => _MarketplaceScreenState();
 }
-class _MarketplaceScreenState extends State<MarketplaceScreen> {
- 
 
+class _MarketplaceScreenState extends State<MarketplaceScreen> {
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyLocationFilter(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
     final filter = widget.locationFilter;
@@ -97,20 +97,35 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
       Query<Map<String, dynamic>> query =
           FirebaseFirestore.instance.collection('products');
 
+// ✅ [수정 시작] 쿼리 로직을 아래와 같이 변경합니다.
+      // 1. Bling 정책에 따라 사용자의 기본 지역(prov)을 기준으로 1차 필터링합니다.
       if (userProv != null && userProv.isNotEmpty) {
         query = query.where('locationParts.prov', isEqualTo: userProv);
       }
 
-      return query.orderBy('createdAt', descending: true);
+// 2. [핵심 수정] 판매중 & (AI 승인 OR 일반 상품) 인 경우만 필터링
+//    이 쿼리는 status 필드와 isAiVerified 필드를 모두 사용합니다.
+      query = query
+          .where('status', isEqualTo: 'selling')
+          .where('isAiVerified', whereIn: [true, false]).where(
+              'aiVerificationStatus',
+              whereIn: ['approved', 'none']);
+
+// 3. AI 검증 상품을 최상단에, 그 후 최신순으로 정렬 (기존과 동일)
+      query = query.orderBy('isAiVerified', descending: true);
+      query = query.orderBy('createdAt', descending: true);
+
+      return query;
+// ✅ [수정 끝]
     }
 
     // ✅ [수정] 위치 정보가 없는 경우를 위한 UI 처리
     if (widget.userModel?.locationParts?['prov'] == null) {
       return Center(
         child: Padding(
-           padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24.0),
           child: Text(
-              'marketplace.setLocationPrompt'.tr(),
+            'marketplace.setLocationPrompt'.tr(),
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
@@ -118,7 +133,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
       );
     }
 
-     return Scaffold(
+    return Scaffold(
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: buildQuery().snapshots(),
         builder: (context, snapshot) {
@@ -126,10 +141,14 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('marketplace.error'.tr(namedArgs: {'error': snapshot.error.toString()})));
+            return Center(
+                child: Text('marketplace.error'
+                    .tr(namedArgs: {'error': snapshot.error.toString()})));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('marketplace.empty'.tr(), textAlign: TextAlign.center));
+            return Center(
+                child: Text('marketplace.empty'.tr(),
+                    textAlign: TextAlign.center));
           }
 
           final allDocs = snapshot.data!.docs;
@@ -146,12 +165,9 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
             // ✅✅✅ 핵심 수정: 복잡한 UI 로직을 ProductCard 호출로 대체합니다. ✅✅✅
             itemBuilder: (context, index) {
               final product = ProductModel.fromFirestore(productsDocs[index]);
-              
+
               // StreamBuilder 환경이므로, 상태 유지를 위해 Key를 전달합니다.
-              return ProductCard(
-                key: ValueKey(product.id), 
-                product: product
-              );
+              return ProductCard(key: ValueKey(product.id), product: product);
             },
           );
         },
