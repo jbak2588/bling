@@ -25,9 +25,66 @@ const { getFirestore } = require("firebase-admin/firestore");
 const vision = require("@google-cloud/vision");
 const logger = require("firebase-functions/logger");
 
+// ✅ [신규] 웹 요청 및 HTML 분석을 위한 라이브러리를 추가합니다.
+const axios = require("axios");
+const cheerio = require("cheerio");
+
 // Admin SDK & Vision Client
 initializeApp();
 const visionClient = new vision.ImageAnnotatorClient();
+
+// ✅ [신규] Google 검색을 통해 가격 정보를 가져오는 별도의 함수
+async function getPriceSuggestion(brand, category) {
+  if (!brand || !category || brand === "Unknown" || category === "Unknown") {
+    return {min: 10000, max: 50000}; // 분석 정보가 없으면 기본값 반환
+  }
+
+  // 인도네시아 주요 중고 사이트를 타겟으로 검색어 생성
+  const searchQuery = `harga bekas ${brand} ${category} site:tokopedia.com OR site:olx.co.id OR site:carousell.id`;
+  const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}&hl=id`; // 인도네시아 기준 검색
+
+  try {
+    const {data} = await axios.get(searchUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      },
+    });
+
+    const $ = cheerio.load(data);
+    const prices = [];
+    
+    // Google 검색 결과에서 가격처럼 보이는 텍스트를 모두 추출합니다.
+    $('div').each((_, element) => {
+      const text = $(element).text();
+      // 'Rp'로 시작하고 숫자를 포함하는 텍스트를 찾습니다.
+      const priceMatches = text.match(/Rp\s*[\d.,]+/g);
+      if (priceMatches) {
+        priceMatches.forEach((match) => {
+          // 'Rp', '.', ',' 등 불필요한 문자를 제거하고 숫자로 변환합니다.
+          const price = parseInt(match.replace(/Rp|\.|,/g, "").trim(), 10);
+          if (!isNaN(price) && price > 0) {
+            prices.push(price);
+          }
+        });
+      }
+    });
+
+    if (prices.length === 0) {
+      return {min: 10000, max: 50000}; // 가격 정보를 찾지 못하면 기본값 반환
+    }
+
+    // 추출된 가격들 중 최소값과 최대값을 찾습니다.
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+
+    return {min: minPrice, max: maxPrice};
+
+  } catch (error) {
+    logger.error("Error during web scraping for price suggestion:", error);
+    return {min: 10000, max: 50000}; // 에러 발생 시 기본값 반환
+  }
+}
+
 
 /* -------------------------------------------------------------------------- */
 /*  0) 핑 함수(네트워크/프로젝트/이름/리전 즉시 확인용)                      */
@@ -145,11 +202,15 @@ exports.onAiVerificationRequest = onCall(
       const logos = responses.logoAnnotations || [];
       const texts = responses.textAnnotations || [];
 
+    // ✅ [핵심 수정] 고정된 가격 대신, 새로 만든 동적 분석 함수를 호출합니다.
+    const priceSuggestion = await getPriceSuggestion(detectedBrand, detectedCategory);
+
+
       const aiReport = {
         detectedCategory: labels[0]?.description ?? "Unknown",
         detectedBrand: logos[0]?.description ?? "Unknown",
         detectedFeatures: texts.slice(1, 6).map((t) => t.description),
-        priceSuggestion: { min: 10000, max: 50000 },
+        priceSuggestion, // <-- 동적으로 분석된 가격이 여기에 담깁니다.
         damageReports: [],
         lastInspected: new Date().toISOString(),
       };
