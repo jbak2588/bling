@@ -167,7 +167,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
               children: [
                 // --- 직종 선택 ---
                 DropdownButtonFormField<String>(
-                  value: _selectedCategory,
+                  initialValue: _selectedCategory,
                   hint: Text('jobs.form.categorySelectHint'.tr()),
                   items: [
                     'restaurant',
@@ -217,7 +217,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 const SizedBox(height: 12),
                 // 급여 종류 선택
                 DropdownButtonFormField<String>(
-                  value: _selectedSalaryType,
+                  initialValue: _selectedSalaryType,
                   hint: Text('jobs.form.salaryTypeHint'.tr()),
                   items: ['hourly', 'daily', 'monthly', 'per_case']
                       .map((String value) => DropdownMenuItem<String>(

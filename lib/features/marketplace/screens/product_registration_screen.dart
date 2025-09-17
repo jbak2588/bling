@@ -366,7 +366,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _condition,
+                initialValue: _condition,
                 decoration: InputDecoration(
                     labelText: 'marketplace.condition.label'.tr()),
                 items: [
