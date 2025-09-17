@@ -370,10 +370,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // ✅ 항상 build 시점에 번역되도록 .tr() 호출
-            Text(
-              _appBarTitleKey.tr(),
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold, fontSize: 16
+           // 👇 [수정] 메인 타이틀도 Flexible로 감싸서 공간을 유연하게 차지하도록 변경
+            Flexible(
+              child: Text(
+                _appBarTitleKey.tr(),
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold, fontSize: 16
+                ),
+                overflow: TextOverflow.ellipsis, // 글자가 길면 ...으로 표시
+                maxLines: 1,                    // 한 줄만 표시
               ),
             ),
             const SizedBox(width: 8),
