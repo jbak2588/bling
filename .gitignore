@@ -10,13 +10,7 @@
 build/
 **/build/
 
-# iOS
-ios/Flutter/.last_build_id
-ios/Pods/
-ios/Runner.xcworkspace/
-ios/build/
-ios/.symlinks/
-ios/Flutter/ephemeral/
+
 
 # Android
 android/.gradle/
@@ -45,8 +39,7 @@ node_modules/
 serviceAccountKey.json
 *.key.json
 
-# Secret API keys
-lib/api_keys.dart
 
-# Android Manifest 파일 제외 (API 키 노출 방지용 임시 조치)
-android/app/src/main/AndroidManifest.xml
+
+# Android Manifest was previously ignored to prevent API key leaks.
+# It is now tracked with placeholder values.
