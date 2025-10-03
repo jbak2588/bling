@@ -38,8 +38,7 @@ class LocationSettingScreen extends StatefulWidget {
 }
 
 class _LocationSettingScreenState extends State<LocationSettingScreen> {
-  final GoogleMapsPlaces _places =
-      GoogleMapsPlaces(apiKey: ApiKeys.googleApiKey);
+  final GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: ApiKeys.serverKey);
   bool _isLoading = false;
 
   // neighborhood_prompt_screen.dart의 최신 DB 검증 함수를 그대로 가져옵니다.
@@ -123,7 +122,8 @@ class _LocationSettingScreenState extends State<LocationSettingScreen> {
       }
 
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+        locationSettings:
+            const LocationSettings(accuracy: LocationAccuracy.high),
       );
 
       // ✅ DEBUG: 1. 기기에서 GPS 좌표를 제대로 받아왔는지 확인

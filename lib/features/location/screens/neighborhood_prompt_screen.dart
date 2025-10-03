@@ -134,8 +134,8 @@ class GoogleGeocodingService {
         });
 
         final best = results.first;
-        final comps = (best['address_components'] as List)
-            .cast<Map<String, dynamic>>();
+        final comps =
+            (best['address_components'] as List).cast<Map<String, dynamic>>();
         final formatted = best['formatted_address'] as String? ?? '';
 
         final parsed = _parseIndoAdmin(comps);
@@ -182,9 +182,8 @@ class GoogleGeocodingService {
 
     final prov = byTypes(['administrative_area_level_1']) ?? '';
 
-    String reg = byTypes(['administrative_area_level_2']) ??
-        byTypes(['locality']) ??
-        '';
+    String reg =
+        byTypes(['administrative_area_level_2']) ?? byTypes(['locality']) ?? '';
     reg = stripPrefix(reg, ['Kabupaten ', 'Kota ']);
 
     String kec = byTypes(['administrative_area_level_3']) ??
@@ -228,7 +227,8 @@ class GoogleGeocodingService {
 class NeighborhoodPromptScreen extends StatefulWidget {
   const NeighborhoodPromptScreen({super.key});
   @override
-  State<NeighborhoodPromptScreen> createState() => _NeighborhoodPromptScreenState();
+  State<NeighborhoodPromptScreen> createState() =>
+      _NeighborhoodPromptScreenState();
 }
 
 class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
@@ -238,7 +238,7 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
   AdminAddress? _address;
 
   // ✅ ApiKeys.googleApiKey 직접 사용
-  final _geocoder = GoogleGeocodingService(ApiKeys.googleApiKey);
+  final _geocoder = GoogleGeocodingService(ApiKeys.serverKey);
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
@@ -272,7 +272,8 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
 
     try {
       final pos = await _getCurrentPosition();
-      final addr = await _geocoder.reverseGeocode(lat: pos.latitude, lng: pos.longitude);
+      final addr =
+          await _geocoder.reverseGeocode(lat: pos.latitude, lng: pos.longitude);
 
       // Prefill RT/RW from existing user doc (backward-compat: locationParts.rt/rw or top-level rt/rw)
       final user = _auth.currentUser;
@@ -373,20 +374,21 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
     } catch (e) {
       _safeSetState(() => _error = e.toString());
     } finally {
-     _safeSetState(() => _loading = false);
+      _safeSetState(() => _loading = false);
     }
   }
 
- void _goManualSelect() async {
-  final ok = await Navigator.of(context).push<bool>(
-    MaterialPageRoute(builder: (_) => const LocationManualSelectScreen()),
-  );
+  void _goManualSelect() async {
+    final ok = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const LocationManualSelectScreen()),
+    );
 
-  // 수동 저장 성공 시, 이 화면도 성공 종료(pop(true))
-  if (ok == true && mounted) {
-    Navigator.of(context).pop(true);
+    // 수동 저장 성공 시, 이 화면도 성공 종료(pop(true))
+    if (ok == true && mounted) {
+      Navigator.of(context).pop(true);
+    }
   }
-}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -433,7 +435,8 @@ class _ErrorView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Something went wrong', style: Theme.of(context).textTheme.titleLarge),
+        Text('Something went wrong',
+            style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 8),
         Text(message, style: Theme.of(context).textTheme.bodyMedium),
         const Spacer(),
@@ -489,17 +492,23 @@ class _Content extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Detected neighborhood', style: Theme.of(context).textTheme.titleLarge),
+          Text('Detected neighborhood',
+              style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           _InfoRow(label: 'Display', value: address.displayName),
           _InfoRow(label: 'Province', value: address.province),
           _InfoRow(label: 'Kab/Kota', value: address.regency),
           _InfoRow(label: 'Kecamatan', value: address.district),
-          _InfoRow(label: 'Kel/Desa', value: '${address.village} (${address.villageType})'),
+          _InfoRow(
+              label: 'Kel/Desa',
+              value: '${address.village} (${address.villageType})'),
           const SizedBox(height: 12),
-          _InfoRow(label: 'Lat/Lng', value: '${position.latitude}, ${position.longitude}'),
+          _InfoRow(
+              label: 'Lat/Lng',
+              value: '${position.latitude}, ${position.longitude}'),
           const SizedBox(height: 16),
-          Text('Add detailed address (RT/RW)', style: Theme.of(context).textTheme.titleMedium),
+          Text('Add detailed address (RT/RW)',
+              style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -590,9 +599,14 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 90, child: Text(label, style: Theme.of(context).textTheme.bodyMedium)),
+          SizedBox(
+              width: 90,
+              child:
+                  Text(label, style: Theme.of(context).textTheme.bodyMedium)),
           const SizedBox(width: 8),
-          Expanded(child: Text(value, style: Theme.of(context).textTheme.titleSmall)),
+          Expanded(
+              child:
+                  Text(value, style: Theme.of(context).textTheme.titleSmall)),
         ],
       ),
     );
