@@ -20,7 +20,6 @@ import '../widgets/comment_list_view.dart';
 import 'edit_local_news_screen.dart';
 import 'tag_search_result_screen.dart';
 
-
 class LocalNewsDetailScreen extends StatefulWidget {
   final PostModel post;
   const LocalNewsDetailScreen({super.key, required this.post});
@@ -188,7 +187,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
       if (mounted) setState(() => _isThanksProcessing = false);
     }
   }
-  
+
   Widget _buildAuthorInfo(String userId) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
@@ -207,9 +206,11 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
             child: Row(
               children: [
                 CircleAvatar(
-                  backgroundImage:
-                      user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-                  child: user.photoUrl == null ? const Icon(Icons.person) : null,
+                  backgroundImage: user.photoUrl != null
+                      ? NetworkImage(user.photoUrl!)
+                      : null,
+                  child:
+                      user.photoUrl == null ? const Icon(Icons.person) : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -247,7 +248,8 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
       orElse: () =>
           AppCategories.postCategories.firstWhere((c) => c.categoryId == 'etc'),
     );
-    final hasImages = _currentPost.mediaUrl != null && _currentPost.mediaUrl!.isNotEmpty;
+    final hasImages =
+        _currentPost.mediaUrl != null && _currentPost.mediaUrl!.isNotEmpty;
     final hasLocation = _currentPost.geoPoint != null;
 
     return Scaffold(
@@ -273,9 +275,11 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
             onSelected: (value) {/* Handle menu selection */},
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               PopupMenuItem<String>(
-                  value: 'report', child: Text('localNewsDetail.menu.report'.tr())),
+                  value: 'report',
+                  child: Text('localNewsDetail.menu.report'.tr())),
               PopupMenuItem<String>(
-                  value: 'share', child: Text('localNewsDetail.menu.share'.tr())),
+                  value: 'share',
+                  child: Text('localNewsDetail.menu.share'.tr())),
             ],
           ),
         ],
@@ -310,15 +314,12 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                           .bodyLarge
                           ?.copyWith(height: 1.5)),
                   const SizedBox(height: 16),
-                  
                   if (_currentPost.tags.isNotEmpty) ...[
                     _buildTags(context, _currentPost.tags),
                     const SizedBox(height: 16),
                   ],
-                  
                   if (hasImages)
                     _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
-                  
                   if (hasLocation) ...[
                     const SizedBox(height: 16),
                     _buildMiniMap(context, _currentPost),
@@ -395,7 +396,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
         ),
       );
     }
-    
+
     return Column(
       children: [
         SizedBox(
@@ -486,17 +487,19 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     if (post.geoPoint == null) {
       return const SizedBox.shrink();
     }
-    
+
     final lat = post.geoPoint!.latitude;
     final lng = post.geoPoint!.longitude;
-    final apiKey = ApiKeys.googleApiKey;
-    
-    final staticMapUrl = 'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lng&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C$lat,$lng&key=$apiKey';
+    final apiKey = ApiKeys.staticMapKey;
+
+    final staticMapUrl =
+        'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lng&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C$lat,$lng&key=$apiKey';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('postCard.location'.tr(), style: Theme.of(context).textTheme.titleMedium),
+        Text('postCard.location'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
