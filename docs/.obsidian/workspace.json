@@ -69,34 +69,6 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "DevLog_개발일지/Add SliverAppBar with TabBar funcitonality diff Patch 2025년 7월 11일 22시 26분.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Add SliverAppBar with TabBar funcitonality diff Patch 2025년 7월 11일 22시 26분"
-            }
-          },
-          {
-            "id": "ff27b3b52377b3f7",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Find_Friend/Bling FindFriend Features Spec (Final).md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Bling FindFriend Features Spec (Final)"
-            }
-          },
-          {
-            "id": "0cb93bf07ce5b8b6",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
                 "file": "Bling AI 검수 시스템 리뉴얼 개발 체크리스트 (확정안).md",
                 "mode": "source",
                 "source": false
@@ -104,9 +76,21 @@
               "icon": "lucide-file",
               "title": "Bling AI 검수 시스템 리뉴얼 개발 체크리스트 (확정안)"
             }
+          },
+          {
+            "id": "ff27b3b52377b3f7",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.9.14"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.9.14"
+            }
           }
         ],
-        "currentTab": 6
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -254,36 +238,44 @@
       "bases:Create new base": false
     }
   },
-  "active": "0cb93bf07ce5b8b6",
+  "active": "05c7ae7d344c7cd5",
   "lastOpenFiles": [
-    "Find_Friend/Bling FindFriend Features Spec (Final).md",
-    "Bling AI 검수 시스템 리뉴얼 개발 체크리스트 (확정안).md",
-    "Gemini API AI 검수 시스템",
-    "Find_Friend/FindFriend_Feature_Spec.md.md",
-    "DevLog_개발일지/local_news_screen.dart 백업본 AppBar Update 이전 작업본 2025년 7월 12일 00시 21분 저장.md",
-    "Find_Friend/8_05_1. 친구 찾기 초기 기획서.md",
-    "index/📌 Bling_Team_ToDo_QA_Index.md",
-    "DevLog_개발일지/room_listing_model.md",
-    "빌드시 터미널 로그.md",
-    "Sliver Appbar + TabBar 스크롤 구현.md",
-    "DevLog_개발일지/auction_model.md",
-    "DevLog_개발일지/progress_status.md",
-    "home_screen.dart 백업파일 7월10일 오후11시11분.md",
-    "chat_list_screen.dart 백업 7월 11일 오전 00시 7분 버전.md",
-    "하단메뉴바 유지 home_screen.dart 7월10일 23시41분 버전.md",
-    "DevLog_개발일지/Add SliverAppBar with TabBar funcitonality diff Patch 2025년 7월 11일 22시 26분.md",
-    "DevLog_개발일지/home_screen.dart 백업본 7월11일 22시24분 SliverAppBar 구현전 안전구동 코드.md",
-    "DevLog_개발일지",
-    "index/012  Find Friend & Club & Jobs & etc 모듈.md",
-    "index/01  프로젝트 개요 & 폴더트리.md",
+    "개발 1차 보고서/개발일지/자동 슬라이딩 문제 해결의 위한 디버깅 터미널 로그.md",
+    "개발 1차 보고서/개발일지/블링 0.9 버전 개발 완료 보고서.md",
+    "개발 1차 보고서/개발일지/feature local_news UI UX 개선 작업 DevLog.md",
+    "개발 1차 보고서/개발일지/Bling App UI UX 패턴 확장 및 시스템 안정화 DevLog 2025년 9월 12일.md",
+    "개발 1차 보고서/개발일지/AI 검수 등록 및 인수 시스템' 완성을 위한 구체적인 위젯 개발 및 백엔드 연동 계획.md",
+    "개발 1차 보고서/개발과정 백업/main.dart 백업 2025년 9월 15일 오전 7시 28분.md",
+    "개발 1차 보고서/자주 사용하는 git  명령어.md",
+    "개발 1차 보고서/앱체크 debug 토큰.md",
+    "개발 1차 보고서/디버그 토큰 복사.md",
+    "개발 1차 보고서/개발일지",
+    "개발 1차 보고서/개발과정 백업",
+    "개발 1차 보고서/RT RW 까지 찾아낸 neighboorhood_prompt_screen.dart.md",
+    "개발 1차 보고서/main.dart 코드 수정후 터미널 로그.md",
+    "개발 1차 보고서/local_newe  개선안.md",
+    "개발 1차 보고서/http.dart' as http.md",
+    "개발 1차 보고서/flutter_google_maps_webservices.md",
+    "개발 1차 보고서/Features 개선안.md",
+    "개발 1차 보고서/ChatGPT 대화 내용.md",
+    "개발 1차 보고서/AndroidDebugKey.md",
+    "개발 1차 보고서",
+    "index/013 참조용 자료/Pasted image 20250701221455.png",
+    "index/013 참조용 자료/9  Notification - 신고 - 커뮤니티.md",
+    "index/013 참조용 자료/8  Frind-Club-Jobs-Shops-Auciton-POM.md",
+    "index/013 참조용 자료/7  Marketplace.md",
+    "index/013 참조용 자료/6  피드 (Local News).md",
+    "index/013 참조용 자료/5  지역-위치-개인정보.md",
+    "index/013 참조용 자료/4  사용자 화면 & 마이페이지.md",
+    "index/013 참조용 자료/3  사용자 DB & 신뢰 등급.md",
+    "index/013 참조용 자료/2  프로젝트 개요 & 메인 구조.md",
+    "index/013 참조용 자료/12. 약관 & 법적 정책.md",
+    "index/013 참조용 자료",
+    "index",
+    "_sync",
     "Find_Friend",
-    "터미널 로그 에러 메시지3.md",
-    "team/TeamA_Auth_Trust_module_통합 작업문서.md",
-    "index/00  Mainscreen & 런처 & Tab & Drawer QA.md",
-    "index/010  Post 모듈.md",
-    "index/011  Marketplace 모듈.md",
-    "index/09  신고 & 차단 & Privacy Guard.md",
-    "index/08  Notification 모듈 Core.md",
-    "index/07  Chat 모듈 Core.md"
+    "DevLog_개발일지",
+    "_sensitive",
+    "features/find_friend"
   ]
 }
