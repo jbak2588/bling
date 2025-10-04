@@ -186,7 +186,21 @@
             "new": "New",
             "used": "Used"
         },
-        "setLocationPrompt": "Please set your neighborhood first to see marketplace items!"
+        "setLocationPrompt": "Please set your neighborhood first to see marketplace items!",
+        "registration_flow": {
+            "title": "Select Item Type to Sell",
+            "new_item_title": "Sell New Item",
+            "new_item_desc": "Quickly register a new, unused item.",
+            "used_item_title": "Sell Used Item (AI Verified)",
+            "used_item_desc": "Let AI analyze your item to build trust and help you sell."
+        },
+        "ai_flow": {
+            "category_selection": {
+                "title": "Select AI Verification Category",
+                "error": "Error loading categories.",
+                "no_categories": "No categories available for verification."
+            }
+        }
     },
     "myBling": {
         "title": "My Bling",

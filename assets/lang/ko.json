@@ -185,7 +185,21 @@
             "new": "새것",
             "used": "중고"
         },
-        "setLocationPrompt": "중고거래 상품을 보려면 먼저 내 동네를 설정해주세요!"
+        "setLocationPrompt": "중고거래 상품을 보려면 먼저 내 동네를 설정해주세요!",
+        "registration_flow": {
+            "title": "판매 상품 종류 선택",
+            "new_item_title": "신품 판매",
+            "new_item_desc": "한 번도 사용하지 않은 새 상품을 간단하게 등록합니다.",
+            "used_item_title": "중고품 판매 (AI 검수)",
+            "used_item_desc": "AI가 상품을 자동 분석하여 신뢰도를 높이고 판매를 도와줍니다."
+        },
+        "ai_flow": {
+            "category_selection": {
+                "title": "AI 검수 카테고리 선택",
+                "error": "카테고리를 불러오는 중 오류가 발생했습니다.",
+                "no_categories": "검수를 지원하는 카테고리가 없습니다."
+            }
+        }
     },
     "myBling": {
         "title": "나의 Bling",

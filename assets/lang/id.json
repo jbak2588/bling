@@ -186,7 +186,21 @@
             "new": "Baru",
             "used": "Bekas"
         },
-        "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!"
+        "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!",
+        "registration_flow": {
+            "title": "Pilih Jenis Barang untuk Dijual",
+            "new_item_title": "Jual Barang Baru",
+            "new_item_desc": "Daftarkan barang baru yang belum pernah dipakai dengan cepat.",
+            "used_item_title": "Jual Barang Bekas (Verifikasi AI)",
+            "used_item_desc": "Biarkan AI menganalisis barang Anda untuk membangun kepercayaan dan membantu penjualan."
+        },
+        "ai_flow": {
+            "category_selection": {
+                "title": "Pilih Kategori Verifikasi AI",
+                "error": "Gagal memuat kategori.",
+                "no_categories": "Tidak ada kategori yang tersedia untuk verifikasi."
+            }
+        }
     },
     "myBling": {
         "title": "Bling Saya",
