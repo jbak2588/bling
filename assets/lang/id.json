@@ -186,21 +186,52 @@
             "new": "Baru",
             "used": "Bekas"
         },
-        "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!",
-        "registration_flow": {
-            "title": "Pilih Jenis Barang untuk Dijual",
-            "new_item_title": "Jual Barang Baru",
-            "new_item_desc": "Daftarkan barang baru yang belum pernah dipakai dengan cepat.",
-            "used_item_title": "Jual Barang Bekas (Verifikasi AI)",
-            "used_item_desc": "Biarkan AI menganalisis barang Anda untuk membangun kepercayaan dan membantu penjualan."
+        "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!"
+    },
+    "ai_flow": {
+        "category_selection": {
+            "title": "Pilih Kategori Verifikasi AI",
+            "error": "Gagal memuat kategori.",
+            "no_categories": "Tidak ada kategori yang tersedia untuk verifikasi."
         },
-        "ai_flow": {
-            "category_selection": {
-                "title": "Pilih Kategori Verifikasi AI",
-                "error": "Gagal memuat kategori.",
-                "no_categories": "Tidak ada kategori yang tersedia untuk verifikasi."
-            }
+        "gallery_upload": {
+            "title": "Unggah Foto (1/3)",
+            "instruction": "Mari analisis barang {category} Anda.",
+            "min_photo_guide": "Pilih minimal {0} foto dari galeri Anda agar AI dapat mengenali barang tersebut.",
+            "min_photo_error": "Diperlukan minimal {0} foto.",
+            "next_button": "Langkah Berikutnya"
+        },
+        "prediction": {
+            "title": "Konfirmasi Barang (2/3)",
+            "loading": "AI sedang menganalisis barang Anda...\nMohon tunggu sebentar.",
+            "uploading": "Mengunggah gambar dengan aman...",
+            "analyzing": "Menganalisis gambar yang diunggah...",
+            "error": "Tidak dapat mengenali barang.",
+            "question": "Apakah ini barang Anda?",
+            "confirm_button": "Ya, benar",
+            "reject_button": "Bukan, ini salah (Kembali)",
+            "retry_button": "Coba Lagi",
+            "back_button": "Kembali"
+        },
+        "guided_camera": {
+            "title": "Foto Terpandu AI (3/3)",
+            "location_error": "Lokasi foto tidak cocok dengan lokasi Anda saat ini. Harap ambil foto di lokasi barang.",
+            "next_button": "Minta Analisis Akhir"
+        },
+        "final_report": {
+            "title": "Tinjauan Iklan oleh AI",
+            "loading": "AI sedang menulis iklan penjualan terakhir...",
+            "error": "Gagal membuat laporan. Silakan coba lagi.",
+            "guide": "Ini adalah draf iklan penjualan yang dibuat oleh AI. Periksa dan ubah isinya sebelum dipublikasikan.",
+            "submit_button": "Daftarkan"
         }
+    },
+    "registration_flow": {
+        "title": "Pilih Jenis Barang untuk Dijual",
+        "new_item_title": "Jual Barang Baru",
+        "new_item_desc": "Daftarkan barang baru yang belum pernah dipakai dengan cepat.",
+        "used_item_title": "Jual Barang Bekas (Verifikasi AI)",
+        "used_item_desc": "Biarkan AI menganalisis barang Anda untuk membangun kepercayaan dan membantu penjualan."
     },
     "myBling": {
         "title": "Bling Saya",
