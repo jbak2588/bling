@@ -1,235 +1,186 @@
 /**
  * ============================================================================
- * Bling DocHeader (2nd Gen)
+ * Bling DocHeader (v3 - Gemini Refactored)
  * Module        : Auth, Trust, AI Verification
  * File          : functions-v2/index.js
- * Purpose       : 사용자 신뢰도 계산 및 AI 이미지 검증을 처리합니다.
- * Triggers      : Firestore onUpdate `users/{userId}`, HTTPS onCall
- * Data Access   : `users/{userId}`의 `thanksReceived`, `reportCount`, `profileCompleted`, `phoneNumber`, `locationParts`를 읽고 `trustScore`, `trustLevel`을 갱신합니다.
- * Monetization  : 높은 신뢰도는 마켓플레이스와 광고 참여 자격을 부여합니다.
- * KPIs          : 분석을 위해 `update_trust_level` 이벤트를 수집합니다.
- * Observability : `functions.logger`를 사용하며 오류는 Cloud Logging에 의존합니다.
- * Security      : Admin SDK는 서비스 계정이 필요하며 Firestore 규칙이 쓰기를 보호합니다.
- * Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
- * Source Docs   : docs/index/3 사용자 DB & 신뢰 등급.md; docs/team/TeamA_Auth_Trust_module_통합 작업문서.md
+ * Purpose       : 사용자 신뢰도 계산 및 Gemini 기반의 AI 상품 분석을 처리합니다.
+ * Triggers      : Firestore onUpdate `users/{userId}`, HTTPS onCall `initialProductAnalysis`
  * ============================================================================
  */
-// 아래부터 실제 코드
-
-// 2세대 SDK에서 필요한 모듈을 가져옵니다.
-
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall } = require("firebase-functions/v2/https");
 const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
-const vision = require("@google-cloud/vision");
-const logger = require("firebase-functions/logger");
+const { logger } = require("firebase-functions");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Admin SDK & Vision Client
 initializeApp();
-const visionClient = new vision.ImageAnnotatorClient();
 
-/* -------------------------------------------------------------------------- */
-/*  0) 핑 함수(네트워크/프로젝트/이름/리전 즉시 확인용)                      */
-/* -------------------------------------------------------------------------- */
-exports.ping = onCall(
-  { region: "us-central1", enforceAppCheck: false },
-  (request) => {
-    logger.info("ping: ENTER", { uid: request.auth?.uid ?? null });
-    return {
-      ok: true,
-      uid: request.auth?.uid ?? null,
-      ts: new Date().toISOString(),
-    };
-  }
-);
+// Gemini API 키를 환경 변수에서 가져옵니다. (보안 강화)
+// 터미널 명령어: firebase functions:config:set gemini.key="YOUR_API_KEY"
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
 
-/* -------------------------------------------------------------------------- */
-/*  1) AI 검수 요청 (Vision)                                                  */
-/*      - 타이밍 로그: ENTER / INPUT_READY / Vision REQUEST_START /           */
-/*                    Vision RESPONSE_RECEIVED / RETURN                        */
-/*      - 트러블슈팅 단계: enforceAppCheck: false (테스트용)                  */
-/* 참고: 테스트 중 임시 완화가 필요하면 위 첫 줄의 enforceAppCheck: true 를 false */
-/* 로만 바꿔 배포했다가, 통신 확인 후 다시 true로 복구하세요.                      */
-/* -------------------------------------------------------------------------- */
-exports.onAiVerificationRequest = onCall(
-  { region: "us-central1", enforceAppCheck: true },
-  async (request) => {
-    const t0 = Date.now();
-    logger.info("onAiVerificationRequest: ENTER", {
-      uid: request.auth?.uid ?? null,
-      hasData: !!request.data,
-      len: (request.data?.imageBase64 || "").length,
-    });
+/**
+ * [유지] 사용자 문서가 업데이트될 때 신뢰도 점수와 레벨을 다시 계산합니다.
+ */
+exports.calculateTrustScore = onDocumentUpdated("users/{userId}", async (event) => {
+  const userData = event.data.after.data();
+  const previousUserData = event.data.before.data();
+  const userId = event.params.userId;
 
-    // 1) 로그인 강제
-    if (!request.auth) {
-      throw new HttpsError(
-        "unauthenticated",
-        "The function must be called while authenticated."
-      );
-    }
-
-    // 2) 입력 검증 + data URL 프리픽스 제거
-    const imageBase64Raw = request.data?.imageBase64;
-    if (!imageBase64Raw) {
-      throw new HttpsError(
-        "invalid-argument",
-        "The function must be called with an 'imageBase64' argument."
-      );
-    }
-    const imageBase64 = String(imageBase64Raw).replace(
-      /^data:image\/\w+;base64,/,
-      ""
-    );
-    logger.info("onAiVerificationRequest: INPUT_READY", {
-      base64Length: imageBase64.length,
-      ms: Date.now() - t0,
-    });
-
-    try {
-      // 3) Vision 요청
-      const visionRequest = [
-        {
-          image: { content: imageBase64 }, // base64 문자열 그대로
-          features: [
-            { type: "LABEL_DETECTION", maxResults: 5 },
-            { type: "LOGO_DETECTION", maxResults: 5 },
-            { type: "TEXT_DETECTION" },
-            { type: "SAFE_SEARCH_DETECTION" },
-          ],
-        },
-      ];
-
-      logger.info("Vision: REQUEST_START");
-      const [result] = await visionClient.batchAnnotateImages({
-        requests: visionRequest,
-      });
-      logger.info("Vision: RESPONSE_RECEIVED", { ms: Date.now() - t0 });
-
-      // 4) 응답 파싱
-      const responsesArr = result?.responses ?? [];
-      if (responsesArr.length === 0) {
-        logger.error("Vision: EMPTY_RESPONSE", {
-          resultKeys: Object.keys(result || {}),
-        });
-        throw new HttpsError(
-          "internal",
-          "Vision API returned an empty response."
-        );
-      }
-      const responses = responsesArr[0];
-
-      if (responses.error) {
-        logger.error("Vision: RESPONSE_ERROR", responses.error);
-        throw new HttpsError(
-          "internal",
-          `Vision API Error: ${responses.error.message}`
-        );
-      }
-
-      // 5) 정책 검사 & 요약
-      const safeSearch = responses.safeSearchAnnotation || {};
-      if (
-        safeSearch.adult === "VERY_LIKELY" ||
-        safeSearch.violence === "VERY_LIKELY"
-      ) {
-        logger.warn("Policy: BLOCKED_BY_SAFESEARCH", safeSearch);
-        throw new HttpsError(
-          "permission-denied",
-          "Inappropriate image content detected."
-        );
-      }
-
-      const labels = responses.labelAnnotations || [];
-      const logos = responses.logoAnnotations || [];
-      const texts = responses.textAnnotations || [];
-
-      const aiReport = {
-        detectedCategory: labels[0]?.description ?? "Unknown",
-        detectedBrand: logos[0]?.description ?? "Unknown",
-        detectedFeatures: texts.slice(1, 6).map((t) => t.description),
-        priceSuggestion: { min: 10000, max: 50000 },
-        damageReports: [],
-        lastInspected: new Date().toISOString(),
-      };
-
-      logger.info("onAiVerificationRequest: RETURN", {
-        ms: Date.now() - t0,
-        hasLabels: labels.length > 0,
-        hasLogos: logos.length > 0,
-        hasText: texts.length > 0,
-      });
-
-      return aiReport;
-    } catch (error) {
-      logger.error("onAiVerificationRequest: ERROR", {
-        message: error?.message,
-        code: error?.code,
-        stack: error?.stack,
-      });
-      if (error instanceof HttpsError) throw error;
-      const message = (error?.message || "Vision error").slice(0, 300);
-      throw new HttpsError("internal", "Vision failed", { message });
-    }
-  }
-);
-
-/* -------------------------------------------------------------------------- */
-/*  2) 사용자 프로필 업데이트 시 신뢰 점수 계산 (2nd Gen Firestore)            */
-/* -------------------------------------------------------------------------- */
-exports.calculateTrustScore = onDocumentUpdated(
-  "users/{userId}",
-  async (event) => {
-    const userData = event.data.after.data();
-    const previousUserData = event.data.before.data();
-    const userId = event.params.userId;
-
-    const mainFieldsUnchanged =
-      userData.thanksReceived === previousUserData.thanksReceived &&
-      userData.reportCount === previousUserData.reportCount &&
-      userData.profileCompleted === previousUserData.profileCompleted &&
-      userData.phoneNumber === previousUserData.phoneNumber &&
-      JSON.stringify(userData.locationParts) ===
-        JSON.stringify(previousUserData.locationParts);
-
-    if (mainFieldsUnchanged) {
-      logger.info(`No score-related changes for user ${userId}, exiting.`);
-      return null;
-    }
-
-    // 점수 계산 로직
-    let score = 0;
-    if (userData.locationParts && userData.locationParts.kel) score += 50;
-    if (userData.locationParts && userData.locationParts.rt) score += 50;
-    if (userData.phoneNumber && userData.phoneNumber.length > 0) score += 100;
-    if (userData.profileCompleted === true) score += 50;
-
-    const thanksCount = userData.thanksReceived || 0;
-    score += thanksCount * 10;
-
-    const reportCount = userData.reportCount || 0;
-    score -= reportCount * 50;
-
-    const finalScore = Math.max(0, score);
-
-    let level = "normal";
-    if (finalScore > 500) {
-      level = "trusted";
-    } else if (finalScore > 100) {
-      level = "verified";
-    }
-
-    if (finalScore !== userData.trustScore || level !== userData.trustLevel) {
-      logger.info(
-        `Updating user ${userId}: New Score = ${finalScore}, New Level = ${level}`
-      );
-      return getFirestore().collection("users").doc(userId).update({
-        trustScore: finalScore,
-        trustLevel: level,
-      });
-    }
-
+  if (!userData) {
+    logger.info(`User data for ${userId} is missing.`);
     return null;
   }
-);
+  
+  // (기존 코드와 동일)
+  const mainFieldsUnchanged =
+    previousUserData &&
+    userData.thanksReceived === previousUserData.thanksReceived &&
+    userData.reportCount === previousUserData.reportCount &&
+    userData.profileCompleted === previousUserData.profileCompleted &&
+    userData.phoneNumber === previousUserData.phoneNumber &&
+    JSON.stringify(userData.locationParts) ===
+      JSON.stringify(previousUserData.locationParts);
+
+  if (mainFieldsUnchanged) {
+    logger.info(`No score-related changes for user ${userId}, exiting.`);
+    return null;
+  }
+  
+  let score = 0;
+  if (userData.locationParts && userData.locationParts.kel) score += 50;
+  if (userData.locationParts && userData.locationParts.rt) score += 50;
+  if (userData.phoneNumber && userData.phoneNumber.length > 0) score += 100;
+  if (userData.profileCompleted === true) score += 50;
+
+  const thanksCount = userData.thanksReceived || 0;
+  score += thanksCount * 10;
+
+  const reportCount = userData.reportCount || 0;
+  score -= reportCount * 50;
+
+  const finalScore = Math.max(0, score);
+
+  let level = "normal";
+  if (finalScore > 500) {
+    level = "trusted";
+  } else if (finalScore > 100) {
+    level = "verified";
+  }
+
+  if (finalScore !== userData.trustScore || level !== userData.trustLevel) {
+    logger.info(
+      `Updating user ${userId} score to ${finalScore} and level to ${level}`
+    );
+    return event.data.after.ref.update({
+      trustScore: finalScore,
+      trustLevel: level,
+    });
+  } else {
+    logger.info(`Score and level for user ${userId} remain unchanged.`);
+    return null;
+  }
+});
+
+/**
+ * [신규] 1차 갤러리 이미지들을 기반으로 상품명을 예측합니다.
+ */
+exports.initialProductAnalysis = onCall(async (request) => {
+  const { imageUrls } = request.data;
+  if (!imageUrls || imageUrls.length === 0) {
+    return { success: false, error: "No images provided." };
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+
+    const prompt = "Based on these images, what is the specific brand and model name of this product? Provide only the name, without any extra text or labels. For example: 'Samsung Galaxy S23 Ultra' or 'Nike Air Jordan 1'.";
+
+    // 보안 규칙이 있는 Storage의 이미지를 다루기 위해 admin SDK를 사용하는 것이 안정적입니다.
+    // 이 예제에서는 공개 URL로 가정하고 fetch를 사용합니다.
+    const imageParts = await Promise.all(
+      imageUrls.map(async (url) => {
+        const response = await fetch(url);
+        const buffer = await response.arrayBuffer();
+        return {
+          inlineData: {
+            mimeType: response.headers.get('content-type') || 'image/jpeg',
+            data: Buffer.from(buffer).toString("base64"),
+          },
+        };
+      })
+    );
+
+    const result = await model.generateContent([prompt, ...imageParts]);
+    const responseText = result.response.text().trim();
+
+    return { success: true, prediction: responseText };
+
+  } catch (error) {
+    logger.error("Gemini API call failed:", error);
+    return { success: false, error: "AI analysis failed." };
+  }
+});
+
+
+/**
+ * [신규] 모든 이미지와 정보를 종합하여 최종 판매 보고서를 생성합니다.
+ */
+exports.generateFinalReport = onCall(async (request) => {
+  const { 
+    imageUrls, // { initial: [...], guided: {...} }
+    ruleId, // e.g., 'smartphone'
+    confirmedProductName, 
+    userPrice, 
+    userDescription 
+  } = request.data;
+
+  if (!imageUrls || !ruleId) {
+    return { success: false, error: "Required data is missing." };
+  }
+
+  try {
+    // 1. Firestore에서 해당 카테고리의 프롬프트 템플릿 가져오기
+    const db = getFirestore();
+    const ruleDoc = await db.collection("ai_verification_rules").doc(ruleId).get();
+    if (!ruleDoc.exists) {
+      return { success: false, error: "Verification rule not found." };
+    }
+    let promptTemplate = ruleDoc.data().report_template_prompt;
+
+    // 2. 프롬프트 템플릿에 사용자 정보 주입
+    promptTemplate = promptTemplate.replace("{{userPrice}}", userPrice || "");
+    promptTemplate = promptTemplate.replace("{{userDescription}}", userDescription || "");
+    promptTemplate = promptTemplate.replace("{{confirmedProductName}}", confirmedProductName || "");
+
+    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+
+    // 3. 모든 이미지(갤러리+가이드)를 Base64로 변환
+    const allImageUrls = [...imageUrls.initial, ...Object.values(imageUrls.guided)];
+    const imageParts = await Promise.all(
+      allImageUrls.map(async (url) => {
+        const response = await fetch(url);
+        const buffer = await response.arrayBuffer();
+        return {
+          inlineData: {
+            mimeType: response.headers.get('content-type') || 'image/jpeg',
+            data: Buffer.from(buffer).toString("base64"),
+          },
+        };
+      })
+    );
+    
+    // 4. Gemini API 호출
+    const result = await model.generateContent([promptTemplate, ...imageParts]);
+    const responseText = result.response.text();
+    const cleanJsonText = responseText.replace(/```json|```/g, '').trim();
+
+    const report = JSON.parse(cleanJsonText);
+    return { success: true, report: report };
+
+  } catch (error) {
+    logger.error("Final report generation failed:", error);
+    return { success: false, error: "AI final report generation failed." };
+  }
+});

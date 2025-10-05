@@ -4,6 +4,7 @@ import 'package:bling_app/features/marketplace/models/ai_verification_rule_model
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/features/marketplace/screens/ai_gallery_upload_screen.dart';
 
 class AiCategorySelectionScreen extends StatelessWidget {
   const AiCategorySelectionScreen({super.key});
@@ -62,12 +63,13 @@ class AiCategorySelectionScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
-          // TODO: 다음 단계(2-3 (2) 1차 갤러리 업로드 화면)로 이동하는 로직 구현
-          // Navigator.of(context).push(MaterialPageRoute(
-          //   builder: (context) => AiGalleryUploadScreen(rule: rule), // 선택한 rule 객체를 전달
-          // ));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${rule.nameKo} 카테고리 선택됨. 다음 화면으로 이동합니다.')),
+          // 기존: ScaffoldMessenger...
+          // 수정: 새로 만든 1차 갤러리 업로드 화면으로 이동
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  AiGalleryUploadScreen(rule: rule), // 선택한 rule 객체를 전달
+            ),
           );
         },
         borderRadius: BorderRadius.circular(12),
