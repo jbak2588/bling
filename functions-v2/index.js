@@ -1,10 +1,10 @@
 /**
  * ============================================================================
- * Bling DocHeader (v3 - Gemini Refactored)
+ * Bling DocHeader (v3.1 - Gemini Safety Settings)
  * Module        : Auth, Trust, AI Verification
  * File          : functions-v2/index.js
  * Purpose       : 사용자 신뢰도 계산 및 Gemini 기반의 AI 상품 분석을 처리합니다.
- * Triggers      : Firestore onUpdate `users/{userId}`, HTTPS onCall `initialProductAnalysis`
+ * Triggers      : Firestore onUpdate `users/{userId}`, HTTPS onCall
  * ============================================================================
  */
 const { onCall } = require("firebase-functions/v2/https");
@@ -12,13 +12,31 @@ const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { logger } = require("firebase-functions");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 
 initializeApp();
 
-// Gemini API 키를 환경 변수에서 가져옵니다. (보안 강화)
-// 터미널 명령어: firebase functions:config:set gemini.key="YOUR_API_KEY"
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
+
+// [신규] Gemini 안전 설정: 유해성 기준이 '높음'일 경우에만 차단하도록 설정
+const safetySettings = [
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+  },
+];
 
 /**
  * [유지] 사용자 문서가 업데이트될 때 신뢰도 점수와 레벨을 다시 계산합니다.
@@ -83,8 +101,9 @@ exports.calculateTrustScore = onDocumentUpdated("users/{userId}", async (event) 
   }
 });
 
+
 /**
- * [신규] 1차 갤러리 이미지들을 기반으로 상품명을 예측합니다.
+ * [수정] 1차 갤러리 이미지들을 기반으로 상품명을 예측합니다. (안전 설정 추가)
  */
 exports.initialProductAnalysis = onCall(async (request) => {
   const { imageUrls } = request.data;
@@ -93,12 +112,11 @@ exports.initialProductAnalysis = onCall(async (request) => {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+    // [수정] getGenerativeModel 호출 시 safetySettings를 전달합니다.
+    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision", safetySettings });
 
-    const prompt = "Based on these images, what is the specific brand and model name of this product? Provide only the name, without any extra text or labels. For example: 'Samsung Galaxy S23 Ultra' or 'Nike Air Jordan 1'.";
+    const prompt = "Based on these images, what is the specific brand and model name of this product? Provide only the name, without any extra text or labels.";
 
-    // 보안 규칙이 있는 Storage의 이미지를 다루기 위해 admin SDK를 사용하는 것이 안정적입니다.
-    // 이 예제에서는 공개 URL로 가정하고 fetch를 사용합니다.
     const imageParts = await Promise.all(
       imageUrls.map(async (url) => {
         const response = await fetch(url);
@@ -118,19 +136,18 @@ exports.initialProductAnalysis = onCall(async (request) => {
     return { success: true, prediction: responseText };
 
   } catch (error) {
-    logger.error("Gemini API call failed:", error);
+    logger.error("initialProductAnalysis failed:", error.toString());
     return { success: false, error: "AI analysis failed." };
   }
 });
 
-
 /**
- * [신규] 모든 이미지와 정보를 종합하여 최종 판매 보고서를 생성합니다.
+ * [수정] 모든 이미지와 정보를 종합하여 최종 판매 보고서를 생성합니다. (안전 설정 추가)
  */
 exports.generateFinalReport = onCall(async (request) => {
   const { 
-    imageUrls, // { initial: [...], guided: {...} }
-    ruleId, // e.g., 'smartphone'
+    imageUrls,
+    ruleId,
     confirmedProductName, 
     userPrice, 
     userDescription 
@@ -141,22 +158,20 @@ exports.generateFinalReport = onCall(async (request) => {
   }
 
   try {
-    // 1. Firestore에서 해당 카테고리의 프롬프트 템플릿 가져오기
     const db = getFirestore();
     const ruleDoc = await db.collection("ai_verification_rules").doc(ruleId).get();
     if (!ruleDoc.exists) {
       return { success: false, error: "Verification rule not found." };
     }
     let promptTemplate = ruleDoc.data().report_template_prompt;
-
-    // 2. 프롬프트 템플릿에 사용자 정보 주입
+    
     promptTemplate = promptTemplate.replace("{{userPrice}}", userPrice || "");
     promptTemplate = promptTemplate.replace("{{userDescription}}", userDescription || "");
     promptTemplate = promptTemplate.replace("{{confirmedProductName}}", confirmedProductName || "");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
-
-    // 3. 모든 이미지(갤러리+가이드)를 Base64로 변환
+    // [수정] getGenerativeModel 호출 시 safetySettings를 전달합니다.
+    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision", safetySettings });
+    
     const allImageUrls = [...imageUrls.initial, ...Object.values(imageUrls.guided)];
     const imageParts = await Promise.all(
       allImageUrls.map(async (url) => {
@@ -171,7 +186,6 @@ exports.generateFinalReport = onCall(async (request) => {
       })
     );
     
-    // 4. Gemini API 호출
     const result = await model.generateContent([promptTemplate, ...imageParts]);
     const responseText = result.response.text();
     const cleanJsonText = responseText.replace(/```json|```/g, '').trim();
@@ -180,7 +194,7 @@ exports.generateFinalReport = onCall(async (request) => {
     return { success: true, report: report };
 
   } catch (error) {
-    logger.error("Final report generation failed:", error);
+    logger.error("Final report generation failed:", error.toString());
     return { success: false, error: "AI final report generation failed." };
   }
 });

@@ -161,25 +161,23 @@ class ProductModel {
       'categoryId': categoryId,
       'price': price,
       'negotiable': negotiable,
-      'tags': tags, // ✅ toJson 맵에 tags 추가
+      'tags': tags,
       'locationName': locationName,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
       'status': status,
       'condition': condition,
-      // ✅ [추가] toJson 맵에 transactionPlace를 추가합니다.
       'transactionPlace': transactionPlace,
       'likesCount': likesCount,
       'chatsCount': chatsCount,
       'viewsCount': viewsCount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
-      // ✅ [추가] AI 검수 관련 필드를 모두 추가하여 데이터 누락을 방지합니다.
       'isAiVerified': isAiVerified,
       'aiVerificationStatus': aiVerificationStatus,
       'aiReport': aiReport,
       'rejectionReason': rejectionReason,
-      'isNew': isNew, // <-- toMap에 추가
+      'isNew': isNew,
     };
   }
 
