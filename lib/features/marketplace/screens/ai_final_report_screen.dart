@@ -31,15 +31,17 @@ class AiFinalReportScreen extends StatefulWidget {
 }
 
 class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
-  // AI가 생성한 데이터를 담을 컨트롤러들
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
 
-  // 기타 AI 리포트 데이터를 저장할 Map
   Map<String, dynamic>? _aiReport;
   bool _isLoading = true;
+  bool _isSubmitting = false;
   bool _hasError = false;
+
+  late List<String> _initialImageUrls;
+  late Map<String, String> _guidedImageUrls;
 
   @override
   void initState() {
@@ -54,29 +56,20 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     });
 
     try {
-      // 1. 모든 이미지들을 Storage에 업로드하고 URL을 받습니다.
-      final initialImageUrls = await _uploadImages(widget.initialImages);
-      final guidedImageUrls = await _uploadImageMap(widget.takenShots);
+      _initialImageUrls = await _uploadImages(widget.initialImages);
+      _guidedImageUrls = await _uploadImageMap(widget.takenShots);
 
-      // 2. Cloud Function 'generateFinalReport' 호출
       final functions = FirebaseFunctions.instance;
       final callable = functions.httpsCallable('generateFinalReport');
       final result = await callable.call<Map<String, dynamic>>({
-        'imageUrls': {
-          'initial': initialImageUrls,
-          'guided': guidedImageUrls,
-        },
+        'imageUrls': {'initial': _initialImageUrls, 'guided': _guidedImageUrls},
         'ruleId': widget.rule.id,
         'confirmedProductName': widget.confirmedProductName,
-        // TODO: 사용자 희망 가격, 간단 설명도 전달하면 좋습니다.
-        'userPrice': '',
-        'userDescription': '',
       });
 
       if (result.data['success'] == true) {
         setState(() {
           _aiReport = result.data['report'];
-          // 컨트롤러에 초기값 설정
           _titleController.text = _aiReport?['title'] ?? '';
           _descriptionController.text = _aiReport?['description'] ?? '';
           _priceController.text =
@@ -87,34 +80,15 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
         throw Exception(result.data['error']);
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _hasError = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
     }
   }
 
-  // 이미지 리스트(XFile)를 Storage에 업로드하고 URL 리스트 반환
-  Future<List<String>> _uploadImages(List<XFile> images) async {
-    List<String> urls = [];
-    for (final image in images) {
-      final url = await _uploadSingleImage(image);
-      urls.add(url);
-    }
-    return urls;
-  }
-
-  // 이미지 맵(Map<String, XFile>)을 Storage에 업로드하고 URL 맵 반환
-  Future<Map<String, String>> _uploadImageMap(Map<String, XFile> images) async {
-    Map<String, String> urls = {};
-    for (final entry in images.entries) {
-      final url = await _uploadSingleImage(entry.value);
-      urls[entry.key] = url;
-    }
-    return urls;
-  }
-
-  // 단일 이미지 업로드 로직
   Future<String> _uploadSingleImage(XFile image) async {
     final fileName = const Uuid().v4();
     final ref =
@@ -123,44 +97,48 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     return await ref.getDownloadURL();
   }
 
+  Future<List<String>> _uploadImages(List<XFile> images) async {
+    return await Future.wait(
+        images.map((image) => _uploadSingleImage(image)).toList());
+  }
+
+  Future<Map<String, String>> _uploadImageMap(Map<String, XFile> images) async {
+    final urls = <String, String>{};
+    for (final entry in images.entries) {
+      urls[entry.key] = await _uploadSingleImage(entry.value);
+    }
+    return urls;
+  }
+
   Future<void> _submitProduct() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     setState(() {
-      _isLoading = true;
+      _isSubmitting = true;
     });
 
     try {
-      // product_model.dart의 필드와 타입에 맞춰 ProductModel 객체를 생성합니다.
       final productRef =
           FirebaseFirestore.instance.collection('products').doc();
-      final allImageUrls = [
-        ...widget.initialImages
-            .map((f) => f.path), // 임시로 로컬 경로 사용, 실제로는 업로드된 URL 사용
-        ...widget.takenShots.values.map((f) => f.path)
-      ];
+      final allImageUrls = [..._initialImageUrls, ..._guidedImageUrls.values];
 
       final product = ProductModel(
         id: productRef.id,
         userId: user.uid,
         title: _titleController.text,
         description: _descriptionController.text,
-        // ▼▼▼▼▼ [수정 1] double -> int 로 타입 변경 ▼▼▼▼▼
         price: int.tryParse(_priceController.text) ?? 0,
-        imageUrls: allImageUrls, // 최종 저장 시에는 업로드된 URL 리스트로 교체
+        imageUrls: allImageUrls,
         categoryId: widget.rule.id,
-        // ▼▼▼▼▼ [수정 2] 필수 파라미터 'negotiable' 추가 ▼▼▼▼▼
-        negotiable: false, // 신품/AI검수품은 가격 제안 불가로 기본값 설정
+        negotiable: false,
         isNew: false,
         isAiVerified: true,
         aiReport: _aiReport,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
-        // product_model.dart에 있는 나머지 nullable 필드들은 null로 자동 처리됩니다.
       );
 
-      // ▼▼▼▼▼ [수정 3] toMap() -> toJson() 으로 메소드명 변경 ▼▼▼▼▼
       await productRef.set(product.toJson());
 
       if (mounted) {
@@ -177,7 +155,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     } finally {
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          _isSubmitting = false;
         });
       }
     }
@@ -190,8 +168,10 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
         title: Text('ai_flow.final_report.title'.tr()),
         actions: [
           TextButton(
-            onPressed: _isLoading ? null : _submitProduct,
-            child: Text('ai_flow.final_report.submit_button'.tr()),
+            onPressed: _isLoading || _isSubmitting ? null : _submitProduct,
+            child: _isSubmitting
+                ? const CircularProgressIndicator()
+                : Text('ai_flow.final_report.submit_button'.tr()),
           )
         ],
       ),
@@ -200,8 +180,8 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
                   Text('ai_flow.final_report.loading'.tr())
                 ]))
           : _hasError
