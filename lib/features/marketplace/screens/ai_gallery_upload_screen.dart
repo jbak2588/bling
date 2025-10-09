@@ -47,10 +47,16 @@ class _AiGalleryUploadScreenState extends State<AiGalleryUploadScreen> {
       return;
     }
 
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) =>
-          AiPredictionScreen(rule: widget.rule, images: _images),
-    ));
+    // ✅ 기존에 있던 'rule:' 파라미터는 제거하고, 'ruleId:'로 전달
+    // ✅ pickedImages 대신, 실제 너의 리스트 변수명을 넣어줘. (예: _images, _imageFiles 등)
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AiPredictionScreen(
+          ruleId: widget.rule.id,
+          images: _images.cast<Object>(), // ← 여기서 _images 를 네가 실제로 쓰는 리스트 이름으로!
+        ),
+      ),
+    );
   }
 
   @override

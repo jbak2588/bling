@@ -62,12 +62,18 @@ flutter {
 }
 
 dependencies {
+   dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.firebase:firebase-appcheck-playintegrity") // 운영(릴리즈)용
-    debugImplementation("com.google.firebase:firebase-appcheck-debug")   // 개발(디버그)용
+
+    // 릴리즈에서만 포함 → 디버그 APK엔 안 들어감
+    releaseImplementation("com.google.firebase:firebase-appcheck-playintegrity")
+
+    // 디버그용 App Check
+    debugImplementation("com.google.firebase:firebase-appcheck-debug")
+}
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

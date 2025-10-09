@@ -60,11 +60,19 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
       _guidedImageUrls = await _uploadImageMap(widget.takenShots);
 
       final functions = FirebaseFunctions.instance;
-      final callable = functions.httpsCallable('generateFinalReport');
+      final callable = functions.httpsCallable('generatefinalreport');
+
+      // [수정] 사용자가 수정한 가격과 설명을 파라미터에 추가합니다.
+      // String을 int로 변환하되, 변환 실패 시 null을 전달합니다.
+      final userPrice = int.tryParse(_priceController.text.replaceAll(',', ''));
+      final userDescription = _descriptionController.text;
+
       final result = await callable.call<Map<String, dynamic>>({
         'imageUrls': {'initial': _initialImageUrls, 'guided': _guidedImageUrls},
         'ruleId': widget.rule.id,
         'confirmedProductName': widget.confirmedProductName,
+        'userPrice': userPrice,
+        'userDescription': userDescription,
       });
 
       if (result.data['success'] == true) {

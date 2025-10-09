@@ -49,7 +49,7 @@
 
 - `functions-v2/index.js`
     
-    - **설명:** `initialProductAnalysis`, `generateFinalReport` 등 새로운 Gemini 기반 함수와 기존 `calculateTrustScore` 함수가 포함된 **최신 버전의 백엔드 파일**입니다.
+    - **설명:** `initialproductanalysis`, `generatefinalreport` 등 새로운 Gemini 기반 함수와 기존 `calculateTrustScore` 함수가 포함된 **최신 버전의 백엔드 파일**입니다.
         
 - `functions-v2/package.json`
     
@@ -117,7 +117,7 @@
 
 ### **Phase 3: 백엔드 AI 로직 개발 (Cloud Functions & Gemini API)**
 
-- [x] **3-1. `initialProductAnalysis` (1차 품목 분석) 함수 개발:**
+- [x] **3-1. `initialproductanalysis` (1차 품목 분석) 함수 개발:**
     
     - [x] Cloud Functions에 HTTPS Callable 함수 생성
         
@@ -127,7 +127,7 @@
         
     - [ ] 출력: 예측된 상품명 텍스트
         
-- [x] **3-2. `generateFinalReport` (최종 보고서 생성) 함수 개발:**
+- [x] **3-2. `generatefinalreport` (최종 보고서 생성) 함수 개발:**
     
     - [ ] Cloud Functions에 HTTPS Callable 함수 생성
         

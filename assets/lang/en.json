@@ -1,973 +1,975 @@
 {
-    "login": {
-        "title": "Login",
-        "subtitle": "Let's buy easily",
-        "emailHint": "Email Address",
-        "passwordHint": "Password",
-        "buttons": {
-            "login": "LOGIN",
-            "google": "Login with Google",
-            "apple": "Continue with Apple"
-        },
-        "links": {
-            "findPassword": "Forgot your password?",
-            "askForAccount": "Don't have an account?",
-            "signUp": "Sign Up"
-        },
-        "alerts": {
-            "invalidEmail": "Invalid email format.",
-            "userNotFound": "User not found or wrong password.",
-            "wrongPassword": "Wrong password.",
-            "unknownError": "An unknown error occurred. Please try again."
-        }
+  "login": {
+    "title": "Login",
+    "subtitle": "Let's buy easily",
+    "emailHint": "Email Address",
+    "passwordHint": "Password",
+    "buttons": {
+      "login": "LOGIN",
+      "google": "Login with Google",
+      "apple": "Continue with Apple"
     },
-    "signup": {
-        "title": "Sign Up",
-        "emailHint": "Email Address",
-        "passwordHint": "Password (at least 6 characters)",
-        "passwordConfirmHint": "Confirm Password",
-        "nicknameHint": "Nickname (Required)",
-        "subtitle": "Let's start with Bling! Please enter your information.",
-        "locationHint": "Your location (for local services)",
-        "locationNotice": "Your location is used to show neighborhood posts and is not disclosed to others.",
-        "buttons": {
-            "signup": "Sign Up",
-            "checkDuplicate": "Check"
-        },
-        "links": {
-            "askForLogin": "Already have an account?",
-            "login": "Login"
-        },
-        "alerts": {
-            "passwordMismatch": "Passwords do not match.",
-            "passwordTooShort": "Password must be at least 6 characters long.",
-            "emailInUse": "This email is already in use.",
-            "nicknameInUse": "This nickname is already in use.",
-            "nicknameAvailable": "This nickname is available.",
-            "nicknameNotChecked": "Please check for nickname duplication.",
-            "signupSuccessLoginNotice": "Registration complete! Please log in to continue.",
-            "unknownError": "An unknown error occurred. Please try again."
-        },
-        "policy": {
-            "title": "Registration Policy",
-            "description": "Bling collects minimal information for a safe community. All information is stored securely and will not be disclosed without consent.",
-            "agree": "I agree to the terms and wish to continue."
-        }
+    "links": {
+      "findPassword": "Forgot your password?",
+      "askForAccount": "Don't have an account?",
+      "signUp": "Sign Up"
     },
-    "main": {
-        "appBar": {
-            "locationNotSet": "Set Location",
-            "locationError": "Location Error",
-            "locationLoading": "Loading..."
-        },
-        "tabs": {
-            "newFeed": "New Feed",
-            "localNews": "Local Stories",
-            "marketplace": "Marketplace",
-            "findFriends": "Find Friends",
-            "clubs": "Clubs",
-            "jobs": "Jobs",
-            "localStores": "Local Stores",
-            "auction": "Auction",
-            "pom": "POM",
-            "lostAndFound": "Lost & Found",
-            "realEstate": "Real Estate"
-        },
-        "bottomNav": {
-            "home": "Home",
-            "search": "Search",
-            "chat": "Chat",
-            "myBling": "My Bling"
-        },
-        "myTown": "My Town",
-        "search": {
-            "placeholder": "Search Screen",
-            "chipPlaceholder": "Search neighbors, news, marketplace, jobs…"
-        },
-        "errors": {
-            "loginRequired": "Login is required.",
-            "userNotFound": "User not found."
-        }
+    "alerts": {
+      "invalidEmail": "Invalid email format.",
+      "userNotFound": "User not found or wrong password.",
+      "wrongPassword": "Wrong password.",
+      "unknownError": "An unknown error occurred. Please try again."
+    }
+  },
+  "signup": {
+    "title": "Sign Up",
+    "emailHint": "Email Address",
+    "passwordHint": "Password (at least 6 characters)",
+    "passwordConfirmHint": "Confirm Password",
+    "nicknameHint": "Nickname (Required)",
+    "subtitle": "Let's start with Bling! Please enter your information.",
+    "locationHint": "Your location (for local services)",
+    "locationNotice": "Your location is used to show neighborhood posts and is not disclosed to others.",
+    "buttons": {
+      "signup": "Sign Up",
+      "checkDuplicate": "Check"
     },
-    "drawer": {
-        "editProfile": "Edit Profile",
-        "bookmarks": "Bookmarks",
-        "uploadSampleData": "Upload Sample Data",
-        "runDataFix": "Run Data Fix",
-        "logout": "Logout",
-        "trustDashboard": {
-            "title": "My Trust Verification",
-            "kelurahanAuth": "Neighborhood Verified (Kelurahan)",
-            "rtRwAuth": "Detailed Address Verified (RT/RW)",
-            "phoneAuth": "Phone Number Verified",
-            "profileComplete": "Profile Complete",
-            "feedThanks": "Feed Thanks",
-            "marketThanks": " Market Thanks",
-            "reports": "Reports",
-            "breakdownButton": "Details",
-            "breakdownModalTitle": "Trust Score Breakdown",
-            "breakdownClose": "OK",
-            "breakdown": {
-                "kelurahanAuth": "+50",
-                "rtRwAuth": "+50",
-                "phoneAuth": "+100",
-                "profileComplete": "+50",
-                "feedThanks": "+10 per",
-                "marketThanks": "+20 per",
-                "reports": "-50 per"
-            }
-        }
+    "links": {
+      "askForLogin": "Already have an account?",
+      "login": "Login"
     },
-    "marketplace": {
-        "error": "An error has occurred: {error}",
-        "empty": "No items registered yet.\nPress the + button to add the first item!",
-        "registration": {
-            "title": "New Post",
-            "done": "Done",
-            "titleHint": "Title",
-            "priceHint": "Price (Rp)",
-            "negotiable": "Allow Offers",
-            "addressHint": "Location",
-            "addressDetailHint": "Meet-up location",
-            "descriptionHint": "Detailed Description",
-            "tagsHint": "e.g. dog, freeshare",
-            "success": "Product has been successfully listed!",
-            "fail": "Failed to register product: {error}"
-        },
-        "edit": {
-            "title": "Edit Product",
-            "done": "Edit Completed",
-            "titleHint": "Edit Product Name",
-            "addressHint": "Edit Location",
-            "priceHint": "Edit Price (Rp)",
-            "negotiable": "Edit Price Negotiable",
-            "descriptionHint": "Edit Description",
-            "success": "Product successfully updated!",
-            "fail": "Failed to update product: {error}",
-            "resetLocation": "Reset location"
-        },
-        "detail": {
-            "makeOffer": "Make an offer",
-            "fixedPrice": "Fixed price",
-            "description": "Product Description",
-            "sellerInfo": "Seller Information",
-            "chat": "Chat",
-            "favorite": "Favorite",
-            "unfavorite": "Favorited",
-            "share": "Share",
-            "edit": "Edit",
-            "delete": "Delete",
-            "category": "Category",
-            "categoryError": "Category: -",
-            "categoryNone": "No category",
-            "views": "Views",
-            "likes": "Likes",
-            "chats": "Chats",
-            "noSeller": "Seller info unavailable",
-            "noLocation": "Location info unavailable",
-            "seller": "Seller",
-            "dealLocation": "Deal location"
-        },
-        "dialog": {
-            "deleteTitle": "Delete Post",
-            "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
-            "cancel": "Cancel",
-            "deleteConfirm": "Delete",
-            "deleteSuccess": "Post deleted successfully."
-        },
-        "errors": {
-            "deleteError": "Failed to delete post: {error}",
-            "requiredField": "This field is required.",
-            "noPhoto": "Please add at least one photo.",
-            "noCategory": "Please select a category."
-        },
-        "condition": {
-            "label": "Condition",
-            "new": "New",
-            "used": "Used"
-        },
-        "setLocationPrompt": "Please set your neighborhood first to see marketplace items!"
+    "alerts": {
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Password must be at least 6 characters long.",
+      "emailInUse": "This email is already in use.",
+      "nicknameInUse": "This nickname is already in use.",
+      "nicknameAvailable": "This nickname is available.",
+      "nicknameNotChecked": "Please check for nickname duplication.",
+      "signupSuccessLoginNotice": "Registration complete! Please log in to continue.",
+      "unknownError": "An unknown error occurred. Please try again."
     },
-    "ai_flow": {
-        "category_selection": {
-            "title": "Select AI Verification Category",
-            "error": "Error loading categories.",
-            "no_categories": "No categories available for verification."
-        },
-        "gallery_upload": {
-            "title": "Upload Photos (1/3)",
-            "instruction": "Let's analyze your {category} item.",
-            "min_photo_guide": "Please select at least {0} photos from your gallery for the AI to recognize the item.",
-            "min_photo_error": "At least {0} photos are required.",
-            "next_button": "Next Step"
-        },
-        "prediction": {
-            "title": "Confirm Item (2/3)",
-            "loading": "AI is analyzing your item...\nPlease wait a moment.",
-            "uploading": "Securely uploading images...",
-            "analyzing": "Analyzing uploaded images...",
-            "error": "Could not recognize the item.",
-            "question": "Is this your item?",
-            "confirm_button": "Yes, that's correct",
-            "reject_button": "No, it's wrong (Go back)",
-            "retry_button": "Retry",
-            "back_button": "Go Back"
-        },
-        "guided_camera": {
-            "title": "AI Guided Photos (3/3)",
-            "location_error": "Photo location does not match your current location. Please take photos at the item's location.",
-            "next_button": "Request Final Analysis"
-        },
-        "final_report": {
-            "title": "AI Sales Post Review",
-            "loading": "AI is generating the final sales post...",
-            "error": "Failed to generate the report. Please try again.",
-            "guide": "This is the sales post draft generated by AI. Review and edit it before publishing.",
-            "submit_button": "Submit"
-        }
+    "policy": {
+      "title": "Registration Policy",
+      "description": "Bling collects minimal information for a safe community. All information is stored securely and will not be disclosed without consent.",
+      "agree": "I agree to the terms and wish to continue."
+    }
+  },
+  "main": {
+    "appBar": {
+      "locationNotSet": "Set Location",
+      "locationError": "Location Error",
+      "locationLoading": "Loading..."
     },
-    "registration_flow": {
-        "title": "Select Item Type to Sell",
-        "new_item_title": "Sell New Item",
-        "new_item_desc": "Quickly register a new, unused item.",
-        "used_item_title": "Sell Used Item (AI Verified)",
-        "used_item_desc": "Let AI analyze your item to build trust and help you sell."
+    "tabs": {
+      "newFeed": "New Feed",
+      "localNews": "Local Stories",
+      "marketplace": "Marketplace",
+      "findFriends": "Find Friends",
+      "clubs": "Clubs",
+      "jobs": "Jobs",
+      "localStores": "Local Stores",
+      "auction": "Auction",
+      "pom": "POM",
+      "lostAndFound": "Lost & Found",
+      "realEstate": "Real Estate"
     },
-    "myBling": {
-        "title": "My Bling",
-        "editProfile": "Edit Profile",
-        "settings": "Settings",
-        "stats": {
-            "posts": "Posts",
-            "followers": "Followers",
-            "neighbors": "Neighbors",
-            "friends": "Friends"
-        },
-        "tabs": {
-            "posts": "My Posts",
-            "products": "My Products",
-            "bookmarks": "Bookmarks",
-            "friends": "Friends"
-        },
-        "friendRequests": "Friend Requests",
-        "sentFriendRequests": "Sent Requests"
+    "bottomNav": {
+      "home": "Home",
+      "search": "Search",
+      "chat": "Chat",
+      "myBling": "My Bling"
     },
-    "settings": {
-        "title": "Settings",
-        "accountPrivacy": "Account & Privacy",
-        "notifications": "Notification Settings",
-        "appInfo": "App Info"
+    "myTown": "My Town",
+    "search": {
+      "placeholder": "Search Screen",
+      "chipPlaceholder": "Search neighbors, news, marketplace, jobs…"
     },
-    "friendRequests": {
-        "title": "Friend Requests",
-        "noRequests": "No friend requests received.",
-        "acceptSuccess": "Friend request accepted.",
-        "rejectSuccess": "Friend request rejected.",
-        "error": "An error occurred: {error}",
-        "tooltip": {
-            "accept": "Accept",
-            "reject": "Reject"
-        },
-        "defaultChatMessage": "You are now friends! Start chatting."
+    "errors": {
+      "loginRequired": "Login is required.",
+      "userNotFound": "User not found."
+    }
+  },
+  "drawer": {
+    "editProfile": "Edit Profile",
+    "bookmarks": "Bookmarks",
+    "uploadSampleData": "Upload Sample Data",
+    "runDataFix": "Run Data Fix",
+    "logout": "Logout",
+    "trustDashboard": {
+      "title": "My Trust Verification",
+      "kelurahanAuth": "Neighborhood Verified (Kelurahan)",
+      "rtRwAuth": "Detailed Address Verified (RT/RW)",
+      "phoneAuth": "Phone Number Verified",
+      "profileComplete": "Profile Complete",
+      "feedThanks": "Feed Thanks",
+      "marketThanks": " Market Thanks",
+      "reports": "Reports",
+      "breakdownButton": "Details",
+      "breakdownModalTitle": "Trust Score Breakdown",
+      "breakdownClose": "OK",
+      "breakdown": {
+        "kelurahanAuth": "+50",
+        "rtRwAuth": "+50",
+        "phoneAuth": "+100",
+        "profileComplete": "+50",
+        "feedThanks": "+10 per",
+        "marketThanks": "+20 per",
+        "reports": "-50 per"
+      }
+    }
+  },
+  "marketplace": {
+    "error": "An error has occurred: {error}",
+    "empty": "No items registered yet.\nPress the + button to add the first item!",
+    "registration": {
+      "title": "New Post",
+      "done": "Done",
+      "titleHint": "Title",
+      "priceHint": "Price (Rp)",
+      "negotiable": "Allow Offers",
+      "addressHint": "Location",
+      "addressDetailHint": "Meet-up location",
+      "descriptionHint": "Detailed Description",
+      "tagsHint": "e.g. dog, freeshare",
+      "success": "Product has been successfully listed!",
+      "fail": "Failed to register product: {error}"
     },
-    "sentFriendRequests": {
-        "title": "Sent Friend Requests",
-        "noRequests": "No sent friend requests.",
-        "statusLabel": "Status: {status}",
-        "status": {
-            "pending": "Pending",
-            "accepted": "Accepted",
-            "rejected": "Rejected"
-        }
+    "edit": {
+      "title": "Edit Product",
+      "done": "Edit Completed",
+      "titleHint": "Edit Product Name",
+      "addressHint": "Edit Location",
+      "priceHint": "Edit Price (Rp)",
+      "negotiable": "Edit Price Negotiable",
+      "descriptionHint": "Edit Description",
+      "success": "Product successfully updated!",
+      "fail": "Failed to update product: {error}",
+      "resetLocation": "Reset location"
     },
-    "blockedUsers": {
-        "title": "Blocked Users",
-        "noBlockedUsers": "You haven't blocked anyone.",
-        "unblock": "Unblock",
-        "unblockDialog": {
-            "title": "Unblock {nickname}?",
-            "content": "If you unblock, this user will be able to find you and send friend requests again."
-        },
-        "unblockSuccess": "{nickname} has been unblocked.",
-        "unblockFailure": "Failed to unblock: {error}",
-        "unknownUser": "Unknown user"
+    "detail": {
+      "makeOffer": "Make an offer",
+      "fixedPrice": "Fixed price",
+      "description": "Product Description",
+      "sellerInfo": "Seller Information",
+      "chat": "Chat",
+      "favorite": "Favorite",
+      "unfavorite": "Favorited",
+      "share": "Share",
+      "edit": "Edit",
+      "delete": "Delete",
+      "category": "Category",
+      "categoryError": "Category: -",
+      "categoryNone": "No category",
+      "views": "Views",
+      "likes": "Likes",
+      "chats": "Chats",
+      "noSeller": "Seller info unavailable",
+      "noLocation": "Location info unavailable",
+      "seller": "Seller",
+      "dealLocation": "Deal location"
     },
-    "rejectedUsers": {
-        "title": "Manage Rejected Users",
-        "noRejectedUsers": "You haven't rejected any friend requests.",
-        "unreject": "Undo Rejection",
-        "unrejectDialog": {
-            "title": "Undo rejection for {nickname}?",
-            "content": "If you undo the rejection, you may appear again in their friend search list."
-        },
-        "unrejectSuccess": "You have undone the rejection for {nickname}.",
-        "unrejectFailure": "Failed to undo rejection: {error}"
+    "dialog": {
+      "deleteTitle": "Delete Post",
+      "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
+      "cancel": "Cancel",
+      "deleteConfirm": "Delete",
+      "deleteSuccess": "Post deleted successfully."
     },
-    "prompt": {
-        "title": "Welcome to Bling!",
-        "subtitle": "To see interesting news and items around you, please set your neighborhood first.",
-        "button": "Set My Neighborhood"
+    "errors": {
+      "deleteError": "Failed to delete post: {error}",
+      "requiredField": "This field is required.",
+      "noPhoto": "Please add at least one photo.",
+      "noCategory": "Please select a category."
     },
-    "location": {
-        "title": "Set Neighborhood",
-        "searchHint": "Search by neighborhood, e.g., Serpong",
-        "gpsButton": "Find with current location",
-        "success": "Neighborhood has been set.",
-        "error": "Failed to set neighborhood: {error}",
-        "empty": "Please enter a neighborhood name.",
-        "permissionDenied": "Location permission is required to find your neighborhood.",
-        "rtLabel": "RT",
-        "rwLabel": "RW",
-        "rtHint": "e.g. 003",
-        "rwHint": "e.g. 007",
-        "rtRequired": "Please enter RT.",
-        "rwRequired": "Please enter RW.",
-        "rtRwInfo": "Your RT/RW will not be public. It helps improve trust and local features.",
-        "saveThisLocation": "Save this location",
-        "manualSelect": "Manual select",
-        "refreshFromGps": "Refresh from GPS"
+    "condition": {
+      "label": "Condition",
+      "new": "New",
+      "used": "Used"
     },
-    "profileEdit": {
-        "title": "Edit Profile",
-        "nicknameHint": "Nickname",
-        "phoneHint": "Phone Number",
-        "bioHint": "Bio (Introduction)",
-        "locationTitle": "Location",
-        "changeLocation": "Change",
-        "locationNotSet": "Not set",
-        "interests": {
-            "title": "Interests",
-            "hint": "Use comma and Enter to add multiple"
-        },
-        "privacy": {
-            "title": "Privacy Settings",
-            "showLocation": "Show my location on map",
-            "allowRequests": "Allow friend requests"
-        },
-        "saveButton": "Save Changes",
-        "successMessage": "Profile updated successfully.",
-        "errors": {
-            "noUser": "User not logged in.",
-            "updateFailed": "Failed to update profile: {error}"
-        }
+    "setLocationPrompt": "Please set your neighborhood first to see marketplace items!"
+  },
+  "ai_flow": {
+    "category_selection": {
+      "title": "Select AI Verification Category",
+      "error": "Error loading categories.",
+      "no_categories": "No categories available for verification."
     },
-    "mainFeed": {
-        "error": "An error occurred: {error}",
-        "empty": "No new posts."
+    "gallery_upload": {
+      "title": "Upload Photos (1/3)",
+      "instruction": "Let's analyze your {category} item.",
+      "min_photo_guide": "Please select at least {0} photos from your gallery for the AI to recognize the item.",
+      "min_photo_error": "At least {0} photos are required.",
+      "next_button": "Next Step"
     },
-    "postCard": {
-        "locationNotSet": "Location not set"
+    "prediction": {
+      "title": "Confirm Product (2/3)",
+      "loading": "AI is analyzing the product...\nPlease wait.",
+      "uploading": "Uploading images securely...",
+      "analyzing": "Analyzing uploaded images...",
+      "error": "Failed to recognize the product. Please try again.",
+      "auth_error": "Cannot start analysis due to missing user authentication. Please try again.",
+      "question": "Is this the correct product?",
+      "confirm_button": "Yes, it is",
+      "reject_button": "No, it's different (Go back)",
+      "analysis_error": "An error occurred during analysis.",
+      "retry_button": "Retry",
+      "back_button": "Back"
     },
-    "time": {
-        "now": "Just now",
-        "minutesAgo": "{minutes} min ago",
-        "hoursAgo": "{hours} hours ago",
-        "daysAgo": "{days} days ago",
-        "dateFormat": "dd/MM/yy",
-        "dateFormatLong": "MMM d"
+    "guided_camera": {
+      "title": "AI Guided Photos (3/3)",
+      "location_error": "Photo location does not match your current location. Please take photos at the item's location.",
+      "next_button": "Request Final Analysis"
     },
-    "productCard": {
-        "currency": "$"
+    "final_report": {
+      "title": "AI Sales Post Review",
+      "loading": "AI is generating the final sales post...",
+      "error": "Failed to generate the report. Please try again.",
+      "guide": "This is the sales post draft generated by AI. Review and edit it before publishing.",
+      "submit_button": "Submit"
+    }
+  },
+  "registration_flow": {
+    "title": "Select Item Type to Sell",
+    "new_item_title": "Sell New Item",
+    "new_item_desc": "Quickly register a new, unused item.",
+    "used_item_title": "Sell Used Item (AI Verified)",
+    "used_item_desc": "Let AI analyze your item to build trust and help you sell."
+  },
+  "myBling": {
+    "title": "My Bling",
+    "editProfile": "Edit Profile",
+    "settings": "Settings",
+    "stats": {
+      "posts": "Posts",
+      "followers": "Followers",
+      "neighbors": "Neighbors",
+      "friends": "Friends"
     },
-    "localNewsFeed": {
-        "setLocationPrompt": "Please set your neighborhood first to see local stories!",
-        "allCategory": "All",
-        "empty": "There are no posts to display."
+    "tabs": {
+      "posts": "My Posts",
+      "products": "My Products",
+      "bookmarks": "Bookmarks",
+      "friends": "Friends"
+    },
+    "friendRequests": "Friend Requests",
+    "sentFriendRequests": "Sent Requests"
+  },
+  "settings": {
+    "title": "Settings",
+    "accountPrivacy": "Account & Privacy",
+    "notifications": "Notification Settings",
+    "appInfo": "App Info"
+  },
+  "friendRequests": {
+    "title": "Friend Requests",
+    "noRequests": "No friend requests received.",
+    "acceptSuccess": "Friend request accepted.",
+    "rejectSuccess": "Friend request rejected.",
+    "error": "An error occurred: {error}",
+    "tooltip": {
+      "accept": "Accept",
+      "reject": "Reject"
+    },
+    "defaultChatMessage": "You are now friends! Start chatting."
+  },
+  "sentFriendRequests": {
+    "title": "Sent Friend Requests",
+    "noRequests": "No sent friend requests.",
+    "statusLabel": "Status: {status}",
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "rejected": "Rejected"
+    }
+  },
+  "blockedUsers": {
+    "title": "Blocked Users",
+    "noBlockedUsers": "You haven't blocked anyone.",
+    "unblock": "Unblock",
+    "unblockDialog": {
+      "title": "Unblock {nickname}?",
+      "content": "If you unblock, this user will be able to find you and send friend requests again."
+    },
+    "unblockSuccess": "{nickname} has been unblocked.",
+    "unblockFailure": "Failed to unblock: {error}",
+    "unknownUser": "Unknown user"
+  },
+  "rejectedUsers": {
+    "title": "Manage Rejected Users",
+    "noRejectedUsers": "You haven't rejected any friend requests.",
+    "unreject": "Undo Rejection",
+    "unrejectDialog": {
+      "title": "Undo rejection for {nickname}?",
+      "content": "If you undo the rejection, you may appear again in their friend search list."
+    },
+    "unrejectSuccess": "You have undone the rejection for {nickname}.",
+    "unrejectFailure": "Failed to undo rejection: {error}"
+  },
+  "prompt": {
+    "title": "Welcome to Bling!",
+    "subtitle": "To see interesting news and items around you, please set your neighborhood first.",
+    "button": "Set My Neighborhood"
+  },
+  "location": {
+    "title": "Set Neighborhood",
+    "searchHint": "Search by neighborhood, e.g., Serpong",
+    "gpsButton": "Find with current location",
+    "success": "Neighborhood has been set.",
+    "error": "Failed to set neighborhood: {error}",
+    "empty": "Please enter a neighborhood name.",
+    "permissionDenied": "Location permission is required to find your neighborhood.",
+    "rtLabel": "RT",
+    "rwLabel": "RW",
+    "rtHint": "e.g. 003",
+    "rwHint": "e.g. 007",
+    "rtRequired": "Please enter RT.",
+    "rwRequired": "Please enter RW.",
+    "rtRwInfo": "Your RT/RW will not be public. It helps improve trust and local features.",
+    "saveThisLocation": "Save this location",
+    "manualSelect": "Manual select",
+    "refreshFromGps": "Refresh from GPS"
+  },
+  "profileEdit": {
+    "title": "Edit Profile",
+    "nicknameHint": "Nickname",
+    "phoneHint": "Phone Number",
+    "bioHint": "Bio (Introduction)",
+    "locationTitle": "Location",
+    "changeLocation": "Change",
+    "locationNotSet": "Not set",
+    "interests": {
+      "title": "Interests",
+      "hint": "Use comma and Enter to add multiple"
+    },
+    "privacy": {
+      "title": "Privacy Settings",
+      "showLocation": "Show my location on map",
+      "allowRequests": "Allow friend requests"
+    },
+    "saveButton": "Save Changes",
+    "successMessage": "Profile updated successfully.",
+    "errors": {
+      "noUser": "User not logged in.",
+      "updateFailed": "Failed to update profile: {error}"
+    }
+  },
+  "mainFeed": {
+    "error": "An error occurred: {error}",
+    "empty": "No new posts."
+  },
+  "postCard": {
+    "locationNotSet": "Location not set"
+  },
+  "time": {
+    "now": "Just now",
+    "minutesAgo": "{minutes} min ago",
+    "hoursAgo": "{hours} hours ago",
+    "daysAgo": "{days} days ago",
+    "dateFormat": "dd/MM/yy",
+    "dateFormatLong": "MMM d"
+  },
+  "productCard": {
+    "currency": "$"
+  },
+  "localNewsFeed": {
+    "setLocationPrompt": "Please set your neighborhood first to see local stories!",
+    "allCategory": "All",
+    "empty": "There are no posts to display."
+  },
+  "categories": {
+    "post": {
+      "daily_life": {
+        "name": "Daily/Questions",
+        "description": "Share your daily life or ask questions."
+      },
+      "help_share": {
+        "name": "Help/Share",
+        "description": "Need help or have something to share?"
+      },
+      "incident_report": {
+        "name": "Incidents",
+        "description": "Share news about incidents in the neighborhood."
+      },
+      "local_news": {
+        "name": "Local News",
+        "description": "Share news and information about our neighborhood."
+      },
+      "daily_question": {
+        "name": "I have a question",
+        "description": "Ask your neighbors anything."
+      },
+      "store_promo": {
+        "name": "Store Promo",
+        "description": "Promote discounts or events at your store."
+      },
+      "etc": {
+        "name": "Etc.",
+        "description": "Share any other stories freely."
+      }
+    }
+  },
+  "localNewsCreate": {
+    "appBarTitle": "Create New Post",
+    "form": {
+      "categoryLabel": "Category",
+      "titleLabel": "Title",
+      "contentLabel": "Enter content",
+      "tagsLabel": "Tags (comma-separated)",
+      "tagsHint": "e.g. dog, freeshare"
+    },
+    "buttons": {
+      "addImage": "Add Image",
+      "submit": "Submit"
+    },
+    "alerts": {
+      "contentRequired": "Please enter content.",
+      "categoryRequired": "Please select a category.",
+      "success": "Post created successfully.",
+      "failure": "Upload failed: {error}"
+    }
+  },
+  "localNewsDetail": {
+    "appBarTitle": "Post",
+    "menu": {
+      "edit": "Edit",
+      "report": "Report",
+      "share": "Share"
+    },
+    "stats": {
+      "views": "Views",
+      "comments": "Comments",
+      "likes": "Likes",
+      "thanks": "Thanks"
+    },
+    "buttons": {
+      "comment": "Add a comment"
+    }
+  },
+  "localNewsEdit": {
+    "appBarTitle": "Edit Post",
+    "buttons": {
+      "submit": "Update"
+    },
+    "alerts": {
+      "success": "Post updated successfully.",
+      "failure": "Update failed: {error}"
+    }
+  },
+  "commentInputField": {
+    "secretCommentLabel": "Secret",
+    "hintText": "Enter a comment...",
+    "replyHintText": "Replying to {nickname}...",
+    "button": {
+      "send": "Send"
+    }
+  },
+  "commentListView": {
+    "empty": "No comments yet. Be the first to comment!",
+    "reply": "Reply",
+    "delete": "Delete",
+    "deleted": "[This comment has been deleted]",
+    "secret": "This is a secret comment visible only to the author and post owner."
+  },
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "done": "Done"
+  },
+  "deleteConfirm": {
+    "title": "Delete Comment",
+    "content": "Are you sure you want to delete this comment?",
+    "failure": "Failed to delete comment: {error}"
+  },
+  "replyInputField": {
+    "hintText": "Enter a reply",
+    "button": {
+      "send": "Send"
+    },
+    "failure": "Failed to add reply: {error}"
+  },
+  "chat_list": {
+    "appBarTitle": "Chat",
+    "empty": "There are no ongoing conversations."
+  },
+  "chat_room": {
+    "placeholder": "Enter a message..."
+  },
+  "jobs": {
+    "setLocationPrompt": "Please set your location to see job posts!",
+    "screen": {
+      "empty": "No job posts yet.",
+      "createTooltip": "New Job Post"
+    },
+    "form": {
+      "title": "New Job Post",
+      "titleHint": "Job title",
+      "descriptionPositionHint": "Describe the position",
+      "categoryHint": "Category",
+      "categorySelectHint": "Select a category",
+      "categoryValidator": "Please select a category.",
+      "locationHint": "Location",
+      "submit": "Post Job",
+      "titleLabel": "Title",
+      "titleValidator": "Please enter a title.",
+      "salaryInfoTitle": "Salary Information",
+      "salaryTypeHint": "Type",
+      "salaryAmountLabel": "Amount (IDR)",
+      "salaryNegotiable": "Negotiable salary",
+      "workInfoTitle": "Work Conditions",
+      "workPeriodTitle": "Work Period",
+      "workHoursLabel": "Work Days/Hours",
+      "workHoursHint": "e.g. Mon-Fri, 09:00-18:00",
+      "imageSectionTitle": "Attach Photos (optional, up to 5)",
+      "descriptionLabel": "Description",
+      "descriptionHint": "e.g. Part-time 3 days a week from 5-10pm. Wage negotiable.",
+      "descriptionValidator": "Please enter a description.",
+      "submitSuccess": "Job post created.",
+      "submitFail": "Failed to create job post: {error}"
     },
     "categories": {
-        "post": {
-            "daily_life": {
-                "name": "Daily/Questions",
-                "description": "Share your daily life or ask questions."
-            },
-            "help_share": {
-                "name": "Help/Share",
-                "description": "Need help or have something to share?"
-            },
-            "incident_report": {
-                "name": "Incidents",
-                "description": "Share news about incidents in the neighborhood."
-            },
-            "local_news": {
-                "name": "Local News",
-                "description": "Share news and information about our neighborhood."
-            },
-            "daily_question": {
-                "name": "I have a question",
-                "description": "Ask your neighbors anything."
-            },
-            "store_promo": {
-                "name": "Store Promo",
-                "description": "Promote discounts or events at your store."
-            },
-            "etc": {
-                "name": "Etc.",
-                "description": "Share any other stories freely."
-            }
-        }
+      "restaurant": "Restaurant",
+      "cafe": "Cafe",
+      "retail": "Retail",
+      "delivery": "Delivery",
+      "etc": "Others"
     },
-    "localNewsCreate": {
-        "appBarTitle": "Create New Post",
-        "form": {
-            "categoryLabel": "Category",
-            "titleLabel": "Title",
-            "contentLabel": "Enter content",
-            "tagsLabel": "Tags (comma-separated)",
-            "tagsHint": "e.g. dog, freeshare"
-        },
-        "buttons": {
-            "addImage": "Add Image",
-            "submit": "Submit"
-        },
-        "alerts": {
-            "contentRequired": "Please enter content.",
-            "categoryRequired": "Please select a category.",
-            "success": "Post created successfully.",
-            "failure": "Upload failed: {error}"
-        }
+    "salaryTypes": {
+      "hourly": "Hourly",
+      "daily": "Daily",
+      "monthly": "Monthly",
+      "per_case": "Per case",
+      "etc": "Others"
     },
-    "localNewsDetail": {
-        "appBarTitle": "Post",
-        "menu": {
-            "edit": "Edit",
-            "report": "Report",
-            "share": "Share"
-        },
-        "stats": {
-            "views": "Views",
-            "comments": "Comments",
-            "likes": "Likes",
-            "thanks": "Thanks"
-        },
-        "buttons": {
-            "comment": "Add a comment"
-        }
+    "workPeriods": {
+      "short_term": "Short term",
+      "mid_term": "Mid term",
+      "long_term": "Long term",
+      "etc": "Other"
     },
-    "localNewsEdit": {
-        "appBarTitle": "Edit Post",
-        "buttons": {
-            "submit": "Update"
-        },
-        "alerts": {
-            "success": "Post updated successfully.",
-            "failure": "Update failed: {error}"
-        }
+    "detail": {
+      "infoTitle": "Details",
+      "apply": "Apply",
+      "noAuthor": "No author information",
+      "chatError": "Cannot start chat: {error}"
     },
-    "commentInputField": {
-        "secretCommentLabel": "Secret",
-        "hintText": "Enter a comment...",
-        "replyHintText": "Replying to {nickname}...",
-        "button": {
-            "send": "Send"
-        }
-    },
-    "commentListView": {
-        "empty": "No comments yet. Be the first to comment!",
-        "reply": "Reply",
-        "delete": "Delete",
-        "deleted": "[This comment has been deleted]",
-        "secret": "This is a secret comment visible only to the author and post owner."
-    },
-    "common": {
-        "cancel": "Cancel",
-        "delete": "Delete",
-        "done": "Done"
-    },
-    "deleteConfirm": {
-        "title": "Delete Comment",
-        "content": "Are you sure you want to delete this comment?",
-        "failure": "Failed to delete comment: {error}"
-    },
-    "replyInputField": {
-        "hintText": "Enter a reply",
-        "button": {
-            "send": "Send"
-        },
-        "failure": "Failed to add reply: {error}"
-    },
-    "chat_list": {
-        "appBarTitle": "Chat",
-        "empty": "There are no ongoing conversations."
-    },
-    "chat_room": {
-        "placeholder": "Enter a message..."
-    },
-    "jobs": {
-        "setLocationPrompt": "Please set your location to see job posts!",
-        "screen": {
-            "empty": "No job posts yet.",
-            "createTooltip": "New Job Post"
-        },
-        "form": {
-            "title": "New Job Post",
-            "titleHint": "Job title",
-            "descriptionPositionHint": "Describe the position",
-            "categoryHint": "Category",
-            "categorySelectHint": "Select a category",
-            "categoryValidator": "Please select a category.",
-            "locationHint": "Location",
-            "submit": "Post Job",
-            "titleLabel": "Title",
-            "titleValidator": "Please enter a title.",
-            "salaryInfoTitle": "Salary Information",
-            "salaryTypeHint": "Type",
-            "salaryAmountLabel": "Amount (IDR)",
-            "salaryNegotiable": "Negotiable salary",
-            "workInfoTitle": "Work Conditions",
-            "workPeriodTitle": "Work Period",
-            "workHoursLabel": "Work Days/Hours",
-            "workHoursHint": "e.g. Mon-Fri, 09:00-18:00",
-            "imageSectionTitle": "Attach Photos (optional, up to 5)",
-            "descriptionLabel": "Description",
-            "descriptionHint": "e.g. Part-time 3 days a week from 5-10pm. Wage negotiable.",
-            "descriptionValidator": "Please enter a description.",
-            "submitSuccess": "Job post created.",
-            "submitFail": "Failed to create job post: {error}"
-        },
-        "categories": {
-            "restaurant": "Restaurant",
-            "cafe": "Cafe",
-            "retail": "Retail",
-            "delivery": "Delivery",
-            "etc": "Others"
-        },
-        "salaryTypes": {
-            "hourly": "Hourly",
-            "daily": "Daily",
-            "monthly": "Monthly",
-            "per_case": "Per case",
-            "etc": "Others"
-        },
-        "workPeriods": {
-            "short_term": "Short term",
-            "mid_term": "Mid term",
-            "long_term": "Long term",
-            "etc": "Other"
-        },
-        "detail": {
-            "infoTitle": "Details",
-            "apply": "Apply",
-            "noAuthor": "No author information",
-            "chatError": "Cannot start chat: {error}"
-        },
-        "card": {
-            "noLocation": "No location info",
-            "minutesAgo": "minutes ago"
-        }
-    },
-    "findFriend": {
-        "title": "Find Friends",
-        "editTitle": "Edit FindFriend Profile",
-        "editProfileTitle": "Edit Profile",
-        "save": "Save",
-        "profileImagesLabel": "Profile Images (Max 6)",
-        "bioLabel": "Bio",
-        "bioHint": "Introduce yourself to others.",
-        "bioValidator": "Please enter your bio.",
-        "ageLabel": "Age",
-        "ageHint": "Please enter your age.",
-        "genderLabel": "Gender",
-        "genderMale": "Male",
-        "genderFemale": "Female",
-        "genderHint": "Select your gender",
-        "interestsLabel": "Interests",
-        "preferredAgeLabel": "Preferred Friend's Age",
-        "preferredAgeUnit": "",
-        "preferredGenderLabel": "Preferred Friend's Gender",
-        "preferredGenderAll": "All",
-        "showProfileLabel": "Show my profile in the list",
-        "showProfileSubtitle": "If turned off, others cannot find you.",
-        "saveSuccess": "Profile saved successfully!",
-        "saveFailed": "Failed to save profile:",
-        "loginRequired": "Login is required.",
-        "noFriendsFound": "No friends found nearby.",
-        "prompt_title": "To meet new friends,\nplease create your profile first!",
-        "prompt_button": "Create My Profile"
-    },
-    "interests": {
-        "title": "Interests",
-        "limit_info": "You can select up to 10.",
-        "limit_reached": "You can only select up to 10 interests.",
-        "category_creative": "🎨 Creative",
-        "category_sports": "🏃 Sports & Activities",
-        "category_food_drink": "🍸 Food & Drink",
-        "category_entertainment": "🍿 Entertainment",
-        "category_growth": "📚 Growth",
-        "category_lifestyle": "🌴 Lifestyle",
-        "items": {
-            "drawing": "Drawing",
-            "instrument": "Playing an instrument",
-            "photography": "Photography",
-            "writing": "Writing",
-            "crafting": "Crafting",
-            "gardening": "Gardening",
-            "soccer": "Soccer/Futsal",
-            "hiking": "Hiking",
-            "camping": "Camping",
-            "running": "Running/Jogging",
-            "biking": "Biking",
-            "golf": "Golf",
-            "workout": "Workout/Fitness",
-            "foodie": "Foodie tour",
-            "cooking": "Cooking",
-            "baking": "Baking",
-            "coffee": "Coffee",
-            "wine": "Wine/Drinks",
-            "tea": "Tea",
-            "movies": "Movies/Dramas",
-            "music": "Listening to music",
-            "concerts": "Concerts/Festivals",
-            "gaming": "Gaming",
-            "reading": "Reading",
-            "investing": "Investing",
-            "language": "Learning languages",
-            "coding": "Coding",
-            "travel": "Travel",
-            "pets": "Pets",
-            "volunteering": "Volunteering",
-            "minimalism": "Minimalism"
-        }
-    },
-    "friendDetail": {
-        "request": "Friend Request",
-        "requestSent": "Request Sent",
-        "alreadyFriends": "Already Friends",
-        "requestFailed": "Request failed:",
-        "loginRequired": "Login is required."
-    },
-    "locationFilter": {
-        "title": "Location Filter",
-        "provinsi": "Province",
-        "kabupaten": "Regency",
-        "kota": "City",
-        "kecamatan": "District",
-        "kelurahan": "Subdistrict",
-        "apply": "Apply Filter",
-        "all": "All",
-        "reset": "Reset"
-    },
-    "clubs": {
-        "screen": {
-            "error": "Error: {error}",
-            "empty": "No clubs yet."
-        },
-        "postList": {
-            "empty": "No posts yet. Be the first to write!",
-            "writeTooltip": "Write"
-        },
-        "memberCard": {
-            "kickConfirmTitle": "Remove {memberName}?",
-            "kickConfirmContent": "Removed members can no longer participate in club activities.",
-            "kick": "Remove",
-            "kickedSuccess": "{memberName} has been removed.",
-            "kickFail": "Failed to remove member: {error}"
-        },
-        "postCard": {
-            "deleteTitle": "Delete Post",
-            "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
-            "deleteSuccess": "Post deleted.",
-            "deleteFail": "Failed to delete post: {error}",
-            "withdrawnMember": "Withdrawn member",
-            "deleteTooltip": "Delete post",
-            "loadingUser": "Loading user information..."
-        },
-        "card": {
-            "membersCount": "{count} members"
-        },
-        "postDetail": {
-            "commentFail": "Failed to add comment: {error}",
-            "appBarTitle": "{title} Board",
-            "commentsTitle": "Comments",
-            "noComments": "No comments yet.",
-            "commentHint": "Enter a comment...",
-            "unknownUser": "Unknown user"
-        },
-        "detail": {
-            "joined": "Joined '{title}' club!",
-            "pendingApproval": "Waiting for the owner's approval. You can participate after approval.",
-            "joinFail": "Failed to request to join: {error}",
-            "tabs": {
-                "info": "Info",
-                "board": "Board",
-                "members": "Members"
-            },
-            "joinChat": "Join chat",
-            "joinClub": "Join club",
-            "info": {
-                "members": "Members",
-                "location": "Location"
-            }
-        },
-        "memberList": {
-            "pendingMembers": "Pending Members",
-            "allMembers": "All Members"
-        },
-        "createPost": {
-            "title": "New Post",
-            "submit": "Submit",
-            "success": "Post submitted.",
-            "fail": "Failed to submit post: {error}",
-            "bodyHint": "Enter content..."
-        },
-        "createClub": {
-            "selectAtLeastOneInterest": "Please select at least one interest.",
-            "success": "Club created successfully!",
-            "fail": "Failed to create club: {error}",
-            "title": "Create Club",
-            "nameLabel": "Club Name",
-            "nameError": "Please enter the club name.",
-            "descriptionLabel": "Club Description",
-            "descriptionError": "Please enter the club description.",
-            "maxInterests": "You can select up to 3 interests.",
-            "privateClub": "Private Club",
-            "privateDescription": "Members can join only by invitation."
-        },
-        "editClub": {
-            "title": "Edit Club Information",
-            "save": "Save",
-            "success": "Club information updated.",
-            "fail": "Failed to update club: {error}"
-        },
-        "repository": {
-            "chatCreated": "Club chat room has been created."
-        }
-    },
-    "auctions": {
-        "card": {
-            "currentBid": "Current bid",
-            "endTime": "Time left",
-            "ended": "Ended",
-            "winningBid": "Winning bid",
-            "winner": "Winner",
-            "noBidders": "No bidders",
-            "unknownBidder": "Unknown bidder",
-            "timeLeft": "{hours}:{minutes}:{seconds} left",
-            "timeLeftDays": "{days}d {hours}:{minutes}:{seconds} left"
-        },
-        "errors": {
-            "fetchFailed": "Failed to fetch auctions: {error}",
-            "notFound": "Auction not found.",
-            "lowerBid": "You must enter a bid higher than the current bid.",
-            "alreadyEnded": "This auction has already ended."
-        },
-        "empty": "No auctions available.",
-        "filter": {
-            "tooltip": "Filter",
-            "clearTooltip": "Clear filter"
-        },
-        "create": {
-            "tooltip": "Create Auction",
-            "title": "Create Auction",
-            "success": "Auction created successfully.",
-            "fail": "Failed to create auction: {error}",
-            "errors": {
-                "noPhoto": "Please add at least one photo."
-            },
-            "form": {
-                "photoSectionTitle": "Upload photos (up to 10)",
-                "title": "Title",
-                "description": "Description",
-                "startPrice": "Starting price",
-                "duration": "Duration",
-                "durationOption": "{days} days",
-                "location": "Location"
-            }
-        },
-        "edit": {
-            "tooltip": "Edit auction",
-            "title": "Edit Auction",
-            "save": "Save",
-            "success": "Auction updated.",
-            "fail": "Failed to update auction: {error}"
-        },
-        "form": {
-            "titleRequired": "Please enter a title.",
-            "descriptionRequired": "Please enter a description.",
-            "startPriceRequired": "Please enter a starting price."
-        },
-        "delete": {
-            "tooltip": "Delete auction",
-            "confirmTitle": "Delete auction",
-            "confirmContent": "Are you sure you want to delete this auction?",
-            "success": "Auction deleted.",
-            "fail": "Failed to delete auction: {error}"
-        },
-        "detail": {
-            "currentBid": "Current bid: {amount}",
-            "location": "Location",
-            "seller": "Seller",
-            "endTime": "End time: {time}",
-            "bidsTitle": "Bids",
-            "noBids": "No bids yet.",
-            "unknownBidder": "Unknown bidder",
-            "bidAmountLabel": "Bid amount (Rp)",
-            "placeBid": "Place bid",
-            "bidSuccess": "Bid placed successfully!",
-            "bidFail": "Failed to place bid: {error}",
-            "errors": {
-                "loginRequired": "Login is required.",
-                "invalidAmount": "Please enter a valid bid amount."
-            }
-        }
-    },
-    "localStores": {
-        "setLocationPrompt": "Please set your location to browse local shops.",
-        "empty": "No shops registered yet.",
-        "error": "An error has occurred: {error}",
-        "create": {
-            "tooltip": "Add my shop",
-            "title": "Register New Shop",
-            "submit": "Register",
-            "success": "Shop registered successfully.",
-            "fail": "Failed to register shop: {error}"
-        },
-        "edit": {
-            "title": "Edit Shop Information",
-            "save": "Save",
-            "success": "Shop information updated.",
-            "fail": "Failed to update shop: {error}",
-            "tooltip": "Edit shop info"
-        },
-        "form": {
-            "nameLabel": "Shop Name",
-            "nameError": "Please enter the shop name.",
-            "descriptionLabel": "Shop Description",
-            "descriptionError": "Please enter the shop description.",
-            "contactLabel": "Contact",
-            "hoursLabel": "Business Hours",
-            "hoursHint": "e.g. 09:00 - 18:00"
-        },
-        "detail": {
-            "description": "Shop Description",
-            "deleteTitle": "Delete Shop",
-            "deleteContent": "Are you sure you want to delete this shop? This action cannot be undone.",
-            "deleteTooltip": "Delete shop",
-            "delete": "Delete",
-            "cancel": "Cancel",
-            "deleteSuccess": "Shop deleted.",
-            "deleteFail": "Failed to delete shop: {error}",
-            "inquire": "Contact",
-            "noOwnerInfo": "Owner info not found",
-            "startChatFail": "Could not start chat: {error}"
-        },
-        "noLocation": "No location info"
-    },
-    "pom": {
-        "share": "Share",
-        "empty": "No POMs have been uploaded yet.",
-        "errors": {
-            "fetchFailed": "An error has occurred: {error}"
-        },
-        "create": {
-            "title": "Upload New POM",
-            "submit": "Upload",
-            "success": "POM uploaded.",
-            "fail": "Failed to upload POM: {error}",
-            "form": {
-                "descriptionLabel": "Video description"
-            }
-        }
-    },
-    "realEstate": {
-        "empty": "No listings registered yet.",
-        "error": "An error has occurred: {error}",
-        "create": "Add listing",
-        "locationUnknown": "No location info",
-        "priceUnits": {
-            "monthly": "month",
-            "yearly": "year"
-        },
-        "form": {
-            "title": "New Listing",
-            "submit": "Register",
-            "imageRequired": "Please attach at least one photo.",
-            "success": "Listing created.",
-            "fail": "Failed to create listing: {error}",
-            "type": {
-                "kos": "Boarding",
-                "kontrakan": "Monthly rent",
-                "sewa": "Lease"
-            },
-            "priceLabel": "Price",
-            "priceRequired": "Please enter the price.",
-            "priceUnit": {
-                "monthly": "/month",
-                "yearly": "/year"
-            },
-            "titleLabel": "Title",
-            "titleRequired": "Please enter a title.",
-            "descriptionLabel": "Description",
-            "amenities": "Amenities",
-            "amenity": {
-                "wifi": "Wi-Fi",
-                "ac": "A/C",
-                "parking": "Parking",
-                "kitchen": "Kitchen"
-            }
-        },
-        "edit": {
-            "title": "Edit Listing",
-            "save": "Save",
-            "success": "Listing updated.",
-            "fail": "Failed to update listing: {error}"
-        }
-    },
-    "lostAndFound": {
-        "empty": "No items registered yet.",
-        "error": "An error has occurred: {error}",
-        "create": "Add lost/found item",
-        "lost": "Lost",
-        "found": "Found",
-        "card": {
-            "location": "Location: {location}"
-        },
-        "form": {
-            "title": "Register Lost/Found Item",
-            "submit": "Register",
-            "type": {
-                "lost": "I lost it",
-                "found": "I found it"
-            },
-            "photoSectionTitle": "Add photos (up to 5)",
-            "imageRequired": "Please attach at least one photo.",
-            "itemLabel": "What is the item?",
-            "itemError": "Please describe the item.",
-            "locationLabel": "Where was it lost or found?",
-            "locationError": "Please describe the location.",
-            "success": "Item registered.",
-            "fail": "Failed to register item: {error}"
-        },
-        "edit": {
-            "title": "Edit Lost/Found Item",
-            "save": "Save",
-            "success": "Item updated.",
-            "fail": "Failed to update item: {error}"
-        },
-        "detail": {
-            "title": "Lost & Found",
-            "location": "Location",
-            "registrant": "Registrant",
-            "contact": "Contact",
-            "deleteTitle": "Delete Post",
-            "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
-            "delete": "Delete",
-            "cancel": "Cancel",
-            "deleteSuccess": "Post deleted.",
-            "deleteFail": "Failed to delete post: {error}",
-            "editTooltip": "Edit",
-            "deleteTooltip": "Delete",
-            "noUser": "User not found",
-            "chatError": "Could not start chat: {error}"
-        }
-    },
-    "community": {
-        "title": "Community Screen"
-    },
-    "selectCategory": "Select category",
-    "address_neighborhood": "Neighborhood",
-    "address_detail_hint": "Address details",
-    "localNewsTagResult": {
-        "error": "An error occurred during search: {error}",
-        "empty": "No posts found with '#{tag}'."
+    "card": {
+      "noLocation": "No location info",
+      "minutesAgo": "minutes ago"
     }
+  },
+  "findFriend": {
+    "title": "Find Friends",
+    "editTitle": "Edit FindFriend Profile",
+    "editProfileTitle": "Edit Profile",
+    "save": "Save",
+    "profileImagesLabel": "Profile Images (Max 6)",
+    "bioLabel": "Bio",
+    "bioHint": "Introduce yourself to others.",
+    "bioValidator": "Please enter your bio.",
+    "ageLabel": "Age",
+    "ageHint": "Please enter your age.",
+    "genderLabel": "Gender",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderHint": "Select your gender",
+    "interestsLabel": "Interests",
+    "preferredAgeLabel": "Preferred Friend's Age",
+    "preferredAgeUnit": "",
+    "preferredGenderLabel": "Preferred Friend's Gender",
+    "preferredGenderAll": "All",
+    "showProfileLabel": "Show my profile in the list",
+    "showProfileSubtitle": "If turned off, others cannot find you.",
+    "saveSuccess": "Profile saved successfully!",
+    "saveFailed": "Failed to save profile:",
+    "loginRequired": "Login is required.",
+    "noFriendsFound": "No friends found nearby.",
+    "prompt_title": "To meet new friends,\nplease create your profile first!",
+    "prompt_button": "Create My Profile"
+  },
+  "interests": {
+    "title": "Interests",
+    "limit_info": "You can select up to 10.",
+    "limit_reached": "You can only select up to 10 interests.",
+    "category_creative": "🎨 Creative",
+    "category_sports": "🏃 Sports & Activities",
+    "category_food_drink": "🍸 Food & Drink",
+    "category_entertainment": "🍿 Entertainment",
+    "category_growth": "📚 Growth",
+    "category_lifestyle": "🌴 Lifestyle",
+    "items": {
+      "drawing": "Drawing",
+      "instrument": "Playing an instrument",
+      "photography": "Photography",
+      "writing": "Writing",
+      "crafting": "Crafting",
+      "gardening": "Gardening",
+      "soccer": "Soccer/Futsal",
+      "hiking": "Hiking",
+      "camping": "Camping",
+      "running": "Running/Jogging",
+      "biking": "Biking",
+      "golf": "Golf",
+      "workout": "Workout/Fitness",
+      "foodie": "Foodie tour",
+      "cooking": "Cooking",
+      "baking": "Baking",
+      "coffee": "Coffee",
+      "wine": "Wine/Drinks",
+      "tea": "Tea",
+      "movies": "Movies/Dramas",
+      "music": "Listening to music",
+      "concerts": "Concerts/Festivals",
+      "gaming": "Gaming",
+      "reading": "Reading",
+      "investing": "Investing",
+      "language": "Learning languages",
+      "coding": "Coding",
+      "travel": "Travel",
+      "pets": "Pets",
+      "volunteering": "Volunteering",
+      "minimalism": "Minimalism"
+    }
+  },
+  "friendDetail": {
+    "request": "Friend Request",
+    "requestSent": "Request Sent",
+    "alreadyFriends": "Already Friends",
+    "requestFailed": "Request failed:",
+    "loginRequired": "Login is required."
+  },
+  "locationFilter": {
+    "title": "Location Filter",
+    "provinsi": "Province",
+    "kabupaten": "Regency",
+    "kota": "City",
+    "kecamatan": "District",
+    "kelurahan": "Subdistrict",
+    "apply": "Apply Filter",
+    "all": "All",
+    "reset": "Reset"
+  },
+  "clubs": {
+    "screen": {
+      "error": "Error: {error}",
+      "empty": "No clubs yet."
+    },
+    "postList": {
+      "empty": "No posts yet. Be the first to write!",
+      "writeTooltip": "Write"
+    },
+    "memberCard": {
+      "kickConfirmTitle": "Remove {memberName}?",
+      "kickConfirmContent": "Removed members can no longer participate in club activities.",
+      "kick": "Remove",
+      "kickedSuccess": "{memberName} has been removed.",
+      "kickFail": "Failed to remove member: {error}"
+    },
+    "postCard": {
+      "deleteTitle": "Delete Post",
+      "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
+      "deleteSuccess": "Post deleted.",
+      "deleteFail": "Failed to delete post: {error}",
+      "withdrawnMember": "Withdrawn member",
+      "deleteTooltip": "Delete post",
+      "loadingUser": "Loading user information..."
+    },
+    "card": {
+      "membersCount": "{count} members"
+    },
+    "postDetail": {
+      "commentFail": "Failed to add comment: {error}",
+      "appBarTitle": "{title} Board",
+      "commentsTitle": "Comments",
+      "noComments": "No comments yet.",
+      "commentHint": "Enter a comment...",
+      "unknownUser": "Unknown user"
+    },
+    "detail": {
+      "joined": "Joined '{title}' club!",
+      "pendingApproval": "Waiting for the owner's approval. You can participate after approval.",
+      "joinFail": "Failed to request to join: {error}",
+      "tabs": {
+        "info": "Info",
+        "board": "Board",
+        "members": "Members"
+      },
+      "joinChat": "Join chat",
+      "joinClub": "Join club",
+      "info": {
+        "members": "Members",
+        "location": "Location"
+      }
+    },
+    "memberList": {
+      "pendingMembers": "Pending Members",
+      "allMembers": "All Members"
+    },
+    "createPost": {
+      "title": "New Post",
+      "submit": "Submit",
+      "success": "Post submitted.",
+      "fail": "Failed to submit post: {error}",
+      "bodyHint": "Enter content..."
+    },
+    "createClub": {
+      "selectAtLeastOneInterest": "Please select at least one interest.",
+      "success": "Club created successfully!",
+      "fail": "Failed to create club: {error}",
+      "title": "Create Club",
+      "nameLabel": "Club Name",
+      "nameError": "Please enter the club name.",
+      "descriptionLabel": "Club Description",
+      "descriptionError": "Please enter the club description.",
+      "maxInterests": "You can select up to 3 interests.",
+      "privateClub": "Private Club",
+      "privateDescription": "Members can join only by invitation."
+    },
+    "editClub": {
+      "title": "Edit Club Information",
+      "save": "Save",
+      "success": "Club information updated.",
+      "fail": "Failed to update club: {error}"
+    },
+    "repository": {
+      "chatCreated": "Club chat room has been created."
+    }
+  },
+  "auctions": {
+    "card": {
+      "currentBid": "Current bid",
+      "endTime": "Time left",
+      "ended": "Ended",
+      "winningBid": "Winning bid",
+      "winner": "Winner",
+      "noBidders": "No bidders",
+      "unknownBidder": "Unknown bidder",
+      "timeLeft": "{hours}:{minutes}:{seconds} left",
+      "timeLeftDays": "{days}d {hours}:{minutes}:{seconds} left"
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch auctions: {error}",
+      "notFound": "Auction not found.",
+      "lowerBid": "You must enter a bid higher than the current bid.",
+      "alreadyEnded": "This auction has already ended."
+    },
+    "empty": "No auctions available.",
+    "filter": {
+      "tooltip": "Filter",
+      "clearTooltip": "Clear filter"
+    },
+    "create": {
+      "tooltip": "Create Auction",
+      "title": "Create Auction",
+      "success": "Auction created successfully.",
+      "fail": "Failed to create auction: {error}",
+      "errors": {
+        "noPhoto": "Please add at least one photo."
+      },
+      "form": {
+        "photoSectionTitle": "Upload photos (up to 10)",
+        "title": "Title",
+        "description": "Description",
+        "startPrice": "Starting price",
+        "duration": "Duration",
+        "durationOption": "{days} days",
+        "location": "Location"
+      }
+    },
+    "edit": {
+      "tooltip": "Edit auction",
+      "title": "Edit Auction",
+      "save": "Save",
+      "success": "Auction updated.",
+      "fail": "Failed to update auction: {error}"
+    },
+    "form": {
+      "titleRequired": "Please enter a title.",
+      "descriptionRequired": "Please enter a description.",
+      "startPriceRequired": "Please enter a starting price."
+    },
+    "delete": {
+      "tooltip": "Delete auction",
+      "confirmTitle": "Delete auction",
+      "confirmContent": "Are you sure you want to delete this auction?",
+      "success": "Auction deleted.",
+      "fail": "Failed to delete auction: {error}"
+    },
+    "detail": {
+      "currentBid": "Current bid: {amount}",
+      "location": "Location",
+      "seller": "Seller",
+      "endTime": "End time: {time}",
+      "bidsTitle": "Bids",
+      "noBids": "No bids yet.",
+      "unknownBidder": "Unknown bidder",
+      "bidAmountLabel": "Bid amount (Rp)",
+      "placeBid": "Place bid",
+      "bidSuccess": "Bid placed successfully!",
+      "bidFail": "Failed to place bid: {error}",
+      "errors": {
+        "loginRequired": "Login is required.",
+        "invalidAmount": "Please enter a valid bid amount."
+      }
+    }
+  },
+  "localStores": {
+    "setLocationPrompt": "Please set your location to browse local shops.",
+    "empty": "No shops registered yet.",
+    "error": "An error has occurred: {error}",
+    "create": {
+      "tooltip": "Add my shop",
+      "title": "Register New Shop",
+      "submit": "Register",
+      "success": "Shop registered successfully.",
+      "fail": "Failed to register shop: {error}"
+    },
+    "edit": {
+      "title": "Edit Shop Information",
+      "save": "Save",
+      "success": "Shop information updated.",
+      "fail": "Failed to update shop: {error}",
+      "tooltip": "Edit shop info"
+    },
+    "form": {
+      "nameLabel": "Shop Name",
+      "nameError": "Please enter the shop name.",
+      "descriptionLabel": "Shop Description",
+      "descriptionError": "Please enter the shop description.",
+      "contactLabel": "Contact",
+      "hoursLabel": "Business Hours",
+      "hoursHint": "e.g. 09:00 - 18:00"
+    },
+    "detail": {
+      "description": "Shop Description",
+      "deleteTitle": "Delete Shop",
+      "deleteContent": "Are you sure you want to delete this shop? This action cannot be undone.",
+      "deleteTooltip": "Delete shop",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "deleteSuccess": "Shop deleted.",
+      "deleteFail": "Failed to delete shop: {error}",
+      "inquire": "Contact",
+      "noOwnerInfo": "Owner info not found",
+      "startChatFail": "Could not start chat: {error}"
+    },
+    "noLocation": "No location info"
+  },
+  "pom": {
+    "share": "Share",
+    "empty": "No POMs have been uploaded yet.",
+    "errors": {
+      "fetchFailed": "An error has occurred: {error}"
+    },
+    "create": {
+      "title": "Upload New POM",
+      "submit": "Upload",
+      "success": "POM uploaded.",
+      "fail": "Failed to upload POM: {error}",
+      "form": {
+        "descriptionLabel": "Video description"
+      }
+    }
+  },
+  "realEstate": {
+    "empty": "No listings registered yet.",
+    "error": "An error has occurred: {error}",
+    "create": "Add listing",
+    "locationUnknown": "No location info",
+    "priceUnits": {
+      "monthly": "month",
+      "yearly": "year"
+    },
+    "form": {
+      "title": "New Listing",
+      "submit": "Register",
+      "imageRequired": "Please attach at least one photo.",
+      "success": "Listing created.",
+      "fail": "Failed to create listing: {error}",
+      "type": {
+        "kos": "Boarding",
+        "kontrakan": "Monthly rent",
+        "sewa": "Lease"
+      },
+      "priceLabel": "Price",
+      "priceRequired": "Please enter the price.",
+      "priceUnit": {
+        "monthly": "/month",
+        "yearly": "/year"
+      },
+      "titleLabel": "Title",
+      "titleRequired": "Please enter a title.",
+      "descriptionLabel": "Description",
+      "amenities": "Amenities",
+      "amenity": {
+        "wifi": "Wi-Fi",
+        "ac": "A/C",
+        "parking": "Parking",
+        "kitchen": "Kitchen"
+      }
+    },
+    "edit": {
+      "title": "Edit Listing",
+      "save": "Save",
+      "success": "Listing updated.",
+      "fail": "Failed to update listing: {error}"
+    }
+  },
+  "lostAndFound": {
+    "empty": "No items registered yet.",
+    "error": "An error has occurred: {error}",
+    "create": "Add lost/found item",
+    "lost": "Lost",
+    "found": "Found",
+    "card": {
+      "location": "Location: {location}"
+    },
+    "form": {
+      "title": "Register Lost/Found Item",
+      "submit": "Register",
+      "type": {
+        "lost": "I lost it",
+        "found": "I found it"
+      },
+      "photoSectionTitle": "Add photos (up to 5)",
+      "imageRequired": "Please attach at least one photo.",
+      "itemLabel": "What is the item?",
+      "itemError": "Please describe the item.",
+      "locationLabel": "Where was it lost or found?",
+      "locationError": "Please describe the location.",
+      "success": "Item registered.",
+      "fail": "Failed to register item: {error}"
+    },
+    "edit": {
+      "title": "Edit Lost/Found Item",
+      "save": "Save",
+      "success": "Item updated.",
+      "fail": "Failed to update item: {error}"
+    },
+    "detail": {
+      "title": "Lost & Found",
+      "location": "Location",
+      "registrant": "Registrant",
+      "contact": "Contact",
+      "deleteTitle": "Delete Post",
+      "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "deleteSuccess": "Post deleted.",
+      "deleteFail": "Failed to delete post: {error}",
+      "editTooltip": "Edit",
+      "deleteTooltip": "Delete",
+      "noUser": "User not found",
+      "chatError": "Could not start chat: {error}"
+    }
+  },
+  "community": {
+    "title": "Community Screen"
+  },
+  "selectCategory": "Select category",
+  "address_neighborhood": "Neighborhood",
+  "address_detail_hint": "Address details",
+  "localNewsTagResult": {
+    "error": "An error occurred during search: {error}",
+    "empty": "No posts found with '#{tag}'."
+  }
 }
