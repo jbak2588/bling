@@ -1,4 +1,61 @@
 /**
+ * =======================[ Server/Client 책임 경계 최종 검수 메모 ]=======================
+ * 대상 파일 : functions-v2/index.js (최신본)
+ * 목적     : "범용 중고물품 AI 검수" 서버 코드로서의 적합성 점검 및
+ *            Flutter(클라이언트)로 위임해야 할 기능 명시. (코드 변경 없음)
+ *
+ * ■ 서버(이 파일)가 맡는 범위 — 유지 대상
+ *   1) 보안/검증:
+ *      - App Check/인증 강제(enforceAppCheck, auth 확인)
+ *      - 입력 유효성 검증(ruleId 존재, 이미지 URL 배열 형식)
+ *      - 이미지 다운로드/크기 제한(HTTPS만 허용, 7.5MB 제한)
+ *   2) 규칙/프롬프트 관리:
+ *      - Firestore의 ai_verification_rules/{ruleId}에서 프롬프트 템플릿 로드
+ *      - ruleId만으로 다양한 카테고리·템플릿을 처리(범용성 유지)
+ *   3) 모델 호출/파싱:
+ *      - Gemini 호출(2.5 계열), 안전설정 적용
+ *      - 응답(JSON)만 엄격 파싱, 핵심 필드만 추출
+ *      - 공통 오류 매핑(HttpsError) 및 진단 로그 기록(원문 스니펫/파싱 키)
+ *   4) 중립 응답 계약:
+ *      - initialproductanalysis → { success, prediction }  (prediction: string|null)
+ *      - generatefinalreport   → { success, report }       (report: object)
+ *      - UI 문구/카테고리 매핑/브랜드 규칙 등은 포함하지 않음 (범용성 보존)
+ *
+ * ■ Flutter(클라이언트)가 맡아야 할 범위 — 서버 밖으로 위임
+ *   1) 화면/UX:
+ *      - 카테고리 선택/촬영 가이드/갤러리 업로드 흐름
+ *      - "예상 상품명(없음)" 등 UI 문구 표시, 재시도·수정 입력 UX
+ *   2) 데이터 준비/전송:
+ *      - 이미지 업로드(Storage) 후 HTTPS URL 전달
+ *      - 어떤 ruleId를 쓸지 선택(카테고리와 규칙 매핑)
+ *      - userPrice/userDescription/confirmedProductName 등 최종 보고서에 필요한 값 전달
+ *   3) 후처리·매핑:
+ *      - predicted_category_id → 앱 내부 카테고리 매핑
+ *      - prediction이 비었을 때의 대체 경로(수기 입력/재시도) 결정
+ *   4) 상태 동기화:
+ *      - UI 단계 전환(초기분석 → 사용자확정 → 최종보고서)
+ *      - 필요 시 클라이언트측 로컬 로깅/분석 이벤트 전송
+ *
+ * ■ 요청/응답 데이터 계약(요약)
+ *   - initialproductanalysis (onCall)
+ *     req: { imageUrls: string[], ruleId: string }
+ *     res: { success: boolean, prediction: string|null }
+ *
+ *   - generatefinalreport (onCall)
+ *     req: {
+ *       imageUrls: { initial: string[], guided: Record<string,string> },
+ *       ruleId: string,
+ *       confirmedProductName?: string,
+ *       userPrice?: number|string,
+ *       userDescription?: string
+ *     }
+ *     res: { success: boolean, report: object }
+ *
+ * ⓘ 결론: 현 index.js는 서버-클라이언트 역할 분리가 준수된 "범용" 구조이며,
+ *         제품군 특화 로직/문구는 포함하지 않습니다. Flutter 측에서 UX/매핑을 담당하세요.
+ * ===========================================================================================
+ */
+/**
  * ============================================================================
  * Bling DocHeader (v3.1 - Gemini Safety Settings)
  * Module        : Auth, Trust, AI Verification
