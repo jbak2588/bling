@@ -24,6 +24,48 @@ initializeApp();
 // 🔐 Secrets 선언: 배포/런타임에서 안전하게 주입
 const GEMINI_KEY = defineSecret("GEMINI_KEY");
 
+// ──────────────────────────────────────────────────────────────────────────────
+// Debug/Tracing helpers for AI response diagnostics
+// ──────────────────────────────────────────────────────────────────────────────
+const RAW_LOG_LIMIT = 1200; // 로그에 남길 최대 원문 길이
+/**
+ * 모델이 가끔 ```json 코드블럭으로 감싸거나, 앞뒤에 잡담을 붙이는 경우가 있어
+ * 가능한 한 JSON 본문만 뽑아 파싱을 시도한다.
+ */
+function extractJsonText(raw) {
+  if (!raw) return "";
+  const m = raw.match(/```json([\s\S]*?)```/i);
+  return (m ? m[1] : raw).trim();
+}
+function tryParseJson(text) {
+  try { return JSON.parse(text); } catch { return null; }
+}
+/**
+ * 분석용 진단 로그: 원문 스니펫 + 파싱된 키 + 핵심 필드 유무
+ */
+function logAiDiagnostics(ctx, rawText, parsed) {
+  try {
+    logger.info("🧪 AI raw snippet", {
+      ctx,
+      length: (rawText || "").length,
+      snippet: String(rawText || "").slice(0, RAW_LOG_LIMIT),
+    });
+    if (parsed && typeof parsed === "object") {
+      logger.info("🧪 AI parsed keys", {
+        ctx,
+        keys: Object.keys(parsed),
+        has_predicted_item_name: Object.prototype.hasOwnProperty.call(parsed, "predicted_item_name"),
+        predicted_item_name: parsed?.predicted_item_name ?? null,
+        confidence: parsed?.confidence ?? null,
+      });
+    } else {
+      logger.warn("🧪 AI parse failed (no valid JSON object)", { ctx });
+    }
+  } catch (e) {
+    logger.warn("🧪 AI diagnostics logging error", { ctx, err: e?.toString?.() || e });
+  }
+}
+
 // 런타임 시점에서만 키를 읽어 클라이언트 생성
 const getGenAI = () => {
   const key = GEMINI_KEY.value();
@@ -247,20 +289,23 @@ exports.initialproductanalysis = onCall(
         }
       }
 
-      const jsonBlock = (text.match(/```json([\s\S]*?)```/i)?.[1] || text).trim();
-      let prediction;
-      try {
-        prediction = JSON.parse(jsonBlock);
-      } catch (e) {
-        logger.error("❌ JSON parse failed for Gemini output", {
-          output: text.slice(0, 500),
-        });
+      // 진단 로그용 원문/파싱 결과 기록
+      const jsonText = extractJsonText(text);
+      const prediction = tryParseJson(jsonText);
+      logAiDiagnostics("initialproductanalysis", text, prediction);
+      if (!prediction) {
         throw new HttpsError("data-loss", "AI returned invalid JSON.");
       }
-      logger.info("✅ Gemini 분석 성공", {
-        predicted_item_name: prediction?.predicted_item_name,
-      });
-      return { success: true, prediction: prediction?.predicted_item_name ?? null };
+      const predictedName = prediction?.predicted_item_name ?? null;
+      if (!predictedName || (typeof predictedName === "string" && predictedName.trim() === "")) {
+        logger.warn("⚠️ AI returned empty 'predicted_item_name'", {
+          ctx: "initialproductanalysis",
+          hasKeys: Object.keys(prediction || {}),
+        });
+      } else {
+        logger.info("✅ Gemini 분석 성공", { predicted_item_name: predictedName });
+      }
+      return { success: true, prediction: predictedName };
 
     } catch (error) {
       logger.error("❌ initialproductanalysis 함수 내부에서 심각한 오류 발생:", error);
@@ -378,14 +423,10 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
       }
     }
 
-    const jsonBlock = (jsonStr.match(/```json([\s\S]*?)```/i)?.[1] || jsonStr).trim();
-    let report;
-    try {
-      report = JSON.parse(jsonBlock);
-    } catch (e) {
-      logger.error("❌ JSON parse failed for final report", {
-        output: jsonStr.slice(0, 500),
-      });
+    const jsonBlock = extractJsonText(jsonStr);
+    const report = tryParseJson(jsonBlock);
+    logAiDiagnostics("generatefinalreport", jsonStr, report);
+    if (!report) {
       throw new HttpsError("data-loss", "AI final report JSON invalid.");
     }
     return { success: true, report };
