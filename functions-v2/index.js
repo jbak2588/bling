@@ -55,6 +55,11 @@ function isModelNotFoundError(err) {
   }
 }
 
+// SDK 호환 보조: Responses API 지원 여부 체크
+function hasResponsesApi(genAI) {
+  return !!(genAI && genAI.responses && typeof genAI.responses.generate === "function");
+}
+
 /**
  * [유지] 사용자 문서가 업데이트될 때 신뢰도 점수와 레벨을 다시 계산합니다.
  */
@@ -192,27 +197,55 @@ exports.initialproductanalysis = onCall(
       );
       clearTimeout(to);
 
-      // New: 2.5 계열로 통일 (1.5 계열 제거)
-      let aiResp;
-      try {
-        aiResp = await genAI.responses.generate({
-          model: "gemini-2.5-flash",
-          contents: [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }],
-          safetySettings,
-          responseMimeType: "application/json",
-        });
-      } catch (e) {
-        if (isModelNotFoundError(e)) {
-          const fb = await genAI.responses.generate({
-            model: "gemini-2.5-pro",
-            contents: [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }],
+      // New: 2.5 계열로 통일 + Responses API 미지원 환경 폴백
+      const userContents = [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }];
+      let text = "";
+      if (hasResponsesApi(genAI)) {
+        try {
+          const primary = await genAI.responses.generate({
+            model: "gemini-2.5-flash",
+            contents: userContents,
             safetySettings,
             responseMimeType: "application/json",
           });
-          aiResp = fb;
-        } else throw e;
+          text = primary?.output_text || "";
+        } catch (e) {
+          if (isModelNotFoundError(e)) {
+            const fb = await genAI.responses.generate({
+              model: "gemini-2.5-pro",
+              contents: userContents,
+              safetySettings,
+              responseMimeType: "application/json",
+            });
+            text = fb?.output_text || "";
+          } else {
+            throw e;
+          }
+        }
+      } else {
+        // 구 SDK: getGenerativeModel().generateContent 사용
+        try {
+          const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash",
+            safetySettings,
+            generationConfig: { responseMimeType: "application/json" },
+          });
+          const res = await model.generateContent({ contents: userContents });
+          text = String(res?.response?.text?.() ?? "");
+        } catch (e) {
+          if (isModelNotFoundError(e)) {
+            const fbModel = genAI.getGenerativeModel({
+              model: "gemini-2.5-pro",
+              safetySettings,
+              generationConfig: { responseMimeType: "application/json" },
+            });
+            const res2 = await fbModel.generateContent({ contents: userContents });
+            text = String(res2?.response?.text?.() ?? "");
+          } else {
+            throw e;
+          }
+        }
       }
-      const text = aiResp.output_text || "";
 
       const jsonBlock = (text.match(/```json([\s\S]*?)```/i)?.[1] || text).trim();
       let prediction;
@@ -275,6 +308,13 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
       .replace(/{{userDescription}}/g, String(userDescription ?? ""))
       .replace(/{{confirmedProductName}}/g, String(confirmedProductName ?? ""));
 
+    // NOTE: 1.5 계열/별칭 제거, 2.5 계열로 통일
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      safetySettings,
+      generationConfig: { responseMimeType: "application/json" },
+    });
+
     if (!Array.isArray(imageUrls.initial) || typeof imageUrls.guided !== "object") {
       throw new HttpsError("invalid-argument", "imageUrls must include initial[] and guided{}");
     }
@@ -315,27 +355,28 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     );
     clearTimeout(to);
 
-    // New: 2.5 계열로 통일 (1.5 계열 제거)
-    let aiResp;
+    // New: responses.generate 미지원 환경 대비 generateContent 사용
+    let jsonStr = "";
     try {
-      aiResp = await genAI.responses.generate({
-        model: "gemini-2.5-flash",
+      const res = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }],
-        safetySettings,
-        responseMimeType: "application/json",
       });
+      jsonStr = String(res?.response?.text?.() ?? "").trim();
     } catch (e) {
       if (isModelNotFoundError(e)) {
-        const fb = await genAI.responses.generate({
+        const fallbackModel = genAI.getGenerativeModel({
           model: "gemini-2.5-pro",
-          contents: [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }],
           safetySettings,
-          responseMimeType: "application/json",
+          generationConfig: { responseMimeType: "application/json" },
         });
-        aiResp = fb;
-      } else throw e;
+        const res2 = await fallbackModel.generateContent({
+          contents: [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }],
+        });
+        jsonStr = String(res2?.response?.text?.() ?? "").trim();
+      } else {
+        throw e;
+      }
     }
-    const jsonStr = String(aiResp.output_text || "").trim();
 
     const jsonBlock = (jsonStr.match(/```json([\s\S]*?)```/i)?.[1] || jsonStr).trim();
     let report;
@@ -360,10 +401,12 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
   }
 });
 
-// [업데이트] Gemini 안전 설정: 필요에 맞게 임계치 조정
+// [업데이트] Gemini 안전 설정 (최신 카테고리 명칭 사용)
+// 허용 카테고리: DANGEROUS_CONTENT, HARASSMENT, HATE_SPEECH, SEXUALLY_EXPLICIT, CIVIC_INTEGRITY
 const safetySettings = [
   { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-  { category: HarmCategory.HARM_CATEGORY_HARASSMENT,      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,     threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_SEXUAL_CONTENT,  threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT,        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,       threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  { category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,   threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
 ];
