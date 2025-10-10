@@ -229,8 +229,8 @@
   },
   "registration_flow": {
     "title": "판매 상품 종류 선택",
-    "new_item_title": "신품 판매",
-    "new_item_desc": "한 번도 사용하지 않은 새 상품을 간단하게 등록합니다.",
+    "new_item_title": "신품 및 중고품 일반 판매 등록",
+    "new_item_desc": "구입 후 사용하지 않은 상품과 사용 중고 물품을 간단하게 등록합니다.",
     "used_item_title": "중고품 판매 (AI 검수)",
     "used_item_desc": "AI가 상품을 자동 분석하여 신뢰도를 높이고 판매를 도와줍니다."
   },
