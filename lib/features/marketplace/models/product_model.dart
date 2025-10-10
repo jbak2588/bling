@@ -80,6 +80,7 @@ class ProductModel {
 
   final Timestamp createdAt;
   final Timestamp updatedAt;
+  final bool isNew; // <-- 신품 여부 구분을 위한 필드 추가
 
   ProductModel({
     required this.id,
@@ -107,6 +108,7 @@ class ProductModel {
     this.aiVerificationStatus = 'none',
     this.aiReport,
     this.rejectionReason,
+    this.isNew = false, // <-- 기본값은 false(중고)
   });
 
   factory ProductModel.fromFirestore(
@@ -142,8 +144,11 @@ class ProductModel {
       // ✅ [핵심 수정] AI 관련 필드들을 안전하게 불러옵니다.
       isAiVerified: data['isAiVerified'] ?? false,
       aiVerificationStatus: data['aiVerificationStatus'] ?? 'none',
-      aiReport: data['aiReport'] != null ? Map<String, dynamic>.from(data['aiReport']) : null,
+      aiReport: data['aiReport'] != null
+          ? Map<String, dynamic>.from(data['aiReport'])
+          : null,
       rejectionReason: data['rejectionReason'],
+      isNew: data['isNew'] ?? false, // <-- fromMap에 추가
     );
   }
 
@@ -156,24 +161,23 @@ class ProductModel {
       'categoryId': categoryId,
       'price': price,
       'negotiable': negotiable,
-      'tags': tags, // ✅ toJson 맵에 tags 추가
+      'tags': tags,
       'locationName': locationName,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
       'status': status,
       'condition': condition,
-      // ✅ [추가] toJson 맵에 transactionPlace를 추가합니다.
       'transactionPlace': transactionPlace,
       'likesCount': likesCount,
       'chatsCount': chatsCount,
       'viewsCount': viewsCount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
-      // ✅ [추가] AI 검수 관련 필드를 모두 추가하여 데이터 누락을 방지합니다.
       'isAiVerified': isAiVerified,
       'aiVerificationStatus': aiVerificationStatus,
       'aiReport': aiReport,
       'rejectionReason': rejectionReason,
+      'isNew': isNew,
     };
   }
 

@@ -38,8 +38,8 @@ import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
 import 'home_screen.dart';
 
-
 import 'package:bling_app/features/admin/screens/admin_screen.dart'; // ✅ 관리자 화면 import
+import 'package:bling_app/core/utils/ai_rule_uploader.dart';
 
 /// 현재 보고 있는 섹션을 타입 세이프하게 관리하기 위한 enum
 enum AppSection {
@@ -73,7 +73,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   StreamSubscription? _unreadChatsSubscription;
   int _totalUnreadCount = 0;
 
-  static const int kSearchTabIndex = 1; // 예: 0=Home, 1=Search, 2=Chat, 3=Profile
+  static const int kSearchTabIndex =
+      1; // 예: 0=Home, 1=Search, 2=Chat, 3=Profile
 
   void goToSearchTab() {
     if (!mounted) return;
@@ -167,7 +168,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       setState(() {
         _currentHomePageContent = null;
         _appBarTitleKey = 'main.myTown'; // 홈으로 돌아올 때 키 초기화
-  _currentSection = AppSection.home; // 섹션도 홈으로 복원
+        _currentSection = AppSection.home; // 섹션도 홈으로 복원
       });
     }
     setState(() {
@@ -196,7 +197,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     }
 
     // 섹션 내부: enum 기준으로 안전 분기
-  late Widget target;
+    late Widget target;
 
     switch (_currentSection) {
       case AppSection.localNews:
@@ -257,25 +258,55 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           child: ListView(
             shrinkWrap: true,
             children: [
-              _sheetItem(Icons.article_rounded,   'main.tabs.localNews'.tr(),     'localNewsCreate.appBarTitle'.tr(),
+              _sheetItem(
+                  Icons.article_rounded,
+                  'main.tabs.localNews'.tr(),
+                  'localNewsCreate.appBarTitle'.tr(),
                   () => const CreateLocalNewsScreen()),
-              _sheetItem(Icons.store_mall_directory_rounded, 'main.tabs.marketplace'.tr(), 'marketplace.registration.title'.tr(),
+              _sheetItem(
+                  Icons.store_mall_directory_rounded,
+                  'main.tabs.marketplace'.tr(),
+                  'marketplace.registration.title'.tr(),
                   () => const RegistrationTypeScreen()),
-        _sheetItem(Icons.sentiment_satisfied_alt_rounded, 'main.tabs.findFriends'.tr(), 'findfriend.form.title'.tr(),
-          () => FindFriendFormScreen(userModel: _userModel!)),
-              _sheetItem(Icons.groups_rounded,    'main.tabs.clubs'.tr(),         'clubs.create.title'.tr(),
+              _sheetItem(
+                  Icons.sentiment_satisfied_alt_rounded,
+                  'main.tabs.findFriends'.tr(),
+                  'findfriend.form.title'.tr(),
+                  () => FindFriendFormScreen(userModel: _userModel!)),
+              _sheetItem(
+                  Icons.groups_rounded,
+                  'main.tabs.clubs'.tr(),
+                  'clubs.create.title'.tr(),
                   () => CreateClubScreen(userModel: _userModel!)),
-              _sheetItem(Icons.work_outline_rounded, 'main.tabs.jobs'.tr(),      'jobs.form.title'.tr(),
+              _sheetItem(
+                  Icons.work_outline_rounded,
+                  'main.tabs.jobs'.tr(),
+                  'jobs.form.title'.tr(),
                   () => CreateJobScreen(userModel: _userModel!)),
-              _sheetItem(Icons.storefront_rounded, 'main.tabs.localStores'.tr(), 'localStores.create.title'.tr(),
+              _sheetItem(
+                  Icons.storefront_rounded,
+                  'main.tabs.localStores'.tr(),
+                  'localStores.create.title'.tr(),
                   () => CreateShopScreen(userModel: _userModel!)),
-              _sheetItem(Icons.gavel_rounded,     'main.tabs.auction'.tr(),      'auctions.create.title'.tr(),
+              _sheetItem(
+                  Icons.gavel_rounded,
+                  'main.tabs.auction'.tr(),
+                  'auctions.create.title'.tr(),
                   () => CreateAuctionScreen(userModel: _userModel!)),
-              _sheetItem(Icons.video_camera_back_rounded, 'main.tabs.pom'.tr(),  'pom.create.title'.tr(),
+              _sheetItem(
+                  Icons.video_camera_back_rounded,
+                  'main.tabs.pom'.tr(),
+                  'pom.create.title'.tr(),
                   () => CreateShortScreen(userModel: _userModel!)),
-              _sheetItem(Icons.report_gmailerrorred_rounded, 'main.tabs.lostAndFound'.tr(), 'lostAndFound.form.title'.tr(),
+              _sheetItem(
+                  Icons.report_gmailerrorred_rounded,
+                  'main.tabs.lostAndFound'.tr(),
+                  'lostAndFound.form.title'.tr(),
                   () => CreateLostItemScreen(userModel: _userModel!)),
-              _sheetItem(Icons.house_rounded,     'main.tabs.realEstate'.tr(),   'realEstate.form.title'.tr(),
+              _sheetItem(
+                  Icons.house_rounded,
+                  'main.tabs.realEstate'.tr(),
+                  'realEstate.form.title'.tr(),
                   () => CreateRoomListingScreen(userModel: _userModel!)),
               const SizedBox(height: 12),
             ],
@@ -285,7 +316,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  Widget _sheetItem(IconData icon, String title, String sub, Widget Function() builder) {
+  Widget _sheetItem(
+      IconData icon, String title, String sub, Widget Function() builder) {
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
@@ -293,10 +325,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       trailing: const Icon(Icons.chevron_right_rounded),
       onTap: () {
         Navigator.of(context).pop();
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => builder()));
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => builder()));
       },
     );
   }
+
   PreferredSizeWidget _buildAppBar() {
     // ✅ locale 의존성만 생성(교체X, 리빌드O)
     final _ = context.locale;
@@ -370,15 +404,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // ✅ 항상 build 시점에 번역되도록 .tr() 호출
-           // 👇 [수정] 메인 타이틀도 Flexible로 감싸서 공간을 유연하게 차지하도록 변경
+            // 👇 [수정] 메인 타이틀도 Flexible로 감싸서 공간을 유연하게 차지하도록 변경
             Flexible(
               child: Text(
                 _appBarTitleKey.tr(),
                 style: GoogleFonts.inter(
-                  fontWeight: FontWeight.bold, fontSize: 16
-                ),
+                    fontWeight: FontWeight.bold, fontSize: 16),
                 overflow: TextOverflow.ellipsis, // 글자가 길면 ...으로 표시
-                maxLines: 1,                    // 한 줄만 표시
+                maxLines: 1, // 한 줄만 표시
               ),
             ),
             const SizedBox(width: 8),
@@ -518,7 +551,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Widget _buildBottomNavItem(
       {required IconData icon, required int index, int badgeCount = 0}) {
-  const Map<int, String> tooltipKeys = {
+    const Map<int, String> tooltipKeys = {
       0: 'main.bottomNav.home',
       1: 'main.bottomNav.search',
       3: 'main.bottomNav.chat',
@@ -674,6 +707,27 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                           builder: (_) => const AdminScreen())); // 관리자 페이지로 이동
                     },
                   ),
+
+                  // ▼▼▼▼▼ 여기에 아래 코드를 추가하세요 ▼▼▼▼▼
+                  ListTile(
+                    leading: const Icon(Icons.cloud_upload_outlined),
+                    title: const Text('AI 검수 규칙 업로드 (초기화)'),
+                    onTap: () async {
+                      Navigator.pop(context); // Drawer를 먼저 닫습니다.
+
+                      // Uploader 실행
+                      final uploader = AiRuleUploader();
+                      await uploader.uploadInitialRules();
+
+                      // 작업 완료 후 사용자에게 피드백 표시
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('AI 검수 규칙 초기 데이터 업로드를 시도했습니다.')),
+                        );
+                      }
+                    },
+                  ),
                 ],
                 const Divider(),
                 ListTile(
@@ -714,7 +768,7 @@ class _LanguageMenu extends StatelessWidget {
 
     return PopupMenuButton<Locale>(
       tooltip: 'Change Language',
-       onSelected: (loc) {
+      onSelected: (loc) {
         // 팝업 닫힘(라우트 pop) 이후 프레임에 로케일 변경
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final el = EasyLocalization.of(context);
