@@ -79,13 +79,13 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
   Future<void> _submitPost() async {
     if (_contentController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('localNewsCreate.alerts.contentRequired'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('localNewsCreate.alerts.contentRequired'.tr())));
       return;
     }
     if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
       return;
     }
 
@@ -93,13 +93,17 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception("로그인이 필요합니다.");   // TODO : 다국어 작업
+      if (user == null) {
+        throw Exception('localNewsCreate.alerts.loginRequired'.tr());
+      }
 
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
-      if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");   // TODO : 다국어 작업
+      if (!userDoc.exists) {
+        throw Exception('localNewsCreate.alerts.userNotFound'.tr());
+      }
       final userModel = UserModel.fromFirestore(userDoc);
 
       final imageUrls = await _uploadImages();
@@ -128,7 +132,8 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
       };
 
       // 1. 새 게시물 저장 (DocumentReference로 ID 생성)
-      final newPostRef = await FirebaseFirestore.instance.collection('posts').add(postData);
+      final newPostRef =
+          await FirebaseFirestore.instance.collection('posts').add(postData);
       final newPostId = newPostRef.id;
 
       // 2. ✅ [핵심 추가] 사용자의 postIds 배열에 새 게시물 ID 추가
@@ -217,7 +222,6 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                 });
               },
             ),
-            
             const SizedBox(height: 16),
             _buildImagePicker(),
             const SizedBox(height: 24),

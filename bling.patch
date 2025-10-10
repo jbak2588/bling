@@ -1,251 +1,844 @@
-diff --git a/.gitignore b/.gitignore
-index 81112c902351e18dd7398f145689d0f32d4f524d..fbcda005fdb5701baade7a80a3abf3bc752d2787 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -26,27 +26,27 @@ android/build/
- 
- # Firebase
- .firebase/
- 
- # VS Code & IntelliJ/Android Studio
- .vscode/
- .idea/
- *.iml
- 
- # 기타 캐시/임시 파일
- *.log
- *.tmp
- *.lock
- .DS_Store
- 
- # Node dependencies (if exists)
- node_modules/
- 
- # Google Service Account Key
- serviceAccountKey.json
- *.key.json
- 
- # Secret API keys
- lib/api_keys.dart
- 
--# Android Manifest 파일 제외 (API 키 노출 방지용 임시 조치)
--android/app/src/main/AndroidManifest.xml
-\ No newline at end of file
-+# Android Manifest was previously ignored to prevent API key leaks.
-+# It is now tracked with placeholder values.
-diff --git a/android/app/src/main/AndroidManifest.xml b/android/app/src/main/AndroidManifest.xml
-new file mode 100644
-index 0000000000000000000000000000000000000000..6a175041ed3f8f9ed16659db59e3f17c03305c51
---- /dev/null
-+++ b/android/app/src/main/AndroidManifest.xml
-@@ -0,0 +1,36 @@
-+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-+    package="com.example.bling_app">
-+    <uses-permission android:name="android.permission.INTERNET" />
-+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-+    <uses-permission android:name="android.permission.CAMERA" />
-+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-+
-+    <application
-+        android:label="Bling App"
-+        android:name="${applicationName}"
-+        android:icon="@mipmap/ic_launcher">
-+        <activity
-+            android:name=".MainActivity"
-+            android:exported="true"
-+            android:launchMode="singleTop"
-+            android:theme="@style/LaunchTheme"
-+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-+            android:hardwareAccelerated="true"
-+            android:windowSoftInputMode="adjustResize">
-+            <meta-data
-+                android:name="io.flutter.embedding.android.NormalTheme"
-+                android:resource="@style/NormalTheme" />
-+            <meta-data
-+                android:name="flutterEmbedding"
-+                android:value="2" />
-+            <intent-filter>
-+                <action android:name="android.intent.action.MAIN" />
-+                <category android:name="android.intent.category.LAUNCHER" />
-+            </intent-filter>
-+        </activity>
-+        <meta-data
-+            android:name="com.google.android.geo.API_KEY"
-+            android:value="${googleMapsApiKey}" />
-+    </application>
-+</manifest>
-diff --git a/ios/Runner/Info.plist b/ios/Runner/Info.plist
-index d73713b67219da8f5f29ebd5d5f13fc6886fb913..db8ff050a9aa81bad06bb52bcb1e7aaf9d811019 100644
---- a/ios/Runner/Info.plist
-+++ b/ios/Runner/Info.plist
-@@ -16,34 +16,44 @@
- 	<string>6.0</string>
- 	<key>CFBundleName</key>
- 	<string>bling_app</string>
- 	<key>CFBundlePackageType</key>
- 	<string>APPL</string>
- 	<key>CFBundleShortVersionString</key>
- 	<string>$(FLUTTER_BUILD_NAME)</string>
- 	<key>CFBundleSignature</key>
- 	<string>????</string>
- 	<key>CFBundleVersion</key>
- 	<string>$(FLUTTER_BUILD_NUMBER)</string>
- 	<key>LSRequiresIPhoneOS</key>
- 	<true/>
- 	<key>UIApplicationSupportsIndirectInputEvents</key>
- 	<true/>
- 	<key>UILaunchStoryboardName</key>
- 	<string>LaunchScreen</string>
- 	<key>UIMainStoryboardFile</key>
- 	<string>Main</string>
- 	<key>UISupportedInterfaceOrientations</key>
- 	<array>
- 		<string>UIInterfaceOrientationPortrait</string>
- 		<string>UIInterfaceOrientationLandscapeLeft</string>
- 		<string>UIInterfaceOrientationLandscapeRight</string>
- 	</array>
--	<key>UISupportedInterfaceOrientations~ipad</key>
--	<array>
--		<string>UIInterfaceOrientationPortrait</string>
--		<string>UIInterfaceOrientationPortraitUpsideDown</string>
--		<string>UIInterfaceOrientationLandscapeLeft</string>
--		<string>UIInterfaceOrientationLandscapeRight</string>
--	</array>
-+        <key>UISupportedInterfaceOrientations~ipad</key>
-+        <array>
-+                <string>UIInterfaceOrientationPortrait</string>
-+                <string>UIInterfaceOrientationPortraitUpsideDown</string>
-+                <string>UIInterfaceOrientationLandscapeLeft</string>
-+                <string>UIInterfaceOrientationLandscapeRight</string>
-+        </array>
-+        <key>NSCameraUsageDescription</key>
-+        <string>Camera access is required to capture photos and videos.</string>
-+        <key>NSMicrophoneUsageDescription</key>
-+        <string>Microphone access is required to record audio.</string>
-+        <key>NSPhotoLibraryUsageDescription</key>
-+        <string>Photo library access is required to select pictures.</string>
-+        <key>NSLocationWhenInUseUsageDescription</key>
-+        <string>Location access is required to show nearby services.</string>
-+        <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-+        <string>Location access is required while the app runs in the background.</string>
- </dict>
- </plist>
-diff --git a/lib/main.dart b/lib/main.dart
-index 12d4d770cc77f4709346274f671b1f81fa4e0176..6da830763d588dc0baca80601a29d9db42f13997 100644
---- a/lib/main.dart
-+++ b/lib/main.dart
-@@ -1,54 +1,59 @@
- // lib/main.dart
- 
- /// [기획 문서: 00 Mainscreen & 런처 & Tab & Drawer QA.md]
- /// - 기획 요약: Keluharan 기반 지역 슈퍼앱의 메인 레이아웃, Gojek 런처 UX, 직관적 인터페이스, 상단 AppBar/슬라이드탭/Drawer/BottomNavigationBar 구조
- /// - 실제 코드 기능: BlingApp의 MaterialApp, 다국어 지원, AuthGate 진입점, 메인 화면 구조는 별도 위젯에서 구현
- /// - 비교: 기획의 전체 레이아웃/UX 구조는 main.dart에서 직접 구현되지 않고, 각 화면/네비게이션 위젯에서 분리 관리됨. 다국어, 초기화, 진입점 등은 기획과 일치
- library;
- 
-+import 'dart:io' show Platform;
-+
- import 'package:bling_app/features/auth/screens/auth_gate.dart';
- import 'package:easy_localization/easy_localization.dart';
- import 'package:firebase_core/firebase_core.dart';
- import 'package:flutter/material.dart';
- import 'package:google_fonts/google_fonts.dart';
- 
- import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
-+import 'package:google_maps_flutter_ios/google_maps_flutter_ios.dart';
- 
- import 'package:bling_app/firebase_options.dart';
- import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
- 
- 
- 
- void main() async {
-   WidgetsFlutterBinding.ensureInitialized();
- 
--// ✅ 지도 렌더러를 최신 버전으로 강제하는 코드를 추가합니다.
--  // 이 코드는 다른 초기화 코드보다 먼저 실행될 수 있습니다.
--  final GoogleMapsFlutterPlatform mapsImplementation = GoogleMapsFlutterPlatform.instance;
--  if (mapsImplementation is GoogleMapsFlutterAndroid) {
-+  // ✅ 플랫폼별 Google Maps 초기화
-+  final GoogleMapsFlutterPlatform mapsImplementation =
-+      GoogleMapsFlutterPlatform.instance;
-+  if (Platform.isAndroid && mapsImplementation is GoogleMapsFlutterAndroid) {
-     mapsImplementation.initializeWithRenderer(AndroidMapRenderer.latest);
-+  } else if (Platform.isIOS && mapsImplementation is GoogleMapsFlutterIOS) {
-+    // iOS-specific renderer configuration can go here if needed
+diff --git a/assets/lang/en.json b/assets/lang/en.json
+index 1e50a694434a81669beaa9be6fbaf767464772d7..8d0cc3d9989d90232a3b88bb5a3da6715dc81cb1 100644
+--- a/assets/lang/en.json
++++ b/assets/lang/en.json
+@@ -157,51 +157,53 @@
+       "share": "Share",
+       "edit": "Edit",
+       "delete": "Delete",
+       "category": "Category",
+       "categoryError": "Category: -",
+       "categoryNone": "No category",
+       "views": "Views",
+       "likes": "Likes",
+       "chats": "Chats",
+       "noSeller": "Seller info unavailable",
+       "noLocation": "Location info unavailable",
+       "seller": "Seller",
+       "dealLocation": "Deal location"
+     },
+     "dialog": {
+       "deleteTitle": "Delete Post",
+       "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
+       "cancel": "Cancel",
+       "deleteConfirm": "Delete",
+       "deleteSuccess": "Post deleted successfully."
+     },
+     "errors": {
+       "deleteError": "Failed to delete post: {error}",
+       "requiredField": "This field is required.",
+       "noPhoto": "Please add at least one photo.",
+-      "noCategory": "Please select a category."
++      "noCategory": "Please select a category.",
++      "loginRequired": "Login is required.",
++      "userNotFound": "User information could not be found."
+     },
+     "condition": {
+       "label": "Condition",
+       "new": "New",
+       "used": "Used"
+     },
+     "setLocationPrompt": "Please set your neighborhood first to see marketplace items!"
+   },
+   "ai_flow": {
+     "category_selection": {
+       "title": "Select AI Verification Category",
+       "error": "Error loading categories.",
+       "no_categories": "No categories available for verification."
+     },
+     "gallery_upload": {
+       "title": "Upload Photos (1/3)",
+       "instruction": "Let's analyze your {category} item.",
+       "min_photo_guide": "Please select at least {0} photos from your gallery for the AI to recognize the item.",
+       "min_photo_error": "At least {0} photos are required.",
+       "next_button": "Next Step"
+     },
+     "prediction": {
+       "title": "Confirm Product (2/3)",
+       "loading": "AI is analyzing the product...\nPlease wait.",
+       "uploading": "Uploading images securely...",
+@@ -403,51 +405,53 @@
+         "description": "Promote discounts or events at your store."
+       },
+       "etc": {
+         "name": "Etc.",
+         "description": "Share any other stories freely."
+       }
+     }
+   },
+   "localNewsCreate": {
+     "appBarTitle": "Create New Post",
+     "form": {
+       "categoryLabel": "Category",
+       "titleLabel": "Title",
+       "contentLabel": "Enter content",
+       "tagsLabel": "Tags (comma-separated)",
+       "tagsHint": "e.g. dog, freeshare"
+     },
+     "buttons": {
+       "addImage": "Add Image",
+       "submit": "Submit"
+     },
+     "alerts": {
+       "contentRequired": "Please enter content.",
+       "categoryRequired": "Please select a category.",
+       "success": "Post created successfully.",
+-      "failure": "Upload failed: {error}"
++      "failure": "Upload failed: {error}",
++      "loginRequired": "Login is required to create a post.",
++      "userNotFound": "User information could not be found."
+     }
+   },
+   "localNewsDetail": {
+     "appBarTitle": "Post",
+     "menu": {
+       "edit": "Edit",
+       "report": "Report",
+       "share": "Share"
+     },
+     "stats": {
+       "views": "Views",
+       "comments": "Comments",
+       "likes": "Likes",
+       "thanks": "Thanks"
+     },
+     "buttons": {
+       "comment": "Add a comment"
+     }
+   },
+   "localNewsEdit": {
+     "appBarTitle": "Edit Post",
+     "buttons": {
+       "submit": "Update"
+     },
+     "alerts": {
+@@ -943,33 +947,38 @@
+       "title": "Edit Lost/Found Item",
+       "save": "Save",
+       "success": "Item updated.",
+       "fail": "Failed to update item: {error}"
+     },
+     "detail": {
+       "title": "Lost & Found",
+       "location": "Location",
+       "registrant": "Registrant",
+       "contact": "Contact",
+       "deleteTitle": "Delete Post",
+       "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
+       "delete": "Delete",
+       "cancel": "Cancel",
+       "deleteSuccess": "Post deleted.",
+       "deleteFail": "Failed to delete post: {error}",
+       "editTooltip": "Edit",
+       "deleteTooltip": "Delete",
+       "noUser": "User not found",
+       "chatError": "Could not start chat: {error}"
+     }
+   },
+   "community": {
+     "title": "Community Screen"
+   },
++  "shared": {
++    "tagInput": {
++      "defaultHint": "Add tags (press space to confirm)"
++    }
++  },
+   "selectCategory": "Select category",
+   "address_neighborhood": "Neighborhood",
+   "address_detail_hint": "Address details",
+   "localNewsTagResult": {
+     "error": "An error occurred during search: {error}",
+     "empty": "No posts found with '#{tag}'."
+   }
+ }
+diff --git a/assets/lang/id.json b/assets/lang/id.json
+index 8efcebd7ec1c8a75358d0ba0c37014925469f77d..1c2971d2dd82618886aac2d514291a405044819f 100644
+--- a/assets/lang/id.json
++++ b/assets/lang/id.json
+@@ -157,51 +157,53 @@
+       "share": "Share",
+       "edit": "Eidt",
+       "delete": "Hapus",
+       "category": "Kategori",
+       "categoryError": "Kategori: -",
+       "categoryNone": "Tidak ada kategori",
+       "views": "Dilihat",
+       "likes": "Suka",
+       "chats": "Chat",
+       "noSeller": "Info penjual tidak tersedia",
+       "noLocation": "Info lokasi tidak tersedia",
+       "seller": "Penjual",
+       "dealLocation": "Lokasi transaksi"
+     },
+     "dialog": {
+       "deleteTitle": "Hapus Postingan",
+       "deleteContent": "Apakah Anda yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.",
+       "cancel": "Batal",
+       "deleteConfirm": "Hapus",
+       "deleteSuccess": "Postingan berhasil dihapus."
+     },
+     "errors": {
+       "deleteError": "Gagal menghapus postingan: {error}",
+       "requiredField": "Kolom ini wajib diisi.",
+       "noPhoto": "Silakan tambahkan minimal 1 foto.",
+-      "noCategory": "Silakan pilih kategori."
++      "noCategory": "Silakan pilih kategori.",
++      "loginRequired": "Anda harus masuk.",
++      "userNotFound": "Informasi pengguna tidak ditemukan."
+     },
+     "condition": {
+       "label": "Kondisi",
+       "new": "Baru",
+       "used": "Bekas"
+     },
+     "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!"
+   },
+   "ai_flow": {
+     "category_selection": {
+       "title": "Pilih Kategori Verifikasi AI",
+       "error": "Gagal memuat kategori.",
+       "no_categories": "Tidak ada kategori yang tersedia untuk verifikasi."
+     },
+     "gallery_upload": {
+       "title": "Unggah Foto (1/3)",
+       "instruction": "Mari analisis barang {category} Anda.",
+       "min_photo_guide": "Pilih minimal {0} foto dari galeri Anda agar AI dapat mengenali barang tersebut.",
+       "min_photo_error": "Diperlukan minimal {0} foto.",
+       "next_button": "Langkah Berikutnya"
+     },
+     "prediction": {
+       "title": "Konfirmasi Produk (2/3)",
+       "loading": "AI sedang menganalisis produk...\nHarap tunggu.",
+       "uploading": "Mengunggah gambar dengan aman...",
+@@ -403,51 +405,53 @@
+         "description": "Promosikan diskon atau acara di toko Anda."
+       },
+       "etc": {
+         "name": "Lain-lain",
+         "description": "Bagikan cerita lain dengan bebas."
+       }
+     }
+   },
+   "localNewsCreate": {
+     "appBarTitle": "Buat Postingan Baru",
+     "form": {
+       "categoryLabel": "Kategori",
+       "titleLabel": "Judul",
+       "contentLabel": "Masukkan konten",
+       "tagsLabel": "Tag (pisahkan dengan koma)",
+       "tagsHint": "cth. anjing, gratisan"
+     },
+     "buttons": {
+       "addImage": "Tambah Gambar",
+       "submit": "Kirim"
+     },
+     "alerts": {
+       "contentRequired": "Harap masukkan konten.",
+       "categoryRequired": "Harap pilih kategori.",
+       "success": "Postingan berhasil dibuat.",
+-      "failure": "Gagal mengunggah: {error}"
++      "failure": "Gagal mengunggah: {error}",
++      "loginRequired": "Anda harus masuk untuk membuat postingan.",
++      "userNotFound": "Informasi pengguna tidak ditemukan."
+     }
+   },
+   "localNewsDetail": {
+     "appBarTitle": "Postingan",
+     "menu": {
+       "edit": "Ubah",
+       "report": "Lapor",
+       "share": "Bagikan"
+     },
+     "stats": {
+       "views": "Dilihat",
+       "comments": "Komentar",
+       "likes": "Suka",
+       "thanks": "Terima Kasih"
+     },
+     "buttons": {
+       "comment": "Tambahkan komentar"
+     }
+   },
+   "localNewsEdit": {
+     "appBarTitle": "Ubah Postingan",
+     "buttons": {
+       "submit": "Perbarui"
+     },
+     "alerts": {
+@@ -943,33 +947,38 @@
+       "title": "Ubah Barang Hilang/Temuan",
+       "save": "Simpan",
+       "success": "Berhasil diperbarui.",
+       "fail": "Gagal memperbarui: {error}"
+     },
+     "detail": {
+       "title": "Barang Hilang/Temuan",
+       "location": "Lokasi",
+       "registrant": "Pendaftar",
+       "contact": "Hubungi",
+       "deleteTitle": "Hapus Postingan",
+       "deleteContent": "Yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.",
+       "delete": "Hapus",
+       "cancel": "Batal",
+       "deleteSuccess": "Postingan dihapus.",
+       "deleteFail": "Gagal menghapus postingan: {error}",
+       "editTooltip": "Ubah",
+       "deleteTooltip": "Hapus",
+       "noUser": "Info pengguna tidak ada",
+       "chatError": "Tidak dapat memulai chat: {error}"
+     }
+   },
+   "community": {
+     "title": "Halaman Komunitas"
+   },
++  "shared": {
++    "tagInput": {
++      "defaultHint": "Tambahkan tag (tekan spasi untuk menambahkan)"
++    }
++  },
+   "selectCategory": "Pilih kategori",
+   "address_neighborhood": "Lingkungan",
+   "address_detail_hint": "Alamat detail",
+   "localNewsTagResult": {
+     "error": "Terjadi kesalahan saat mencari: {error}",
+     "empty": "Tidak ada postingan dengan tag '#{tag}'."
+   }
+ }
+diff --git a/assets/lang/ko.json b/assets/lang/ko.json
+index 04333fd2051afab6bf3b8f589f5c55220537abbf..ca591f2197f7e8da8f73c4b222bf163d3da49e26 100644
+--- a/assets/lang/ko.json
++++ b/assets/lang/ko.json
+@@ -156,51 +156,53 @@
+       "share": "공유",
+       "edit": "편집",
+       "delete": "삭제",
+       "category": "카테고리",
+       "categoryError": "카테고리: -",
+       "categoryNone": "카테고리 없음",
+       "views": "조회",
+       "likes": "관심",
+       "chats": "채팅",
+       "noSeller": "판매자 정보 없음",
+       "noLocation": "지역 정보 없음",
+       "seller": "판매자",
+       "dealLocation": "거래 장소"
+     },
+     "dialog": {
+       "deleteTitle": "게시물 삭제",
+       "deleteContent": "이 게시물을 정말 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+       "cancel": "취소",
+       "deleteConfirm": "삭제",
+       "deleteSuccess": "게시물이 성공적으로 삭제되었습니다."
+     },
+     "errors": {
+       "deleteError": "게시물을 삭제하지 못했습니다: {error}",
+       "requiredField": "필수 입력 항목입니다.",
+       "noPhoto": "사진을 1장 이상 등록해주세요.",
+-      "noCategory": "카테고리를 선택해주세요."
++      "noCategory": "카테고리를 선택해주세요.",
++      "loginRequired": "로그인이 필요합니다.",
++      "userNotFound": "사용자 정보를 찾을 수 없습니다."
+     },
+     "condition": {
+       "label": "상태",
+       "new": "새것",
+       "used": "중고"
+     },
+     "setLocationPrompt": "중고거래 상품을 보려면 먼저 내 동네를 설정해주세요!"
+   },
+   "ai_flow": {
+     "category_selection": {
+       "title": "AI 검수 카테고리 선택",
+       "error": "카테고리를 불러오는 중 오류가 발생했습니다.",
+       "no_categories": "검수를 지원하는 카테고리가 없습니다."
+     },
+     "gallery_upload": {
+       "title": "사진 등록 (1/3)",
+       "instruction": "{category} 상품을 분석할게요.",
+       "min_photo_guide": "AI가 상품을 인식할 수 있도록 최소 {0}장 이상의 사진을 갤러리에서 선택해주세요.",
+       "min_photo_error": "최소 {0}장 이상의 사진이 필요합니다.",
+       "next_button": "다음 단계로"
+     },
+     "prediction": {
+       "title": "상품 확인 (2/3)",
+       "loading": "AI가 상품을 분석하고 있습니다...\n잠시만 기다려주세요.",
+       "uploading": "이미지를 안전하게 업로드하는 중...",
+@@ -402,51 +404,53 @@
+         "description": "가게의 할인 정보나 이벤트를 홍보해보세요."
+       },
+       "etc": {
+         "name": "기타",
+         "description": "어디에도 속하지 않는 자유로운 이야기를 나눠요."
+       }
+     }
+   },
+   "localNewsCreate": {
+     "appBarTitle": "새 게시물 작성",
+     "form": {
+       "categoryLabel": "카테고리",
+       "titleLabel": "제목",
+       "contentLabel": "내용을 입력하세요",
+       "tagsLabel": "태그 (쉼표로 구분)",
+       "tagsHint": "예: 강아지, 무료나눔"
+     },
+     "buttons": {
+       "addImage": "이미지 추가",
+       "submit": "등록하기"
+     },
+     "alerts": {
+       "contentRequired": "내용을 입력해주세요.",
+       "categoryRequired": "카테고리를 선택해주세요.",
+       "success": "게시글이 등록되었습니다.",
+-      "failure": "업로드 실패: {error}"
++      "failure": "업로드 실패: {error}",
++      "loginRequired": "게시물을 작성하려면 로그인해야 합니다.",
++      "userNotFound": "사용자 정보를 찾을 수 없습니다."
+     }
+   },
+   "localNewsDetail": {
+     "appBarTitle": "게시물",
+     "menu": {
+       "edit": "수정하기",
+       "report": "신고하기",
+       "share": "공유하기"
+     },
+     "stats": {
+       "views": "조회",
+       "comments": "댓글",
+       "likes": "좋아요",
+       "thanks": "감사"
+     },
+     "buttons": {
+       "comment": "댓글 달기"
+     }
+   },
+   "localNewsEdit": {
+     "appBarTitle": "게시물 수정",
+     "buttons": {
+       "submit": "수정하기"
+     },
+     "alerts": {
+@@ -942,33 +946,38 @@
+       "title": "분실/습득물 수정",
+       "save": "저장",
+       "success": "수정되었습니다.",
+       "fail": "수정에 실패했습니다: {error}"
+     },
+     "detail": {
+       "title": "분실/습득물",
+       "location": "장소",
+       "registrant": "등록자",
+       "contact": "연락하기",
+       "deleteTitle": "게시글 삭제",
+       "deleteContent": "정말로 이 게시글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+       "delete": "삭제",
+       "cancel": "취소",
+       "deleteSuccess": "게시글이 삭제되었습니다.",
+       "deleteFail": "삭제에 실패했습니다: {error}",
+       "editTooltip": "수정하기",
+       "deleteTooltip": "삭제하기",
+       "noUser": "사용자 정보 없음",
+       "chatError": "채팅을 시작할 수 없습니다: {error}"
+     }
+   },
+   "community": {
+     "title": "커뮤니티 화면"
+   },
++  "shared": {
++    "tagInput": {
++      "defaultHint": "태그를 입력하고 스페이스바로 추가하세요"
++    }
++  },
+   "selectCategory": "카테고리 선택",
+   "address_neighborhood": "동네",
+   "address_detail_hint": "상세 주소",
+   "localNewsTagResult": {
+     "error": "검색 중 오류가 발생했습니다: {error}",
+     "empty": "'#{tag}' 태그가 포함된 게시물이 없습니다."
+   }
+ }
+diff --git a/lib/features/local_news/screens/create_local_news_screen.dart b/lib/features/local_news/screens/create_local_news_screen.dart
+index 74106f6b926a50261aaa162f09b7559aaf4ffea5..6b27329c66a7d8cc493959dab0752d65535b9801 100644
+--- a/lib/features/local_news/screens/create_local_news_screen.dart
++++ b/lib/features/local_news/screens/create_local_news_screen.dart
+@@ -71,57 +71,61 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
+     for (var image in _selectedImages) {
+       final ref = FirebaseStorage.instance.ref(
+           'post_images/${DateTime.now().millisecondsSinceEpoch}_${image.name}');
+       final uploadTask = await ref.putFile(File(image.path));
+       downloadUrls.add(await uploadTask.ref.getDownloadURL());
+     }
+     return downloadUrls;
    }
  
-   await EasyLocalization.ensureInitialized();
-   await Firebase.initializeApp(
-     options: DefaultFirebaseOptions.currentPlatform,
-   );
+   Future<void> _submitPost() async {
+     if (_contentController.text.trim().isEmpty) {
+       ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('localNewsCreate.alerts.contentRequired'.tr())));
+       return;
+     }
+     if (_selectedCategory == null) {
+       ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
+       return;
+     }
  
-   runApp(
-     EasyLocalization(
-       supportedLocales: const [Locale('id'), Locale('en'), Locale('ko')],
-       path: 'assets/lang',
-       fallbackLocale: const Locale('id'),
-       startLocale: const Locale('id'),
-       child: const BlingApp(),
-     ),
-   );
- }
+     setState(() => _isSubmitting = true);
  
- class BlingApp extends StatelessWidget {
-   const BlingApp({super.key});
+     try {
+       final user = FirebaseAuth.instance.currentUser;
+-      if (user == null) throw Exception("로그인이 필요합니다.");   // TODO : 다국어 작업
++      if (user == null) {
++        throw Exception('localNewsCreate.alerts.loginRequired'.tr());
++      }
+ 
+       final userDoc = await FirebaseFirestore.instance
+           .collection('users')
+           .doc(user.uid)
+           .get();
+-      if (!userDoc.exists) throw Exception("사용자 정보를 찾을 수 없습니다.");   // TODO : 다국어 작업
++      if (!userDoc.exists) {
++        throw Exception('localNewsCreate.alerts.userNotFound'.tr());
++      }
+       final userModel = UserModel.fromFirestore(userDoc);
+ 
+       final imageUrls = await _uploadImages();
+       // final tags = _tagsController.text
+       //     .split(',')
+       //     .map((tag) => tag.trim())
+       //     .where((tag) => tag.isNotEmpty)
+       //     .toList();
+ 
+       final postData = {
+         'userId': user.uid,
+         'title': _titleController.text.trim(),
+         'body': _contentController.text.trim(),
+         'mediaUrl': imageUrls,
+         'mediaType': imageUrls.isNotEmpty ? 'image' : null,
+         'category': _selectedCategory!.categoryId,
+         'tags': _tags, // ✅ 공용 위젯과 연결된 _tags 상태 사용
+         'locationName': userModel.locationName,
+         'locationParts': userModel.locationParts,
+         'geoPoint': userModel.geoPoint,
+         'createdAt': FieldValue.serverTimestamp(),
+         'likesCount': 0,
+         'commentsCount': 0,
+         'viewsCount': 0,
+         'thanksCount': 0,
+diff --git a/lib/features/local_news/screens/edit_local_news_screen.dart b/lib/features/local_news/screens/edit_local_news_screen.dart
+index e1f3d276c23ca97626cfc13227a6ac7f81e0b84d..ee38d7418dadf2f31a16fd034eace1c377c37b97 100644
+--- a/lib/features/local_news/screens/edit_local_news_screen.dart
++++ b/lib/features/local_news/screens/edit_local_news_screen.dart
+@@ -112,57 +112,64 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
+       return;
+     }
+ 
+     setState(() => _isSubmitting = true);
+ 
+     try {
+       final newImageUrls = await _uploadImages();
+       final finalImageUrls = [..._existingImageUrls, ...newImageUrls];
+ 
+       final updatedData = {
+         'title': _titleController.text.trim(),
+         'body': _contentController.text.trim(),
+         'mediaUrl': finalImageUrls,
+         'mediaType': finalImageUrls.isNotEmpty ? 'image' : null,
+         'category': _selectedCategory!.categoryId,
+         'tags': _tags, // ✅ _tags 상태는 그대로 사용됩니다.
+         'updatedAt': FieldValue.serverTimestamp(),
+       };
+ 
+       await FirebaseFirestore.instance
+           .collection('posts')
+           .doc(widget.post.id)
+           .update(updatedData);
+ 
+       if (!mounted) return;
+-      ScaffoldMessenger.of(context)
+-          .showSnackBar(const SnackBar(content: Text('게시글이 수정되었습니다')));   // TODO : 다국어 작업
++      ScaffoldMessenger.of(context).showSnackBar(
++        SnackBar(content: Text('localNewsEdit.alerts.success'.tr())),
++      );
+       Navigator.of(context).pop(true);
+     } catch (e) {
+       if (mounted) {
+-        ScaffoldMessenger.of(context)
+-            .showSnackBar(SnackBar(content: Text('수정 실패: $e')));   // TODO : 다국어 작업
++        ScaffoldMessenger.of(context).showSnackBar(
++          SnackBar(
++            content: Text(
++              'localNewsEdit.alerts.failure'
++                  .tr(namedArgs: {'error': e.toString()}),
++            ),
++          ),
++        );
+       }
+     } finally {
+       if (mounted) setState(() => _isSubmitting = false);
+     }
+   }
+ 
+   // ❌ 기존 커스텀 태그 위젯 빌드 함수는 완전히 제거합니다.
+   // Widget _buildCustomChipsInput() { ... }
  
    @override
    Widget build(BuildContext context) {
-     return MaterialApp(
-       localizationsDelegates: context.localizationDelegates,
-diff --git a/pubspec.yaml b/pubspec.yaml
-index e996a81715f992b6331cb3eae667ab102ce47597..bd9411f3a46af64eccfd3e42f48b77591c3b702c 100644
---- a/pubspec.yaml
-+++ b/pubspec.yaml
-@@ -28,43 +28,44 @@ dependencies:
-   geolocator: ^14.0.2
-   geocoding: ^4.0.0
-   permission_handler: ^12.0.1
-   geoflutterfire_plus: ^0.0.21
+     return Scaffold(
+       appBar: AppBar(title: Text('localNewsEdit.appBarTitle'.tr())),
+       body: SingleChildScrollView(
+         padding: const EdgeInsets.all(16),
+         child: Column(
+           crossAxisAlignment: CrossAxisAlignment.stretch,
+           children: [
+             DropdownButtonFormField<PostCategoryModel>(
+               initialValue: _selectedCategory,
+               decoration: InputDecoration(
+                   labelText: 'localNewsCreate.form.categoryLabel'.tr(),
+                   border: const OutlineInputBorder()),
+               items: AppCategories.postCategories.map((category) {
+                 return DropdownMenuItem<PostCategoryModel>(
+diff --git a/lib/features/marketplace/screens/product_edit_screen.dart b/lib/features/marketplace/screens/product_edit_screen.dart
+index b48e74e3e0a5bbde18ac2b6ec0559be416f381c5..5b8e4e35e324e16994abbfaa97754d5cdef1efda 100644
+--- a/lib/features/marketplace/screens/product_edit_screen.dart
++++ b/lib/features/marketplace/screens/product_edit_screen.dart
+@@ -184,57 +184,59 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
+     if (!_formKey.currentState!.validate()) {
+       return;
+     }
  
-   get: ^4.6.6
-   uuid: ^4.3.3
+     setState(() {
+       _isLoading = true;
+     });
  
-   # ▼▼▼▼▼ Google Places API를 위한 패키지 추가 ▼▼▼▼▼
-   flutter_google_maps_webservices: ^1.1.1
-   
-   
-   # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+     try {
+       // 새로 추가된 이미지 업로드
+       List<String> uploadedUrls = [];
+       for (var image in _images) {
+         final fileName = DateTime.now().millisecondsSinceEpoch.toString();
+         final ref =
+             FirebaseStorage.instance.ref().child('product_images/$fileName');
+         final uploadTask = ref.putFile(File(image.path));
+         final snapshot = await uploadTask;
+         uploadedUrls.add(await snapshot.ref.getDownloadURL());
+       }
  
-   cupertino_icons: ^1.0.8
-   google_maps_flutter: ^2.12.3
-   intl: ^0.20.2
-   flutter_chip_tags: ^2.0.2
-   provider: ^6.1.5
-   video_player: ^2.10.0
-   visibility_detector: ^0.4.0+2
-   cached_network_image: ^3.4.0
-   smooth_page_indicator: ^1.2.1
-   google_maps_flutter_platform_interface: ^2.14.0
-   google_maps_flutter_android: ^2.18.2
-+  google_maps_flutter_ios: ^2.18.2
-   http: ^1.5.0
-  
-  
-   
+       // 기존 이미지 + 새로 업로드된 이미지 합치기
+       final allImageUrls = [..._existingImageUrls, ...uploadedUrls];
  
+       // ✅ [핵심 수정] 사용자의 최신 정보를 가져와서 위치 정보를 업데이트합니다.
+       final user = FirebaseAuth.instance.currentUser;
+-      if (user == null) throw Exception("로그인이 필요합니다."); // TODO: 다국어 작업
++      if (user == null) {
++        throw Exception('marketplace.errors.loginRequired'.tr());
++      }
+       final userDoc = await FirebaseFirestore.instance
+           .collection('users')
+           .doc(user.uid)
+           .get();
+       if (!userDoc.exists) {
+-        throw Exception("사용자 정보를 찾을 수 없습니다."); // TODO: 다국어 작업
++        throw Exception('marketplace.errors.userNotFound'.tr());
+       }
+       final userModel = UserModel.fromFirestore(userDoc);
  
- dev_dependencies:
-   flutter_test:
-     sdk: flutter
-   flutter_lints: ^6.0.0
+       // ✅ [핵심 수정] copyWith 대신, Map을 직접 만들어 업데이트합니다.
+       final updatedData = {
+         'title': _titleController.text,
+         'price': int.tryParse(_priceController.text) ?? 0,
+         'description': _descriptionController.text,
+         'transactionPlace': _transactionPlaceController.text,
+         'negotiable': _isNegotiable,
+         'imageUrls': allImageUrls,
+         'categoryId': _selectedCategory?.id ?? widget.product.categoryId,
+         'condition': _condition,
  
- flutter:
-   uses-material-design: true
-   assets:
-     - assets/lang/
-     - assets/icons/
-     - assets/sounds/
-     - assets/data/
+         'tags': _tags, // ✅ 수정된 태그를 업데이트 데이터에 포함 : 2025년 8월 30일
+         'updatedAt': Timestamp.now(),
+ 
+         // ✅ 구버전 address 대신, 사용자의 최신 위치 정보로 덮어씁니다.
+         'locationName': userModel.locationName,
+         'locationParts': userModel.locationParts,
+         'geoPoint': userModel.geoPoint,
+       };
+ 
+ // ✅ [핵심 수정] toJson() 대신 생성한 Map을 사용하여 update합니다.
+       await FirebaseFirestore.instance
+diff --git a/lib/features/marketplace/screens/product_registration_screen.dart b/lib/features/marketplace/screens/product_registration_screen.dart
+index 5f1de41918a7a4a4758c6bace8859aad26c4f353..0eecffdac7799442d6042fcc10dda575c740cbd7 100644
+--- a/lib/features/marketplace/screens/product_registration_screen.dart
++++ b/lib/features/marketplace/screens/product_registration_screen.dart
+@@ -132,51 +132,51 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
+     }
+     if (_selectedCategory == null) {
+       ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('marketplace.errors.noCategory'.tr())));
+       return;
+     }
+     if (!_formKey.currentState!.validate()) {
+       return;
+     }
+ 
+     setState(() => _isLoading = true);
+ 
+     final user = FirebaseAuth.instance.currentUser;
+     if (user == null) {
+       setState(() => _isLoading = false);
+       return;
+     }
+ 
+     try {
+       // 현재 사용자의 프로필 정보를 가져와서 위치 데이터를 확보
+       final userDoc = await FirebaseFirestore.instance
+           .collection('users')
+           .doc(user.uid)
+           .get();
+       if (!userDoc.exists) {
+-        throw Exception("사용자 정보를 찾을 수 없습니다."); // TODO : 다국어 작업
++        throw Exception('marketplace.errors.userNotFound'.tr());
+       }
+       final userModel = UserModel.fromFirestore(userDoc);
+ 
+       // 이미지 업로드
+       List<String> imageUrls = [];
+       for (var image in _images) {
+         final fileName = const Uuid().v4();
+         final ref =
+             FirebaseStorage.instance.ref().child('product_images/$fileName');
+         await ref.putFile(File(image.path));
+         imageUrls.add(await ref.getDownloadURL());
+       }
+ 
+       final newProductId =
+           FirebaseFirestore.instance.collection('products').doc().id;
+ 
+       final newProduct = ProductModel(
+         id: newProductId,
+         userId: user.uid,
+         title: _titleController.text,
+         description: _descriptionController.text,
+         imageUrls: imageUrls,
+         categoryId: _selectedCategory!.id,
+         price: int.tryParse(_priceController.text) ?? 0,
+         negotiable: _isNegotiable,
+diff --git a/lib/features/shared/widgets/custom_tag_input_field.dart b/lib/features/shared/widgets/custom_tag_input_field.dart
+index 11e0592a8f55bd4bfd3630a8f800e2f07d6a8763..1716b53bc536d5c78d6ca733c6ee15358b828b17 100644
+--- a/lib/features/shared/widgets/custom_tag_input_field.dart
++++ b/lib/features/shared/widgets/custom_tag_input_field.dart
+@@ -1,37 +1,38 @@
++import 'package:easy_localization/easy_localization.dart';
+ import 'package:flutter/material.dart';
+ 
+ class CustomTagInputField extends StatefulWidget {
+   final Function(List<String>) onTagsChanged;
+   final List<String>? initialTags;
+-  final String hintText;
++  final String? hintText;
+ 
+   const CustomTagInputField({
+     super.key,
+     required this.onTagsChanged,
+     this.initialTags,
+-    this.hintText = '태그를 입력하세요 (스페이스바로 추가)',   // TODO : 다국어 작업
++    this.hintText,
+   });
+ 
+   @override
+   State<CustomTagInputField> createState() => _CustomTagInputFieldState();
+ }
+ 
+ class _CustomTagInputFieldState extends State<CustomTagInputField> {
+   final TextEditingController _textController = TextEditingController();
+   final FocusNode _focusNode = FocusNode();
+   late List<String> _tags;
+ 
+   @override
+   void initState() {
+     super.initState();
+     _tags = widget.initialTags ?? [];
+     _textController.addListener(_onTextChanged);
+   }
+ 
+   @override
+   void dispose() {
+     _textController.removeListener(_onTextChanged);
+     _textController.dispose();
+     _focusNode.dispose();
+     super.dispose();
+   }
+@@ -42,70 +43,73 @@ class _CustomTagInputFieldState extends State<CustomTagInputField> {
+       _addTag(text.trim());
+     }
+   }
+ 
+   void _addTag(String tag) {
+     if (tag.isNotEmpty && !_tags.contains(tag)) {
+       setState(() {
+         _tags.add(tag);
+         _textController.clear();
+       });
+       widget.onTagsChanged(_tags);
+     } else {
+        _textController.clear();
+     }
+   }
+ 
+   void _removeTag(String tag) {
+     setState(() {
+       _tags.remove(tag);
+     });
+     widget.onTagsChanged(_tags);
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
++    final resolvedHintText =
++        widget.hintText ?? 'shared.tagInput.defaultHint'.tr();
++
+     return GestureDetector(
+       onTap: () {
+         _focusNode.requestFocus();
+       },
+       child: Container(
+         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+         decoration: BoxDecoration(
+           border: Border.all(color: Colors.grey.shade400),
+           borderRadius: BorderRadius.circular(8.0),
+         ),
+         child: Wrap(
+           spacing: 8.0,
+           runSpacing: 4.0,
+           crossAxisAlignment: WrapCrossAlignment.center,
+           children: [
+             ..._tags.map(
+               (tag) => Chip(
+                 label: Text(tag),
+                 onDeleted: () => _removeTag(tag),
+                 deleteIcon: const Icon(Icons.close, size: 16),
+                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
+               ),
+             ),
+             SizedBox(
+               width: 150, // TextField의 최소 너비 확보
+               child: TextField(
+                 controller: _textController,
+                 focusNode: _focusNode,
+                 decoration: InputDecoration(
+                   border: InputBorder.none,
+-                  hintText: _tags.isEmpty ? widget.hintText : '',
++                  hintText: _tags.isEmpty ? resolvedHintText : '',
+                   isDense: true,
+                   contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
+                 ),
+                 onSubmitted: (value) {
+                   _addTag(value.trim());
+                 },
+               ),
+             ),
+           ],
+         ),
+       ),
+     );
+   }
+ }
 \ No newline at end of file

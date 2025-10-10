@@ -9,7 +9,7 @@ class CustomTagInputField extends StatefulWidget {
     super.key,
     required this.onTagsChanged,
     this.initialTags,
-    this.hintText = '태그를 입력하세요 (스페이스바로 추가)',   // TODO : 다국어 작업
+    this.hintText = '태그를 입력하세요 (스페이스바로 추가)', // DO : 다국어 작업
   });
 
   @override
@@ -51,7 +51,7 @@ class _CustomTagInputFieldState extends State<CustomTagInputField> {
       });
       widget.onTagsChanged(_tags);
     } else {
-       _textController.clear();
+      _textController.clear();
     }
   }
 

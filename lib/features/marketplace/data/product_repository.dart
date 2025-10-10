@@ -5,6 +5,7 @@ import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 class ProductRepository {
@@ -32,7 +33,7 @@ class ProductRepository {
       await _firestore.collection('products').add(product.toJson());
     } catch (e) {
       // 에러 처리
-      print('Firestore 상품 추가 에러: $e');
+      debugPrint('Firestore 상품 추가 에러: $e');
       rethrow;
     }
   }
@@ -50,7 +51,7 @@ class ProductRepository {
         'updatedAt': Timestamp.now(),
       });
     } catch (e) {
-      print('상품 상태 업데이트 에러: $e');
+      debugPrint('상품 상태 업데이트 에러: $e');
       rethrow;
     }
   }

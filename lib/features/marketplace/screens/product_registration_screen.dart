@@ -154,7 +154,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
           .doc(user.uid)
           .get();
       if (!userDoc.exists) {
-        throw Exception("사용자 정보를 찾을 수 없습니다."); // TODO : 다국어 작업
+        throw Exception('marketplace.errors.userNotFound'.tr());
       }
       final userModel = UserModel.fromFirestore(userDoc);
 

@@ -206,13 +206,15 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
 
       // ✅ [핵심 수정] 사용자의 최신 정보를 가져와서 위치 정보를 업데이트합니다.
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception("로그인이 필요합니다."); // TODO: 다국어 작업
+      if (user == null) {
+        throw Exception('marketplace.errors.loginRequired'.tr());
+      }
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
       if (!userDoc.exists) {
-        throw Exception("사용자 정보를 찾을 수 없습니다."); // TODO: 다국어 작업
+        throw Exception('marketplace.errors.userNotFound'.tr());
       }
       final userModel = UserModel.fromFirestore(userDoc);
 
@@ -442,7 +444,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _transactionPlaceController,
-                 decoration: InputDecoration(
+                decoration: InputDecoration(
                     labelText:
                         'marketplace.registration.addressDetailHint'.tr()),
               ),
@@ -476,7 +478,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 onChanged: (value) =>
                     setState(() => _condition = value ?? 'used'),
               ),
-             // ✅ 공용 태그 위젯 추가 (초기값 전달)
+              // ✅ 공용 태그 위젯 추가 (초기값 전달)
               CustomTagInputField(
                 initialTags: _tags,
                 hintText: 'marketplace.registration.tagsHint'.tr(),

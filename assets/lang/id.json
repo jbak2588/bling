@@ -179,7 +179,9 @@
       "deleteError": "Gagal menghapus postingan: {error}",
       "requiredField": "Kolom ini wajib diisi.",
       "noPhoto": "Silakan tambahkan minimal 1 foto.",
-      "noCategory": "Silakan pilih kategori."
+      "noCategory": "Silakan pilih kategori.",
+      "loginRequired": "Anda harus masuk.",
+      "userNotFound": "Informasi pengguna tidak ditemukan."
     },
     "condition": {
       "label": "Kondisi",
@@ -425,7 +427,9 @@
       "contentRequired": "Harap masukkan konten.",
       "categoryRequired": "Harap pilih kategori.",
       "success": "Postingan berhasil dibuat.",
-      "failure": "Gagal mengunggah: {error}"
+      "failure": "Gagal mengunggah: {error}",
+      "loginRequired": "Anda harus masuk untuk membuat postingan.",
+      "userNotFound": "Informasi pengguna tidak ditemukan."
     }
   },
   "localNewsDetail": {
@@ -964,6 +968,11 @@
   },
   "community": {
     "title": "Halaman Komunitas"
+  },
+    "shared": {
+    "tagInput": {
+      "defaultHint": "Tambahkan tag (tekan spasi untuk menambahkan)"
+    }
   },
   "selectCategory": "Pilih kategori",
   "address_neighborhood": "Lingkungan",

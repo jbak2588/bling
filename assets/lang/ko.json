@@ -178,7 +178,9 @@
       "deleteError": "게시물을 삭제하지 못했습니다: {error}",
       "requiredField": "필수 입력 항목입니다.",
       "noPhoto": "사진을 1장 이상 등록해주세요.",
-      "noCategory": "카테고리를 선택해주세요."
+      "noCategory": "카테고리를 선택해주세요.",
+      "loginRequired": "로그인이 필요합니다.",
+      "userNotFound": "사용자 정보를 찾을 수 없습니다."
     },
     "condition": {
       "label": "상태",
@@ -424,7 +426,9 @@
       "contentRequired": "내용을 입력해주세요.",
       "categoryRequired": "카테고리를 선택해주세요.",
       "success": "게시글이 등록되었습니다.",
-      "failure": "업로드 실패: {error}"
+      "failure": "업로드 실패: {error}",
+      "loginRequired": "게시물을 작성하려면 로그인해야 합니다.",
+      "userNotFound": "사용자 정보를 찾을 수 없습니다."
     }
   },
   "localNewsDetail": {
@@ -963,6 +967,11 @@
   },
   "community": {
     "title": "커뮤니티 화면"
+  },
+    "shared": {
+    "tagInput": {
+      "defaultHint": "태그를 입력하고 스페이스바로 추가하세요"
+    }
   },
   "selectCategory": "카테고리 선택",
   "address_neighborhood": "동네",
