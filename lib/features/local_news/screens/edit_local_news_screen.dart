@@ -14,7 +14,6 @@ import '../../../core/constants/app_categories.dart';
 import '../models/post_category_model.dart';
 import '../models/post_model.dart';
 
-
 class EditLocalNewsScreen extends StatefulWidget {
   final PostModel post;
   const EditLocalNewsScreen({super.key, required this.post});
@@ -26,10 +25,10 @@ class EditLocalNewsScreen extends StatefulWidget {
 class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  
+
   // ❌ 공용 위젯으로 대체되었으므로 기존 태그 컨트롤러는 제거합니다.
-  // final _tagInputController = TextEditingController(); 
-  
+  // final _tagInputController = TextEditingController();
+
   // ✅ 태그 목록 상태는 그대로 유지합니다. 공용 위젯이 이 상태를 업데이트합니다.
   List<String> _tags = [];
 
@@ -48,7 +47,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
     _tags = List<String>.from(widget.post.tags);
 
     if (widget.post.mediaUrl != null) {
-        _existingImageUrls.addAll(widget.post.mediaUrl!);
+      _existingImageUrls.addAll(widget.post.mediaUrl!);
     }
 
     _selectedCategory = AppCategories.postCategories.firstWhere(
@@ -62,7 +61,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
     _titleController.dispose();
     _contentController.dispose();
     // ❌ 더 이상 사용하지 않으므로 dispose 호출도 제거합니다.
-    // _tagInputController.dispose(); 
+    // _tagInputController.dispose();
     super.dispose();
   }
 
@@ -134,13 +133,20 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
           .update(updatedData);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('게시글이 수정되었습니다')));   // TODO : 다국어 작업
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('localNewsEdit.alerts.success'.tr())),
+      );
       Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('수정 실패: $e')));   // TODO : 다국어 작업
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'localNewsEdit.alerts.failure'
+                  .tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -192,7 +198,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
                     labelText: 'localNewsCreate.form.contentLabel'.tr(),
                     border: const OutlineInputBorder())),
             const SizedBox(height: 16),
-            
+
             // ✅ 교체된 공용 커스텀 태그 위젯을 사용합니다.
             CustomTagInputField(
               initialTags: _tags, // 초기 태그 목록을 전달합니다.
@@ -234,7 +240,8 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
         OutlinedButton.icon(
           onPressed: totalImageCount >= 10 ? null : _pickImages,
           icon: const Icon(Icons.camera_alt),
-          label: Text('${'localNewsCreate.buttons.addImage'.tr()} ($totalImageCount/10)'),
+          label: Text(
+              '${'localNewsCreate.buttons.addImage'.tr()} ($totalImageCount/10)'),
         ),
         const SizedBox(height: 8),
         if (totalImageCount > 0)
@@ -255,12 +262,14 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
               if (index < existingImageCount) {
                 isExisting = true;
                 imageIndex = index;
-                imageWidget = Image.network(_existingImageUrls[index], fit: BoxFit.cover);
+                imageWidget =
+                    Image.network(_existingImageUrls[index], fit: BoxFit.cover);
               } else {
                 isExisting = false;
                 imageIndex = index - existingImageCount;
-                imageWidget =
-                    Image.file(File(_newSelectedImages[imageIndex].path), fit: BoxFit.cover);
+                imageWidget = Image.file(
+                    File(_newSelectedImages[imageIndex].path),
+                    fit: BoxFit.cover);
               }
 
               return Stack(

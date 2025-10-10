@@ -179,7 +179,9 @@
       "deleteError": "Failed to delete post: {error}",
       "requiredField": "This field is required.",
       "noPhoto": "Please add at least one photo.",
-      "noCategory": "Please select a category."
+      "noCategory": "Please select a category.",
+      "loginRequired": "Login is required.",
+      "userNotFound": "User information could not be found."
     },
     "condition": {
       "label": "Condition",
@@ -425,7 +427,9 @@
       "contentRequired": "Please enter content.",
       "categoryRequired": "Please select a category.",
       "success": "Post created successfully.",
-      "failure": "Upload failed: {error}"
+      "failure": "Upload failed: {error}",
+      "loginRequired": "Login is required to create a post.",
+      "userNotFound": "User information could not be found."
     }
   },
   "localNewsDetail": {
@@ -964,6 +968,11 @@
   },
   "community": {
     "title": "Community Screen"
+  },
+    "shared": {
+    "tagInput": {
+      "defaultHint": "Add tags (press space to confirm)"
+    }
   },
   "selectCategory": "Select category",
   "address_neighborhood": "Neighborhood",
