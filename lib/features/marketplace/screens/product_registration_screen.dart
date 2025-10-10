@@ -67,7 +67,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   // Position? _currentPosition;
 
   // 현재 상품 상태 및 추가 입력값
-  String _condition = 'used';
+  String _condition = 'new';
 
   @override
   void initState() {
@@ -190,6 +190,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         isAiVerified: false,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
+        isNew: true, // <-- 이 부분을 추가하여 '신품'임을 명시합니다.
       );
 
       // 1. 상품 문서 저장

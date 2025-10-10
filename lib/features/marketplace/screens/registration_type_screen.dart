@@ -2,7 +2,9 @@
 
 import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
 import 'package:flutter/material.dart';
-import 'ai_inspection_guide_screen.dart'; // AI 검수 안내 화면
+import 'package:easy_localization/easy_localization.dart';
+
+import 'package:bling_app/features/marketplace/screens/ai_category_selection_screen.dart';
 
 class RegistrationTypeScreen extends StatelessWidget {
   const RegistrationTypeScreen({super.key});
@@ -11,7 +13,7 @@ class RegistrationTypeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('등록 방식 선택'),
+        title: Text('registration_flow.title'.tr()),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -19,6 +21,7 @@ class RegistrationTypeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // 1. 신품 판매 카드
             _buildSelectionCard(
               context: context,
               icon: Icons.edit_note,
@@ -27,11 +30,13 @@ class RegistrationTypeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ProductRegistrationScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const ProductRegistrationScreen()),
                 );
               },
             ),
             const SizedBox(height: 24),
+            // 2. 중고품 판매(AI 검수) 카드 (isFeatured: true로 강조)
             _buildSelectionCard(
               context: context,
               icon: Icons.shield_outlined,
@@ -41,7 +46,8 @@ class RegistrationTypeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AiInspectionGuideScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const AiCategorySelectionScreen()),
                 );
               },
             ),
@@ -51,7 +57,7 @@ class RegistrationTypeScreen extends StatelessWidget {
     );
   }
 
-  // 등록 방식 선택 카드를 만드는 위젯
+  // 등록 방식 선택 카드를 만드는 위젯 (기존 코드 활용 및 개선)
   Widget _buildSelectionCard({
     required BuildContext context,
     required IconData icon,
@@ -75,7 +81,11 @@ class RegistrationTypeScreen extends StatelessWidget {
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
-              Icon(icon, size: 48, color: isFeatured ? Theme.of(context).primaryColor : Colors.grey[700]),
+              Icon(icon,
+                  size: 48,
+                  color: isFeatured
+                      ? Theme.of(context).primaryColor
+                      : Colors.grey[700]),
               const SizedBox(height: 16),
               Text(
                 title,
@@ -87,7 +97,9 @@ class RegistrationTypeScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 description,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
                 textAlign: TextAlign.center,
               ),
             ],

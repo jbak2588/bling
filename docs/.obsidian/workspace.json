@@ -69,20 +69,39 @@
             "state": {
               "type": "markdown",
               "state": {
+<<<<<<< HEAD
                 "file": "Bling AI 검수 시스템 리뉴얼 개발 체크리스트 (확정안).md",
+=======
+                "file": "Bling AI 검수 시스템 리뉴얼 개발 디버그 콘솔 로그 12.md",
+>>>>>>> feature/gemini-api
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
+<<<<<<< HEAD
               "title": "Bling AI 검수 시스템 리뉴얼 개발 체크리스트 (확정안)"
+=======
+              "title": "Bling AI 검수 시스템 리뉴얼 개발 디버그 콘솔 로그 12"
+>>>>>>> feature/gemini-api
             }
           },
           {
-            "id": "ff27b3b52377b3f7",
+            "id": "73de42fe4415d94f",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          },
+          {
+            "id": "0c63642fe200ad47",
             "type": "leaf",
             "state": {
               "type": "release-notes",
               "state": {
+<<<<<<< HEAD
                 "currentVersion": "1.9.14"
               },
               "icon": "lucide-book-up",
@@ -91,6 +110,46 @@
           }
         ],
         "currentTab": 4
+=======
+                "file": "한국어 교재.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "한국어 교재"
+            }
+          },
+          {
+            "id": "a95f008c9475137a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Bling AI 검수 시스템 리뉴얼 개발 디버그 콘솔 로그 18.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Bling AI 검수 시스템 리뉴얼 개발 디버그 콘솔 로그 18"
+            }
+          },
+          {
+            "id": "444d8835f5b0b91c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "BLING Weekly Report (Personal Assistant).md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "BLING Weekly Report (Personal Assistant)"
+            }
+          }
+        ],
+        "currentTab": 8
+>>>>>>> feature/gemini-api
       }
     ],
     "direction": "vertical"
@@ -238,6 +297,7 @@
       "bases:Create new base": false
     }
   },
+<<<<<<< HEAD
   "active": "05c7ae7d344c7cd5",
   "lastOpenFiles": [
     "개발 1차 보고서/개발일지/자동 슬라이딩 문제 해결의 위한 디버깅 터미널 로그.md",
@@ -277,5 +337,46 @@
     "DevLog_개발일지",
     "_sensitive",
     "features/find_friend"
+=======
+  "active": "444d8835f5b0b91c",
+  "lastOpenFiles": [
+    "WhatsApp 이미지 2025-10-08, 22.07.52_39c41a0b.jpg",
+    "BLING Weekly Report (Personal Assistant).md",
+    "Bling AI 검수 시스템 리뉴얼 개발 디버그 콘솔 로그 18.md",
+    "Bling_Ai_Tester  첫 테스트 터미널 로그 1.md",
+    "블링 백서_6월14일버전 .md",
+    "Bling AI 검수 시스템 리뉴얼 개발 체크리스트 (확정안).md",
+    "한국어 교재.md",
+    "Bling AI 검수 시스템 리뉴얼 개발 완료후 디버그 콘솔 로그 3.md",
+    "reference/SECURITY_RULES_OVERVIEW.md",
+    "reference/DESIGN_GUIDE.md",
+    "reference/ARCHITECTURE_OVERVIEW.md",
+    "reference/AI_VERIFICATION_PIPELINE.md",
+    "reference",
+    "policies/TERMS_AND_POLICIES.md",
+    "policies/PRIVACY_AND_LOCATION.md",
+    "policies",
+    "migration/DOC_PATH_MAPPING.md",
+    "migration",
+    "features/real_estate/SPEC.md",
+    "features/pom/SPEC.md",
+    "features/marketplace/SPEC.md",
+    "features/main_feed/SPEC.md",
+    "features/lost_and_found/SPEC.md",
+    "features/local_store/SPEC.md",
+    "features/local_news/SPEC.md",
+    "features/clubs/SPEC.md",
+    "features/local_jobs/SPEC.md",
+    "features/find_friend/SPEC.md",
+    "features/find_friend/DATA_MODEL.md",
+    "features/real_estate",
+    "features/pom",
+    "features/marketplace",
+    "features/main_feed",
+    "features/lost_and_found",
+    "features/local_store",
+    "features/local_news",
+    "index/013 참조용 자료/Pasted image 20250701221455.png"
+>>>>>>> feature/gemini-api
   ]
 }
