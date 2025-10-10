@@ -82,6 +82,13 @@ initializeApp();
 const GEMINI_KEY = defineSecret("GEMINI_KEY");
 
 // ──────────────────────────────────────────────────────────────────────────────
+// 요청 타임아웃/재시도 설정 (Gemini 전용)
+// ──────────────────────────────────────────────────────────────────────────────
+const GENAI_TIMEOUT_MS = 30_000;         // 30s: 개별 Gemini 요청 타임아웃
+const GENAI_MAX_RETRIES = 2;             // 총 3회(최초 + 2회 재시도)
+const GENAI_BASE_DELAY_MS = 800;         // 첫 백오프 지연
+
+// ──────────────────────────────────────────────────────────────────────────────
 // Debug/Tracing helpers for AI response diagnostics
 // ──────────────────────────────────────────────────────────────────────────────
 const RAW_LOG_LIMIT = 1200; // 로그에 남길 최대 원문 길이
@@ -137,6 +144,8 @@ const CALL_OPTS = {
   region: "us-central1",
   enforceAppCheck: true,
   memory: "1GiB",
+  // 장시간 이미지 다운로드 + 모델 혼잡 대비
+  timeoutSeconds: 300,
   secrets: [GEMINI_KEY],
 };
 
@@ -157,6 +166,100 @@ function isModelNotFoundError(err) {
 // SDK 호환 보조: Responses API 지원 여부 체크
 function hasResponsesApi(genAI) {
   return !!(genAI && genAI.responses && typeof genAI.responses.generate === "function");
+}
+
+// 재시도 가능한 오류인지 판별
+function isRetryable(err) {
+  const s = (err && (err.status || err.code)) || 0;
+  const msg = (err && (err.message || (err.toString && err.toString()))) || "";
+  if ([408, 429, 500, 502, 503, 504].includes(Number(s))) return true;
+  if (/timeout|timed out|unavailable|try again/i.test(msg)) return true;
+  return false;
+}
+
+// 지정 ms 뒤 reject되는 타임아웃 Promise
+function timeoutPromise(ms, tag = "genai") {
+  return new Promise((_, rej) =>
+    setTimeout(() => rej(new Error(`[${tag}] request timeout ${ms}ms`)), ms)
+  );
+}
+
+// 지수 백오프 재시도 래퍼
+async function withRetry(fn, { maxRetries = GENAI_MAX_RETRIES, baseDelay = GENAI_BASE_DELAY_MS, tag = "genai" } = {}) {
+  let attempt = 0;
+  let delay = baseDelay;
+  while (true) {
+    try {
+      const started = Date.now();
+      const result = await Promise.race([fn(), timeoutPromise(GENAI_TIMEOUT_MS, tag)]);
+      logger.info("⏱️ GenAI latency", { tag, attempt: attempt + 1, ms: Date.now() - started });
+      return result;
+    } catch (e) {
+      const retriable = isRetryable(e);
+      logger.warn("↻ GenAI attempt failed", { tag, attempt: attempt + 1, retriable, err: e?.toString?.() || e });
+      if (attempt >= maxRetries || !retriable) throw e;
+      const jitter = Math.floor(Math.random() * 200);
+      await new Promise((r) => setTimeout(r, delay + jitter));
+      delay *= 2;
+      attempt += 1;
+    }
+  }
+}
+
+// SDK 버전별 호출을 감싸는 통합 함수
+async function genAiCall(genAI, { modelPrimary = "gemini-2.5-flash", modelFallback = "gemini-2.5-pro", contents, safetySettings, responseMimeType = "application/json", tag }) {
+  if (hasResponsesApi(genAI)) {
+    return withRetry(
+      async () => {
+        try {
+          const resp = await genAI.responses.generate({
+            model: modelPrimary,
+            contents,
+            safetySettings,
+            responseMimeType,
+          });
+          return resp?.output_text || "";
+        } catch (e) {
+          if (isModelNotFoundError(e)) {
+            const fb = await genAI.responses.generate({
+              model: modelFallback,
+              contents,
+              safetySettings,
+              responseMimeType,
+            });
+            return fb?.output_text || "";
+          }
+          throw e;
+        }
+      },
+      { tag }
+    );
+  }
+  return withRetry(
+    async () => {
+      try {
+        const m = genAI.getGenerativeModel({
+          model: modelPrimary,
+          safetySettings,
+          generationConfig: { responseMimeType },
+        });
+        const r = await m.generateContent({ contents });
+        return String(r?.response?.text?.() ?? "");
+      } catch (e) {
+        if (isModelNotFoundError(e)) {
+          const fm = genAI.getGenerativeModel({
+            model: modelFallback,
+            safetySettings,
+            generationConfig: { responseMimeType },
+          });
+          const r2 = await fm.generateContent({ contents });
+          return String(r2?.response?.text?.() ?? "");
+        }
+        throw e;
+      }
+    },
+    { tag }
+  );
 }
 
 /**
@@ -296,55 +399,16 @@ exports.initialproductanalysis = onCall(
       );
       clearTimeout(to);
 
-      // New: 2.5 계열로 통일 + Responses API 미지원 환경 폴백
+      // 2.5 계열 고정 호출 + 재시도/타임아웃 래퍼 사용
       const userContents = [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }];
-      let text = "";
-      if (hasResponsesApi(genAI)) {
-        try {
-          const primary = await genAI.responses.generate({
-            model: "gemini-2.5-flash",
-            contents: userContents,
-            safetySettings,
-            responseMimeType: "application/json",
-          });
-          text = primary?.output_text || "";
-        } catch (e) {
-          if (isModelNotFoundError(e)) {
-            const fb = await genAI.responses.generate({
-              model: "gemini-2.5-pro",
-              contents: userContents,
-              safetySettings,
-              responseMimeType: "application/json",
-            });
-            text = fb?.output_text || "";
-          } else {
-            throw e;
-          }
-        }
-      } else {
-        // 구 SDK: getGenerativeModel().generateContent 사용
-        try {
-          const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
-            safetySettings,
-            generationConfig: { responseMimeType: "application/json" },
-          });
-          const res = await model.generateContent({ contents: userContents });
-          text = String(res?.response?.text?.() ?? "");
-        } catch (e) {
-          if (isModelNotFoundError(e)) {
-            const fbModel = genAI.getGenerativeModel({
-              model: "gemini-2.5-pro",
-              safetySettings,
-              generationConfig: { responseMimeType: "application/json" },
-            });
-            const res2 = await fbModel.generateContent({ contents: userContents });
-            text = String(res2?.response?.text?.() ?? "");
-          } else {
-            throw e;
-          }
-        }
-      }
+      const text = await genAiCall(genAI, {
+        modelPrimary: "gemini-2.5-flash",
+        modelFallback: "gemini-2.5-pro",
+        contents: userContents,
+        safetySettings,
+        responseMimeType: "application/json",
+        tag: "initialproductanalysis",
+      });
 
       // 진단 로그용 원문/파싱 결과 기록
       const jsonText = extractJsonText(text);
@@ -410,16 +474,7 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
       .replace(/{{userDescription}}/g, String(userDescription ?? ""))
       .replace(/{{confirmedProductName}}/g, String(confirmedProductName ?? ""));
 
-    // NOTE: 1.5 계열/별칭 제거, 2.5 계열로 통일
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      safetySettings,
-      generationConfig: { responseMimeType: "application/json" },
-    });
-
-    if (!Array.isArray(imageUrls.initial) || typeof imageUrls.guided !== "object") {
-      throw new HttpsError("invalid-argument", "imageUrls must include initial[] and guided{}");
-    }
+    // 2.5 계열 호출은 통합 래퍼(genAiCall)로 처리
     const allImageUrls = [...imageUrls.initial, ...Object.values(imageUrls.guided)];
 
     const ac = new AbortController();
@@ -457,28 +512,14 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     );
     clearTimeout(to);
 
-    // New: responses.generate 미지원 환경 대비 generateContent 사용
-    let jsonStr = "";
-    try {
-      const res = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }],
-      });
-      jsonStr = String(res?.response?.text?.() ?? "").trim();
-    } catch (e) {
-      if (isModelNotFoundError(e)) {
-        const fallbackModel = genAI.getGenerativeModel({
-          model: "gemini-2.5-pro",
-          safetySettings,
-          generationConfig: { responseMimeType: "application/json" },
-        });
-        const res2 = await fallbackModel.generateContent({
-          contents: [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }],
-        });
-        jsonStr = String(res2?.response?.text?.() ?? "").trim();
-      } else {
-        throw e;
-      }
-    }
+    const jsonStr = (await genAiCall(genAI, {
+      modelPrimary: "gemini-2.5-flash",
+      modelFallback: "gemini-2.5-pro",
+      contents: [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }],
+      safetySettings,
+      responseMimeType: "application/json",
+      tag: "generatefinalreport",
+    })).trim();
 
     const jsonBlock = extractJsonText(jsonStr);
     const report = tryParseJson(jsonBlock);

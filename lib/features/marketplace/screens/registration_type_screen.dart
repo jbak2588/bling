@@ -24,9 +24,9 @@ class RegistrationTypeScreen extends StatelessWidget {
             // 1. 신품 판매 카드
             _buildSelectionCard(
               context: context,
-              icon: Icons.add_box_outlined,
-              title: 'registration_flow.new_item_title'.tr(),
-              description: 'registration_flow.new_item_desc'.tr(),
+              icon: Icons.edit_note,
+              title: '일반 등록',
+              description: '기본적인 정보를 입력하여 빠르게 상품을 등록합니다.',
               onTap: () {
                 Navigator.push(
                   context,
@@ -40,9 +40,9 @@ class RegistrationTypeScreen extends StatelessWidget {
             _buildSelectionCard(
               context: context,
               icon: Icons.shield_outlined,
-              title: 'registration_flow.used_item_title'.tr(),
-              description: 'registration_flow.used_item_desc'.tr(),
-              isFeatured: true, // AI 검수 옵션을 강조 표시합니다.
+              title: 'AI 검수 안전 거래 등록',
+              description: 'AI가 상품을 분석하여 신뢰도를 높이고 더 빠르게 판매할 수 있도록 도와줍니다.',
+              isFeatured: true, // AI 검수 옵션을 강조
               onTap: () {
                 Navigator.push(
                   context,
