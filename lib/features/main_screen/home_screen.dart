@@ -27,13 +27,13 @@
 /// - Kab 필터 도입은 사용자 경험과 비즈니스 전략 모두에서 매우 중요한 결정
 /// - 향후 개선: 지역 단위별 추천·광고·커뮤니티 연계, UI/UX(지도 시각화, 애니메이션 등) 강화, 데이터 기반 KPI/Analytics 연동
 /// - Todo: 통합 피드 스크롤 다운 후 즉시 화면 맨 위로 이동 기능 필요
-library;
+library;  // 불필요한 라이브러리 지시어는 제거 (분석 시 간헐적 경고/에러 유발)
 
 import 'package:bling_app/features/shared/grab_widgets.dart';
 
 import 'package:bling_app/core/models/feed_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/features/main_feed/data/feed_repository.dart';
+import 'package:bling_app/features/main_feed/screens/main_feed_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -214,8 +214,10 @@ class HomeScreen extends StatelessWidget {
 
     final double childAspectRatio = tileWidth / tileHeight;
 
-    // ✅ 탭 전환 콜백 준비: 주입받았으면 그걸 쓰고, 없으면 기존 플레이스홀더로 Fallback
-    final VoidCallback? searchAction = onSearchChipTap;
+  // ✅ 탭 전환 콜백 준비: 주입받았으면 그걸 쓰고, 없으면 기존 플레이스홀더로 Fallback
+  final VoidCallback? searchAction = onSearchChipTap;
+  // 로그인 전이거나 초기 로딩 시 uid가 없을 수 있으므로 안전 가드
+  final uid = userModel?.uid;
 
     return CustomScrollView(
       slivers: [
@@ -304,40 +306,15 @@ class HomeScreen extends StatelessWidget {
                     ?.copyWith(fontWeight: FontWeight.bold)),
           ),
         ),
-        FutureBuilder<List<FeedItemModel>>(
-          future: FeedRepository().fetchUnifiedFeed(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()));
-            }
-            if (snapshot.hasError ||
-                !snapshot.hasData ||
-                snapshot.data!.isEmpty) {
-              return SliverToBoxAdapter(
-                  child: Center(
-                      child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Text("mainFeed.empty".tr()))));
-            }
-            final feedItems = snapshot.data!;
-            // [수정] Provider를 통해 userModel을 하위 위젯에 전달합니다.
-            return Provider.value(
-              value: userModel,
-              child: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => FeedItemCard(
-                    item: feedItems[index],
-                    onIconTap: onIconTap,
-                    allFeedItems: feedItems, // [신규] 전체 피드 리스트 전달
-                    currentIndex: index, // [신규] 현재 인덱스 전달
-                  ),
-                  childCount: feedItems.length,
-                ),
-              ),
-            );
-          },
-        ),
+        // NEW: Grab 스타일 메인 피드(섹션 + 가로 캐러셀)
+        // SliverFillRemaining로 남는 높이를 채워 내부 스크롤 뷰의 세로 제약을 보장
+        if (uid == null)
+          const SliverToBoxAdapter(child: SizedBox.shrink())
+        else
+          SliverFillRemaining(
+            hasScrollBody: true,
+            child: MainFeedScreen(userModel: userModel),
+          ),
       ],
     );
   }

@@ -29,6 +29,7 @@ void main() async {
   await EasyLocalization.ensureInitialized();
   await _ensureGoogleMapRenderer();
 
+
   // 1. Firebase 초기화
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -41,9 +42,7 @@ void main() async {
     androidProvider: kDebugMode
         ? AndroidProvider.debug
         : AndroidProvider.playIntegrity, // 배포 시 playIntegrity
-    appleProvider: kDebugMode
-        ? AppleProvider.debug
-        : AppleProvider.appAttestWithDeviceCheckFallback, // 배포 시 App Attest 우선
+    appleProvider: kDebugMode ? AppleProvider.debug : AppleProvider.appAttest, // 또는 .deviceCheck// 배포 시 App Attest 우선
   );
 
   try {

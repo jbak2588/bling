@@ -519,25 +519,33 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return Scaffold(
       appBar: _buildAppBar(),
       drawer: _buildAppDrawer(_userModel),
+      // ✅ 비침 방지: 바디를 바텀바 뒤로 확장하지 않음
+      extendBody: false,
       body: IndexedStack(
         index: effectiveIndex,
         children: pages,
       ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            _buildBottomNavItem(icon: Icons.home, index: 0),
-            _buildBottomNavItem(icon: Icons.search, index: 1),
-            const SizedBox(width: 40),
-            _buildBottomNavItem(
-                icon: Icons.chat_bubble_outline,
-                index: 3,
-                badgeCount: _totalUnreadCount),
-            _buildBottomNavItem(icon: Icons.person_outline, index: 4),
-          ],
+      bottomNavigationBar: SafeArea(
+        top: false,
+        bottom: false, // ✅ 하단 여백 제거: 화면 하단에 밀착
+        // ✅ 하단 완전 고정: SafeArea는 쓰되 추가 여백 최소화
+        minimum: EdgeInsets.zero,
+        child: BottomAppBar(
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 8.0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              _buildBottomNavItem(icon: Icons.home, index: 0),
+              _buildBottomNavItem(icon: Icons.search, index: 1),
+              const SizedBox(width: 40),
+              _buildBottomNavItem(
+                  icon: Icons.chat_bubble_outline,
+                  index: 3,
+                  badgeCount: _totalUnreadCount),
+              _buildBottomNavItem(icon: Icons.person_outline, index: 4),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
