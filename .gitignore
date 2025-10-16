@@ -21,8 +21,7 @@ android/build/
 # Firebase
 .firebase/
 
-# VS Code & IntelliJ/Android Studio
-.vscode/
+# IntelliJ/Android Studio
 .idea/
 *.iml
 

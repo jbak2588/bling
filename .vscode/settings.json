@@ -1,0 +1,40 @@
+{
+  // Increase V8 old space for extension host to handle large Flutter projects
+  "extensions.experimental.affinity": {
+    "asvetliakov.vscode-neovim": 1
+  },
+  
+  // Flutter-specific settings
+  "dart.flutterSdkPath": null,
+  "dart.previewFlutterUiGuides": true,
+  "dart.previewFlutterUiGuidesCustomTracking": true,
+  
+  // Editor settings for better performance
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/.hg/store/**": true,
+    "**/build/**": true,
+    "**/.dart_tool/**": true,
+    "**/ios/Pods/**": true,
+    "**/android/.gradle/**": true
+  },
+  
+  // Exclude build artifacts from search
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/build": true,
+    "**/.dart_tool": true,
+    "**/ios/Pods": true,
+    "**/android/.gradle": true
+  },
+  
+  // Git settings
+  "files.eol": "\n",
+  
+  // JSON formatting
+  "json.format.enable": true
+}
