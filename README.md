@@ -406,6 +406,13 @@ npm run deploy
 2. **Firebase Functions 디버깅**:
    - `.vscode/launch.json`에 이미 설정되어 있음
    - "Firebase Functions: Debug" 또는 "Firebase Emulator" 구성 사용
+   - Node.js 20 필요 (`node --version`로 확인)
+   - Firebase CLI 설치 필요 (`firebase --version`로 확인)
+
+**문제 해결**:
+- VS Code가 느려지거나 충돌하는 경우: `argv.json`의 메모리 값을 8192 (8GB)로 증가
+- Firebase 디버깅이 작동하지 않는 경우: `functions-v2` 폴더에서 `npm install` 실행
+- Flutter 디버깅 문제: `flutter doctor` 실행하여 환경 확인
 
 자세한 내용은 [.vscode/README.md](.vscode/README.md)를 참고하세요.
 
