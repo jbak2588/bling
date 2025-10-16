@@ -32,6 +32,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:bling_app/features/marketplace/screens/product_edit_screen.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
+import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart'; // AI 뱃지
 
 // ✅ 공용 위젯 4개를 import 합니다.
 import '../../shared/widgets/author_profile_tile.dart';
@@ -194,8 +195,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       }
     }
   }
-
-  // --- 위젯 빌더 (디자인 및 다국어 수정) ---
 
   // [다국어 수정] 시간 포맷 함수
   String _formatTimestamp(Timestamp timestamp) {
@@ -430,25 +429,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ),
                 actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () => SharePlus.instance.share(
-              ShareParams(text: 'Check out this product: ${product.title}'),
-            ),
-          ),
-          if (isMyProduct)
-            IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            ProductEditScreen(product: product)))),
-          if (isMyProduct)
-            IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: _showDeleteDialog),
-              ],
-            ),
+                  IconButton(
+                    icon: const Icon(Icons.share),
+                    onPressed: () => SharePlus.instance.share(
+                      ShareParams(
+                          text: 'Check out this product: ${product.title}'),
+                    ),
+                  ),
+                  if (isMyProduct)
+                    IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ProductEditScreen(product: product)))),
+                  if (isMyProduct)
+                    IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: _showDeleteDialog),
+                ],
+              ),
               SliverList(
                 delegate: SliverChildListDelegate([
                   Padding(
@@ -464,6 +464,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
+                        // [추가] 제목 아래 AI 뱃지
+                        if (product.isAiVerified)
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 16.0),
+                            child: AiVerificationBadge(),
+                          ),
                         Row(children: [
                           CategoryNameWidget(categoryId: product.categoryId),
                           Text(" ∙ ${_formatTimestamp(product.createdAt)}",
@@ -471,6 +477,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   fontSize: 13, color: Colors.grey)),
                         ]),
                         const SizedBox(height: 16),
+
+                        // [추가] AI 리포트 섹션
+                        if (product.isAiVerified && product.aiReport != null)
+                          _buildAiReportSection(context, product.aiReport!),
+
                         Text(product.description,
                             style: const TextStyle(fontSize: 16, height: 1.6)),
                         const SizedBox(height: 16),
@@ -505,6 +516,75 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         );
       },
+    );
+  }
+
+  // [추가] AI 리포트 데이터를 UI로 변환하는 위젯
+  Widget _buildAiReportSection(
+      BuildContext context, Map<String, dynamic> aiReport) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.blue.shade100),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "🤖 AI 검수 리포트",
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue.shade800),
+              ),
+              const SizedBox(height: 8),
+              if (aiReport['specs'] is Map)
+                _buildReportMap(title: "상세 사양", data: aiReport['specs']),
+              if (aiReport['condition_check'] is Map)
+                _buildReportMap(
+                    title: "상태 점검", data: aiReport['condition_check']),
+              if (aiReport['included_items'] is List)
+                _buildReportList(
+                    title: "구성품", data: aiReport['included_items']),
+            ],
+          ),
+        ),
+        const Divider(height: 32),
+      ],
+    );
+  }
+
+  // Map 데이터를 표시하는 헬퍼
+  Widget _buildReportMap(
+      {required String title, required Map<dynamic, dynamic> data}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        Text(title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        ...data.entries.map((e) => Text("- ${e.key}: ${e.value}")),
+      ],
+    );
+  }
+
+  // List 데이터를 표시하는 헬퍼
+  Widget _buildReportList(
+      {required String title, required List<dynamic> data}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        Text(title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        ...data.map((item) => Text("- $item")),
+      ],
     );
   }
 }

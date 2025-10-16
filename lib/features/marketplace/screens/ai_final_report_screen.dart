@@ -12,13 +12,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class AiFinalReportScreen extends StatefulWidget {
-  // [수정] 이전 화면에서 생성된 최종 리포트를 전달받습니다.
+  // [추가] 이전 화면에서 생성된 최종 리포트와 확정 상품명
   final Map<String, dynamic> finalReport;
-
-  // 최종 제출 시 이미지와 규칙 정보가 필요하므로 계속 전달받습니다.
   final AiVerificationRule rule;
   final List<XFile> initialImages;
   final Map<String, XFile> takenShots;
+  final String confirmedProductName; // [추가]
 
   const AiFinalReportScreen({
     super.key,
@@ -26,6 +25,7 @@ class AiFinalReportScreen extends StatefulWidget {
     required this.rule,
     required this.initialImages,
     required this.takenShots,
+    required this.confirmedProductName, // [추가]
   });
 
   @override
@@ -36,13 +36,10 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
-
-  // [추가] Form 키 및 상세 데이터 컨트롤러
   final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _specsControllers = {};
   final Map<String, TextEditingController> _conditionControllers = {};
   final List<TextEditingController> _itemsControllers = [];
-
   bool _isSubmitting = false;
 
   @override
@@ -53,9 +50,11 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
 
   void _populateFieldsFromReport() {
     final report = widget.finalReport;
-    _titleController.text = report['title'] as String? ?? '';
 
-    // [개선] AI가 생성한 상세 정보를 기본 설명에 포함시킵니다.
+    // [변경] AI 제안 대신 사용자가 확정한 상품명 사용
+    _titleController.text = widget.confirmedProductName;
+
+    // [유지] 상세 설명에 사양을 합쳐 기본값 구성
     String baseDescription = report['description'] as String? ?? '';
     final specs = report['specs'] as Map<String, dynamic>?;
     if (specs != null) {
@@ -65,7 +64,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     }
     _descriptionController.text = baseDescription;
 
-    // [핵심 수정] AI가 가격을 문자열로 보내도 앱이 멈추지 않도록 안전하게 처리
+    // 가격 안전 파싱
     final priceValue = report['price_suggestion'];
     if (priceValue is num) {
       _priceController.text = priceValue.toString();
@@ -74,18 +73,15 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     }
 
     if (report['specs'] is Map) {
-      (report['specs'] as Map).forEach((key, value) {
-        _specsControllers[key] = TextEditingController(text: value.toString());
+      (report['specs'] as Map).forEach((k, v) {
+        _specsControllers[k] = TextEditingController(text: v.toString());
       });
     }
-
     if (report['condition_check'] is Map) {
-      (report['condition_check'] as Map).forEach((key, value) {
-        _conditionControllers[key] =
-            TextEditingController(text: value.toString());
+      (report['condition_check'] as Map).forEach((k, v) {
+        _conditionControllers[k] = TextEditingController(text: v.toString());
       });
     }
-
     if (report['included_items'] is List) {
       for (var item in (report['included_items'] as List)) {
         _itemsControllers.add(TextEditingController(text: item.toString()));
@@ -94,16 +90,18 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
   }
 
   void _applyAllSuggestionsToDescription() {
-    String baseDescription = _descriptionController.text;
+    // [변경] 중복 누적 방지: 항상 AI 리포트의 기본 설명에서 시작
+    final report = widget.finalReport;
+    String baseDescription = report['description'] as String? ?? '';
+
     String specsText = _specsControllers.entries
         .map((e) => "- ${e.key}: ${e.value.text}")
         .join('\n');
     String conditionText = _conditionControllers.entries
         .map((e) => "- ${e.key}: ${e.value.text}")
         .join('\n');
-    String itemsText = _itemsControllers
-        .map((controller) => "- ${controller.text}")
-        .join('\n');
+    String itemsText =
+        _itemsControllers.map((c) => "- ${c.text.trim()}").join('\n');
 
     setState(() {
       _descriptionController.text = '''$baseDescription
@@ -230,6 +228,7 @@ $itemsText
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
+                  // [수정] 안정적인 API 사용
                   color: Theme.of(context).primaryColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -343,7 +342,7 @@ $itemsText
               ),
             ),
           );
-        }).toList(),
+        }),
         const SizedBox(height: 16),
       ],
     );

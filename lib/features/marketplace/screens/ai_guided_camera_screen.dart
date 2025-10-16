@@ -67,6 +67,7 @@ class _AiGuidedCameraScreenState extends State<AiGuidedCameraScreen> {
               rule: widget.rule,
               initialImages: widget.initialImages,
               takenShots: _takenShots,
+              confirmedProductName: widget.confirmedProductName,
             ),
           ),
         );
