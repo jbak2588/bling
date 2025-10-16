@@ -410,7 +410,7 @@ npm run deploy
    - Firebase CLI 설치 필요 (`firebase --version`로 확인)
 
 **문제 해결**:
-- VS Code가 느려지거나 충돌하는 경우: `argv.json`의 메모리 값을 8192 (8GB)로 증가
+- VS Code가 느려지거나 충돌하는 경우: `argv.json`의 메모리 값을 `--max-old-space-size=8192`로 증가 (8GB, 시스템에 충분한 RAM 필요)
 - Firebase 디버깅이 작동하지 않는 경우: `functions-v2` 폴더에서 `npm install` 실행
 - Flutter 디버깅 문제: `flutter doctor` 실행하여 환경 확인
 
