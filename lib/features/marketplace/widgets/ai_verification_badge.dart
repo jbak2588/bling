@@ -1,22 +1,39 @@
 // lib/features/marketplace/widgets/ai_verification_badge.dart
 
 import 'package:flutter/material.dart';
+// import 'package:easy_localization/easy_localization.dart';
 
 class AiVerificationBadge extends StatelessWidget {
-  final String status;
-  const AiVerificationBadge({super.key, required this.status});
+  const AiVerificationBadge({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // 'approved' 상태일 때만 배지를 표시합니다.
-    if (status == 'approved') {
-      return const Tooltip(
-        message: 'AI 검증 완료',
-        child: Icon(Icons.verified, color: Colors.blue, size: 20),
-      );
-    }
-    
-    // 그 외의 경우(pending, rejected, none)에는 아무것도 표시하지 않습니다.
-    return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.shield_outlined,
+              color: Theme.of(context).primaryColor, size: 16),
+          const SizedBox(width: 6),
+          Text(
+            'AI 검증 완료', // TODO: 다국어 키 추가
+            style: TextStyle(
+              color: Theme.of(context).primaryColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

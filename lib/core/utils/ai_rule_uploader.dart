@@ -29,6 +29,9 @@ class AiRuleUploader {
   }
 
   List<AiVerificationRule> _getInitialRules() {
+    const initialPrompt = '''
+Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {"predicted_item_name": "PREDICTED_NAME"}''';
+
     return [
       // 1. 스마트폰 카테고리 규칙
       AiVerificationRule(
@@ -46,8 +49,9 @@ class AiRuleUploader {
           'imei': RequiredShot(
               nameKo: 'IMEI 정보 샷', descKo: '*#06#을 눌러 나오는 IMEI 화면을 촬영하세요.'),
         },
+        initialAnalysisPromptTemplate: initialPrompt,
         reportTemplatePrompt: '''
-        당신은 인도네시아 중고 스마트폰 거래 전문가입니다. 제공된 이미지들과 사용자 정보를 바탕으로, 아래 JSON 형식에 맞춰 인도네시아어로 상세 판매 게시글을 작성해주세요.
+         당신은 인도네시아 중고 스마트폰 거래 전문가입니다. 제공된 이미지들과 사용자 정보를 바탕으로, 아래 JSON 형식에 맞춰 인도네시아어로 상세 판매 게시글을 작성해주세요.
 
         사용자 정보:
         - 희망 가격: {{userPrice}} IDR
@@ -86,8 +90,9 @@ class AiRuleUploader {
           'corners': RequiredShot(
               nameKo: '모서리 마모', descKo: '가장 마모가 심한 하단 모서리를 촬영하세요.'),
         },
+        initialAnalysisPromptTemplate: initialPrompt,
         reportTemplatePrompt: '''
-        당신은 인도네시아 중고 명품 가방 거래 전문가입니다. 제공된 이미지들과 사용자 정보를 바탕으로, 아래 JSON 형식에 맞춰 인도네시아어로 상세 판매 게시글을 작성해주세요.
+         당신은 인도네시아 중고 명품 가방 거래 전문가입니다. 제공된 이미지들과 사용자 정보를 바탕으로, 아래 JSON 형식에 맞춰 인도네시아어로 상세 판매 게시글을 작성해주세요.
 
         사용자 정보:
         - 희망 가격: {{userPrice}} IDR
@@ -126,8 +131,9 @@ class AiRuleUploader {
           'front': RequiredShot(
               nameKo: '앞코 샷', descKo: '신발 앞코 부분의 사용감을 가까이서 촬영하세요.'),
         },
+        initialAnalysisPromptTemplate: initialPrompt,
         reportTemplatePrompt: '''
-        당신은 인도네시아 중고 신발 거래 전문가입니다. 제공된 이미지들과 사용자 정보를 바탕으로, 아래 JSON 형식에 맞춰 인도네시아어로 상세 판매 게시글을 작성해주세요.
+         당신은 인도네시아 중고 신발 거래 전문가입니다. 제공된 이미지들과 사용자 정보를 바탕으로, 아래 JSON 형식에 맞춰 인도네시아어로 상세 판매 게시글을 작성해주세요.
 
         사용자 정보:
         - 희망 가격: {{userPrice}} IDR

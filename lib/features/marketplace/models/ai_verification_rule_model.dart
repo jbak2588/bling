@@ -38,6 +38,7 @@ class AiVerificationRule {
   final int minGalleryPhotos;
   final Map<String, RequiredShot> requiredShots;
   final String reportTemplatePrompt;
+  final String initialAnalysisPromptTemplate;
 
   AiVerificationRule({
     required this.id,
@@ -47,6 +48,7 @@ class AiVerificationRule {
     required this.minGalleryPhotos,
     required this.requiredShots,
     required this.reportTemplatePrompt,
+    required this.initialAnalysisPromptTemplate,
   });
 
   // DocumentSnapshot -> AiVerificationRule 객체 변환
@@ -67,6 +69,8 @@ class AiVerificationRule {
       minGalleryPhotos: data['min_gallery_photos'] ?? 0,
       requiredShots: requiredShots,
       reportTemplatePrompt: data['report_template_prompt'] ?? '',
+      initialAnalysisPromptTemplate:
+          data['initial_analysis_prompt_template'] ?? '',
     );
   }
 
