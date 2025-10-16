@@ -117,100 +117,105 @@ class _ProductCardState extends State<ProductCard>
               }
               final user = UserModel.fromFirestore(userSnapshot.data!);
 
-              return Row(
+              // [핵심 수정] 뱃지를 카드 내부에 조건부로 포함하기 위해 Column으로 감쌉니다.
+              return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (product.imageUrls.isNotEmpty)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: ImageCarouselCard(
-                        imageUrls: product.imageUrls,
-                        // ✅ product.id를 storageId로 전달하여 에러를 해결합니다.
-                        storageId: product.id,
-                        width: 100,
-                        height: 100,
-                      ),
+                  if (product.isAiVerified)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8.0),
+                      child: AiVerificationBadge(),
                     ),
-                  const SizedBox(width: 16.0),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // ✅ [핵심 수정] 기존 Text 위젯을 Row로 감싸 배지를 추가합니다.
-                        Row(
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (product.imageUrls.isNotEmpty)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: ImageCarouselCard(
+                            imageUrls: product.imageUrls,
+                            storageId: product.id,
+                            width: 100,
+                            height: 100,
+                          ),
+                        ),
+                      const SizedBox(width: 16.0),
+                      Expanded(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 제목이 길어질 경우를 대비해 Expanded로 감쌉니다.
-                            Expanded(
-                              child: Text(
-                                product.title,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                            Text(
+                              product.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
                               ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(width: 4), // 제목과 배지 사이의 간격
-
-                            // AiVerificationBadge 위젯을 호출합니다.
-                            AiVerificationBadge(status: product.aiVerificationStatus),
+                            const SizedBox(height: 4.0),
+                            Text(
+                              // [개선] AI 검수 상품일 경우, 설명 대신 AI 리포트 요약을 보여줍니다.
+                              product.isAiVerified
+                                  ? ((product.aiReport?['condition_check']
+                                              as Map<String, dynamic>?)
+                                          ?.entries
+                                          .map((e) => '${e.key}: ${e.value}')
+                                          .join(', ') ??
+                                      product.description)
+                                  : product.description,
+                              style: TextStyle(
+                                  fontSize: 14.0, color: Colors.grey[800]),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4.0),
+                            Text(
+                              '${product.locationParts?['kel'] ?? product.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $registeredAt',
+                              style: TextStyle(
+                                  fontSize: 12.0, color: Colors.grey[600]),
+                            ),
+                            const SizedBox(height: 8.0),
+                            Text(
+                              NumberFormat.currency(
+                                locale: 'id_ID',
+                                symbol: 'Rp ',
+                                decimalDigits: 0,
+                              ).format(product.price),
+                              style: const TextStyle(
+                                  fontSize: 15.0, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8.0),
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 12,
+                                  backgroundImage: user.photoUrl != null
+                                      ? NetworkImage(user.photoUrl!)
+                                      : null,
+                                  child: user.photoUrl == null
+                                      ? const Icon(Icons.person, size: 12)
+                                      : null,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(user.nickname,
+                                    style: const TextStyle(fontSize: 13)),
+                                const Spacer(),
+                                const Icon(Icons.chat_bubble_outline,
+                                    size: 16.0, color: Colors.grey),
+                                const SizedBox(width: 4.0),
+                                Text('${product.chatsCount}'),
+                                const SizedBox(width: 12.0),
+                                const Icon(Icons.favorite_outline,
+                                    size: 16.0, color: Colors.grey),
+                                const SizedBox(width: 4.0),
+                                Text('${product.likesCount}'),
+                              ],
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 4.0),
-                        Text(
-                          product.description,
-                          style: TextStyle(
-                              fontSize: 14.0, color: Colors.grey[800]),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4.0),
-                        Text(
-                          '${product.locationParts?['kel'] ?? product.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $registeredAt',
-                          style: TextStyle(
-                              fontSize: 12.0, color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 8.0),
-                        Text(
-                          NumberFormat.currency(
-                            locale: 'id_ID',
-                            symbol: 'Rp ',
-                            decimalDigits: 0,
-                          ).format(product.price),
-                          style: const TextStyle(
-                              fontSize: 15.0, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8.0),
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 12,
-                              backgroundImage: user.photoUrl != null
-                                  ? NetworkImage(user.photoUrl!)
-                                  : null,
-                              child: user.photoUrl == null
-                                  ? const Icon(Icons.person, size: 12)
-                                  : null,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(user.nickname,
-                                style: const TextStyle(fontSize: 13)),
-                            const Spacer(),
-                            const Icon(Icons.chat_bubble_outline,
-                                size: 16.0, color: Colors.grey),
-                            const SizedBox(width: 4.0),
-                            Text('${product.chatsCount}'),
-                            const SizedBox(width: 12.0),
-                            const Icon(Icons.favorite_outline,
-                                size: 16.0, color: Colors.grey),
-                            const SizedBox(width: 4.0),
-                            Text('${product.likesCount}'),
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               );

@@ -51,18 +51,14 @@ class ProductModel {
   final String categoryId;
   final int price;
   final bool negotiable;
-
   // ✅ [추가] 태그 필드를 추가합니다.
   final List<String> tags;
-
   // ✅ [통합] 신규 모델의 정교한 위치 정보 필드를 사용합니다.
   final String? locationName;
   final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
-
   // ✅ [통합] 구버전 모델의 상태 관리 필드를 가져옵니다.
   final String status; // 'selling', 'reserved', 'sold'
-
   final String condition; // 'new' or 'used'
   // ✅ [추가] 거래 희망 장소 필드를 추가합니다.
   final String? transactionPlace;
@@ -71,6 +67,8 @@ class ProductModel {
   final String
       aiVerificationStatus; // 'pending', 'approved', 'rejected', 'none'
   final Map<String, dynamic>? aiReport;
+  // [추가] AI 검수 완료 상품을 위한 필드 (새 키 호환)
+  final Map<String, dynamic>? aiVerificationData;
   final String? rejectionReason;
 
   // 카운트 필드
@@ -91,13 +89,12 @@ class ProductModel {
     required this.categoryId,
     required this.price,
     required this.negotiable,
-    this.tags = const [], // ✅ 생성자에 tags 추가
+    this.tags = const [],
     this.locationName,
     this.locationParts,
     this.geoPoint,
     this.status = 'selling',
     this.condition = 'used',
-    // ✅ [추가] 생성자에 transactionPlace를 추가합니다.
     this.transactionPlace,
     this.likesCount = 0,
     this.chatsCount = 0,
@@ -107,8 +104,10 @@ class ProductModel {
     this.isAiVerified = false,
     this.aiVerificationStatus = 'none',
     this.aiReport,
+    // [추가] 새 필드 추가
+    this.aiVerificationData,
     this.rejectionReason,
-    this.isNew = false, // <-- 기본값은 false(중고)
+    this.isNew = false,
   });
 
   factory ProductModel.fromFirestore(
@@ -124,7 +123,6 @@ class ProductModel {
       categoryId: data['categoryId'] ?? '',
       price: data['price'] ?? 0,
       negotiable: data['negotiable'] ?? false,
-      // ✅ Firestore에서 tags 필드를 가져옵니다.
       tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
       locationName: data['locationName'],
       locationParts: data['locationParts'] != null
@@ -132,9 +130,7 @@ class ProductModel {
           : null,
       geoPoint: data['geoPoint'],
       status: data['status'] ?? 'selling',
-
       condition: data['condition'] ?? 'used',
-      // ✅ [추가] Firestore에서 transactionPlace 필드를 가져옵니다.
       transactionPlace: data['transactionPlace'],
       likesCount: data['likesCount'] ?? 0,
       chatsCount: data['chatsCount'] ?? 0,
@@ -147,8 +143,14 @@ class ProductModel {
       aiReport: data['aiReport'] != null
           ? Map<String, dynamic>.from(data['aiReport'])
           : null,
+      // [추가] 새 키(aiVerificationData)도 함께 로드, 없으면 aiReport로 폴백
+      aiVerificationData: data['aiVerificationData'] != null
+          ? Map<String, dynamic>.from(data['aiVerificationData'])
+          : (data['aiReport'] != null
+              ? Map<String, dynamic>.from(data['aiReport'])
+              : null),
       rejectionReason: data['rejectionReason'],
-      isNew: data['isNew'] ?? false, // <-- fromMap에 추가
+      isNew: data['isNew'] ?? false,
     );
   }
 
@@ -176,6 +178,8 @@ class ProductModel {
       'isAiVerified': isAiVerified,
       'aiVerificationStatus': aiVerificationStatus,
       'aiReport': aiReport,
+      // [추가] 새 필드 저장
+      'aiVerificationData': aiVerificationData,
       'rejectionReason': rejectionReason,
       'isNew': isNew,
     };
@@ -205,6 +209,8 @@ class ProductModel {
     bool? isAiVerified,
     String? aiVerificationStatus,
     Map<String, dynamic>? aiReport,
+    // [추가]
+    Map<String, dynamic>? aiVerificationData,
     String? rejectionReason,
   }) {
     return ProductModel(
@@ -231,7 +237,10 @@ class ProductModel {
       isAiVerified: isAiVerified ?? this.isAiVerified,
       aiVerificationStatus: aiVerificationStatus ?? this.aiVerificationStatus,
       aiReport: aiReport ?? this.aiReport,
+      // [추가]
+      aiVerificationData: aiVerificationData ?? this.aiVerificationData,
       rejectionReason: rejectionReason ?? this.rejectionReason,
+      isNew: isNew,
     );
   }
 }

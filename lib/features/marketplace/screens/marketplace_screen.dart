@@ -40,7 +40,6 @@
 library;
 
 /// 아래부터 실제 코드
-
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -90,36 +89,27 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ [수정] 쿼리 생성 로직을 build 메소드 안으로 이동하고, Tangerang 권역을 모두 포함하도록 수정
     Query<Map<String, dynamic>> buildQuery() {
       final userProv = widget.userModel?.locationParts?['prov'];
 
       Query<Map<String, dynamic>> query =
           FirebaseFirestore.instance.collection('products');
 
-// ✅ [수정 시작] 쿼리 로직을 아래와 같이 변경합니다.
-      // 1. Bling 정책에 따라 사용자의 기본 지역(prov)을 기준으로 1차 필터링합니다.
       if (userProv != null && userProv.isNotEmpty) {
         query = query.where('locationParts.prov', isEqualTo: userProv);
       }
 
-// 2. [핵심 수정] 판매중 & (AI 승인 OR 일반 상품) 인 경우만 필터링
-//    이 쿼리는 status 필드와 isAiVerified 필드를 모두 사용합니다.
       query = query
-          .where('status', isEqualTo: 'selling')
-          .where('isAiVerified', whereIn: [true, false]).where(
-              'aiVerificationStatus',
-              whereIn: ['approved', 'none']);
+          // [수정] 'selling' 상태인 상품만 노출하도록 쿼리를 단순화합니다.
+          .where('status', isEqualTo: 'selling');
 
-// 3. AI 검증 상품을 최상단에, 그 후 최신순으로 정렬 (기존과 동일)
+      // AI 검증 상품을 최상단에, 그 후 최신순으로 정렬
       query = query.orderBy('isAiVerified', descending: true);
       query = query.orderBy('createdAt', descending: true);
 
       return query;
-// ✅ [수정 끝]
     }
 
-    // ✅ [수정] 위치 정보가 없는 경우를 위한 UI 처리
     if (widget.userModel?.locationParts?['prov'] == null) {
       return Center(
         child: Padding(
@@ -162,12 +152,15 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
               indent: 16,
               endIndent: 16,
             ),
-            // ✅✅✅ 핵심 수정: 복잡한 UI 로직을 ProductCard 호출로 대체합니다. ✅✅✅
             itemBuilder: (context, index) {
               final product = ProductModel.fromFirestore(productsDocs[index]);
 
-              // StreamBuilder 환경이므로, 상태 유지를 위해 Key를 전달합니다.
-              return ProductCard(key: ValueKey(product.id), product: product);
+              // 이제 ProductCard가 AI 뱃지 표시를 스스로 책임지므로,
+              // 여기서는 ProductCard만 호출하면 됩니다.
+              return ProductCard(
+                key: ValueKey(product.id),
+                product: product,
+              );
             },
           );
         },

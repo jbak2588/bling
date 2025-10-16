@@ -84,7 +84,8 @@ const GEMINI_KEY = defineSecret("GEMINI_KEY");
 // ──────────────────────────────────────────────────────────────────────────────
 // 요청 타임아웃/재시도 설정 (Gemini 전용)
 // ──────────────────────────────────────────────────────────────────────────────
-const GENAI_TIMEOUT_MS = 30_000;         // 30s: 개별 Gemini 요청 타임아웃
+// [수정] Gemini 서버의 극심한 지연에 대응하기 위해 개별 요청 타임아웃을 60초로 늘립니다.
+const GENAI_TIMEOUT_MS = 60_000;         // 60s: 개별 Gemini 요청 타임아웃
 const GENAI_MAX_RETRIES = 2;             // 총 3회(최초 + 2회 재시도)
 const GENAI_BASE_DELAY_MS = 800;         // 첫 백오프 지연
 
@@ -220,7 +221,10 @@ async function genAiCall(genAI, { modelPrimary = "gemini-2.5-flash", modelFallba
           });
           return resp?.output_text || "";
         } catch (e) {
-          if (isModelNotFoundError(e)) {
+          // [수정] 모델을 찾을 수 없거나, 과부하 등 재시도 가능한 에러 발생 시 fallback 모델을 사용하도록 로직 강화
+          const shouldUseFallback = isModelNotFoundError(e) || isRetryable(e);
+          if (shouldUseFallback) {
+            logger.warn(`⚠️ Primary model failed (${e.message}). Falling back to ${modelFallback}...`, { tag });
             const fb = await genAI.responses.generate({
               model: modelFallback,
               contents,
@@ -246,7 +250,10 @@ async function genAiCall(genAI, { modelPrimary = "gemini-2.5-flash", modelFallba
         const r = await m.generateContent({ contents });
         return String(r?.response?.text?.() ?? "");
       } catch (e) {
-        if (isModelNotFoundError(e)) {
+        // [수정] 동일한 fallback 로직을 다른 SDK 버전 호출에도 적용
+        const shouldUseFallback = isModelNotFoundError(e) || isRetryable(e);
+        if (shouldUseFallback) {
+          logger.warn(`⚠️ Primary model failed (${e.message}). Falling back to ${modelFallback}...`, { tag });
           const fm = genAI.getGenerativeModel({
             model: modelFallback,
             safetySettings,
@@ -359,10 +366,17 @@ exports.initialproductanalysis = onCall(
       const db = getFirestore();
       const ruleDoc = await db.collection("ai_verification_rules").doc(ruleId).get();
       if (!ruleDoc.exists) {
-        logger.error(`❌ 오류: Firestore에서 ruleId '${ruleId}' 문서를 찾을 수 없습니다.`);
-        return { success: false, error: "Invalid ruleId." };
+        // [수정] onCall 함수에서는 HttpsError를 throw하여 클라이언트에 일관된 오류를 전달하는 것이 표준입니다.
+        throw new HttpsError("not-found", `Rule with ID ${ruleId} not found.`);
       }
-      const promptTemplate = ruleDoc.data().report_template_prompt;
+      // [수정] 데이터베이스 필드 불일치에 대응하기 위한 방어 코드
+      // initial_analysis_prompt_template 필드를 우선 사용하고, 없으면 report_template_prompt를 사용합니다. (하위 호환성)
+      const ruleData = ruleDoc.data();
+      const promptTemplate =
+        ruleData.initial_analysis_prompt_template || ruleData.report_template_prompt;
+      if (!promptTemplate) {
+        throw new HttpsError("failed-precondition", `Rule '${ruleId}' is missing a valid prompt template.`);
+      }
 
       const ac = new AbortController();
       const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
@@ -468,17 +482,25 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     }
     let promptTemplate = ruleDoc.data().report_template_prompt;
 
+    // [추적 코드 1] 프롬프트 템플릿 누락 방지
+    if (!promptTemplate) {
+      logger.error(`❌ Rule '${ruleId}' is missing the 'report_template_prompt' field.`);
+      throw new HttpsError("failed-precondition", `Rule '${ruleId}' is not configured for final report.`);
+    }
+
     // 전역 치환
     promptTemplate = (promptTemplate || "")
       .replace(/{{userPrice}}/g, String(userPrice ?? ""))
       .replace(/{{userDescription}}/g, String(userDescription ?? ""))
       .replace(/{{confirmedProductName}}/g, String(confirmedProductName ?? ""));
 
-    // 2.5 계열 호출은 통합 래퍼(genAiCall)로 처리
+    // ... (이미지 처리 로직은 동일)
     const allImageUrls = [...imageUrls.initial, ...Object.values(imageUrls.guided)];
 
     const ac = new AbortController();
     const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
+
+    // ... (이미지 처리 로직은 동일)
     const imageParts = await Promise.all(
       allImageUrls.map(async (url) => {
         if (!/^https:\/\//i.test(url)) {
@@ -525,8 +547,35 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     const report = tryParseJson(jsonBlock);
     logAiDiagnostics("generatefinalreport", jsonStr, report);
     if (!report) {
-      throw new HttpsError("data-loss", "AI final report JSON invalid.");
+      throw new HttpsError("data-loss", "AI returned invalid JSON for the final report.");
     }
+
+    // [최종 수정] 클라이언트(Flutter) 코드와 데이터 키 이름을 일치시킵니다.
+    // AI는 'suggested_price'를 반환하지만, Flutter 코드는 'price_suggestion'을 기대하고 있습니다.
+    // 서버에서 키 이름을 변경하여 클라이언트로 보내기 전에 데이터 구조를 맞춰줍니다.
+    if (report.suggested_price !== undefined) {
+      report.price_suggestion = report.suggested_price;
+      delete report.suggested_price;
+    }
+
+    // [추적 코드 2] 성공 직전 최종 로그
+    logger.info("✅ Final report generated successfully. Preparing to return.", { reportObjectKeys: Object.keys(report) });
+
+    // [최종 추적 코드] 객체를 문자열로 변환(직렬화)하는 과정에서 오류가 발생하는지 명시적으로 확인합니다.
+    try {
+      const reportString = JSON.stringify(report);
+      logger.info(`✅ Report object successfully serialized. Length: ${reportString.length}. Returning to client.`);
+    } catch (serializationError) {
+      // 만약 여기서 에러가 발생하면, Gemini가 보낸 report 객체에 문제가 있는 것입니다.
+      logger.error("❌ CRITICAL: Failed to serialize the report object.", {
+        error: serializationError.toString(),
+        reportObjectKeys: Object.keys(report),
+      });
+      // 직렬화 실패는 복구 불가능하므로, 명확한 에러를 던집니다.
+      throw new HttpsError("internal", "Failed to process the AI report due to a serialization error.");
+    }
+
+    // [최종 복원] 진단용 임시 코드를 삭제하고, 실제 AI 리포트를 반환하는 원래 코드를 활성화합니다.
     return { success: true, report };
 
   } catch (error) {

@@ -1,23 +1,21 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p;
+import 'package:easy_localization/easy_localization.dart';
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_functions/cloud_functions.dart'; // ✅ use cloud_functions
-
-import 'package:bling_app/firebase_options.dart'; // ✅ adjust to your app package name
+import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
+import 'package:bling_app/features/marketplace/screens/ai_guided_camera_screen.dart';
 
 class AiPredictionScreen extends StatefulWidget {
-  final String ruleId; // ✅ required
-  final List<Object /*File|XFile|String|Reference*/ > images;
+  // [수정] 이전 화면에서 분석 결과를 전달받도록 생성자 변경
+  final AiVerificationRule rule;
+  final List<XFile> initialImages;
+  final String predictedName;
 
   const AiPredictionScreen({
     super.key,
-    required this.ruleId,
-    required this.images,
+    required this.rule,
+    required this.initialImages,
+    required this.predictedName,
   });
 
   @override
@@ -25,105 +23,89 @@ class AiPredictionScreen extends StatefulWidget {
 }
 
 class _AiPredictionScreenState extends State<AiPredictionScreen> {
-  String? _predictedName;
-  String? _error;
-  bool _busy = true;
+  // [추가] 사용자가 상품명을 수정할 수 있도록 TextEditingController 추가
+  late final TextEditingController _nameController;
+  bool _isEditing = false;
 
   @override
   void initState() {
     super.initState();
-    _run();
+    _nameController = TextEditingController(text: widget.predictedName);
   }
 
-  Future<void> _run() async {
-    try {
-      WidgetsFlutterBinding.ensureInitialized();
-      await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform);
-
-      // ✅ Ensure region matches your deployed functions (us-central1)
-      final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
-
-      final callable = functions.httpsCallable(
-        'initialproductanalysis',
-        options: HttpsCallableOptions(timeout: const Duration(seconds: 60)),
-      );
-      final res = await callable.call(<String, dynamic>{
-        'ruleId': widget.ruleId,
-        'imageUrls': await _ensureDownloadUrls(widget.images),
-      });
-
-      final data = (res.data as Map?) ?? {};
-      setState(() {
-        _predictedName = data['prediction']?.toString();
-        _error = (data['success'] == true) ? null : 'AI 분석에 실패했습니다.';
-        _busy = false;
-      });
-    } catch (e, st) {
-      if (kDebugMode) {
-        debugPrint('❌ AI prediction error: $e\n$st');
-      }
-      setState(() {
-        _error = e.toString();
-        _busy = false;
-      });
-    }
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
   }
 
-  /// Converts any of [File|XFile|String(URL)|Reference] to public download URLs
-  Future<List<String>> _ensureDownloadUrls(List<Object> items) async {
-    final storage = FirebaseStorage.instance;
-    final out = <String>[];
-    for (final it in items) {
-      if (it is String && it.startsWith('http')) {
-        out.add(it);
-      } else if (it is XFile) {
-        out.add(await _uploadAndGetUrl(File(it.path), storage));
-      } else if (it is File) {
-        out.add(await _uploadAndGetUrl(it, storage));
-      } else if (it is Reference) {
-        out.add(await it.getDownloadURL());
-      } else {
-        throw StateError('Unsupported image type: ${it.runtimeType}');
-      }
-    }
-    return out;
-  }
-
-  Future<String> _uploadAndGetUrl(File file, FirebaseStorage storage) async {
-    final bytes = await file.length();
-    if (bytes > 10 * 1024 * 1024) {
-      throw StateError('이미지 파일이 10MB를 초과했습니다.');
-    }
-    final name = p.basename(file.path);
-    final stamp = DateTime.now().millisecondsSinceEpoch;
-    final ref = storage.ref('ai_uploads/$stamp-$name');
-    final snap = await ref.putFile(file);
-    return await snap.ref.getDownloadURL();
+  void _goToNextStep() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AiGuidedCameraScreen(
+          rule: widget.rule,
+          initialImages: widget.initialImages,
+          // [수정] 확정된 상품명(수정되었을 수 있음)을 다음 화면으로 전달
+          confirmedProductName: _nameController.text,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_busy) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-    if (_error != null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('AI 분석')),
-        body: Center(child: Text('오류: $_error', textAlign: TextAlign.center)),
-      );
-    }
     return Scaffold(
-      appBar: AppBar(title: const Text('AI 분석 결과')),
-      body: Center(
+      appBar: AppBar(
+        title: Text('ai_flow.prediction.title'.tr()),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('예상 상품명',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(_predictedName ?? '(없음)',
-                style: const TextStyle(fontSize: 20)),
+            Text(
+              'ai_flow.prediction.guide'.tr(),
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            // [추가] 상품명 표시 및 수정 UI
+            _isEditing
+                ? TextField(
+                    controller: _nameController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      labelText: 'ai_flow.prediction.edit_label'.tr(),
+                      border: const OutlineInputBorder(),
+                    ),
+                    onSubmitted: (_) => setState(() => _isEditing = false),
+                  )
+                : Text(
+                    _nameController.text,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+            const SizedBox(height: 16),
+            // [추가] 수정/저장 버튼
+            TextButton.icon(
+              icon: Icon(_isEditing ? Icons.check : Icons.edit_outlined),
+              label: Text(_isEditing
+                  ? 'ai_flow.prediction.save_button'.tr()
+                  : 'ai_flow.prediction.edit_button'.tr()),
+              onPressed: () => setState(() => _isEditing = !_isEditing),
+            ),
+            const Spacer(),
+            // [추가] 다음 단계로 가는 버튼
+            ElevatedButton(
+              onPressed: _goToNextStep,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: Text('ai_flow.prediction.confirm_button'.tr()),
+            ),
           ],
         ),
       ),
