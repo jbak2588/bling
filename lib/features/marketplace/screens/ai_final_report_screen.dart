@@ -71,9 +71,11 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     // [수정] 가격 컨트롤러 초기화 로직 변경
     // 판매 가격은 사용자가 입력한 가격을 기본값으로 설정
     _priceController.text = widget.userPrice ?? '';
-    // AI 추천 가격은 별도의 컨트롤러로 관리
+    // AI 추천 가격은 별도의 컨트롤러로 관리 (suggested_price 우선, 그다음 price_suggestion)
     _priceSuggestionController.text =
-        widget.finalReport['price_suggestion']?.toString() ?? '';
+        widget.finalReport['suggested_price']?.toString() ??
+            widget.finalReport['price_suggestion']?.toString() ??
+            '';
 
     // [핵심 수정] 중첩된 key_specs 맵을 안전하게 Map<String, dynamic>으로 변환합니다.
     final dynamic rawSpecs = widget.finalReport['key_specs'];
@@ -178,7 +180,8 @@ ${_itemsController.text.split(',').map((e) => "- ${e.trim()}").join('\n')}
         'included_items':
             _itemsController.text.split(',').map((e) => e.trim()).toList(),
         // [수정] AI 추천가와 사용자가 선택한 가격을 모두 저장
-        // 서버 응답의 의미를 유지하기 위해 price_suggestion에는 AI 추천가를 저장합니다.
+        // 호환성을 위해 suggested_price와 price_suggestion 둘 다 저장합니다.
+        'suggested_price': aiSuggestedPrice,
         'price_suggestion': aiSuggestedPrice,
         'ai_recommended_price': aiSuggestedPrice,
         'user_selected_price': userSelectedPrice,

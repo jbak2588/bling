@@ -41,10 +41,8 @@ import '../../location/screens/location_setting_screen.dart';
 // ✅ 공용 태그 위젯 import  : 2025년 8월 30일
 import '../../shared/widgets/custom_tag_input_field.dart';
 import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart'; // [추가] AI 뱃지
-import 'package:bling_app/features/marketplace/screens/ai_evidence_collection_screen.dart';
 import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
-import 'package:cloud_functions/cloud_functions.dart';
-import 'ai_final_report_screen.dart';
+import 'package:bling_app/features/marketplace/services/ai_verification_service.dart';
 
 class ProductEditScreen extends StatefulWidget {
   final ProductModel product;
@@ -55,6 +53,7 @@ class ProductEditScreen extends StatefulWidget {
 }
 
 class _ProductEditScreenState extends State<ProductEditScreen> {
+  final _aiVerificationService = AiVerificationService();
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _priceController = TextEditingController();
@@ -82,7 +81,9 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   void initState() {
     super.initState();
     // [핵심 추가] 화면이 시작될 때 현재 상품의 카테고리 ID로 AI 규칙을 미리 불러옵니다.
-    _loadAiRule(widget.product.categoryId);
+    _aiVerificationService.loadAiRule(widget.product.categoryId).then((rule) {
+      if (mounted) setState(() => _aiRule = rule);
+    });
 
     _titleController.text = widget.product.title;
     _priceController.text = widget.product.price.toString();
@@ -101,41 +102,6 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
 
     _loadInitialCategory();
     // 규칙은 위에서 카테고리 ID로 로드합니다.
-  }
-
-  // [핵심 추가] product_registration_screen.dart에서 가져온 AI 규칙 로딩 함수
-  Future<void> _loadAiRule(String? categoryId) async {
-    if (categoryId == null || categoryId.isEmpty) {
-      if (mounted) setState(() => _aiRule = null);
-      return;
-    }
-    try {
-      // 1. 카테고리 전용 규칙을 먼저 시도
-      DocumentSnapshot snap = await FirebaseFirestore.instance
-          .collection('ai_verification_rules')
-          .doc(categoryId)
-          .get();
-
-      // 2. 전용 규칙이 없으면, 범용 규칙을 시도
-      if (!snap.exists) {
-        snap = await FirebaseFirestore.instance
-            .collection('ai_verification_rules')
-            .doc('generic_v2')
-            .get();
-      }
-
-      if (mounted) {
-        if (snap.exists) {
-          setState(() {
-            _aiRule = AiVerificationRule.fromSnapshot(snap);
-          });
-        } else {
-          setState(() => _aiRule = null);
-        }
-      }
-    } catch (_) {
-      if (mounted) setState(() => _aiRule = null);
-    }
   }
 
   @override
@@ -310,7 +276,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     }
   }
 
-  // [V2 수정] AI 검수 시작 로직
+  // [리팩토링] AI 검수 시작 로직을 서비스 클래스로 위임
   Future<void> _startAiVerification() async {
     if (_aiRule == null) return;
 
@@ -319,77 +285,16 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     });
 
     try {
-      // 규칙에 따라 흐름 분기
-      if (_aiRule!.requiredShots.isNotEmpty) {
-        // 추가 증거샷이 필요하면 기존 화면으로 이동
-        await Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => AiEvidenceCollectionScreen(
-            categoryId: widget.product.categoryId,
-            productId: widget.product.id,
-            rule: _aiRule!,
-            // 기존 상품의 이미지 URL 목록 전달 (증거샷 화면에서 업로드 처리)
-            initialImages: widget.product.imageUrls,
-            confirmedProductName: widget.product.title,
-          ),
-        ));
-      } else {
-        // 추가 증거샷이 필요 없으면 바로 리포트 생성
-        // 카테고리 이름 조회 (ko 기준; 필요시 locale 반영 가능)
-        final categoryDoc = await FirebaseFirestore.instance
-            .collection('categories_v2')
-            .doc(widget.product.categoryId)
-            .get();
-        final data = categoryDoc.data() ?? const {};
-        final String subCategoryName =
-            (data['name_ko'] as String?) ?? widget.product.categoryId;
-        final dynamic parentId = data['parentId'];
-        String categoryName = '';
-        if (parentId is String && parentId.isNotEmpty) {
-          final parentDoc = await FirebaseFirestore.instance
-              .collection('categories_v2')
-              .doc(parentId)
-              .get();
-          categoryName = (parentDoc.data() ?? const {})['name_ko'] ?? '';
-        }
-
-        final HttpsCallable callable =
-            FirebaseFunctions.instanceFor(region: 'us-central1')
-                .httpsCallable('generatefinalreport');
-
-        final result = await callable.call(<String, dynamic>{
-          'imageUrls': {'initial': widget.product.imageUrls, 'guided': {}},
-          'ruleId': _aiRule!.id,
-          'confirmedProductName': widget.product.title,
-          'categoryName': categoryName,
-          'subCategoryName': subCategoryName,
-          'userPrice': widget.product.price.toString(),
-          'userDescription': widget.product.description,
-        });
-
-        // [핵심 수정] 서버에서 온 generic Map을 안전하게 Map<String, dynamic>으로 변환합니다.
-        final dynamic reportRaw = result.data['report'];
-        if (reportRaw is! Map) {
-          throw Exception("AI가 유효한 리포트를 생성하지 못했습니다.");
-        }
-        final reportData = Map<String, dynamic>.from(reportRaw);
-
-        if (!mounted) return;
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => AiFinalReportScreen(
-            // [핵심 수정] 상품의 모든 필수 원본 데이터를 전달합니다.
-            productId: widget.product.id,
-            categoryId: widget.product.categoryId,
-            userPrice: widget.product.price.toString(),
-            initialImages:
-                widget.product.imageUrls, // URL 목록(List<String>)을 그대로 전달
-
-            finalReport: reportData,
-            rule: _aiRule!,
-            takenShots: const {},
-            confirmedProductName: widget.product.title,
-          ),
-        ));
-      }
+      await _aiVerificationService.startVerificationFlow(
+        context: context,
+        rule: _aiRule!,
+        productId: widget.product.id,
+        categoryId: widget.product.categoryId,
+        initialImages: widget.product.imageUrls,
+        productName: _titleController.text,
+        productDescription: _descriptionController.text,
+        productPrice: _priceController.text,
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)

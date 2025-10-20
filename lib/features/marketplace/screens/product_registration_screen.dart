@@ -26,6 +26,7 @@ library;
 import 'dart:io';
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:bling_app/features/categories/screens/parent_category_screen.dart';
+import 'package:bling_app/features/marketplace/services/ai_verification_service.dart';
 import '../models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -55,6 +56,7 @@ class ProductRegistrationScreen extends StatefulWidget {
 }
 
 class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
+  final _aiVerificationService = AiVerificationService();
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _priceController = TextEditingController();
@@ -128,36 +130,19 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       setState(() {
         _selectedCategory = result;
       });
-      // [수정] 카테고리 선택 시, 규칙과 함께 이름도 조회합니다.
       if (result.parentId != null && result.parentId!.isNotEmpty) {
-        _loadAiRule(result.id);
-        _fetchCategoryNames(result.id, result.parentId!);
+        final rule = await _aiVerificationService.loadAiRule(result.id);
+        final names = await _aiVerificationService.getCategoryNames(
+            result.id, result.parentId!);
+        if (!mounted) return;
+        setState(() {
+          _selectedAiRule = rule;
+          _selectedSubCategoryName = names['subCategoryName'];
+          _selectedParentCategoryName = names['parentCategoryName'];
+        });
       } else {
         debugPrint("선택된 카테고리에 parentId가 없습니다.");
       }
-    }
-  }
-
-  // [추가] 카테고리 ID를 이용해 대/소분류 이름을 가져오는 함수
-  Future<void> _fetchCategoryNames(
-      String subCategoryId, String parentCategoryId) async {
-    try {
-      final subDoc = await FirebaseFirestore.instance
-          .collection('categories_v2')
-          .doc(subCategoryId)
-          .get();
-      final parentDoc = await FirebaseFirestore.instance
-          .collection('categories_v2')
-          .doc(parentCategoryId)
-          .get();
-      if (mounted) {
-        setState(() {
-          _selectedSubCategoryName = subDoc.data()?['name_ko'];
-          _selectedParentCategoryName = parentDoc.data()?['name_ko'];
-        });
-      }
-    } catch (e) {
-      debugPrint("카테고리 이름을 가져오는 중 오류 발생: $e");
     }
   }
 
@@ -283,42 +268,6 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         return category.nameId;
       default:
         return category.nameEn;
-    }
-  }
-
-  // [수정] AI 규칙 로딩 함수: 전용 규칙이 없으면 범용 규칙('generic_v2')을 불러옵니다.
-  Future<void> _loadAiRule(String? categoryId) async {
-    if (categoryId == null) {
-      setState(() => _selectedAiRule = null);
-      return;
-    }
-    try {
-      // 1. 카테고리 전용 규칙을 먼저 시도
-      DocumentSnapshot snap = await FirebaseFirestore.instance
-          .collection('ai_verification_rules')
-          .doc(categoryId)
-          .get();
-
-      // 2. 전용 규칙이 없으면, 범용 규칙을 시도
-      if (!snap.exists) {
-        snap = await FirebaseFirestore.instance
-            .collection('ai_verification_rules')
-            .doc('generic_v2')
-            .get();
-      }
-
-      if (snap.exists) {
-        setState(() {
-          _selectedAiRule = AiVerificationRule.fromSnapshot(snap);
-        });
-      } else {
-        // 전용 규칙도, 범용 규칙도 없으면 null 처리
-        setState(() => _selectedAiRule = null);
-        debugPrint("AI 검수 규칙을 찾을 수 없습니다 (범용 규칙 포함).");
-      }
-    } catch (e) {
-      setState(() => _selectedAiRule = null);
-      debugPrint("AI 규칙 로딩 중 오류: $e");
     }
   }
 
