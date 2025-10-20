@@ -130,7 +130,8 @@
       "addressHint": "동네",
       "addressDetailHint": "거래 장소",
       "descriptionHint": "상세 설명",
-      "success": "상품이 성공적으로 등록되었습니다!"
+      "success": "상품이 성공적으로 등록되었습니다!",
+      "tagsHint": "예: 강아지, 무료나눔"
     },
     "edit": {
       "title": "게시물 수정",
@@ -143,7 +144,8 @@
       "tagsHint": "예: 강아지, 무료나눔",
       "success": "상품이 성공적으로 등록되었습니다!",
       "fail": "상품 수정 실패: {error}",
-      "resetLocation": "위치 초기화"
+      "resetLocation": "위치 초기화",
+      "save": "변경사항 저장"
     },
     "detail": {
       "makeOffer": "가격 제안하기",

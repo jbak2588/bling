@@ -76,14 +76,24 @@ class AiVerificationRule {
 
   // AiVerificationRule 객체 -> Firestore Map 변환
   Map<String, dynamic> toMap() {
+    // requiredShots 맵을 Firestore에 저장 가능한 형태로 변환
+    final shotsToMap = requiredShots.map((key, value) {
+      return MapEntry(key, value.toMap());
+    });
+
     return {
       'name_ko': nameKo,
       'name_id': nameId,
       'is_ai_verification_supported': isAiVerificationSupported,
       'min_gallery_photos': minGalleryPhotos,
-      'required_shots':
-          requiredShots.map((key, value) => MapEntry(key, value.toMap())),
+      'required_shots': shotsToMap,
       'report_template_prompt': reportTemplatePrompt,
+      'initial_analysis_prompt_template': initialAnalysisPromptTemplate,
     };
+  }
+
+  // [추가] toMap()을 호출하는 toJson() 메소드. JSON 직렬화를 위한 표준 명칭.
+  Map<String, dynamic> toJson() {
+    return toMap();
   }
 }
