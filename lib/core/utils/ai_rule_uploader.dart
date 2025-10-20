@@ -63,18 +63,21 @@ Output a report in JSON format ONLY, in Indonesian.
 - Product Name Claim: "{{confirmedProductName}}"
 - Category: "{{categoryName}}"
 - Sub-Category: "{{subCategoryName}}"
+- User's Desired Price: "{{userPrice}}" IDR
 
 **Your Instructions:**
 1.  **Respect User Input:** Assume the user's "Product Name Claim" is correct. Your role is to find evidence in the photos to support it.
 2.  **Dynamic Analysis:** Based on the given "Category" and "Sub-Category", identify 2-3 key specifications (e.g., for 'Smartphone', this would be 'Model' and 'Storage'; for 'Shoes', it would be 'Model' and 'Size'). Then, analyze the evidence photos to find values for these specs.
 3.  **Objective Condition Check:** Objectively describe the visual condition of the item based on all provided photos. Note any visible scratches, dents, or signs of wear.
-4.  **JSON Output Only:** The entire response must be a single, valid JSON object.
+4.  **Suggest Market Price:** Based on all the information, suggest a reasonable used market price in Indonesian Rupiah (IDR).
+5.  **JSON Output Only:** The entire response must be a single, valid JSON object.
 
 {
   "verification_summary": "string (A brief summary confirming that you have analyzed the item based on user's claim and photos. Example: 'Berdasarkan klaim pengguna dan foto bukti, item telah diverifikasi sebagai...')",
   "key_specs": { "Spec 1 Name": "Value 1", "Spec 2 Name": "Value 2" },
   "condition_check": "string (A detailed, objective description of the item's condition based on the photos.)",
-  "included_items": ["string array (List all items visible in the photos, e.g., 'Box', 'Charger')"]
+  "included_items": ["string array (List all items visible in the photos, e.g., 'Box', 'Charger')"],
+  "suggested_price": "integer (Your suggested market price in IDR, numbers only)"
 }
 ''';
 

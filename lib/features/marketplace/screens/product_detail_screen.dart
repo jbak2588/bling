@@ -98,24 +98,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _isFavorite = false;
   int _currentIndex = 0;
   late final PageController _pageController = PageController(initialPage: 0);
+  // 기본은 상세 설명을 보여주고, 버튼으로 AI 리포트 표시를 전환합니다.
+  bool _showAiReport = false;
 
-  int? _toInt(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value;
-    if (value is double) return value.round();
-    if (value is String) {
-      return int.tryParse(value.replaceAll(RegExp(r'[^0-9-]'), ''));
-    }
-    return null;
-  }
-
-  String _formatCurrency(int value) {
-    return NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    ).format(value);
-  }
+  // 가격 포맷 및 숫자 변환 유틸은 현 섹션에서 사용하지 않으므로 제거되었습니다.
 
   @override
   void initState() {
@@ -493,14 +479,46 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ]),
                         const SizedBox(height: 16),
 
-                        // [추가] AI 리포트 섹션
-                        if (product.isAiVerified && product.aiReport != null)
-                          _buildAiReportSection(context, product.aiReport!,
-                              userPrice: product.price),
-
-                        Text(product.description,
-                            style: const TextStyle(fontSize: 16, height: 1.6)),
-                        const SizedBox(height: 16),
+                        // 상세 설명을 우선 표시하고, AI 리포트는 버튼으로 토글합니다.
+                        if (product.isAiVerified &&
+                            product.aiReport != null) ...[
+                          if (_showAiReport) ...[
+                            _buildAiReportSection(),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () =>
+                                    setState(() => _showAiReport = false),
+                                child: const Text('상세 설명 보기'),
+                              ),
+                            ),
+                          ] else ...[
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Text(
+                                product.description,
+                                style:
+                                    const TextStyle(fontSize: 16, height: 1.6),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () =>
+                                    setState(() => _showAiReport = true),
+                                child: const Text('[AI 리포트 보기]'),
+                              ),
+                            ),
+                          ],
+                        ] else ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: Text(
+                              product.description,
+                              style: const TextStyle(fontSize: 16, height: 1.6),
+                            ),
+                          ),
+                        ],
 
                         // ✅ 3. 공용 위젯 추가
                         ClickableTagList(tags: product.tags),
@@ -535,111 +553,112 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // [추가] AI 리포트 데이터를 UI로 변환하는 위젯
-  Widget _buildAiReportSection(
-      BuildContext context, Map<String, dynamic> aiReport,
-      {int? userPrice}) {
-    // V2: 지원 키 확장 - verification_summary, key_specs/specs, condition_check(Map 또는 String), included_items(List)
-    final dynamic specsData = aiReport['key_specs'] ?? aiReport['specs'];
-    final dynamic conditionData = aiReport['condition_check'];
-    final dynamic includedItems = aiReport['included_items'];
-    final int? aiSuggestedPrice = _toInt(aiReport['ai_recommended_price'] ??
-        aiReport['price_suggestion'] ??
-        aiReport['suggested_price']);
+  // AI 검수 리포트 섹션 위젯
+  Widget _buildAiReportSection() {
+    if (!widget.product.isAiVerified || widget.product.aiReport == null) {
+      return const SizedBox.shrink();
+    }
+    final report = widget.product.aiReport!;
+    final summary = report['verification_summary'];
+    final specs = report['key_specs'];
+    final condition = report['condition_check'];
+    final items = report['included_items'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            color: Colors.blue.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.shade100),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "🤖 AI 검수 리포트", // TODO: i18n key
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade800),
-              ),
-              const SizedBox(height: 4),
-              if (aiReport['verification_summary'] != null)
-                Text(
-                  aiReport['verification_summary'].toString(),
-                  style: TextStyle(
-                      color: Colors.blue.shade700, fontStyle: FontStyle.italic),
-                ),
-              // 가격 섹션: 사용자 가격과 AI 추천가를 나란히 표시
-              if (userPrice != null || aiSuggestedPrice != null) ...[
-                const SizedBox(height: 12),
-                const Text("가격",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                if (userPrice != null)
-                  Text("- 판매가: ${_formatCurrency(userPrice)}"),
-                if (aiSuggestedPrice != null)
-                  Text("- AI 추천가: ${_formatCurrency(aiSuggestedPrice)}",
-                      style: TextStyle(color: Colors.blue.shade800)),
-                const Divider(height: 24),
-              ],
-              const Divider(height: 24),
-              if (specsData is Map)
-                _buildReportMap(title: "주요 사양", data: specsData),
-              if (conditionData != null) ...[
-                const SizedBox(height: 12),
-                const Text("상태 점검",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                if (conditionData is Map)
-                  _buildReportMap(title: "", data: conditionData)
-                else
-                  Text(conditionData.toString()),
-              ],
-              if (includedItems is List && includedItems.isNotEmpty)
-                _buildReportList(title: "구성품", data: includedItems),
-            ],
-          ),
-        ),
+        // 구조화된 리포트 표시
+
+        // [V2] 구조화된 리포트 표시
+        if (summary != null)
+          _buildReportItem(context, Icons.task_alt, "AI 검증 요약", summary),
+        if (specs is Map && specs.isNotEmpty)
+          _buildReportMap(context, Icons.list_alt, "주요 사양", specs),
+        if (condition != null)
+          _buildReportItem(context, Icons.healing, "상태 점검", condition),
+        if (items is List && items.isNotEmpty)
+          _buildReportList(context, Icons.inbox, "구성품", items),
+
         const Divider(height: 32),
       ],
     );
   }
 
-  // Map 데이터를 표시하는 헬퍼
-  Widget _buildReportMap(
-      {required String title, required Map<dynamic, dynamic> data}) {
+  // 리포트 항목을 표시하는 헬퍼 위젯들
+  Widget _buildReportItem(
+      BuildContext context, IconData icon, String title, dynamic content) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: Theme.of(context).primaryColor, size: 20),
+              const SizedBox(width: 8),
+              Text(title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(content.toString(), style: const TextStyle(height: 1.5)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportMap(BuildContext context, IconData icon, String title,
+      Map<dynamic, dynamic> data) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (title.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Text(title,
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-        ],
-        ...data.entries.map((e) => Text("- ${e.key}: ${e.value}")),
+        Row(
+          children: [
+            Icon(icon, color: Theme.of(context).primaryColor, size: 20),
+            const SizedBox(width: 8),
+            Text(title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ...data.entries.map((e) => Padding(
+              padding: const EdgeInsets.only(left: 28.0, bottom: 4.0),
+              child: Text("- ${e.key}: ${e.value}"),
+            )),
       ],
     );
   }
 
-  // List 데이터를 표시하는 헬퍼
   Widget _buildReportList(
-      {required String title, required List<dynamic> data}) {
+      BuildContext context, IconData icon, String title, List<dynamic> data) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Row(
+          children: [
+            Icon(icon, color: Theme.of(context).primaryColor, size: 20),
+            const SizedBox(width: 8),
+            Text(title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
+          ],
+        ),
         const SizedBox(height: 8),
-        Text(title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-        ...data.map((item) => Text("- $item")),
+        ...data.map((e) => Padding(
+              padding: const EdgeInsets.only(left: 28.0, bottom: 4.0),
+              child: Text("- ${e.toString()}"),
+            )),
       ],
     );
   }
+
+  // 원문 다이얼로그 기능은 요청에 따라 제거되었습니다.
 }
