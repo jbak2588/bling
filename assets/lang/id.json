@@ -63,7 +63,7 @@
     "tabs": {
       "newFeed": "Berita Baru",
       "localNews": "Cerita Lokal",
-      "marketplace": "Marketplace",
+      "marketplace": "Preloved",
       "findFriends": "Cari Teman",
       "clubs": "Grup",
       "jobs": "Lowongan",
@@ -86,7 +86,7 @@
     "myTown": "Kota Saya",
     "search": {
       "placeholder": "Halaman Pencarian",
-      "chipPlaceholder": "Cari tetangga, berita, pasar, pekerjaan…"
+      "chipPlaceholder": "Cari tetangga, berita, proloved, pekerjaan…"
     }
   },
   "drawer": {
@@ -144,7 +144,8 @@
       "descriptionHint": "Ubah Deskripsi Lengkap",
       "success": "Produk berhasil diedit!",
       "fail": "Gagal memperbarui produk: {error}",
-      "resetLocation": "Atur ulang lokasi"
+      "resetLocation": "Atur ulang lokasi",
+      "save": "Simpan Perubahan"
     },
     "detail": {
       "makeOffer": "Tawarkan harga",
@@ -188,7 +189,7 @@
       "new": "Baru",
       "used": "Bekas"
     },
-    "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!"
+    "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang preloved!"
   },
   "ai_flow": {
     "common": {

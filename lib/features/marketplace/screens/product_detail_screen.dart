@@ -99,6 +99,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _currentIndex = 0;
   late final PageController _pageController = PageController(initialPage: 0);
 
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.round();
+    if (value is String) {
+      return int.tryParse(value.replaceAll(RegExp(r'[^0-9-]'), ''));
+    }
+    return null;
+  }
+
+  String _formatCurrency(int value) {
+    return NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    ).format(value);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -239,71 +257,70 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         final hasLocation = product.geoPoint != null;
 
         return Scaffold(
-          // ✅ 채팅/가격 BottomAppBar를 포함한 모든 UI를 원본 기준으로 완벽히 복원합니다.
-          bottomNavigationBar: isMyProduct
-              ? null
-              : BottomAppBar(
-                  surfaceTintColor: Colors.white,
-                  elevation: 10,
-                  child: SizedBox(
-                    height: 80,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
+          // ✅ 채팅/가격 BottomAppBar를 포함한 모든 UI를 항상 표시합니다. (등록자에게도 보이도록)
+          bottomNavigationBar: BottomAppBar(
+            surfaceTintColor: Colors.white,
+            elevation: 10,
+            child: SizedBox(
+              height: 80,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  children: [
+                    Expanded(
                       child: Row(
                         children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  padding: const EdgeInsets.only(right: 16),
-                                  icon: Icon(
-                                      _isFavorite
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      color: _isFavorite
-                                          ? Colors.pink
-                                          : Colors.grey),
-                                  onPressed: _toggleFavorite,
-                                ),
-                                const VerticalDivider(
-                                    width: 1.0, thickness: 1.0),
-                                const SizedBox(width: 16),
-                                Flexible(
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style:
-                                          const TextStyle(color: Colors.black),
-                                      children: [
-                                        TextSpan(
-                                          text: NumberFormat.currency(
-                                                  locale: 'id_ID',
-                                                  symbol: 'Rp ',
-                                                  decimalDigits: 0)
-                                              .format(product.price),
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16),
-                                        ),
-                                        TextSpan(
-                                          text:
-                                              '\n${product.negotiable ? 'marketplace.detail.makeOffer'.tr() : 'marketplace.detail.fixedPrice'.tr()}',
-                                          style: TextStyle(
-                                              color: product.negotiable
-                                                  ? Colors.green
-                                                  : Colors.grey,
-                                              fontSize: 12,
-                                              height: 1.5),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              ],
+                          IconButton(
+                            padding: const EdgeInsets.only(right: 16),
+                            icon: Icon(
+                              _isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isMyProduct
+                                  ? Colors.grey
+                                  : (_isFavorite ? Colors.pink : Colors.grey),
                             ),
+                            onPressed: isMyProduct ? null : _toggleFavorite,
                           ),
-                          ElevatedButton(
-                            onPressed: () async {
+                          const VerticalDivider(width: 1.0, thickness: 1.0),
+                          const SizedBox(width: 16),
+                          Flexible(
+                            child: RichText(
+                              text: TextSpan(
+                                style: const TextStyle(color: Colors.black),
+                                children: [
+                                  TextSpan(
+                                    text: NumberFormat.currency(
+                                            locale: 'id_ID',
+                                            symbol: 'Rp ',
+                                            decimalDigits: 0)
+                                        .format(product.price),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
+                                  ),
+                                  TextSpan(
+                                    text:
+                                        '\n${product.negotiable ? 'marketplace.detail.makeOffer'.tr() : 'marketplace.detail.fixedPrice'.tr()}',
+                                    style: TextStyle(
+                                        color: product.negotiable
+                                            ? Colors.green
+                                            : Colors.grey,
+                                        fontSize: 12,
+                                        height: 1.5),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: isMyProduct
+                          ? null
+                          : () async {
                               if (myUid == null) return;
                               if (!context.mounted) return;
 
@@ -343,22 +360,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 }
                               }
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color(0xFFE8803C), // 당근마켓 주황색
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                            ),
-                            child: Text("marketplace.detail.chat".tr(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                        ],
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE8803C), // 당근마켓 주황색
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
                       ),
+                      child: Text("marketplace.detail.chat".tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
-                  ),
+                  ],
                 ),
+              ),
+            ),
+          ),
           body: CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -480,7 +495,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                         // [추가] AI 리포트 섹션
                         if (product.isAiVerified && product.aiReport != null)
-                          _buildAiReportSection(context, product.aiReport!),
+                          _buildAiReportSection(context, product.aiReport!,
+                              userPrice: product.price),
 
                         Text(product.description,
                             style: const TextStyle(fontSize: 16, height: 1.6)),
@@ -521,37 +537,73 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   // [추가] AI 리포트 데이터를 UI로 변환하는 위젯
   Widget _buildAiReportSection(
-      BuildContext context, Map<String, dynamic> aiReport) {
+      BuildContext context, Map<String, dynamic> aiReport,
+      {int? userPrice}) {
+    // V2: 지원 키 확장 - verification_summary, key_specs/specs, condition_check(Map 또는 String), included_items(List)
+    final dynamic specsData = aiReport['key_specs'] ?? aiReport['specs'];
+    final dynamic conditionData = aiReport['condition_check'];
+    final dynamic includedItems = aiReport['included_items'];
+    final int? aiSuggestedPrice = _toInt(aiReport['ai_recommended_price'] ??
+        aiReport['price_suggestion'] ??
+        aiReport['suggested_price']);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
             color: Colors.blue.shade50,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.blue.shade100),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "🤖 AI 검수 리포트",
+                "🤖 AI 검수 리포트", // TODO: i18n key
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.blue.shade800),
               ),
-              const SizedBox(height: 8),
-              if (aiReport['specs'] is Map)
-                _buildReportMap(title: "상세 사양", data: aiReport['specs']),
-              if (aiReport['condition_check'] is Map)
-                _buildReportMap(
-                    title: "상태 점검", data: aiReport['condition_check']),
-              if (aiReport['included_items'] is List)
-                _buildReportList(
-                    title: "구성품", data: aiReport['included_items']),
+              const SizedBox(height: 4),
+              if (aiReport['verification_summary'] != null)
+                Text(
+                  aiReport['verification_summary'].toString(),
+                  style: TextStyle(
+                      color: Colors.blue.shade700, fontStyle: FontStyle.italic),
+                ),
+              // 가격 섹션: 사용자 가격과 AI 추천가를 나란히 표시
+              if (userPrice != null || aiSuggestedPrice != null) ...[
+                const SizedBox(height: 12),
+                const Text("가격",
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                if (userPrice != null)
+                  Text("- 판매가: ${_formatCurrency(userPrice)}"),
+                if (aiSuggestedPrice != null)
+                  Text("- AI 추천가: ${_formatCurrency(aiSuggestedPrice)}",
+                      style: TextStyle(color: Colors.blue.shade800)),
+                const Divider(height: 24),
+              ],
+              const Divider(height: 24),
+              if (specsData is Map)
+                _buildReportMap(title: "주요 사양", data: specsData),
+              if (conditionData != null) ...[
+                const SizedBox(height: 12),
+                const Text("상태 점검",
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                if (conditionData is Map)
+                  _buildReportMap(title: "", data: conditionData)
+                else
+                  Text(conditionData.toString()),
+              ],
+              if (includedItems is List && includedItems.isNotEmpty)
+                _buildReportList(title: "구성품", data: includedItems),
             ],
           ),
         ),
@@ -566,9 +618,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 8),
-        Text(title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        if (title.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        ],
         ...data.entries.map((e) => Text("- ${e.key}: ${e.value}")),
       ],
     );

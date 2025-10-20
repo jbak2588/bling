@@ -63,7 +63,7 @@
     "tabs": {
       "newFeed": "New Feed",
       "localNews": "Local News",
-      "marketplace": "Marketplace",
+      "marketplace": "Preloved",
       "findFriends": "Find Friends",
       "clubs": "Clubs",
       "jobs": "Jobs",
@@ -86,7 +86,7 @@
     "myTown": "My Town",
     "search": {
       "placeholder": "Search",
-      "chipPlaceholder": "Search neighbors, news, marketplace, jobs…"
+      "chipPlaceholder": "Search neighbors, news, preloved, jobs…"
     }
   },
   "drawer": {
@@ -130,7 +130,8 @@
       "addressHint": "Neighborhood",
       "addressDetailHint": "Meeting Place",
       "descriptionHint": "Detailed Description",
-      "success": "Product registered successfully!"
+      "success": "Product registered successfully!",
+      "tagsHint": "e.g. dog, freeshare"
     },
     "edit": {
       "title": "Edit Post",
@@ -143,7 +144,8 @@
       "tagsHint": "e.g. dog, freeshare",
       "success": "Product registered successfully!",
       "fail": "Failed to update product: {error}",
-      "resetLocation": "Reset location"
+      "resetLocation": "Reset location",
+      "save": "Save Changes"
     },
     "detail": {
       "makeOffer": "Make an offer",
@@ -187,7 +189,7 @@
       "new": "New",
       "used": "Used"
     },
-    "setLocationPrompt": "Set your neighborhood first to see marketplace items!"
+    "setLocationPrompt": "Set your neighborhood first to see preloved items!"
   },
   "ai_flow": {
     "common": {

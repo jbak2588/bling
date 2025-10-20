@@ -1,0 +1,12 @@
+{
+  "name": "bling-scripts",
+  "version": "1.0.0",
+  "description": "One-off scripts for Bling app maintenance.",
+  "main": "migrate_categories.js",
+  "scripts": {
+    "start": "node migrate_categories.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

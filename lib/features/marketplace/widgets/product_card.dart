@@ -68,6 +68,46 @@ class _ProductCardState extends State<ProductCard>
   @override
   bool get wantKeepAlive => true;
 
+  // 안전한 미리보기 텍스트 생성: condition_check가 Map/String/List 어떤 형태든 처리하고,
+  // 없으면 verification_summary 또는 기존 description으로 폴백합니다.
+  String _aiDescriptionPreview(ProductModel product) {
+    final Map<String, dynamic>? report =
+        (product.aiReport ?? product.aiVerificationData)
+            ?.map((key, value) => MapEntry(key.toString(), value));
+
+    if (report == null) return product.description;
+
+    final dynamic condition = report['condition_check'];
+    String? condText;
+    if (condition is Map) {
+      try {
+        condText =
+            condition.entries.map((e) => '${e.key}: ${e.value}').join(', ');
+      } catch (_) {
+        // ignore and fallback below
+      }
+    } else if (condition is List) {
+      try {
+        condText = condition.join(', ');
+      } catch (_) {
+        // ignore and fallback below
+      }
+    } else if (condition is String) {
+      condText = condition;
+    }
+
+    if (condText != null && condText.trim().isNotEmpty) {
+      return condText;
+    }
+
+    final dynamic summary = report['verification_summary'];
+    if (summary is String && summary.trim().isNotEmpty) {
+      return summary;
+    }
+
+    return product.description;
+  }
+
   String _formatTimestamp(BuildContext context, Timestamp timestamp) {
     final now = DateTime.now();
     final dt = timestamp.toDate();
@@ -157,12 +197,7 @@ class _ProductCardState extends State<ProductCard>
                             Text(
                               // [개선] AI 검수 상품일 경우, 설명 대신 AI 리포트 요약을 보여줍니다.
                               product.isAiVerified
-                                  ? ((product.aiReport?['condition_check']
-                                              as Map<String, dynamic>?)
-                                          ?.entries
-                                          .map((e) => '${e.key}: ${e.value}')
-                                          .join(', ') ??
-                                      product.description)
+                                  ? _aiDescriptionPreview(product)
                                   : product.description,
                               style: TextStyle(
                                   fontSize: 14.0, color: Colors.grey[800]),
