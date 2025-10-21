@@ -1,153 +1,128 @@
-// lib/core/utils/ai_rule_uploader.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-// 17번 요청에서 생성한 모델 파일을 import 합니다.
 import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:bling_app/firebase_options.dart';
+
+// 이 파일은 관리자 메뉴 또는 개발자가 직접 실행하여 Firestore의 AI 규칙을
+// V2 시스템에 맞는 '범용 규칙' 하나로 깨끗하게 초기화하는 최종 스크립트입니다.
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  final uploader = AiRuleUploader();
+  await uploader.uploadInitialRules();
+}
 
 class AiRuleUploader {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  // main_navigation_screen.dart 의 관리자 메뉴에서 호출하는 최종 함수
   Future<void> uploadInitialRules() async {
-    final rulesCollection = _firestore.collection('ai_verification_rules');
-    final List<AiVerificationRule> initialRules = _getInitialRules();
+    final rulesCollection = _db.collection('ai_verification_rules');
 
-    WriteBatch batch = _firestore.batch();
+    debugPrint("[AI 규칙 V2.1 마이그레이션 시작]");
 
-    for (final rule in initialRules) {
-      final docRef = rulesCollection.doc(rule.id);
-      batch.set(docRef, rule.toMap());
-    }
+    // V2.1 규칙 목록 생성 (범용 + 스마트폰 전용)
+    final List<AiVerificationRule> rulesToUpload = [
+      _getGenericV2Rule(),
+      _getSmartphoneV2Rule(),
+    ];
 
+    debugPrint("새로운 V2.1 규칙들을 업로드합니다...");
     try {
+      // WriteBatch를 사용하여 모든 규칙을 한 번에 업로드 (원자적 연산)
+      WriteBatch batch = _db.batch();
+      for (final rule in rulesToUpload) {
+        batch.set(rulesCollection.doc(rule.id), rule.toJson());
+      }
       await batch.commit();
-      debugPrint('AI 검수 규칙 초기 데이터 업로드 성공!');
+      debugPrint(
+          '✅ 성공: ${rulesToUpload.length}개의 AI 검수 V2.1 규칙이 성공적으로 Firestore에 업로드되었습니다.');
     } catch (e) {
-      debugPrint('AI 검수 규칙 초기 데이터 업로드 실패: $e');
+      debugPrint('❌ 실패: AI 검수 V2.1 규칙 업로드 실패: $e');
     }
   }
 
-  List<AiVerificationRule> _getInitialRules() {
-    return [
-      // 1. 스마트폰 카테고리 규칙
-      AiVerificationRule(
-        id: 'smartphone',
-        nameKo: '스마트폰',
-        nameId: 'Smartphone',
-        isAiVerificationSupported: true,
-        minGalleryPhotos: 3,
-        requiredShots: {
-          'front':
-              RequiredShot(nameKo: '정면 스크린 샷', descKo: '화면이 켜진 상태로 정면을 촬영하세요.'),
-          'back': RequiredShot(nameKo: '후면 샷', descKo: '카메라와 기기 뒷면 전체를 촬영하세요.'),
-          'corners': RequiredShot(
-              nameKo: '모서리 흠집 샷', descKo: '가장 흠집이 잘 보이는 모서리를 가까이서 찍어주세요.'),
-          'imei': RequiredShot(
-              nameKo: 'IMEI 정보 샷', descKo: '*#06#을 눌러 나오는 IMEI 화면을 촬영하세요.'),
-        },
-        reportTemplatePrompt: '''
-        당신은 인도네시아 중고 스마트폰 거래 전문가입니다. 제공된 이미지들과 사용자 정보를 바탕으로, 아래 JSON 형식에 맞춰 인도네시아어로 상세 판매 게시글을 작성해주세요.
+  // index.js 서버와 100% 호환되는 최종 프롬프트가 포함된 규칙 생성 함수
+  AiVerificationRule _getGenericV2Rule() {
+    // 1단계: 상품명 예측을 위한 프롬프트 (기존과 동일)
+    const initialPrompt = '''
+Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {"predicted_item_name": "PREDICTED_NAME"}''';
 
-        사용자 정보:
-        - 희망 가격: {{userPrice}} IDR
-        - 간단 설명: {{userDescription}}
+    // 2단계: 최종 AI 보고서 생성을 위한 프롬프트 (서버 변수와 완벽하게 일치)
+    const v2ReportPrompt = '''
+You are an expert product inspector for a marketplace, acting as a helpful assistant.
+Your task is to verify a user's claims based on the information and evidence photos they provided.
+Output a report in JSON format ONLY, in Indonesian.
 
-        {
-          "title": "[브랜드] [모델명] [용량] [색상] 판매합니다.",
-          "description": "상세한 제품 설명 (최초 구매일, 사용 기간, 특징 등)",
-          "specs": { "brand": "브랜드", "model": "모델명", "storage": "저장 용량", "color": "색상" },
-          "condition_check": {
-            "overall": "전체적인 상태 (A급, B급 등)와 그 이유",
-            "screen": "화면 상태 (스크래치, 번인 유무)",
-            "body": "외관 상태 (찍힘, 흠집 등)",
-            "battery_performance": "배터리 성능에 대한 추정"
-          },
-          "included_items": "포함된 구성품 목록 (예: '박스, 충전기 포함')",
-          "suggested_price": "적정 중고 가격 (IDR 숫자만)"
-        }
-        ''',
-      ),
+**User's Input:**
+- Product Name Claim: "{{confirmedProductName}}"
+- Category: "{{categoryName}}"
+- Sub-Category: "{{subCategoryName}}"
+- User's Desired Price: "{{userPrice}}" IDR
 
-      // 2. 여성 가방 카테고리 규칙
-      AiVerificationRule(
-        id: 'womens_bag',
-        nameKo: '여성 가방',
-        nameId: 'Tas Wanita',
-        isAiVerificationSupported: true,
-        minGalleryPhotos: 4,
-        requiredShots: {
-          'front':
-              RequiredShot(nameKo: '가방 정면', descKo: '가방의 전체적인 앞모습을 촬영하세요.'),
-          'logo': RequiredShot(
-              nameKo: '브랜드 로고', descKo: '브랜드 로고 부분을 선명하게 가까이서 찍어주세요.'),
-          'interior': RequiredShot(
-              nameKo: '가방 내부', descKo: '가방 내부의 전체적인 모습과 오염도를 보여주세요.'),
-          'corners': RequiredShot(
-              nameKo: '모서리 마모', descKo: '가장 마모가 심한 하단 모서리를 촬영하세요.'),
-        },
-        reportTemplatePrompt: '''
-        당신은 인도네시아 중고 명품 가방 거래 전문가입니다. 제공된 이미지들과 사용자 정보를 바탕으로, 아래 JSON 형식에 맞춰 인도네시아어로 상세 판매 게시글을 작성해주세요.
+**Your Instructions:**
+1.  **Respect User Input:** Assume the user's "Product Name Claim" is correct. Your role is to find evidence in the photos to support it.
+2.  **Dynamic Analysis:** Based on the given "Category" and "Sub-Category", identify 2-3 key specifications (e.g., for 'Smartphone', this would be 'Model' and 'Storage'; for 'Shoes', it would be 'Model' and 'Size'). Then, analyze the evidence photos to find values for these specs.
+3.  **Objective Condition Check:** Objectively describe the visual condition of the item based on all provided photos. Note any visible scratches, dents, or signs of wear.
+4.  **Suggest Market Price:** Based on all the information, suggest a reasonable used market price in Indonesian Rupiah (IDR).
+5.  **JSON Output Only:** The entire response must be a single, valid JSON object.
 
-        사용자 정보:
-        - 희망 가격: {{userPrice}} IDR
-        - 간단 설명: {{userDescription}}
+{
+  "verification_summary": "string (A brief summary confirming that you have analyzed the item based on user's claim and photos. Example: 'Berdasarkan klaim pengguna dan foto bukti, item telah diverifikasi sebagai...')",
+  "key_specs": { "Spec 1 Name": "Value 1", "Spec 2 Name": "Value 2" },
+  "condition_check": "string (A detailed, objective description of the item's condition based on the photos.)",
+  "included_items": ["string array (List all items visible in the photos, e.g., 'Box', 'Charger')"],
+  "suggested_price": "integer (Your suggested market price in IDR, numbers only)"
+}
+''';
 
-        {
-          "title": "[브랜드] [모델명/라인] [색상] 가방 판매합니다.",
-          "description": "상세한 제품 설명 (구매처, 구매 시기, 실사용 횟수 등)",
-          "specs": { "brand": "브랜드", "model": "모델명/라인", "material": "소재", "color": "색상" },
-          "condition_check": {
-            "overall": "전체적인 상태 (A급, B급 등)와 그 이유",
-            "exterior": "외부 상태 (스크래치, 오염, 가죽 마모 상태)",
-            "interior": "내부 상태 (오염, 찢어짐 등)",
-            "hardware": "금속 장식 상태 (벗겨짐, 변색 등)"
-          },
-          "included_items": "포함된 구성품 목록 (예: '더스트백, 개런티 카드 포함')",
-          "suggested_price": "적정 중고 가격 (IDR 숫자만)"
-        }
-        ''',
-      ),
+    return AiVerificationRule(
+      id: 'generic_v2', // 서버와 프론트엔드가 찾는 바로 그 ID
+      nameKo: "범용 중고물품 검증 규칙 V2",
+      nameId: "Aturan Verifikasi Barang Bekas Umum V2",
+      isAiVerificationSupported: true,
+      minGalleryPhotos: 1,
+      suggestedShots: {}, // 범용 규칙이므로 추천샷 없음
+      initialAnalysisPromptTemplate: initialPrompt,
+      reportTemplatePrompt:
+          v2ReportPrompt, // V1 필드명과의 호환성을 위해 reportTemplatePrompt 사용
+    );
+  }
 
-      // 3. 신발 카테고리 규칙
-      AiVerificationRule(
-        id: 'shoes',
-        nameKo: '신발',
-        nameId: 'Sepatu',
-        isAiVerificationSupported: true,
-        minGalleryPhotos: 4,
-        requiredShots: {
-          'side':
-              RequiredShot(nameKo: '측면 전체 샷', descKo: '신발의 전체적인 옆모습을 촬영하세요.'),
-          'sole':
-              RequiredShot(nameKo: '밑창 샷', descKo: '밑창의 마모도를 확인할 수 있도록 촬영하세요.'),
-          'tag': RequiredShot(
-              nameKo: '내부 탭/사이즈 샷', descKo: '사이즈와 모델 정보가 보이는 탭을 선명하게 찍어주세요.'),
-          'front': RequiredShot(
-              nameKo: '앞코 샷', descKo: '신발 앞코 부분의 사용감을 가까이서 촬영하세요.'),
-        },
-        reportTemplatePrompt: '''
-        당신은 인도네시아 중고 신발 거래 전문가입니다. 제공된 이미지들과 사용자 정보를 바탕으로, 아래 JSON 형식에 맞춰 인도네시아어로 상세 판매 게시글을 작성해주세요.
+  // [V2.1 신규] 스마트폰 전용 규칙 생성 함수
+  AiVerificationRule _getSmartphoneV2Rule() {
+    // 프롬프트는 범용 프롬프트를 그대로 재사용할 수 있습니다.
+    // V2.1의 핵심은 프롬프트가 아닌, 'suggestedShots' 데이터에 있습니다.
 
-        사용자 정보:
-        - 희망 가격: {{userPrice}} IDR
-        - 간단 설명: {{userDescription}}
-
-        {
-          "title": "[브랜드] [모델명] [사이즈] 판매합니다.",
-          "description": "상세한 제품 설명 (구매 시기, 실착 횟수, 착화감 등)",
-          "specs": { "brand": "브랜드", "model": "모델명", "size": "사이즈 (mm)", "color": "주요 색상" },
-          "condition_check": {
-            "overall": "전체적인 상태 (A급, B급 등)와 그 이유",
-            "upper": "갑피 상태 (오염, 주름, 스크래치 등)",
-            "sole": "밑창 마모 상태",
-            "interior": "내부 깔창 및 뒤꿈치 상태"
-          },
-          "included_items": "포함된 구성품 목록 (예: '정품 박스 포함')",
-          "suggested_price": "적정 중고 가격 (IDR 숫자만)"
-        }
-        ''',
-      ),
-    ];
+    return AiVerificationRule(
+      id: 'smartphone-tablet', // 실제 카테고리 ID와 일치
+      nameKo: "스마트폰/태블릿 전용 검증 규칙",
+      nameId: "Aturan Verifikasi Khusus Smartphone/Tablet",
+      isAiVerificationSupported: true,
+      minGalleryPhotos: 1,
+      suggestedShots: {
+        'imei_shot': RequiredShot(
+          nameKo: 'IMEI 정보 화면',
+          descKo: '단말기 정보 또는 IMEI 화면을 촬영하면 신뢰도가 크게 상승합니다.',
+        ),
+        'battery_shot': RequiredShot(
+          nameKo: '배터리 성능 화면',
+          descKo: '배터리 성능 상태 화면을 촬영하여 구매자에게 정확한 정보를 제공하세요.',
+        ),
+        'info_shot': RequiredShot(
+          nameKo: '기기 정보 화면',
+          descKo: '설정 > 휴대전화 정보 화면을 촬영하여 모델명과 용량을 명확히 보여주세요.',
+        ),
+      },
+      // initialAnalysisPromptTemplate, reportTemplatePrompt는 범용 규칙과 동일한 것을 사용하거나
+      // 필요시 스마트폰에 더 특화된 프롬프트를 여기에 별도로 정의할 수 있습니다.
+      initialAnalysisPromptTemplate: '', // 우선 비워두어 서버에서 범용 프롬프트를 찾도록 유도
+      reportTemplatePrompt: '',
+    );
   }
 }

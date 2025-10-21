@@ -38,6 +38,7 @@ node_modules/
 # Google Service Account Key
 serviceAccountKey.json
 *.key.json
+scripts/serviceAccountKey.json
 
 
 

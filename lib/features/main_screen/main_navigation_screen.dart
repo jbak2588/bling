@@ -12,7 +12,7 @@ import 'package:bling_app/features/local_stores/screens/create_shop_screen.dart'
 
 import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
 // import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
-import 'package:bling_app/features/marketplace/screens/registration_type_screen.dart';
+import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
 import 'package:bling_app/features/clubs/screens/create_club_screen.dart';
 import 'package:bling_app/features/jobs/screens/create_job_screen.dart';
 import 'package:bling_app/features/pom/screens/create_short_screen.dart';
@@ -204,7 +204,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         target = const CreateLocalNewsScreen();
         break;
       case AppSection.marketplace:
-        target = const RegistrationTypeScreen();
+        target = const ProductRegistrationScreen();
         break;
       case AppSection.findFriends:
         target = FindFriendFormScreen(userModel: _userModel!);
@@ -267,7 +267,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   Icons.store_mall_directory_rounded,
                   'main.tabs.marketplace'.tr(),
                   'marketplace.registration.title'.tr(),
-                  () => const RegistrationTypeScreen()),
+                  () => const ProductRegistrationScreen()),
               _sheetItem(
                   Icons.sentiment_satisfied_alt_rounded,
                   'main.tabs.findFriends'.tr(),

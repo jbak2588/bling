@@ -32,6 +32,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:bling_app/features/marketplace/screens/product_edit_screen.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
+import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart'; // AI 뱃지
 
 // ✅ 공용 위젯 4개를 import 합니다.
 import '../../shared/widgets/author_profile_tile.dart';
@@ -97,6 +98,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _isFavorite = false;
   int _currentIndex = 0;
   late final PageController _pageController = PageController(initialPage: 0);
+  // 기본은 상세 설명을 보여주고, 버튼으로 AI 리포트 표시를 전환합니다.
+  bool _showAiReport = false;
+
+  // 가격 포맷 및 숫자 변환 유틸은 현 섹션에서 사용하지 않으므로 제거되었습니다.
 
   @override
   void initState() {
@@ -195,8 +200,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  // --- 위젯 빌더 (디자인 및 다국어 수정) ---
-
   // [다국어 수정] 시간 포맷 함수
   String _formatTimestamp(Timestamp timestamp) {
     final now = DateTime.now();
@@ -240,71 +243,70 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         final hasLocation = product.geoPoint != null;
 
         return Scaffold(
-          // ✅ 채팅/가격 BottomAppBar를 포함한 모든 UI를 원본 기준으로 완벽히 복원합니다.
-          bottomNavigationBar: isMyProduct
-              ? null
-              : BottomAppBar(
-                  surfaceTintColor: Colors.white,
-                  elevation: 10,
-                  child: SizedBox(
-                    height: 80,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
+          // ✅ 채팅/가격 BottomAppBar를 포함한 모든 UI를 항상 표시합니다. (등록자에게도 보이도록)
+          bottomNavigationBar: BottomAppBar(
+            surfaceTintColor: Colors.white,
+            elevation: 10,
+            child: SizedBox(
+              height: 80,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  children: [
+                    Expanded(
                       child: Row(
                         children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  padding: const EdgeInsets.only(right: 16),
-                                  icon: Icon(
-                                      _isFavorite
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      color: _isFavorite
-                                          ? Colors.pink
-                                          : Colors.grey),
-                                  onPressed: _toggleFavorite,
-                                ),
-                                const VerticalDivider(
-                                    width: 1.0, thickness: 1.0),
-                                const SizedBox(width: 16),
-                                Flexible(
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style:
-                                          const TextStyle(color: Colors.black),
-                                      children: [
-                                        TextSpan(
-                                          text: NumberFormat.currency(
-                                                  locale: 'id_ID',
-                                                  symbol: 'Rp ',
-                                                  decimalDigits: 0)
-                                              .format(product.price),
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16),
-                                        ),
-                                        TextSpan(
-                                          text:
-                                              '\n${product.negotiable ? 'marketplace.detail.makeOffer'.tr() : 'marketplace.detail.fixedPrice'.tr()}',
-                                          style: TextStyle(
-                                              color: product.negotiable
-                                                  ? Colors.green
-                                                  : Colors.grey,
-                                              fontSize: 12,
-                                              height: 1.5),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              ],
+                          IconButton(
+                            padding: const EdgeInsets.only(right: 16),
+                            icon: Icon(
+                              _isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isMyProduct
+                                  ? Colors.grey
+                                  : (_isFavorite ? Colors.pink : Colors.grey),
                             ),
+                            onPressed: isMyProduct ? null : _toggleFavorite,
                           ),
-                          ElevatedButton(
-                            onPressed: () async {
+                          const VerticalDivider(width: 1.0, thickness: 1.0),
+                          const SizedBox(width: 16),
+                          Flexible(
+                            child: RichText(
+                              text: TextSpan(
+                                style: const TextStyle(color: Colors.black),
+                                children: [
+                                  TextSpan(
+                                    text: NumberFormat.currency(
+                                            locale: 'id_ID',
+                                            symbol: 'Rp ',
+                                            decimalDigits: 0)
+                                        .format(product.price),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
+                                  ),
+                                  TextSpan(
+                                    text:
+                                        '\n${product.negotiable ? 'marketplace.detail.makeOffer'.tr() : 'marketplace.detail.fixedPrice'.tr()}',
+                                    style: TextStyle(
+                                        color: product.negotiable
+                                            ? Colors.green
+                                            : Colors.grey,
+                                        fontSize: 12,
+                                        height: 1.5),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: isMyProduct
+                          ? null
+                          : () async {
                               if (myUid == null) return;
                               if (!context.mounted) return;
 
@@ -344,22 +346,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 }
                               }
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color(0xFFE8803C), // 당근마켓 주황색
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                            ),
-                            child: Text("marketplace.detail.chat".tr(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                        ],
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE8803C), // 당근마켓 주황색
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
                       ),
+                      child: Text("marketplace.detail.chat".tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
-                  ),
+                  ],
                 ),
+              ),
+            ),
+          ),
           body: CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -430,25 +430,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ),
                 actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () => SharePlus.instance.share(
-              ShareParams(text: 'Check out this product: ${product.title}'),
-            ),
-          ),
-          if (isMyProduct)
-            IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            ProductEditScreen(product: product)))),
-          if (isMyProduct)
-            IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: _showDeleteDialog),
-              ],
-            ),
+                  IconButton(
+                    icon: const Icon(Icons.share),
+                    onPressed: () => SharePlus.instance.share(
+                      ShareParams(
+                          text: 'Check out this product: ${product.title}'),
+                    ),
+                  ),
+                  if (isMyProduct)
+                    IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ProductEditScreen(product: product)))),
+                  if (isMyProduct)
+                    IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: _showDeleteDialog),
+                ],
+              ),
               SliverList(
                 delegate: SliverChildListDelegate([
                   Padding(
@@ -464,6 +465,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
+                        // [추가] 제목 아래 AI 뱃지
+                        if (product.isAiVerified)
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 16.0),
+                            child: AiVerificationBadge(),
+                          ),
                         Row(children: [
                           CategoryNameWidget(categoryId: product.categoryId),
                           Text(" ∙ ${_formatTimestamp(product.createdAt)}",
@@ -471,9 +478,49 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   fontSize: 13, color: Colors.grey)),
                         ]),
                         const SizedBox(height: 16),
-                        Text(product.description,
-                            style: const TextStyle(fontSize: 16, height: 1.6)),
-                        const SizedBox(height: 16),
+
+                        // 상세 설명을 우선 표시하고, AI 리포트는 버튼으로 토글합니다.
+                        if (product.isAiVerified &&
+                            product.aiReport != null) ...[
+                          if (_showAiReport) ...[
+                            _buildAiReportSection(),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () =>
+                                    setState(() => _showAiReport = false),
+                                child:
+                                    Text('marketplace.detail.description'.tr()),
+                              ),
+                            ),
+                          ] else ...[
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Text(
+                                product.description,
+                                style:
+                                    const TextStyle(fontSize: 16, height: 1.6),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () =>
+                                    setState(() => _showAiReport = true),
+                                child: Text(
+                                    '[${'ai_flow.final_report.title'.tr()}]'),
+                              ),
+                            ),
+                          ],
+                        ] else ...[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: Text(
+                              product.description,
+                              style: const TextStyle(fontSize: 16, height: 1.6),
+                            ),
+                          ),
+                        ],
 
                         // ✅ 3. 공용 위젯 추가
                         ClickableTagList(tags: product.tags),
@@ -507,4 +554,134 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       },
     );
   }
+
+  // AI 검수 리포트 섹션 위젯
+  Widget _buildAiReportSection() {
+    if (!widget.product.isAiVerified || widget.product.aiReport == null) {
+      return const SizedBox.shrink();
+    }
+    final report = widget.product.aiReport!;
+    final summary = report['verification_summary'];
+    final specs = report['key_specs'];
+    final condition = report['condition_check'];
+    final items = report['included_items'];
+    final buyerNotes = report['notes_for_buyer'];
+    final skipped = report['skipped_items'];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 구조화된 리포트 표시
+
+        // [V2] 구조화된 리포트 표시
+        if (summary != null)
+          _buildReportItem(context, Icons.task_alt,
+              'ai_flow.final_report.summary'.tr(), summary),
+        if (specs is Map && specs.isNotEmpty)
+          _buildReportMap(context, Icons.list_alt,
+              'ai_flow.final_report.key_specs'.tr(), specs),
+        if (condition != null)
+          _buildReportItem(context, Icons.healing,
+              'ai_flow.final_report.condition'.tr(), condition),
+        if (items is List && items.isNotEmpty)
+          _buildReportList(context, Icons.inbox,
+              'ai_flow.final_report.included_items_label'.tr(), items),
+
+        if (buyerNotes is String && buyerNotes.trim().isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _buildReportItem(context, Icons.info_outline,
+              'ai_flow.final_report.buyer_notes_label'.tr(), buyerNotes),
+        ],
+
+        if (skipped is List && skipped.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          _buildReportList(
+              context,
+              Icons.photo_size_select_actual_outlined,
+              'ai_flow.final_report.skipped_items'.tr(),
+              List<String>.from(skipped)),
+        ],
+
+        const Divider(height: 32),
+      ],
+    );
+  }
+
+  // 리포트 항목을 표시하는 헬퍼 위젯들
+  Widget _buildReportItem(
+      BuildContext context, IconData icon, String title, dynamic content) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: Theme.of(context).primaryColor, size: 20),
+              const SizedBox(width: 8),
+              Text(title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(content.toString(), style: const TextStyle(height: 1.5)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportMap(BuildContext context, IconData icon, String title,
+      Map<dynamic, dynamic> data) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Theme.of(context).primaryColor, size: 20),
+            const SizedBox(width: 8),
+            Text(title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ...data.entries.map((e) => Padding(
+              padding: const EdgeInsets.only(left: 28.0, bottom: 4.0),
+              child: Text("- ${e.key}: ${e.value}"),
+            )),
+      ],
+    );
+  }
+
+  Widget _buildReportList(
+      BuildContext context, IconData icon, String title, List<dynamic> data) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Theme.of(context).primaryColor, size: 20),
+            const SizedBox(width: 8),
+            Text(title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ...data.map((e) => Padding(
+              padding: const EdgeInsets.only(left: 28.0, bottom: 4.0),
+              child: Text("- ${e.toString()}"),
+            )),
+      ],
+    );
+  }
+
+  // 원문 다이얼로그 기능은 요청에 따라 제거되었습니다.
 }
