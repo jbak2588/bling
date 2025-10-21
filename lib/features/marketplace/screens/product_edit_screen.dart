@@ -20,16 +20,17 @@
 /// 2025년 8월 30일 : 공용위젯인 테그 위젯, 검색화 도입 및 이미지 갤러리 위젯 작업 진행
 /// ============================================================================
 library;
+
 // 아래부터 실제 코드
 
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/utils/upload_helpers.dart';
 
 import '../models/product_model.dart';
 import '../../../core/models/user_model.dart';
@@ -39,6 +40,9 @@ import '../../location/screens/location_setting_screen.dart';
 
 // ✅ 공용 태그 위젯 import  : 2025년 8월 30일
 import '../../shared/widgets/custom_tag_input_field.dart';
+import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart'; // [추가] AI 뱃지
+import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
+import 'package:bling_app/features/marketplace/services/ai_verification_service.dart';
 
 class ProductEditScreen extends StatefulWidget {
   final ProductModel product;
@@ -49,6 +53,7 @@ class ProductEditScreen extends StatefulWidget {
 }
 
 class _ProductEditScreenState extends State<ProductEditScreen> {
+  final _aiVerificationService = AiVerificationService();
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _priceController = TextEditingController();
@@ -66,9 +71,20 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   // ✅ 태그 목록을 관리할 상태 변수 추가 : 2025년 8월 30일
   List<String> _tags = [];
 
+  // [추가] AI 검증 여부
+  bool _isAiVerified = false;
+  AiVerificationRule? _aiRule; // [추가] AI 규칙을 저장할 변수
+  // [핵심 추가] AI 검수 진행 상태를 추적하는 변수
+  bool _isAiLoading = false;
+
   @override
   void initState() {
     super.initState();
+    // [핵심 추가] 화면이 시작될 때 현재 상품의 카테고리 ID로 AI 규칙을 미리 불러옵니다.
+    _aiVerificationService.loadAiRule(widget.product.categoryId).then((rule) {
+      if (mounted) setState(() => _aiRule = rule);
+    });
+
     _titleController.text = widget.product.title;
     _priceController.text = widget.product.price.toString();
     _descriptionController.text = widget.product.description;
@@ -81,7 +97,11 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     // ✅ 기존 상품의 태그를 초기값으로 설정
     _tags = List<String>.from(widget.product.tags);
 
+    // [추가] AI 검증 상태 초기화
+    _isAiVerified = widget.product.isAiVerified;
+
     _loadInitialCategory();
+    // 규칙은 위에서 카테고리 ID로 로드합니다.
   }
 
   @override
@@ -190,25 +210,19 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     });
 
     try {
-      // 새로 추가된 이미지 업로드
-      List<String> uploadedUrls = [];
-      for (var image in _images) {
-        final fileName = DateTime.now().millisecondsSinceEpoch.toString();
-        final ref =
-            FirebaseStorage.instance.ref().child('product_images/$fileName');
-        final uploadTask = ref.putFile(File(image.path));
-        final snapshot = await uploadTask;
-        uploadedUrls.add(await snapshot.ref.getDownloadURL());
+      // 새로 추가된 이미지 업로드 (user-scoped path)
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('marketplace.errors.loginRequired'.tr());
       }
+      final List<String> uploadedUrls =
+          await uploadAllProductImages(_images, user.uid);
 
       // 기존 이미지 + 새로 업로드된 이미지 합치기
       final allImageUrls = [..._existingImageUrls, ...uploadedUrls];
 
       // ✅ [핵심 수정] 사용자의 최신 정보를 가져와서 위치 정보를 업데이트합니다.
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception('marketplace.errors.loginRequired'.tr());
-      }
+      // user already checked above
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -262,10 +276,41 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     }
   }
 
+  // [리팩토링] AI 검수 시작 로직을 서비스 클래스로 위임
+  Future<void> _startAiVerification() async {
+    if (_aiRule == null) return;
+
+    setState(() {
+      _isAiLoading = true;
+    });
+
+    try {
+      await _aiVerificationService.startVerificationFlow(
+        context: context,
+        rule: _aiRule!,
+        productId: widget.product.id,
+        categoryId: widget.product.categoryId,
+        initialImages: widget.product.imageUrls,
+        productName: _titleController.text,
+        productDescription: _descriptionController.text,
+        productPrice: _priceController.text,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('오류: ${e.toString()}')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAiLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('marketplace.edit.title'.tr()),
@@ -274,222 +319,282 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
             onPressed: _isLoading ? null : _saveProduct,
             child: _isLoading
                 ? const SizedBox(
-                    width: 18,
-                    height: 18,
+                    width: 16,
+                    height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(
-                    'marketplace.edit.done'.tr(),
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                : Text('marketplace.edit.save'.tr()),
           ),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 이미지 미리보기: 기존 이미지 + 새로 추가된 이미지 + 삭제/추가 기능
-              SizedBox(
-                height: 110,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    ..._existingImageUrls.asMap().entries.map((entry) {
-                      final idx = entry.key;
-                      final url = entry.value;
-                      return Stack(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: Image.network(
-                              url,
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Positioned(
-                            top: 2,
-                            right: 10,
-                            child: GestureDetector(
-                              onTap: () => _removeExistingImage(idx),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  shape: BoxShape.circle,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // 이미지 섹션
+                SizedBox(
+                  height: 120,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      // 기존 이미지
+                      ...List.generate(_existingImageUrls.length, (index) {
+                        final url = _existingImageUrls[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  url,
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
                                 ),
-                                child: const Icon(Icons.close,
-                                    color: Colors.white, size: 20),
                               ),
-                            ),
-                          ),
-                        ],
-                      );
-                    }),
-                    ..._images.asMap().entries.map((entry) {
-                      final idx = entry.key;
-                      final xfile = entry.value;
-                      return Stack(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: Image.file(
-                              File(xfile.path),
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Positioned(
-                            top: 2,
-                            right: 10,
-                            child: GestureDetector(
-                              onTap: () => _removeNewImage(idx),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  shape: BoxShape.circle,
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: InkWell(
+                                  onTap: () => _removeExistingImage(index),
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: const Icon(
+                                      Icons.close,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
-                                child: const Icon(Icons.close,
-                                    color: Colors.white, size: 20),
                               ),
+                            ],
+                          ),
+                        );
+                      }),
+                      // 새로 추가한 이미지
+                      ...List.generate(_images.length, (index) {
+                        final img = _images[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  File(img.path),
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: InkWell(
+                                  onTap: () => _removeNewImage(index),
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: const Icon(
+                                      Icons.close,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                      // 추가 버튼
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: _pickImages,
+                          child: Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey[400]!),
+                            ),
+                            child: const Icon(
+                              Icons.add_a_photo,
+                              size: 32,
+                              color: Colors.grey,
                             ),
                           ),
-                        ],
-                      );
-                    }),
-                    // 이미지 추가 버튼
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: GestureDetector(
-                        onTap: _pickImages,
-                        child: Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey[400]!),
-                          ),
-                          child: const Icon(Icons.add_a_photo,
-                              size: 32, color: Colors.grey),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: 'marketplace.edit.titleHint'.tr(),
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'marketplace.errors.requiredField'.tr()
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                  onTap: _selectCategory,
+                  title: Text(_getCategoryName(context, _selectedCategory)),
+                  leading: const Icon(Icons.category_outlined),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _priceController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'marketplace.edit.priceHint'.tr(),
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'marketplace.errors.requiredField'.tr()
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _descriptionController,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    labelText: 'marketplace.edit.descriptionHint'.tr(),
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'marketplace.errors.requiredField'.tr()
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _addressController,
+                  decoration: InputDecoration(
+                    labelText: 'marketplace.edit.addressHint'.tr(),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _resetLocation,
+                    child: Text('marketplace.edit.resetLocation'.tr()),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _transactionPlaceController,
+                  decoration: InputDecoration(
+                    labelText:
+                        'marketplace.registration.addressDetailHint'.tr(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text('marketplace.edit.negotiable'.tr()),
+                    Switch(
+                      value: _isNegotiable,
+                      onChanged: (value) {
+                        setState(() {
+                          _isNegotiable = value;
+                        });
+                      },
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                    labelText: 'marketplace.edit.titleHint'.tr()),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'marketplace.errors.requiredField'.tr()
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                onTap: _selectCategory,
-                title: Text(_getCategoryName(context, _selectedCategory)),
-                leading: const Icon(Icons.category_outlined),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _priceController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                    labelText: 'marketplace.edit.priceHint'.tr()),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'marketplace.errors.requiredField'.tr()
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                maxLines: 5,
-                decoration: InputDecoration(
-                    labelText: 'marketplace.edit.descriptionHint'.tr()),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'marketplace.errors.requiredField'.tr()
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _addressController,
-                decoration: InputDecoration(
-                    labelText: 'marketplace.edit.addressHint'.tr()),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: _resetLocation,
-                  child: Text('marketplace.edit.resetLocation'.tr()),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _transactionPlaceController,
-                decoration: InputDecoration(
-                    labelText:
-                        'marketplace.registration.addressDetailHint'.tr()),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Text('marketplace.edit.negotiable'.tr()),
-                  Switch(
-                    value: _isNegotiable,
-                    onChanged: (value) {
-                      setState(() {
-                        _isNegotiable = value;
-                      });
-                    },
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _condition,
+                  decoration: InputDecoration(
+                    labelText: 'marketplace.condition.label'.tr(),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                initialValue: _condition,
-                decoration: InputDecoration(
-                    labelText: 'marketplace.condition.label'.tr()),
-                items: [
-                  DropdownMenuItem(
+                  items: [
+                    DropdownMenuItem(
                       value: 'new',
-                      child: Text('marketplace.condition.new'.tr())),
-                  DropdownMenuItem(
+                      child: Text('marketplace.condition.new'.tr()),
+                    ),
+                    DropdownMenuItem(
                       value: 'used',
-                      child: Text('marketplace.condition.used'.tr())),
+                      child: Text('marketplace.condition.used'.tr()),
+                    ),
+                  ],
+                  onChanged: (value) =>
+                      setState(() => _condition = value ?? 'used'),
+                ),
+                const SizedBox(height: 16),
+                CustomTagInputField(
+                  initialTags: _tags,
+                  hintText: 'marketplace.registration.tagsHint'.tr(),
+                  onTagsChanged: (tags) {
+                    setState(() {
+                      _tags = tags;
+                    });
+                  },
+                ),
+
+                // AI 검수 섹션
+                if (!_isAiVerified) ...[
+                  const Divider(height: 32),
+                  Text(
+                    '🤖 AI 검수로 신뢰도 높이기',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'AI 검증 뱃지를 받아 구매자의 신뢰를 얻고 더 빨리 판매하세요.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    // [핵심 수정] 로딩 중일 때 버튼 비활성화
+                    onPressed: (_aiRule != null &&
+                            _aiRule!.isAiVerificationSupported &&
+                            !_isAiLoading)
+                        ? _startAiVerification
+                        : null,
+                    icon: const Icon(Icons.shield_outlined),
+                    // [핵심 수정] 로딩 중일 때 스피너 표시
+                    label: _isAiLoading
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('AI 검수 시작하기'),
+                  ),
+                ] else ...[
+                  const Divider(height: 32),
+                  const AiVerificationBadge(),
                 ],
-                onChanged: (value) =>
-                    setState(() => _condition = value ?? 'used'),
-              ),
-              // ✅ 공용 태그 위젯 추가 (초기값 전달)
-              CustomTagInputField(
-                initialTags: _tags,
-                hintText: 'marketplace.registration.tagsHint'.tr(),
-                onTagsChanged: (tags) {
-                  setState(() {
-                    _tags = tags;
-                  });
-                },
-              ),
-              const SizedBox(height: 24),
-            ],
+
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _saveProduct,
+                  child: Text('marketplace.edit.save'.tr()),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -48,6 +48,8 @@
  *       confirmedProductName?: string,
  *       userPrice?: number|string,
  *       userDescription?: string
+ *       categoryName?: string,       // [V2 추가]
+ *       subCategoryName?: string     // [V2 추가]
  *     }
  *     res: { success: boolean, report: object }
  *
@@ -68,7 +70,7 @@ const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const { defineSecret } = require("firebase-functions/params");
-const { getFirestore } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { logger } = require("firebase-functions");
 const {
   GoogleGenerativeAI,
@@ -84,9 +86,10 @@ const GEMINI_KEY = defineSecret("GEMINI_KEY");
 // ──────────────────────────────────────────────────────────────────────────────
 // 요청 타임아웃/재시도 설정 (Gemini 전용)
 // ──────────────────────────────────────────────────────────────────────────────
-const GENAI_TIMEOUT_MS = 30_000;         // 30s: 개별 Gemini 요청 타임아웃
-const GENAI_MAX_RETRIES = 2;             // 총 3회(최초 + 2회 재시도)
-const GENAI_BASE_DELAY_MS = 800;         // 첫 백오프 지연
+// [수정] Gemini 서버의 극심한 지연에 대응하기 위해 개별 요청 타임아웃을 60초로 늘립니다.
+const GENAI_TIMEOUT_MS = 60_000; // 60s: 개별 Gemini 요청 타임아웃
+const GENAI_MAX_RETRIES = 2; // 총 3회(최초 + 2회 재시도)
+const GENAI_BASE_DELAY_MS = 800; // 첫 백오프 지연
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Debug/Tracing helpers for AI response diagnostics
@@ -102,7 +105,11 @@ function extractJsonText(raw) {
   return (m ? m[1] : raw).trim();
 }
 function tryParseJson(text) {
-  try { return JSON.parse(text); } catch { return null; }
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
 }
 /**
  * 분석용 진단 로그: 원문 스니펫 + 파싱된 키 + 핵심 필드 유무
@@ -118,7 +125,10 @@ function logAiDiagnostics(ctx, rawText, parsed) {
       logger.info("🧪 AI parsed keys", {
         ctx,
         keys: Object.keys(parsed),
-        has_predicted_item_name: Object.prototype.hasOwnProperty.call(parsed, "predicted_item_name"),
+        has_predicted_item_name: Object.prototype.hasOwnProperty.call(
+          parsed,
+          "predicted_item_name"
+        ),
         predicted_item_name: parsed?.predicted_item_name ?? null,
         confidence: parsed?.confidence ?? null,
       });
@@ -126,7 +136,10 @@ function logAiDiagnostics(ctx, rawText, parsed) {
       logger.warn("🧪 AI parse failed (no valid JSON object)", { ctx });
     }
   } catch (e) {
-    logger.warn("🧪 AI diagnostics logging error", { ctx, err: e?.toString?.() || e });
+    logger.warn("🧪 AI diagnostics logging error", {
+      ctx,
+      err: e?.toString?.() || e,
+    });
   }
 }
 
@@ -134,7 +147,10 @@ function logAiDiagnostics(ctx, rawText, parsed) {
 const getGenAI = () => {
   const key = GEMINI_KEY.value();
   if (!key) {
-    throw new HttpsError("failed-precondition", "GEMINI_KEY is not configured.");
+    throw new HttpsError(
+      "failed-precondition",
+      "GEMINI_KEY is not configured."
+    );
   }
   return new GoogleGenerativeAI(key);
 };
@@ -156,8 +172,11 @@ const FETCH_TIMEOUT_MS = 45000; // 45s (네트워크/Storage 지연 대비)
 // Treat Gemini model resolution issues as "not found" to allow graceful fallback.
 function isModelNotFoundError(err) {
   try {
-    const msg = (err && (err.message || (err.toString && err.toString()))) || "";
-    return /404|Not Found|models\/.+? is not found|is not supported for generateContent/i.test(msg);
+    const msg =
+      (err && (err.message || (err.toString && err.toString()))) || "";
+    return /404|Not Found|models\/.+? is not found|is not supported for generateContent/i.test(
+      msg
+    );
   } catch {
     return false;
   }
@@ -165,7 +184,11 @@ function isModelNotFoundError(err) {
 
 // SDK 호환 보조: Responses API 지원 여부 체크
 function hasResponsesApi(genAI) {
-  return !!(genAI && genAI.responses && typeof genAI.responses.generate === "function");
+  return !!(
+    genAI &&
+    genAI.responses &&
+    typeof genAI.responses.generate === "function"
+  );
 }
 
 // 재시도 가능한 오류인지 판별
@@ -185,18 +208,37 @@ function timeoutPromise(ms, tag = "genai") {
 }
 
 // 지수 백오프 재시도 래퍼
-async function withRetry(fn, { maxRetries = GENAI_MAX_RETRIES, baseDelay = GENAI_BASE_DELAY_MS, tag = "genai" } = {}) {
+async function withRetry(
+  fn,
+  {
+    maxRetries = GENAI_MAX_RETRIES,
+    baseDelay = GENAI_BASE_DELAY_MS,
+    tag = "genai",
+  } = {}
+) {
   let attempt = 0;
   let delay = baseDelay;
   while (true) {
     try {
       const started = Date.now();
-      const result = await Promise.race([fn(), timeoutPromise(GENAI_TIMEOUT_MS, tag)]);
-      logger.info("⏱️ GenAI latency", { tag, attempt: attempt + 1, ms: Date.now() - started });
+      const result = await Promise.race([
+        fn(),
+        timeoutPromise(GENAI_TIMEOUT_MS, tag),
+      ]);
+      logger.info("⏱️ GenAI latency", {
+        tag,
+        attempt: attempt + 1,
+        ms: Date.now() - started,
+      });
       return result;
     } catch (e) {
       const retriable = isRetryable(e);
-      logger.warn("↻ GenAI attempt failed", { tag, attempt: attempt + 1, retriable, err: e?.toString?.() || e });
+      logger.warn("↻ GenAI attempt failed", {
+        tag,
+        attempt: attempt + 1,
+        retriable,
+        err: e?.toString?.() || e,
+      });
       if (attempt >= maxRetries || !retriable) throw e;
       const jitter = Math.floor(Math.random() * 200);
       await new Promise((r) => setTimeout(r, delay + jitter));
@@ -207,7 +249,17 @@ async function withRetry(fn, { maxRetries = GENAI_MAX_RETRIES, baseDelay = GENAI
 }
 
 // SDK 버전별 호출을 감싸는 통합 함수
-async function genAiCall(genAI, { modelPrimary = "gemini-2.5-flash", modelFallback = "gemini-2.5-pro", contents, safetySettings, responseMimeType = "application/json", tag }) {
+async function genAiCall(
+  genAI,
+  {
+    modelPrimary = "gemini-2.5-flash",
+    modelFallback = "gemini-2.5-pro",
+    contents,
+    safetySettings,
+    responseMimeType = "application/json",
+    tag,
+  }
+) {
   if (hasResponsesApi(genAI)) {
     return withRetry(
       async () => {
@@ -220,7 +272,13 @@ async function genAiCall(genAI, { modelPrimary = "gemini-2.5-flash", modelFallba
           });
           return resp?.output_text || "";
         } catch (e) {
-          if (isModelNotFoundError(e)) {
+          // [수정] 모델을 찾을 수 없거나, 과부하 등 재시도 가능한 에러 발생 시 fallback 모델을 사용하도록 로직 강화
+          const shouldUseFallback = isModelNotFoundError(e) || isRetryable(e);
+          if (shouldUseFallback) {
+            logger.warn(
+              `⚠️ Primary model failed (${e.message}). Falling back to ${modelFallback}...`,
+              { tag }
+            );
             const fb = await genAI.responses.generate({
               model: modelFallback,
               contents,
@@ -246,7 +304,13 @@ async function genAiCall(genAI, { modelPrimary = "gemini-2.5-flash", modelFallba
         const r = await m.generateContent({ contents });
         return String(r?.response?.text?.() ?? "");
       } catch (e) {
-        if (isModelNotFoundError(e)) {
+        // [수정] 동일한 fallback 로직을 다른 SDK 버전 호출에도 적용
+        const shouldUseFallback = isModelNotFoundError(e) || isRetryable(e);
+        if (shouldUseFallback) {
+          logger.warn(
+            `⚠️ Primary model failed (${e.message}). Falling back to ${modelFallback}...`,
+            { tag }
+          );
           const fm = genAI.getGenerativeModel({
             model: modelFallback,
             safetySettings,
@@ -333,174 +397,104 @@ exports.calculateTrustScore = onDocumentUpdated(
 /**
  * [수정] 1차 갤러리 이미지들을 기반으로 상품명을 예측합니다. (안전 설정 추가)
  */
-exports.initialproductanalysis = onCall(
-  CALL_OPTS,
-  async (request) => {
-    const genAI = getGenAI();
-
-    logger.info("✅ initialproductanalysis 함수가 호출되었습니다.", {
-      auth: request.auth,
-      uid: request.auth ? request.auth.uid : "No UID",
-      body: request.data,
-    });
-
-    if (!request.auth) {
-      logger.error("❌ 치명적 오류: request.auth 객체가 없습니다. 비로그인 사용자의 호출로 간주됩니다.");
-      throw new HttpsError("unauthenticated", "The function must be called while authenticated.");
-    }
-
-    try {
-      const { imageUrls, ruleId } = request.data || {};
-      if (!Array.isArray(imageUrls) || imageUrls.length === 0 || !ruleId) {
-        logger.error("❌ 오류: 이미지 URL 또는 ruleId가 누락되었습니다.");
-        throw new HttpsError("invalid-argument", "Image URLs (array) and ruleId are required.");
-      }
-
-      const db = getFirestore();
-      const ruleDoc = await db.collection("ai_verification_rules").doc(ruleId).get();
-      if (!ruleDoc.exists) {
-        logger.error(`❌ 오류: Firestore에서 ruleId '${ruleId}' 문서를 찾을 수 없습니다.`);
-        return { success: false, error: "Invalid ruleId." };
-      }
-      const promptTemplate = ruleDoc.data().report_template_prompt;
-
-      const ac = new AbortController();
-      const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
-      const imageParts = await Promise.all(
-        imageUrls.map(async (url) => {
-          if (!/^https:\/\//i.test(url)) {
-            throw new HttpsError("invalid-argument", "Only https image URLs are allowed.");
-          }
-          let response;
-          try {
-            response = await fetch(url, { signal: ac.signal });
-          } catch (e) {
-            if (e && e.name === "AbortError") throw new HttpsError("deadline-exceeded", "Image fetch timed out.");
-            throw e;
-          }
-          if (!response.ok) {
-            throw new HttpsError("not-found", `Failed to fetch image: ${response.status}`);
-          }
-          const len = Number(response.headers.get("content-length") || 0);
-          if (len && len > MAX_IMAGE_BYTES) {
-            throw new HttpsError("resource-exhausted", "Image too large (>7.5MB).");
-          }
-          const buffer = Buffer.from(await response.arrayBuffer());
-          if (!len && buffer.length > MAX_IMAGE_BYTES) {
-            throw new HttpsError("resource-exhausted", "Image too large (>7.5MB).");
-          }
-          return {
-            inlineData: {
-              mimeType: response.headers.get("content-type") || "image/jpeg",
-              data: buffer.toString("base64"),
-            },
-          };
-        })
-      );
-      clearTimeout(to);
-
-      // 2.5 계열 고정 호출 + 재시도/타임아웃 래퍼 사용
-      const userContents = [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }];
-      const text = await genAiCall(genAI, {
-        modelPrimary: "gemini-2.5-flash",
-        modelFallback: "gemini-2.5-pro",
-        contents: userContents,
-        safetySettings,
-        responseMimeType: "application/json",
-        tag: "initialproductanalysis",
-      });
-
-      // 진단 로그용 원문/파싱 결과 기록
-      const jsonText = extractJsonText(text);
-      const prediction = tryParseJson(jsonText);
-      logAiDiagnostics("initialproductanalysis", text, prediction);
-      if (!prediction) {
-        throw new HttpsError("data-loss", "AI returned invalid JSON.");
-      }
-      const predictedName = prediction?.predicted_item_name ?? null;
-      if (!predictedName || (typeof predictedName === "string" && predictedName.trim() === "")) {
-        logger.warn("⚠️ AI returned empty 'predicted_item_name'", {
-          ctx: "initialproductanalysis",
-          hasKeys: Object.keys(prediction || {}),
-        });
-      } else {
-        logger.info("✅ Gemini 분석 성공", { predicted_item_name: predictedName });
-      }
-      return { success: true, prediction: predictedName };
-
-    } catch (error) {
-      logger.error("❌ initialproductanalysis 함수 내부에서 심각한 오류 발생:", error);
-      if (error instanceof HttpsError) throw error;
-      // Gemini/네트워크 예외 메시지를 그대로 남기되, 상태 코드는 명확히
-      const msg = (error && (error.message || error.toString && error.toString())) || "Unknown";
-      // SDK의 rate-limit/availability는 'unavailable'로 매핑
-      if (/quota|rate|unavailable|temporarily/i.test(msg)) {
-        throw new HttpsError("unavailable", "AI service temporarily unavailable.");
-      }
-      throw new HttpsError("internal", "An internal error occurred.");
-    }
-  }
-);
-
-/**
- * [수정] 모든 이미지와 정보를 종합하여 최종 판매 보고서를 생성합니다. (안전 설정 추가)
- */
-exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
+exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
   const genAI = getGenAI();
 
-  const {
-    imageUrls,
-    ruleId,
-    confirmedProductName,
-    userPrice,
-    userDescription,
-  } = request.data;
+  logger.info("✅ initialproductanalysis 함수가 호출되었습니다.", {
+    auth: request.auth,
+    uid: request.auth ? request.auth.uid : "No UID",
+    body: request.data,
+  });
 
-  if (!imageUrls || !ruleId) {
-    throw new HttpsError("invalid-argument", "Required data is missing.");
+  if (!request.auth) {
+    logger.error(
+      "❌ 치명적 오류: request.auth 객체가 없습니다. 비로그인 사용자의 호출로 간주됩니다."
+    );
+    throw new HttpsError(
+      "unauthenticated",
+      "The function must be called while authenticated."
+    );
   }
 
   try {
-    const db = getFirestore();
-    const ruleDoc = await db.collection("ai_verification_rules").doc(ruleId).get();
-    if (!ruleDoc.exists) {
-      throw new HttpsError("not-found", "Verification rule not found.");
+    const { imageUrls, ruleId, locale } = request.data || {};
+    if (!Array.isArray(imageUrls) || imageUrls.length === 0 || !ruleId) {
+      logger.error("❌ 오류: 이미지 URL 또는 ruleId가 누락되었습니다.");
+      throw new HttpsError(
+        "invalid-argument",
+        "Image URLs (array) and ruleId are required."
+      );
     }
-    let promptTemplate = ruleDoc.data().report_template_prompt;
 
-    // 전역 치환
-    promptTemplate = (promptTemplate || "")
-      .replace(/{{userPrice}}/g, String(userPrice ?? ""))
-      .replace(/{{userDescription}}/g, String(userDescription ?? ""))
-      .replace(/{{confirmedProductName}}/g, String(confirmedProductName ?? ""));
+    const db = getFirestore();
+    const ruleDoc = await db
+      .collection("ai_verification_rules")
+      .doc(ruleId)
+      .get();
+    if (!ruleDoc.exists) {
+      // [수정] onCall 함수에서는 HttpsError를 throw하여 클라이언트에 일관된 오류를 전달하는 것이 표준입니다.
+      throw new HttpsError("not-found", `Rule with ID ${ruleId} not found.`);
+    }
+    // [수정] 데이터베이스 필드 불일치에 대응하기 위한 방어 코드
+    // initial_analysis_prompt_template 필드를 우선 사용하고, 없으면 report_template_prompt를 사용합니다. (하위 호환성)
+    const ruleData = ruleDoc.data();
+    const promptTemplate =
+      ruleData.initial_analysis_prompt_template ||
+      ruleData.report_template_prompt;
+    if (!promptTemplate) {
+      throw new HttpsError(
+        "failed-precondition",
+        `Rule '${ruleId}' is missing a valid prompt template.`
+      );
+    }
 
-    // 2.5 계열 호출은 통합 래퍼(genAiCall)로 처리
-    const allImageUrls = [...imageUrls.initial, ...Object.values(imageUrls.guided)];
+    // [V2.1 핵심 추가] 규칙에 정의된 '추천 증거(suggested_shots)' 목록을 가져와
+    // 제공된 이미지에서 확인할 수 없는 항목 키를 AI가 판별하도록 지시합니다.
+    const suggestedShotsMap = ruleData.suggested_shots || {};
+    const suggestedShotKeys = Object.keys(suggestedShotsMap || {});
+    const evidenceInstruction = suggestedShotKeys.length
+      ? `\nAdditionally, analyze the provided images and determine which of the following suggested evidence keys CANNOT be confidently verified from the images: [${suggestedShotKeys.join(
+          ", "
+        )}].\nReturn JSON ONLY with the following schema:\n{\n  "predicted_item_name": "string",\n  "missing_evidence_list": ["key", ...]  // keys from the list above that cannot be verified\n}`
+      : `\nReturn JSON ONLY with the following schema:\n{\n  "predicted_item_name": "string",\n  "missing_evidence_list": []\n}`;
 
     const ac = new AbortController();
     const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
     const imageParts = await Promise.all(
-      allImageUrls.map(async (url) => {
+      imageUrls.map(async (url) => {
         if (!/^https:\/\//i.test(url)) {
-          throw new HttpsError("invalid-argument", "Only https image URLs are allowed.");
+          throw new HttpsError(
+            "invalid-argument",
+            "Only https image URLs are allowed."
+          );
         }
         let response;
         try {
           response = await fetch(url, { signal: ac.signal });
         } catch (e) {
-          if (e && e.name === "AbortError") throw new HttpsError("deadline-exceeded", "Image fetch timed out.");
+          if (e && e.name === "AbortError")
+            throw new HttpsError("deadline-exceeded", "Image fetch timed out.");
           throw e;
         }
         if (!response.ok) {
-          throw new HttpsError("not-found", `Failed to fetch image: ${response.status}`);
+          throw new HttpsError(
+            "not-found",
+            `Failed to fetch image: ${response.status}`
+          );
         }
         const len = Number(response.headers.get("content-length") || 0);
         if (len && len > MAX_IMAGE_BYTES) {
-          throw new HttpsError("resource-exhausted", "Image too large (>7.5MB).");
+          throw new HttpsError(
+            "resource-exhausted",
+            "Image too large (>7.5MB)."
+          );
         }
         const buffer = Buffer.from(await response.arrayBuffer());
         if (!len && buffer.length > MAX_IMAGE_BYTES) {
-          throw new HttpsError("resource-exhausted", "Image too large (>7.5MB).");
+          throw new HttpsError(
+            "resource-exhausted",
+            "Image too large (>7.5MB)."
+          );
         }
         return {
           inlineData: {
@@ -512,40 +506,526 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     );
     clearTimeout(to);
 
-    const jsonStr = (await genAiCall(genAI, {
+    // 2.5 계열 고정 호출 + 재시도/타임아웃 래퍼 사용
+  // Locale-aware directive
+  const lc = (typeof locale === "string" && locale) || "id";
+  const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
+  const localeDirective = `\n\n[Language]\nAll textual responses must be written in ${langName}. For example, return 'predicted_item_name' in ${langName}.`;
+
+  const augmentedPrompt = `${promptTemplate}${evidenceInstruction}${localeDirective}`;
+    const userContents = [
+      { role: "user", parts: [{ text: augmentedPrompt }, ...imageParts] },
+    ];
+    const text = await genAiCall(genAI, {
       modelPrimary: "gemini-2.5-flash",
       modelFallback: "gemini-2.5-pro",
-      contents: [{ role: "user", parts: [{ text: promptTemplate }, ...imageParts] }],
+      contents: userContents,
       safetySettings,
       responseMimeType: "application/json",
-      tag: "generatefinalreport",
-    })).trim();
+      tag: "initialproductanalysis",
+    });
+
+    // 진단 로그용 원문/파싱 결과 기록
+    const jsonText = extractJsonText(text);
+    const parsed = tryParseJson(jsonText);
+    logAiDiagnostics("initialproductanalysis", text, parsed);
+    if (!parsed) {
+      throw new HttpsError("data-loss", "AI returned invalid JSON.");
+    }
+    const predictedName = parsed?.predicted_item_name ?? null;
+    // [V2.1] 동적 증거 보강: 누락된 증거 키 목록 추출 및 필터링
+    let missingEvidenceList = [];
+    if (Array.isArray(parsed?.missing_evidence_list)) {
+      missingEvidenceList = parsed.missing_evidence_list
+        .filter((v) => typeof v === "string")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+      // 서버 신뢰도 보강: 정의되지 않은 키는 제외
+      if (suggestedShotKeys.length) {
+        const allowed = new Set(suggestedShotKeys);
+        missingEvidenceList = missingEvidenceList.filter((k) => allowed.has(k));
+      }
+    }
+    if (
+      !predictedName ||
+      (typeof predictedName === "string" && predictedName.trim() === "")
+    ) {
+      logger.warn("⚠️ AI returned empty 'predicted_item_name'", {
+        ctx: "initialproductanalysis",
+        hasKeys: Object.keys(parsed || {}),
+      });
+    } else {
+      logger.info("✅ Gemini 분석 성공", {
+        predicted_item_name: predictedName,
+      });
+    }
+    return { success: true, prediction: predictedName, missing_evidence_list: missingEvidenceList };
+  } catch (error) {
+    logger.error(
+      "❌ initialproductanalysis 함수 내부에서 심각한 오류 발생:",
+      error
+    );
+    if (error instanceof HttpsError) throw error;
+    // Gemini/네트워크 예외 메시지를 그대로 남기되, 상태 코드는 명확히
+    const msg =
+      (error && (error.message || (error.toString && error.toString()))) ||
+      "Unknown";
+    // SDK의 rate-limit/availability는 'unavailable'로 매핑
+    if (/quota|rate|unavailable|temporarily/i.test(msg)) {
+      throw new HttpsError(
+        "unavailable",
+        "AI service temporarily unavailable."
+      );
+    }
+    throw new HttpsError("internal", "An internal error occurred.");
+  }
+});
+
+/**
+ * [V2 최종 수정] 모든 이미지와 정보를 종합하여 최종 판매 보고서를 생성합니다.
+ */
+exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
+  const genAI = getGenAI();
+
+  const {
+    imageUrls,
+    ruleId,
+    confirmedProductName,
+    userPrice,
+    userDescription,
+    categoryName, // <-- V2 데이터
+    subCategoryName, // <-- V2 데이터
+    skipped_items, // <-- V2.1: 사용자가 건너뛴 증거 키 목록
+    locale,
+  } = request.data;
+
+  if (!imageUrls || !ruleId) {
+    throw new HttpsError("invalid-argument", "Required data is missing.");
+  }
+
+  try {
+    const db = getFirestore();
+    const ruleDoc = await db
+      .collection("ai_verification_rules")
+      .doc(ruleId)
+      .get();
+    if (!ruleDoc.exists) {
+      throw new HttpsError("not-found", "Verification rule not found.");
+    }
+    const ruleData = ruleDoc.data();
+
+    // V1과의 호환성을 위해 v2ReportPrompt 필드가 있으면 그것을 사용하고, 없으면 report_template_prompt를 사용
+    let promptTemplate =
+      ruleData.v2ReportPrompt || ruleData.report_template_prompt;
+
+    // [추적 코드 1] 프롬프트 템플릿 누락 방지
+    if (!promptTemplate) {
+      logger.error(
+        `❌ Rule '${ruleId}' is missing the 'report_template_prompt' field.`
+      );
+      throw new HttpsError(
+        "failed-precondition",
+        `Rule '${ruleId}' is not configured for final report.`
+      );
+    }
+
+    // 2. [V2 수정] 새로운 카테고리 변수를 포함하여 모든 변수를 치환합니다.
+    promptTemplate = (promptTemplate || "")
+      .replace(/{{userPrice}}/g, String(userPrice ?? ""))
+      .replace(/{{userDescription}}/g, String(userDescription ?? ""))
+      .replace(/{{confirmedProductName}}/g, String(confirmedProductName ?? ""))
+      .replace(/{{categoryName}}/g, String(categoryName ?? ""))           // <-- V2 로직
+      .replace(/{{subCategoryName}}/g, String(subCategoryName ?? ""));   // <-- V2 로직
+
+  // [Locale] Ensure model writes in the requested language
+  const lc = (typeof locale === "string" && locale) || "id";
+  const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
+  promptTemplate += `\n\n[Language]\nWrite all textual fields in ${langName}.`;
+
+  // [V2.1 추가] 사용자가 건너뛴 증거 키(skipped_items)를 프롬프트에 반영하여
+    // 구매자에게 안내할 notes_for_buyer를 생성하도록 모델에 지시합니다.
+    let skippedKeys = [];
+    if (Array.isArray(skipped_items)) {
+      skippedKeys = skipped_items.filter((v) => typeof v === "string").map((s) => s.trim()).filter((s) => s.length > 0);
+    }
+    const guidedKeys = Object.keys((imageUrls && imageUrls.guided) || {});
+    if (skippedKeys.length) {
+      promptTemplate += `\n\n[Context: Skipped Evidence]\n` +
+        `The user skipped providing the following suggested evidence keys: [${skippedKeys.join(", ")}].\n` +
+        `Please still complete the final report objectively. In addition, include a field named \'notes_for_buyer\' (string) that politely informs the buyer which evidence was not provided and suggests verifying them in person or via chat. Do not fabricate data for skipped items.`;
+    }
+    if (guidedKeys.length) {
+      promptTemplate += `\n\n[Context: Guided Evidence]\n` +
+        `The user provided additional guided evidence images for keys: [${guidedKeys.join(", ")}]. Use them to improve report quality.`;
+    }
+
+
+    // ... (이미지 처리 로직은 동일)
+    const allImageUrls = [
+      ...imageUrls.initial,
+      ...Object.values(imageUrls.guided),
+    ];
+
+    const ac = new AbortController();
+    const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
+
+    // ... (이미지 처리 로직은 동일)
+    const imageParts = await Promise.all(
+      allImageUrls.map(async (url) => {
+        if (!/^https:\/\//i.test(url)) {
+          throw new HttpsError(
+            "invalid-argument",
+            "Only https image URLs are allowed."
+          );
+        }
+        let response;
+        try {
+          response = await fetch(url, { signal: ac.signal });
+        } catch (e) {
+          if (e && e.name === "AbortError")
+            throw new HttpsError("deadline-exceeded", "Image fetch timed out.");
+          throw e;
+        }
+        if (!response.ok) {
+          throw new HttpsError(
+            "not-found",
+            `Failed to fetch image: ${response.status}`
+          );
+        }
+        const len = Number(response.headers.get("content-length") || 0);
+        if (len && len > MAX_IMAGE_BYTES) {
+          throw new HttpsError(
+            "resource-exhausted",
+            "Image too large (>7.5MB)."
+          );
+        }
+        const buffer = Buffer.from(await response.arrayBuffer());
+        if (!len && buffer.length > MAX_IMAGE_BYTES) {
+          throw new HttpsError(
+            "resource-exhausted",
+            "Image too large (>7.5MB)."
+          );
+        }
+        return {
+          inlineData: {
+            mimeType: response.headers.get("content-type") || "image/jpeg",
+            data: buffer.toString("base64"),
+          },
+        };
+      })
+    );
+    clearTimeout(to);
+
+    const jsonStr = (
+      await genAiCall(genAI, {
+        modelPrimary: "gemini-2.5-flash",
+        modelFallback: "gemini-2.5-pro",
+        contents: [
+          { role: "user", parts: [{ text: promptTemplate }, ...imageParts] },
+        ],
+        safetySettings,
+        responseMimeType: "application/json",
+        tag: "generatefinalreport",
+      })
+    ).trim();
 
     const jsonBlock = extractJsonText(jsonStr);
     const report = tryParseJson(jsonBlock);
     logAiDiagnostics("generatefinalreport", jsonStr, report);
     if (!report) {
-      throw new HttpsError("data-loss", "AI final report JSON invalid.");
+      throw new HttpsError(
+        "data-loss",
+        "AI returned invalid JSON for the final report."
+      );
     }
-    return { success: true, report };
 
+    // [최종 수정] 클라이언트(Flutter) 코드와 데이터 키 이름을 일치시킵니다.
+    // AI는 'suggested_price'를 반환하지만, Flutter 코드는 'price_suggestion'을 기대하고 있습니다.
+    // 서버에서 키 이름을 변경하여 클라이언트로 보내기 전에 데이터 구조를 맞춰줍니다.
+    if (report.suggested_price !== undefined) {
+      report.price_suggestion = report.suggested_price;
+      delete report.suggested_price;
+    }
+
+    // [V2.1 보강] 사용자가 건너뛴 증거가 있는 경우, notes_for_buyer가 비어 있으면 기본 안내 문구를 생성합니다.
+    if (skippedKeys.length) {
+      const hasNotes =
+        report.notes_for_buyer && typeof report.notes_for_buyer === "string" && report.notes_for_buyer.trim().length > 0;
+      if (!hasNotes) {
+        report.notes_for_buyer = `The seller did not provide the following evidence: ${skippedKeys.join(", ")}. Please consider verifying these points in person or request additional proof in chat before purchasing.`;
+      }
+      // 참고용으로 최종 보고서에 skipped_items를 포함하여 클라이언트가 표시/저장을 선택할 수 있게 합니다.
+      if (!Array.isArray(report.skipped_items)) {
+        report.skipped_items = skippedKeys;
+      }
+    }
+
+    // [추적 코드 2] 성공 직전 최종 로그
+    logger.info(
+      "✅ Final report generated successfully. Preparing to return.",
+      { reportObjectKeys: Object.keys(report) }
+    );
+
+    // [최종 추적 코드] 객체를 문자열로 변환(직렬화)하는 과정에서 오류가 발생하는지 명시적으로 확인합니다.
+    try {
+      const reportString = JSON.stringify(report);
+      logger.info(
+        `✅ Report object successfully serialized. Length: ${reportString.length}. Returning to client.`
+      );
+    } catch (serializationError) {
+      // 만약 여기서 에러가 발생하면, Gemini가 보낸 report 객체에 문제가 있는 것입니다.
+      logger.error("❌ CRITICAL: Failed to serialize the report object.", {
+        error: serializationError.toString(),
+        reportObjectKeys: Object.keys(report),
+      });
+      // 직렬화 실패는 복구 불가능하므로, 명확한 에러를 던집니다.
+      throw new HttpsError(
+        "internal",
+        "Failed to process the AI report due to a serialization error."
+      );
+    }
+
+    // [최종 복원] 진단용 임시 코드를 삭제하고, 실제 AI 리포트를 반환하는 원래 코드를 활성화합니다.
+    return { success: true, report };
   } catch (error) {
-    logger.error("Final report generation failed:", error?.toString?.() || error);
+    logger.error(
+      "Final report generation failed:",
+      error?.toString?.() || error
+    );
     if (error instanceof HttpsError) throw error;
-    const msg = (error && (error.message || error.toString && error.toString())) || "Unknown";
+    const msg =
+      (error && (error.message || (error.toString && error.toString()))) ||
+      "Unknown";
     if (/quota|rate|unavailable|temporarily/i.test(msg)) {
-      throw new HttpsError("unavailable", "AI final report temporarily unavailable.");
+      throw new HttpsError(
+        "unavailable",
+        "AI final report temporarily unavailable."
+      );
     }
     throw new HttpsError("internal", "AI final report generation failed.");
+  }
+});
+
+// [신규] URL로부터 이미지를 다운로드하여 Gemini API가 요구하는 형식으로 변환하는 헬퍼 함수
+async function urlToGenerativePart(url) {
+  if (!/^https:\/\//i.test(url)) {
+    throw new HttpsError(
+      "invalid-argument",
+      `Invalid URL format: ${url}. Only https is allowed.`
+    );
+  }
+  const ac = new AbortController();
+  const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
+  let response;
+  try {
+    response = await fetch(url, { signal: ac.signal });
+  } catch (e) {
+    if (e && e.name === "AbortError")
+      throw new HttpsError(
+        "deadline-exceeded",
+        `Image fetch timed out for url: ${url}`
+      );
+    throw e;
+  } finally {
+    clearTimeout(to);
+  }
+  if (!response.ok)
+    throw new HttpsError(
+      "not-found",
+      `Failed to fetch image from ${url}: ${response.status}`
+    );
+  const contentType = response.headers.get("content-type") || "image/jpeg";
+  const buffer = Buffer.from(await response.arrayBuffer());
+  if (buffer.length > MAX_IMAGE_BYTES)
+    throw new HttpsError(
+      "resource-exhausted",
+      `Image from ${url} is too large (>7.5MB).`
+    );
+  return {
+    inlineData: {
+      mimeType: contentType,
+      data: buffer.toString("base64"),
+    },
+  };
+}
+
+/**
+ * ============================================================================
+ * [V2] 기존 상품에 AI 검수 리포트를 추가하여 '강화'합니다.
+ * ============================================================================
+ */
+exports.enhanceProductWithAi = onCall(CALL_OPTS, async (request) => {
+  logger.info("✅ [V2] enhanceProductWithAi 함수가 호출되었습니다.", {
+    uid: request.auth ? request.auth.uid : "No UID",
+    body: request.data,
+  });
+
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated",
+      "The function must be called while authenticated."
+    );
+  }
+
+  try {
+    const { productId, evidenceImageUrls } = request.data || {};
+    if (
+      !productId ||
+      !Array.isArray(evidenceImageUrls) ||
+      evidenceImageUrls.length === 0
+    ) {
+      throw new HttpsError(
+        "invalid-argument",
+        "productId and evidenceImageUrls (array) are required."
+      );
+    }
+
+    const db = getFirestore();
+    const genAI = getGenAI();
+
+    // 1. productId로 Firestore에서 상품 데이터 가져오기
+    const productRef = db.collection("products").doc(productId);
+    const productDoc = await productRef.get();
+    if (!productDoc.exists) {
+      throw new HttpsError(
+        "not-found",
+        `Product with ID ${productId} not found.`
+      );
+    }
+    const productData = productDoc.data();
+    const categoryId = productData.categoryId;
+    if (!categoryId) {
+      throw new HttpsError(
+        "failed-precondition",
+        `Product ${productId} does not have a categoryId.`
+      );
+    }
+
+    // 2. 상품 데이터 + evidenceImageUrls로 프롬프트 동적 생성
+    // [V2 수정] 특정 카테고리 규칙이 아닌, 범용 V2 규칙('generic_v2')을 사용합니다.
+    const ruleDoc = await db
+      .collection("ai_verification_rules")
+      .doc("generic_v2")
+      .get();
+    if (!ruleDoc.exists) {
+      throw new HttpsError("not-found", `Generic AI rule 'generic_v2' not found.`);
+    }
+
+    // V1과의 호환성을 위해 v2ReportPrompt 필드가 있으면 그것을 사용하고, 없으면 report_template_prompt를 사용
+    let promptTemplate =
+      ruleDoc.data().v2ReportPrompt || ruleDoc.data().report_template_prompt;
+    if (!promptTemplate) {
+      throw new HttpsError(
+        "failed-precondition",
+        `AI rule 'generic_v2' is missing a prompt.`
+      );
+    }
+
+    // [V2 핵심 추가] 상품의 categoryId를 이용해 'categories_v2'에서 대/소분류 이름을 직접 조회합니다.
+    const subCategoryDoc = await db
+      .collection("categories_v2")
+      .doc(categoryId)
+      .get();
+    if (!subCategoryDoc.exists) {
+      throw new HttpsError(
+        "not-found",
+        `Sub-category with ID ${categoryId} not found.`
+      );
+    }
+    const subCategoryData = subCategoryDoc.data();
+    const subCategoryName = subCategoryData.name_ko || categoryId;
+    const parentCategoryId = subCategoryData.parentId;
+
+    let categoryName = "";
+    if (parentCategoryId) {
+      const parentCategoryDoc = await db
+        .collection("categories_v2")
+        .doc(parentCategoryId)
+        .get();
+      if (parentCategoryDoc.exists) {
+        categoryName = parentCategoryDoc.data().name_ko || parentCategoryId;
+      }
+    }
+
+    const confirmedProductName = productData.title;
+    // [V2 수정] 상품의 모든 정보를 활용하여 프롬프트를 완성합니다.
+    promptTemplate = promptTemplate
+      .replace(/{{confirmedProductName}}/g, String(confirmedProductName ?? ""))
+      .replace(/{{categoryName}}/g, String(categoryName ?? ""))
+      .replace(/{{subCategoryName}}/g, String(subCategoryName ?? ""))
+      .replace(/{{userPrice}}/g, String(productData.price ?? ""))
+      .replace(/{{userDescription}}/g, String(productData.description ?? ""));
+
+    // 3. 증거 이미지 준비 및 Gemini API 호출
+    const imageParts = await Promise.all(
+      evidenceImageUrls.map((url) => urlToGenerativePart(url))
+    );
+
+    const contents = [
+      { role: "user", parts: [{ text: promptTemplate }, ...imageParts] },
+    ];
+    const rawResponseText = await genAiCall(genAI, {
+      contents,
+      safetySettings,
+      responseMimeType: "application/json",
+      tag: "enhanceProductWithAi",
+    });
+
+    // 4. productId에 해당하는 상품 문서에 aiReport 업데이트
+    const jsonText = extractJsonText(rawResponseText);
+    const aiReport = tryParseJson(jsonText);
+    logAiDiagnostics("enhanceProductWithAi", rawResponseText, aiReport);
+    if (!aiReport) {
+      throw new HttpsError(
+        "data-loss",
+        "AI returned invalid JSON for the enhancement report."
+      );
+    }
+
+    await productRef.update({
+      isAiVerified: true,
+      aiVerificationStatus: "verified",
+      aiReport: aiReport,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    logger.info(`✅ [V2] Successfully enhanced product ${productId}.`);
+
+    return { success: true, report: aiReport };
+  } catch (error) {
+    logger.error(
+      "❌ [V2] enhanceProductWithAi 함수 내부에서 오류 발생:",
+      error
+    );
+    if (error instanceof HttpsError) throw error;
+    throw new HttpsError(
+      "internal",
+      "An internal error occurred during AI enhancement."
+    );
   }
 });
 
 // [업데이트] Gemini 안전 설정 (최신 카테고리 명칭 사용)
 // 허용 카테고리: DANGEROUS_CONTENT, HARASSMENT, HATE_SPEECH, SEXUALLY_EXPLICIT, CIVIC_INTEGRITY
 const safetySettings = [
-  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-  { category: HarmCategory.HARM_CATEGORY_HARASSMENT,        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,       threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,   threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  {
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_NONE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
 ];

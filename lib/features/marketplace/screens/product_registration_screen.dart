@@ -26,19 +26,23 @@ library;
 import 'dart:io';
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:bling_app/features/categories/screens/parent_category_screen.dart';
+import 'package:bling_app/features/marketplace/services/ai_verification_service.dart';
 import '../models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+// Removed direct UUID/path usage for uploads; using shared helper instead
+// ignore: unused_import
 import 'package:uuid/uuid.dart';
+import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart'; // [추가] AI 규칙 모델
 
 // ✅ [추가] UserModel을 사용하기 위해 import 합니다.
 import '../../../../core/models/user_model.dart';
 // ✅ 공용 태그 위젯 import
 import '../../shared/widgets/custom_tag_input_field.dart'; // 2025년 8월 30일
+import 'package:bling_app/core/utils/upload_helpers.dart';
 
 class ProductRegistrationScreen extends StatefulWidget {
   const ProductRegistrationScreen({super.key});
@@ -49,6 +53,7 @@ class ProductRegistrationScreen extends StatefulWidget {
 }
 
 class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
+  final _aiVerificationService = AiVerificationService();
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _priceController = TextEditingController();
@@ -64,10 +69,19 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   List<String> _tags = [];
 
   Category? _selectedCategory;
-  // Position? _currentPosition;
+
+  // 선택된 카테고리의 ID만 필요할 때 사용할 안전한 게터
+  String? get _selectedCategoryId => _selectedCategory?.id;
 
   // 현재 상품 상태 및 추가 입력값
-  String _condition = 'new';
+  String _condition = 'used';
+
+  // [추가] AI 검수 관련 상태
+  bool _isSaving = false;
+  AiVerificationRule? _selectedAiRule;
+
+  // 1. [추가] 대/소분류 이름을 저장할 상태 변수
+  String? _selectedParentCategoryName;
 
   @override
   void initState() {
@@ -112,6 +126,18 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       setState(() {
         _selectedCategory = result;
       });
+      if (result.parentId != null && result.parentId!.isNotEmpty) {
+        final rule = await _aiVerificationService.loadAiRule(result.id);
+        final names = await _aiVerificationService.getCategoryNames(
+            result.id, result.parentId!);
+        if (!mounted) return;
+        setState(() {
+          _selectedAiRule = rule;
+          _selectedParentCategoryName = names['parentCategoryName'];
+        });
+      } else {
+        debugPrint("선택된 카테고리에 parentId가 없습니다.");
+      }
     }
   }
 
@@ -158,14 +184,10 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       }
       final userModel = UserModel.fromFirestore(userDoc);
 
-      // 이미지 업로드
+      // 이미지 업로드 (공용 helper 사용)
       List<String> imageUrls = [];
       for (var image in _images) {
-        final fileName = const Uuid().v4();
-        final ref =
-            FirebaseStorage.instance.ref().child('product_images/$fileName');
-        await ref.putFile(File(image.path));
-        imageUrls.add(await ref.getDownloadURL());
+        imageUrls.add(await uploadProductImage(image, user.uid));
       }
 
       final newProductId =
@@ -243,6 +265,43 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         return category.nameEn;
     }
   }
+
+  // [수정] AI 검수 시작 함수: Cloud Function을 직접 호출하는 방식으로 변경
+  Future<void> _startAiVerification() async {
+    // 유효성 검사 강화
+    if (!_formKey.currentState!.validate() ||
+        _selectedCategoryId == null ||
+        _images.isEmpty ||
+        _selectedAiRule == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('ai_flow.cta.missing_required_fields'.tr())),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      final productId =
+          FirebaseFirestore.instance.collection('products').doc().id;
+      await _aiVerificationService.startVerificationFlow(
+        context: context,
+        rule: _selectedAiRule!,
+        productId: productId,
+        categoryId: _selectedCategoryId!,
+        initialImages: _images, // XFile 리스트 그대로 전달하면 서비스가 업로드 처리
+        productName: _titleController.text,
+        productDescription: _descriptionController.text,
+        productPrice: _priceController.text,
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  // 기존 수동 흐름(_navigateToEvidenceCollection/_generateReportDirectly)은
+  // 서비스 기반으로 대체되었습니다.
+
+  // 이미지 업로드는 공용 helper(uploadProductImage)를 사용합니다.
 
   @override
   Widget build(BuildContext context) {
@@ -404,6 +463,41 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                 },
               ),
               const SizedBox(height: 24),
+
+              // [V2 핵심 추가] AI 검수 옵션 섹션
+              const Divider(height: 32),
+              Text('ai_flow.cta.title'.tr(),
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 8),
+              Text('ai_flow.cta.subtitle'.tr(),
+                  style: Theme.of(context).textTheme.bodyMedium),
+              const SizedBox(height: 16),
+              // [핵심 수정] 버튼 활성/비활성 및 동작 구현
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _titleController,
+                builder: (context, value, _) {
+                  final isReady = value.text.isNotEmpty &&
+                      _selectedCategoryId != null &&
+                      _images.isNotEmpty &&
+                      _selectedAiRule != null &&
+                      _selectedParentCategoryName != null; // 이름까지 로드되었는지 확인
+                  return OutlinedButton.icon(
+                    onPressed:
+                        (isReady && !_isSaving) ? _startAiVerification : null,
+                    icon: const Icon(Icons.shield_outlined),
+                    label: _isSaving
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text('ai_flow.cta.start_button'.tr()),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
