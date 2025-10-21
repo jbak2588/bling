@@ -45,6 +45,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
   final TextEditingController _itemsController = TextEditingController();
   final TextEditingController _priceSuggestionController =
       TextEditingController();
+  final TextEditingController _buyerNotesController = TextEditingController();
   // [복원] 상품 제목, 가격, 설명을 위한 컨트롤러
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
@@ -63,6 +64,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
   void _initializeControllers() {
     _titleController.text = widget.confirmedProductName;
     _summaryController.text = widget.finalReport['verification_summary'] ?? '';
+    _buyerNotesController.text = widget.finalReport['notes_for_buyer'] ?? '';
     _conditionController.text = widget.finalReport['condition_check'] ?? '';
     _itemsController.text =
         (widget.finalReport['included_items'] as List<dynamic>? ?? [])
@@ -123,6 +125,7 @@ ${_itemsController.text.split(',').map((e) => "- ${e.trim()}").join('\n')}
     _conditionController.dispose();
     _itemsController.dispose();
     _priceSuggestionController.dispose();
+    _buyerNotesController.dispose();
     _titleController.dispose();
     _priceController.dispose();
     _descriptionController.dispose();
@@ -179,6 +182,7 @@ ${_itemsController.text.split(',').map((e) => "- ${e.trim()}").join('\n')}
         'condition_check': _conditionController.text,
         'included_items':
             _itemsController.text.split(',').map((e) => e.trim()).toList(),
+        'notes_for_buyer': _buyerNotesController.text,
         // [수정] AI 추천가와 사용자가 선택한 가격을 모두 저장
         // 호환성을 위해 suggested_price와 price_suggestion 둘 다 저장합니다.
         'suggested_price': aiSuggestedPrice,
@@ -275,53 +279,69 @@ ${_itemsController.text.split(',').map((e) => "- ${e.trim()}").join('\n')}
               // [복원] 상품 제목, 가격, 설명 필드
               TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(
-                      labelText: '상품명', border: OutlineInputBorder())),
+                  decoration: InputDecoration(
+                      labelText: 'marketplace.registration.titleHint'.tr(),
+                      border: const OutlineInputBorder())),
               const SizedBox(height: 16),
               TextFormField(
                   controller: _priceController,
-                  decoration: const InputDecoration(
-                      labelText: '판매 가격 (IDR)', border: OutlineInputBorder()),
+                  decoration: InputDecoration(
+                      labelText: 'marketplace.registration.priceHint'.tr(),
+                      border: const OutlineInputBorder()),
                   keyboardType: TextInputType.number),
               const Divider(height: 32),
               // [추가] AI 추천 가격을 별도로 표시 (편집 불가)
               TextFormField(
                   controller: _priceSuggestionController,
                   readOnly: true,
-                  decoration: const InputDecoration(
-                      labelText: 'AI 추천 가격 (IDR)',
+                  decoration: InputDecoration(
+                      labelText: tr('ai_flow.final_report.suggested_price',
+                          args: ['Rp']),
                       border: InputBorder.none,
-                      prefixIcon: Icon(Icons.auto_awesome))),
+                      prefixIcon: const Icon(Icons.auto_awesome))),
               const Divider(height: 32),
               TextFormField(
                 controller: _summaryController,
-                decoration: const InputDecoration(
-                    labelText: '검증 요약', border: OutlineInputBorder()),
+                decoration: InputDecoration(
+                    labelText: 'ai_flow.final_report.summary'.tr(),
+                    border: const OutlineInputBorder()),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+              // [V2.1] 구매자 안내 노트 표시 및 편집 가능
+              TextFormField(
+                controller: _buyerNotesController,
+                decoration: InputDecoration(
+                    labelText: 'ai_flow.final_report.buyer_notes'.tr(),
+                    border: const OutlineInputBorder()),
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
               _buildReportSection(
-                  "주요 사양",
+                  'ai_flow.final_report.key_specs'.tr(),
                   _specsControllers.entries
                       .map((e) => MapEntry(e.key, e.value))
                       .toList()),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _conditionController,
-                decoration: const InputDecoration(
-                    labelText: '상태 점검', border: OutlineInputBorder()),
+                decoration: InputDecoration(
+                    labelText: 'ai_flow.final_report.condition'.tr(),
+                    border: const OutlineInputBorder()),
                 maxLines: 5,
               ),
               const SizedBox(height: 16),
               TextFormField(
                   controller: _itemsController,
-                  decoration: const InputDecoration(
-                      labelText: '구성품 (쉼표로 구분)', border: OutlineInputBorder())),
+                  decoration: InputDecoration(
+                      labelText: 'ai_flow.final_report.included_items'.tr(),
+                      border: const OutlineInputBorder())),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                    labelText: '최종 상세 설명', border: OutlineInputBorder()),
+                decoration: InputDecoration(
+                    labelText: 'ai_flow.final_report.final_description'.tr(),
+                    border: const OutlineInputBorder()),
                 maxLines: 12,
               ),
               const SizedBox(height: 16),
@@ -329,7 +349,7 @@ ${_itemsController.text.split(',').map((e) => "- ${e.trim()}").join('\n')}
               ElevatedButton.icon(
                 onPressed: () => _applyAllSuggestionsToDescription(),
                 icon: const Icon(Icons.auto_fix_high),
-                label: const Text("수정한 내용으로 상세 설명 업데이트"),
+                label: Text('ai_flow.final_report.apply_suggestions'.tr()),
               ),
             ],
           ),

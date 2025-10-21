@@ -24,31 +24,31 @@ class AiRuleUploader {
   Future<void> uploadInitialRules() async {
     final rulesCollection = _db.collection('ai_verification_rules');
 
-    debugPrint("[AI 규칙 V2 마이그레이션 시작]");
-    debugPrint("1. 기존의 모든 V1 AI 규칙을 삭제합니다...");
-    final oldRules = await rulesCollection.get();
-    WriteBatch deleteBatch = _db.batch();
-    for (final doc in oldRules.docs) {
-      deleteBatch.delete(doc.reference);
-    }
-    await deleteBatch.commit();
-    debugPrint("=> 기존 규칙 삭제 완료.");
+    debugPrint("[AI 규칙 V2.1 마이그레이션 시작]");
 
-    // 최종 V2 범용 규칙 객체 생성
-    final AiVerificationRule genericRule = _getFinalGenericV2Rule();
+    // V2.1 규칙 목록 생성 (범용 + 스마트폰 전용)
+    final List<AiVerificationRule> rulesToUpload = [
+      _getGenericV2Rule(),
+      _getSmartphoneV2Rule(),
+    ];
 
-    debugPrint("2. 서버(index.js)와 호환되는 최종 V2 범용 규칙을 업로드합니다...");
+    debugPrint("새로운 V2.1 규칙들을 업로드합니다...");
     try {
-      await rulesCollection.doc(genericRule.id).set(genericRule.toJson());
+      // WriteBatch를 사용하여 모든 규칙을 한 번에 업로드 (원자적 연산)
+      WriteBatch batch = _db.batch();
+      for (final rule in rulesToUpload) {
+        batch.set(rulesCollection.doc(rule.id), rule.toJson());
+      }
+      await batch.commit();
       debugPrint(
-          '✅ 성공: AI 검수 V2 범용 규칙(`generic_v2`)이 성공적으로 Firestore에 업로드되었습니다.');
+          '✅ 성공: ${rulesToUpload.length}개의 AI 검수 V2.1 규칙이 성공적으로 Firestore에 업로드되었습니다.');
     } catch (e) {
-      debugPrint('❌ 실패: AI 검수 V2 범용 규칙 업로드 실패: $e');
+      debugPrint('❌ 실패: AI 검수 V2.1 규칙 업로드 실패: $e');
     }
   }
 
   // index.js 서버와 100% 호환되는 최종 프롬프트가 포함된 규칙 생성 함수
-  AiVerificationRule _getFinalGenericV2Rule() {
+  AiVerificationRule _getGenericV2Rule() {
     // 1단계: 상품명 예측을 위한 프롬프트 (기존과 동일)
     const initialPrompt = '''
 Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {"predicted_item_name": "PREDICTED_NAME"}''';
@@ -86,11 +86,43 @@ Output a report in JSON format ONLY, in Indonesian.
       nameKo: "범용 중고물품 검증 규칙 V2",
       nameId: "Aturan Verifikasi Barang Bekas Umum V2",
       isAiVerificationSupported: true,
-      minGalleryPhotos: 1, // 모든 상품은 최소 1장의 사진만 있어도 검수 가능
-      requiredShots: {}, // 범용 규칙이므로 특정 카테고리 전용 필수샷은 없음
+      minGalleryPhotos: 1,
+      suggestedShots: {}, // 범용 규칙이므로 추천샷 없음
       initialAnalysisPromptTemplate: initialPrompt,
       reportTemplatePrompt:
           v2ReportPrompt, // V1 필드명과의 호환성을 위해 reportTemplatePrompt 사용
+    );
+  }
+
+  // [V2.1 신규] 스마트폰 전용 규칙 생성 함수
+  AiVerificationRule _getSmartphoneV2Rule() {
+    // 프롬프트는 범용 프롬프트를 그대로 재사용할 수 있습니다.
+    // V2.1의 핵심은 프롬프트가 아닌, 'suggestedShots' 데이터에 있습니다.
+
+    return AiVerificationRule(
+      id: 'smartphone-tablet', // 실제 카테고리 ID와 일치
+      nameKo: "스마트폰/태블릿 전용 검증 규칙",
+      nameId: "Aturan Verifikasi Khusus Smartphone/Tablet",
+      isAiVerificationSupported: true,
+      minGalleryPhotos: 1,
+      suggestedShots: {
+        'imei_shot': RequiredShot(
+          nameKo: 'IMEI 정보 화면',
+          descKo: '단말기 정보 또는 IMEI 화면을 촬영하면 신뢰도가 크게 상승합니다.',
+        ),
+        'battery_shot': RequiredShot(
+          nameKo: '배터리 성능 화면',
+          descKo: '배터리 성능 상태 화면을 촬영하여 구매자에게 정확한 정보를 제공하세요.',
+        ),
+        'info_shot': RequiredShot(
+          nameKo: '기기 정보 화면',
+          descKo: '설정 > 휴대전화 정보 화면을 촬영하여 모델명과 용량을 명확히 보여주세요.',
+        ),
+      },
+      // initialAnalysisPromptTemplate, reportTemplatePrompt는 범용 규칙과 동일한 것을 사용하거나
+      // 필요시 스마트폰에 더 특화된 프롬프트를 여기에 별도로 정의할 수 있습니다.
+      initialAnalysisPromptTemplate: '', // 우선 비워두어 서버에서 범용 프롬프트를 찾도록 유도
+      reportTemplatePrompt: '',
     );
   }
 }

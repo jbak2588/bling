@@ -417,7 +417,7 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
   }
 
   try {
-    const { imageUrls, ruleId } = request.data || {};
+    const { imageUrls, ruleId, locale } = request.data || {};
     if (!Array.isArray(imageUrls) || imageUrls.length === 0 || !ruleId) {
       logger.error("❌ 오류: 이미지 URL 또는 ruleId가 누락되었습니다.");
       throw new HttpsError(
@@ -447,6 +447,16 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
         `Rule '${ruleId}' is missing a valid prompt template.`
       );
     }
+
+    // [V2.1 핵심 추가] 규칙에 정의된 '추천 증거(suggested_shots)' 목록을 가져와
+    // 제공된 이미지에서 확인할 수 없는 항목 키를 AI가 판별하도록 지시합니다.
+    const suggestedShotsMap = ruleData.suggested_shots || {};
+    const suggestedShotKeys = Object.keys(suggestedShotsMap || {});
+    const evidenceInstruction = suggestedShotKeys.length
+      ? `\nAdditionally, analyze the provided images and determine which of the following suggested evidence keys CANNOT be confidently verified from the images: [${suggestedShotKeys.join(
+          ", "
+        )}].\nReturn JSON ONLY with the following schema:\n{\n  "predicted_item_name": "string",\n  "missing_evidence_list": ["key", ...]  // keys from the list above that cannot be verified\n}`
+      : `\nReturn JSON ONLY with the following schema:\n{\n  "predicted_item_name": "string",\n  "missing_evidence_list": []\n}`;
 
     const ac = new AbortController();
     const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
@@ -497,8 +507,14 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
     clearTimeout(to);
 
     // 2.5 계열 고정 호출 + 재시도/타임아웃 래퍼 사용
+  // Locale-aware directive
+  const lc = (typeof locale === "string" && locale) || "id";
+  const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
+  const localeDirective = `\n\n[Language]\nAll textual responses must be written in ${langName}. For example, return 'predicted_item_name' in ${langName}.`;
+
+  const augmentedPrompt = `${promptTemplate}${evidenceInstruction}${localeDirective}`;
     const userContents = [
-      { role: "user", parts: [{ text: promptTemplate }, ...imageParts] },
+      { role: "user", parts: [{ text: augmentedPrompt }, ...imageParts] },
     ];
     const text = await genAiCall(genAI, {
       modelPrimary: "gemini-2.5-flash",
@@ -511,26 +527,39 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
 
     // 진단 로그용 원문/파싱 결과 기록
     const jsonText = extractJsonText(text);
-    const prediction = tryParseJson(jsonText);
-    logAiDiagnostics("initialproductanalysis", text, prediction);
-    if (!prediction) {
+    const parsed = tryParseJson(jsonText);
+    logAiDiagnostics("initialproductanalysis", text, parsed);
+    if (!parsed) {
       throw new HttpsError("data-loss", "AI returned invalid JSON.");
     }
-    const predictedName = prediction?.predicted_item_name ?? null;
+    const predictedName = parsed?.predicted_item_name ?? null;
+    // [V2.1] 동적 증거 보강: 누락된 증거 키 목록 추출 및 필터링
+    let missingEvidenceList = [];
+    if (Array.isArray(parsed?.missing_evidence_list)) {
+      missingEvidenceList = parsed.missing_evidence_list
+        .filter((v) => typeof v === "string")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+      // 서버 신뢰도 보강: 정의되지 않은 키는 제외
+      if (suggestedShotKeys.length) {
+        const allowed = new Set(suggestedShotKeys);
+        missingEvidenceList = missingEvidenceList.filter((k) => allowed.has(k));
+      }
+    }
     if (
       !predictedName ||
       (typeof predictedName === "string" && predictedName.trim() === "")
     ) {
       logger.warn("⚠️ AI returned empty 'predicted_item_name'", {
         ctx: "initialproductanalysis",
-        hasKeys: Object.keys(prediction || {}),
+        hasKeys: Object.keys(parsed || {}),
       });
     } else {
       logger.info("✅ Gemini 분석 성공", {
         predicted_item_name: predictedName,
       });
     }
-    return { success: true, prediction: predictedName };
+    return { success: true, prediction: predictedName, missing_evidence_list: missingEvidenceList };
   } catch (error) {
     logger.error(
       "❌ initialproductanalysis 함수 내부에서 심각한 오류 발생:",
@@ -566,6 +595,8 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     userDescription,
     categoryName, // <-- V2 데이터
     subCategoryName, // <-- V2 데이터
+    skipped_items, // <-- V2.1: 사용자가 건너뛴 증거 키 목록
+    locale,
   } = request.data;
 
   if (!imageUrls || !ruleId) {
@@ -605,6 +636,28 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
       .replace(/{{confirmedProductName}}/g, String(confirmedProductName ?? ""))
       .replace(/{{categoryName}}/g, String(categoryName ?? ""))           // <-- V2 로직
       .replace(/{{subCategoryName}}/g, String(subCategoryName ?? ""));   // <-- V2 로직
+
+  // [Locale] Ensure model writes in the requested language
+  const lc = (typeof locale === "string" && locale) || "id";
+  const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
+  promptTemplate += `\n\n[Language]\nWrite all textual fields in ${langName}.`;
+
+  // [V2.1 추가] 사용자가 건너뛴 증거 키(skipped_items)를 프롬프트에 반영하여
+    // 구매자에게 안내할 notes_for_buyer를 생성하도록 모델에 지시합니다.
+    let skippedKeys = [];
+    if (Array.isArray(skipped_items)) {
+      skippedKeys = skipped_items.filter((v) => typeof v === "string").map((s) => s.trim()).filter((s) => s.length > 0);
+    }
+    const guidedKeys = Object.keys((imageUrls && imageUrls.guided) || {});
+    if (skippedKeys.length) {
+      promptTemplate += `\n\n[Context: Skipped Evidence]\n` +
+        `The user skipped providing the following suggested evidence keys: [${skippedKeys.join(", ")}].\n` +
+        `Please still complete the final report objectively. In addition, include a field named \'notes_for_buyer\' (string) that politely informs the buyer which evidence was not provided and suggests verifying them in person or via chat. Do not fabricate data for skipped items.`;
+    }
+    if (guidedKeys.length) {
+      promptTemplate += `\n\n[Context: Guided Evidence]\n` +
+        `The user provided additional guided evidence images for keys: [${guidedKeys.join(", ")}]. Use them to improve report quality.`;
+    }
 
 
     // ... (이미지 처리 로직은 동일)
@@ -692,6 +745,19 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     if (report.suggested_price !== undefined) {
       report.price_suggestion = report.suggested_price;
       delete report.suggested_price;
+    }
+
+    // [V2.1 보강] 사용자가 건너뛴 증거가 있는 경우, notes_for_buyer가 비어 있으면 기본 안내 문구를 생성합니다.
+    if (skippedKeys.length) {
+      const hasNotes =
+        report.notes_for_buyer && typeof report.notes_for_buyer === "string" && report.notes_for_buyer.trim().length > 0;
+      if (!hasNotes) {
+        report.notes_for_buyer = `The seller did not provide the following evidence: ${skippedKeys.join(", ")}. Please consider verifying these points in person or request additional proof in chat before purchasing.`;
+      }
+      // 참고용으로 최종 보고서에 skipped_items를 포함하여 클라이언트가 표시/저장을 선택할 수 있게 합니다.
+      if (!Array.isArray(report.skipped_items)) {
+        report.skipped_items = skippedKeys;
+      }
     }
 
     // [추적 코드 2] 성공 직전 최종 로그

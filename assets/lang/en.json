@@ -193,7 +193,17 @@
   },
   "ai_flow": {
     "common": {
-      "error": "An error occurred: {error}"
+      "error": "An error occurred: {error}",
+      "add_photo": "Add Photo",
+      "skip": "Skip",
+  "added_photo": "Photo added: {}",
+      "skipped": "Skipped"
+    },
+    "cta": {
+      "title": "🤖 Boost trust with AI verification (optional)",
+      "subtitle": "Earn an AI verification badge to increase buyer trust and sell faster. Fill in all product info before starting.",
+      "start_button": "Start AI verification",
+      "missing_required_fields": "Please enter item name, category, and at least one image."
     },
     "category_selection": {
       "title": "AI Verification: Select Category",
@@ -223,19 +233,30 @@
       "back_button": "Back"
     },
     "guided_camera": {
-      "title": "AI Verification: Guided Shots",
-      "guide": "Complete the missions below to increase credibility.",
+      "title": "AI guidance: missing evidence",
+      "guide": "To improve trust, please add suggested photos for the items below.",
       "location_mismatch_error": "The photo’s location doesn’t match your current location. Please shoot at the same place.",
       "location_permission_error": "Location permission denied. Please enable it in settings.",
       "no_location_data_error": "No location data found in the photo. Please enable location tags in your camera settings.",
-      "next_button": "Generate Final Report"
+      "next_button": "Generate final report"
     },
     "final_report": {
       "title": "AI Verification Report",
       "guide": "AI generated a draft listing. Edit the content and finish registration.",
       "loading": "AI is generating the final report...",
       "error": "Failed to generate the report.",
-      "submit_button": "Register for Sale"
+      "submit_button": "Register for Sale",
+  "suggested_price": "AI suggested price ({})",
+      "summary": "Verification summary",
+      "buyer_notes": "Notes for buyer (AI)",
+      "key_specs": "Key specs",
+      "condition": "Condition check",
+      "included_items": "Included items (comma-separated)",
+      "final_description": "Final description",
+      "apply_suggestions": "Apply suggestions to description",
+      "included_items_label": "Included items",
+      "buyer_notes_label": "Buyer notes",
+      "skipped_items": "Skipped evidence items"
     }
   },
   "registration_flow": {

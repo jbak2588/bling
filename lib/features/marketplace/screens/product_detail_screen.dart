@@ -489,7 +489,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               child: TextButton(
                                 onPressed: () =>
                                     setState(() => _showAiReport = false),
-                                child: const Text('상세 설명 보기'),
+                                child:
+                                    Text('marketplace.detail.description'.tr()),
                               ),
                             ),
                           ] else ...[
@@ -506,7 +507,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               child: TextButton(
                                 onPressed: () =>
                                     setState(() => _showAiReport = true),
-                                child: const Text('[AI 리포트 보기]'),
+                                child: Text(
+                                    '[${'ai_flow.final_report.title'.tr()}]'),
                               ),
                             ),
                           ],
@@ -563,6 +565,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final specs = report['key_specs'];
     final condition = report['condition_check'];
     final items = report['included_items'];
+    final buyerNotes = report['notes_for_buyer'];
+    final skipped = report['skipped_items'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -571,13 +575,32 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
         // [V2] 구조화된 리포트 표시
         if (summary != null)
-          _buildReportItem(context, Icons.task_alt, "AI 검증 요약", summary),
+          _buildReportItem(context, Icons.task_alt,
+              'ai_flow.final_report.summary'.tr(), summary),
         if (specs is Map && specs.isNotEmpty)
-          _buildReportMap(context, Icons.list_alt, "주요 사양", specs),
+          _buildReportMap(context, Icons.list_alt,
+              'ai_flow.final_report.key_specs'.tr(), specs),
         if (condition != null)
-          _buildReportItem(context, Icons.healing, "상태 점검", condition),
+          _buildReportItem(context, Icons.healing,
+              'ai_flow.final_report.condition'.tr(), condition),
         if (items is List && items.isNotEmpty)
-          _buildReportList(context, Icons.inbox, "구성품", items),
+          _buildReportList(context, Icons.inbox,
+              'ai_flow.final_report.included_items_label'.tr(), items),
+
+        if (buyerNotes is String && buyerNotes.trim().isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _buildReportItem(context, Icons.info_outline,
+              'ai_flow.final_report.buyer_notes_label'.tr(), buyerNotes),
+        ],
+
+        if (skipped is List && skipped.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          _buildReportList(
+              context,
+              Icons.photo_size_select_actual_outlined,
+              'ai_flow.final_report.skipped_items'.tr(),
+              List<String>.from(skipped)),
+        ],
 
         const Divider(height: 32),
       ],
