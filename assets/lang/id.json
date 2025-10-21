@@ -86,7 +86,7 @@
     "myTown": "Kota Saya",
     "search": {
       "placeholder": "Halaman Pencarian",
-      "chipPlaceholder": "Cari tetangga, berita, proloved, pekerjaan…"
+      "chipPlaceholder": "Cari tetangga, berita, Preloved, pekerjaan…"
     }
   },
   "drawer": {
@@ -144,8 +144,7 @@
       "descriptionHint": "Ubah Deskripsi Lengkap",
       "success": "Produk berhasil diedit!",
       "fail": "Gagal memperbarui produk: {error}",
-      "resetLocation": "Atur ulang lokasi",
-      "save": "Simpan Perubahan"
+      "resetLocation": "Atur ulang lokasi"
     },
     "detail": {
       "makeOffer": "Tawarkan harga",
@@ -156,7 +155,7 @@
       "favorite": "Favorit",
       "unfavorite": "Batal Favorit",
       "share": "Share",
-      "edit": "Edit",
+      "edit": "Eidt",
       "delete": "Hapus",
       "category": "Kategori",
       "categoryError": "Kategori: -",
@@ -189,74 +188,46 @@
       "new": "Baru",
       "used": "Bekas"
     },
-    "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang preloved!"
+    "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!"
   },
   "ai_flow": {
-    "common": {
-      "error": "Terjadi kesalahan: {error}",
-      "add_photo": "Tambah Foto",
-      "skip": "Lewati",
-  "added_photo": "Foto ditambahkan: {}",
-      "skipped": "Dilewati"
-    },
-    "cta": {
-      "title": "🤖 Tingkatkan kepercayaan dengan verifikasi AI (opsional)",
-      "subtitle": "Dapatkan badge verifikasi AI untuk meningkatkan kepercayaan pembeli dan jual lebih cepat. Lengkapi semua informasi produk sebelum memulai.",
-      "start_button": "Mulai verifikasi AI",
-      "missing_required_fields": "Harap masukkan nama barang, kategori, dan minimal satu gambar."
-    },
     "category_selection": {
-      "title": "Verifikasi AI: Pilih Kategori",
+      "title": "Pilih Kategori Verifikasi AI",
       "error": "Gagal memuat kategori.",
       "no_categories": "Tidak ada kategori yang tersedia untuk verifikasi."
     },
     "gallery_upload": {
-      "title": "Verifikasi AI: Pilih Foto",
-      "guide": "Harap unggah minimal {count} foto untuk verifikasi.",
-      "min_photo_error": "Anda harus memilih minimal {count} foto.",
-      "next_button": "Minta Analisis AI"
+      "title": "Unggah Foto (1/3)",
+      "instruction": "Mari analisis barang {category} Anda.",
+       "min_photo_guide": "Pilih minimal {0} foto dari galeri Anda agar AI dapat mengenali barang tersebut.",
+      "min_photo_error": "Diperlukan minimal {0} foto.",
+      "next_button": "Langkah Berikutnya"
     },
     "prediction": {
-      "title": "Hasil Analisis AI",
-      "guide": "Ini adalah nama barang yang diprediksi oleh AI.",
-      "edit_label": "Ubah Nama Barang",
-      "edit_button": "Ubah Manual",
-      "save_button": "Simpan Perubahan",
-      "confirm_button": "Konfirmasi Nama Ini",
-      "no_name": "Nama barang tidak ada",
-      "error": "Tidak dapat mengenali barang. Silakan coba lagi.",
-      "auth_error": "Info autentikasi pengguna tidak ada. Tidak dapat memulai analisis.",
-      "question": "Apakah barang ini benar?",
-      "reject_button": "Tidak, berbeda (Kembali)",
+      "title": "Konfirmasi Produk (2/3)",
+      "loading": "AI sedang menganalisis produk...\nHarap tunggu.",
+      "uploading": "Mengunggah gambar dengan aman...",
+      "analyzing": "Menganalisis gambar yang diunggah...",
+      "error": "Gagal mengenali produk. Silakan coba lagi.",
+      "auth_error": "Analisis tidak dapat dimulai karena otentikasi pengguna tidak ada. Silakan coba lagi.",
+      "question": "Apakah ini produk yang benar?",
+      "confirm_button": "Ya, benar",
+      "reject_button": "Bukan, ini berbeda (Kembali)",
       "analysis_error": "Terjadi kesalahan saat analisis.",
       "retry_button": "Coba Lagi",
       "back_button": "Kembali"
     },
     "guided_camera": {
-      "title": "Panduan AI: bukti yang kurang",
-      "guide": "Untuk meningkatkan kepercayaan, tambahkan foto yang disarankan untuk item di bawah ini.",
-      "location_mismatch_error": "Lokasi foto tidak sesuai dengan lokasi Anda saat ini. Harap ambil foto di tempat yang sama.",
-      "location_permission_error": "Izin lokasi ditolak. Harap aktifkan di pengaturan.",
-      "no_location_data_error": "Data lokasi tidak ditemukan di foto. Harap aktifkan tag lokasi di pengaturan kamera Anda.",
-      "next_button": "Buat laporan akhir"
+      "title": "Foto Terpandu AI (3/3)",
+      "location_error": "Lokasi foto tidak cocok dengan lokasi Anda saat ini. Harap ambil foto di lokasi barang.",
+      "next_button": "Minta Analisis Akhir"
     },
     "final_report": {
-      "title": "Laporan Verifikasi AI",
-      "guide": "Ini adalah draf yang dibuat oleh AI. Ubah konten dan selesaikan pendaftaran.",
-      "loading": "AI sedang membuat laporan akhir...",
-      "error": "Gagal membuat laporan.",
-      "submit_button": "Daftarkan untuk Dijual",
-  "suggested_price": "Harga yang disarankan AI ({})",
-      "summary": "Ringkasan verifikasi",
-      "buyer_notes": "Catatan untuk pembeli (AI)",
-      "key_specs": "Spesifikasi utama",
-      "condition": "Pemeriksaan kondisi",
-      "included_items": "Barang termasuk (dipisahkan koma)",
-      "final_description": "Deskripsi akhir",
-      "apply_suggestions": "Terapkan saran ke deskripsi",
-      "included_items_label": "Barang termasuk",
-      "buyer_notes_label": "Catatan pembeli",
-      "skipped_items": "Item bukti yang dilewati"
+      "title": "Tinjauan Iklan oleh AI",
+      "loading": "AI sedang menulis iklan penjualan terakhir...",
+      "error": "Gagal membuat laporan. Silakan coba lagi.",
+      "guide": "Ini adalah draf iklan penjualan yang dibuat oleh AI. Periksa dan ubah isinya sebelum dipublikasikan.",
+      "submit_button": "Daftarkan"
     }
   },
   "registration_flow": {
@@ -998,9 +969,9 @@
   "community": {
     "title": "Halaman Komunitas"
   },
-  "shared": {
+    "shared": {
     "tagInput": {
-      "defaultHint": "Tambah tag (tekan spasi untuk konfirmasi)"
+      "defaultHint": "Tambahkan tag (tekan spasi untuk menambahkan)"
     }
   },
   "selectCategory": "Pilih kategori",
