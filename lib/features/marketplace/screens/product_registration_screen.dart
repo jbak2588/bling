@@ -29,7 +29,6 @@ import 'package:bling_app/features/categories/screens/parent_category_screen.dar
 import 'package:bling_app/features/marketplace/services/ai_verification_service.dart';
 import '../models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -37,13 +36,11 @@ import 'package:image_picker/image_picker.dart';
 // Removed direct UUID/path usage for uploads; using shared helper instead
 // ignore: unused_import
 import 'package:uuid/uuid.dart';
-import 'package:bling_app/features/marketplace/screens/ai_evidence_collection_screen.dart'; // [추가] 증거 수집 화면
 import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart'; // [추가] AI 규칙 모델
 
 // ✅ [추가] UserModel을 사용하기 위해 import 합니다.
 import '../../../../core/models/user_model.dart';
 // ✅ 공용 태그 위젯 import
-import 'ai_final_report_screen.dart';
 import '../../shared/widgets/custom_tag_input_field.dart'; // 2025년 8월 30일
 import 'package:bling_app/core/utils/upload_helpers.dart';
 
@@ -85,7 +82,6 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
 
   // 1. [추가] 대/소분류 이름을 저장할 상태 변수
   String? _selectedParentCategoryName;
-  String? _selectedSubCategoryName;
 
   @override
   void initState() {
@@ -137,7 +133,6 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         if (!mounted) return;
         setState(() {
           _selectedAiRule = rule;
-          _selectedSubCategoryName = names['subCategoryName'];
           _selectedParentCategoryName = names['parentCategoryName'];
         });
       } else {
@@ -279,121 +274,32 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         _images.isEmpty ||
         _selectedAiRule == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("상품명, 카테고리, 이미지를 모두 입력해주세요.")),
+        SnackBar(content: Text('ai_flow.cta.missing_required_fields'.tr())),
       );
       return;
     }
 
     setState(() => _isSaving = true);
     try {
-      // [V2 스마트 로직] 규칙에 따라 흐름을 분기합니다.
-      if (_selectedAiRule!.requiredShots.isNotEmpty) {
-        await _navigateToEvidenceCollection();
-      } else {
-        await _generateReportDirectly();
-      }
+      final productId =
+          FirebaseFirestore.instance.collection('products').doc().id;
+      await _aiVerificationService.startVerificationFlow(
+        context: context,
+        rule: _selectedAiRule!,
+        productId: productId,
+        categoryId: _selectedCategoryId!,
+        initialImages: _images, // XFile 리스트 그대로 전달하면 서비스가 업로드 처리
+        productName: _titleController.text,
+        productDescription: _descriptionController.text,
+        productPrice: _priceController.text,
+      );
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
   }
 
-  // 증거 수집 화면으로 이동하는 기존 로직
-  Future<void> _navigateToEvidenceCollection() async {
-    try {
-      // 1단계: 상품명 예측 (초기 이미지 업로드 후 URL 사용)
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception("User not authenticated.");
-
-      final List<String> imageUrls =
-          await uploadAllProductImages(_images, user.uid);
-
-      final HttpsCallable callable =
-          FirebaseFunctions.instanceFor(region: 'us-central1')
-              .httpsCallable('initialproductanalysis');
-      final result = await callable.call(<String, dynamic>{
-        'imageUrls': imageUrls,
-        'ruleId': _selectedAiRule!.id,
-      });
-
-      final confirmedProductName = result.data['prediction'] as String?;
-      if (confirmedProductName == null || !mounted) {
-        throw Exception("AI가 상품명을 인식하지 못했습니다.");
-      }
-
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => AiEvidenceCollectionScreen(
-          productId: FirebaseFirestore.instance.collection('products').doc().id,
-          categoryId: _selectedCategory!.id, // [핵심 추가]
-          rule: _selectedAiRule!,
-          initialImages: _images,
-          confirmedProductName: confirmedProductName,
-        ),
-      ));
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('오류: ${e.toString()}')));
-      }
-    }
-  }
-
-  // 증거 수집 화면을 건너뛰고 바로 리포트를 생성하는 신규 로직
-  Future<void> _generateReportDirectly() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception("User not authenticated.");
-
-      // 1. 초기 이미지 업로드
-      final List<String> initialImageUrls =
-          await uploadAllProductImages(_images, user.uid);
-
-      // 2. 최종 리포트 생성 함수 호출
-      final HttpsCallable callable =
-          FirebaseFunctions.instanceFor(region: 'us-central1')
-              .httpsCallable('generatefinalreport');
-      final result = await callable.call(<String, dynamic>{
-        'imageUrls': {'initial': initialImageUrls, 'guided': {}},
-        'ruleId': _selectedAiRule!.id,
-        'confirmedProductName': _titleController.text,
-        'categoryName': _selectedParentCategoryName,
-        'subCategoryName': _selectedSubCategoryName,
-        'userPrice': _priceController.text,
-        'userDescription': _descriptionController.text,
-      });
-
-      // [핵심 수정] 서버에서 온 generic Map을 안전하게 Map<String, dynamic>으로 변환합니다.
-      final dynamic reportRaw = result.data['report'];
-      if (reportRaw is! Map) {
-        throw Exception("AI가 유효한 리포트를 생성하지 못했습니다.");
-      }
-      final reportData = Map<String, dynamic>.from(reportRaw);
-
-      // 새 상품 ID를 미리 생성하고, 선택된 카테고리 ID를 전달합니다.
-      final productId =
-          FirebaseFirestore.instance.collection('products').doc().id;
-      final categoryId = _selectedCategory!.id;
-
-      if (mounted) {
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => AiFinalReportScreen(
-            productId: productId,
-            categoryId: categoryId,
-            finalReport: reportData,
-            rule: _selectedAiRule!,
-            initialImages: _images,
-            takenShots: const {},
-            confirmedProductName: _titleController.text,
-            userPrice: _priceController.text, // [추가]
-          ),
-        ));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('오류: ${e.toString()}')));
-      }
-    }
-  }
+  // 기존 수동 흐름(_navigateToEvidenceCollection/_generateReportDirectly)은
+  // 서비스 기반으로 대체되었습니다.
 
   // 이미지 업로드는 공용 helper(uploadProductImage)를 사용합니다.
 
@@ -560,15 +466,11 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
 
               // [V2 핵심 추가] AI 검수 옵션 섹션
               const Divider(height: 32),
-              Text(
-                "🤖 AI 검수로 신뢰도 높이기 (선택 사항)", // TODO: 다국어 키 추가
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text('ai_flow.cta.title'.tr(),
+                  style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
-              Text(
-                "AI 검증 뱃지를 받아 구매자의 신뢰를 얻고 더 빨리 판매하세요. 상품 정보를 모두 입력한 후 시작할 수 있습니다.", // TODO: 다국어 키 추가
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              Text('ai_flow.cta.subtitle'.tr(),
+                  style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 16),
               // [핵심 수정] 버튼 활성/비활성 및 동작 구현
               ValueListenableBuilder<TextEditingValue>(
@@ -589,7 +491,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                             width: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text("AI 검수 시작하기"), // TODO: 다국어 키 추가
+                        : Text('ai_flow.cta.start_button'.tr()),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),

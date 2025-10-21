@@ -40,7 +40,7 @@ class _AiEvidenceCollectionScreenState
   bool _isLoading = false;
 
   bool get _allShotsTaken =>
-      _evidenceShots.length == widget.rule.requiredShots.length;
+      _evidenceShots.length == widget.rule.suggestedShots.length;
 
   Future<void> _takePicture(String shotKey) async {
     final XFile? image = await _picker.pickImage(source: ImageSource.camera);
@@ -52,7 +52,7 @@ class _AiEvidenceCollectionScreenState
   }
 
   Future<void> _submitForVerification() async {
-    if (!_allShotsTaken && widget.rule.requiredShots.isNotEmpty) {
+    if (!_allShotsTaken && widget.rule.suggestedShots.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('ai_flow.evidence.all_shots_required'.tr())),
       );
@@ -87,7 +87,7 @@ class _AiEvidenceCollectionScreenState
       }
 
       final HttpsCallable callable =
-          FirebaseFunctions.instanceFor(region: 'asia-northeast3')
+          FirebaseFunctions.instanceFor(region: 'us-central1')
               .httpsCallable('generatefinalreport');
 
       final result = await callable.call(<String, dynamic>{
@@ -153,10 +153,10 @@ class _AiEvidenceCollectionScreenState
       appBar: AppBar(title: Text('ai_flow.evidence.title'.tr())),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: widget.rule.requiredShots.length,
+        itemCount: widget.rule.suggestedShots.length,
         itemBuilder: (context, index) {
-          final shotKey = widget.rule.requiredShots.keys.elementAt(index);
-          final shotRule = widget.rule.requiredShots[shotKey]!;
+          final shotKey = widget.rule.suggestedShots.keys.elementAt(index);
+          final shotRule = widget.rule.suggestedShots[shotKey]!;
           final takenImage = _evidenceShots[shotKey];
           final isCompleted = takenImage != null;
 
@@ -182,7 +182,7 @@ class _AiEvidenceCollectionScreenState
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
-          onPressed: (_allShotsTaken || widget.rule.requiredShots.isEmpty) &&
+          onPressed: (_allShotsTaken || widget.rule.suggestedShots.isEmpty) &&
                   !_isLoading
               ? _submitForVerification
               : null,

@@ -36,7 +36,8 @@ class AiVerificationRule {
   final String nameId;
   final bool isAiVerificationSupported;
   final int minGalleryPhotos;
-  final Map<String, RequiredShot> requiredShots;
+  final Map<String, RequiredShot>
+      suggestedShots; // [V2.1] 'required' -> 'suggested'로 변경
   final String reportTemplatePrompt;
   final String initialAnalysisPromptTemplate;
 
@@ -46,7 +47,7 @@ class AiVerificationRule {
     required this.nameId,
     required this.isAiVerificationSupported,
     required this.minGalleryPhotos,
-    required this.requiredShots,
+    required this.suggestedShots,
     required this.reportTemplatePrompt,
     required this.initialAnalysisPromptTemplate,
   });
@@ -55,8 +56,8 @@ class AiVerificationRule {
   factory AiVerificationRule.fromSnapshot(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
-    // requiredShots 맵 변환
-    final shotsMap = data['required_shots'] as Map<String, dynamic>? ?? {};
+    // [V2.1] Firestore에서도 suggested_shots 필드를 읽도록 변경
+    final shotsMap = data['suggested_shots'] as Map<String, dynamic>? ?? {};
     final requiredShots = shotsMap.map((key, value) {
       return MapEntry(key, RequiredShot.fromMap(value as Map<String, dynamic>));
     });
@@ -67,7 +68,7 @@ class AiVerificationRule {
       nameId: data['name_id'] ?? '',
       isAiVerificationSupported: data['is_ai_verification_supported'] ?? false,
       minGalleryPhotos: data['min_gallery_photos'] ?? 0,
-      requiredShots: requiredShots,
+      suggestedShots: requiredShots,
       reportTemplatePrompt: data['report_template_prompt'] ?? '',
       initialAnalysisPromptTemplate:
           data['initial_analysis_prompt_template'] ?? '',
@@ -76,8 +77,8 @@ class AiVerificationRule {
 
   // AiVerificationRule 객체 -> Firestore Map 변환
   Map<String, dynamic> toMap() {
-    // requiredShots 맵을 Firestore에 저장 가능한 형태로 변환
-    final shotsToMap = requiredShots.map((key, value) {
+    // [V2.1] suggestedShots 맵을 Firestore에 저장 가능한 형태로 변환
+    final shotsToMap = suggestedShots.map((key, value) {
       return MapEntry(key, value.toMap());
     });
 
@@ -86,7 +87,8 @@ class AiVerificationRule {
       'name_id': nameId,
       'is_ai_verification_supported': isAiVerificationSupported,
       'min_gallery_photos': minGalleryPhotos,
-      'required_shots': shotsToMap,
+      'suggested_shots':
+          shotsToMap, // [V2.1] Firestore에도 suggested_shots 필드로 저장
       'report_template_prompt': reportTemplatePrompt,
       'initial_analysis_prompt_template': initialAnalysisPromptTemplate,
     };

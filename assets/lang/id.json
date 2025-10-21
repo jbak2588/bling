@@ -193,7 +193,17 @@
   },
   "ai_flow": {
     "common": {
-      "error": "Terjadi kesalahan: {error}"
+      "error": "Terjadi kesalahan: {error}",
+      "add_photo": "Tambah Foto",
+      "skip": "Lewati",
+  "added_photo": "Foto ditambahkan: {}",
+      "skipped": "Dilewati"
+    },
+    "cta": {
+      "title": "🤖 Tingkatkan kepercayaan dengan verifikasi AI (opsional)",
+      "subtitle": "Dapatkan badge verifikasi AI untuk meningkatkan kepercayaan pembeli dan jual lebih cepat. Lengkapi semua informasi produk sebelum memulai.",
+      "start_button": "Mulai verifikasi AI",
+      "missing_required_fields": "Harap masukkan nama barang, kategori, dan minimal satu gambar."
     },
     "category_selection": {
       "title": "Verifikasi AI: Pilih Kategori",
@@ -223,19 +233,30 @@
       "back_button": "Kembali"
     },
     "guided_camera": {
-      "title": "Verifikasi AI: Foto Terpandu",
-      "guide": "Harap selesaikan misi di bawah ini untuk meningkatkan kredibilitas.",
+      "title": "Panduan AI: bukti yang kurang",
+      "guide": "Untuk meningkatkan kepercayaan, tambahkan foto yang disarankan untuk item di bawah ini.",
       "location_mismatch_error": "Lokasi foto tidak sesuai dengan lokasi Anda saat ini. Harap ambil foto di tempat yang sama.",
       "location_permission_error": "Izin lokasi ditolak. Harap aktifkan di pengaturan.",
       "no_location_data_error": "Data lokasi tidak ditemukan di foto. Harap aktifkan tag lokasi di pengaturan kamera Anda.",
-      "next_button": "Buat Laporan Akhir"
+      "next_button": "Buat laporan akhir"
     },
     "final_report": {
       "title": "Laporan Verifikasi AI",
       "guide": "Ini adalah draf yang dibuat oleh AI. Ubah konten dan selesaikan pendaftaran.",
       "loading": "AI sedang membuat laporan akhir...",
       "error": "Gagal membuat laporan.",
-      "submit_button": "Daftarkan untuk Dijual"
+      "submit_button": "Daftarkan untuk Dijual",
+  "suggested_price": "Harga yang disarankan AI ({})",
+      "summary": "Ringkasan verifikasi",
+      "buyer_notes": "Catatan untuk pembeli (AI)",
+      "key_specs": "Spesifikasi utama",
+      "condition": "Pemeriksaan kondisi",
+      "included_items": "Barang termasuk (dipisahkan koma)",
+      "final_description": "Deskripsi akhir",
+      "apply_suggestions": "Terapkan saran ke deskripsi",
+      "included_items_label": "Barang termasuk",
+      "buyer_notes_label": "Catatan pembeli",
+      "skipped_items": "Item bukti yang dilewati"
     }
   },
   "registration_flow": {
