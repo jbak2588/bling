@@ -256,6 +256,15 @@
     "friendRequests": "Permintaan Pertemanan",
     "sentFriendRequests": "Permintaan Terkirim"
   },
+  "profileView": {
+    "title": "Profil",
+    "tabs": {
+      "posts": "Postingan",
+      "interests": "Minat"
+    },
+    "noPosts": "Belum ada postingan.",
+    "noInterests": "Belum ada minat."
+  },
   "settings": {
     "title": "Pengaturan",
     "accountPrivacy": "Akun & Privasi",
@@ -360,7 +369,8 @@
     "empty": "Tidak ada berita baru."
   },
   "postCard": {
-    "locationNotSet": "Lokasi belum diatur"
+    "locationNotSet": "Lokasi belum diatur",
+    "location" : "Lokasi"
   },
   "time": {
     "now": "Baru saja",

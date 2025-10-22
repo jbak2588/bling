@@ -37,31 +37,11 @@ import 'package:bling_app/features/main_feed/data/feed_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
-import 'package:visibility_detector/visibility_detector.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 // 모든 card 위젯과 그에 필요한 model들을 import 합니다.
-import 'package:bling_app/features/local_news/widgets/post_card.dart';
 import 'package:bling_app/features/local_news/models/post_model.dart';
-import 'package:bling_app/features/marketplace/widgets/product_card.dart';
-import 'package:bling_app/features/marketplace/models/product_model.dart';
-import 'package:bling_app/features/jobs/widgets/job_card.dart';
-import 'package:bling_app/features/jobs/models/job_model.dart';
-import 'package:bling_app/features/auction/widgets/auction_card.dart';
-import 'package:bling_app/features/auction/models/auction_model.dart';
-import 'package:bling_app/features/clubs/widgets/club_post_card.dart';
-import 'package:bling_app/features/clubs/models/club_post_model.dart';
-import 'package:bling_app/features/clubs/models/club_model.dart';
-import 'package:bling_app/features/lost_and_found/widgets/lost_item_card.dart';
-import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
-import 'package:bling_app/features/pom/models/short_model.dart';
-import 'package:bling_app/features/real_estate/widgets/room_card.dart';
-import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
-import 'package:bling_app/features/local_stores/widgets/shop_card.dart';
-import 'package:bling_app/features/local_stores/models/shop_model.dart';
-import 'package:bling_app/features/find_friends/widgets/findfriend_card.dart';
+// ▼▼▼▼▼ [개편] 신규 썸네일 및 상세 화면 import ▼▼▼▼▼
+import 'package:bling_app/features/main_feed/widgets/post_thumb.dart';
 
 // 아이콘 그리드에서 사용할 각 기능별 화면을 import 합니다.
 import 'package:bling_app/features/local_news/screens/local_news_screen.dart';
@@ -294,335 +274,93 @@ class HomeScreen extends StatelessWidget {
         ),
         const SliverToBoxAdapter(
             child: Divider(height: 8, thickness: 8, color: Color(0xFFF0F2F5))),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text("main.tabs.newFeed".tr(),
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-          ),
-        ),
-        FutureBuilder<List<FeedItemModel>>(
-          future: FeedRepository().fetchUnifiedFeed(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()));
-            }
-            if (snapshot.hasError ||
-                !snapshot.hasData ||
-                snapshot.data!.isEmpty) {
-              return SliverToBoxAdapter(
-                  child: Center(
-                      child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Text("mainFeed.empty".tr()))));
-            }
-            final feedItems = snapshot.data!;
-            // [수정] Provider를 통해 userModel을 하위 위젯에 전달합니다.
-            return Provider.value(
-              value: userModel,
-              child: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => FeedItemCard(
-                    item: feedItems[index],
-                    onIconTap: onIconTap,
-                    allFeedItems: feedItems, // [신규] 전체 피드 리스트 전달
-                    currentIndex: index, // [신규] 현재 인덱스 전달
-                  ),
-                  childCount: feedItems.length,
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
 
-class FeedItemCard extends StatelessWidget {
-  final FeedItemModel item;
-  final Function(Widget, String) onIconTap;
-  // [신규] 전체 피드 목록과 현재 아이템의 인덱스를 받습니다.
-  final List<FeedItemModel> allFeedItems;
-  final int currentIndex;
-
-  const FeedItemCard({
-    super.key,
-    required this.item,
-    required this.onIconTap,
-    required this.allFeedItems,
-    required this.currentIndex,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    switch (item.type) {
-      case FeedItemType.post:
-        final post = PostModel.fromFirestore(
-            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        return PostCard(post: post);
-      case FeedItemType.product:
-        final product = ProductModel.fromFirestore(
-            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        return ProductCard(product: product);
-      case FeedItemType.job:
-        final job = JobModel.fromFirestore(
-            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        return JobCard(job: job);
-      case FeedItemType.auction:
-        final auction = AuctionModel.fromFirestore(
-            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        return AuctionCard(auction: auction);
-      case FeedItemType.club:
-        final clubPost = ClubPostModel.fromFirestore(
-            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        final tempClub = ClubModel.fromFirestore(
-            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        return ClubPostCard(post: clubPost, club: tempClub);
-      case FeedItemType.lostAndFound:
-        final lostItem = LostItemModel.fromFirestore(
-            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        return LostItemCard(item: lostItem);
-      case FeedItemType.pom:
-        final short = ShortModel.fromFirestore(
-            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        // [신규] 전체 피드에서 POM 영상만 필터링하여 새로운 리스트를 만듭니다.
-        final allShorts = allFeedItems
-            .where((feedItem) => feedItem.type == FeedItemType.pom)
-            .map((feedItem) => ShortModel.fromFirestore(
-                feedItem.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
-            .toList();
-
-        // [신규] 현재 POM 영상이 필터링된 리스트에서 몇 번째인지 찾습니다.
-        final currentShortIndex = allShorts.indexWhere((s) => s.id == short.id);
-
-        return _ShortFeedCardWithPlayer(
-          short: short,
-          onCardTap: () {
-            final userModel = Provider.of<UserModel?>(context, listen: false);
-            // [수정] PomScreen으로 이동 시, 전체 POM 목록과 시작 인덱스를 전달합니다.
-            onIconTap(
-              PomScreen(
-                userModel: userModel,
-                initialShorts: allShorts,
-                initialIndex: currentShortIndex,
-              ),
-              'main.tabs.pom',
-            );
-          },
-        );
-      case FeedItemType.realEstate:
-        final room = RoomListingModel.fromFirestore(
-            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        return RoomCard(room: room);
-      case FeedItemType.localStores:
-        final shop = ShopModel.fromFirestore(
-            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        return ShopCard(shop: shop);
-      case FeedItemType.findFriends:
-        final user = UserModel.fromFirestore(
-            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>);
-        return FindFriendCard(user: user);
-      default:
-        return Card(
-          child: ListTile(
-            title: Text(item.title),
-            subtitle: const Text('Unknown item type'),
-          ),
-        );
-    }
-  }
-}
-
-class _ShortFeedCardWithPlayer extends StatefulWidget {
-  final ShortModel short;
-  final VoidCallback onCardTap; // Function(Widget, String) -> VoidCallback
-  const _ShortFeedCardWithPlayer(
-      {required this.short, required this.onCardTap});
-
-  @override
-  State<_ShortFeedCardWithPlayer> createState() =>
-      _ShortFeedCardWithPlayerState();
-}
-
-class _ShortFeedCardWithPlayerState extends State<_ShortFeedCardWithPlayer> {
-  VideoPlayerController? _controller;
-  Future<void>? _initializeVideoPlayerFuture;
-  bool _hasError = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.short.videoUrl.isNotEmpty) {
-      final videoUri = Uri.parse(widget.short.videoUrl);
-      _controller = VideoPlayerController.networkUrl(videoUri);
-
-      _initializeVideoPlayerFuture = _controller!.initialize().then((_) {
-        _controller!.setVolume(0);
-        _controller!.setLooping(true);
-        if (mounted) setState(() {});
-      }).catchError((error) {
-        debugPrint(
-            "===== VideoPlayer Init Error for short ${widget.short.id}: $error =====");
-        if (mounted) {
-          setState(() {
-            _hasError = true;
-          });
-        }
-      });
-    } else {
-      _hasError = true;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _UserInfoRow(userId: widget.short.userId),
-          GestureDetector(
-            onTap: widget.onCardTap, // [수정] 상세 화면 이동을 위해 콜백 함수 호출
-            child: VisibilityDetector(
-              key: Key(widget.short.id),
-              onVisibilityChanged: (visibilityInfo) {
-                if (!mounted ||
-                    _controller == null ||
-                    !_controller!.value.isInitialized ||
-                    _hasError) {
-                  return;
-                }
-
-                var visiblePercentage = visibilityInfo.visibleFraction * 100;
-                if (visiblePercentage > 50 && !_controller!.value.isPlaying) {
-                  _controller!.play();
-                } else if (visiblePercentage < 10 &&
-                    _controller!.value.isPlaying) {
-                  _controller!.pause();
-                }
-              },
-              child: (_hasError || _controller == null)
-                  ? _buildErrorThumbnail()
-                  : FutureBuilder(
-                      future: _initializeVideoPlayerFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done &&
-                            !_hasError) {
-                          return AspectRatio(
-                            aspectRatio: _controller!.value.aspectRatio,
-                            child: VideoPlayer(_controller!),
-                          );
-                        } else if (snapshot.hasError) {
-                          return _buildErrorThumbnail();
-                        } else {
-                          return _buildLoadingThumbnail();
-                        }
-                      },
-                    ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text(
-              widget.short.title,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingThumbnail() {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        if (widget.short.thumbnailUrl.isNotEmpty)
-          Image.network(
-            widget.short.thumbnailUrl,
-            height: 200,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) =>
-                _buildErrorThumbnail(),
-          ),
-        const CircularProgressIndicator(),
+        // ▼▼▼▼▼ [개편] 1단계: 기존 통합 피드를 삭제하고, Post 캐러셀 섹션으로 교체 ▼▼▼▼▼
+        //
+        _buildPostCarousel(context),
+        // (TODO: 추후 이곳에 Product, Job 등 다른 캐러셀 섹션이 추가될 예정입니다.)
       ],
     );
   }
 
-  Widget _buildErrorThumbnail() {
-    return const SizedBox(
-      height: 200,
-      width: double.infinity,
-      child:
-          Center(child: Icon(Icons.error_outline, color: Colors.red, size: 48)),
-    );
-  }
-}
+  /// [개편] 2단계: 로컬뉴스(Post) 캐러셀 섹션 빌더
+  /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
+  ///
+  Widget _buildPostCarousel(BuildContext context) {
+    // FeedRepository 인스턴스화 (HomeScreen이 StatelessWidget이므로)
+    final feedRepository = FeedRepository();
 
-class _UserInfoRow extends StatelessWidget {
-  final String userId;
-  const _UserInfoRow({required this.userId});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance.collection('users').doc(userId).get(),
+    return FutureBuilder<List<FeedItemModel>>(
+      // 1. Repository에서 Post 최신 20개를 가져옵니다. (MD 요구사항 "최신 20개")
+      future: feedRepository.fetchLatestPosts(limit: 20),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done &&
-            snapshot.hasData &&
-            snapshot.data!.exists) {
-          final user = UserModel.fromFirestore(
-              snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
-          return Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundImage:
-                      (user.photoUrl != null && user.photoUrl!.isNotEmpty)
-                          ? CachedNetworkImageProvider(user.photoUrl!)
-                          : null,
-                  child: (user.photoUrl == null || user.photoUrl!.isEmpty)
-                      ? const Icon(Icons.person, size: 16)
-                      : null,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  user.nickname,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 로딩 중: 스켈레톤 섹션 (높이만 차지)
+          // (MD 요구사항 "스켈레톤/플레이스홀더로 깨짐 인상 방지")
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 290, // 썸네일 240 + 헤더/패딩 50
+              alignment: Alignment.center,
+              child: const CircularProgressIndicator(),
             ),
           );
         }
-        return const SizedBox(height: 48);
+
+        // 2. MD요구사항 "6. 빈 섹션 처리": 데이터가 없으면 섹션 자체를 숨김
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        final posts = snapshot.data!
+            .map((item) => PostModel.fromFirestore(
+                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+            .toList();
+
+        // 3. 데이터가 있을 경우: 섹션 헤더 + 가로 캐러셀
+        return SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 3-1. 섹션 헤더 (MD: "모두 보기" 버튼은 선택사항)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(
+                  "main.tabs.localNews".tr(), // "로컬 뉴스"
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              // 3-2. 가로 캐러셀 (MD: 5. 레이아웃/여백 가이드)
+              SizedBox(
+                height: 240, // MD: 2. 표준 썸네일 고정 크기 (220x240)
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16), // MD: 섹션 좌우 패딩 16
+                  primary: false, // MD: 중첩 스크롤
+                  shrinkWrap: true, // MD: 중첩 스크롤
+                  clipBehavior: Clip.none, // MD: 오버플로우 방지
+                  itemCount: posts.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          right: (index == posts.length - 1)
+                              ? 0
+                              : 12), // MD: 카드 간격 12
+                      child: PostThumb(post: posts[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
       },
     );
   }
+  // ▲▲▲▲▲ [개편] 1, 2단계 완료 ▲▲▲▲▲
 }
 
 extension StringExtension on String {

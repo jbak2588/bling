@@ -1,10 +1,10 @@
 // lib/features/local_news/screens/local_news_detail_screen.dart
 
-import 'package:bling_app/api_keys.dart'; // ✅ Maps Static API 키를 위해 추가
+import 'package:bling_app/features/shared/widgets/mini_map_view.dart'; // ✅ [수정] 공통 미니맵 위젯 import
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// ❌ 리소스 충돌을 일으키는 google_maps_flutter 패키지는 더 이상 필요 없으므로 삭제합니다.
+// ❌ 리소스 충돌을 일으키는 google_maps_flutter 패키지는 더 이상 필요 없으므로 삭제합니다. (주석 유지)
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -322,7 +322,15 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                     _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
                   if (hasLocation) ...[
                     const SizedBox(height: 16),
-                    _buildMiniMap(context, _currentPost),
+                    // 위치 섹션 제목
+                    Text('postCard.location'.tr(),
+                        style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    // ✅ [수정] 잘못된 _buildGoogleMap/_buildMiniMap 호출을 MiniMapView (공통 위젯)으로 교체
+                    MiniMapView(
+                      location: _currentPost.geoPoint!,
+                      markerId: _currentPost.id,
+                    ),
                   ],
                   const Divider(height: 32),
                   _buildPostStats(),
@@ -483,49 +491,5 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     );
   }
 
-  Widget _buildMiniMap(BuildContext context, PostModel post) {
-    if (post.geoPoint == null) {
-      return const SizedBox.shrink();
-    }
-
-    final lat = post.geoPoint!.latitude;
-    final lng = post.geoPoint!.longitude;
-    final apiKey = ApiKeys.staticMapKey;
-
-    final staticMapUrl =
-        'https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lng&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C$lat,$lng&key=$apiKey';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('postCard.location'.tr(),
-            style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            staticMapUrl,
-            height: 180,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Container(
-                height: 180,
-                color: Colors.grey[200],
-                child: const Center(child: CircularProgressIndicator()),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                height: 180,
-                color: Colors.grey[200],
-                child: const Center(child: Icon(Icons.error_outline)),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+  // ✅ [수정] 버그의 원인이었던 _buildGoogleMap/_buildMiniMap 함수 전체 삭제 (MiniMapView로 대체)
 }
