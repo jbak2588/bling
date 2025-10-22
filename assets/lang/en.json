@@ -285,6 +285,15 @@
     "friendRequests": "Received Friend Requests",
     "sentFriendRequests": "Sent Requests"
   },
+  "profileView": {
+    "title": "Profile",
+    "tabs": {
+      "posts": "Posts",
+      "interests": "Interests"
+    },
+    "noPosts": "No posts yet.",
+    "noInterests": "No interests set."
+  },
   "settings": {
     "title": "Settings",
     "accountPrivacy": "Account & Privacy",
@@ -389,7 +398,8 @@
     "empty": "No new posts."
   },
   "postCard": {
-    "locationNotSet": "Location not set"
+    "locationNotSet": "Location not set",
+    "location" : "Location"
   },
   "time": {
     "now": "Just now",

@@ -31,10 +31,10 @@ class UserProfileScreen extends StatelessWidget {
               ),
               SliverPersistentHeader(
                 delegate: _SliverTabBarDelegate(
-                  const TabBar(
+                  TabBar(
                     tabs: [
-                      Tab(text: '작성한 글'),
-                      Tab(text: '관심사'),
+                      Tab(text: 'profileView.tabs.posts'.tr()),
+                      Tab(text: 'profileView.tabs.interests'.tr()),
                     ],
                   ),
                 ),
@@ -55,7 +55,10 @@ class UserProfileScreen extends StatelessWidget {
 
   Widget _buildUserProfileHeader() {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -69,8 +72,12 @@ class UserProfileScreen extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-                  child: user.photoUrl == null ? const Icon(Icons.person, size: 40) : null,
+                  backgroundImage: user.photoUrl != null
+                      ? NetworkImage(user.photoUrl!)
+                      : null,
+                  child: user.photoUrl == null
+                      ? const Icon(Icons.person, size: 40)
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -78,10 +85,12 @@ class UserProfileScreen extends StatelessWidget {
                   children: [
                     Text(
                       user.nickname,
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 8),
-                    TrustLevelBadge(trustLevel: user.trustLevel, showText: true),
+                    TrustLevelBadge(
+                        trustLevel: user.trustLevel, showText: true),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -123,10 +132,13 @@ class UserProfileScreen extends StatelessWidget {
       },
     );
   }
-  
+
   Widget _buildUserInterests() {
-     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -167,7 +179,8 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: _tabBar,

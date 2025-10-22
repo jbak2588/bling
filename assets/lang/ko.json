@@ -285,6 +285,15 @@
     "friendRequests": "받은 친구 요청",
     "sentFriendRequests": "보낸 친구 요청"
   },
+  "profileView": {
+    "title": "프로필",
+    "tabs": {
+      "posts": "작성한 글",
+      "interests": "관심사"
+    },
+    "noPosts": "아직 작성한 게시물이 없습니다.",
+    "noInterests": "설정된 관심사가 없습니다."
+  },
   "settings": {
     "title": "설정",
     "accountPrivacy": "계정 및 개인정보",
@@ -389,7 +398,8 @@
     "empty": "새로운 소식이 없습니다."
   },
   "postCard": {
-    "locationNotSet": "지역 미설정"
+    "locationNotSet": "지역 미설정",
+    "location" : "위치"
   },
   "time": {
     "now": "방금 전",

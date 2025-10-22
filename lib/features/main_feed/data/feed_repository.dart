@@ -18,7 +18,6 @@
 // * 5. 인기/추천/광고 로직은 KPI(조회수, 클릭률, 사용자 반응 등) 기반으로 설계/튜닝 권장.
 // */
 
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bling_app/core/models/feed_item_model.dart';
 
@@ -59,11 +58,22 @@ class FeedRepository {
     return feedItems;
   }
 
+  // ▼▼▼▼▼ [개편] 2단계: HomeScreen의 Post 캐러셀이 호출할 공개(public) 메소드 추가 ▼▼▼▼▼
+  //
+  Future<List<FeedItemModel>> fetchLatestPosts({int limit = 20}) async {
+    // 기존 비공개(_fetchLatestPosts) 메소드를 호출하여 결과를 반환합니다.
+    return _fetchLatestPosts(limit: limit);
+  }
+
   // [수정 완료] 각 모델의 '실제' 필드 이름을 사용하여 FeedItemModel로 변환합니다.
-  
+
   Future<List<FeedItemModel>> _fetchLatestPosts({int limit = 5}) async {
     try {
-      final snapshot = await _firestore.collection('posts').orderBy('createdAt', descending: true).limit(limit).get();
+      final snapshot = await _firestore
+          .collection('posts')
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
       return snapshot.docs.map((doc) {
         final post = PostModel.fromFirestore(doc);
         return FeedItemModel(
@@ -72,17 +82,21 @@ class FeedRepository {
           type: FeedItemType.post,
           title: post.title ?? '',
           content: post.body,
-          imageUrl: post.mediaUrl?.isNotEmpty == true ? post.mediaUrl!.first : null,
+          imageUrl:
+              post.mediaUrl?.isNotEmpty == true ? post.mediaUrl!.first : null,
           createdAt: post.createdAt,
           originalDoc: doc,
         );
       }).toList();
-    } catch (e) { debugPrint('Error fetching posts: $e'); return []; }
+    } catch (e) {
+      debugPrint('Error fetching posts: $e');
+      return [];
+    }
   }
 
   Future<List<FeedItemModel>> _fetchLatestProducts({int limit = 5}) async {
     try {
-     // ✅ [수정 시작]
+      // ✅ [수정 시작]
       final snapshot = await _firestore
           .collection('products')
           // ✅ [핵심 수정] 'approved'(승인됨)와 'none'(일반 상품) 상태의 상품만 허용합니다.
@@ -99,17 +113,25 @@ class FeedRepository {
           type: FeedItemType.product,
           title: product.title,
           content: product.description,
-          imageUrl: product.imageUrls.isNotEmpty ? product.imageUrls.first : null,
+          imageUrl:
+              product.imageUrls.isNotEmpty ? product.imageUrls.first : null,
           createdAt: product.createdAt,
           originalDoc: doc,
         );
       }).toList();
-    } catch (e) { debugPrint('Error fetching products: $e'); return []; }
+    } catch (e) {
+      debugPrint('Error fetching products: $e');
+      return [];
+    }
   }
 
   Future<List<FeedItemModel>> _fetchLatestJobs({int limit = 5}) async {
     try {
-      final snapshot = await _firestore.collection('jobs').orderBy('createdAt', descending: true).limit(limit).get();
+      final snapshot = await _firestore
+          .collection('jobs')
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
       return snapshot.docs.map((doc) {
         final job = JobModel.fromFirestore(doc);
         return FeedItemModel(
@@ -123,12 +145,19 @@ class FeedRepository {
           originalDoc: doc,
         );
       }).toList();
-    } catch (e) { debugPrint('Error fetching jobs: $e'); return []; }
+    } catch (e) {
+      debugPrint('Error fetching jobs: $e');
+      return [];
+    }
   }
 
   Future<List<FeedItemModel>> _fetchLatestAuctions({int limit = 5}) async {
     try {
-      final snapshot = await _firestore.collection('auctions').orderBy('startAt', descending: true).limit(limit).get();
+      final snapshot = await _firestore
+          .collection('auctions')
+          .orderBy('startAt', descending: true)
+          .limit(limit)
+          .get();
       return snapshot.docs.map((doc) {
         final auction = AuctionModel.fromFirestore(doc);
         return FeedItemModel(
@@ -142,12 +171,19 @@ class FeedRepository {
           originalDoc: doc,
         );
       }).toList();
-    } catch (e) { debugPrint('Error fetching auctions: $e'); return []; }
+    } catch (e) {
+      debugPrint('Error fetching auctions: $e');
+      return [];
+    }
   }
 
   Future<List<FeedItemModel>> _fetchLatestClubPosts({int limit = 5}) async {
     try {
-      final snapshot = await _firestore.collectionGroup('posts').orderBy('createdAt', descending: true).limit(limit).get();
+      final snapshot = await _firestore
+          .collectionGroup('posts')
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
       return snapshot.docs.map((doc) {
         final post = ClubPostModel.fromFirestore(doc);
         return FeedItemModel(
@@ -156,17 +192,25 @@ class FeedRepository {
           type: FeedItemType.club,
           title: post.body, // ClubPostModel에는 title이 없고 body를 title로 사용합니다.
           content: post.body,
-          imageUrl: post.imageUrls?.isNotEmpty == true ? post.imageUrls!.first : null,
+          imageUrl:
+              post.imageUrls?.isNotEmpty == true ? post.imageUrls!.first : null,
           createdAt: post.createdAt,
           originalDoc: doc,
         );
       }).toList();
-    } catch (e) { debugPrint('Error fetching club posts: $e'); return []; }
+    } catch (e) {
+      debugPrint('Error fetching club posts: $e');
+      return [];
+    }
   }
 
   Future<List<FeedItemModel>> _fetchLatestLostItems({int limit = 5}) async {
     try {
-      final snapshot = await _firestore.collection('lostItems').orderBy('createdAt', descending: true).limit(limit).get();
+      final snapshot = await _firestore
+          .collection('lostItems')
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
       return snapshot.docs.map((doc) {
         final item = LostItemModel.fromFirestore(doc);
         return FeedItemModel(
@@ -180,15 +224,22 @@ class FeedRepository {
           originalDoc: doc,
         );
       }).toList();
-    } catch (e) { debugPrint('Error fetching lost items: $e'); return []; }
+    } catch (e) {
+      debugPrint('Error fetching lost items: $e');
+      return [];
+    }
   }
 
   // [수정] 디버깅을 위해 이 함수에서만 일시적으로 try-catch를 제거합니다.
-Future<List<FeedItemModel>> _fetchLatestShorts({int limit = 5}) async {
+  Future<List<FeedItemModel>> _fetchLatestShorts({int limit = 5}) async {
     try {
       // [수정] timestamp -> createdAt 로 정렬 필드를 정확히 수정합니다.
-      final snapshot = await _firestore.collection('shorts').orderBy('createdAt', descending: true).limit(limit).get();
-      
+      final snapshot = await _firestore
+          .collection('shorts')
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
+
       return snapshot.docs.map((doc) {
         final short = ShortModel.fromFirestore(doc);
         return FeedItemModel(
@@ -199,20 +250,23 @@ Future<List<FeedItemModel>> _fetchLatestShorts({int limit = 5}) async {
           content: null,
           imageUrl: short.thumbnailUrl,
           // [수정] short.timestamp -> short.createdAt 로 필드 이름을 정확히 수정합니다.
-          createdAt: short.createdAt, 
+          createdAt: short.createdAt,
           originalDoc: doc,
         );
       }).toList();
-    } catch (e) { 
-      debugPrint('Error fetching shorts: $e'); 
-      return []; 
+    } catch (e) {
+      debugPrint('Error fetching shorts: $e');
+      return [];
     }
   }
 
-  
   Future<List<FeedItemModel>> _fetchLatestRoomListings({int limit = 5}) async {
     try {
-      final snapshot = await _firestore.collection('roomListings').orderBy('createdAt', descending: true).limit(limit).get();
+      final snapshot = await _firestore
+          .collection('roomListings')
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
       return snapshot.docs.map((doc) {
         final room = RoomListingModel.fromFirestore(doc);
         return FeedItemModel(
@@ -226,12 +280,19 @@ Future<List<FeedItemModel>> _fetchLatestShorts({int limit = 5}) async {
           originalDoc: doc,
         );
       }).toList();
-    } catch (e) { debugPrint('Error fetching room listings: $e'); return []; }
+    } catch (e) {
+      debugPrint('Error fetching room listings: $e');
+      return [];
+    }
   }
 
   Future<List<FeedItemModel>> _fetchLatestShops({int limit = 5}) async {
     try {
-      final snapshot = await _firestore.collection('shops').orderBy('createdAt', descending: true).limit(limit).get();
+      final snapshot = await _firestore
+          .collection('shops')
+          .orderBy('createdAt', descending: true)
+          .limit(limit)
+          .get();
       return snapshot.docs.map((doc) {
         final shop = ShopModel.fromFirestore(doc);
         return FeedItemModel(
@@ -245,6 +306,9 @@ Future<List<FeedItemModel>> _fetchLatestShorts({int limit = 5}) async {
           originalDoc: doc,
         );
       }).toList();
-    } catch (e) { debugPrint('Error fetching shops: $e'); return []; }
+    } catch (e) {
+      debugPrint('Error fetching shops: $e');
+      return [];
+    }
   }
 }
