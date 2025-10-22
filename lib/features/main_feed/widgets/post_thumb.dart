@@ -3,7 +3,6 @@ import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // ✅ 1. Firestore import 추가
 import 'package:easy_localization/easy_localization.dart'; // ✅ 이슈 2: 다국어 import
 import 'package:bling_app/core/models/user_model.dart'; // ✅ 이슈 1: UserModel import

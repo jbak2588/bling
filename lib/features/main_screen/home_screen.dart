@@ -42,6 +42,9 @@ import 'package:flutter/material.dart';
 import 'package:bling_app/features/local_news/models/post_model.dart';
 // ▼▼▼▼▼ [개편] 신규 썸네일 및 상세 화면 import ▼▼▼▼▼
 import 'package:bling_app/features/main_feed/widgets/post_thumb.dart';
+// ▼▼▼▼▼ [개편] 3단계: Product 썸네일 및 모델 import ▼▼▼▼▼
+import 'package:bling_app/features/marketplace/models/product_model.dart';
+import 'package:bling_app/features/main_feed/widgets/product_thumb.dart';
 
 // 아이콘 그리드에서 사용할 각 기능별 화면을 import 합니다.
 import 'package:bling_app/features/local_news/screens/local_news_screen.dart';
@@ -278,7 +281,8 @@ class HomeScreen extends StatelessWidget {
         // ▼▼▼▼▼ [개편] 1단계: 기존 통합 피드를 삭제하고, Post 캐러셀 섹션으로 교체 ▼▼▼▼▼
         //
         _buildPostCarousel(context),
-        // (TODO: 추후 이곳에 Product, Job 등 다른 캐러셀 섹션이 추가될 예정입니다.)
+        // ▼▼▼▼▼ [개편] 3단계: Product 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildProductCarousel(context),
       ],
     );
   }
@@ -350,6 +354,79 @@ class HomeScreen extends StatelessWidget {
                               ? 0
                               : 12), // MD: 카드 간격 12
                       child: PostThumb(post: posts[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// [개편] 3단계: 마켓플레이스(Product) 캐러셀 섹션 빌더
+  /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
+  ///
+  Widget _buildProductCarousel(BuildContext context) {
+    final feedRepository = FeedRepository();
+
+    return FutureBuilder<List<FeedItemModel>>(
+      // 1. Repository에서 Product 최신 20개를 가져옵니다.
+      future: feedRepository.fetchLatestProducts(limit: 20),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 로딩 중: 스켈레톤 섹션
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 290, // 썸네일 240 + 헤더/패딩 50
+              alignment: Alignment.center,
+              child: const CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        // 2. MD요구사항 "6. 빈 섹션 처리": 데이터가 없으면 섹션 자체를 숨김
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        final products = snapshot.data!
+            .map((item) => ProductModel.fromFirestore(
+                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+            .toList();
+
+        // 3. 데이터가 있을 경우: 섹션 헤더 + 가로 캐러셀
+        return SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 3-1. 섹션 헤더
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(
+                  "main.tabs.marketplace".tr(), // "마켓플레이스"
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              // 3-2. 가로 캐러셀
+              SizedBox(
+                height: 240, // MD: 표준 썸네일 고정 크기 (220x240)
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  primary: false,
+                  shrinkWrap: true,
+                  clipBehavior: Clip.none,
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          right: (index == products.length - 1) ? 0 : 12),
+                      child: ProductThumb(product: products[index]),
                     );
                   },
                 ),
