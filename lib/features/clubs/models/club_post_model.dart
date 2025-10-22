@@ -27,6 +27,7 @@ class ClubPostModel {
   final Timestamp createdAt;
   final int likesCount;
   final int commentsCount;
+  final String parentType; // 저장 시 상위 타입 구분 (기본값: 'club')
 
   ClubPostModel({
     required this.id,
@@ -37,19 +38,24 @@ class ClubPostModel {
     required this.createdAt,
     this.likesCount = 0,
     this.commentsCount = 0,
+    this.parentType = 'club',
   });
 
-  factory ClubPostModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory ClubPostModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return ClubPostModel(
       id: doc.id,
       clubId: data['clubId'] ?? '',
       userId: data['userId'] ?? '',
       body: data['body'] ?? '',
-      imageUrls: data['imageUrls'] != null ? List<String>.from(data['imageUrls']) : null,
+      imageUrls: data['imageUrls'] != null
+          ? List<String>.from(data['imageUrls'])
+          : null,
       createdAt: data['createdAt'] ?? Timestamp.now(),
       likesCount: data['likesCount'] ?? 0,
       commentsCount: data['commentsCount'] ?? 0,
+      parentType: data['parentType'] ?? 'club',
     );
   }
 
@@ -62,6 +68,7 @@ class ClubPostModel {
       'createdAt': createdAt,
       'likesCount': likesCount,
       'commentsCount': commentsCount,
+      'parentType': parentType,
     };
   }
 }
