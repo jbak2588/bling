@@ -71,6 +71,7 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
         createdAt: Timestamp.now(),
       );
 
+      // Save via repository; ClubPostModel.toJson() already includes parentType: 'club'
       await _repository.createClubPost(widget.clubId, newPost);
 
       if (mounted) {

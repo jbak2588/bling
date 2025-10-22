@@ -72,6 +72,13 @@ class FeedRepository {
     return _fetchLatestProducts(limit: limit);
   }
 
+  // ▼▼▼▼▼ [개편] 4단계: HomeScreen의 Club 캐러셀이 호출할 공개(public) 메소드 추가 ▼▼▼▼▼
+  //
+  Future<List<FeedItemModel>> fetchLatestClubPosts({int limit = 20}) async {
+    // 기존 비공개(_fetchLatestClubPosts) 메소드를 호출하여 결과를 반환합니다.
+    return _fetchLatestClubPosts(limit: limit);
+  }
+
   // [수정 완료] 각 모델의 '실제' 필드 이름을 사용하여 FeedItemModel로 변환합니다.
 
   Future<List<FeedItemModel>> _fetchLatestPosts({int limit = 5}) async {
@@ -186,11 +193,16 @@ class FeedRepository {
 
   Future<List<FeedItemModel>> _fetchLatestClubPosts({int limit = 5}) async {
     try {
+      // ✅ [최종 수정] Copilot 제안 적용: 'parentType' 필드를 사용하여 서버 측에서 필터링 및 limit 적용
+      // 중요: Firestore의 모든 /clubs/{clubId}/posts/{postId} 문서에
+      // 'parentType': 'club' 필드가 추가되어 있어야 합니다!
       final snapshot = await _firestore
           .collectionGroup('posts')
+          .where('parentType', isEqualTo: 'club') // 서버 측 필터링
           .orderBy('createdAt', descending: true)
-          .limit(limit)
+          .limit(limit) // 서버 측 Limit 적용
           .get();
+
       return snapshot.docs.map((doc) {
         final post = ClubPostModel.fromFirestore(doc);
         return FeedItemModel(
