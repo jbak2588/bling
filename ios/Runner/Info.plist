@@ -57,5 +57,17 @@
 	<string>Location access is required to show nearby services.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Location access is required while the app runs in the background.</string>
+	<!-- URL schemes for Google Sign-In (uses REVERSED_CLIENT_ID from GoogleService-Info.plist) -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.1075298230474-r8c9o68f6al2ak4f1825njq7ontq3c5n</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
