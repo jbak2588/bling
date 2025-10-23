@@ -94,6 +94,27 @@ class FeedRepository {
     return _fetchLatestJobs(limit: limit);
   }
 
+  // ▼▼▼▼▼ [개편] 7단계: HomeScreen의 LocalStore 캐러셀이 호출할 공개(public) 메소드 추가 ▼▼▼▼▼
+  //
+  Future<List<FeedItemModel>> fetchLatestShops({int limit = 20}) async {
+    // 비공개(_fetchLatestShops) 메소드를 호출하여 결과를 반환합니다.
+    return _fetchLatestShops(limit: limit);
+  }
+
+  // ▼▼▼▼▼ [개편] 8단계: HomeScreen의 Auction 캐러셀이 호출할 공개(public) 메소드 추가 ▼▼▼▼▼
+  //
+  Future<List<FeedItemModel>> fetchLatestAuctions({int limit = 20}) async {
+    // 비공개(_fetchLatestAuctions) 메소드를 호출하여 결과를 반환합니다.
+    return _fetchLatestAuctions(limit: limit);
+  }
+
+  // ▼▼▼▼▼ [개편] 9단계: HomeScreen의 POM 캐러셀이 호출할 공개(public) 메소드 추가 ▼▼▼▼▼
+  //
+  Future<List<FeedItemModel>> fetchLatestShorts({int limit = 20}) async {
+    // 비공개(_fetchLatestShorts) 메소드를 호출하여 결과를 반환합니다.
+    return _fetchLatestShorts(limit: limit);
+  }
+
   // [수정 완료] 각 모델의 '실제' 필드 이름을 사용하여 FeedItemModel로 변환합니다.
 
   Future<List<FeedItemModel>> _fetchLatestPosts({int limit = 5}) async {
