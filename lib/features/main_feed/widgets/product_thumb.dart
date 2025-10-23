@@ -111,21 +111,22 @@ class ProductThumb extends StatelessWidget {
 
     return Expanded(
       child: Padding(
-        // ✅ [수정] 오버플로우 해결: 상하 Padding을 12 -> 10으로 줄임 (총 4px 확보)
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+        // ✅ [수정] 오버플로우 완화: 상하 Padding을 10 -> 8로 줄임
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // MD: "제목"
             Text(
               product.title, //
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              // ✅ [수정] 오버플로우 완화: 본문 크기를 한 단계 낮춤
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
               maxLines: 2, // MD: 오버플로우 방지
               overflow: TextOverflow.ellipsis,
             ),
-            // const SizedBox(height: 4), // ✅ [수정] 오버플로우 해결을 위해 SizedBox 제거
+            const SizedBox(height: 2),
             // MD: "보조=지역"
             Text(
               location,
@@ -135,11 +136,12 @@ class ProductThumb extends StatelessWidget {
               maxLines: 1, // MD: 오버플로우 방지
               overflow: TextOverflow.ellipsis,
             ),
-            const Spacer(),
+            const SizedBox(height: 6),
             // MD: "배지=가격"
             Text(
               priceString,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              // ✅ [수정] 오버플로우 완화: 가격 텍스트 크기를 한 단계 낮춤
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
               maxLines: 1, // MD: 오버플로우 방지

@@ -42,12 +42,18 @@ import 'package:flutter/material.dart';
 import 'package:bling_app/features/local_news/models/post_model.dart';
 // ▼▼▼▼▼ [개편] 신규 썸네일 및 상세 화면 import ▼▼▼▼▼
 import 'package:bling_app/features/main_feed/widgets/post_thumb.dart';
-// ▼▼▼▼▼ [개편] 3단계: Product 썸네일 및 모델 import ▼▼▼▼▼
+// ▼▼▼▼▼ [개편] 2단계: Product 썸네일 및 모델 import ▼▼▼▼▼
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:bling_app/features/main_feed/widgets/product_thumb.dart';
-// ▼▼▼▼▼ [개편] 4단계: Club Post 썸네일 및 모델 import ▼▼▼▼▼
+// ▼▼▼▼▼ [개편] 3단계: Club Post 썸네일 및 모델 import ▼▼▼▼▼
 import 'package:bling_app/features/clubs/models/club_post_model.dart';
 import 'package:bling_app/features/main_feed/widgets/club_thumb.dart';
+// ▼▼▼▼▼ [개편] 4단계: Find Friend 썸네일 및 모델 import ▼▼▼▼▼
+// UserModel은 이미 core/models에서 import 되어 있음
+import 'package:bling_app/features/main_feed/widgets/find_friend_thumb.dart';
+// ▼▼▼▼▼ [개편] 5단계: Job 썸네일 및 모델 import ▼▼▼▼▼
+import 'package:bling_app/features/jobs/models/job_model.dart';
+import 'package:bling_app/features/main_feed/widgets/job_thumb.dart';
 
 // 아이콘 그리드에서 사용할 각 기능별 화면을 import 합니다.
 import 'package:bling_app/features/local_news/screens/local_news_screen.dart';
@@ -288,6 +294,10 @@ class HomeScreen extends StatelessWidget {
         _buildProductCarousel(context),
         // ▼▼▼▼▼ [개편] 4단계: Club 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildClubCarousel(context),
+        // ▼▼▼▼▼ [개편] 5단계: Find Friend 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildFindFriendCarousel(context),
+        // ▼▼▼▼▼ [개편] 6단계: Job 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildJobCarousel(context),
       ],
     );
   }
@@ -333,12 +343,35 @@ class HomeScreen extends StatelessWidget {
               // 3-1. 섹션 헤더 (MD: "모두 보기" 버튼은 선택사항)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  "main.tabs.localNews".tr(), // "로컬 뉴스"
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "main.tabs.localNews".tr(), // "로컬 뉴스"
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (userModel == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('main.errors.loginRequired'.tr())),
+                          );
+                          return;
+                        }
+                        final nextScreen = LocalNewsScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                        );
+                        onIconTap(nextScreen, 'main.tabs.localNews');
+                      },
+                      child: Text('common.viewAll'.tr()),
+                    )
+                  ],
                 ),
               ),
               // 3-2. 가로 캐러셀 (MD: 5. 레이아웃/여백 가이드)
@@ -409,12 +442,35 @@ class HomeScreen extends StatelessWidget {
               // 3-1. 섹션 헤더
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  "main.tabs.marketplace".tr(), // "마켓플레이스"
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "main.tabs.marketplace".tr(), // "마켓플레이스"
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (userModel == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('main.errors.loginRequired'.tr())),
+                          );
+                          return;
+                        }
+                        final nextScreen = MarketplaceScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                        );
+                        onIconTap(nextScreen, 'main.tabs.marketplace');
+                      },
+                      child: Text('common.viewAll'.tr()),
+                    )
+                  ],
                 ),
               ),
               // 3-2. 가로 캐러셀
@@ -482,12 +538,35 @@ class HomeScreen extends StatelessWidget {
               // 3-1. 섹션 헤더
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  "main.tabs.clubs".tr(), // "클럽"
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "main.tabs.clubs".tr(), // "클럽"
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (userModel == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('main.errors.loginRequired'.tr())),
+                          );
+                          return;
+                        }
+                        final nextScreen = ClubsScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                        );
+                        onIconTap(nextScreen, 'main.tabs.clubs');
+                      },
+                      child: Text('common.viewAll'.tr()),
+                    )
+                  ],
                 ),
               ),
               // 3-2. 가로 캐러셀
@@ -505,6 +584,199 @@ class HomeScreen extends StatelessWidget {
                       padding: EdgeInsets.only(
                           right: (index == clubPosts.length - 1) ? 0 : 12),
                       child: ClubThumb(post: clubPosts[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// [개편] 5단계: 친구찾기(Find Friend) 캐러셀 섹션 빌더
+  /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
+  ///
+  Widget _buildFindFriendCarousel(BuildContext context) {
+    final feedRepository = FeedRepository();
+
+    return FutureBuilder<List<FeedItemModel>>(
+      // 1. Repository에서 최신 사용자 20명을 가져옵니다.
+      future: feedRepository.fetchLatestFindFriends(limit: 20),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 로딩 중: 스켈레톤 섹션
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 290, // 썸네일 240 + 헤더/패딩 50
+              alignment: Alignment.center,
+              child: const CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        // 2. MD요구사항 "6. 빈 섹션 처리": 데이터가 없으면 섹션 자체를 숨김
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        final users = snapshot.data!
+            .map((item) => UserModel.fromFirestore(
+                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+            .toList();
+
+        // 3. 데이터가 있을 경우: 섹션 헤더 + 가로 캐러셀
+        return SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 3-1. 섹션 헤더
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "main.tabs.findFriends".tr(), // "친구찾기"
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (userModel == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('main.errors.loginRequired'.tr())),
+                          );
+                          return;
+                        }
+                        final nextScreen = FindFriendsScreen(
+                          userModel: userModel,
+                        );
+                        onIconTap(nextScreen, 'main.tabs.findFriends');
+                      },
+                      child: Text('common.viewAll'.tr()),
+                    )
+                  ],
+                ),
+              ),
+              // 3-2. 가로 캐러셀
+              SizedBox(
+                height: 240, // MD: 표준 썸네일 고정 크기 (220x240)
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  primary: false,
+                  shrinkWrap: true,
+                  clipBehavior: Clip.none,
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    // FindFriendThumb에 현재 사용자 정보(userModel) 전달
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          right: (index == users.length - 1) ? 0 : 12),
+                      child: FindFriendThumb(
+                          user: users[index], currentUserModel: userModel),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// [개편] 6단계: 구인/구직(Job) 캐러셀 섹션 빌더
+  /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
+  ///
+  Widget _buildJobCarousel(BuildContext context) {
+    final feedRepository = FeedRepository();
+
+    return FutureBuilder<List<FeedItemModel>>(
+      // 1. Repository에서 Job 최신 20개를 가져옵니다.
+      future: feedRepository.fetchLatestJobs(limit: 20),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 로딩 중: 스켈레톤 섹션
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 290, // 썸네일 240 + 헤더/패딩 50
+              alignment: Alignment.center,
+              child: const CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        // 2. MD요구사항 "6. 빈 섹션 처리": 데이터가 없으면 섹션 자체를 숨김
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        final jobs = snapshot.data!
+            .map((item) => JobModel.fromFirestore(
+                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+            .toList();
+
+        // 3. 데이터가 있을 경우: 섹션 헤더 + 가로 캐러셀
+        return SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 3-1. 섹션 헤더
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "main.tabs.jobs".tr(), // "구인/구직"
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (userModel == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('main.errors.loginRequired'.tr())),
+                          );
+                          return;
+                        }
+                        final nextScreen = JobsScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                        );
+                        onIconTap(nextScreen, 'main.tabs.jobs');
+                      },
+                      child: Text('common.viewAll'.tr()),
+                    )
+                  ],
+                ),
+              ),
+              // 3-2. 가로 캐러셀
+              SizedBox(
+                height: 240, // MD: 표준 썸네일 고정 크기 (220x240)
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  primary: false,
+                  shrinkWrap: true,
+                  clipBehavior: Clip.none,
+                  itemCount: jobs.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          right: (index == jobs.length - 1) ? 0 : 12),
+                      child: JobThumb(job: jobs[index]),
                     );
                   },
                 ),

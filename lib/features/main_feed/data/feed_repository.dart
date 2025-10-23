@@ -32,6 +32,7 @@ import 'package:bling_app/features/pom/models/short_model.dart';
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:flutter/foundation.dart';
+import 'package:bling_app/core/models/user_model.dart';
 
 class FeedRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -77,6 +78,20 @@ class FeedRepository {
   Future<List<FeedItemModel>> fetchLatestClubPosts({int limit = 20}) async {
     // 기존 비공개(_fetchLatestClubPosts) 메소드를 호출하여 결과를 반환합니다.
     return _fetchLatestClubPosts(limit: limit);
+  }
+
+  // ▼▼▼▼▼ [개편] 5단계: HomeScreen의 FindFriend 캐러셀이 호출할 공개(public) 메소드 추가 ▼▼▼▼▼
+  //
+  Future<List<FeedItemModel>> fetchLatestFindFriends({int limit = 20}) async {
+    // 비공개(_fetchLatestFindFriends) 메소드를 호출하여 결과를 반환합니다.
+    return _fetchLatestFindFriends(limit: limit);
+  }
+
+  // ▼▼▼▼▼ [개편] 6단계: HomeScreen의 Job 캐러셀이 호출할 공개(public) 메소드 추가 ▼▼▼▼▼
+  //
+  Future<List<FeedItemModel>> fetchLatestJobs({int limit = 20}) async {
+    // 비공개(_fetchLatestJobs) 메소드를 호출하여 결과를 반환합니다.
+    return _fetchLatestJobs(limit: limit);
   }
 
   // [수정 완료] 각 모델의 '실제' 필드 이름을 사용하여 FeedItemModel로 변환합니다.
@@ -329,5 +344,33 @@ class FeedRepository {
       debugPrint('Error fetching shops: $e');
       return [];
     }
+  }
+}
+
+// ▼▼▼▼▼ [개편] 5단계: Find Friend 데이터 로드 함수 추가 ▼▼▼▼▼
+// 가장 최근 가입한 사용자 목록을 가져옵니다. (UserModel 사용)
+Future<List<FeedItemModel>> _fetchLatestFindFriends({int limit = 20}) async {
+  try {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .orderBy('createdAt', descending: true) // 최신 가입 순서
+        .limit(limit)
+        .get();
+
+    return snapshot.docs.map((doc) {
+      final user = UserModel.fromFirestore(doc);
+      return FeedItemModel(
+        id: doc.id,
+        userId: user.uid, // UserModel의 uid 필드 사용
+        type: FeedItemType.findFriends,
+        title: user.nickname, // title로 nickname 사용
+        imageUrl: user.photoUrl,
+        createdAt: user.createdAt, // UserModel의 createdAt 사용
+        originalDoc: doc,
+      );
+    }).toList();
+  } catch (e) {
+    debugPrint('Error fetching latest users (for FindFriends): $e');
+    return [];
   }
 }
