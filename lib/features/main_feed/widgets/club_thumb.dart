@@ -19,7 +19,8 @@ import 'package:intl/intl.dart';
 /// 5. 스켈레톤/플레이스홀더
 class ClubThumb extends StatelessWidget {
   final ClubPostModel post;
-  const ClubThumb({super.key, required this.post});
+  final void Function(Widget, String)? onIconTap;
+  const ClubThumb({super.key, required this.post, this.onIconTap});
 
   // 클럽 정보를 가져오는 Future 함수
   Future<ClubModel?> _fetchClubInfo() async {
@@ -52,15 +53,15 @@ class ClubThumb extends StatelessWidget {
           return InkWell(
             onTap: (club != null)
                 ? () {
-                    // 클럽 정보 로드 성공 시에만 탭 가능
-                    // MD: "썸네일 탭 → 해당 feature의 _detail_screen.dart 'ontop push'"
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        //
-                        builder: (_) =>
-                            ClubPostDetailScreen(post: post, club: club),
-                      ),
-                    );
+                    final detailScreen =
+                        ClubPostDetailScreen(post: post, club: club);
+                    if (onIconTap != null) {
+                      onIconTap!(detailScreen, 'main.tabs.clubs');
+                    } else {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => detailScreen),
+                      );
+                    }
                   }
                 : null, // 클럽 정보 로드 실패 시 탭 비활성화
             child: Card(

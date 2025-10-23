@@ -19,12 +19,14 @@ class PomThumb extends StatefulWidget {
   final ShortModel short;
   final List<ShortModel> allShorts; // 전체 POM 목록 (상세 화면 이동 시 필요)
   final int currentIndex; // 현재 POM의 인덱스 (상세 화면 이동 시 필요)
+  final void Function(Widget, String)? onIconTap;
 
   const PomThumb({
     super.key,
     required this.short,
     required this.allShorts,
     required this.currentIndex,
+    this.onIconTap,
   });
 
   @override
@@ -72,34 +74,35 @@ class _PomThumbState extends State<PomThumb> {
       height: 240,
       child: InkWell(
         onTap: () {
-          // MD: "탭 시 POM 상세 뷰어를 ontop으로 열어 뒤로가기 가능"
           // Provider를 통해 현재 UserModel 가져오기 (PomScreen 생성자에 필요)
           final userModel = Provider.of<UserModel?>(context, listen: false);
-
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              //
-              builder: (_) => PomScreen(
-                userModel: userModel,
-                initialShorts: widget.allShorts, // 전체 목록 전달
-                initialIndex: widget.currentIndex, // 현재 인덱스 전달
-              ),
-            ),
+          final pomScreen = PomScreen(
+            userModel: userModel,
+            initialShorts: widget.allShorts,
+            initialIndex: widget.currentIndex,
           );
+          if (widget.onIconTap != null) {
+            widget.onIconTap!(pomScreen, 'main.tabs.pom');
+          } else {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => pomScreen),
+            );
+          }
         },
         child: Card(
-          elevation: 1,
+          elevation: 0, // Stack 사용으로 그림자 제거 또는 조정 필요
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          // ✅ [수정] Column 대신 Stack 사용
+          child: Stack(
+            alignment: Alignment.center, // 기본 정렬을 중앙으로
             children: [
-              // 1. 상단 비디오 플레이어 영역 (MD: 재생 정책 적용)
+              // 1. 비디오 플레이어 (Stack의 배경 역할)
               _buildVideoPlayerArea(context),
-              // 2. 하단 메타 (제목)
-              _buildMeta(context),
+              // 2. 제목 텍스트 (비디오 위에 오버레이)
+              _buildOverlayMeta(context),
             ],
           ),
         ),
@@ -109,8 +112,8 @@ class _PomThumbState extends State<PomThumb> {
 
   // --- 상단 비디오 플레이어 영역 ---
   Widget _buildVideoPlayerArea(BuildContext context) {
-    // 플레이어 영역 높이 조절 (비율 유지 시도)
-    const double playerHeight = 160.0; // 240 높이 중 일부 할당
+    // ✅ [수정] 카드 전체 높이(240px)를 사용하도록 변경
+    const double playerHeight = 240.0;
 
     return VisibilityDetector(
       key: Key(widget.short.id), // 고유 키
@@ -132,6 +135,7 @@ class _PomThumbState extends State<PomThumb> {
       },
       child: SizedBox(
         height: playerHeight,
+        // ✅ [수정] 너비도 카드 전체 너비(220px) 사용
         width: 220,
         child: (_hasError || _controller == null)
             ? _buildPlaceholder(Icons.videocam_off_outlined) // 에러 시 아이콘
@@ -182,45 +186,66 @@ class _PomThumbState extends State<PomThumb> {
 
   // --- 플레이스홀더 위젯 ---
   Widget _buildPlaceholder(IconData? icon) {
-    const double playerHeight = 160.0;
+    // ✅ [수정] 카드 전체 높이 사용
+    const double playerHeight = 240.0;
     return Container(
       height: playerHeight,
       width: 220,
       color: Colors.grey[900], // 어두운 배경
       child: Center(
         child: icon != null
-            ? Icon(icon, color: Colors.grey[700], size: 40)
+            ? Icon(icon, color: Colors.grey[700], size: 50) // 아이콘 크기 조정
             : const SizedBox(
                 // 로딩 인디케이터
                 width: 30, height: 30,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.white54),
+                    strokeWidth: 3, color: Colors.white54), // 인디케이터 조정
               ),
       ),
     );
   }
 
-  // --- 하단 메타 (제목) ---
-  Widget _buildMeta(BuildContext context) {
-    // 하단 영역 높이: 240 - 160 = 80
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center, // 세로 중앙 정렬
-          children: [
-            // 제목
-            Text(
-              widget.short.title, //
+  // ✅ [수정] 하단 정렬 + 그라디언트 페이드 오버레이 (Reels/Shorts 패턴)
+  Widget _buildOverlayMeta(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        ignoring: true, // 오버레이가 탭을 가로채지 않도록
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            width: double.infinity,
+            // 바닥쪽만 어둡게 페이드되는 그라디언트
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.55),
+                  Colors.black.withValues(alpha: 0.75),
+                ],
+                stops: const [0.5, 0.8, 1.0],
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(12, 24, 12, 12),
+            child: Text(
+              widget.short.title,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    blurRadius: 4.0,
+                    color: Colors.black.withValues(alpha: 0.5),
+                    offset: const Offset(1.0, 1.0),
                   ),
-              maxLines: 2, // MD: 오버플로우 방지
+                ],
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            // (추가 정보 필요 시 여기에)
-          ],
+          ),
         ),
       ),
     );

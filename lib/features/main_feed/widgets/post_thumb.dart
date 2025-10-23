@@ -18,7 +18,10 @@ import 'package:bling_app/features/shared/widgets/trust_level_badge.dart'; // �
 /// 5. 스켈레톤/플레이스홀더
 class PostThumb extends StatelessWidget {
   final PostModel post;
-  const PostThumb({super.key, required this.post});
+  // Optional callback to delegate navigation to parent (keeps top/bottom bars)
+  final void Function(Widget, String)? onIconTap;
+
+  const PostThumb({super.key, required this.post, this.onIconTap});
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +31,16 @@ class PostThumb extends StatelessWidget {
       height: 240,
       child: InkWell(
         onTap: () {
-          // MD: "썸네일 탭 → 해당 feature의 _detail_screen.dart 'ontop push'"
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => LocalNewsDetailScreen(post: post),
-            ),
-          );
+          final detailScreen = LocalNewsDetailScreen(post: post);
+          if (onIconTap != null) {
+            // Delegate to parent to keep top/bottom bars
+            onIconTap!(detailScreen, 'main.tabs.localNews');
+          } else {
+            // Fallback: push a full-screen route
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => detailScreen),
+            );
+          }
         },
         child: Card(
           elevation: 1,

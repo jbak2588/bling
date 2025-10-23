@@ -488,7 +488,9 @@
     "cancel": "Batal",
     "delete": "Hapus",
     "done": "Selesai",
-    "viewAll": "Lihat semua"
+    "viewAll": "Lihat semua",
+    "new": "Baru",
+    "updated": "Diperbarui"
   },
   "deleteConfirm": {
     "title": "Hapus Komentar",
