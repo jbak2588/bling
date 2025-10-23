@@ -516,7 +516,8 @@
   "common": {
     "cancel": "Cancel",
     "delete": "Delete",
-    "done": "Done"
+    "done": "Done",
+    "viewAll": "View all"
   },
   "deleteConfirm": {
     "title": "Delete Comment",

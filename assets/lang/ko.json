@@ -86,7 +86,7 @@
     "myTown": "우리 동네",
     "search": {
       "placeholder": "검색 화면",
-      "chipPlaceholder": "동네ㅔ 이웃, 소식, 마켓플레이스, 일자리… 검색"
+      "chipPlaceholder": "동네 이웃, 소식, 마켓플레이스, 일자리… 검색"
     }
   },
   "drawer": {
@@ -516,7 +516,8 @@
   "common": {
     "cancel": "취소",
     "delete": "삭제",
-    "done": "완료"
+    "done": "완료",
+    "viewAll": "모두 보기"
   },
   "deleteConfirm": {
     "title": "댓글 삭제",
@@ -579,7 +580,9 @@
     "salaryTypes": {
       "hourly": "시급",
       "daily": "일급",
+      "weekly": "주급",
       "monthly": "월급",
+      "yearly": "연봉",
       "per_case": "건당",
       "etc": "기타"
     },

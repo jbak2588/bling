@@ -487,7 +487,8 @@
   "common": {
     "cancel": "Batal",
     "delete": "Hapus",
-    "done": "Selesai"
+    "done": "Selesai",
+    "viewAll": "Lihat semua"
   },
   "deleteConfirm": {
     "title": "Hapus Komentar",
@@ -550,7 +551,9 @@
     "salaryTypes": {
       "hourly": "Per jam",
       "daily": "Harian",
+      "weekly": "Mingguan",
       "monthly": "Bulanan",
+      "yearly": "Tahunan",
       "per_case": "Per kasus",
       "etc": "Lainnya"
     },
