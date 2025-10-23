@@ -517,7 +517,9 @@
     "cancel": "취소",
     "delete": "삭제",
     "done": "완료",
-    "viewAll": "모두 보기"
+    "viewAll": "모두 보기",
+    "new": "신규",
+    "updated": "업데이트"
   },
   "deleteConfirm": {
     "title": "댓글 삭제",

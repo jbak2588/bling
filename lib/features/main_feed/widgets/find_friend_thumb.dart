@@ -15,11 +15,13 @@ import 'package:flutter/material.dart';
 class FindFriendThumb extends StatelessWidget {
   final UserModel user;
   final UserModel? currentUserModel; // 상세 화면 이동 시 필요
+  final void Function(Widget, String)? onIconTap;
 
   const FindFriendThumb({
     super.key,
     required this.user,
     required this.currentUserModel,
+    this.onIconTap,
   });
 
   @override
@@ -30,17 +32,16 @@ class FindFriendThumb extends StatelessWidget {
       height: 240,
       child: InkWell(
         onTap: () {
-          // MD: "썸네일 탭 → 해당 feature의 _detail_screen.dart 'ontop push'"
           if (currentUserModel == null) return; // 현재 사용자 정보 없으면 이동 불가
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              //
-              builder: (_) => FindFriendDetailScreen(
-                user: user,
-                currentUserModel: currentUserModel!,
-              ),
-            ),
-          );
+          final detailScreen = FindFriendDetailScreen(
+              user: user, currentUserModel: currentUserModel!);
+          if (onIconTap != null) {
+            onIconTap!(detailScreen, 'main.tabs.findFriends');
+          } else {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => detailScreen),
+            );
+          }
         },
         child: Card(
           elevation: 1,

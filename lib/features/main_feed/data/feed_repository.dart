@@ -115,6 +115,16 @@ class FeedRepository {
     return _fetchLatestShorts(limit: limit);
   }
 
+  // ▼▼▼▼▼ [개편] 10단계: HomeScreen의 Lost&Found 캐러셀이 호출할 공개 메소드 추가 ▼▼▼▼▼
+  Future<List<FeedItemModel>> fetchLatestLostItems({int limit = 20}) async {
+    return _fetchLatestLostItems(limit: limit);
+  }
+
+  // ▼▼▼▼▼ [개편] 11단계: HomeScreen의 RealEstate 캐러셀이 호출할 공개 메소드 추가 ▼▼▼▼▼
+  Future<List<FeedItemModel>> fetchLatestRoomListings({int limit = 20}) async {
+    return _fetchLatestRoomListings(limit: limit);
+  }
+
   // [수정 완료] 각 모델의 '실제' 필드 이름을 사용하여 FeedItemModel로 변환합니다.
 
   Future<List<FeedItemModel>> _fetchLatestPosts({int limit = 5}) async {
@@ -262,7 +272,7 @@ class FeedRepository {
   Future<List<FeedItemModel>> _fetchLatestLostItems({int limit = 5}) async {
     try {
       final snapshot = await _firestore
-          .collection('lostItems')
+          .collection('lost_and_found')
           .orderBy('createdAt', descending: true)
           .limit(limit)
           .get();
@@ -318,7 +328,8 @@ class FeedRepository {
   Future<List<FeedItemModel>> _fetchLatestRoomListings({int limit = 5}) async {
     try {
       final snapshot = await _firestore
-          .collection('roomListings')
+          .collection('room_listings')
+          .where('isAvailable', isEqualTo: true)
           .orderBy('createdAt', descending: true)
           .limit(limit)
           .get();

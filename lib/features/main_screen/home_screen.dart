@@ -67,6 +67,12 @@ import 'package:bling_app/features/main_feed/widgets/auction_thumb.dart';
 // ▼▼▼▼▼ [개편] 8단계: POM 썸네일 및 모델 import ▼▼▼▼▼
 import 'package:bling_app/features/pom/models/short_model.dart';
 import 'package:bling_app/features/main_feed/widgets/pom_thumb.dart';
+// ▼▼▼▼▼ [개편] 9단계: Lost & Found 썸네일 및 모델 import ▼▼▼▼▼
+import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
+import 'package:bling_app/features/main_feed/widgets/lost_item_thumb.dart';
+// ▼▼▼▼▼ [개편] 10단계: Real Estate 썸네일 및 모델 import ▼▼▼▼▼
+import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
+import 'package:bling_app/features/main_feed/widgets/real_estate_thumb.dart';
 
 import 'package:provider/provider.dart'; // PomThumb에서 UserModel 접근 위해
 
@@ -90,6 +96,47 @@ class MenuItem {
 }
 
 class HomeScreen extends StatelessWidget {
+  // 섹션 헤더 타이틀 + NEW 배지 공통 위젯
+  Widget _buildSectionTitle(BuildContext context, String titleKey) {
+    final theme = Theme.of(context);
+    final onSurface90 = theme.colorScheme.onSurface.withValues(alpha: 0.90);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            titleKey.tr(),
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: onSurface90,
+              height: 1.2,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Semantics(
+          label: 'common.new'.tr(),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              'common.new'.tr(),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   // (2) 검색 칩 위젯 헬퍼 - 디자인/텍스트 최신화
   Widget _searchChip(VoidCallback? onTap) {
     return Padding(
@@ -133,14 +180,32 @@ class HomeScreen extends StatelessWidget {
     return s.scale(basis) / basis;
   }
 
+  // 공통 View all 버튼 스타일
+  ButtonStyle _viewAllButtonStyle(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextButton.styleFrom(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      minimumSize: const Size(0, 0),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      foregroundColor: theme.colorScheme.primary,
+      textStyle: theme.textTheme.labelMedium?.copyWith(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
   final UserModel? userModel;
   final Map<String, String?>? activeLocationFilter;
   final Function(Widget, String) onIconTap;
+  // ✅ [스크롤 위치 보존] ScrollController 파라미터 추가
+  final ScrollController controller;
 
   final List<FeedItemModel> allFeedItems;
   final int currentIndex;
 
   const HomeScreen({
+    required this.controller, // ✅ 생성자에 추가
     super.key,
     required this.userModel,
     required this.activeLocationFilter,
@@ -225,6 +290,7 @@ class HomeScreen extends StatelessWidget {
     final VoidCallback? searchAction = onSearchChipTap;
 
     return CustomScrollView(
+      controller: controller,
       slivers: [
         // ✅ AppBar 바로 아래, 얇은 검색 칩만 노출(입력은 Search 탭에서)
         SliverToBoxAdapter(child: _searchChip(searchAction)),
@@ -305,25 +371,29 @@ class HomeScreen extends StatelessWidget {
         // ▼▼▼▼▼ [개편] 1단계: 기존 통합 피드를 삭제하고, Post 캐러셀 섹션으로 교체 ▼▼▼▼▼
         //
         _buildPostCarousel(context),
-        // ▼▼▼▼▼ [개편] 3단계: Product 캐러셀 섹션 추가 ▼▼▼▼▼
+        // ▼▼▼▼▼ [개편] 2단계: Product 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildProductCarousel(context),
-        // ▼▼▼▼▼ [개편] 4단계: Club 캐러셀 섹션 추가 ▼▼▼▼▼
+        // ▼▼▼▼▼ [개편] 3단계: Club 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildClubCarousel(context),
-        // ▼▼▼▼▼ [개편] 5단계: Find Friend 캐러셀 섹션 추가 ▼▼▼▼▼
+        // ▼▼▼▼▼ [개편] 4단계: Find Friend 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildFindFriendCarousel(context),
-        // ▼▼▼▼▼ [개편] 6단계: Job 캐러셀 섹션 추가 ▼▼▼▼▼
+        // ▼▼▼▼▼ [개편] 5단계: Job 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildJobCarousel(context),
-        // ▼▼▼▼▼ [개편] 7단계: Local Store 캐러셀 섹션 추가 ▼▼▼▼▼
+        // ▼▼▼▼▼ [개편] 6단계: Local Store 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildLocalStoreCarousel(context),
-        // ▼▼▼▼▼ [개편] 8단계: Auction 캐러셀 섹션 추가 ▼▼▼▼▼
+        // ▼▼▼▼▼ [개편] 7단계: Auction 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildAuctionCarousel(context),
-        // ▼▼▼▼▼ [개편] 9단계: POM 캐러셀 섹션 추가 ▼▼▼▼▼
+        // ▼▼▼▼▼ [개편] 8단계: POM 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildPomCarousel(context),
+        // ▼▼▼▼▼ [개편] 9단계: Lost & Found 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildLostAndFoundCarousel(context),
+        // ▼▼▼▼▼ [개편] 10단계: Real Estate 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildRealEstateCarousel(context),
       ],
     );
   }
 
-  /// [개편] 2단계: 로컬뉴스(Post) 캐러셀 섹션 빌더
+  /// [개편] 1단계: 로컬뉴스(Post) 캐러셀 섹션 빌더
   /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
   ///
   Widget _buildPostCarousel(BuildContext context) {
@@ -367,14 +437,11 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "main.tabs.localNews".tr(), // "로컬 뉴스"
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Expanded(
+                        child:
+                            _buildSectionTitle(context, 'main.tabs.localNews')),
                     TextButton(
+                      style: _viewAllButtonStyle(context),
                       onPressed: () {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -412,7 +479,11 @@ class HomeScreen extends StatelessWidget {
                           right: (index == posts.length - 1)
                               ? 0
                               : 12), // MD: 카드 간격 12
-                      child: PostThumb(post: posts[index]),
+                      // ✅ [Final Fix] onIconTap 콜백 전달
+                      child: PostThumb(
+                        post: posts[index],
+                        onIconTap: onIconTap,
+                      ),
                     );
                   },
                 ),
@@ -424,7 +495,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// [개편] 3단계: 마켓플레이스(Product) 캐러셀 섹션 빌더
+  /// [개편] 2단계: 마켓플레이스(Product) 캐러셀 섹션 빌더
   /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
   ///
   Widget _buildProductCarousel(BuildContext context) {
@@ -466,14 +537,11 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "main.tabs.marketplace".tr(), // "마켓플레이스"
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Expanded(
+                        child: _buildSectionTitle(
+                            context, 'main.tabs.marketplace')),
                     TextButton(
+                      style: _viewAllButtonStyle(context),
                       onPressed: () {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -508,7 +576,11 @@ class HomeScreen extends StatelessWidget {
                     return Padding(
                       padding: EdgeInsets.only(
                           right: (index == products.length - 1) ? 0 : 12),
-                      child: ProductThumb(product: products[index]),
+                      // ✅ [Final Fix] onIconTap 콜백 전달
+                      child: ProductThumb(
+                        product: products[index],
+                        onIconTap: onIconTap,
+                      ),
                     );
                   },
                 ),
@@ -520,7 +592,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// [개편] 4단계: 클럽(Club Post) 캐러셀 섹션 빌더
+  /// [개편] 3단계: 클럽(Club Post) 캐러셀 섹션 빌더
   /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
   ///
   Widget _buildClubCarousel(BuildContext context) {
@@ -562,14 +634,10 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "main.tabs.clubs".tr(), // "클럽"
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Expanded(
+                        child: _buildSectionTitle(context, 'main.tabs.clubs')),
                     TextButton(
+                      style: _viewAllButtonStyle(context),
                       onPressed: () {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -604,7 +672,11 @@ class HomeScreen extends StatelessWidget {
                     return Padding(
                       padding: EdgeInsets.only(
                           right: (index == clubPosts.length - 1) ? 0 : 12),
-                      child: ClubThumb(post: clubPosts[index]),
+                      // ✅ [Final Fix] onIconTap 콜백 전달
+                      child: ClubThumb(
+                        post: clubPosts[index],
+                        onIconTap: onIconTap,
+                      ),
                     );
                   },
                 ),
@@ -616,7 +688,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// [개편] 5단계: 친구찾기(Find Friend) 캐러셀 섹션 빌더
+  /// [개편] 4단계: 친구찾기(Find Friend) 캐러셀 섹션 빌더
   /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
   ///
   Widget _buildFindFriendCarousel(BuildContext context) {
@@ -658,14 +730,11 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "main.tabs.findFriends".tr(), // "친구찾기"
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Expanded(
+                        child: _buildSectionTitle(
+                            context, 'main.tabs.findFriends')),
                     TextButton(
+                      style: _viewAllButtonStyle(context),
                       onPressed: () {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -700,8 +769,12 @@ class HomeScreen extends StatelessWidget {
                     return Padding(
                       padding: EdgeInsets.only(
                           right: (index == users.length - 1) ? 0 : 12),
+                      // ✅ [Final Fix] onIconTap 콜백 전달
                       child: FindFriendThumb(
-                          user: users[index], currentUserModel: userModel),
+                        user: users[index],
+                        currentUserModel: userModel,
+                        onIconTap: onIconTap,
+                      ),
                     );
                   },
                 ),
@@ -713,7 +786,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// [개편] 6단계: 구인/구직(Job) 캐러셀 섹션 빌더
+  /// [개편] 5단계: 구인/구직(Job) 캐러셀 섹션 빌더
   /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
   ///
   Widget _buildJobCarousel(BuildContext context) {
@@ -755,14 +828,10 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "main.tabs.jobs".tr(), // "구인/구직"
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Expanded(
+                        child: _buildSectionTitle(context, 'main.tabs.jobs')),
                     TextButton(
+                      style: _viewAllButtonStyle(context),
                       onPressed: () {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -797,7 +866,11 @@ class HomeScreen extends StatelessWidget {
                     return Padding(
                       padding: EdgeInsets.only(
                           right: (index == jobs.length - 1) ? 0 : 12),
-                      child: JobThumb(job: jobs[index]),
+                      // ✅ [Final Fix] onIconTap 콜백 전달
+                      child: JobThumb(
+                        job: jobs[index],
+                        onIconTap: onIconTap,
+                      ),
                     );
                   },
                 ),
@@ -809,7 +882,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// [개편] 7단계: 동네 업체(Local Store) 캐러셀 섹션 빌더
+  /// [개편] 6단계: 동네 업체(Local Store) 캐러셀 섹션 빌더
   /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
   ///
   Widget _buildLocalStoreCarousel(BuildContext context) {
@@ -850,14 +923,11 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "main.tabs.localStores".tr(), // "동네 업체"
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Expanded(
+                        child: _buildSectionTitle(
+                            context, 'main.tabs.localStores')),
                     TextButton(
+                      style: _viewAllButtonStyle(context),
                       onPressed: () {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -892,7 +962,11 @@ class HomeScreen extends StatelessWidget {
                     return Padding(
                       padding: EdgeInsets.only(
                           right: (index == shops.length - 1) ? 0 : 12),
-                      child: LocalStoreThumb(shop: shops[index]),
+                      // ✅ [Final Fix] onIconTap 콜백 전달
+                      child: LocalStoreThumb(
+                        shop: shops[index],
+                        onIconTap: onIconTap,
+                      ),
                     );
                   },
                 ),
@@ -904,7 +978,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// [개편] 8단계: 경매(Auction) 캐러셀 섹션 빌더
+  /// [개편] 7단계: 경매(Auction) 캐러셀 섹션 빌더
   /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
   ///
   Widget _buildAuctionCarousel(BuildContext context) {
@@ -946,14 +1020,11 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "main.tabs.auction".tr(), // "경매"
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Expanded(
+                        child:
+                            _buildSectionTitle(context, 'main.tabs.auction')),
                     TextButton(
+                      style: _viewAllButtonStyle(context),
                       onPressed: () {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -988,7 +1059,11 @@ class HomeScreen extends StatelessWidget {
                     return Padding(
                       padding: EdgeInsets.only(
                           right: (index == auctions.length - 1) ? 0 : 12),
-                      child: AuctionThumb(auction: auctions[index]),
+                      // ✅ [Final Fix] onIconTap 콜백 전달
+                      child: AuctionThumb(
+                        auction: auctions[index],
+                        onIconTap: onIconTap,
+                      ),
                     );
                   },
                 ),
@@ -1000,7 +1075,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// [개편] 9단계: 숏폼(POM) 캐러셀 섹션 빌더
+  /// [개편] 8단계: 숏폼(POM) 캐러셀 섹션 빌더
   /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김, 4.재생 정책
   ///
   Widget _buildPomCarousel(BuildContext context) {
@@ -1046,14 +1121,10 @@ class HomeScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "main.tabs.pom".tr(), // "POM"
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
+                      Expanded(
+                          child: _buildSectionTitle(context, 'main.tabs.pom')),
                       TextButton(
+                        style: _viewAllButtonStyle(context),
                         onPressed: () {
                           if (userModel == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -1092,15 +1163,207 @@ class HomeScreen extends StatelessWidget {
                             right: (index == allShorts.length - 1) ? 0 : 12),
                         // PomThumb에 전체 목록과 현재 인덱스 전달
                         child: PomThumb(
-                            short: allShorts[index],
-                            allShorts: allShorts,
-                            currentIndex: index),
+                          short: allShorts[index],
+                          allShorts: allShorts,
+                          currentIndex: index,
+                          onIconTap: onIconTap,
+                        ),
                       );
                     },
                   ),
                 ),
               ],
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// [개편] 9단계: 분실/습득(Lost & Found) 캐러셀 섹션 빌더
+  /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
+  ///
+  Widget _buildLostAndFoundCarousel(BuildContext context) {
+    final feedRepository = FeedRepository();
+
+    return FutureBuilder<List<FeedItemModel>>(
+      // 1. Repository에서 LostItem 최신 20개를 가져옵니다.
+      future: feedRepository.fetchLatestLostItems(limit: 20),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 로딩 중: 스켈레톤 섹션
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 290,
+              alignment: Alignment.center,
+              child: const CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        // 2. 빈 섹션 처리
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        final lostItems = snapshot.data!
+            .map((item) => LostItemModel.fromFirestore(
+                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+            .toList();
+
+        // 3. 데이터가 있을 경우: 섹션 헤더 + 가로 캐러셀
+        return SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 3-1. 섹션 헤더
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                        child: _buildSectionTitle(
+                            context, 'main.tabs.lostAndFound')),
+                    TextButton(
+                      style: _viewAllButtonStyle(context),
+                      onPressed: () {
+                        if (userModel == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('main.errors.loginRequired'.tr())),
+                          );
+                          return;
+                        }
+                        final nextScreen = LostAndFoundScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                        );
+                        onIconTap(nextScreen, 'main.tabs.lostAndFound');
+                      },
+                      child: Text('common.viewAll'.tr()),
+                    )
+                  ],
+                ),
+              ),
+              // 3-2. 가로 캐러셀
+              SizedBox(
+                height: 240, // 표준 썸네일 고정 크기 (220x240)
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  primary: false,
+                  shrinkWrap: true,
+                  clipBehavior: Clip.none,
+                  itemCount: lostItems.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          right: (index == lostItems.length - 1) ? 0 : 12),
+                      child: LostItemThumb(
+                          item: lostItems[index], onIconTap: onIconTap),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// [개편] 10단계: 부동산(Real Estate) 캐러셀 섹션 빌더
+  /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
+  ///
+  Widget _buildRealEstateCarousel(BuildContext context) {
+    final feedRepository = FeedRepository();
+
+    return FutureBuilder<List<FeedItemModel>>(
+      // 1. Repository에서 RoomListing 최신 20개를 가져옵니다.
+      future: feedRepository.fetchLatestRoomListings(limit: 20),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 로딩 중: 스켈레톤 섹션
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 290,
+              alignment: Alignment.center,
+              child: const CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        // 2. 빈 섹션 처리
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        final rooms = snapshot.data!
+            .map((item) => RoomListingModel.fromFirestore(
+                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+            .toList();
+
+        // 3. 데이터가 있을 경우: 섹션 헤더 + 가로 캐러셀
+        return SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 3-1. 섹션 헤더
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                        child: _buildSectionTitle(
+                            context, 'main.tabs.realEstate')),
+                    TextButton(
+                      style: _viewAllButtonStyle(context),
+                      onPressed: () {
+                        if (userModel == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('main.errors.loginRequired'.tr())),
+                          );
+                          return;
+                        }
+                        final nextScreen = RealEstateScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                        );
+                        onIconTap(nextScreen, 'main.tabs.realEstate');
+                      },
+                      child: Text('common.viewAll'.tr()),
+                    )
+                  ],
+                ),
+              ),
+              // 3-2. 가로 캐러셀
+              SizedBox(
+                height: 240, // 표준 썸네일 고정 크기 (220x240)
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  primary: false,
+                  shrinkWrap: true,
+                  clipBehavior: Clip.none,
+                  itemCount: rooms.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          right: (index == rooms.length - 1) ? 0 : 12),
+                      child: RealEstateThumb(
+                          room: rooms[index], onIconTap: onIconTap),
+                    );
+                  },
+                ),
+              ),
+              // ✅ 캐러셀과 FAB 간섭 방지용 여백 추가 (MD 요구사항)
+              const SizedBox(height: 80),
+            ],
           ),
         );
       },

@@ -73,6 +73,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   StreamSubscription? _unreadChatsSubscription;
   int _totalUnreadCount = 0;
 
+  // ✅ [스크롤 위치 보존] HomeScreen용 ScrollController 및 위치 저장 변수 추가
+  final ScrollController _homeScrollController = ScrollController();
+  double _savedHomeScrollOffset = 0.0;
+
   static const int kSearchTabIndex =
       1; // 예: 0=Home, 1=Search, 2=Chat, 3=Profile
 
@@ -119,6 +123,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void dispose() {
     _userSubscription?.cancel();
     _unreadChatsSubscription?.cancel();
+    // ✅ [스크롤 위치 보존] ScrollController 해제
+    _homeScrollController.dispose();
     super.dispose();
   }
 
@@ -344,10 +350,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   _currentHomePageContent = null;
                   _appBarTitleKey = 'main.myTown'; // 키로 저장
                 });
+                // ✅ [스크롤 위치 보존] 다음 프레임에서 스크롤 위치 복원
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  // 컨트롤러가 HomeScreen의 ScrollView에 연결된 후 실행
+                  if (_homeScrollController.hasClients) {
+                    _homeScrollController
+                        .jumpTo(_savedHomeScrollOffset); // 저장된 위치로 즉시 이동
+                  }
+                });
               },
             )
           : Builder(
               builder: (context) => IconButton(
+                // ✅ [스크롤 위치 보존] Drawer 열 때 스크롤 위치 저장 (선택 사항, 필요시)
+                // onPressed: () {
+                //   _savedHomeScrollOffset = _homeScrollController.hasClients ? _homeScrollController.offset : 0.0;
+                //   Scaffold.of(context).openDrawer();
+                // },
                 icon: CircleAvatar(
                   backgroundImage: (_userModel?.photoUrl != null &&
                           _userModel!.photoUrl!.isNotEmpty)
@@ -463,6 +482,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _navigateToPage(Widget page, String titleKey) {
+    // ✅ [스크롤 위치 보존] 네비게이션 전에 현재 스크롤 위치 저장
+    // 상세 화면으로 이동하는 경우에만 저장 (setState 호출 전에)
+    if (_homeScrollController.hasClients) {
+      // HomeScreen이 화면에 있을 때만 offset 접근
+      _savedHomeScrollOffset = _homeScrollController.offset;
+    }
     setState(() {
       _currentHomePageContent = page;
       _appBarTitleKey = titleKey; // 키 그대로 저장
@@ -503,9 +528,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final List<Widget> pages = [
       _currentHomePageContent ??
           HomeScreen(
+            // ✅ [스크롤 위치 보존] ScrollController 전달
+            controller: _homeScrollController,
             userModel: _userModel,
             activeLocationFilter: _activeLocationFilter,
-            onIconTap: (page, titleKey) => _navigateToPage(page, titleKey),
+            // onIconTap 콜백은 이미 스크롤 위치 저장을 처리함 (_navigateToPage 내부)
+            onIconTap: _navigateToPage,
             onSearchChipTap: goToSearchTab, // ✅ 추가
           ),
       const SearchScreen(),

@@ -3,7 +3,6 @@ import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/features/jobs/screens/job_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart'; // ✅ 이미지 위젯 import
-import 'package:intl/intl.dart';
 import 'package:easy_localization/easy_localization.dart'; // 다국어 지원
 
 /// [개편] 6단계: 메인 피드용 표준 썸네일 (Job 전용)
@@ -16,7 +15,8 @@ import 'package:easy_localization/easy_localization.dart'; // 다국어 지원
 /// 5. 스켈레톤/플레이스홀더 (Job은 이미지가 없으므로 아이콘으로 대체)
 class JobThumb extends StatelessWidget {
   final JobModel job;
-  const JobThumb({super.key, required this.job});
+  final void Function(Widget, String)? onIconTap;
+  const JobThumb({super.key, required this.job, this.onIconTap});
 
   // 급여 정보를 포맷하는 헬퍼 함수
   String _formatSalary(BuildContext context) {
@@ -84,13 +84,14 @@ class JobThumb extends StatelessWidget {
       height: 240,
       child: InkWell(
         onTap: () {
-          // MD: "썸네일 탭 → 해당 feature의 _detail_screen.dart 'ontop push'"
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              //
-              builder: (_) => JobDetailScreen(job: job),
-            ),
-          );
+          final detailScreen = JobDetailScreen(job: job);
+          if (onIconTap != null) {
+            onIconTap!(detailScreen, 'main.tabs.jobs');
+          } else {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => detailScreen),
+            );
+          }
         },
         child: Card(
           elevation: 1,

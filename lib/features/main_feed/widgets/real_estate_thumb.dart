@@ -1,22 +1,28 @@
-// lib/features/main_feed/widgets/product_thumb.dart
-import 'package:bling_app/features/marketplace/models/product_model.dart';
-import 'package:bling_app/features/marketplace/screens/product_detail_screen.dart';
+// lib/features/main_feed/widgets/real_estate_thumb.dart
+import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
+import 'package:bling_app/features/real_estate/screens/room_detail_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart'; // 다국어 지원
+import 'package:bling_app/core/utils/address_formatter.dart'; // 주소 단축 유틸
 
-/// [개편] 3단계: 메인 피드용 표준 썸네일 (Product 전용)
+/// [개편] 11단계: 메인 피드용 표준 썸네일 (RealEstate 전용)
 ///
 /// MD문서 요구사항:
 /// 1. 표준 썸네일 (고정 크기): 220x240
-/// 2. 탭 동작: _detail_screen.dart 로 "ontop push"
-/// 3. Product 전용 규칙: 제목 / 보조=지역 / 배지=가격
+/// 2. 탭 동작: _detail_screen.dart 로 전환 (setState 방식)
+/// 3. Real Estate 규칙: 제목 / 보조=주소 단축 / 배지=월세/매매가
 /// 4. 오버플로우 방지 (maxLines, ellipsis)
 /// 5. 스켈레톤/플레이스홀더
-class ProductThumb extends StatelessWidget {
-  final ProductModel product;
-  final void Function(Widget, String)? onIconTap;
-  const ProductThumb({super.key, required this.product, this.onIconTap});
+class RealEstateThumb extends StatelessWidget {
+  final RoomListingModel room;
+  final Function(Widget, String) onIconTap; // 네비게이션 콜백
+
+  const RealEstateThumb({
+    super.key,
+    required this.room,
+    required this.onIconTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +32,9 @@ class ProductThumb extends StatelessWidget {
       height: 240,
       child: InkWell(
         onTap: () {
-          final detailScreen = ProductDetailScreen(product: product);
-          if (onIconTap != null) {
-            onIconTap!(detailScreen, 'main.tabs.marketplace');
-          } else {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => detailScreen),
-            );
-          }
+          // ✅ [Final Fix] Navigator.push 대신 onIconTap 콜백 사용
+          final detailScreen = RoomDetailScreen(room: room);
+          onIconTap(detailScreen, 'main.tabs.realEstate'); // 타이틀 키 전달
         },
         child: Card(
           elevation: 1,
@@ -46,7 +47,7 @@ class ProductThumb extends StatelessWidget {
             children: [
               // 1. 상단 이미지 (16:9 비율)
               _buildImageContent(context),
-              // 2. 하단 메타 (제목, 지역, 가격)
+              // 2. 하단 메타 (제목, 주소 단축, 가격)
               _buildMeta(context),
             ],
           ),
@@ -57,12 +58,10 @@ class ProductThumb extends StatelessWidget {
 
   // --- 상단 이미지 (16:9 이미지) ---
   Widget _buildImageContent(BuildContext context) {
-    // 220 (width) / 1.777 (16:9) = 123.7
-    const double imageHeight = 124.0;
-
+    // 16:9 비율
+    const double imageHeight = 116.0;
     //
-    final imageUrl =
-        (product.imageUrls.isNotEmpty) ? product.imageUrls.first : null;
+    final imageUrl = (room.imageUrls.isNotEmpty) ? room.imageUrls.first : null;
 
     return (imageUrl != null)
         ? CachedNetworkImage(
@@ -81,70 +80,68 @@ class ProductThumb extends StatelessWidget {
               width: 220,
               color: Colors.grey[200],
               child: Center(
-                  child:
-                      Icon(Icons.image_not_supported, color: Colors.grey[400])),
+                  child: Icon(Icons.house_outlined,
+                      color: Colors.grey[400], size: 40)),
             ),
           )
         : Container(
             // 이미지가 없는 경우 플레이스홀더
-            height: imageHeight,
-            width: 220,
-            color: Colors.grey[200],
+            height: imageHeight, width: 220, color: Colors.grey[200],
             child: Center(
-                child: Icon(Icons.shopping_bag_outlined,
+                child: Icon(Icons.house_outlined,
                     color: Colors.grey[400], size: 40)),
           );
   }
 
-  // --- 하단 메타 (제목 + 지역 + 가격) ---
+  // --- 하단 메타 (제목 + 주소 단축 + 가격) ---
   Widget _buildMeta(BuildContext context) {
-    // 240 (total) - 124 (image) = 116
+    // 하단 영역 높이: 240 - 124 = 116
 
-    // MD: "보조=지역 또는 셀러" - 여기서는 '지역' 사용
+    // MD: "보조=주소 단축"
     //
-    final location =
-        product.locationParts?['kab'] ?? product.locationParts?['kota'] ?? '';
+    final shortAddress = AddressFormatter.toSingkatan(
+        room.locationName ?? ''); // AddressFormatter 사용
 
-    // MD: "배지=가격"
+    // MD: "배지=월세/매매가"
     //
-    final priceFormat =
-        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-    final priceString = priceFormat.format(product.price);
+    final priceFormat = NumberFormat.currency(
+        locale: context.locale.toString(), symbol: 'Rp ', decimalDigits: 0);
+    final priceString = priceFormat.format(room.price);
+    // 가격 단위 (monthly, yearly 등) - 다국어 키 필요 (예: 'realEstate.priceUnit.monthly')
+    final priceUnitString = 'realEstate.priceUnit.${room.priceUnit}'.tr();
 
     return Expanded(
       child: Padding(
-        // ✅ [수정] 오버플로우 완화: 상하 Padding을 10 -> 8로 줄임
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // MD: "제목"
             Text(
-              product.title, //
-              // ✅ [수정] 오버플로우 완화: 본문 크기를 한 단계 낮춤
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              room.title, //
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
               maxLines: 2, // MD: 오버플로우 방지
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 2),
-            // MD: "보조=지역"
+            // MD: "보조=주소 단축"
             Text(
-              location,
+              shortAddress,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[600],
                   ),
               maxLines: 1, // MD: 오버플로우 방지
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 6),
-            // MD: "배지=가격"
+            const Spacer(),
+            // MD: "배지=월세/매매가"
             Text(
-              priceString,
-              // ✅ [수정] 오버플로우 완화: 가격 텍스트 크기를 한 단계 낮춤
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              '$priceString / $priceUnitString', // 예: "Rp 1.000.000 / 월"
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: Colors.teal, // 강조 색상
                   ),
               maxLines: 1, // MD: 오버플로우 방지
               overflow: TextOverflow.ellipsis,

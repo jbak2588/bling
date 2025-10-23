@@ -15,7 +15,8 @@ import 'package:easy_localization/easy_localization.dart'; // 다국어 지원
 /// 5. 스켈레톤/플레이스홀더
 class AuctionThumb extends StatelessWidget {
   final AuctionModel auction;
-  const AuctionThumb({super.key, required this.auction});
+  final void Function(Widget, String)? onIconTap;
+  const AuctionThumb({super.key, required this.auction, this.onIconTap});
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +26,14 @@ class AuctionThumb extends StatelessWidget {
       height: 240,
       child: InkWell(
         onTap: () {
-          // MD: "썸네일 탭 → 해당 feature의 _detail_screen.dart 'ontop push'"
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              //
-              builder: (_) => AuctionDetailScreen(auction: auction),
-            ),
-          );
+          final detailScreen = AuctionDetailScreen(auction: auction);
+          if (onIconTap != null) {
+            onIconTap!(detailScreen, 'main.tabs.auction');
+          } else {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => detailScreen),
+            );
+          }
         },
         child: Card(
           elevation: 1,
