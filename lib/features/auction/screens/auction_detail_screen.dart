@@ -176,14 +176,51 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                   children: [
                     // ✅ 기존 이미지 슬라이더를 공용 위젯으로 교체
                     if (auction.images.isNotEmpty)
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => ImageGalleryScreen(imageUrls: auction.images),
-                        )),
-                        child: ImageCarouselCard(
-                          storageId: auction.id,
-                          imageUrls: auction.images,
-                          height: 250,
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        // ✅ [추가] Stack을 사용하여 이미지 캐러셀 위에 오버레이 추가
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => ImageGalleryScreen(
+                                      imageUrls: auction.images),
+                                ),
+                              ),
+                              child: ImageCarouselCard(
+                                storageId: auction.id,
+                                imageUrls: auction.images,
+                                height: 250,
+                              ),
+                            ),
+                            // ✅ 경매 종료 여부 확인 및 오버레이 표시
+                            if (auction.endAt.toDate().isBefore(DateTime.now()))
+                              Positioned.fill(
+                                // Stack 전체를 덮도록 설정 (탭은 통과)
+                                child: IgnorePointer(
+                                  ignoring: true,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.5),
+                                      borderRadius: BorderRadius.circular(12),
+                                      // ImageCarouselCard의 borderRadius와 맞춤
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'auctions.card.ended'.tr(),
+                                        // "경매 종료" 텍스트
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     Padding(
@@ -209,21 +246,23 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                               style:
                                   const TextStyle(fontSize: 16, height: 1.5)),
                           const SizedBox(height: 16),
-                          
+
                           // ✅ 태그, 지도, 작성자 정보 공용 위젯 추가
                           ClickableTagList(tags: auction.tags),
                           if (auction.geoPoint != null) ...[
                             const Divider(height: 32),
-                            Text('auctions.detail.location'.tr(), style: Theme.of(context).textTheme.titleLarge),
+                            Text('auctions.detail.location'.tr(),
+                                style: Theme.of(context).textTheme.titleLarge),
                             const SizedBox(height: 12),
-                            MiniMapView(location: auction.geoPoint!, markerId: auction.id),
+                            MiniMapView(
+                                location: auction.geoPoint!,
+                                markerId: auction.id),
                           ],
                           const Divider(height: 32),
-                          Text('auctions.detail.seller'.tr(), style: Theme.of(context).textTheme.titleLarge),
+                          Text('auctions.detail.seller'.tr(),
+                              style: Theme.of(context).textTheme.titleLarge),
                           const SizedBox(height: 12),
                           AuthorProfileTile(userId: auction.ownerId),
-
-
                         ],
                       ),
                     ),
@@ -354,4 +393,3 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
     );
   }
 }
-

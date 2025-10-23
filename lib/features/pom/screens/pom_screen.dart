@@ -14,7 +14,6 @@
 // =====================================================
 // lib/features/pom/screens/pom_screen.dart
 
-
 import 'package:bling_app/features/pom/models/short_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/pom/data/short_repository.dart';
@@ -29,13 +28,12 @@ class PomScreen extends StatefulWidget {
   // [추가] HomeScreen에서 locationFilter를 전달받습니다.
   final Map<String, String?>? locationFilter;
 
-  const PomScreen({
-    this.userModel,
-    this.initialShorts,
-    this.initialIndex = 0,
-    this.locationFilter, // [추가]
-    super.key
-  });
+  const PomScreen(
+      {this.userModel,
+      this.initialShorts,
+      this.initialIndex = 0,
+      this.locationFilter, // [추가]
+      super.key});
 
   @override
   State<PomScreen> createState() => _PomScreenState();
@@ -45,7 +43,7 @@ class _PomScreenState extends State<PomScreen> {
   final ShortRepository _shortRepository = ShortRepository();
   late Future<List<ShortModel>>? _shortsFuture;
   late final PageController _pageController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -53,7 +51,8 @@ class _PomScreenState extends State<PomScreen> {
 
     if (widget.initialShorts == null) {
       // [수정] fetchShortsOnce 함수에 locationFilter를 전달합니다.
-      _shortsFuture = _shortRepository.fetchShortsOnce(locationFilter: widget.locationFilter);
+      _shortsFuture = _shortRepository.fetchShortsOnce(
+          locationFilter: widget.locationFilter);
     } else {
       _shortsFuture = null;
     }
@@ -69,27 +68,32 @@ class _PomScreenState extends State<PomScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: 
-          widget.initialShorts != null
-              ? _buildPageView(widget.initialShorts!)
-              : FutureBuilder<List<ShortModel>>(
-                  future: _shortsFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError) {
-                      return Center(child: Text('pom.errors.fetchFailed'.tr(namedArgs: {'error': snapshot.error.toString()}), style: const TextStyle(color: Colors.white)));
-                    }
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(child: Text('pom.empty'.tr(), style: const TextStyle(color: Colors.white)));
-                    }
-                  
-                    final shorts = snapshot.data!;
-                  
-                    return _buildPageView(shorts);
-                  },
-                ),
+      body: widget.initialShorts != null
+          ? _buildPageView(widget.initialShorts!)
+          : FutureBuilder<List<ShortModel>>(
+              future: _shortsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                      child: Text(
+                          'pom.errors.fetchFailed'.tr(
+                              namedArgs: {'error': snapshot.error.toString()}),
+                          style: const TextStyle(color: Colors.white)));
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                      child: Text('pom.empty'.tr(),
+                          style: const TextStyle(color: Colors.white)));
+                }
+
+                final shorts = snapshot.data!;
+
+                return _buildPageView(shorts);
+              },
+            ),
     );
   }
 

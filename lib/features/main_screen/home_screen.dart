@@ -39,10 +39,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 // 모든 card 위젯과 그에 필요한 model들을 import 합니다.
-import 'package:bling_app/features/local_news/models/post_model.dart';
+
 // ▼▼▼▼▼ [개편] 신규 썸네일 및 상세 화면 import ▼▼▼▼▼
+// ▼▼▼▼▼ [개편] 1 단계: Product 썸네일 및 모델 import ▼▼▼▼▼
+import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/features/main_feed/widgets/post_thumb.dart';
-// ▼▼▼▼▼ [개편] 2단계: Product 썸네일 및 모델 import ▼▼▼▼▼
+
+// ▼▼▼▼▼ [개편] 2 단계: Product 썸네일 및 모델 import ▼▼▼▼▼
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:bling_app/features/main_feed/widgets/product_thumb.dart';
 // ▼▼▼▼▼ [개편] 3단계: Club Post 썸네일 및 모델 import ▼▼▼▼▼
@@ -54,6 +57,18 @@ import 'package:bling_app/features/main_feed/widgets/find_friend_thumb.dart';
 // ▼▼▼▼▼ [개편] 5단계: Job 썸네일 및 모델 import ▼▼▼▼▼
 import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/features/main_feed/widgets/job_thumb.dart';
+// ▼▼▼▼▼ [개편] 6단계: Local Store 썸네일 및 모델 import ▼▼▼▼▼
+import 'package:bling_app/features/local_stores/models/shop_model.dart';
+import 'package:bling_app/features/main_feed/widgets/local_store_thumb.dart';
+// ▼▼▼▼▼ [개편] 7단계: Auction 썸네일 및 모델 import ▼▼▼▼▼
+import 'package:bling_app/features/auction/models/auction_model.dart';
+import 'package:bling_app/features/main_feed/widgets/auction_thumb.dart';
+
+// ▼▼▼▼▼ [개편] 8단계: POM 썸네일 및 모델 import ▼▼▼▼▼
+import 'package:bling_app/features/pom/models/short_model.dart';
+import 'package:bling_app/features/main_feed/widgets/pom_thumb.dart';
+
+import 'package:provider/provider.dart'; // PomThumb에서 UserModel 접근 위해
 
 // 아이콘 그리드에서 사용할 각 기능별 화면을 import 합니다.
 import 'package:bling_app/features/local_news/screens/local_news_screen.dart';
@@ -298,6 +313,12 @@ class HomeScreen extends StatelessWidget {
         _buildFindFriendCarousel(context),
         // ▼▼▼▼▼ [개편] 6단계: Job 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildJobCarousel(context),
+        // ▼▼▼▼▼ [개편] 7단계: Local Store 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildLocalStoreCarousel(context),
+        // ▼▼▼▼▼ [개편] 8단계: Auction 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildAuctionCarousel(context),
+        // ▼▼▼▼▼ [개편] 9단계: POM 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildPomCarousel(context),
       ],
     );
   }
@@ -782,6 +803,304 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// [개편] 7단계: 동네 업체(Local Store) 캐러셀 섹션 빌더
+  /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
+  ///
+  Widget _buildLocalStoreCarousel(BuildContext context) {
+    final feedRepository = FeedRepository();
+
+    return FutureBuilder<List<FeedItemModel>>(
+      // 1. Repository에서 Shop 최신 20개를 가져옵니다.
+      future: feedRepository.fetchLatestShops(limit: 20),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 로딩 중: 스켈레톤 섹션
+          return const SliverToBoxAdapter(
+            child: SizedBox(
+              height: 290, // 썸네일 240 + 헤더/패딩 50
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+
+        // 2. MD요구사항 "6. 빈 섹션 처리": 데이터가 없으면 섹션 자체를 숨김
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        final shops = snapshot.data!
+            .map((item) => ShopModel.fromFirestore(
+                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+            .toList();
+
+        // 3. 데이터가 있을 경우: 섹션 헤더 + 가로 캐러셀
+        return SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 3-1. 섹션 헤더
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "main.tabs.localStores".tr(), // "동네 업체"
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (userModel == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('main.errors.loginRequired'.tr())),
+                          );
+                          return;
+                        }
+                        final nextScreen = LocalStoresScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                        );
+                        onIconTap(nextScreen, 'main.tabs.localStores');
+                      },
+                      child: Text('common.viewAll'.tr()),
+                    )
+                  ],
+                ),
+              ),
+              // 3-2. 가로 캐러셀
+              SizedBox(
+                height: 240, // MD: 표준 썸네일 고정 크기 (220x240)
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  primary: false,
+                  shrinkWrap: true,
+                  clipBehavior: Clip.none,
+                  itemCount: shops.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          right: (index == shops.length - 1) ? 0 : 12),
+                      child: LocalStoreThumb(shop: shops[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// [개편] 8단계: 경매(Auction) 캐러셀 섹션 빌더
+  /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김
+  ///
+  Widget _buildAuctionCarousel(BuildContext context) {
+    final feedRepository = FeedRepository();
+
+    return FutureBuilder<List<FeedItemModel>>(
+      // 1. Repository에서 Auction 최신 20개를 가져옵니다.
+      future: feedRepository.fetchLatestAuctions(limit: 20),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 로딩 중: 스켈레톤 섹션
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 290, // 썸네일 240 + 헤더/패딩 50
+              alignment: Alignment.center,
+              child: const CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        // 2. MD요구사항 "6. 빈 섹션 처리": 데이터가 없으면 섹션 자체를 숨김
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        final auctions = snapshot.data!
+            .map((item) => AuctionModel.fromFirestore(
+                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+            .toList();
+
+        // 3. 데이터가 있을 경우: 섹션 헤더 + 가로 캐러셀
+        return SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 3-1. 섹션 헤더
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "main.tabs.auction".tr(), // "경매"
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (userModel == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('main.errors.loginRequired'.tr())),
+                          );
+                          return;
+                        }
+                        final nextScreen = AuctionScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                        );
+                        onIconTap(nextScreen, 'main.tabs.auction');
+                      },
+                      child: Text('common.viewAll'.tr()),
+                    )
+                  ],
+                ),
+              ),
+              // 3-2. 가로 캐러셀
+              SizedBox(
+                height: 240, // MD: 표준 썸네일 고정 크기 (220x240)
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  primary: false,
+                  shrinkWrap: true,
+                  clipBehavior: Clip.none,
+                  itemCount: auctions.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          right: (index == auctions.length - 1) ? 0 : 12),
+                      child: AuctionThumb(auction: auctions[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// [개편] 9단계: 숏폼(POM) 캐러셀 섹션 빌더
+  /// MD요구사항: 1.행 단위 가로 캐러셀, 2.최신 20개, 6.빈 섹션 숨김, 4.재생 정책
+  ///
+  Widget _buildPomCarousel(BuildContext context) {
+    final feedRepository = FeedRepository();
+
+    return FutureBuilder<List<FeedItemModel>>(
+      // 1. Repository에서 Short 최신 20개를 가져옵니다.
+      future: feedRepository.fetchLatestShorts(limit: 20),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 로딩 중: 스켈레톤 섹션
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 290, // 썸네일 240 + 헤더/패딩 50
+              alignment: Alignment.center,
+              child: const CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        // 2. MD요구사항 "6. 빈 섹션 처리": 데이터가 없으면 섹션 자체를 숨김
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        // 3. FeedItemModel 리스트를 ShortModel 리스트로 변환 (전체 목록 전달용)
+        final allShorts = snapshot.data!
+            .map((item) => ShortModel.fromFirestore(
+                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+            .toList();
+
+        // 4. 데이터가 있을 경우: 섹션 헤더 + 가로 캐러셀
+        return SliverToBoxAdapter(
+          // Provider를 통해 userModel을 PomThumb 위젯 트리에 제공
+          child: Provider.value(
+            value: userModel,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 4-1. 섹션 헤더
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "main.tabs.pom".tr(), // "POM"
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          if (userModel == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content:
+                                      Text('main.errors.loginRequired'.tr())),
+                            );
+                            return;
+                          }
+                          final nextScreen = PomScreen(
+                            userModel: userModel,
+                            locationFilter: activeLocationFilter,
+                            initialShorts: null,
+                            initialIndex: 0,
+                          );
+                          onIconTap(nextScreen, 'main.tabs.pom');
+                        },
+                        child: Text('common.viewAll'.tr()),
+                      ),
+                    ],
+                  ),
+                ),
+                // 4-2. 가로 캐러셀
+                SizedBox(
+                  height: 240, // MD: 표준 썸네일 고정 크기 (220x240)
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    primary: false,
+                    shrinkWrap: true,
+                    clipBehavior: Clip.none,
+                    itemCount: allShorts.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                            right: (index == allShorts.length - 1) ? 0 : 12),
+                        // PomThumb에 전체 목록과 현재 인덱스 전달
+                        child: PomThumb(
+                            short: allShorts[index],
+                            allShorts: allShorts,
+                            currentIndex: index),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
