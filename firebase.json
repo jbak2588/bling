@@ -1,1 +1,65 @@
-{"functions":[{"source":"functions-v2","codebase":"functions-v2","ignore":["node_modules",".git","firebase-debug.log","firebase-debug.*.log","*.local"]}],"firestore":{"database":"(default)","location":"asia-southeast2","rules":"firestore.rules","indexes":"firestore.indexes.json"},"flutter":{"platforms":{"android":{"default":{"projectId":"blingbling-app","appId":"1:1075298230474:android:a2d59738deb2548022d433","fileOutput":"android/app/google-services.json"}},"macos":{"default":{"projectId":"blingbling-app","appId":"1:1075298230474:ios:497ca2e2036ace8722d433","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"blingbling-app","configurations":{"android":"1:1075298230474:android:a2d59738deb2548022d433","ios":"1:1075298230474:ios:4d5ce196717fa56c22d433"}}},"ios":{"default":{"projectId":"blingbling-app","appId":"1:1075298230474:ios:4d5ce196717fa56c22d433","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}}}}}
+{
+  "functions": [
+    {
+      "source": "functions-v2",
+      "codebase": "functions-v2",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ],
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-southeast2",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "blingbling-app",
+          "appId": "1:1075298230474:android:a2d59738deb2548022d433",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "blingbling-app",
+          "appId": "1:1075298230474:ios:497ca2e2036ace8722d433",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "blingbling-app",
+          "configurations": {
+            "android": "1:1075298230474:android:a2d59738deb2548022d433",
+            "ios": "1:1075298230474:ios:4d5ce196717fa56c22d433"
+          }
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "blingbling-app",
+          "appId": "1:1075298230474:ios:4d5ce196717fa56c22d433",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

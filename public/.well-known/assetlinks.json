@@ -1,0 +1,10 @@
+
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.example.bling_app",
+    "sha256_cert_fingerprints":
+    ["74:CE:C3:A5:89:D0:8E:3B:7A:30:4D:13:D5:17:92:9E:F6:62:B1:5F:07:96:9A:E0:37:B6:45:61:0C:D5:E7:AD"]
+  }
+}]

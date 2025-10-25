@@ -12,6 +12,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
+import 'package:share_plus/share_plus.dart'; // ✅ SharePlus import 확인
 import '../../../core/constants/app_categories.dart';
 import '../models/post_model.dart';
 import '../../../core/models/user_model.dart';
@@ -39,6 +40,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
   late int _thanksCount;
   bool _isThanksProcessing = false;
   late PostModel _currentPost;
+  bool _isReporting = false; // 신고 처리 중 상태
 
   @override
   void initState() {
@@ -272,15 +274,15 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
               },
             ),
           PopupMenuButton<String>(
-            onSelected: (value) {/* Handle menu selection */},
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              PopupMenuItem<String>(
-                  value: 'report',
-                  child: Text('localNewsDetail.menu.report'.tr())),
-              PopupMenuItem<String>(
-                  value: 'share',
-                  child: Text('localNewsDetail.menu.share'.tr())),
-            ],
+            itemBuilder: (context) => _buildPopupMenuItems(context),
+            onSelected: (value) => _handleMenuSelection(context, value),
+          ),
+          // 공유 버튼 추가
+          IconButton(
+            icon: const Icon(Icons.share),
+            // ✅ [수정] onPressed에 바로 _sharePost 연결 및 툴팁 추가
+            onPressed: _sharePost,
+            tooltip: 'common.share'.tr(),
           ),
         ],
       ),
@@ -359,6 +361,228 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
         ),
       ),
     );
+  }
+
+  // ✅ [네이티브 딥링킹] 공유 기능 함수
+  Future<void> _sharePost() async {
+    try {
+      // 1. 공유할 웹 URL 생성 (Firebase Hosting 기본 도메인 사용)
+      final String postUrl =
+          'https://blingbling-app.web.app/post/${_currentPost.id}';
+
+      // 2. 생성된 URL과 함께 공유 메시지 전달
+      await SharePlus.instance.share(
+        ShareParams(
+          text:
+              'Check out this post on Bling!\n${_currentPost.title ?? ''}\n\n$postUrl',
+          subject: 'Bling Post: ${_currentPost.title ?? ''}',
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error sharing post: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('common.shareError'.tr())),
+        );
+      }
+    } finally {
+      // 상태 업데이트 없음
+    }
+  }
+
+  List<PopupMenuEntry<String>> _buildPopupMenuItems(BuildContext context) {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final isOwner =
+        currentUserId != null && currentUserId == _currentPost.userId;
+
+    if (isOwner) {
+      return <PopupMenuEntry<String>>[
+        PopupMenuItem(value: 'edit', child: Text('common.edit'.tr())),
+        PopupMenuItem(value: 'delete', child: Text('common.delete'.tr())),
+      ];
+    } else {
+      return <PopupMenuEntry<String>>[
+        PopupMenuItem(value: 'report', child: Text('common.report'.tr())),
+      ];
+    }
+  }
+
+  void _handleMenuSelection(BuildContext context, String value) {
+    switch (value) {
+      case 'edit':
+        Navigator.of(context)
+            .push<bool>(
+          MaterialPageRoute(
+            builder: (_) => EditLocalNewsScreen(post: _currentPost),
+          ),
+        )
+            .then((result) {
+          if (result == true) {
+            _refreshPostData();
+          }
+        });
+        break;
+      case 'delete':
+        _showDeleteConfirmation(context);
+        break;
+      case 'report':
+        _showReportDialog(context);
+        break;
+    }
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('common.delete'.tr()),
+        content: Text('localNewsDetail.confirmDelete'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('common.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _deletePost();
+            },
+            child: Text('common.delete'.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deletePost() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(_currentPost.id)
+          .delete();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('localNewsDetail.deleted'.tr())),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('main.errors.unknown'.tr())),
+        );
+      }
+    }
+  }
+
+  // 신고 다이얼로그
+  void _showReportDialog(BuildContext context) {
+    String? selectedReason;
+    final reportReasons = [
+      'reportReasons.spam',
+      'reportReasons.abuse',
+      'reportReasons.inappropriate',
+      'reportReasons.illegal',
+      'reportReasons.etc',
+    ];
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('reportDialog.title'.tr()),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: reportReasons.map((reasonKey) {
+                    return RadioListTile<String>(
+                      title: Text(reasonKey.tr()),
+                      value: reasonKey,
+                      groupValue: selectedReason,
+                      onChanged: (value) {
+                        setState(() => selectedReason = value);
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text('common.cancel'.tr()),
+                ),
+                ElevatedButton(
+                  onPressed: (selectedReason != null && !_isReporting)
+                      ? () async {
+                          Navigator.pop(dialogContext);
+                          await _submitReport(context, selectedReason!);
+                        }
+                      : null,
+                  child: _isReporting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text('common.report'.tr()),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _submitReport(BuildContext context, String reasonKey) async {
+    if (_isReporting) return;
+
+    final reporterId = FirebaseAuth.instance.currentUser?.uid;
+    if (reporterId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('main.errors.loginRequired'.tr())));
+      return;
+    }
+
+    if (_currentPost.userId == reporterId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('reportDialog.cannotReportSelf'.tr())));
+      return;
+    }
+
+    setState(() => _isReporting = true);
+    try {
+      final reportData = {
+        'reportedContentId': _currentPost.id,
+        'reportedContentType': 'post',
+        'reportedUserId': _currentPost.userId,
+        'reporterUserId': reporterId,
+        'reason': reasonKey,
+        'status': 'pending',
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      await FirebaseFirestore.instance.collection('reports').add(reportData);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('reportDialog.success'.tr())));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'reportDialog.fail'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isReporting = false);
+    }
   }
 
   Widget _buildTags(BuildContext context, List<String> tags) {
