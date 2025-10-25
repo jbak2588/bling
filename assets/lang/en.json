@@ -517,9 +517,31 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "done": "Done",
+    "report": "Report",
+    "moreOptions": "More options",
     "viewAll": "View all",
     "new": "New",
     "updated": "Updated"
+  },
+  "reportDialog": {
+    "title": "Report Post",
+    "titleComment": "Report Comment",
+    "titleReply": "Report Reply",
+    "cannotReportSelfComment": "You cannot report your own comment.",
+    "cannotReportSelfReply": "You cannot report your own reply.",
+    "success": "Report submitted. Thank you.",
+    "fail": "Failed to submit report: {error}",
+    "cannotReportSelf": "You cannot report your own post."
+  },
+  "replyDelete": {
+    "fail": "Failed to delete reply: {error}"
+  },
+  "reportReasons": {
+    "spam": "Spam or misleading",
+    "abuse": "Harassment or hateful speech",
+    "inappropriate": "Sexually inappropriate",
+    "illegal": "Illegal content",
+    "etc": "Other"
   },
   "deleteConfirm": {
     "title": "Delete Comment",

@@ -43,8 +43,8 @@ class PostCard extends StatefulWidget {
 }
 
 // ✅ 2. State 클래스를 만들고 with AutomaticKeepAliveClientMixin을 추가합니다.
-class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin {
-  
+class _PostCardState extends State<PostCard>
+    with AutomaticKeepAliveClientMixin {
   // ✅ 3. wantKeepAlive를 true로 설정하여 카드 상태를 유지합니다.
   @override
   bool get wantKeepAlive => true;
@@ -56,7 +56,8 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
 
     if (diff.inMinutes < 1) return 'time.now'.tr();
     if (diff.inHours < 1) {
-      return 'time.minutesAgo'.tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+      return 'time.minutesAgo'
+          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
     }
     if (diff.inDays < 1) {
       return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
@@ -67,9 +68,13 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
     return DateFormat('time.dateFormat'.tr()).format(dt);
   }
 
-  Widget _buildAuthorInfo(BuildContext context, String userId, Timestamp createdAt) {
+  Widget _buildAuthorInfo(
+      BuildContext context, String userId, Timestamp createdAt) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox(height: 40);
@@ -87,8 +92,11 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-                child: user.photoUrl == null ? const Icon(Icons.person, size: 20) : null,
+                backgroundImage:
+                    user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                child: user.photoUrl == null
+                    ? const Icon(Icons.person, size: 20)
+                    : null,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -97,19 +105,23 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
                   children: [
                     Row(
                       children: [
-                        Text(user.nickname, style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                        Text(user.nickname,
+                            style:
+                                GoogleFonts.inter(fontWeight: FontWeight.bold)),
                         const SizedBox(width: 4),
                         TrustLevelBadge(trustLevel: user.trustLevel),
                       ],
                     ),
                     Text(
                       '${user.locationParts?['kel'] ?? user.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $timeAgo',
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                      style:
+                          TextStyle(color: Colors.grey.shade600, fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz_outlined)),
+              // ✅ [수정] 점 3개 메뉴 제거 (기능 없음)
+              // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz_outlined)),
             ],
           ),
         );
@@ -129,7 +141,8 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.location_on_outlined, color: Colors.grey.shade600, size: 16),
+          Icon(Icons.location_on_outlined,
+              color: Colors.grey.shade600, size: 16),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
@@ -143,7 +156,8 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
     );
   }
 
-  Widget _buildTitleAndCategory(BuildContext context, PostModel post, PostCategoryModel category) {
+  Widget _buildTitleAndCategory(
+      BuildContext context, PostModel post, PostCategoryModel category) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -154,7 +168,8 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
             Expanded(
               child: Text(
                 post.title ?? post.body,
-                style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
+                style: GoogleFonts.inter(
+                    fontSize: 16, fontWeight: FontWeight.w600),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -165,7 +180,8 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
           const SizedBox(height: 6),
           Text(
             post.body,
-            style: TextStyle(fontSize: 14, color: Colors.grey.shade800, height: 1.4),
+            style: TextStyle(
+                fontSize: 14, color: Colors.grey.shade800, height: 1.4),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -208,7 +224,9 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
         Icon(icon, size: 20, color: Colors.grey.shade700),
         if (count != null) ...[
           const SizedBox(width: 6),
-          Text('$count', style: TextStyle(color: Colors.grey.shade800, fontWeight: FontWeight.w500)),
+          Text('$count',
+              style: TextStyle(
+                  color: Colors.grey.shade800, fontWeight: FontWeight.w500)),
         ],
       ],
     );
@@ -219,9 +237,12 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _actionButton(icon: Icons.favorite_border, count: post.likesCount),
-        _actionButton(icon: Icons.chat_bubble_outline, count: post.commentsCount),
-        _actionButton(icon: Icons.card_giftcard_outlined, count: post.thanksCount),
-        _actionButton(icon: Icons.share_outlined, count: null),
+        _actionButton(
+            icon: Icons.chat_bubble_outline, count: post.commentsCount),
+        _actionButton(
+            icon: Icons.card_giftcard_outlined, count: post.thanksCount),
+        // ✅ [수정] 공유 아이콘 제거 (기능 없음)
+        // _actionButton(icon: Icons.share_outlined, count: null),
       ],
     );
   }
@@ -273,8 +294,7 @@ class _PostCardState extends State<PostCard> with AutomaticKeepAliveClientMixin 
                 const SizedBox(height: 12),
                 _buildLocationInfo(context, post.locationName),
               ],
-              if (post.tags.isNotEmpty)
-                _buildTags(context, post.tags),
+              if (post.tags.isNotEmpty) _buildTags(context, post.tags),
               const Divider(height: 24),
               _buildActionButtons(post),
             ],

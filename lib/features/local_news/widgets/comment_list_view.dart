@@ -3,8 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:intl/intl.dart';
-import 'package:easy_localization/easy_localization.dart'; 
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../core/models/comment_model.dart';
 import '../../../core/models/user_model.dart';
@@ -34,6 +33,9 @@ class CommentListView extends StatefulWidget {
 class _CommentListViewState extends State<CommentListView> {
   final _likeLoading = <String, bool>{};
   final _likedComments = <String, bool>{};
+  // ✅ [신고하기] 신고 처리 중 상태 변수 추가
+  bool _isReporting = false;
+  final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   @override
   void initState() {
@@ -138,8 +140,6 @@ class _CommentListViewState extends State<CommentListView> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
-
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('posts')
@@ -213,11 +213,35 @@ class _CommentListViewState extends State<CommentListView> {
                       ],
                     ),
                   ),
-                  if (currentUserId == comment.userId)
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline, size: 20),
-                      onPressed: () => _deleteComment(comment.id),
-                    ),
+                  // ✅ [신고하기] 본인 댓글/답글 여부에 따라 다른 메뉴 표시
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, size: 20),
+                    tooltip: 'common.moreOptions'.tr(),
+                    onSelected: (value) {
+                      if (value == 'delete') {
+                        _deleteComment(comment.id);
+                      } else if (value == 'report') {
+                        _showReportDialog(context, comment);
+                      }
+                    },
+                    itemBuilder: (context) {
+                      final bool isOwner = comment.userId == currentUserId;
+                      List<PopupMenuItem<String>> items = [];
+
+                      if (isOwner) {
+                        items.add(PopupMenuItem(
+                          value: 'delete',
+                          child: Text('common.delete'.tr()),
+                        ));
+                      } else {
+                        items.add(PopupMenuItem(
+                          value: 'report',
+                          child: Text('common.report'.tr()),
+                        ));
+                      }
+                      return items;
+                    },
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -267,6 +291,127 @@ class _CommentListViewState extends State<CommentListView> {
         );
       },
     );
+  }
+
+  // ✅ [신고하기] 신고 다이얼로그 표시 함수
+  void _showReportDialog(BuildContext context, CommentModel comment) {
+    String? selectedReason;
+    final reportReasons = [
+      'reportReasons.spam',
+      'reportReasons.abuse',
+      'reportReasons.inappropriate',
+      'reportReasons.illegal',
+      'reportReasons.etc',
+    ];
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: Text('reportDialog.titleComment'.tr()),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: reportReasons.map((reasonKey) {
+                  return RadioListTile<String>(
+                    title: Text(reasonKey.tr()),
+                    value: reasonKey,
+                    groupValue: selectedReason,
+                    onChanged: (value) =>
+                        setState(() => selectedReason = value),
+                  );
+                }).toList(),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text('common.cancel'.tr()),
+              ),
+              ElevatedButton(
+                onPressed: (selectedReason != null && !_isReporting)
+                    ? () async {
+                        Navigator.pop(dialogContext);
+                        await _submitReport(context, comment, selectedReason!);
+                      }
+                    : null,
+                child: _isReporting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text('common.report'.tr()),
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
+  // ✅ [신고하기] Firestore에 신고 내역 저장 함수
+  Future<void> _submitReport(
+      BuildContext context, CommentModel comment, String reasonKey) async {
+    if (_isReporting) return;
+
+    final reporterId = currentUserId;
+    if (reporterId.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('main.errors.loginRequired'.tr())),
+        );
+      }
+      return;
+    }
+
+    // 자기 자신의 댓글은 신고 불가
+    if (comment.userId == reporterId) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('reportDialog.cannotReportSelfComment'.tr())),
+        );
+      }
+      return;
+    }
+
+    setState(() => _isReporting = true);
+
+    try {
+      final reportData = {
+        'reportedContentId': comment.id,
+        'reportedContentType': 'comment',
+        'reportedParentId': widget.postId,
+        'reportedUserId': comment.userId,
+        'reporterUserId': reporterId,
+        'reason': reasonKey,
+        'status': 'pending',
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      await FirebaseFirestore.instance.collection('reports').add(reportData);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('reportDialog.success'.tr())),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'reportDialog.fail'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        Future.microtask(() => setState(() => _isReporting = false));
+      }
+    }
   }
 
   String _formatTime(DateTime dateTime) {

@@ -1,0 +1,10 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appID": "JJN3959AL8.com.company.blingbling-app",  
+        "paths": [ "/post/*" ]  
+      }
+    ]
+  }
+}

@@ -488,9 +488,31 @@
     "cancel": "Batal",
     "delete": "Hapus",
     "done": "Selesai",
+    "report": "Laporkan",
+    "moreOptions": "Opsi lainnya",
     "viewAll": "Lihat semua",
     "new": "Baru",
     "updated": "Diperbarui"
+  },
+  "reportDialog": {
+    "title": "Laporkan Postingan",
+    "titleComment": "Laporkan Komentar",
+    "titleReply": "Laporkan Balasan",
+    "cannotReportSelfComment": "Anda tidak bisa melaporkan komentar Anda sendiri.",
+    "cannotReportSelfReply": "Anda tidak bisa melaporkan balasan Anda sendiri.",
+    "success": "Laporan terkirim. Terima kasih.",
+    "fail": "Gagal mengirim laporan: {error}",
+    "cannotReportSelf": "Anda tidak bisa melaporkan postingan Anda sendiri."
+  },
+  "replyDelete": {
+    "fail": "Gagal menghapus balasan: {error}"
+  },
+  "reportReasons": {
+    "spam": "Spam atau menyesatkan",
+    "abuse": "Pelecehan atau ujaran kebencian",
+    "inappropriate": "Konten seksual tidak pantas",
+    "illegal": "Konten ilegal",
+    "etc": "Lainnya"
   },
   "deleteConfirm": {
     "title": "Hapus Komentar",

@@ -517,9 +517,31 @@
     "cancel": "취소",
     "delete": "삭제",
     "done": "완료",
+    "report": "신고",
+    "moreOptions": "더보기",
     "viewAll": "모두 보기",
     "new": "신규",
     "updated": "업데이트"
+  },
+  "reportDialog": {
+    "title": "게시물 신고",
+    "titleComment": "댓글 신고",
+    "titleReply": "답글 신고",
+    "cannotReportSelfComment": "내가 쓴 댓글은 신고할 수 없습니다.",
+    "cannotReportSelfReply": "내가 쓴 답글은 신고할 수 없습니다.",
+    "success": "신고가 접수되었습니다. 감사합니다.",
+    "fail": "신고 접수에 실패했습니다: {error}",
+    "cannotReportSelf": "내가 작성한 글은 신고할 수 없습니다."
+  },
+  "replyDelete": {
+    "fail": "답글 삭제 실패: {error}"
+  },
+  "reportReasons": {
+    "spam": "스팸/허위 정보",
+    "abuse": "괴롭힘 또는 혐오 발언",
+    "inappropriate": "성적으로 부적절함",
+    "illegal": "불법/위법 내용",
+    "etc": "기타"
   },
   "deleteConfirm": {
     "title": "댓글 삭제",
