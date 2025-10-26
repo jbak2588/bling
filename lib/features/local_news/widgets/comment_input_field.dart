@@ -10,7 +10,10 @@ class CommentInputField extends StatefulWidget {
   final void Function(Map<String, dynamic> newComment)? onCommentAdded;
 
   const CommentInputField(
-      {super.key, required this.postId, this.onCommentAdded, required String hintText});
+      {super.key,
+      required this.postId,
+      this.onCommentAdded,
+      required String hintText});
 
   @override
   State<CommentInputField> createState() => _CommentInputFieldState();
@@ -75,7 +78,7 @@ class _CommentInputFieldState extends State<CommentInputField> {
           8, 8, 8, MediaQuery.of(context).viewInsets.bottom + 8),
       child: Row(
         children: [
-          // 비밀댓글 체크박스 (UI 예시)
+          // ✅ [수정] 비밀 댓글: 체크박스와 아이콘만 표시
           Checkbox(
             value: _isSecret,
             onChanged: (value) {
@@ -84,13 +87,27 @@ class _CommentInputFieldState extends State<CommentInputField> {
               });
             },
             visualDensity: VisualDensity.compact,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            activeColor: Theme.of(context).primaryColor, // 활성 색상 지정 (옵션)
           ),
-         Text('commentInputField.secretCommentLabel'.tr()),
+          // ✅ 비밀 댓글 텍스트 대신 아이콘 표시 (+ 탭으로 토글 가능)
+          InkWell(
+            onTap: () => setState(() => _isSecret = !_isSecret),
+            borderRadius: BorderRadius.circular(4),
+            child: Padding(
+              padding: const EdgeInsets.all(4.0), // 더 넉넉한 탭 영역
+              child: Icon(
+                _isSecret ? Icons.lock_outline : Icons.lock_open_outlined,
+                size: 18,
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8), // TextField와의 간격
           Expanded(
-            flex: 5,
             child: TextField(
               controller: _controller,
-             decoration: InputDecoration(
+              decoration: InputDecoration(
                 // ✅ [다국어 수정] 힌트 텍스트
                 hintText: 'commentInputField.hintText'.tr(),
                 border: const OutlineInputBorder(),

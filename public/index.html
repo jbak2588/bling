@@ -1,89 +1,238 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="ko">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
-
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.4.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.4.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.4.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.4.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.4.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.4.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.4.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.4.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.4.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.4.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
-
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bling | 지역 소식과 이웃을 잇다</title>
+    <meta name="description" content="Bling - 지역 소식과 이웃을 잇는 커뮤니티 앱" />
+    <style>
+      :root {
+        --bg: #0b0c10;
+        --card: #ffffff;
+        --text: #111827;
+        --sub: #6b7280;
+        --primary: #4f46e5;
+        --primary-700: #4338ca;
+        --badge-height: 54px;
+        --badge-height-sm: 46px;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        background: var(--bg);
+        color: var(--text);
+        display: grid;
+        place-items: center;
+      }
+      .container {
+        width: min(920px, 92vw);
+        margin: 8vh auto;
+        background: var(--card);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        overflow: hidden;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 28px 28px 8px 28px;
+      }
+      .logo {
+        width: 48px; height: 48px; border-radius: 12px;
+        background: linear-gradient(135deg, #7c3aed, #22d3ee);
+        display: grid; place-items: center; color: white;
+        font-weight: 800; font-size: 22px;
+        box-shadow: 0 6px 18px rgba(124,58,237,0.35);
+      }
+      h1 { font-size: 28px; margin: 0; }
+      p.desc { margin: 6px 0 0 0; color: var(--sub); }
+  .content { padding: 8px 28px 28px 28px; }
+  .lang-switch { display:flex; gap:8px; }
+  .lang-switch .lang { cursor:pointer; background:#fff; color: var(--sub); border:1px solid #e5e7eb; border-radius:8px; padding:6px 10px; font-size:12px; }
+  .lang-switch .lang.active { background: var(--primary); border-color: var(--primary); color:#fff; }
+      .badges { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; margin: 18px 0 8px; }
+      .badge {
+        display: flex; align-items: center; justify-content: center;
+        border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; background: #fff;
+        transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      }
+      .badge:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,.08); border-color:#d1d5db; }
+      .badge.highlight { outline: 3px solid #e0e7ff; transform: translateY(-2px) scale(1.02); }
+  .badge { min-height: calc(var(--badge-height) + 6px); }
+  .badge img { display: block; height: var(--badge-height); width: auto; }
+  .badge .badge-text { display: none; font-weight: 700; letter-spacing: .2px; }
+  .badge.fallback { background: #000; color: #fff; border-color: #111827; }
+  .badge.fallback .badge-text { display: inline-block; padding: 12px 16px; }
+  .badge.fallback img { display: none; }
+      .hint {
+        background: #f9fafb; border: 1px dashed #e5e7eb; color: #374151;
+        padding: 14px 16px; border-radius: 12px; font-size: 14px;
+      }
+      footer { padding: 20px 28px 28px 28px; font-size: 12px; color: #9ca3af; }
+      @media (max-width: 560px) {
+        h1 { font-size: 22px; }
+        .badge img { height: var(--badge-height-sm); }
+        .badge { min-height: calc(var(--badge-height-sm) + 6px); }
       }
     </style>
   </head>
   <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
-    </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+    <main class="container" role="main">
+      <header>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <div class="logo" aria-hidden="true">B</div>
+          <div>
+            <h1 id="app-title">Bling</h1>
+            <p id="app-desc" class="desc">지역 소식과 이웃을 잇는 커뮤니티 앱</p>
+          </div>
+        </div>
+        <div class="lang-switch" role="group" aria-label="언어 선택">
+          <button class="lang active" data-lang="ko" aria-pressed="true">한국어</button>
+          <button class="lang" data-lang="id" aria-pressed="false">Bahasa Indonesia</button>
+          <button class="lang" data-lang="en" aria-pressed="false">English</button>
+        </div>
+      </header>
+      <section class="content">
+        <div class="badges" id="store-badges">
+          <a id="play-badge" class="badge" href="https://play.google.com/store/apps/details?id=com.example.bling_app" target="_blank" rel="noopener" aria-label="Google Play에서 Bling 앱 받기">
+            <img id="play-img" src="https://play.google.com/intl/ko/badges/static/images/badges/ko_badge_web_generic.png" alt="Google Play에서 다운로드" />
+          </a>
+          <a id="appstore-badge" class="badge" href="https://apps.apple.com/app/id0000000000" target="_blank" rel="noopener" aria-label="App Store에서 Bling 앱 받기">
+            <img id="appstore-img" src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store/ko-kr.svg" alt="App Store에서 다운로드" />
+          </a>
+        </div>
+        <p id="install-hint" class="hint">앱을 설치하고 링크를 다시 클릭하시면 해당 콘텐츠로 바로 이동합니다.</p>
+      </section>
+      <footer>
+        © <span id="year"></span> Bling. All rights reserved.
+      </footer>
+    </main>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+      // 간단한 OS 감지 + 다국어 스위치
+      (function() {
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        const isAndroid = /Android/i.test(ua);
+        const isIOS = /iPhone|iPad|iPod/i.test(ua);
+        const play = document.getElementById('play-badge');
+        const appstore = document.getElementById('appstore-badge');
+        const playImg = document.getElementById('play-img');
+        const appImg = document.getElementById('appstore-img');
+        const appTitle = document.getElementById('app-title');
+        const appDesc = document.getElementById('app-desc');
+        const hint = document.getElementById('install-hint');
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+        const translations = {
+          ko: {
+            title: 'Bling',
+            desc: '지역 소식과 이웃을 잇는 커뮤니티 앱',
+            hint: '앱을 설치하고 링크를 다시 클릭하시면 해당 콘텐츠로 바로 이동합니다.',
+            playAria: 'Google Play에서 Bling 앱 받기',
+            appAria: 'App Store에서 Bling 앱 받기',
+            playAlt: 'Google Play에서 다운로드',
+            appAlt: 'App Store에서 다운로드'
+          },
+          id: {
+            title: 'Bling',
+            desc: 'Aplikasi komunitas untuk berita lokal dan tetangga',
+            hint: 'Instal aplikasi lalu klik tautannya lagi untuk langsung menuju konten.',
+            playAria: 'Dapatkan Bling di Google Play',
+            appAria: 'Dapatkan Bling di App Store',
+            playAlt: 'Dapatkan di Google Play',
+            appAlt: 'Unduh di App Store'
+          },
+          en: {
+            title: 'Bling',
+            desc: 'A community app for local news and neighbors',
+            hint: 'Install the app, then click the link again to go straight to the content.',
+            playAria: 'Get Bling on Google Play',
+            appAria: 'Get Bling on the App Store',
+            playAlt: 'Get it on Google Play',
+            appAlt: 'Download on the App Store'
+          }
+        };
+
+        const playBadgeSrc = {
+          ko: 'https://play.google.com/intl/ko/badges/static/images/badges/ko_badge_web_generic.png',
+          id: 'https://play.google.com/intl/id/badges/static/images/badges/id_badge_web_generic.png',
+          en: 'https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'
+        };
+        const appBadgeSrc = {
+          ko: '/assets/badges/appstore/ko-kr.svg',
+          id: 'https://developer.apple.com/assets/elements/badges/download-on-the-app-store/id.svg',
+          en: '/assets/badges/appstore/en-us.svg'
+        };
+
+        let currentLang = localStorage.getItem('lang') || 'ko'; // 기본 한국어
+
+        function setLang(lang) {
+          currentLang = lang;
+          localStorage.setItem('lang', lang);
+          const dict = translations[lang] || translations.ko;
+          appTitle.textContent = dict.title;
+          appDesc.textContent = dict.desc;
+          hint.textContent = dict.hint;
+          play?.setAttribute('aria-label', dict.playAria);
+          appstore?.setAttribute('aria-label', dict.appAria);
+          if (playImg) { playImg.alt = dict.playAlt; playImg.src = playBadgeSrc[lang] || playBadgeSrc.ko; }
+          // Reset any previous fallback state before switching src
+          const appParent = document.getElementById('appstore-badge');
+          appParent?.classList.remove('fallback');
+          const prevText = appParent?.querySelector('.badge-text');
+          if (prevText) prevText.remove();
+          if (appImg) {
+            delete appImg.dataset.fallbackTried;
+            appImg.alt = dict.appAlt;
+            appImg.src = appBadgeSrc[lang] || appBadgeSrc.ko;
+          }
+          // 버튼 active 표시 (표시 순서는 한국어, 인니어, 영어)
+          document.querySelectorAll('.lang-switch .lang').forEach(btn => {
+            const active = btn.getAttribute('data-lang') === lang;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+          });
         }
-      });
+
+        // 초기 언어 설정
+        setLang(currentLang);
+        if (isAndroid) {
+          play?.classList.add('highlight');
+        } else if (isIOS) {
+          appstore?.classList.add('highlight');
+        }
+        document.getElementById('year').textContent = new Date().getFullYear();
+        // 앱스토어 배지 로드 실패 시: 1) 로컬 en-us.svg로 자동 대체, 2) 그마저 실패하면 텍스트 버튼으로 대체
+        if (appImg) {
+          appImg.addEventListener('error', () => {
+            // 첫 실패 시 로컬 영어 배지로 재시도
+            if (appImg.dataset.fallbackTried !== '1') {
+              appImg.dataset.fallbackTried = '1';
+              appImg.src = '/assets/badges/appstore/en-us.svg';
+              return;
+            }
+            // 두 번째 실패 시 텍스트 대체
+            const parent = document.getElementById('appstore-badge');
+            parent?.classList.add('fallback');
+            if (parent && !parent.querySelector('.badge-text')) {
+              const sp = document.createElement('span');
+              sp.className = 'badge-text';
+              sp.setAttribute('aria-hidden', 'true');
+              sp.textContent = (translations[currentLang] || translations.ko).appAlt;
+              parent.appendChild(sp);
+            }
+          });
+        }
+
+        // 언어 버튼 핸들러 (표시 순서: 한국어, 인니어, 영어)
+        document.querySelectorAll('.lang-switch .lang').forEach(btn => {
+          btn.addEventListener('click', () => setLang(btn.getAttribute('data-lang')));
+        });
+      })();
     </script>
+    <noscript>이 페이지의 일부 기능은 JavaScript를 필요로 합니다.</noscript>
   </body>
 </html>

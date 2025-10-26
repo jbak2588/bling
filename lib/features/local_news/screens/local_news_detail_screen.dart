@@ -10,6 +10,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
+// import 'package:firebase_dynamic_links/firebase_dynamic_links.dart'; // 🗑️ Dynamic Links 제거
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
 import 'package:share_plus/share_plus.dart'; // ✅ SharePlus import 확인
@@ -280,65 +281,65 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           // 공유 버튼 추가
           IconButton(
             icon: const Icon(Icons.share),
-            // ✅ [수정] onPressed에 바로 _sharePost 연결 및 툴팁 추가
+            // ✅ 링크 생성 중에는 버튼 비활성화 -> 제거
+            // onPressed: _isCreatingLink ? null : _sharePost,
+            // tooltip: _isCreatingLink ? 'common.creatingLink'.tr() : 'common.share'.tr(), // 다국어 필요
+            // ✅ [수정] onPressed에 바로 _sharePost 연결
             onPressed: _sharePost,
-            tooltip: 'common.share'.tr(),
+            tooltip: 'common.share'.tr(), // 다국어 키 추가 필요
           ),
         ],
       ),
       body: SingleChildScrollView(
+        // ✅ 키보드 문제 해결 위해 CommentInputField를 bottomNavigationBar로 이동하고, 본문에 충분한 하단 패딩 확보
+        padding: const EdgeInsets.only(
+            left: 16.0, right: 16.0, top: 16.0, bottom: 80.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildAuthorInfo(_currentPost.userId),
-                  const SizedBox(height: 16),
-                  Chip(
-                    avatar: Text(category.emoji,
-                        style: const TextStyle(fontSize: 16)),
-                    label: Text(category.nameKey.tr()),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(_currentPost.title ?? '',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  Text(_currentPost.body,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge
-                          ?.copyWith(height: 1.5)),
-                  const SizedBox(height: 16),
-                  if (_currentPost.tags.isNotEmpty) ...[
-                    _buildTags(context, _currentPost.tags),
-                    const SizedBox(height: 16),
-                  ],
-                  if (hasImages)
-                    _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
-                  if (hasLocation) ...[
-                    const SizedBox(height: 16),
-                    // 위치 섹션 제목
-                    Text('postCard.location'.tr(),
-                        style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 8),
-                    // ✅ [수정] 잘못된 _buildGoogleMap/_buildMiniMap 호출을 MiniMapView (공통 위젯)으로 교체
-                    MiniMapView(
-                      location: _currentPost.geoPoint!,
-                      markerId: _currentPost.id,
-                    ),
-                  ],
-                  const Divider(height: 32),
-                  _buildPostStats(),
-                ],
-              ),
+            _buildAuthorInfo(_currentPost.userId),
+            const SizedBox(height: 16),
+            Chip(
+              avatar:
+                  Text(category.emoji, style: const TextStyle(fontSize: 16)),
+              label: Text(category.nameKey.tr()),
+              visualDensity: VisualDensity.compact,
             ),
+            const SizedBox(height: 8),
+            Text(
+              _currentPost.title ?? '',
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _currentPost.body,
+              style:
+                  Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5),
+            ),
+            const SizedBox(height: 16),
+            if (_currentPost.tags.isNotEmpty) ...[
+              _buildTags(context, _currentPost.tags),
+              const SizedBox(height: 16),
+            ],
+            if (hasImages)
+              _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
+            if (hasLocation) ...[
+              const SizedBox(height: 16),
+              // 위치 섹션 제목
+              Text('postCard.location'.tr(),
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              // ✅ [수정] 잘못된 _buildGoogleMap/_buildMiniMap 호출을 MiniMapView (공통 위젯)으로 교체
+              MiniMapView(
+                location: _currentPost.geoPoint!,
+                markerId: _currentPost.id,
+              ),
+            ],
+            const Divider(height: 32),
+            _buildPostStats(),
             CommentListView(
               postId: _currentPost.id,
               postOwnerId: _currentPost.userId,
@@ -349,16 +350,11 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-              8, 8, 8, MediaQuery.of(context).viewInsets.bottom + 8),
-          child: CommentInputField(
-            postId: _currentPost.id,
-            onCommentAdded: _handleCommentAdded,
-            hintText: 'localNewsDetail.buttons.comment'.tr(),
-          ),
-        ),
+      // ✅ [키보드 문제 해결] CommentInputField를 bottomNavigationBar로 이동 (Scaffold가 자동으로 키보드 위로 올림)
+      bottomNavigationBar: CommentInputField(
+        postId: _currentPost.id,
+        onCommentAdded: _handleCommentAdded,
+        hintText: 'commentInputField.hintText'.tr(),
       ),
     );
   }
@@ -367,23 +363,22 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
   Future<void> _sharePost() async {
     try {
       // 1. 공유할 웹 URL 생성 (Firebase Hosting 기본 도메인 사용)
+      //    URL 형식: https://<your-project-id>.web.app/post/<postId>
       final String postUrl =
-          'https://blingbling-app.web.app/post/${_currentPost.id}';
+          'https://blingbling-app.web.app/post/${widget.post.id}'; // 👈 Firebase Hosting 도메인 및 경로
 
-      // 2. 생성된 URL과 함께 공유 메시지 전달
+      // 2. 생성된 URL과 함께 공유 메시지 전달 (✅ 수정: 인스턴스 API 및 ShareParams 사용)
       await SharePlus.instance.share(
         ShareParams(
           text:
-              'Check out this post on Bling!\n${_currentPost.title ?? ''}\n\n$postUrl',
-          subject: 'Bling Post: ${_currentPost.title ?? ''}',
+              'Check out this post on Bling!\n${widget.post.title ?? ''}\n\n$postUrl', // ✅ URL 포함
+          subject: 'Bling Post: ${widget.post.title ?? ''}',
         ),
       );
     } catch (e) {
-      debugPrint('Error sharing post: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('common.shareError'.tr())),
-        );
+            SnackBar(content: Text('common.shareError'.tr()))); // 다국어 필요
       }
     } finally {
       // 상태 업데이트 없음
@@ -501,6 +496,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                       title: Text(reasonKey.tr()),
                       value: reasonKey,
                       groupValue: selectedReason,
+                      // ignore: deprecated_member_use
                       onChanged: (value) {
                         setState(() => selectedReason = value);
                       },
