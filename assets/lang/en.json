@@ -1038,11 +1038,71 @@
       "defaultHint": "Add tags (press space to confirm)"
     }
   },
+  "linkPreview": {
+    "errorTitle": "Could not load preview",
+    "errorBody": "Please check the link or try again later."
+  },
   "selectCategory": "Select category",
   "address_neighborhood": "Neighborhood",
   "address_detail_hint": "Address details",
   "localNewsTagResult": {
     "error": "An error occurred during search: {error}",
     "empty": "No posts found with '#{tag}'."
+  },
+  "admin": {
+    "screen": {
+      "title": "Admin Menu"
+    },
+    "menu": {
+      "aiApproval": "AI Verification Management",
+      "reportManagement": "Report Management"
+    },
+    "aiApproval": {
+      "empty": "No products pending AI verification.",
+      "error": "Error loading pending products.",
+      "requestedAt": "Requested at"
+    },
+    "reports": {
+      "title": "Report Management",
+      "empty": "No pending reports.",
+      "error": "Error loading reports.",
+      "createdAt": "Created at"
+    },
+    "reportList": {
+      "title": "Report Management",
+      "empty": "No pending reports.",
+      "error": "Error loading reports."
+    },
+    "reportDetail": {
+      "title": "Report Details",
+      "loadError": "Error loading report details.",
+      "sectionReportInfo": "Report Information",
+      "idLabel": "ID",
+      "postIdLabel": "Reported Post ID",
+      "reporter": "Reporter",
+      "reportedUser": "Reported User",
+      "reason": "Reason",
+      "reportedAt": "Reported At",
+      "currentStatus": "Status",
+      "sectionContent": "Reported Content",
+      "loadingContent": "Loading content...",
+      "contentLoadError": "Failed to load reported content.",
+      "contentNotAvailable": "Content information not available or deleted.",
+      "authorIdLabel": "Author ID",
+      "content": {
+        "post": "Post: {title}\n\n{body}",
+        "comment": "Comment: {content}",
+        "reply": "Reply: {content}"
+      },
+      "viewOriginalPost": "View Original Post",
+      "sectionActions": "Actions",
+      "actionReviewed": "Mark as Reviewed",
+      "actionTaken": "Mark Action Taken (e.g., Deleted)",
+      "actionDismissed": "Dismiss Report",
+      "statusUpdateSuccess": "Report status updated to '{status}'.",
+      "statusUpdateFail": "Failed to update status: {error}",
+      "originalPostNotFound": "Original post not found.",
+      "couldNotOpenOriginalPost": "Could not open original post."
+    }
   }
 }

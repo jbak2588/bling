@@ -60,6 +60,10 @@ dependencies:
   firebase_app_check: ^0.4.0+1
   flutter_riverpod: ^3.0.3
 
+  # Link handling and rich previews
+  url_launcher: ^6.3.0
+  any_link_preview: ^3.0.2
+
 
   
   

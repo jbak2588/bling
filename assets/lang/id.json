@@ -1011,11 +1011,71 @@
       "defaultHint": "Tambahkan tag (tekan spasi untuk menambahkan)"
     }
   },
+    "linkPreview": {
+      "errorTitle": "Tidak dapat memuat pratinjau",
+      "errorBody": "Periksa tautannya atau coba lagi nanti."
+    },
   "selectCategory": "Pilih kategori",
   "address_neighborhood": "Lingkungan",
   "address_detail_hint": "Alamat detail",
   "localNewsTagResult": {
     "error": "Terjadi kesalahan saat mencari: {error}",
     "empty": "Tidak ada postingan dengan tag '#{tag}'."
+  },
+  "admin": {
+    "screen": {
+      "title": "Menu Admin"
+    },
+    "menu": {
+      "aiApproval": "Manajemen Verifikasi AI",
+      "reportManagement": "Manajemen Laporan"
+    },
+    "aiApproval": {
+      "empty": "Tidak ada produk yang menunggu verifikasi AI.",
+      "error": "Gagal memuat produk yang menunggu.",
+      "requestedAt": "Diminta pada"
+    },
+    "reports": {
+      "title": "Manajemen Laporan",
+      "empty": "Tidak ada laporan yang menunggu.",
+      "error": "Gagal memuat laporan.",
+      "createdAt": "Dibuat pada"
+    },
+    "reportList": {
+      "title": "Manajemen Laporan",
+      "empty": "Tidak ada laporan yang menunggu.",
+      "error": "Gagal memuat laporan."
+    },
+    "reportDetail": {
+      "title": "Detail Laporan",
+      "loadError": "Gagal memuat detail laporan.",
+      "sectionReportInfo": "Informasi Laporan",
+      "idLabel": "ID",
+      "postIdLabel": "ID Post yang Dilaporkan",
+      "reporter": "Pelapor",
+      "reportedUser": "Pengguna Dilaporkan",
+      "reason": "Alasan",
+      "reportedAt": "Waktu Laporan",
+      "currentStatus": "Status",
+      "sectionContent": "Konten Dilaporkan",
+      "loadingContent": "Memuat konten...",
+      "contentLoadError": "Gagal memuat konten yang dilaporkan.",
+      "contentNotAvailable": "Informasi konten tidak tersedia atau telah dihapus.",
+      "authorIdLabel": "ID Penulis",
+      "content": {
+        "post": "Postingan: {title}\n\n{body}",
+        "comment": "Komentar: {content}",
+        "reply": "Balasan: {content}"
+      },
+      "viewOriginalPost": "Lihat Postingan Asli",
+      "sectionActions": "Tindakan",
+      "actionReviewed": "Tandai Sudah Ditinjau",
+      "actionTaken": "Tandai Tindakan Diambil (mis: Dihapus)",
+      "actionDismissed": "Tolak Laporan",
+      "statusUpdateSuccess": "Status laporan diperbarui menjadi '{status}'.",
+      "statusUpdateFail": "Gagal memperbarui status: {error}",
+      "originalPostNotFound": "Postingan asli tidak ditemukan.",
+      "couldNotOpenOriginalPost": "Tidak dapat membuka postingan asli."
+    }
   }
 }

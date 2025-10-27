@@ -1040,11 +1040,71 @@
       "defaultHint": "태그 추가 (스페이스바로 확정)"
     }
   },
+  "linkPreview": {
+    "errorTitle": "미리보기를 불러올 수 없습니다",
+    "errorBody": "링크를 확인하거나 나중에 다시 시도하세요."
+  },
   "selectCategory": "카테고리 선택",
   "address_neighborhood": "동네",
   "address_detail_hint": "상세 주소",
   "localNewsTagResult": {
     "error": "검색 중 오류가 발생했습니다: {error}",
     "empty": "'#{tag}' 태그가 포함된 게시물이 없습니다."
+  },
+  "admin": {
+    "screen": {
+      "title": "관리자 메뉴"
+    },
+    "menu": {
+      "aiApproval": "AI 검수 승인 관리",
+      "reportManagement": "신고 관리"
+    },
+    "aiApproval": {
+      "empty": "AI 검수 대기 중인 상품이 없습니다.",
+      "error": "대기 중인 상품을 불러오는 중 오류 발생.",
+      "requestedAt": "요청 시각"
+    },
+    "reports": {
+      "title": "신고 관리",
+      "empty": "처리 대기 중인 신고가 없습니다.",
+      "error": "신고 목록을 불러오는 중 오류 발생.",
+      "createdAt": "접수 시각"
+    },
+    "reportList": {
+      "title": "신고 관리",
+      "empty": "처리 대기 중인 신고가 없습니다.",
+      "error": "신고 목록을 불러오는 중 오류 발생."
+    },
+    "reportDetail": {
+      "title": "신고 상세 정보",
+      "loadError": "신고 정보를 불러오는데 실패했습니다.",
+      "sectionReportInfo": "신고 정보",
+      "idLabel": "ID",
+      "postIdLabel": "신고된 게시글 ID",
+      "reporter": "신고자",
+      "reportedUser": "피신고자",
+      "reason": "신고 사유",
+      "reportedAt": "신고 시각",
+      "currentStatus": "현재 상태",
+      "sectionContent": "신고된 콘텐츠",
+      "loadingContent": "콘텐츠 로딩 중...",
+      "contentLoadError": "신고된 콘텐츠를 불러오는데 실패했습니다.",
+      "contentNotAvailable": "콘텐츠 정보가 없거나 삭제되었습니다.",
+      "authorIdLabel": "작성자 ID",
+      "content": {
+        "post": "게시글: {title}\n\n{body}",
+        "comment": "댓글: {content}",
+        "reply": "답글: {content}"
+      },
+      "viewOriginalPost": "원본 게시글 보기",
+      "sectionActions": "처리",
+      "actionReviewed": "검토 완료로 표시",
+      "actionTaken": "조치 완료로 표시 (예: 삭제)",
+      "actionDismissed": "신고 기각",
+      "statusUpdateSuccess": "신고 상태를 '{status}'(으)로 업데이트했습니다.",
+      "statusUpdateFail": "상태 업데이트 실패: {error}",
+      "originalPostNotFound": "원본 게시글을 찾을 수 없습니다.",
+      "couldNotOpenOriginalPost": "원본 게시글을 열 수 없습니다."
+    }
   }
 }
