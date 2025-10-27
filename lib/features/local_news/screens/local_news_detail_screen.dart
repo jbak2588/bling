@@ -13,6 +13,8 @@ import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 // import 'package:firebase_dynamic_links/firebase_dynamic_links.dart'; // 🗑️ Dynamic Links 제거
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
+import 'package:any_link_preview/any_link_preview.dart'; // ✅ 링크 미리보기 import
+import 'package:url_launcher/url_launcher.dart'; // ✅ URL 실행 import
 import 'package:share_plus/share_plus.dart'; // ✅ SharePlus import 확인
 import '../../../core/constants/app_categories.dart';
 import '../models/post_model.dart';
@@ -319,6 +321,8 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
               style:
                   Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5),
             ),
+            // ✅ [링크 미리보기] 본문 아래에 미리보기 카드 추가
+            _buildLinkPreview(_currentPost.body),
             const SizedBox(height: 16),
             if (_currentPost.tags.isNotEmpty) ...[
               _buildTags(context, _currentPost.tags),
@@ -549,6 +553,9 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     }
 
     setState(() => _isReporting = true);
+
+    // ✅ [Exception Fix] await 전에 ScaffoldMessenger 참조 저장
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
       final reportData = {
         'reportedContentId': _currentPost.id,
@@ -566,6 +573,10 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('reportDialog.success'.tr())));
       }
+      // ✅ [Exception Fix] 저장된 참조 사용
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('reportDialog.success'.tr())),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -576,6 +587,14 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           ),
         );
       }
+      // ✅ [Exception Fix] 저장된 참조 사용
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'reportDialog.fail'.tr(namedArgs: {'error': e.toString()}),
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isReporting = false);
     }
@@ -712,4 +731,51 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
   }
 
   // ✅ [수정] 버그의 원인이었던 _buildGoogleMap/_buildMiniMap 함수 전체 삭제 (MiniMapView로 대체)
+}
+
+// ✅ [링크 미리보기] 링크 미리보기 위젯 빌더 함수
+Widget _buildLinkPreview(String text) {
+  // 본문 텍스트에서 첫 번째 URL 추출 (간단한 정규식 사용)
+  // 더 강력한 URL 감지를 원하면 linkify 패키지 등 사용 가능
+  final urlRegExp = RegExp(r'(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/\S*)?');
+  final match = urlRegExp.firstMatch(text);
+  final String? rawUrl = match?.group(0);
+
+  if (rawUrl == null || rawUrl.isEmpty) {
+    return const SizedBox.shrink(); // URL 없으면 아무것도 표시 안 함
+  }
+
+  // 스킴 누락 시 https:// 프리픽스 부여
+  final String normalizedUrl =
+      rawUrl.startsWith('http') ? rawUrl : 'https://$rawUrl';
+
+  return Padding(
+    padding: const EdgeInsets.only(top: 16.0), // 본문과의 간격
+    child: AnyLinkPreview(
+      link: normalizedUrl,
+      displayDirection: UIDirection.uiDirectionHorizontal, // 가로형 카드
+      showMultimedia: true, // 이미지 표시
+      bodyMaxLines: 3, // 설명 최대 3줄
+      bodyTextOverflow: TextOverflow.ellipsis,
+      titleStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+      bodyStyle: TextStyle(color: Colors.grey[600], fontSize: 12),
+      errorTitle: 'linkPreview.errorTitle'.tr(),
+      errorBody: 'linkPreview.errorBody'.tr(),
+      errorWidget: Container(
+        padding: const EdgeInsets.all(12),
+        color: Colors.grey[200],
+        child: Text('linkPreview.errorBody'.tr()),
+      ),
+      cache: const Duration(days: 7), // 미리보기 정보 캐시 기간
+      backgroundColor: Colors.grey[100],
+      borderRadius: 12,
+      removeElevation: true,
+      onTap: () async {
+        final uri = Uri.parse(normalizedUrl);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      },
+    ),
+  );
 }

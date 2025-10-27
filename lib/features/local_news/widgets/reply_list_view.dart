@@ -261,6 +261,8 @@ class _ReplyListViewState extends State<ReplyListView> {
     }
 
     setState(() => _isReporting = true);
+    // ✅ [Exception Fix] await 전에 ScaffoldMessenger 참조 저장
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
       final reportData = {
         'reportedContentId': reply.id, // 답글 ID
@@ -274,12 +276,13 @@ class _ReplyListViewState extends State<ReplyListView> {
         'createdAt': FieldValue.serverTimestamp(),
       };
       await FirebaseFirestore.instance.collection('reports').add(reportData);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('reportDialog.success'.tr())));
+      // ✅ [Exception Fix] 저장된 참조 사용
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('reportDialog.success'.tr())),
+      );
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      // ✅ [Exception Fix] 저장된 참조 사용
+      scaffoldMessenger.showSnackBar(SnackBar(
           content: Text(
               'reportDialog.fail'.tr(namedArgs: {'error': e.toString()}))));
     } finally {

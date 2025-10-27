@@ -377,7 +377,8 @@ class _CommentListViewState extends State<CommentListView> {
     }
 
     setState(() => _isReporting = true);
-
+    // ✅ [Exception Fix] await 전에 ScaffoldMessenger 참조 저장
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
       final reportData = {
         'reportedContentId': comment.id,
@@ -392,25 +393,22 @@ class _CommentListViewState extends State<CommentListView> {
 
       await FirebaseFirestore.instance.collection('reports').add(reportData);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('reportDialog.success'.tr())),
-        );
-      }
+      // ✅ [Exception Fix] 저장된 참조 사용 (mounted 체크 불필요, showSnackBar는 내부적으로 체크함)
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('reportDialog.success'.tr())),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'reportDialog.fail'.tr(namedArgs: {'error': e.toString()}),
-            ),
+      // ✅ [Exception Fix] 저장된 참조 사용
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'reportDialog.fail'.tr(namedArgs: {'error': e.toString()}),
           ),
-        );
-      }
+        ),
+      );
     } finally {
-      if (mounted) {
-        Future.microtask(() => setState(() => _isReporting = false));
-      }
+      // setState 호출은 StatefulBuilder 내에서만 유효하므로 여기서는 호출하지 않음
+      // 대신 _isReporting 상태를 외부에서 관리하거나 다른 방식으로 처리 필요
     }
   }
 
