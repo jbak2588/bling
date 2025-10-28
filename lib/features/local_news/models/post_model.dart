@@ -25,8 +25,12 @@ class PostModel {
   final String userId;
   final String? title;
   final String body;
-  final String category;
-  final List<String> tags;
+  // ❌ [태그 시스템] category 필드 제거
+  // final String category;
+  // ✅ [태그 시스템] tags 필드 추가 (필수)
+  final List<String> tags; // 태그 ID 목록 (최소 1개 이상)
+
+  // final List<String> tags; // 해시태그 목록 -> 기존 tags 필드는 다른 용도였던 것으로 보이므로 주석 처리 또는 제거
   // ✅ [수정] mediaUrl의 타입을 List<String>? 로 변경하여 여러 이미지를 지원합니다.
   final List<String>? mediaUrl;
   final String? mediaType;
@@ -40,12 +44,18 @@ class PostModel {
   final int viewsCount;
   final int thanksCount;
 
+  // ✅ [태그 시스템] 가이드형 추가 필드 (옵션)
+  final Timestamp? eventTime; // 특정 이벤트 시간 (예: 정전 시작 시간)
+  final String? eventLocation; // 특정 이벤트 장소 (예: 특정 거리명)
+
   PostModel({
     required this.id,
     required this.userId,
     this.title,
     required this.body,
-    required this.category,
+    // ❌ [태그 시스템] category 제거
+    // required this.category,
+    // ✅ [태그 시스템] tags 추가
     required this.tags,
     this.mediaUrl, // ✅ 수정
     this.mediaType,
@@ -58,6 +68,9 @@ class PostModel {
     this.commentsCount = 0,
     this.viewsCount = 0,
     this.thanksCount = 0,
+    // ✅ 가이드형 필드 추가
+    this.eventTime,
+    this.eventLocation,
   });
 
   /// Firestore 문서로부터 PostModel 객체를 생성합니다.
@@ -78,8 +91,10 @@ class PostModel {
       userId: data['userId'] ?? '',
       title: data['title'],
       body: data['body'] ?? '',
-      category: data['category'] ?? 'etc',
-      tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
+      // ❌ [태그 시스템] category 로드 제거
+      // category: data['category'] ?? 'etc',
+      // ✅ [태그 시스템] tags 로드 (null 이거나 List가 아니면 빈 리스트 반환)
+      tags: (data['tags'] is List) ? List<String>.from(data['tags']) : [],
       mediaUrl: mediaUrls, // ✅ 수정된 변수를 사용
       mediaType: data['mediaType'],
       locationName: data['locationName'],
@@ -93,6 +108,9 @@ class PostModel {
       commentsCount: data['commentsCount'] ?? 0,
       viewsCount: data['viewsCount'] ?? 0,
       thanksCount: data['thanksCount'] ?? 0,
+      // ✅ 가이드형 필드 로드
+      eventTime: data['eventTime'] as Timestamp?,
+      eventLocation: data['eventLocation'] as String?,
     );
   }
 
@@ -102,19 +120,24 @@ class PostModel {
       'userId': userId,
       'title': title,
       'body': body,
-      'category': category,
+      // ❌ [태그 시스템] category 저장 제거
+      // 'category': category,
+      // ✅ [태그 시스템] tags 저장
       'tags': tags,
       'mediaUrl': mediaUrl, // ✅ 수정
       'mediaType': mediaType,
       'locationName': locationName,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
-      'createdAt': createdAt,
+      'createdAt': createdAt, // 최초 생성 시에는 FieldValue.serverTimestamp() 사용 권장
       'updatedAt': updatedAt, // ✅ 추가
       'likesCount': likesCount,
       'commentsCount': commentsCount,
       'viewsCount': viewsCount,
       'thanksCount': thanksCount,
+      // ✅ 가이드형 필드 저장 (null이 아닐 경우)
+      if (eventTime != null) 'eventTime': eventTime,
+      if (eventLocation != null) 'eventLocation': eventLocation,
     };
   }
 }

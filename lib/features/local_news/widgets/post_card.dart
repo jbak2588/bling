@@ -29,9 +29,8 @@ import 'package:bling_app/features/local_news/screens/tag_search_result_screen.d
 
 // ✅ 새로 만든 공용 캐러셀 위젯을 import 합니다.
 import '../../shared/widgets/image_carousel_card.dart';
-
-import '../../../core/constants/app_categories.dart';
-import '../models/post_category_model.dart';
+// ✅ [태그 시스템] 태그 사전 import 추가
+import 'package:bling_app/core/constants/app_tags.dart';
 
 // ✅ 더 이상 상태가 필요 없으므로 StatelessWidget으로 변경합니다.
 class PostCard extends StatefulWidget {
@@ -156,35 +155,55 @@ class _PostCardState extends State<PostCard>
     );
   }
 
-  Widget _buildTitleAndCategory(
-      BuildContext context, PostModel post, PostCategoryModel category) {
+  // ✅ [태그 시스템 수정] _buildTitleAndCategory -> _buildTitleAndTags
+  Widget _buildTitleAndTags(BuildContext context, PostModel post) {
+    // PostModel의 tags 리스트에서 TagInfo 객체 리스트 생성 (local_news_detail_screen과 동일)
+    final List<TagInfo> tagInfos = post.tags
+        .map((tagId) => AppTags.localNewsTags.firstWhere(
+              (tagInfo) => tagInfo.tagId == tagId,
+              orElse: () => TagInfo(
+                  tagId: tagId,
+                  nameKey: tagId,
+                  descriptionKey: '',
+                  emoji: '🏷️'),
+            ))
+        .toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(category.emoji, style: const TextStyle(fontSize: 18)),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                post.title ?? post.body,
-                style: GoogleFonts.inter(
-                    fontSize: 16, fontWeight: FontWeight.w600),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        if (post.title != null && post.body.isNotEmpty) ...[
-          const SizedBox(height: 6),
-          Text(
-            post.body,
-            style: TextStyle(
-                fontSize: 14, color: Colors.grey.shade800, height: 1.4),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
+        // 태그 목록 표시 (칩 형태)
+        if (tagInfos.isNotEmpty)
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 4.0,
+            children: tagInfos
+                .map((tagInfo) => Chip(
+                      avatar: tagInfo.emoji != null
+                          ? Text(tagInfo.emoji!,
+                              style: const TextStyle(fontSize: 10))
+                          : null,
+                      label: Text(tagInfo.nameKey.tr(),
+                          style: const TextStyle(fontSize: 11)),
+                      // 폰트 크기 미세 조정
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 0),
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: Colors.grey[200],
+                    ))
+                .toList(),
           ),
+
+        // 게시글 제목 (옵션)
+        if (post.title != null && post.title!.isNotEmpty) ...[
+          const SizedBox(height: 10), // 태그와 제목 사이 간격
+          Text(
+            post.title!,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4), // 제목과 본문(다음 위젯) 사이 간격
         ],
       ],
     );
@@ -256,10 +275,7 @@ class _PostCardState extends State<PostCard>
     final post = widget.post;
     final hasImages = post.mediaUrl != null && post.mediaUrl!.isNotEmpty;
     final hasLocation = post.geoPoint != null;
-    final category = AppCategories.postCategories.firstWhere(
-      (c) => c.categoryId == post.category,
-      orElse: () => AppCategories.postCategories.first,
-    );
+    // ❌ [태그 시스템] 기존 카테고리 로직 제거
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
@@ -282,7 +298,8 @@ class _PostCardState extends State<PostCard>
             children: [
               _buildAuthorInfo(context, post.userId, post.createdAt),
               const SizedBox(height: 12),
-              _buildTitleAndCategory(context, post, category),
+              // ✅ [태그 시스템] 태그 칩 + 제목 표시
+              _buildTitleAndTags(context, post),
               if (hasImages) ...[
                 const SizedBox(height: 12),
                 ImageCarouselCard(

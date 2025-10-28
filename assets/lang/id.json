@@ -422,12 +422,32 @@
   },
   "localNewsCreate": {
     "appBarTitle": "Buat Postingan Baru",
+    "title": "Buat Postingan Baru",
     "form": {
       "categoryLabel": "Kategori",
       "titleLabel": "Judul",
       "contentLabel": "Masukkan konten",
       "tagsLabel": "Tag (pisahkan dengan koma)",
       "tagsHint": "cth. anjing, gratisan"
+    },
+    "labels": {
+      "title": "Judul (Opsional)",
+      "body": "Konten",
+      "tags": "Tag",
+      "guidedTitle": "Info Tambahan (Opsional)",
+      "eventLocation": "Lokasi Kejadian/Peristiwa"
+      
+    },
+    "hints": {
+      "body": "Bagikan kabar lingkungan atau ajukan pertanyaan...",
+      "tagSelection": "(Pilih 1-3 tag)",
+      "eventLocation": "mis., Jl. Sudirman 123"
+    },
+    "validation": {
+      "bodyRequired": "Harap masukkan konten.",
+      "tagRequired": "Pilih minimal 1 tag.",
+      "tagMaxLimit": "Maksimal 3 tag.",
+      "imageMaxLimit": "Maksimal 5 gambar dapat dilampirkan."
     },
     "buttons": {
       "addImage": "Tambah Gambar",
@@ -440,7 +460,9 @@
       "failure": "Gagal mengunggah: {error}",
       "loginRequired": "Anda harus masuk untuk membuat postingan.",
       "userNotFound": "Informasi pengguna tidak ditemukan."
-    }
+    },
+    "success": "Postingan berhasil dibuat.",
+    "fail": "Gagal membuat postingan: {error}"
   },
   "localNewsDetail": {
     "appBarTitle": "Postingan",
@@ -1076,6 +1098,94 @@
       "statusUpdateFail": "Gagal memperbarui status: {error}",
       "originalPostNotFound": "Postingan asli tidak ditemukan.",
       "couldNotOpenOriginalPost": "Tidak dapat membuka postingan asli."
+    }
+  },
+  "tags": {
+    "local_news": {
+      "kelurahan_notice": {
+        "name": "Pengumuman Kelurahan",
+        "desc": "Pengumuman dari kantor kelurahan."
+      },
+      "kecamatan_notice": {
+        "name": "Pengumuman Kecamatan",
+        "desc": "Pengumuman dari kantor kecamatan."
+      },
+      "public_campaign": {
+        "name": "Kampanye publik",
+        "desc": "Informasi publik dan program pemerintah."
+      },
+      "siskamling": {
+        "name": "Siskamling",
+        "desc": "Kegiatan ronda/keamanan lingkungan."
+      },
+      "power_outage": {
+        "name": "Pemadaman listrik",
+        "desc": "Informasi mati lampu di sekitar Anda."
+      },
+      "water_outage": {
+        "name": "Gangguan air",
+        "desc": "Informasi gangguan/pemutusan pasokan air."
+      },
+      "waste_collection": {
+        "name": "Pengangkutan sampah",
+        "desc": "Jadwal atau pemberitahuan pengangkutan sampah."
+      },
+      "road_works": {
+        "name": "Perbaikan jalan",
+        "desc": "Informasi pekerjaan/perbaikan jalan."
+      },
+      "public_facility": {
+        "name": "Fasilitas umum",
+        "desc": "Informasi taman, lapangan, dan fasilitas umum."
+      },
+      "weather_warning": {
+        "name": "Peringatan cuaca",
+        "desc": "Peringatan cuaca buruk di sekitar Anda."
+      },
+      "flood_alert": {
+        "name": "Peringatan banjir",
+        "desc": "Peringatan dan lokasi terdampak banjir."
+      },
+      "air_quality": {
+        "name": "Kualitas udara",
+        "desc": "Informasi polusi udara dan AQI."
+      },
+      "disease_alert": {
+        "name": "Peringatan penyakit",
+        "desc": "Peringatan penyakit menular dan info kesehatan."
+      },
+      "school_notice": {
+        "name": "Pengumuman sekolah",
+        "desc": "Pengumuman dari sekolah sekitar."
+      },
+      "posyandu": {
+        "name": "Posyandu",
+        "desc": "Kegiatan posyandu (kesehatan ibu & anak)."
+      },
+      "health_campaign": {
+        "name": "Kampanye kesehatan",
+        "desc": "Kampanye kesehatan dan panduan publik."
+      },
+      "traffic_control": {
+        "name": "Pengaturan lalu lintas",
+        "desc": "Pengalihan arus/penutupan dan info rekayasa lalin."
+      },
+      "public_transport": {
+        "name": "Transportasi umum",
+        "desc": "Info bus, KRL, MRT, LRT, dan lainnya."
+      },
+      "parking_policy": {
+        "name": "Kebijakan parkir",
+        "desc": "Informasi dan perubahan kebijakan parkir."
+      },
+      "community_event": {
+        "name": "Acara warga",
+        "desc": "Festival, lomba, dan kegiatan warga."
+      },
+      "worship_event": {
+        "name": "Acara ibadah",
+        "desc": "Kegiatan di masjid, gereja, vihara, pura, dll."
+      }
     }
   }
 }
