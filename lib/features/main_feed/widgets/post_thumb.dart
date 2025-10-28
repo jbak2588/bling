@@ -246,9 +246,11 @@ class PostThumb extends StatelessWidget {
             flex: 3,
             child: Text(
               // ✅ [수정] "store_promo" -> "categories.post.store_promo.name"
+              // ✅ [태그 시스템 수정] category 대신 tags.first 사용
               // post.category 값(ID)을 기반으로 올바른 i18n 키를 조립합니다.
-              //
-              "categories.post.${post.category}.name".tr(),
+              // tags 리스트가 비어있지 않다고 가정
+              "categories.post.${post.tags.isNotEmpty ? post.tags.first : 'etc'}.name"
+                  .tr(),
               overflow: TextOverflow.ellipsis,
             ),
           ),

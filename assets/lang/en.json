@@ -451,12 +451,32 @@
   },
   "localNewsCreate": {
     "appBarTitle": "Create New Post",
+    "title": "Create New Post",
     "form": {
       "categoryLabel": "Category",
       "titleLabel": "Title",
       "contentLabel": "Enter content",
       "tagsLabel": "Tags (comma-separated)",
       "tagsHint": "e.g. dog, freeshare"
+    },
+    "labels": {
+      "title": "Title (Optional)",
+      "body": "Content",
+      "tags": "Tags",
+      "guidedTitle": "Additional Info (Optional)",
+      "eventLocation": "Event/Incident Location"
+      
+    },
+    "hints": {
+      "body": "Share your neighborhood news or ask questions...",
+      "tagSelection": "(Select 1-3 tags)",
+      "eventLocation": "e.g., Jl. Sudirman 123"
+    },
+    "validation": {
+      "bodyRequired": "Please enter the content.",
+      "tagRequired": "Please select at least one tag.",
+      "tagMaxLimit": "You can select up to 3 tags.",
+      "imageMaxLimit": "You can attach up to 5 images."
     },
     "buttons": {
       "addImage": "Add Image",
@@ -469,7 +489,9 @@
       "failure": "Upload failed: {error}",
       "loginRequired": "Login is required to create a post.",
       "userNotFound": "User information could not be found."
-    }
+    },
+    "success": "Post created successfully.",
+    "fail": "Failed to create post: {error}"
   },
   "localNewsDetail": {
     "appBarTitle": "Post",
@@ -1103,6 +1125,94 @@
       "statusUpdateFail": "Failed to update status: {error}",
       "originalPostNotFound": "Original post not found.",
       "couldNotOpenOriginalPost": "Could not open original post."
+    }
+  },
+  "tags": {
+    "local_news": {
+      "kelurahan_notice": {
+        "name": "Kelurahan notice",
+        "desc": "Neighborhood office announcements."
+      },
+      "kecamatan_notice": {
+        "name": "Kecamatan notice",
+        "desc": "District office announcements."
+      },
+      "public_campaign": {
+        "name": "Public campaign",
+        "desc": "Public information and government programs."
+      },
+      "siskamling": {
+        "name": "Neighborhood watch",
+        "desc": "Community safety patrol activities."
+      },
+      "power_outage": {
+        "name": "Power outage",
+        "desc": "Information about electricity outages in your area."
+      },
+      "water_outage": {
+        "name": "Water outage",
+        "desc": "Information about water supply outages."
+      },
+      "waste_collection": {
+        "name": "Waste collection",
+        "desc": "Garbage pickup schedules or notices."
+      },
+      "road_works": {
+        "name": "Road works",
+        "desc": "Road construction and maintenance information."
+      },
+      "public_facility": {
+        "name": "Public facility",
+        "desc": "Parks, fields, and public facility updates."
+      },
+      "weather_warning": {
+        "name": "Weather warning",
+        "desc": "Severe weather alerts in your area."
+      },
+      "flood_alert": {
+        "name": "Flood alert",
+        "desc": "Flood advisories and areas affected."
+      },
+      "air_quality": {
+        "name": "Air quality",
+        "desc": "Air pollution and AQI information."
+      },
+      "disease_alert": {
+        "name": "Disease alert",
+        "desc": "Communicable disease alerts and public health info."
+      },
+      "school_notice": {
+        "name": "School notice",
+        "desc": "Notices from nearby schools."
+      },
+      "posyandu": {
+        "name": "Posyandu",
+        "desc": "Community health post activities."
+      },
+      "health_campaign": {
+        "name": "Health campaign",
+        "desc": "Health campaign and public health guidance."
+      },
+      "traffic_control": {
+        "name": "Traffic control",
+        "desc": "Traffic diversions, closures, and control info."
+      },
+      "public_transport": {
+        "name": "Public transport",
+        "desc": "Bus, train, and public transportation updates."
+      },
+      "parking_policy": {
+        "name": "Parking policy",
+        "desc": "Parking information and policy changes."
+      },
+      "community_event": {
+        "name": "Community event",
+        "desc": "Local festivals, gatherings, and events."
+      },
+      "worship_event": {
+        "name": "Religious event",
+        "desc": "Events at mosques, churches, temples, etc."
+      }
     }
   }
 }

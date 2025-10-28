@@ -451,12 +451,32 @@
   },
   "localNewsCreate": {
     "appBarTitle": "새 게시물 작성",
+    "title": "새 게시물 작성",
     "form": {
       "categoryLabel": "카테고리",
       "titleLabel": "제목",
       "contentLabel": "내용을 입력하세요",
       "tagsLabel": "태그 (쉼표로 구분)",
       "tagsHint": "예: 강아지, 무료나눔"
+    },
+    "labels": {
+      "title": "제목 (선택)",
+      "body": "내용",
+      "tags": "태그",
+      "guidedTitle": "추가 정보 (선택)",
+      "eventLocation": "이벤트/발생 장소"
+      
+    },
+    "hints": {
+      "body": "동네 소식이나 질문을 자유롭게 공유해보세요...",
+      "tagSelection": "(태그 1~3개 선택)",
+      "eventLocation": "예: Jl. Sudirman 123"
+    },
+    "validation": {
+      "bodyRequired": "내용을 입력해주세요.",
+      "tagRequired": "태그를 최소 1개 선택해주세요.",
+      "tagMaxLimit": "태그는 최대 3개까지 선택할 수 있어요.",
+      "imageMaxLimit": "이미지는 최대 5장까지 첨부할 수 있어요."
     },
     "buttons": {
       "addImage": "이미지 추가",
@@ -469,7 +489,9 @@
       "failure": "업로드 실패: {error}",
       "loginRequired": "게시물을 작성하려면 로그인해야 합니다.",
       "userNotFound": "사용자 정보를 찾을 수 없습니다."
-    }
+    },
+    "success": "게시글이 등록되었습니다.",
+    "fail": "게시글 등록 실패: {error}"
   },
   "localNewsDetail": {
     "appBarTitle": "게시물",
@@ -1105,6 +1127,94 @@
       "statusUpdateFail": "상태 업데이트 실패: {error}",
       "originalPostNotFound": "원본 게시글을 찾을 수 없습니다.",
       "couldNotOpenOriginalPost": "원본 게시글을 열 수 없습니다."
+    }
+  },
+  "tags": {
+    "local_news": {
+      "kelurahan_notice": {
+        "name": "동/리 공지",
+        "desc": "주민센터(동/리) 공지사항."
+      },
+      "kecamatan_notice": {
+        "name": "구/면 공지",
+        "desc": "구청/면사무소 공지사항."
+      },
+      "public_campaign": {
+        "name": "공공 캠페인",
+        "desc": "공공 안내 및 정부 프로그램."
+      },
+      "siskamling": {
+        "name": "자율방범",
+        "desc": "동네 방범 활동/순찰 소식."
+      },
+      "power_outage": {
+        "name": "정전",
+        "desc": "우리 동네 전기 끊김/정전 안내."
+      },
+      "water_outage": {
+        "name": "단수",
+        "desc": "수도 공급 중단/장애 안내."
+      },
+      "waste_collection": {
+        "name": "쓰레기 수거",
+        "desc": "쓰레기 수거 일정 및 안내."
+      },
+      "road_works": {
+        "name": "도로 공사",
+        "desc": "도로 공사/보수 작업 안내."
+      },
+      "public_facility": {
+        "name": "공공 시설",
+        "desc": "공원/광장 등 공공시설 안내."
+      },
+      "weather_warning": {
+        "name": "기상 특보",
+        "desc": "우리 동네 기상 특보/주의보."
+      },
+      "flood_alert": {
+        "name": "홍수 알림",
+        "desc": "홍수 경보 및 침수 지역 안내."
+      },
+      "air_quality": {
+        "name": "대기 질",
+        "desc": "대기오염 정보 및 AQI."
+      },
+      "disease_alert": {
+        "name": "질병 알림",
+        "desc": "전염병/보건 관련 알림."
+      },
+      "school_notice": {
+        "name": "학교 공지",
+        "desc": "인근 학교의 공지사항."
+      },
+      "posyandu": {
+        "name": "포샨두",
+        "desc": "지역 보건소(포샨두) 활동 안내."
+      },
+      "health_campaign": {
+        "name": "건강 캠페인",
+        "desc": "보건 캠페인 및 안내."
+      },
+      "traffic_control": {
+        "name": "교통 통제",
+        "desc": "도로 통제/우회/차량 통제 안내."
+      },
+      "public_transport": {
+        "name": "대중교통",
+        "desc": "버스/전철 등 대중교통 안내."
+      },
+      "parking_policy": {
+        "name": "주차 정보/정책",
+        "desc": "주차 정보 및 정책 변경 안내."
+      },
+      "community_event": {
+        "name": "동네 행사",
+        "desc": "축제/모임/행사 안내."
+      },
+      "worship_event": {
+        "name": "종교 행사",
+        "desc": "사원/교회/사찰 등 종교 행사."
+      }
     }
   }
 }

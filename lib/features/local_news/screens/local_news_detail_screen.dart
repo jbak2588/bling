@@ -14,9 +14,17 @@ import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
 import 'package:any_link_preview/any_link_preview.dart'; // ✅ 링크 미리보기 import
-import 'package:url_launcher/url_launcher.dart'; // ✅ URL 실행 import
+// ✅ [수정] url_launcher import 경로 확인 (기존 코드에 없었을 수 있음)
+import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart'; // ✅ SharePlus import 확인
-import '../../../core/constants/app_categories.dart';
+// ❌ [태그 시스템] 기존 카테고리 import 제거
+// import '../../../core/constants/app_categories.dart';
+// ✅ [태그 시스템] 태그 사전 import 추가
+import '../../../core/constants/app_tags.dart';
+
+// ✅ [태그 시스템] 공용 태그 리스트 위젯 import (이전 작업에서 사용됨)
+// ignore: unused_import
+import '../../shared/widgets/clickable_tag_list.dart';
 import '../models/post_model.dart';
 import '../../../core/models/user_model.dart';
 import '../widgets/comment_input_field.dart';
@@ -248,11 +256,6 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-    final category = AppCategories.postCategories.firstWhere(
-      (cat) => cat.categoryId == _currentPost.category,
-      orElse: () =>
-          AppCategories.postCategories.firstWhere((c) => c.categoryId == 'etc'),
-    );
     final hasImages =
         _currentPost.mediaUrl != null && _currentPost.mediaUrl!.isNotEmpty;
     final hasLocation = _currentPost.geoPoint != null;
@@ -301,20 +304,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           children: [
             _buildAuthorInfo(_currentPost.userId),
             const SizedBox(height: 16),
-            Chip(
-              avatar:
-                  Text(category.emoji, style: const TextStyle(fontSize: 16)),
-              label: Text(category.nameKey.tr()),
-              visualDensity: VisualDensity.compact,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _currentPost.title ?? '',
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
+            _buildTitleAndTags(context, _currentPost),
             const SizedBox(height: 16),
             Text(
               _currentPost.body,
@@ -598,6 +588,62 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     } finally {
       if (mounted) setState(() => _isReporting = false);
     }
+  }
+
+  // ✅ [태그 시스템 수정] 제목과 태그 목록 표시 위젯
+  Widget _buildTitleAndTags(BuildContext context, PostModel post) {
+    // PostModel의 tags 리스트에서 TagInfo 객체 리스트 생성
+    final List<TagInfo> tagInfos = post.tags
+        .map((tagId) => AppTags.localNewsTags.firstWhere(
+              (tagInfo) => tagInfo.tagId == tagId,
+              // ✅ [i18n 버그 수정] AppTags에 없는 tagId라면
+              // nameKey에 tagId를 두고, emoji에 기본 아이콘을 부여해 키 노출 대신 태그 ID 자체가 보이도록 처리
+              orElse: () => TagInfo(
+                tagId: tagId,
+                nameKey: tagId,
+                descriptionKey: '',
+                emoji: '🏷️',
+              ),
+            ))
+        .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (tagInfos.isNotEmpty)
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 4.0,
+            children: tagInfos
+                .map(
+                  (tagInfo) => Chip(
+                    avatar: tagInfo.emoji != null ? Text(tagInfo.emoji!) : null,
+                    label: Text(
+                      tagInfo.nameKey.tr(),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: Colors.grey[200],
+                  ),
+                )
+                .toList(),
+          ),
+
+        // 게시글 제목 (옵션)
+        if (post.title != null && post.title!.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            post.title!,
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ],
+    );
   }
 
   Widget _buildTags(BuildContext context, List<String> tags) {

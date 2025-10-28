@@ -49,9 +49,11 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
     if (widget.post.mediaUrl != null) {
       _existingImageUrls.addAll(widget.post.mediaUrl!);
     }
-
+    // ✅ [태그 시스템 수정] category 대신 tags.first 사용
+    final initialTagId =
+        widget.post.tags.isNotEmpty ? widget.post.tags.first : 'etc';
     _selectedCategory = AppCategories.postCategories.firstWhere(
-      (c) => c.categoryId == widget.post.category,
+      (c) => c.categoryId == initialTagId,
       orElse: () => AppCategories.postCategories.first,
     );
   }
