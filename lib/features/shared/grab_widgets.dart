@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'package:bling_app/core/theme/grab_theme.dart';
+import 'dart:math' as math;
 import 'package:flutter/services.dart';
+import 'package:vector_math/vector_math_64.dart' as vm;
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// 상단 그라데이션 + 둥근 검색바만 보여주는 헤더
 /// - AppBar는 항상 유지한다는 기획이므로, 기본적으로 타이틀 행은 숨깁니다.
@@ -196,8 +200,9 @@ class GrabAppBarShell extends StatelessWidget implements PreferredSizeWidget {
 }
 
 /// Grab 스타일의 아이콘 타일(외형만). onTap 로직은 호출부에서 기존 그대로 사용.
-class GrabIconTile extends StatelessWidget {
-  final IconData icon;
+class GrabIconTile extends StatefulWidget {
+  final IconData? icon; // 기존 IconData 지원
+  final String? svgAsset; // 신규: SVG 에셋 경로 지원
   final String label;
   final VoidCallback onTap;
 
@@ -206,95 +211,191 @@ class GrabIconTile extends StatelessWidget {
 
   const GrabIconTile({
     super.key,
-    required this.icon,
+    this.icon,
+    this.svgAsset,
     required this.label,
     required this.onTap,
     this.compact = false,
-  });
+  }) : assert(icon != null || svgAsset != null,
+            'Either icon or svgAsset must be provided');
+
+  @override
+  State<GrabIconTile> createState() => _GrabIconTileState();
+}
+
+class _GrabIconTileState extends State<GrabIconTile> {
+  bool _down = false; // 터치 시 3D 눌림/떠오름 효과
+  final GlobalKey _bgKey = GlobalKey(); // 64x64 배경 영역 키
+  double _tiltX = 0.0; // 라디안 기준 (위/아래 기울기)
+  double _tiltY = 0.0; // 라디안 기준 (좌/우 기울기)
+  static const double _maxTiltDeg = 8.0; // 최대 기울기 각도
+
+  void _applyTiltFromGlobal(Offset globalPosition) {
+    if (_bgKey.currentContext == null) return;
+    final box = _bgKey.currentContext!.findRenderObject() as RenderBox?;
+    if (box == null) return;
+    final local = box.globalToLocal(globalPosition);
+    final size = box.size;
+    if (size.width == 0 || size.height == 0) return;
+
+    // -1..1로 정규화 (중앙=0)
+    final dx =
+        ((local.dx - size.width / 2) / (size.width / 2)).clamp(-1.0, 1.0);
+    final dy =
+        ((local.dy - size.height / 2) / (size.height / 2)).clamp(-1.0, 1.0);
+
+    final maxRad = _maxTiltDeg * math.pi / 180;
+    setState(() {
+      _tiltY = dx * maxRad; // 좌우 이동 → Y축 회전
+      _tiltX = -dy * maxRad; // 상하 이동 반전 → X축 회전
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     // 컴팩트 모드 값: 아이콘은 키우고, 여백/라인간격은 최소화
-    final double vPad = compact ? 8 : 12; // 컨테이너 세로 패딩
-    final double hPad = compact ? 10 : 12; // 컨테이너 가로 패딩
-    final double dotPad = compact ? 9 : 8; // 원형 내부 패딩(아이콘 영역)
-    final double iconSz = compact ? 28 : 22; // 아이콘 크기
-    final double gap = compact ? 4 : 8; // 아이콘-텍스트 간격
-    final double fontSz = compact ? 10 : 12; // 라벨 폰트 크기
-    final double lineH = compact ? 1.0 : 1.1; // 라벨 줄간격(시각적 상하 균형)
+    // Figma 스펙: 배경 64x64(라운드 22, #F4F7F8), 내부 여백 12 → 아이콘 40x40
+    const double tileBgSize = 64;
+    const double tileBgRadius = 22;
+    const Color tileBgColor = Color(0xFFF4F7F8);
+    const double innerPad = 12; // 64 - 12*2 = 40
+    const double iconSz = 40; // SVG 기준 아이콘 크기
+    const double labelGap = 1; // 배경과 라벨 사이 간격
+    const double labelW = 64;
+    const double labelH = 20;
+    const double fontSz = 12;
+    const double lineH = 1.67; // Figma 텍스트 height
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Container(
-            //   padding: EdgeInsets.all(dotPad),
-            //   decoration: const BoxDecoration(
-            //     color: Color(0x1A00B14F), // Grab primary 10% 정도
-            //     shape: BoxShape.circle,
-            //   ),
-            //   child: Icon(icon, color: GrabColors.primary, size: iconSz),
-            // ),
-            _FloatingCircleIcon(
-              icon: icon,
-              size: iconSz, // compact면 28, 아니면 22 등 기존 값 그대로
-              pad: dotPad, // compact면 9, 아니면 8 등
-              fg: GrabColors.primary,
-              bg: const Color(0xFFEFFAF3), // 연한 민트/그린 틴트(자연스러운 볼륨)
-            ),
+    // 3D 효과 파라미터 (떠있을 때 살짝 위, 그림자 진하고 작아짐)
+    final double lift = _down ? 0.0 : 2.0; // 위로 뜨는 정도
+    final double scale = _down ? 0.98 : 1.0; // 눌림 시 살짝 축소
+    final double shadowOpacity = _down ? 0.10 : 0.16;
+    final double shadowSigmaX = _down ? 7 : 8;
+    final double shadowSigmaY = _down ? 5 : 6;
+    final double shadowWidth = iconSz * (_down ? 0.95 : 0.90);
+    final double shadowHeight = iconSz * 0.22;
+    final double maxRad = _maxTiltDeg * math.pi / 180;
+    // 기울기에 따른 그림자 위치 보정 (기울기의 반대 방향으로 살짝 이동)
+    final double shadowDx = (_tiltY / maxRad) * 3.0; // 좌우 3px 범위
+    final double shadowDy =
+        2 - lift * 0.4 + (_tiltX / maxRad) * 3.0; // 상하 3px 범위
 
-            SizedBox(height: gap),
-            Text(
-              label,
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              // 라벨의 위·아래 내부 리딩을 줄여 시각적 상하 여백을 동일하게
-              textHeightBehavior: const TextHeightBehavior(
-                applyHeightToFirstAscent: false,
-                applyHeightToLastDescent: false,
-              ),
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: fontSz,
-                height: lineH, // 1.0~1.05 권장
+    return GestureDetector(
+      onTap: widget.onTap,
+      onTapDown: (d) {
+        _applyTiltFromGlobal(d.globalPosition);
+        setState(() => _down = true);
+      },
+      onTapUp: (d) => setState(() {
+        _down = false;
+        _tiltX = 0.0;
+        _tiltY = 0.0;
+      }),
+      onTapCancel: () => setState(() {
+        _down = false;
+        _tiltX = 0.0;
+        _tiltY = 0.0;
+      }),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 상단 64x64 배경 박스
+          Container(
+            key: _bgKey,
+            width: tileBgSize,
+            height: tileBgSize,
+            decoration: ShapeDecoration(
+              color: tileBgColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(tileBgRadius),
               ),
             ),
-          ],
-        ),
+            child: Padding(
+              padding: const EdgeInsets.all(innerPad),
+              child: Stack(
+                fit: StackFit.expand,
+                clipBehavior: Clip.none,
+                children: [
+                  // 바닥면 타원 그림자 (은은한 그라운드 섀도우)
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Transform.translate(
+                      offset: Offset(shadowDx, shadowDy),
+                      child: ImageFiltered(
+                        imageFilter: ui.ImageFilter.blur(
+                            sigmaX: shadowSigmaX, sigmaY: shadowSigmaY),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 120),
+                          width: shadowWidth,
+                          height: shadowHeight,
+                          decoration: BoxDecoration(
+                            color:
+                                Colors.black.withValues(alpha: shadowOpacity),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // 아이콘 본체
+                  Center(
+                    child: Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.0015) // 원근감
+                        ..translateByVector3(vm.Vector3(0.0, -lift, 0.0))
+                        ..rotateX(_tiltX)
+                        ..rotateY(_tiltY)
+                        ..scaleByVector3(vm.Vector3(scale, scale, scale)),
+                      child: widget.svgAsset != null
+                          ? SvgPicture.asset(
+                              widget.svgAsset!,
+                              width: iconSz,
+                              height: iconSz,
+                            )
+                          : Icon(widget.icon,
+                              size: iconSz, color: GrabColors.primary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: labelGap),
+          SizedBox(
+            width: labelW,
+            height: labelH,
+            child: Center(
+              child: Text(
+                widget.label,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFF191A1C),
+                  fontSize: fontSz,
+                  fontWeight: FontWeight.w400,
+                  height: lineH,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _FloatingCircleIcon extends StatefulWidget {
-  final IconData icon;
-  final double size; // 아이콘 크기
+  final Widget child; // 아이콘 위젯(Icon 또는 Svg)
   final double pad; // 원형 내부 패딩
-  final Color fg; // 아이콘 색
   final Color bg; // 원형 배경
 
   const _FloatingCircleIcon({
-    required this.icon,
-    required this.size,
+    required this.child,
     required this.pad,
-    required this.fg,
     required this.bg,
   });
 
@@ -324,7 +425,7 @@ class _FloatingCircleIconState extends State<_FloatingCircleIcon> {
           shadowColor: Colors.black.withValues(alpha: 1.00),
           child: Padding(
             padding: EdgeInsets.all(widget.pad),
-            child: Icon(widget.icon, size: widget.size, color: widget.fg),
+            child: widget.child,
           ),
         ),
       ),
