@@ -18,7 +18,7 @@ class TagSearchResultScreen extends StatelessWidget {
         ? col.where('tags', arrayContains: tags.first)
         : col.where('tags', arrayContainsAny: tags.take(10).toList());
 
-    String _displayName(String tagId) {
+    String displayName(String tagId) {
       final info = AppTags.localNewsTags.firstWhere(
         (t) => t.tagId == tagId,
         orElse: () => const TagInfo(
@@ -31,7 +31,7 @@ class TagSearchResultScreen extends StatelessWidget {
       return info.nameKey.tr();
     }
 
-    String _displayEmoji(String tagId) {
+    String displayEmoji(String tagId) {
       final info = AppTags.localNewsTags.firstWhere(
         (t) => t.tagId == tagId,
         orElse: () => const TagInfo(
@@ -43,7 +43,7 @@ class TagSearchResultScreen extends StatelessWidget {
       return info.emoji ?? '';
     }
 
-    String _titleForTags(List<String> tagIds) {
+    String titleForTags(List<String> tagIds) {
       if (tagIds.isEmpty) return '#';
       if (tagIds.length == 1) {
         final info = AppTags.localNewsTags.firstWhere(
@@ -61,15 +61,15 @@ class TagSearchResultScreen extends StatelessWidget {
       }
       // Multiple: join each as `emoji + name`
       final items = tagIds.map((id) {
-        final name = _displayName(id);
-        final emoji = _displayEmoji(id);
+        final name = displayName(id);
+        final emoji = displayEmoji(id);
         return emoji.isNotEmpty ? '$emoji $name' : name;
       }).toList();
       return items.join('   ');
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(_titleForTags(tags))),
+      appBar: AppBar(title: Text(titleForTags(tags))),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: q.orderBy('createdAt', descending: true).snapshots(),
         builder: (context, snap) {
