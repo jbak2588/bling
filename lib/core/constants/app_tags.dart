@@ -24,6 +24,15 @@ class TagInfo {
 // 앱 전체 또는 Local News에서 사용할 태그 사전
 class AppTags {
   static final List<TagInfo> localNewsTags = [
+    // --- 일상 (기본/일반 주제) ---
+    const TagInfo(
+      tagId: 'daily_life',
+      nameKey: 'categories.post.daily_life.name',
+      descriptionKey: 'categories.post.daily_life.description',
+      synonyms: ['일상', 'daily', 'sehari-hari', 'obrolan', 'everyday'],
+      emoji: '😊',
+      group: 'misc',
+    ),
     // --- 공공 · 행정 ---
     const TagInfo(
       tagId: 'kelurahan_notice', // 동/리 공지
@@ -73,7 +82,12 @@ class AppTags {
         'listrik padam',
         'pemadaman listrik',
         'PLN',
-        '정전'
+        'mati listrik',
+        'byarpet',
+        'byar pet',
+        'padam total',
+        'genset',
+        'token habis'
       ],
       guidedFields: ['eventTime', 'eventLocation'], // 시간, 장소 추가 필드
       emoji: '💡',
@@ -83,7 +97,18 @@ class AppTags {
       tagId: 'water_outage', // 단수
       nameKey: 'tags.local_news.water_outage.name',
       descriptionKey: 'tags.local_news.water_outage.desc',
-      synonyms: ['air mati', 'pam mati', 'gangguan air', '단수'],
+      synonyms: [
+        'air mati',
+        'pam mati',
+        'gangguan air',
+        'pdam',
+        'air tidak mengalir',
+        'air kecil',
+        'tekanan air rendah',
+        'kran kering',
+        'pipa bocor',
+        'pipa pecah'
+      ],
       guidedFields: ['eventTime', 'eventLocation'], // 시간, 장소 추가 필드
       emoji: '💧',
       group: 'infra',
@@ -92,7 +117,19 @@ class AppTags {
       tagId: 'waste_collection', // 쓰레기 수거
       nameKey: 'tags.local_news.waste_collection.name',
       descriptionKey: 'tags.local_news.waste_collection.desc',
-      synonyms: ['sampah', 'pengangkutan sampah', 'jadwal sampah', '쓰레기 수거'],
+      synonyms: [
+        'sampah',
+        'pengangkutan sampah',
+        'jadwal sampah',
+        'bank sampah',
+        'TPS',
+        'TPA',
+        'sampah menumpuk',
+        'jadwal angkut',
+        '3R',
+        'daur ulang',
+        'bau sampah'
+      ],
       emoji: '🗑️',
       group: 'infra',
     ),
@@ -100,17 +137,39 @@ class AppTags {
       tagId: 'road_works', // 도로 공사
       nameKey: 'tags.local_news.road_works.name',
       descriptionKey: 'tags.local_news.road_works.desc',
-      synonyms: ['perbaikan jalan', 'pembangunan jalan', 'galian', '도로 공사'],
+      synonyms: [
+        'perbaikan jalan',
+        'pembangunan jalan',
+        'galian',
+        'aspal',
+        'betonisasi',
+        'perbaikan drainase',
+        'saluran',
+        'trotoar',
+        'paving',
+        'proyek'
+      ],
       guidedFields: ['eventTime', 'eventLocation'],
-      emoji: '🛠️',
+      emoji: '🚧',
       group: 'infra',
     ),
     const TagInfo(
       tagId: 'public_facility', // 공공 시설
       nameKey: 'tags.local_news.public_facility.name',
       descriptionKey: 'tags.local_news.public_facility.desc',
-      synonyms: ['fasilitas umum', 'taman', 'lapangan', '공원', '놀이터', '공공시설'],
-      emoji: '🌳',
+      synonyms: [
+        'fasilitas umum',
+        'taman',
+        'lapangan',
+        'balai warga',
+        'pos ronda',
+        'poskamling',
+        'PJU',
+        'lampu jalan',
+        'GOR',
+        'rusun'
+      ],
+      emoji: '🏙️',
       group: 'infra',
     ),
 
@@ -124,17 +183,33 @@ class AppTags {
         'peringatan dini',
         'hujan deras',
         'angin kencang',
-        '기상특보',
-        '악천후'
+        'bmkg',
+        'petir',
+        'kilat',
+        'gelombang tinggi',
+        'panas terik',
+        'heatwave',
+        'hujan ekstrem'
       ],
-      emoji: '⚠️',
+      emoji: '⛈️',
       group: 'safety',
     ),
     const TagInfo(
       tagId: 'flood_alert', // 홍수 알림
       nameKey: 'tags.local_news.flood_alert.name',
       descriptionKey: 'tags.local_news.flood_alert.desc',
-      synonyms: ['banjir', 'genangan air', 'siaga banjir', '홍수'],
+      synonyms: [
+        'banjir',
+        'genangan air',
+        'siaga banjir',
+        'genangan tinggi',
+        'air masuk',
+        'kali meluap',
+        'drainase mampet',
+        'banjir rob',
+        'rob',
+        'kebanjiran'
+      ],
       guidedFields: ['eventLocation'],
       emoji: '🌊',
       group: 'safety',
@@ -143,26 +218,58 @@ class AppTags {
       tagId: 'air_quality', // 대기 질
       nameKey: 'tags.local_news.air_quality.name',
       descriptionKey: 'tags.local_news.air_quality.desc',
-      synonyms: ['polusi udara', 'kabut asap', 'AQI', 'PM2.5', '미세먼지', '대기오염'],
-      emoji: '💨',
+      synonyms: [
+        'polusi udara',
+        'kabut asap',
+        'AQI',
+        'PM2.5',
+        'PM10',
+        'ISPU',
+        'asap',
+        'bau menyengat',
+        'debu',
+        'berkabut'
+      ],
+      emoji: '🌫️',
       group: 'safety',
     ),
     const TagInfo(
       tagId: 'disease_alert', // 질병 알림
       nameKey: 'tags.local_news.disease_alert.name',
       descriptionKey: 'tags.local_news.disease_alert.desc',
-      synonyms: ['wabah', 'penyakit menular', 'DBD', 'COVID', '질병', '전염병'],
+      synonyms: [
+        'wabah',
+        'penyakit menular',
+        'DBD',
+        'COVID',
+        'demam berdarah',
+        'chikungunya',
+        'ISPA',
+        'rabies',
+        'flu',
+        'fogging'
+      ],
       emoji: '🦠',
       group: 'safety',
     ),
-    // (기존) 사건/사고
+    // 사건/사고 제보
     const TagInfo(
-      tagId: 'incident_report',
-      nameKey: 'categories.post.incident_report.name', // 기존 키 재사용 가능
-      descriptionKey: 'categories.post.incident_report.description',
-      synonyms: ['kecelakaan', 'kebakaran', 'kriminalitas', '사건사고', '화재', '범죄'],
+      tagId: 'incident_report', // 사건/사고 제보
+      nameKey: 'tags.local_news.incident_report.name',
+      descriptionKey: 'tags.local_news.incident_report.desc',
+      synonyms: [
+        'lapor',
+        'laporan',
+        'kejadian',
+        'kecelakaan',
+        'kehilangan',
+        'pencurian',
+        'kebakaran',
+        'tawuran',
+        'gempa'
+      ],
       emoji: '🚨',
-      group: 'safety',
+      group: 'report',
     ),
 
     // --- 교육 · 보건 ---
@@ -175,8 +282,11 @@ class AppTags {
         'pengumuman sekolah',
         'PPDB',
         'ujian',
-        '학교 공지',
-        '입학'
+        'daftar ulang',
+        'rapor',
+        'MPLS',
+        'ekskul',
+        'libur sekolah'
       ],
       emoji: '🎒',
       group: 'edu_health',
@@ -190,8 +300,12 @@ class AppTags {
         'vaksin',
         'kesehatan anak',
         'ibu hamil',
-        '예방접종',
-        '영유아검진'
+        'jadwal posyandu',
+        'timbang bayi',
+        'balita',
+        'PMT',
+        'kader',
+        'vitamin A'
       ],
       emoji: '🩺',
       group: 'edu_health',
@@ -201,12 +315,15 @@ class AppTags {
       nameKey: 'tags.local_news.health_campaign.name',
       descriptionKey: 'tags.local_news.health_campaign.desc',
       synonyms: [
-        'kampanye kesehatan',
-        'penyuluhan',
-        'cek kesehatan gratis',
-        '건강 캠페인'
+        'donor darah',
+        'cek kesehatan',
+        'vaksinasi',
+        'vaksin booster',
+        'sunat massal',
+        'senam sehat',
+        'skrining'
       ],
-      emoji: '❤️‍🩹', // or '🏥'
+      emoji: '❤️', // or '🏥'
       group: 'edu_health',
     ),
 
@@ -221,9 +338,12 @@ class AppTags {
         'jalan ditutup',
         'rekayasa lalin',
         'one way',
-        '교통 통제',
-        '도로 폐쇄',
-        '교통정보'
+        'contra flow',
+        'ganjil genap',
+        'padat merayap',
+        'penyekatan',
+        'buka tutup',
+        'traffic update'
       ],
       guidedFields: ['eventTime', 'eventLocation'],
       emoji: '🚦', // or '🚧'
@@ -236,11 +356,16 @@ class AppTags {
       synonyms: [
         'bus',
         'angkot',
+        'mikrolet',
         'KRL',
         'MRT',
         'LRT',
-        'transportasi umum',
-        '대중교통'
+        'busway',
+        'TransJakarta',
+        'halte',
+        'stasiun',
+        'jadwal',
+        'terlambat'
       ],
       emoji: '🚌',
       group: 'traffic',
@@ -249,7 +374,14 @@ class AppTags {
       tagId: 'parking_policy', // 주차 정보/정책
       nameKey: 'tags.local_news.parking_policy.name',
       descriptionKey: 'tags.local_news.parking_policy.desc',
-      synonyms: ['parkir', 'kebijakan parkir', 'zona parkir', '주차'],
+      synonyms: [
+        'parkir',
+        'stiker parkir',
+        'penertiban',
+        'parkir liar',
+        'derek',
+        'e-parking'
+      ],
       emoji: '🅿️',
       group: 'traffic',
     ),
@@ -260,13 +392,14 @@ class AppTags {
       nameKey: 'tags.local_news.community_event.name',
       descriptionKey: 'tags.local_news.community_event.desc',
       synonyms: [
-        'acara warga',
         'festival',
         'lomba',
         'kegiatan RT RW',
-        '동네 행사',
-        '축제',
-        '모임'
+        'bazar',
+        'gotong royong',
+        'kerja bakti',
+        '17an',
+        'karnaval'
       ],
       guidedFields: ['eventTime', 'eventLocation'],
       emoji: '🎉', // or '🎪'
@@ -285,7 +418,13 @@ class AppTags {
         'jumatan',
         'pengajian',
         'ibadah',
-        '종교행사'
+        'tarawih',
+        'buka puasa',
+        'salat id',
+        'natal',
+        'kebaktian',
+        'nyepi',
+        'galungan'
       ],
       guidedFields: ['eventTime', 'eventLocation'],
       emoji: '🕌', // or '⛪️', '🕍', '⛩️'

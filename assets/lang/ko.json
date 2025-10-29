@@ -460,7 +460,7 @@
       "tagsHint": "예: 강아지, 무료나눔"
     },
     "labels": {
-      "title": "제목 (선택)",
+      "title": "제목",
       "body": "내용",
       "tags": "태그",
       "guidedTitle": "추가 정보 (선택)",
@@ -1214,6 +1214,10 @@
       "worship_event": {
         "name": "종교 행사",
         "desc": "사원/교회/사찰 등 종교 행사."
+      },
+      "incident_report": {
+        "name": "사건/사고 제보",
+        "desc": "동네의 사건·사고 신고/알림."
       }
     }
   }

@@ -22,15 +22,13 @@ import 'package:share_plus/share_plus.dart'; // ✅ SharePlus import 확인
 // ✅ [태그 시스템] 태그 사전 import 추가
 import '../../../core/constants/app_tags.dart';
 
-// ✅ [태그 시스템] 공용 태그 리스트 위젯 import (이전 작업에서 사용됨)
-// ignore: unused_import
-import '../../shared/widgets/clickable_tag_list.dart';
+// 태그 검색 화면 네비게이션을 위해 import
+import 'tag_search_result_screen.dart';
 import '../models/post_model.dart';
 import '../../../core/models/user_model.dart';
 import '../widgets/comment_input_field.dart';
 import '../widgets/comment_list_view.dart';
 import 'edit_local_news_screen.dart';
-import 'tag_search_result_screen.dart';
 
 class LocalNewsDetailScreen extends StatefulWidget {
   final PostModel post;
@@ -241,7 +239,9 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                         ],
                       ),
                       Text(
-                        user.locationName ?? 'postCard.locationNotSet'.tr(),
+                        // 요청: 전체 주소 대신 kel만 표시
+                        user.locationParts?['kel'] ??
+                            'postCard.locationNotSet'.tr(),
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
@@ -314,10 +314,8 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
             // ✅ [링크 미리보기] 본문 아래에 미리보기 카드 추가
             _buildLinkPreview(_currentPost.body),
             const SizedBox(height: 16),
-            if (_currentPost.tags.isNotEmpty) ...[
-              _buildTags(context, _currentPost.tags),
-              const SizedBox(height: 16),
-            ],
+            // [NEW] 태그 칩 노출 (ClickableTagList)
+            // ✅ 본문 아래 #태그 중복 노출 제거: 상단 칩만 유지
             if (hasImages)
               _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
             if (hasLocation) ...[
@@ -616,16 +614,27 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
             runSpacing: 4.0,
             children: tagInfos
                 .map(
-                  (tagInfo) => Chip(
-                    avatar: tagInfo.emoji != null ? Text(tagInfo.emoji!) : null,
-                    label: Text(
-                      tagInfo.nameKey.tr(),
-                      style: const TextStyle(fontSize: 12),
+                  (tagInfo) => InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              TagSearchResultScreen(tags: [tagInfo.tagId]),
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Chip(
+                      // 표준화: 레이블에 "이모지 + 이름" 표시
+                      label: Text(
+                        '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${tagInfo.nameKey.tr()}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: Colors.grey[200],
                     ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: Colors.grey[200],
                   ),
                 )
                 .toList(),
@@ -646,28 +655,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     );
   }
 
-  Widget _buildTags(BuildContext context, List<String> tags) {
-    return Wrap(
-      spacing: 8.0,
-      runSpacing: 4.0,
-      children: tags.map((tag) {
-        return InkWell(
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => TagSearchResultScreen(tag: tag),
-            ));
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Chip(
-            label: Text('#$tag', style: const TextStyle(fontSize: 12)),
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            visualDensity: VisualDensity.compact,
-            backgroundColor: Colors.grey[200],
-          ),
-        );
-      }).toList(),
-    );
-  }
+  // (Deprecated) 개별 태그 칩 렌더링은 ClickableTagList로 대체되었습니다.
 
   Widget _buildImageSliderWithIndicator(List<String> imageUrls) {
     if (imageUrls.length <= 1) {

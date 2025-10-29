@@ -460,7 +460,7 @@
       "tagsHint": "e.g. dog, freeshare"
     },
     "labels": {
-      "title": "Title (Optional)",
+      "title": "Title",
       "body": "Content",
       "tags": "Tags",
       "guidedTitle": "Additional Info (Optional)",
@@ -1212,6 +1212,10 @@
       "worship_event": {
         "name": "Religious event",
         "desc": "Events at mosques, churches, temples, etc."
+      },
+      "incident_report": {
+        "name": "Incident report",
+        "desc": "Reports of incidents and accidents in the neighborhood."
       }
     }
   }
