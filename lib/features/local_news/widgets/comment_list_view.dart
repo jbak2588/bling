@@ -313,15 +313,21 @@ class _CommentListViewState extends State<CommentListView> {
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: reportReasons.map((reasonKey) {
-                  return RadioListTile<String>(
-                    title: Text(reasonKey.tr()),
-                    value: reasonKey,
-                    groupValue: selectedReason,
-                    onChanged: (value) =>
-                        setState(() => selectedReason = value),
-                  );
-                }).toList(),
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: reportReasons.map((reasonKey) {
+                      final isSelected = selectedReason == reasonKey;
+                      return ChoiceChip(
+                        label: Text(reasonKey.tr()),
+                        selected: isSelected,
+                        onSelected: (_) =>
+                            setState(() => selectedReason = reasonKey),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
             ),
             actions: [

@@ -152,8 +152,11 @@ List<String> recommendTagsFromText({
     if (picked.length >= topN) break;
     // extra guard (exclude/whitelist checked earlier, but double-check)
     if (exclude.contains(e.key)) continue;
-    if (whitelist != null && whitelist.isNotEmpty && !whitelist.contains(e.key))
+    if (whitelist != null &&
+        whitelist.isNotEmpty &&
+        !whitelist.contains(e.key)) {
       continue;
+    }
     picked.add(e.key);
   }
 
