@@ -15,6 +15,7 @@ import 'package:uuid/uuid.dart'; // 이미지 ID 생성을 위해 추가
 
 // ✅ [태그 시스템] 태그 사전 import 추가
 import '../../../core/constants/app_tags.dart';
+import '../utils/tag_recommender.dart';
 
 // ❌ [태그 시스템] 기존 자유 태그 입력 필드 import 제거
 // import '../../shared/widgets/custom_tag_input_field.dart';
@@ -36,6 +37,9 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
   // ✅ [태그 시스템] _tags 리스트는 이제 선택된 Tag ID (String)를 저장
   final List<String> _tags = []; // 예: ['power_outage', 'question']
+  // ✅ 추천 태그 상태 및 컨트롤러
+  List<String> _recommended = [];
+  TagRecommenderController? _reco;
 
   // ❌ [태그 시스템] _selectedCategory 상태 변수 제거
   // PostCategoryModel? _selectedCategory;
@@ -53,6 +57,19 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
   void initState() {
     super.initState();
     _fetchCurrentUser();
+    // ✅ 제목/본문 실시간 추천 연결 (디바운스 300ms)
+    _reco = TagRecommenderController(
+      titleController: _titleController,
+      contentController: _contentController,
+      // 이미 선택된 태그는 추천에서 제외
+      excludeProvider: () => _tags.toSet(),
+      onRecommend: (tags) {
+        if (!mounted) return;
+        setState(() {
+          _recommended = tags;
+        });
+      },
+    );
   }
 
   @override
@@ -60,6 +77,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
     _titleController.dispose();
     _contentController.dispose();
     _eventLocationController.dispose(); // ✅ 가이드형 필드 컨트롤러 해제
+    _reco?.dispose();
     super.dispose();
   }
 
@@ -249,6 +267,71 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
+
+                  // =========================
+                  // ✅ 실시간 추천 태그 블록 (선택된 태그 제외 후 비어있으면 숨김)
+                  // =========================
+                  for (final _ in [0])
+                    ...(() {
+                      final visibleRecs = _recommended
+                          .where((id) => !_tags.contains(id))
+                          .toList();
+                      if (visibleRecs.isEmpty) return <Widget>[];
+                      return [
+                        Text(
+                          'localNewsCreate.form.recommendedTags'.tr(),
+                          // i18n 키가 없으면 키 문자열이 노출됩니다.
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final id in visibleRecs)
+                              ChoiceChip(
+                                label: Text(
+                                  // 태그 이름 로컬라이즈 + 이모지 표시
+                                  () {
+                                    final tag =
+                                        AppTags.localNewsTags.firstWhere(
+                                      (t) => t.tagId == id,
+                                      orElse: () => TagInfo(
+                                          tagId: id,
+                                          nameKey: id,
+                                          descriptionKey: ''),
+                                    );
+                                    final label = tag.nameKey.tr();
+                                    return '${tag.emoji ?? ''} $label'.trim();
+                                  }(),
+                                ),
+                                selected: _tags.contains(id),
+                                onSelected: (_) {
+                                  setState(() {
+                                    if (_tags.contains(id)) {
+                                      _tags.remove(id);
+                                    } else if (_tags.length < 3) {
+                                      _tags.add(id);
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'localNewsCreate.validation.tagMaxLimit'
+                                                .tr(),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    _updateGuidedFieldsVisibility();
+                                  });
+                                },
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                      ];
+                    }()),
 
                   // --- ❌ [태그 시스템] 기존 자유 태그 입력 제거 ---
                   // Text('localNewsCreate.labels.tags'.tr(), ...),

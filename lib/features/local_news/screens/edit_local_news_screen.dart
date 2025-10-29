@@ -13,6 +13,9 @@ import '../../shared/widgets/custom_tag_input_field.dart';
 import '../../../core/constants/app_categories.dart';
 import '../models/post_category_model.dart';
 import '../models/post_model.dart';
+// ✅ 태그 사전 + 추천 로직
+import '../../../core/constants/app_tags.dart';
+import '../utils/tag_recommender.dart';
 
 class EditLocalNewsScreen extends StatefulWidget {
   final PostModel post;
@@ -31,6 +34,9 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
 
   // ✅ 태그 목록 상태는 그대로 유지합니다. 공용 위젯이 이 상태를 업데이트합니다.
   List<String> _tags = [];
+  // ✅ 추천 태그 상태
+  List<String> _recommended = [];
+  TagRecommenderController? _reco;
 
   final List<XFile> _newSelectedImages = [];
   final List<String> _existingImageUrls = [];
@@ -56,6 +62,17 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
       (c) => c.categoryId == initialTagId,
       orElse: () => AppCategories.postCategories.first,
     );
+
+    // ✅ (선택) 기존 포스트의 태그를 초기 세팅했다면 그대로 두고, 추천 컨트롤러만 연결합니다.
+    _reco = TagRecommenderController(
+      titleController: _titleController,
+      contentController: _contentController,
+      excludeProvider: () => _tags.toSet(),
+      onRecommend: (tags) {
+        if (!mounted) return;
+        setState(() => _recommended = tags);
+      },
+    );
   }
 
   @override
@@ -64,6 +81,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
     _contentController.dispose();
     // ❌ 더 이상 사용하지 않으므로 dispose 호출도 제거합니다.
     // _tagInputController.dispose();
+    _reco?.dispose();
     super.dispose();
   }
 
@@ -200,6 +218,58 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
                     labelText: 'localNewsCreate.form.contentLabel'.tr(),
                     border: const OutlineInputBorder())),
             const SizedBox(height: 16),
+            // =========================
+            // ✅ 실시간 추천 태그 블록 (선택된 태그 제외 후 비어있으면 숨김)
+            // =========================
+            for (final _ in [0])
+              ...(() {
+                final visibleRecs =
+                    _recommended.where((id) => !_tags.contains(id)).toList();
+                if (visibleRecs.isEmpty) return <Widget>[];
+                return [
+                  Text('localNewsCreate.form.recommendedTags'.tr(),
+                      style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final id in visibleRecs)
+                        ChoiceChip(
+                          label: Text(
+                            () {
+                              final tag = AppTags.localNewsTags.firstWhere(
+                                (t) => t.tagId == id,
+                                orElse: () => const TagInfo(
+                                    tagId: '', nameKey: '', descriptionKey: ''),
+                              );
+                              final name = (tag.nameKey.isNotEmpty)
+                                  ? tag.nameKey.tr()
+                                  : id;
+                              return '${tag.emoji ?? ''} $name'.trim();
+                            }(),
+                          ),
+                          selected: _tags.contains(id),
+                          onSelected: (_) {
+                            setState(() {
+                              if (_tags.contains(id)) {
+                                _tags.remove(id);
+                              } else if (_tags.length < 3) {
+                                _tags.add(id);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('태그는 최대 3개까지 선택할 수 있어요.')),
+                                );
+                              }
+                            });
+                          },
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ];
+              }()),
 
             // ✅ 교체된 공용 커스텀 태그 위젯을 사용합니다.
             CustomTagInputField(

@@ -89,10 +89,13 @@ import 'package:bling_app/features/lost_and_found/screens/lost_and_found_screen.
 import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart';
 
 class MenuItem {
-  final IconData icon;
+  final IconData? icon; // 기존 IconData 지원
+  final String? svg; // 신규: SVG 에셋 경로
   final String labelKey;
   final Widget screen;
-  MenuItem({required this.icon, required this.labelKey, required this.screen});
+  MenuItem({this.icon, this.svg, required this.labelKey, required this.screen})
+      : assert(
+            icon != null || svg != null, 'Either icon or svg must be provided');
 }
 
 class HomeScreen extends StatelessWidget {
@@ -217,45 +220,48 @@ class HomeScreen extends StatelessWidget {
 
   final VoidCallback? onSearchChipTap;
 
+  // SVG 아이콘 경로 기본 폴더
+  static const String _iconsPath = 'assets/icons';
+
   static final List<MenuItem> menuItems = [
     MenuItem(
-        icon: Icons.newspaper_outlined,
+        svg: '$_iconsPath/ico_news.svg',
         labelKey: 'main.tabs.localNews',
         screen: const LocalNewsScreen()),
     MenuItem(
-        icon: Icons.storefront_outlined,
+        svg: '$_iconsPath/ico_seconhand.svg',
         labelKey: 'main.tabs.marketplace',
         screen: const MarketplaceScreen()),
     MenuItem(
-        icon: Icons.groups_outlined,
+        svg: '$_iconsPath/ico_community.svg',
         labelKey: 'main.tabs.clubs',
         screen: const ClubsScreen()),
     MenuItem(
-        icon: Icons.favorite_border_outlined,
+        svg: '$_iconsPath/ico_friend.svg',
         labelKey: 'main.tabs.findFriends',
         screen: const FindFriendsScreen()),
     MenuItem(
-        icon: Icons.work_outline,
+        svg: '$_iconsPath/ico_job.svg',
         labelKey: 'main.tabs.jobs',
         screen: const JobsScreen()),
     MenuItem(
-        icon: Icons.store_mall_directory_outlined,
+        svg: '$_iconsPath/ico_store.svg',
         labelKey: 'main.tabs.localStores',
         screen: const LocalStoresScreen()),
     MenuItem(
-        icon: Icons.gavel_outlined,
+        svg: '$_iconsPath/ico_auction.svg',
         labelKey: 'main.tabs.auction',
         screen: const AuctionScreen()),
     MenuItem(
-        icon: Icons.star_outline,
+        svg: '$_iconsPath/ico_pom.svg',
         labelKey: 'main.tabs.pom',
         screen: const PomScreen()),
     MenuItem(
-        icon: Icons.help_outline,
+        svg: '$_iconsPath/ico_lost item.svg',
         labelKey: 'main.tabs.lostAndFound',
         screen: const LostAndFoundScreen()),
     MenuItem(
-        icon: Icons.house_outlined,
+        svg: '$_iconsPath/ico_real estate.svg',
         labelKey: 'main.tabs.realEstate',
         screen: const RealEstateScreen()),
   ];
@@ -306,6 +312,7 @@ class HomeScreen extends StatelessWidget {
               return GrabIconTile(
                 compact: gridCount == 5,
                 icon: item.icon,
+                svgAsset: item.svg,
                 label: item.labelKey.tr(),
                 onTap: () {
                   // ⬇️ 기존 onTap 로직 그대로 (절대 수정 X)
