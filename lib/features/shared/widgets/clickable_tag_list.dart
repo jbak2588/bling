@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../local_news/screens/tag_search_result_screen.dart'; // local_news에 있지만 공용으로 사용
+import '../../local_news/screens/tag_search_result_screen.dart'; // 기본 네비(폴백)
 
 class ClickableTagList extends StatelessWidget {
   final List<String> tags;
 
+  /// ✅ (옵션) 태그 탭 시 커스텀 동작: null이면 기본 네비게이션
+  final void Function(String tag)? onTapTag;
+
   const ClickableTagList({
     super.key,
     required this.tags,
+    this.onTapTag,
   });
 
   @override
@@ -18,23 +22,24 @@ class ClickableTagList extends StatelessWidget {
     return Wrap(
       spacing: 8.0,
       runSpacing: 4.0,
-      children: tags.map((tag) {
-        return InkWell(
-          onTap: () {
-            // 현재는 local_news 하위의 화면을 사용하지만, 추후 공용 검색 화면으로 대체 가능
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => TagSearchResultScreen(tag: tag),
-            ));
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Chip(
+      children: [
+        for (final tag in tags)
+          ActionChip(
             label: Text('#$tag', style: const TextStyle(fontSize: 12)),
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            visualDensity: VisualDensity.compact,
-            backgroundColor: Colors.grey[200],
+            onPressed: () {
+              if (onTapTag != null) {
+                onTapTag!(tag);
+              } else {
+                // 폴백: 로컬 뉴스 태그 검색 화면으로 이동
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => TagSearchResultScreen(tags: [tag]),
+                  ),
+                );
+              }
+            },
           ),
-        );
-      }).toList(),
+      ],
     );
   }
 }

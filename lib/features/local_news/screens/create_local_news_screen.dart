@@ -8,12 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:uuid/uuid.dart'; // 이미지 ID 생성을 위해 추가
+// ✅ 공용 텍스트 입력 기반 태그 위젯
+import '../../shared/widgets/custom_tag_input_field.dart';
 
 // ❌ [태그 시스템] 기존 카테고리 import 제거
 // import '../../../core/constants/app_categories.dart';
 // import '../models/post_category_model.dart';
 
-// ✅ [태그 시스템] 태그 사전 import 추가
+// ✅ [태그 시스템] 태그 사전 + 추천 로직
 import '../../../core/constants/app_tags.dart';
 import '../utils/tag_recommender.dart';
 
@@ -35,7 +37,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
-  // ✅ [태그 시스템] _tags 리스트는 이제 선택된 Tag ID (String)를 저장
+  // ✅ [태그 시스템] 텍스트 입력 기반 태그 목록
   final List<String> _tags = []; // 예: ['power_outage', 'question']
   // ✅ 추천 태그 상태 및 컨트롤러
   List<String> _recommended = [];
@@ -125,15 +127,9 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
       return;
     }
 
-    // ✅ [태그 시스템] 2. 태그 선택 유효성 검사 (최소 1개)
-    if (_tags.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-                'localNewsCreate.validation.tagRequired'.tr())), // 다국어 키 추가 필요
-      );
-      return;
-    }
+    // ✅ [태그 시스템] 2. 태그 선택 유효성 검사 → 선택은 선택사항, 비어 있으면 'etc'(일상/기타)로 저장
+    final List<String> tagsToSave =
+        _tags.isEmpty ? ['daily_life'] : List.of(_tags);
 
     if (_currentUserModel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -165,8 +161,8 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
         'body': _contentController.text.trim(),
         // ❌ [태그 시스템] category 제거
         // 'category': _selectedCategory!.categoryId,
-        // ✅ [태그 시스템] tags (Tag ID 리스트) 저장
-        'tags': _tags,
+        // ✅ [태그 시스템] tags (Tag ID 리스트) 저장 - 비었으면 'etc' 기본값
+        'tags': tagsToSave,
         'mediaUrl': imageUrls,
         'mediaType': imageUrls.isNotEmpty ? 'image' : null,
         // 사용자 위치 정보 사용
@@ -269,80 +265,35 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                   const SizedBox(height: 16),
 
                   // =========================
-                  // ✅ 실시간 추천 태그 블록 (선택된 태그 제외 후 비어있으면 숨김)
+                  // ✅ 텍스트 입력 기반 태그 캡처
                   // =========================
-                  for (final _ in [0])
-                    ...(() {
-                      final visibleRecs = _recommended
-                          .where((id) => !_tags.contains(id))
-                          .toList();
-                      if (visibleRecs.isEmpty) return <Widget>[];
-                      return [
-                        Text(
-                          'localNewsCreate.form.recommendedTags'.tr(),
-                          // i18n 키가 없으면 키 문자열이 노출됩니다.
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (final id in visibleRecs)
-                              ChoiceChip(
-                                label: Text(
-                                  // 태그 이름 로컬라이즈 + 이모지 표시
-                                  () {
-                                    final tag =
-                                        AppTags.localNewsTags.firstWhere(
-                                      (t) => t.tagId == id,
-                                      orElse: () => TagInfo(
-                                          tagId: id,
-                                          nameKey: id,
-                                          descriptionKey: ''),
-                                    );
-                                    final label = tag.nameKey.tr();
-                                    return '${tag.emoji ?? ''} $label'.trim();
-                                  }(),
-                                ),
-                                selected: _tags.contains(id),
-                                onSelected: (_) {
-                                  setState(() {
-                                    if (_tags.contains(id)) {
-                                      _tags.remove(id);
-                                    } else if (_tags.length < 3) {
-                                      _tags.add(id);
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'localNewsCreate.validation.tagMaxLimit'
-                                                .tr(),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                    _updateGuidedFieldsVisibility();
-                                  });
-                                },
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                      ];
-                    }()),
-
-                  // --- ❌ [태그 시스템] 기존 자유 태그 입력 제거 ---
-                  // Text('localNewsCreate.labels.tags'.tr(), ...),
-                  // CustomTagInputField( ... )
+                  Text(
+                    'localNewsCreate.labels.tags'.tr(), // '태그'
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  CustomTagInputField(
+                    hintText: 'localNewsCreate.form.tagsHint'.tr(),
+                    initialTags: _tags,
+                    onTagsChanged: (tags) {
+                      setState(() {
+                        _tags
+                          ..clear()
+                          ..addAll(tags);
+                        _updateGuidedFieldsVisibility();
+                      });
+                    },
+                    titleController: _titleController, // 제목으로부터 제안
+                    autoCreateTitleTag: true,
+                    allowEmptyTags: true, // 사용자가 원치 않으면 비워둘 수 있음
+                    suggestedTags: _recommended,
+                    whitelist:
+                        AppTags.localNewsTags.map((t) => t.tagId).toSet(),
+                    maxTags: 3,
+                  ),
 
                   // --- 기존 이미지 첨부 ---
                   _buildImagePicker(),
-
-                  // --- ✅ [태그 시스템] 태그 선택 UI 위치 이동 ---
-                  const SizedBox(height: 24),
-                  _buildTagSelector(context),
 
                   // --- ✅ [태그 시스템] 가이드형 필드 UI (조건부 표시) ---
                   if (_showGuidedFields) _buildGuidedFields(),
@@ -357,194 +308,6 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                   child: CircularProgressIndicator(color: Colors.white)),
             ),
         ],
-      ),
-    );
-  }
-
-  // ✅ [UI 개선] 태그 선택기 위젯 (클릭 시 BottomSheet 열림)
-  Widget _buildTagSelector(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'localNewsCreate.labels.tags'.tr(), // '태그'
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        const SizedBox(height: 8),
-        InkWell(
-          onTap: () {
-            _showTagSelectionSheet(context); // 탭하면 바텀 시트 호출
-          },
-          child: InputDecorator(
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              // ✅ 유효성 검사: _tags가 비어있으면 에러 테두리 표시
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: _tags.isEmpty ? Colors.red : Colors.grey[400]!,
-                ),
-              ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _tags.isEmpty
-                      ? Text(
-                          'localNewsCreate.hints.tagSelection'
-                              .tr(), // (최소 1개, 최대 3개)
-                          style: TextStyle(color: Colors.grey[600]),
-                        )
-                      : Wrap(
-                          // 선택된 태그 칩 표시
-                          spacing: 6.0,
-                          runSpacing: 4.0,
-                          children: _tags.map((tagId) {
-                            final tag = AppTags.localNewsTags.firstWhere(
-                              (t) => t.tagId == tagId,
-                              orElse: () => TagInfo(
-                                  tagId: tagId,
-                                  nameKey: tagId,
-                                  descriptionKey: ''),
-                            );
-                            return Chip(
-                              label: Text(tag.nameKey.tr(),
-                                  style: const TextStyle(fontSize: 12)),
-                              labelPadding:
-                                  const EdgeInsets.symmetric(horizontal: 4.0),
-                              padding: EdgeInsets.zero,
-                              visualDensity: VisualDensity.compact,
-                              backgroundColor: Colors.grey[200],
-                              onDeleted: () {
-                                // 선택된 칩에서 바로 삭제
-                                setState(() {
-                                  _tags.remove(tagId);
-                                  _updateGuidedFieldsVisibility();
-                                });
-                              },
-                              deleteIconColor: Colors.grey[600],
-                            );
-                          }).toList(),
-                        ),
-                ),
-                const Icon(Icons.arrow_drop_down, color: Colors.grey),
-              ],
-            ),
-          ),
-        ),
-        if (_tags.isEmpty) // 유효성 검사 메시지
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0, left: 12.0),
-            child: Text(
-              'localNewsCreate.validation.tagRequired'.tr(),
-              style: TextStyle(color: Colors.red[700], fontSize: 12),
-            ),
-          ),
-      ],
-    );
-  }
-
-  // ✅ [UI 개선] 태그 선택 BottomSheet 호출 함수
-  void _showTagSelectionSheet(BuildContext context) {
-    // 바텀 시트 내에서만 사용할 임시 태그 목록
-    List<String> tempSelectedTags = List<String>.from(_tags);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        // 상단 모서리 둥글게
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (sheetContext) {
-        // 바텀 시트 내부 상태 관리를 위해 StatefulBuilder 사용
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
-            return DraggableScrollableSheet(
-              expand: false,
-              initialChildSize: 0.7, // 초기 높이
-              maxChildSize: 0.9, // 최대 높이
-              builder: (_, scrollController) {
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'localNewsCreate.hints.tagSelection'
-                            .tr(), // (최소 1개, 최대 3개)
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        child: _buildTagSelectionSheetContent(
-                          // 태그 목록 UI 재사용
-                          tempSelectedTags,
-                          setModalState, // 바텀 시트의 setState 전달
-                        ),
-                      ),
-                    ),
-                    // TODO: 확인 버튼 추가 (선택 사항, 현재는 칩 선택 시 바로 반영됨)
-                  ],
-                );
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // ✅ [태그 시스템] 태그 선택 UI 위젯
-  // ✅ [UI 개선] 이름 변경: _buildTagSelectionSheetContent (바텀 시트 내용물)
-  Widget _buildTagSelectionSheetContent(
-      List<String> selectedTags, StateSetter setModalState) {
-    return Container(
-      padding: const EdgeInsets.all(16.0), // 바텀 시트 내부 패딩
-      child: Wrap(
-        spacing: 8.0, // 칩 간 가로 간격
-        runSpacing: 4.0, // 칩 간 세로 간격
-        children: AppTags.localNewsTags.map((tag) {
-          final isSelected = selectedTags.contains(tag.tagId);
-          return FilterChip(
-            label: Text('${tag.emoji ?? ''} ${tag.nameKey.tr()}'),
-            selected: isSelected,
-            onSelected: (selected) {
-              // 바텀 시트의 setState 호출
-              setModalState(() {
-                if (selected) {
-                  if (selectedTags.length < 3) {
-                    selectedTags.add(tag.tagId);
-                  } else {
-                    // 바텀 시트 내에서 SnackBar 표시
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'localNewsCreate.validation.tagMaxLimit'.tr(),
-                        ),
-                      ),
-                    );
-                  }
-                } else {
-                  selectedTags.remove(tag.tagId);
-                }
-
-                // ✅ [UI 개선] 바텀 시트에서 선택 시, 메인 화면 상태(_tags)도 즉시 업데이트
-                setState(() {
-                  _tags
-                    ..clear()
-                    ..addAll(selectedTags);
-                  _updateGuidedFieldsVisibility(); // 가이드형 필드 업데이트
-                });
-              });
-            },
-            selectedColor:
-                Theme.of(context).primaryColor.withValues(alpha: 0.2),
-            checkmarkColor: Theme.of(context).primaryColor,
-          );
-        }).toList(),
       ),
     );
   }

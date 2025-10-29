@@ -25,12 +25,15 @@ import 'package:google_fonts/google_fonts.dart';
 
 // ✅ 새로 만든 프로필 스크린 import
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
-import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
 
 // ✅ 새로 만든 공용 캐러셀 위젯을 import 합니다.
 import '../../shared/widgets/image_carousel_card.dart';
 // ✅ [태그 시스템] 태그 사전 import 추가
 import 'package:bling_app/core/constants/app_tags.dart';
+// ✅ 태그 검색 화면 네비게이션을 위해 import
+import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
+// ✅ 클릭 가능한 태그 리스트 위젯 (칩)
+// import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
 
 // ✅ 더 이상 상태가 필요 없으므로 StatelessWidget으로 변경합니다.
 class PostCard extends StatefulWidget {
@@ -130,6 +133,11 @@ class _PostCardState extends State<PostCard>
 
   // ✅ _buildLocationInfo 함수 추가
   Widget _buildLocationInfo(BuildContext context, String? locationName) {
+    // 요청: locationParts의 전체 주소 대신 kel만 표시
+    final kel = widget.post.locationParts != null
+        ? (widget.post.locationParts!['kel'] as String?)
+        : null;
+    final display = kel ?? locationName ?? 'postCard.locationNotSet'.tr();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -145,7 +153,7 @@ class _PostCardState extends State<PostCard>
           const SizedBox(width: 8),
           Flexible(
             child: Text(
-              locationName ?? '위치 정보 있음',
+              display,
               style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
               overflow: TextOverflow.ellipsis,
             ),
@@ -177,18 +185,28 @@ class _PostCardState extends State<PostCard>
             spacing: 8.0,
             runSpacing: 4.0,
             children: tagInfos
-                .map((tagInfo) => Chip(
-                      avatar: tagInfo.emoji != null
-                          ? Text(tagInfo.emoji!,
-                              style: const TextStyle(fontSize: 10))
-                          : null,
-                      label: Text(tagInfo.nameKey.tr(),
-                          style: const TextStyle(fontSize: 11)),
-                      // 폰트 크기 미세 조정
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 0),
-                      visualDensity: VisualDensity.compact,
-                      backgroundColor: Colors.grey[200],
+                .map((tagInfo) => InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                TagSearchResultScreen(tags: [tagInfo.tagId]),
+                          ),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(16),
+                      child: Chip(
+                        // 표준화: 레이블에 "이모지 + 이름" 표시
+                        label: Text(
+                          '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${tagInfo.nameKey.tr()}',
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                        // 폰트 크기 미세 조정
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 0),
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: Colors.grey[200],
+                      ),
                     ))
                 .toList(),
           ),
@@ -205,37 +223,25 @@ class _PostCardState extends State<PostCard>
           ),
           const SizedBox(height: 4), // 제목과 본문(다음 위젯) 사이 간격
         ],
+
+        // ✅ 본문 미리보기 (최대 4줄)
+        if ((post.body).trim().isNotEmpty) ...[
+          Text(
+            post.body.trim(),
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Colors.grey.shade800, height: 1.2),
+          ),
+          const SizedBox(height: 4),
+        ],
       ],
     );
   }
 
-  // ✅ _buildTags 함수를 수정하여 탭 이벤트를 추가합니다.
-  Widget _buildTags(BuildContext context, List<String> tags) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12.0),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 4,
-        children: tags.map((tag) {
-          return InkWell(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => TagSearchResultScreen(tag: tag),
-              ));
-            },
-            borderRadius: BorderRadius.circular(16),
-            child: Chip(
-              label: Text('#$tag'),
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-              labelStyle: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-              backgroundColor: Colors.grey.shade100,
-              visualDensity: VisualDensity.compact,
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
+  // (Deprecated) 기존 태그 칩 렌더링은 ClickableTagList로 대체되었습니다.
 
   Widget _actionButton({required IconData icon, int? count}) {
     return Row(
@@ -311,7 +317,7 @@ class _PostCardState extends State<PostCard>
                 const SizedBox(height: 12),
                 _buildLocationInfo(context, post.locationName),
               ],
-              if (post.tags.isNotEmpty) _buildTags(context, post.tags),
+              // ✅ 본문 아래 해시태그(#tag) 중복 노출 제거: 상단 칩만 유지
               const Divider(height: 24),
               _buildActionButtons(post),
             ],

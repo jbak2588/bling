@@ -431,7 +431,7 @@
       "tagsHint": "cth. anjing, gratisan"
     },
     "labels": {
-      "title": "Judul (Opsional)",
+      "title": "Judul",
       "body": "Konten",
       "tags": "Tag",
       "guidedTitle": "Info Tambahan (Opsional)",
@@ -1185,6 +1185,10 @@
       "worship_event": {
         "name": "Acara ibadah",
         "desc": "Kegiatan di masjid, gereja, vihara, pura, dll."
+      },
+      "incident_report": {
+        "name": "Laporan insiden",
+        "desc": "Laporan insiden dan kecelakaan di lingkungan."
       }
     }
   }

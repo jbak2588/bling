@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // ✅ 1. Firestore impor
 import 'package:easy_localization/easy_localization.dart'; // ✅ 이슈 2: 다국어 import
 import 'package:bling_app/core/models/user_model.dart'; // ✅ 이슈 1: UserModel import
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart'; // ✅ 이슈 1: 신뢰배지 import
+import 'package:bling_app/core/constants/app_tags.dart'; // ✅ 태그 사전 매핑
 
 /// [개편] 2단계: 메인 피드용 표준 썸네일 (Post 전용)
 ///
@@ -230,10 +231,50 @@ class PostThumb extends StatelessWidget {
           color: Colors.grey[600],
         );
 
-    // MD: "위치는 kab/kota만 단축 표기"
-    final location =
-        post.locationParts?['kab'] ?? post.locationParts?['kota'] ?? '';
+    // 요청: locationParts의 전체 주소 대신 kel만 표시
+    final location = post.locationParts?['kel'] ?? '';
     final date = DateFormat('MM.dd').format(post.createdAt.toDate());
+
+    // 카테고리 텍스트를 태그와 완전히 일치시키기 위한 라벨 구성 함수 (최대 2개 + "+N")
+    String resolveTagLabels(BuildContext ctx) {
+      List<String> tagIds = post.tags.isNotEmpty ? post.tags : ['etc'];
+
+      String labelFor(String tagId) {
+        TagInfo? matched;
+        for (final t in AppTags.localNewsTags) {
+          if (t.tagId == tagId) {
+            matched = t;
+            break;
+          }
+        }
+
+        if (matched != null) {
+          final name = matched.nameKey.tr();
+          final emoji = matched.emoji;
+          return (emoji != null && emoji.isNotEmpty) ? '$emoji $name' : name;
+        }
+
+        // 최후 수단: 기존 카테고리 키 시도 (호환용)
+        final fallbackKey = 'categories.post.$tagId.name';
+        final translated = fallbackKey.tr();
+        if (translated != fallbackKey) return translated;
+
+        return tagId; // 마지막 폴백: tagId 그대로
+      }
+
+      final labels = <String>[];
+      final takeCount = tagIds.length >= 2 ? 2 : 1;
+      for (final id in tagIds.take(takeCount)) {
+        labels.add(labelFor(id));
+      }
+
+      String result = labels.join(' · ');
+      final remaining = tagIds.length - takeCount;
+      if (remaining > 0) {
+        result = '$result +$remaining';
+      }
+      return result;
+    }
 
     return DefaultTextStyle(
       style: textStyle!,
@@ -245,12 +286,7 @@ class PostThumb extends StatelessWidget {
           Flexible(
             flex: 3,
             child: Text(
-              // ✅ [수정] "store_promo" -> "categories.post.store_promo.name"
-              // ✅ [태그 시스템 수정] category 대신 tags.first 사용
-              // post.category 값(ID)을 기반으로 올바른 i18n 키를 조립합니다.
-              // tags 리스트가 비어있지 않다고 가정
-              "categories.post.${post.tags.isNotEmpty ? post.tags.first : 'etc'}.name"
-                  .tr(),
+              resolveTagLabels(context),
               overflow: TextOverflow.ellipsis,
             ),
           ),

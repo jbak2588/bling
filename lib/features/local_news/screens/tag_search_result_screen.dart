@@ -3,47 +3,90 @@ import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/features/local_news/widgets/post_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+// ✅ Localize tag names and emojis
+import 'package:bling_app/core/constants/app_tags.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class TagSearchResultScreen extends StatelessWidget {
-  final String tag;
-  const TagSearchResultScreen({super.key, required this.tag});
+  final List<String> tags;
+  const TagSearchResultScreen({super.key, required this.tags});
 
   @override
   Widget build(BuildContext context) {
+    final col = FirebaseFirestore.instance.collection('posts');
+    final q = (tags.length == 1)
+        ? col.where('tags', arrayContains: tags.first)
+        : col.where('tags', arrayContainsAny: tags.take(10).toList());
+
+    String _displayName(String tagId) {
+      final info = AppTags.localNewsTags.firstWhere(
+        (t) => t.tagId == tagId,
+        orElse: () => const TagInfo(
+          tagId: '',
+          nameKey: '',
+          descriptionKey: '',
+        ),
+      );
+      if (info.tagId.isEmpty) return tagId; // fallback to raw id
+      return info.nameKey.tr();
+    }
+
+    String _displayEmoji(String tagId) {
+      final info = AppTags.localNewsTags.firstWhere(
+        (t) => t.tagId == tagId,
+        orElse: () => const TagInfo(
+          tagId: '',
+          nameKey: '',
+          descriptionKey: '',
+        ),
+      );
+      return info.emoji ?? '';
+    }
+
+    String _titleForTags(List<String> tagIds) {
+      if (tagIds.isEmpty) return '#';
+      if (tagIds.length == 1) {
+        final info = AppTags.localNewsTags.firstWhere(
+          (t) => t.tagId == tagIds.first,
+          orElse: () => const TagInfo(
+            tagId: '',
+            nameKey: '',
+            descriptionKey: '',
+          ),
+        );
+        final name = info.tagId.isEmpty ? tagIds.first : info.nameKey.tr();
+        final emoji = info.emoji ?? '';
+        // Always show as `emoji + name` without '#'
+        return emoji.isNotEmpty ? '$emoji $name' : name;
+      }
+      // Multiple: join each as `emoji + name`
+      final items = tagIds.map((id) {
+        final name = _displayName(id);
+        final emoji = _displayEmoji(id);
+        return emoji.isNotEmpty ? '$emoji $name' : name;
+      }).toList();
+      return items.join('   ');
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('#$tag', style: const TextStyle(fontWeight: FontWeight.bold)),
-      ),
+      appBar: AppBar(title: Text(_titleForTags(tags))),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        // Firestore의 array-contains 쿼리를 사용하여 해당 태그를 포함하는 문서를 찾습니다.
-        stream: FirebaseFirestore.instance
-            .collection('posts')
-            .where('tags', arrayContains: tag)
-            .orderBy('createdAt', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+        stream: q.orderBy('createdAt', descending: true).snapshots(),
+        builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {
-             return Center(
-                child: Text(
-                    'localNewsTagResult.error'
-                        .tr(namedArgs: {'error': snapshot.error.toString()})));
+          if (!snap.hasData || snap.data!.docs.isEmpty) {
+            return const Center(child: Text('해당 태그의 글이 없습니다.'));
           }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-             return Center(
-                child: Text('localNewsTagResult.empty'
-                    .tr(namedArgs: {'tag': tag})));
-          }
-
-          final postDocs = snapshot.data!.docs;
-          return ListView.builder(
-            padding: const EdgeInsets.all(8.0),
-            itemCount: postDocs.length,
-            itemBuilder: (context, index) {
-              final post = PostModel.fromFirestore(postDocs[index]);
+          final docs = snap.data!.docs;
+          return ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            itemCount: docs.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (_, i) {
+              final doc = docs[i];
+              final post = PostModel.fromFirestore(doc);
               return PostCard(post: post);
             },
           );

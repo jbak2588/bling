@@ -137,13 +137,17 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
       final newImageUrls = await _uploadImages();
       final finalImageUrls = [..._existingImageUrls, ...newImageUrls];
 
+      // ✅ 태그 기본값 정책 정합: 비어있으면 'daily_life'로 저장
+      final List<String> tagsToSave =
+          _tags.isEmpty ? ['daily_life'] : List.of(_tags);
+
       final updatedData = {
         'title': _titleController.text.trim(),
         'body': _contentController.text.trim(),
         'mediaUrl': finalImageUrls,
         'mediaType': finalImageUrls.isNotEmpty ? 'image' : null,
         'category': _selectedCategory!.categoryId,
-        'tags': _tags, // ✅ _tags 상태는 그대로 사용됩니다.
+        'tags': tagsToSave, // ✅ 비어있으면 daily_life 기본 태그 저장
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
@@ -281,6 +285,12 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
                   _tags = tags;
                 });
               },
+              titleController: _titleController,
+              autoCreateTitleTag: true,
+              allowEmptyTags: true, // 편집에서는 비워두기 허용
+              suggestedTags: _recommended,
+              whitelist: AppTags.localNewsTags.map((t) => t.tagId).toSet(),
+              maxTags: 3,
             ),
 
             const SizedBox(height: 16),
