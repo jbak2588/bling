@@ -67,8 +67,9 @@
  * ============================================================================
  */
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onDocumentUpdated, onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
+const { getMessaging } = require("firebase-admin/messaging"); // ✅ [푸시 스키마] 추가
 const { defineSecret } = require("firebase-functions/params");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { logger } = require("firebase-functions");
@@ -1029,3 +1030,255 @@ const safetySettings = [
     threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
   },
 ];
+
+
+// ----------------------------------------------------------------------
+// [푸시 스키마] 하이브리드 기획안 3. 푸시 구독 스키마
+// ----------------------------------------------------------------------
+
+/**
+ * PushPrefs 객체에서 구독할 FCM 토픽 이름 목록을 생성합니다.
+ * @param {object} prefs - user.pushPrefs 객체
+ * @return {Set<string>} - 구독할 토픽 이름의 Set
+ */
+function buildTopicsFromPrefs(prefs) {
+  const { scope, tags, regionKeys } = prefs || {};
+
+  // scope/regionKeys 가 유효하지 않으면 토픽 생성 불가
+  if (!scope || !regionKeys || !regionKeys[scope]) {
+    return new Set();
+  }
+
+  // 태그가 없으면 태그 기반 구독 없음
+  if (!tags || !Array.isArray(tags) || tags.length === 0) {
+    return new Set();
+  }
+
+  // 1) 기준 지역 키 (예: 'DKI|Jakarta Barat|Palmerah|Slipi')
+  const regionKey = String(regionKeys[scope] || "");
+  // 2) 토픽 베이스 문자열 생성 (공백/특수문자 정리)
+  const baseTopic = `news.${scope}.${regionKey
+    .replace(/[| ]/g, "-")
+    .replace(/[^a-zA-Z0-9-]/g, "")}`;
+
+  // 3) 태그별 최종 토픽 만들기
+  const topics = new Set();
+  for (const tag of tags) {
+    topics.add(`${baseTopic}.${String(tag)}`);
+  }
+  return topics;
+}
+
+/**
+ * users/{uid} 문서의 pushPrefs 변경 시 FCM 토픽 구독을 동기화합니다.
+ */
+exports.onUserPushPrefsWrite = onDocumentUpdated(
+  { document: "users/{uid}", region: "us-central1" },
+  async (event) => {
+    const change = event.data;
+    if (!change) {
+      logger.log("No data change found.");
+      return;
+    }
+
+    const beforeData = change.before.data() || {};
+    const afterData = change.after.data() || {};
+
+    // pushPrefs 미존재 시 종료
+    if (!afterData.pushPrefs) {
+      logger.log("No pushPrefs found in afterData.");
+      return;
+    }
+    // 변경 없음 시 종료
+    if (
+      JSON.stringify(beforeData.pushPrefs || {}) ===
+      JSON.stringify(afterData.pushPrefs || {})
+    ) {
+      logger.log("pushPrefs did not change.");
+      return;
+    }
+
+    logger.log(`Processing pushPrefs for user ${event.params.uid}`);
+
+    const beforePrefs = beforeData.pushPrefs || {};
+    const afterPrefs = afterData.pushPrefs || {};
+
+    const oldTopics = new Set(beforePrefs.subscribedTopics || []);
+    const newTopics = buildTopicsFromPrefs(afterPrefs);
+
+    const oldTokens = new Set(beforePrefs.deviceTokens || []);
+    const newTokens = new Set(afterPrefs.deviceTokens || []);
+
+    const messaging = getMessaging();
+    const promises = [];
+
+    // 1) 제거된 토큰을 이전 토픽들에서 구독 해제
+    const tokensRemoved = Array.from(oldTokens).filter(
+      (t) => !newTokens.has(t)
+    );
+    if (tokensRemoved.length > 0 && oldTopics.size > 0) {
+      for (const topic of oldTopics) {
+        promises.push(messaging.unsubscribeFromTopic(tokensRemoved, topic));
+      }
+    }
+
+    // 2) 현재 토큰들을 제거된 토픽에서 구독 해제
+    const topicsRemoved = Array.from(oldTopics).filter(
+      (t) => !newTopics.has(t)
+    );
+    const currentTokens = Array.from(newTokens);
+    if (currentTokens.length > 0 && topicsRemoved.length > 0) {
+      for (const topic of topicsRemoved) {
+        promises.push(messaging.unsubscribeFromTopic(currentTokens, topic));
+      }
+    }
+
+    // 3) 추가된 토큰들을 새 토픽에 구독
+    const tokensAdded = Array.from(newTokens).filter(
+      (t) => !oldTokens.has(t)
+    );
+    if (tokensAdded.length > 0 && newTopics.size > 0) {
+      for (const topic of newTopics) {
+        promises.push(messaging.subscribeToTopic(tokensAdded, topic));
+      }
+    }
+
+    // 4) 현재 토큰들을 추가된 토픽에 구독
+    const topicsAdded = Array.from(newTopics).filter(
+      (t) => !oldTopics.has(t)
+    );
+    if (currentTokens.length > 0 && topicsAdded.length > 0) {
+      for (const topic of topicsAdded) {
+        promises.push(messaging.subscribeToTopic(currentTokens, topic));
+      }
+    }
+
+    try {
+      await Promise.all(promises);
+      logger.log("FCM topic subscriptions updated successfully.");
+    } catch (error) {
+      logger.error("Error updating FCM subscriptions:", error);
+    }
+
+    // 5) Firestore에 최종 구독 토픽 목록 반영
+    const newTopicsArray = Array.from(newTopics);
+    if (
+      JSON.stringify(beforePrefs.subscribedTopics || []) !==
+      JSON.stringify(newTopicsArray)
+    ) {
+      try {
+        await change.after.ref.update({
+          "pushPrefs.subscribedTopics": newTopicsArray,
+        });
+        logger.log("Updated subscribedTopics in Firestore.");
+      } catch (error) {
+        logger.error("Error updating subscribedTopics in Firestore:", error);
+      }
+    }
+  }
+);
+
+// ----------------------------------------------------------------------
+// [게시판] 하이브리드 기획안 4. 동네 게시판 자동 생성
+// ----------------------------------------------------------------------
+
+/**
+ * [헬퍼 함수]
+ * Post의 adminParts에서 Kelurahan 키를 생성합니다.
+ * 예: { prov: "DKI", kab: "Jakarta Barat", ... } -> "DKI|Jakarta Barat|Palmerah|Slipi"
+ * @param {object} adminParts - 게시글의 adminParts
+ * @return {string|null} - "prov|kab|kec|kel" 형식의 키
+ */
+function getKelKey(adminParts) {
+  if (
+    !adminParts ||
+    !adminParts.prov ||
+    !adminParts.kab ||
+    !adminParts.kec ||
+    !adminParts.kel
+  ) {
+    return null;
+  }
+  return `${adminParts.prov}|${adminParts.kab}|${adminParts.kec}|${adminParts.kel}`;
+}
+
+/**
+ * [게시판] onPostCreate (Local News 전용)
+ * 'posts' 컬렉션에 'local_news' 카테고리(또는 태그)의 문서가 생성될 때마다
+ * 해당 Kelurahan의 'boards/{kel_key}' 문서를 찾아 통계를 업데이트합니다.
+ *
+ * 기획안: "onPostCreate ... /boards/{kel_key} upsert. metrics.last30dPosts++"
+ */
+exports.onLocalNewsPostCreate = onDocumentCreated(
+  { document: "posts/{postId}", region: "us-central1" },
+  async (event) => {
+    const db = getFirestore();
+
+    const postData = event.data.data();
+
+    // 1. local_news 게시글인지 확인 (tags 필드가 있는지로 간단히 확인)
+    if (!postData?.tags || !Array.isArray(postData.tags) || postData.tags.length === 0) {
+      logger.log("Post has no tags, skipping board metric update.");
+      return;
+    }
+
+    // 2. Kelurahan 키 추출
+    const kelKey = getKelKey(postData.adminParts);
+    if (!kelKey) {
+      logger.warn(`Post ${event.params.postId} has invalid adminParts.`);
+      return;
+    }
+
+    const boardRef = db.collection("boards").doc(kelKey);
+
+    // ✅ 트랜잭션으로 안전하게 카운트 증가 및 임계값 판단
+    try {
+      await db.runTransaction(async (transaction) => {
+        const boardDoc = await transaction.get(boardRef);
+
+        // ✅ 런칭 초기 임계값 10으로 설정
+        const ACTIVATION_THRESHOLD = 10;
+
+        let newPostCount = 1;
+        let currentFeatures = { hasGroupChat: false };
+
+        if (boardDoc.exists) {
+          const data = boardDoc.data() || {};
+          const metrics = data.metrics || {};
+          const features = data.features || {};
+          // NOTE: 테스트 단계에서는 30일 기준 없이 단순 누적 카운트만 사용합니다. (추후 롤링 카운트가 필요하면 스케줄러로 전환)
+          newPostCount = (metrics.last30dPosts || 0) + 1;
+          currentFeatures = features;
+        }
+
+        const shouldActivate = newPostCount >= ACTIVATION_THRESHOLD;
+
+        transaction.set(
+          boardRef,
+          {
+            key: kelKey,
+            metrics: {
+              last30dPosts: newPostCount,
+            },
+            features: {
+              ...currentFeatures,
+              hasGroupChat: shouldActivate, // ✅ 10건 도달 시 true
+            },
+            label: {
+              en: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
+              id: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
+              ko: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
+            },
+            createdAt: FieldValue.serverTimestamp(), // (Upsert) 생성 시에만 적용
+            updatedAt: FieldValue.serverTimestamp(), // 항상 업데이트
+          },
+          { merge: true }
+        );
+      });
+
+      logger.log(`Updated board metrics for kel_key: ${kelKey}.`);
+    } catch (error) {
+      logger.error(`Failed to update board metrics for ${kelKey}:`, error);
+    }
+  }
+);

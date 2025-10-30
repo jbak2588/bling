@@ -107,7 +107,9 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
     for (var imageFile in images) {
       final fileId = const Uuid().v4();
-      final imageRef = storageRef.child('posts/$postId/${userId}_$fileId.jpg');
+      // ✅ 규칙 준수: post_images/{userId}/{postId}/...
+      final imageRef =
+          storageRef.child('post_images/$userId/$postId/$fileId.jpg');
       try {
         final uploadTask = await imageRef.putFile(File(imageFile.path));
         final downloadUrl = await uploadTask.ref.getDownloadURL();
