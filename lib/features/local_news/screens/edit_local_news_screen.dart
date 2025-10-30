@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -109,10 +110,17 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   }
 
   Future<List<String>> _uploadImages() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('User not logged in');
+    }
+    final userId = user.uid;
+    final postId = widget.post.id;
+
     List<String> downloadUrls = [];
     for (var image in _newSelectedImages) {
       final ref = FirebaseStorage.instance.ref(
-          'post_images/${DateTime.now().millisecondsSinceEpoch}_${image.name}');
+          'post_images/$userId/$postId/${DateTime.now().millisecondsSinceEpoch}_${image.name}');
       await ref.putFile(File(image.path));
       downloadUrls.add(await ref.getDownloadURL());
     }
@@ -183,7 +191,25 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('localNewsEdit.appBarTitle'.tr())),
+      appBar: AppBar(
+        title: Text('localNewsEdit.appBarTitle'.tr()),
+        actions: [
+          IconButton(
+            tooltip: 'localNewsEdit.buttons.submit'.tr(),
+            icon: _isSubmitting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Icon(Icons.check),
+            onPressed: _isSubmitting ? null : _updatePost,
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -296,15 +322,35 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
             const SizedBox(height: 16),
             _buildImagePicker(),
             const SizedBox(height: 24),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50)),
-              onPressed: _isSubmitting ? null : _updatePost,
-              child: _isSubmitting
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : Text('localNewsEdit.buttons.submit'.tr()),
-            ),
           ],
+        ),
+      ),
+      // ✅ 하단 고정 저장 바: SafeArea + Material(elevation)로 네비게이션바 위에 분리감 제공
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Material(
+          elevation: 8,
+          color: Theme.of(context).colorScheme.surface,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: FilledButton(
+                onPressed: _isSubmitting ? null : _updatePost,
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text('localNewsEdit.buttons.submit'.tr()),
+              ),
+            ),
+          ),
         ),
       ),
     );

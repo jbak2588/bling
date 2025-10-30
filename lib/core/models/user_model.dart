@@ -22,6 +22,8 @@ library;
 // 아래부터 실제 코드
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+// ✅ [푸시 스키마] 1. 별도 파일로 분리된 PushPrefsModel을 import 합니다.
+import 'push_prefs_model.dart';
 
 class UserModel {
   final String uid; // 유저 고유 ID (Firestore 문서 ID)
@@ -59,13 +61,17 @@ class UserModel {
   final int thanksReceived;
   final int reportCount;
 
-// ✅ [신규] 관리자 여부를 나타내는 isAdmin 필드를 추가합니다.
-  final bool isAdmin;
+  // ✅ [푸시 스키마] 2. 기획안 3) 푸시 알림 구독 설정 필드 추가
+  final PushPrefsModel? pushPrefs;
 
   final bool isBanned; // 차단 여부 (true 시 계정 제한)
   final List<String>? blockedUsers; // 차단 유저 목록 (uid 리스트)
   final bool profileCompleted; // 기본 프로필 완성 여부
   final Timestamp createdAt; // 가입 시각 (Firestore Timestamp)
+
+  // [친구찾기/데이팅]
+  // [관리자/운영]
+  final bool isAdmin; // [추가]
   final bool isDatingProfile; // 친구찾기 기능 활성화 여부 (ON/OFF)
   final int? age; // 실제 나이
   final String? ageRange; // 허용 나이대 범위
@@ -107,8 +113,8 @@ class UserModel {
     this.marketThanksReceived = 0,
     this.thanksReceived = 0,
     this.reportCount = 0,
+    this.pushPrefs, // ✅ [푸시 스키마] 3. 생성자에 추가
 
-    // ✅ 생성자에 isAdmin을 추가하고, 기본값은 false로 설정합니다.
     this.isAdmin = false,
     this.isBanned = false,
     this.blockedUsers,
@@ -177,6 +183,11 @@ class UserModel {
       thanksReceived: data['thanksReceived'] ?? 0,
       reportCount: data['reportCount'] ?? 0,
 
+      // ✅ [푸시 스키마] 4. Firestore에서 'pushPrefs' 맵을 읽어 PushPrefsModel 객체로 변환
+      pushPrefs: data['pushPrefs'] != null && data['pushPrefs'] is Map
+          ? PushPrefsModel.fromMap(Map<String, dynamic>.from(data['pushPrefs']))
+          : null,
+
       // ✅ Firestore 문서에서 isAdmin 필드를 읽어옵니다.
       isAdmin: data['isAdmin'] ?? false,
 
@@ -243,6 +254,9 @@ class UserModel {
       'marketThanksReceived': marketThanksReceived,
       'thanksReceived': thanksReceived,
       'reportCount': reportCount,
+
+      // ✅ [푸시 스키마] 5. PushPrefsModel 객체를 맵으로 변환하여 저장
+      'pushPrefs': pushPrefs?.toMap(),
 
       // ✅ toJson 맵에 isAdmin 필드를 추가합니다.
       'isAdmin': isAdmin,

@@ -2,34 +2,30 @@
 /// Bling 문서헤더
 /// 모듈         : 로컬 뉴스(동네 소식)
 /// 파일         : lib/features/local_news/screens/local_news_screen.dart
-/// 목적         : 사용자의 위치 기반으로 동네 소식 게시글을 조회하고, 카테고리별로 분류된 게시글 목록을 제공합니다.
-/// 사용자 가치  : 사용자는 자신의 지역 소식을 빠르게 확인하고, 다양한 카테고리별로 정보를 얻을 수 있습니다.
+/// 목적         : 사용자의 위치 기반으로 동네 소식 게시글을 조회하고, 태그별로 분류된 게시글 목록을 제공합니다. (카테고리 -> 태그로 변경됨)
+/// 사용자 가치  : 사용자는 자신의 지역 소식을 빠르게 확인하고, 다양한 태그별로 정보를 얻을 수 있습니다.
 /// 연결 기능    : lib/features/local_news/screens/create_local_news_screen.dart;
 ///               lib/features/local_news/screens/edit_local_news_screen.dart
-/// 데이터 모델  : 게시글(PostModel)에는 작성자, 내용, 카테고리, 위치 정보, 생성일, 이미지 등이 포함됩니다.
+/// 데이터 모델  : 게시글(PostModel)에는 작성자, 내용, 태그, 위치 정보, 생성일, 이미지 등이 포함됩니다.
 /// 위치 범위    : 사용자의 위치 정보(시/군/구/동 등)를 기반으로 게시글을 필터링합니다.
 ///
 /// ============================================================================///
 /// [기획/실제 코드 분석 및 개선 제안]
 /// 1. 기획 문서 요약
-///   - Keluharan 기반 동네 소통 피드, 주소 표기는 Singkatan(Kel., Kec., Kab.) 사용
-///   - 작성자는 DropDown으로 Kabupaten → Kec. → Kel. 선택, RT/RW 옵션
-///   - 카테고리별(공지, 분실물, 일상, 나눔, 안전, 주거, 유머, 기타) 분류
-///   - Keluharan 인증 사용자만 글 작성 가능(TrustLevel)
-///   - AI 자동 태그 추천, 댓글/좋아요/공유, 공지/신고글 상단 고정, 1:1 채팅, Marketplace 연동
+///   - (DevLog: "대답:81" 기반) Keluharan 기반 동네 소통 피드, 태그 시스템 도입.
 ///
 /// 2. 실제 코드 분석
-///   - 사용자 위치 기반(Local)으로 피드 필터링, 카테고리별 분류, 글 작성/수정/조회 기능
-///   - 데이터 모델(PostModel)에 위치 정보, 카테고리, 신뢰등급 등 포함
+///   - 사용자 위치 기반(Local)으로 피드 필터링, ✅ 태그별 분류, 글 작성/수정/조회 기능
+///   - 데이터 모델(PostModel)에 위치 정보, ✅ 태그, 신뢰등급 등 포함
 ///   - 위치 필터(시/군/구/동 등)와 연동, 신뢰등급(TrustLevel) 적용
 ///   - 광고/커뮤니티 연계, 다국어(i18n) 지원, 신고/공지글 관리 등
 ///
 /// 3. 기획과 실제 기능의 차이점
 ///   - 기획보다 좋아진 점: 데이터 모델 세분화, 현지화·사용자 경험 강화, 신고/공지글 관리 등 서비스 운영 기능 반영
-///   - 기획에 못 미친 점: AI 자동 태그 추천, Marketplace 연동, 1:1 채팅 등 일부 기능 미구현, 광고 슬롯·KPI/Analytics 등 추가 구현 필요
+///   - 기획에 못 미친 점: AI 자동 태그 추천(진행중), Marketplace 연동, 1:1 채팅 등 일부 기능 미구현
 ///
 /// 4. 개선 제안
-///   - UI/UX: 카테고리별 색상/아이콘, 위치 기반 추천, 피드 정렬/필터 강화, 지도 기반 위치 선택, 활동 히스토리/신뢰등급 변화 시각화
+///   - UI/UX: 태그별 색상/아이콘, 위치 기반 추천, 피드 정렬/필터 강화, 지도 기반 위치 선택, 활동 히스토리/신뢰등급 변화 시각화
 ///   - 수익화: 지역 광고, 프로모션, 추천글/상품 노출, 프리미엄 기능 연계, KPI/Analytics 이벤트 로깅
 ///   - 코드: Firestore 쿼리 최적화, 비동기 처리/에러 핸들링 강화, 데이터 모델/위젯 분리, 상태 관리 개선
 library;
@@ -43,7 +39,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../../../core/constants/app_categories.dart';
+// ❌ [태그 시스템] 기존 카테고리 import 제거
+// import '../../../core/constants/app_categories.dart';
+// ✅ [태그 시스템] 신규 태그 사전 import
+import '../../../core/constants/app_tags.dart';
 import '../widgets/post_card.dart';
 import 'local_news_detail_screen.dart';
 
@@ -61,35 +60,60 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
   // ... 이 클래스의 모든 코드는 원본과 동일하게 유지됩니다 ...
   late final TabController _tabController;
   bool _isMapView = false;
-  final List<String> _categoryIds = [
-    'all',
-    ...AppCategories.postCategories.map((c) => c.categoryId)
-  ];
+
+  // ✅ [태그 시스템] 카테고리 ID 목록 대신 태그 ID 목록으로 변경
+  // (AppTags.localNewsTags 중에서 '상시 추천 태그'만 필터링)
+  late final List<String> _tagIds;
 
   // late final List<Widget> _tabViews;
-    late final List<Widget> _listTabViews;
+  late final List<Widget> _listTabViews;
   late final List<Widget> _mapTabViews;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _categoryIds.length, vsync: this);
 
+    // ✅ [태그 시스템] '상시 추천 태그' 목록을 가져옵니다. (예: AppTags.getRecommendedTags())
+    // ❌ ERROR FIX: 'showInFilter' field does not exist in TagInfo.
+    // DevLog(Source 62)에 따라 AppTags.localNewsTags를 사용해야 하며,
+    // 필터 탭에 표시할 주요 태그 ID 목록을 하드코딩하여 문제를 해결합니다.
+    // (tag_recommender.dart의 _urgent 목록 및 주요 태그 참조)
+    const List<String> filterableTagIds = [
+      'power_outage',
+      'water_outage',
+      'traffic_control', // 'traffic_diversion' 등 app_tags.dart에 정의된 ID 사용
+      'weather_warning',
+      'flood_alert',
+      'air_quality',
+      'disease_alert',
+      'community_event', // 주요 일반 태그
+      'question', // 주요 일반 태그
+      'daily_life', // 주요 일반 태그
+    ];
+
+    final recommendedTags = AppTags.localNewsTags
+        .where((tag) => filterableTagIds.contains(tag.tagId))
+        .toList();
+    // 'all' (전체) + 추천 태그 ID 목록
+    _tagIds = ['all', ...recommendedTags.map((t) => t.tagId)];
+
+    _tabController = TabController(length: _tagIds.length, vsync: this);
 
     // ✅ 2. initState에서 탭 페이지 위젯 리스트를 '딱 한 번만' 생성합니다.
-    _listTabViews = _categoryIds.map((categoryId) {
+    // (category 대신 tagId 전달)
+    _listTabViews = _tagIds.map((tagId) {
       return _FeedListView(
-        key: PageStorageKey('list_view_$categoryId'),
-        category: categoryId,
+        key: PageStorageKey('list_view_$tagId'),
+        tagId: tagId, // ✅ category -> tagId
         userModel: widget.userModel,
         locationFilter: widget.locationFilter,
       );
     }).toList();
 
-    _mapTabViews = _categoryIds.map((categoryId) {
+    _mapTabViews = _tagIds.map((tagId) {
       return _FeedMapView(
-        key: PageStorageKey('map_view_$categoryId'),
-        category: categoryId,
+        key: PageStorageKey('map_view_$tagId'),
+        tagId: tagId, // ✅ category -> tagId
         userModel: widget.userModel,
         locationFilter: widget.locationFilter,
       );
@@ -115,6 +139,7 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
       );
     }
 
+    // ✅ [태그 시스템] 탭 목록을 AppTags 기준으로 생성
     final List<Widget> tabs = [
       Tab(
         child: Row(
@@ -122,18 +147,21 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
           children: [
             const Text('📰', style: TextStyle(fontSize: 18)),
             const SizedBox(width: 8),
-            Text('localNewsFeed.allCategory'.tr()),
+            Text('localNewsFeed.allCategory'.tr()), // '전체'
           ],
         ),
       ),
-      ...AppCategories.postCategories.map((category) {
+      // AppCategories 대신 AppTags에서 필터링된 태그 목록을 사용
+      ...AppTags.localNewsTags
+          .where((tag) => _tagIds.contains(tag.tagId)) // initState와 동일한 필터
+          .map((tag) {
         return Tab(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(category.emoji, style: const TextStyle(fontSize: 18)),
+              Text(tag.emoji ?? '🔹', style: const TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
-              Text(category.nameKey.tr()),
+              Text(tag.nameKey.tr()), // 태그 이름
             ],
           ),
         );
@@ -155,7 +183,7 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
                     labelColor: const Color(0xFF00A66C),
                     unselectedLabelColor: const Color(0xFF616161),
                     indicatorColor: const Color(0xFF00A66C),
-                    tabs: tabs,
+                    tabs: tabs, // ✅ 수정된 탭 리스트
                   ),
                 ),
                 IconButton(
@@ -174,7 +202,7 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
             child: TabBarView(
               controller: _tabController,
               // ✅ 3. 매번 새로 생성하는 대신, initState에서 만들어 둔 _tabViews 변수를 사용합니다.
-                 children: _isMapView ? _mapTabViews : _listTabViews,
+              children: _isMapView ? _mapTabViews : _listTabViews,
             ),
           ),
         ],
@@ -187,11 +215,14 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
 
 // ✅ 1. StatelessWidget을 StatefulWidget으로 변경합니다.
 class _FeedListView extends StatefulWidget {
-  final String category;
+  final String tagId; // ✅ category -> tagId
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
   const _FeedListView(
-      {super.key, required this.category, this.userModel, this.locationFilter});
+      {super.key,
+      required this.tagId, // ✅ category -> tagId
+      this.userModel,
+      this.locationFilter});
 
   @override
   State<_FeedListView> createState() => _FeedListViewState();
@@ -213,8 +244,11 @@ class _FeedListViewState extends State<_FeedListView>
     if (userProv != null && userProv.isNotEmpty) {
       query = query.where('locationParts.prov', isEqualTo: userProv);
     }
-    if (widget.category != 'all') {
-      query = query.where('category', isEqualTo: widget.category);
+    // ✅ [태그 시스템] category 쿼리 대신 tag 쿼리 사용
+    if (widget.tagId != 'all') {
+      // query = query.where('category', isEqualTo: widget.category); // ❌ 제거
+      query = query.where('tags',
+          arrayContains: widget.tagId); // ✅ 'tags' 필드에 해당 tagId가 포함되어 있는지
     }
     return query.orderBy('createdAt', descending: true);
   }
@@ -283,11 +317,14 @@ class _FeedListViewState extends State<_FeedListView>
 }
 
 class _FeedMapView extends StatefulWidget {
-  final String category;
+  final String tagId; // ✅ category -> tagId
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
   const _FeedMapView(
-      {super.key, required this.category, this.userModel, this.locationFilter});
+      {super.key,
+      required this.tagId, // ✅ category -> tagId
+      this.userModel,
+      this.locationFilter});
 
   @override
   State<_FeedMapView> createState() => _FeedMapViewState();
@@ -335,8 +372,11 @@ class _FeedMapViewState extends State<_FeedMapView> {
           isEqualTo: widget.userModel!.locationParts!['prov']);
     }
 
-    if (widget.category != 'all') {
-      query = query.where('category', isEqualTo: widget.category);
+    // ✅ [태그 시스템] category 쿼리 대신 tag 쿼리 사용
+    if (widget.tagId != 'all') {
+      // query = query.where('category', isEqualTo: widget.category); // ❌ 제거
+      query = query.where('tags',
+          arrayContains: widget.tagId); // ✅ 'tags' 필드에 해당 tagId가 포함되어 있는지
     }
     debugPrint('[지도 디버그] 카메라 위치 쿼리: ${query.parameters}');
     return query.orderBy('createdAt', descending: true);
@@ -351,8 +391,11 @@ class _FeedMapViewState extends State<_FeedMapView> {
           isEqualTo: widget.userModel!.locationParts!['prov']);
     }
 
-    if (widget.category != 'all') {
-      query = query.where('category', isEqualTo: widget.category);
+    // ✅ [태그 시스템] category 쿼리 대신 tag 쿼리 사용
+    if (widget.tagId != 'all') {
+      // query = query.where('category', isEqualTo: widget.category); // ❌ 제거
+      query = query.where('tags',
+          arrayContains: widget.tagId); // ✅ 'tags' 필드에 해당 tagId가 포함되어 있는지
     }
     debugPrint('[지도 디버그] 마커 생성 쿼리: ${query.parameters}');
     return query.orderBy('createdAt', descending: true);
