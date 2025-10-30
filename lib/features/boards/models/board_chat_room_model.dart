@@ -1,4 +1,20 @@
 // lib/features/boards/models/board_chat_room_model.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Boards (동네 게시판)
+/// File          : lib/features/boards/models/board_chat_room_model.dart
+/// Purpose       : 'board_chats/{kel_key}' 문서의 데이터 모델.
+///                 (향후 동네 게시판 전용 그룹 채팅방용)
+///
+/// Related Docs  : '하이브리드 방식 로컬 뉴스 게시글 개선 방안.md' (4. 동네 게시판)
+///
+/// 2025-10-30 (작업 8):
+///   - '하이브리드 기획안' 4)를 기반으로 BoardChatRoomModel, ChatModeration 신규 생성.
+///   - (참고: '작업 12'에서 이 모델을 사용하지 않고 기존 'ChatRoomModel'을 재사용하기로 결정됨)
+/// ============================================================================
+library;
+// (파일 내용...)
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// 동네 게시판 그룹 채팅방 모델

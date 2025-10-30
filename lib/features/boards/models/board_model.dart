@@ -1,3 +1,19 @@
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Boards (동네 게시판)
+/// File          : lib/features/boards/models/board_model.dart
+/// Purpose       : 'boards/{kel_key}' 문서의 데이터 모델. Kelurahan 단위 게시판의
+///                 통계(metrics) 및 활성화 기능(features)을 정의합니다.
+///
+/// Related Docs  : '하이브리드 방식 로컬 뉴스 게시글 개선 방안.md' (4. 동네 게시판)
+///
+/// 2025-10-30 (작업 8):
+///   - '하이브리드 기획안' 4)를 기반으로 BoardModel, BoardMetrics, BoardFeatures 신규 생성.
+/// ============================================================================
+library;
+
+// (파일 내용...)
+
 // lib/features/boards/models/board_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
