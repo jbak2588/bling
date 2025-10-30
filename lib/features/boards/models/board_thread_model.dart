@@ -1,4 +1,19 @@
 // lib/features/boards/models/board_thread_model.dart
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Boards (동네 게시판)
+/// File          : lib/features/boards/models/board_thread_model.dart
+/// Purpose       : 'boards/{kel_key}/threads/{thread_id}' 문서의 데이터 모델.
+///                 (향후 동네 게시판의 주제별 스레드용)
+///
+/// Related Docs  : '하이브리드 방식 로컬 뉴스 게시글 개선 방안.md' (4. 동네 게시판)
+///
+/// 2025-10-30 (작업 8):
+///   - '하이브리드 기획안' 4)를 기반으로 BoardThreadModel 신규 생성.
+/// ============================================================================
+library;
+// (파일 내용...)
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// 동네 게시판 스레드 모델

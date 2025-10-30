@@ -17,6 +17,10 @@
 /// Edge Cases    : 위치 필드 누락 또는 차단된 계정.
 /// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
 /// Source Docs   : docs/index/03  User 필드 & TrustLever & 프로필정책.md; docs/team/TeamA_Auth_Trust_module_통합 작업문서.md
+/// 2025-10-30 (작업 3, 7):
+///   - '하이브리드 기획안' 3) 푸시 구독 스키마 구현을 위해 'push_prefs_model.dart' import.
+///   - 'pushPrefs' (PushPrefsModel?) 필드 추가.
+///   - fromFirestore/toJson 로직에 'pushPrefs' 맵 변환 로직 추가.
 /// ============================================================================
 library;
 // 아래부터 실제 코드

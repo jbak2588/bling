@@ -36,14 +36,27 @@
 ///   - UI/UX: 그룹 채팅, 미디어 첨부/미리보기, 신뢰등급/알림/차단/신고 UX 강화, 활동 히스토리/신뢰등급 변화 시각화, 광고/프로모션 배너
 ///   - 수익화: 프리미엄 채팅, 광고/프로모션, 추천 친구/상품/채팅방 노출, KPI/Analytics 이벤트 로깅
 ///   - 코드: Firestore 쿼리 최적화, 비동기 처리/에러 핸들링 강화, 데이터 모델/위젯 분리, 상태 관리 개선
+/// ============================================================================
+/// Changelog     : 2025-10-30 (작업 13) 'getOrCreateBoardChatRoom' 함수 추가
+///
+/// 2025-10-30 (작업 13):
+///   - '하이브리드 기획안' 4) 동네 게시판 채팅 연동.
+///   - 'getOrCreateBoardChatRoom' 함수 신규 추가.
+///   - 'kelKey'를 채팅방 ID로 사용하여 'chats' 컬렉션에서 그룹 채팅방을 조회.
+///   - 없는 경우, 'isGroupChat: true', 'contextType: board'로 새 채팅방 생성.
+///   - 이미 있으나 참여자가 아닌 경우, 'participants'에 현 사용자 추가.
+/// ============================================================================
 library;
 // 아래부터 실제 코드
 
 import 'package:bling_app/core/models/chat_message_model.dart';
 import 'package:bling_app/core/models/chat_room_model.dart';
+// ✅ [게시판] UserModel을 import합니다.
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -164,6 +177,90 @@ class ChatService {
       await chatDocRef.set(chatRoomData);
     }
     return chatId;
+  }
+
+  // ✅ [게시판] '하이브리드 방식...md' 기획안 4) 동네 게시판 그룹 채팅방 생성/참여
+  /// Kelurahan(동네) 키를 기반으로 그룹 채팅방을 가져오거나 생성합니다.
+  ///
+  /// [kelKey]는 "prov|kab|kec|kel" 형식의 고유 ID이며, 채팅방의 doc ID가 됩니다.
+  /// [roomName]은 채팅방의 이름 (예: Kelurahan 이름)입니다.
+  /// [currentUser]는 채팅방에 참여하는 사용자입니다.
+  Future<ChatRoomModel> getOrCreateBoardChatRoom({
+    required String kelKey,
+    required String roomName,
+    required UserModel currentUser,
+  }) async {
+    final chatRoomRef = _firestore.collection('chats').doc(kelKey);
+    final doc = await chatRoomRef.get();
+
+    if (doc.exists) {
+      // --- 1. 채팅방이 이미 존재하는 경우 ---
+      final room = ChatRoomModel.fromFirestore(doc);
+
+      // 사용자가 이미 참여자인지 확인
+      if (!room.participants.contains(currentUser.uid)) {
+        // 참여자가 아니면, participants 목록과 unreadCounts 맵에 추가
+        await chatRoomRef.update({
+          'participants': FieldValue.arrayUnion([currentUser.uid]),
+          'unreadCounts.${currentUser.uid}': 0,
+        });
+        // TODO[system-message]: 가입 이벤트 메시지 남기기
+        // 향후 개선 시, messages 서브컬렉션에 시스템 메시지를 삽입하세요.
+        // 예)
+        // final messagesRef = chatRoomRef.collection('messages');
+        // await messagesRef.add({
+        //   'type': 'system',
+        //   'text': '${currentUser.displayName ?? currentUser.uid} joined',
+        //   'timestamp': FieldValue.serverTimestamp(),
+        //   'senderId': 'system',
+        //   'readBy': [currentUser.uid],
+        // });
+        // 업데이트된 모델을 다시 가져와 반환
+        final updatedDoc = await chatRoomRef.get();
+        return ChatRoomModel.fromFirestore(updatedDoc);
+      }
+      return room;
+    } else {
+      // --- 2. 채팅방이 없는 경우 (첫 사용자 입장) ---
+      final now = Timestamp.now();
+      final newRoomData = <String, dynamic>{
+        'participants': [currentUser.uid],
+        'lastMessage': 'boards.chatRoomCreated'.tr(),
+        'lastTimestamp': now,
+        'unreadCounts': {currentUser.uid: 0},
+
+        // --- 그룹 채팅 및 컨텍스트 설정 ---
+        'isGroupChat': true,
+        'groupName': roomName,
+        'groupImage': null, // TODO: Kelurahan 대표 이미지(옵션)
+
+        // 컨텍스트 유형 및 표시용 제목
+        'contextType': 'board',
+        'roomTitle': roomName,
+      };
+
+      try {
+        // 새 채팅방 문서를 kelKey ID로 생성
+        await chatRoomRef.set(newRoomData);
+        // TODO[system-message]: 생성 이벤트 메시지 남기기
+        // 향후 개선 시, messages 서브컬렉션에 시스템 메시지를 삽입하세요.
+        // 예)
+        // final messagesRef = chatRoomRef.collection('messages');
+        // await messagesRef.add({
+        //   'type': 'system',
+        //   'text': tr('boards.chatRoomCreated'), // 또는 고정 텍스트
+        //   'timestamp': FieldValue.serverTimestamp(),
+        //   'senderId': 'system',
+        //   'readBy': [currentUser.uid],
+        // });
+        final created = await chatRoomRef.get();
+        return ChatRoomModel.fromFirestore(created);
+      } catch (e) {
+        // 단순 로깅 후 재던지기
+        debugPrint('Failed to create board chat room: $e');
+        rethrow;
+      }
+    }
   }
 
   Stream<List<ChatMessageModel>> getMessagesStream(String chatId) {

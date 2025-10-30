@@ -3,9 +3,19 @@
 /// - 기획 요약: 메인 네비게이션 구조, AppBar/Drawer/BottomNavigationBar, 위치 필터, 사용자 흐름, 반응형 정책 등
 /// - 실제 코드 기능: MainNavigationScreen에서 AppBar, Drawer, BottomNavigationBar, 위치 필터, 사용자 정보, 알림 등 네비게이션 및 메인 화면 관리
 /// - 비교: 기획의 네비게이션/레이아웃 구조가 실제 코드에서 State 관리와 위젯 조합으로 구현됨. 반응형/접근성/애니메이션 등은 일부 적용됨
-// ===== 생성(등록) 화면: 각 Feature의 create 스크린들 =====
+/// Changelog     : 2025-10-30 (작업 13) 'getOrCreateBoardChatRoom' 함수 추가
+///
+/// 2025-10-30 (작업 13):
+///   - '하이브리드 기획안' 4) 동네 게시판 채팅 연동.
+///   - 'getOrCreateBoardChatRoom' 함수 신규 추가.
+///   - 'kelKey'를 채팅방 ID로 사용하여 'chats' 컬렉션에서 그룹 채팅방을 조회.
+///   - 없는 경우, 'isGroupChat: true', 'contextType: board'로 새 채팅방 생성.
+///   - 이미 있으나 참여자가 아닌 경우, 'participants'에 현 사용자 추가.
+/// ============================================================================
+
 library;
 
+// ===== 생성(등록) 화면: 각 Feature의 create 스크린들 =====
 // [추가] 문맥 자동분기용: 인디프렌드/동네가게 생성 화면
 import 'package:bling_app/features/find_friends/screens/findfriend_form_screen.dart';
 import 'package:bling_app/features/local_stores/screens/create_shop_screen.dart';
@@ -37,6 +47,7 @@ import 'package:bling_app/features/location/screens/location_filter_screen.dart'
 import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
 import 'home_screen.dart';
+import 'package:bling_app/features/boards/screens/kelurahan_board_screen.dart';
 
 import 'package:bling_app/features/admin/screens/admin_screen.dart'; // ✅ 관리자 화면 import
 import 'package:bling_app/core/utils/ai_rule_uploader.dart';
@@ -72,13 +83,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   StreamSubscription? _userSubscription;
   StreamSubscription? _unreadChatsSubscription;
   int _totalUnreadCount = 0;
+  // ✅ [게시판] 동네 게시판 활성화 상태
+  bool _isKelurahanBoardActive = false;
 
   // ✅ [스크롤 위치 보존] HomeScreen용 ScrollController 및 위치 저장 변수 추가
   final ScrollController _homeScrollController = ScrollController();
   double _savedHomeScrollOffset = 0.0;
-
-  static const int kSearchTabIndex =
-      1; // 예: 0=Home, 1=Search, 2=Chat, 3=Profile
 
   void goToSearchTab() {
     if (!mounted) return;
@@ -87,7 +97,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       try {
         _currentHomePageContent = null; // 해당 변수가 있는 경우만
       } catch (_) {}
-      _bottomNavIndex = kSearchTabIndex; // IndexedStack 방식
+      // ✅ [게시판] '동네' 탭이 있으면 검색은 3번 인덱스, 없으면 1번
+      _bottomNavIndex = _isKelurahanBoardActive ? 3 : 1; // IndexedStack 방식
     });
   }
 
@@ -113,6 +124,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             _currentAddress = 'main.appBar.locationNotSet'.tr();
             _isLocationLoading = false;
             _totalUnreadCount = 0;
+            _isKelurahanBoardActive = false;
           });
         }
       }
@@ -144,8 +156,48 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               'main.appBar.locationNotSet'.tr();
           _isLocationLoading = false;
         });
+        // ✅ [게시판] 사용자 위치 로드 후 게시판 활성화 여부 확인
+        _checkKelurahanBoardStatus();
       }
     });
+  }
+
+  // ✅ [게시판] Kelurahan 키 생성 헬퍼 (prov|kab|kec|kel)
+  String? _getKelKey(Map<String, dynamic>? parts) {
+    if (parts == null ||
+        parts['prov'] == null ||
+        parts['kab'] == null ||
+        parts['kec'] == null ||
+        parts['kel'] == null) {
+      return null;
+    }
+    return "${parts['prov']}|${parts['kab']}|${parts['kec']}|${parts['kel']}";
+  }
+
+  // ✅ [게시판] Firestore boards/{kelKey}에서 활성화 플래그 확인
+  Future<void> _checkKelurahanBoardStatus() async {
+    if (_userModel == null) return;
+    final kelKey = _getKelKey(_userModel!.locationParts);
+    if (kelKey == null) return;
+    try {
+      final boardDoc = await FirebaseFirestore.instance
+          .collection('boards')
+          .doc(kelKey)
+          .get();
+      if (!mounted) return;
+      if (boardDoc.exists) {
+        final features =
+            (boardDoc.data()?['features'] as Map<String, dynamic>?) ?? {};
+        final bool isActive = features['hasGroupChat'] == true;
+        if (isActive != _isKelurahanBoardActive) {
+          setState(() => _isKelurahanBoardActive = isActive);
+        }
+      } else if (_isKelurahanBoardActive) {
+        setState(() => _isKelurahanBoardActive = false);
+      }
+    } catch (e) {
+      debugPrint('Error checking Kelurahan board status: $e');
+    }
   }
 
   void _listenToUnreadChats(String myUid) {
@@ -536,6 +588,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             onIconTap: _navigateToPage,
             onSearchChipTap: goToSearchTab, // ✅ 추가
           ),
+      if (_isKelurahanBoardActive && _userModel != null)
+        KelurahanBoardScreen(userModel: _userModel!),
       const SearchScreen(),
       const ChatListScreen(),
       const MyBlingScreen(),
@@ -558,13 +612,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             _buildBottomNavItem(icon: Icons.home, index: 0),
-            _buildBottomNavItem(icon: Icons.search, index: 1),
+            if (_isKelurahanBoardActive)
+              _buildBottomNavItem(
+                  icon: Icons.holiday_village_outlined, index: 1),
             const SizedBox(width: 40),
+            _buildBottomNavItem(icon: Icons.search, index: 3),
             _buildBottomNavItem(
                 icon: Icons.chat_bubble_outline,
-                index: 3,
+                index: 4,
                 badgeCount: _totalUnreadCount),
-            _buildBottomNavItem(icon: Icons.person_outline, index: 4),
+            _buildBottomNavItem(icon: Icons.person_outline, index: 5),
           ],
         ),
       ),
@@ -579,12 +636,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Widget _buildBottomNavItem(
       {required IconData icon, required int index, int badgeCount = 0}) {
-    const Map<int, String> tooltipKeys = {
-      0: 'main.bottomNav.home',
-      1: 'main.bottomNav.search',
-      3: 'main.bottomNav.chat',
-      4: 'main.bottomNav.myBling'
-    };
+    String tooltipKey = '';
+    if (index == 0) {
+      tooltipKey = 'main.bottomNav.home';
+    } else if (index == 1) {
+      tooltipKey = _isKelurahanBoardActive
+          ? 'main.bottomNav.board'
+          : 'main.bottomNav.search';
+    } else if (index == 3) {
+      tooltipKey = 'main.bottomNav.search';
+    } else if (index == 4) {
+      tooltipKey = 'main.bottomNav.chat';
+    } else if (index == 5) {
+      tooltipKey = 'main.bottomNav.myBling';
+    }
     final isSelected = _bottomNavIndex == index;
     Widget iconWidget = Icon(
       icon,
@@ -594,7 +659,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ? Badge(label: Text('$badgeCount'), child: iconWidget)
         : iconWidget;
     return IconButton(
-      tooltip: tooltipKeys[index]?.tr() ?? '',
+      tooltip: tooltipKey.isNotEmpty ? tooltipKey.tr() : '',
       icon: iconWidget,
       onPressed: () => _onBottomNavItemTapped(index),
     );

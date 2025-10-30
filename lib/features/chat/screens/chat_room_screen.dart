@@ -36,6 +36,13 @@
 ///   - UI/UX: 그룹 채팅, 미디어 첨부/미리보기, 신뢰등급/알림/차단/신고 UX 강화, 활동 히스토리/신뢰등급 변화 시각화, 광고/프로모션 배너
 ///   - 수익화: 프리미엄 채팅, 광고/프로모션, 추천 친구/상품/채팅방 노출, KPI/Analytics 이벤트 로깅
 ///   - 코드: Firestore 쿼리 최적화, 비동기 처리/에러 핸들링 강화, 데이터 모델/위젯 분리, 상태 관리 개선
+/// ============================================================================
+/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `send_message`, `enter_chat_room`, `attach_media`.
+///
+/// 2025-10-30 (작업 16):
+///   - [버그 수정] Scaffold에 'resizeToAvoidBottomInset: true' 속성을 추가.
+///   - 핸드폰 키보드가 올라올 때 채팅 입력창이 가려지는 현상 수정.
+/// ============================================================================
 library;
 
 // 아래부터 실제 코드
@@ -57,7 +64,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ChatRoomScreen extends StatefulWidget {
-final String chatId;
+  final String chatId;
   // [수정] 그룹/1:1 채팅을 구분하기 위한 파라미터 추가 및 변경
   final bool isGroupChat;
   final String? groupName;
@@ -86,10 +93,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final _myUid = FirebaseAuth.instance.currentUser!.uid;
   final _audioPlayer = AudioPlayer();
   final ChatService _chatService = ChatService();
-  
+
   Map<String, UserModel> _participantsInfo = {};
   bool _isLoadingParticipants = true;
-
 
   // V V V --- [추가] 컨텍스트 헤더를 위한 상태 변수 --- V V V
   dynamic _contextItem; // JobModel 또는 ProductModel을 저장
@@ -130,22 +136,22 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         });
       }
     } else {
-       if (mounted) setState(() => _isLoadingParticipants = false);
+      if (mounted) setState(() => _isLoadingParticipants = false);
     }
   }
 
-   Future<void> _loadChatContext() async {
+  Future<void> _loadChatContext() async {
     try {
       final chatRoom = await _chatService.getChatRoom(widget.chatId);
       if (chatRoom == null || !mounted) return;
-      
+
       // setState(() => _chatRoomModel = chatRoom);
 
       // [수정] _chatRoomModel 변수에 저장하는 대신, 직접 사용
       if (chatRoom.jobId != null) {
         final job = await JobRepository().fetchJob(chatRoom.jobId!);
         if (job != null && mounted) setState(() => _contextItem = job);
-      } 
+      }
       // else if (chatRoom.productId != null) {
       //   final product = await ProductRepository().fetchProduct(chatRoom.productId!);
       //   if (product != null && mounted) setState(() => _contextItem = product);
@@ -157,11 +163,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     }
   }
 
-  
   Future<void> _sendMessage() async {
     final messageText = _messageController.text.trim();
     if (messageText.isEmpty) return;
-    
+
     _messageController.clear();
     await _audioPlayer.play(AssetSource('sounds/send_sound.mp3'));
 
@@ -181,11 +186,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     bool isReadAll = false;
     if (widget.isGroupChat) {
       // 그룹 채팅: 나를 제외한 모든 참여자가 읽었는지 확인
-      final otherParticipants = widget.participants?.where((id) => id != _myUid).toList() ?? [];
-      isReadAll = otherParticipants.isNotEmpty && otherParticipants.every((id) => message.readBy.contains(id));
+      final otherParticipants =
+          widget.participants?.where((id) => id != _myUid).toList() ?? [];
+      isReadAll = otherParticipants.isNotEmpty &&
+          otherParticipants.every((id) => message.readBy.contains(id));
     } else {
       // 1:1 채팅: 상대방이 읽었는지 확인
-      isReadAll = widget.otherUserId != null && message.readBy.contains(widget.otherUserId!);
+      isReadAll = widget.otherUserId != null &&
+          message.readBy.contains(widget.otherUserId!);
     }
 
     return Padding(
@@ -205,8 +213,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         : widget.productTitle ?? widget.otherUserName ?? 'Chat';
 
     return Scaffold(
-      appBar: AppBar(title: Text(appBarTitle)),
-       body: _isLoadingParticipants
+      // ✅ [수정] 키보드가 올라올 때 입력창이 가려지지 않도록 설정합니다.
+      resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+        elevation: 1,
+        backgroundColor: Colors.white,
+        title: Text(appBarTitle),
+      ),
+      body: _isLoadingParticipants
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
@@ -216,13 +230,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   child: StreamBuilder<List<ChatMessageModel>>(
                     stream: _chatService.getMessagesStream(widget.chatId),
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-                      if (snapshot.data!.isEmpty) return Center(child: Text('chat_room.placeholder'.tr()));
-                      
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.data!.isEmpty) {
+                        return Center(
+                            child: Text('chat_room.placeholder'.tr()));
+                      }
+
                       final messages = snapshot.data!;
                       return ListView.builder(
                         reverse: true,
-                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 8.0),
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
                           final message = messages[index];
@@ -256,9 +276,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               controller: _messageController,
               decoration: InputDecoration(
                   hintText: 'chat_room.placeholder'.tr(),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16)
-              ),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16)),
               onSubmitted: (_) => _sendMessage(),
             ),
           ),
@@ -277,7 +297,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     ImageProvider? image;
     String title = '';
     String subtitle = '';
-    
+
     if (_contextItem is JobModel) {
       final job = _contextItem as JobModel;
       title = job.title;
@@ -285,7 +305,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       if (job.imageUrls != null && job.imageUrls!.isNotEmpty) {
         image = NetworkImage(job.imageUrls!.first);
       }
-    } 
+    }
     // else if (_contextItem is ProductModel) {
     //   final product = _contextItem as ProductModel;
     //   title = product.title;
@@ -295,13 +315,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     //   }
     // }
 
-     return Material(
+    return Material(
       color: Colors.grey.shade50,
       child: InkWell(
         onTap: () {
           if (_contextItem is JobModel) {
-            Navigator.of(context).push(MaterialPageRoute(builder: (_) => JobDetailScreen(job: _contextItem)));
-          } 
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => JobDetailScreen(job: _contextItem)));
+          }
           // else if (_contextItem is ProductModel) {
           //   Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProductDetailScreen(product: _contextItem)));
           // }
@@ -311,24 +332,34 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           child: Row(
             children: [
               Container(
-                width: 40, height: 40,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
-                  image: image != null ? DecorationImage(image: image, fit: BoxFit.cover) : null,
+                  image: image != null
+                      ? DecorationImage(image: image, fit: BoxFit.cover)
+                      : null,
                   color: image == null ? Colors.grey.shade200 : null,
                 ),
-                child: image == null ? Icon(Icons.work_outline, color: Colors.grey.shade600, size: 20) : null,
+                child: image == null
+                    ? Icon(Icons.work_outline,
+                        color: Colors.grey.shade600, size: 20)
+                    : null,
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text(subtitle, style: TextStyle(color: Colors.grey.shade700, fontSize: 12)),
-                  ],
-                )
-              ),
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(subtitle,
+                      style:
+                          TextStyle(color: Colors.grey.shade700, fontSize: 12)),
+                ],
+              )),
               const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
             ],
           ),
@@ -337,32 +368,45 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     );
   }
 
-  Widget _buildMessageItem(ChatMessageModel message, UserModel? sender, bool isMe) {
+  Widget _buildMessageItem(
+      ChatMessageModel message, UserModel? sender, bool isMe) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
-        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe)
             CircleAvatar(
               radius: 18,
-              backgroundImage: (sender?.photoUrl != null && sender!.photoUrl!.isNotEmpty) ? NetworkImage(sender.photoUrl!) : null,
-              child: (sender?.photoUrl == null || sender!.photoUrl!.isEmpty) ? const Icon(Icons.person, size: 18) : null,
+              backgroundImage:
+                  (sender?.photoUrl != null && sender!.photoUrl!.isNotEmpty)
+                      ? NetworkImage(sender.photoUrl!)
+                      : null,
+              child: (sender?.photoUrl == null || sender!.photoUrl!.isEmpty)
+                  ? const Icon(Icons.person, size: 18)
+                  : null,
             ),
           const SizedBox(width: 8),
           Flexible(
             child: Column(
-              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 if (!isMe && widget.isGroupChat)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 4.0, left: 8.0),
-                    child: Text(sender?.nickname ?? 'Unknown', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                    child: Text(sender?.nickname ?? 'Unknown',
+                        style:
+                            TextStyle(fontSize: 12, color: Colors.grey[600])),
                   ),
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                  decoration: BoxDecoration(color: isMe ? Colors.teal[50] : Colors.grey[200], borderRadius: BorderRadius.circular(16)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                  decoration: BoxDecoration(
+                      color: isMe ? Colors.teal[50] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(16)),
                   child: Text(message.text),
                 ),
               ],

@@ -12,7 +12,6 @@
 // =====================================================
 // 파일 경로: lib/features/pom/widgets/short_player.dart
 
-
 import 'package:bling_app/features/pom/models/short_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
@@ -27,9 +26,12 @@ import 'short_comments_sheet.dart';
 class ShortPlayer extends StatefulWidget {
   final ShortModel short;
   // [신규] pom_screen.dart로부터 현재 사용자 정보를 직접 전달받기 위한 파라미터
-  final UserModel? userModel; 
-  
-  const ShortPlayer({super.key, required this.short, this.userModel}); // [수정] 생성자에 userModel 추가
+  final UserModel? userModel;
+
+  const ShortPlayer(
+      {super.key,
+      required this.short,
+      this.userModel}); // [수정] 생성자에 userModel 추가
 
   @override
   State<ShortPlayer> createState() => _ShortPlayerState();
@@ -53,12 +55,12 @@ class _ShortPlayerState extends State<ShortPlayer> {
   void initState() {
     super.initState();
     _likesCount = widget.short.likesCount;
-    
-    // [업그레이드] 
+
+    // [업그레이드]
     // 1. 외부에서 받은 userModel을 현재 사용자 모델로 즉시 설정합니다.
-    _currentUserModel = widget.userModel; 
+    _currentUserModel = widget.userModel;
     // 2. 나머지 초기 데이터를 불러옵니다.
-    _fetchInitialData(); 
+    _fetchInitialData();
 
     _controller =
         VideoPlayerController.networkUrl(Uri.parse(widget.short.videoUrl))
@@ -73,28 +75,36 @@ class _ShortPlayerState extends State<ShortPlayer> {
           });
   }
 
-  // [업그레이드] 이제 이 함수는 '작성자' 정보만 불러오거나, 
+  // [업그레이드] 이제 이 함수는 '작성자' 정보만 불러오거나,
   // 외부에서 userModel을 받지 못한 비상시에만 현재 사용자 정보를 불러옵니다.
   Future<void> _fetchInitialData() async {
     // 1. 동영상 작성자 정보 가져오기 (기존 로직 유지)
-    final authorDoc = await FirebaseFirestore.instance.collection('users').doc(widget.short.userId).get();
+    final authorDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.short.userId)
+        .get();
     if (authorDoc.exists && mounted) {
       setState(() {
         _author = UserModel.fromFirestore(authorDoc);
       });
     }
-    
+
     // 2. 현재 로그인한 사용자 정보 처리
     if (_currentUserModel != null) {
       // 이미 외부에서 userModel을 받았다면, '좋아요' 상태만 갱신합니다.
       if (mounted) {
         setState(() {
-          _isLiked = _currentUserModel!.likedShortIds?.contains(widget.short.id) ?? false;
+          _isLiked =
+              _currentUserModel!.likedShortIds?.contains(widget.short.id) ??
+                  false;
         });
       }
     } else if (_currentUserId != null) {
       // 외부에서 userModel을 받지 못한 경우에만, 기존 방식대로 DB에서 직접 가져옵니다.
-      final currentUserDoc = await FirebaseFirestore.instance.collection('users').doc(_currentUserId).get();
+      final currentUserDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_currentUserId)
+          .get();
       if (currentUserDoc.exists && mounted) {
         final user = UserModel.fromFirestore(currentUserDoc);
         setState(() {
@@ -139,6 +149,8 @@ class _ShortPlayerState extends State<ShortPlayer> {
   Widget build(BuildContext context) {
     // [유지] build 메서드의 모든 UI 로직은 보스의 최적화된 코드를 그대로 유지합니다.
     return Scaffold(
+      // ✅ 전체 화면 오버레이에서 키보드에 의해 레이아웃이 가려지지 않도록 명시
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.black,
       body: GestureDetector(
         onTap: _togglePlayPause,
@@ -164,7 +176,8 @@ class _ShortPlayerState extends State<ShortPlayer> {
                 return !isPlaying
                     ? Center(
                         child: Icon(Icons.play_arrow,
-                            size: 80, color: Colors.white.withValues(alpha:0.7)))
+                            size: 80,
+                            color: Colors.white.withValues(alpha: 0.7)))
                     : const SizedBox.shrink();
               },
             ),
@@ -188,7 +201,7 @@ class _ShortPlayerState extends State<ShortPlayer> {
       ),
     );
   }
-  
+
   Widget _buildVideoInfo() {
     if (_author == null) return const SizedBox.shrink();
     return Column(
@@ -212,9 +225,11 @@ class _ShortPlayerState extends State<ShortPlayer> {
       ],
     );
   }
-  
+
   Widget _buildActionButtons() {
-    if (_currentUserId == null || _author == null) return const SizedBox.shrink();
+    if (_currentUserId == null || _author == null) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -222,7 +237,9 @@ class _ShortPlayerState extends State<ShortPlayer> {
         InkWell(
           onTap: () {
             if (_currentUserModel != null) {
-               Navigator.of(context).push(MaterialPageRoute(builder: (_) => FindFriendDetailScreen(user: _author!, currentUserModel: _currentUserModel!)));
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => FindFriendDetailScreen(
+                      user: _author!, currentUserModel: _currentUserModel!)));
             }
           },
           child: CircleAvatar(
@@ -247,30 +264,30 @@ class _ShortPlayerState extends State<ShortPlayer> {
         ),
         const SizedBox(height: 20),
         StreamBuilder<ShortModel>(
-          stream: _repository.getShortStream(widget.short.id),
-          builder: (context, shortSnapshot) {
-            final liveCommentsCount = shortSnapshot.data?.commentsCount ?? widget.short.commentsCount;
-            return InkWell(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.white,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                  ),
-                  builder: (context) => SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.75,
-                    child: ShortCommentsSheet(shortId: widget.short.id),
-                  ),
-                );
-              },
-              child: _buildActionButton(
-                  icon: Icons.comment,
-                  label: liveCommentsCount.toString()),
-            );
-          }
-        ),
+            stream: _repository.getShortStream(widget.short.id),
+            builder: (context, shortSnapshot) {
+              final liveCommentsCount = shortSnapshot.data?.commentsCount ??
+                  widget.short.commentsCount;
+              return InkWell(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.white,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) => SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.75,
+                      child: ShortCommentsSheet(shortId: widget.short.id),
+                    ),
+                  );
+                },
+                child: _buildActionButton(
+                    icon: Icons.comment, label: liveCommentsCount.toString()),
+              );
+            }),
         const SizedBox(height: 20),
         _buildActionButton(icon: Icons.share, label: 'pom.share'.tr()),
       ],
