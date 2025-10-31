@@ -1,6 +1,7 @@
 // ignore_for_file: unused_import
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart'; // optional: firstWhereOrNull
+import 'package:easy_localization/easy_localization.dart';
 // (선택) 앱 공용 태그 정의가 있다면 주입 대신 import 가능
 // import 'package:bling_app/core/constants/app_tags.dart';
 
@@ -230,10 +231,10 @@ class _CustomTagInputFieldState extends State<CustomTagInputField> {
               child: TextField(
                 controller: _textController,
                 focusNode: _focusNode,
-                decoration: const InputDecoration(
-                  hintText: '태그 입력 후 공백/Enter',
+                decoration: InputDecoration(
+                  hintText: 'shared.tagInput.defaultHint'.tr(),
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 4.0),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
                 ),
                 onSubmitted: (value) {
                   _addTag(value.trim());

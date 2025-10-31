@@ -6,14 +6,20 @@
 /// Changelog     : 2025-10-30 (작업 13) 'getOrCreateBoardChatRoom' 함수 추가
 ///
 /// 2025-10-30 (작업 13):
-///   - '하이브리드 기획안' 4) 동네 게시판 채팅 연동.
-///   - 'getOrCreateBoardChatRoom' 함수 신규 추가.
-///   - 'kelKey'를 채팅방 ID로 사용하여 'chats' 컬렉션에서 그룹 채팅방을 조회.
-///   - 없는 경우, 'isGroupChat: true', 'contextType: board'로 새 채팅방 생성.
-///   - 이미 있으나 참여자가 아닌 경우, 'participants'에 현 사용자 추가.
+/// 2025-10-31 (작업 14, 21, 22, 23, 27):
+///   - [Phase 4] '동네 게시판' 동적 탭 구현:
+///     - `_checkKelurahanBoardStatus` 함수로 `boards.features.hasGroupChat` 플래그 확인.
+///     - '동네' 탭(인덱스 1)을 항상 표시하되, 비활성 시 회색 아이콘 및 팝업(`_showBoardActivationPopup`) 표시.
+///   - [버그 수정] `_buildPages()` 중복 호출 로직을 제거하여 하단 탭 인덱스 오류 완전 해결.
+///   - [Phase 5] 전역 생성 시트(`_showGlobalCreateSheet`) 아이템 순서를 전략적 순서로 재배치.
+///   - [Phase 6] 통합 검색 UI 리팩토링:
+///     - `_isSearchActive` 상태를 중앙에서 관리.
+///     - `_buildPersistentSearchBar` (신규) 위젯을 추가, 모든 화면 상단에 통일된 검색 UI 제공.
+///     - 하단 검색 아이콘(`_onSearchRequested`)이 팝업 대신 이 공용 검색창을 활성화하도록 수정.
+///     - `_submitSearch` 로직 추가 (keyword를 `TagSearchResultScreen`으로 전달).
 /// ============================================================================
-
 library;
+// (파일 내용...)
 
 // ===== 생성(등록) 화면: 각 Feature의 create 스크린들 =====
 // [추가] 문맥 자동분기용: 인디프렌드/동네가게 생성 화면
@@ -48,6 +54,7 @@ import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
 import 'home_screen.dart';
 import 'package:bling_app/features/boards/screens/kelurahan_board_screen.dart';
+import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
 
 import 'package:bling_app/features/admin/screens/admin_screen.dart'; // ✅ 관리자 화면 import
 import 'package:bling_app/core/utils/ai_rule_uploader.dart';
@@ -55,16 +62,18 @@ import 'package:bling_app/core/utils/ai_rule_uploader.dart';
 /// 현재 보고 있는 섹션을 타입 세이프하게 관리하기 위한 enum
 enum AppSection {
   home,
+  // ✅ [버그 수정] 동네 게시판 enum 추가
+  board,
   localNews,
+  jobs,
+  lostAndFound,
   marketplace,
+  localStores,
   findFriends,
   clubs,
-  jobs,
-  localStores,
+  realEstate,
   auction,
   pom,
-  lostAndFound,
-  realEstate,
 }
 
 class MainNavigationScreen extends StatefulWidget {
@@ -86,6 +95,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   // ✅ [게시판] 동네 게시판 활성화 상태
   bool _isKelurahanBoardActive = false;
 
+  // ✅ [검색] 검색창 UI 상태
+  bool _isSearchActive = false;
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  // ✅ [검색] 홈 화면 인라인 검색칩 제어용
+  final ValueNotifier<bool> _homeSearchOpen = ValueNotifier<bool>(false);
+
   // ✅ [스크롤 위치 보존] HomeScreen용 ScrollController 및 위치 저장 변수 추가
   final ScrollController _homeScrollController = ScrollController();
   double _savedHomeScrollOffset = 0.0;
@@ -97,8 +113,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       try {
         _currentHomePageContent = null; // 해당 변수가 있는 경우만
       } catch (_) {}
-      // ✅ [게시판] '동네' 탭이 있으면 검색은 3번 인덱스, 없으면 1번
-      _bottomNavIndex = _isKelurahanBoardActive ? 3 : 1; // IndexedStack 방식
+      // ✅ 검색 아이콘은 항상 index 3 (FAB를 중심으로 좌우 아이콘 고정)
+      _bottomNavIndex = 3; // IndexedStack 방식
     });
   }
 
@@ -137,6 +153,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _unreadChatsSubscription?.cancel();
     // ✅ [스크롤 위치 보존] ScrollController 해제
     _homeScrollController.dispose();
+    // ✅ [검색] 검색 리소스 해제
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    _homeSearchOpen.dispose();
     super.dispose();
   }
 
@@ -176,9 +196,24 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   // ✅ [게시판] Firestore boards/{kelKey}에서 활성화 플래그 확인
   Future<void> _checkKelurahanBoardStatus() async {
-    if (_userModel == null) return;
+    // _userModel이 없으면 '동네' 탭 비활성화로 유지/변경
+    if (_userModel == null) {
+      if (_isKelurahanBoardActive) {
+        if (!mounted) return;
+        setState(() => _isKelurahanBoardActive = false);
+      }
+      return;
+    }
+
     final kelKey = _getKelKey(_userModel!.locationParts);
-    if (kelKey == null) return;
+    // kelKey가 없으면 비활성화로 유지/변경
+    if (kelKey == null) {
+      if (_isKelurahanBoardActive) {
+        if (!mounted) return;
+        setState(() => _isKelurahanBoardActive = false);
+      }
+      return;
+    }
     try {
       final boardDoc = await FirebaseFirestore.instance
           .collection('boards')
@@ -197,6 +232,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       }
     } catch (e) {
       debugPrint('Error checking Kelurahan board status: $e');
+      // 에러 발생 시에도 비활성화로 복원
+      if (_isKelurahanBoardActive) {
+        if (!mounted) return;
+        setState(() => _isKelurahanBoardActive = false);
+      }
     }
   }
 
@@ -222,6 +262,22 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       _onFloatingActionButtonTapped();
       return;
     }
+    // 검색 아이콘(index 3)은 태그 입력 다이얼로그로 처리
+    if (index == 3) {
+      // 홈이 보이는 상태라면 인라인 칩을 열고, 그 외에는 상단 검색바 활성화
+      final hasBoardTab = _isKelurahanBoardActive && _userModel != null;
+      final effectiveIndex = hasBoardTab
+          ? (_bottomNavIndex >= 3 ? _bottomNavIndex - 1 : _bottomNavIndex)
+          : (_bottomNavIndex >= 3 ? _bottomNavIndex - 2 : _bottomNavIndex);
+      final isHomeVisible =
+          (effectiveIndex == 0) && _currentHomePageContent == null;
+      if (isHomeVisible) {
+        _homeSearchOpen.value = true;
+      } else {
+        _onSearchRequested();
+      }
+      return;
+    }
     if (index == 0 && _currentHomePageContent != null) {
       setState(() {
         _currentHomePageContent = null;
@@ -232,6 +288,45 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     setState(() {
       _bottomNavIndex = index;
     });
+  }
+
+  /// ✅ [검색] 'showDialog' 대신 상단 고정 검색바 활성화
+  Future<void> _onSearchRequested() async {
+    if (!mounted) return;
+    setState(() {
+      _isSearchActive = true;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _searchFocusNode.requestFocus();
+    });
+  }
+
+  // ✅ [검색] 제출 처리: keyword로 결과 화면 이동
+  void _submitSearch(String query) {
+    final keyword = query.trim();
+    if (keyword.isEmpty) return;
+    setState(() {
+      _isSearchActive = false;
+      _searchController.clear();
+      _searchFocusNode.unfocus();
+    });
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => TagSearchResultScreen(keyword: keyword),
+      ),
+    );
+  }
+
+  // ✅ [검색] 홈 인라인 칩 제출 처리
+  void _onInlineSearchSubmit(String keyword) {
+    FocusScope.of(context).unfocus();
+    _homeSearchOpen.value = false;
+    if (keyword.trim().isEmpty) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => TagSearchResultScreen(keyword: keyword.trim()),
+      ),
+    );
   }
 
   Future<void> _onFloatingActionButtonTapped() async {
@@ -258,6 +353,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     late Widget target;
 
     switch (_currentSection) {
+      case AppSection.board:
+        target = const CreateLocalNewsScreen();
+        break;
       case AppSection.localNews:
         target = const CreateLocalNewsScreen();
         break;
@@ -316,61 +414,100 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           child: ListView(
             shrinkWrap: true,
             children: [
+              // ✅ [작업 19] 전략적 순서로 재배열
+              // 1) 동네소식
               _sheetItem(
-                  Icons.article_rounded,
+                  Icons.article_rounded, // 1. localNews
                   'main.tabs.localNews'.tr(),
                   'localNewsCreate.appBarTitle'.tr(),
                   () => const CreateLocalNewsScreen()),
+              // 2) 동네 일자리
               _sheetItem(
-                  Icons.store_mall_directory_rounded,
-                  'main.tabs.marketplace'.tr(),
-                  'marketplace.registration.title'.tr(),
-                  () => const ProductRegistrationScreen()),
-              _sheetItem(
-                  Icons.sentiment_satisfied_alt_rounded,
-                  'main.tabs.findFriends'.tr(),
-                  'findfriend.form.title'.tr(),
-                  () => FindFriendFormScreen(userModel: _userModel!)),
-              _sheetItem(
-                  Icons.groups_rounded,
-                  'main.tabs.clubs'.tr(),
-                  'clubs.create.title'.tr(),
-                  () => CreateClubScreen(userModel: _userModel!)),
-              _sheetItem(
-                  Icons.work_outline_rounded,
+                  Icons.work_outline_rounded, // 2. jobs
                   'main.tabs.jobs'.tr(),
                   'jobs.form.title'.tr(),
                   () => CreateJobScreen(userModel: _userModel!)),
+              // 3) 분실물센터
               _sheetItem(
-                  Icons.storefront_rounded,
-                  'main.tabs.localStores'.tr(),
-                  'localStores.create.title'.tr(),
-                  () => CreateShopScreen(userModel: _userModel!)),
-              _sheetItem(
-                  Icons.gavel_rounded,
-                  'main.tabs.auction'.tr(),
-                  'auctions.create.title'.tr(),
-                  () => CreateAuctionScreen(userModel: _userModel!)),
-              _sheetItem(
-                  Icons.video_camera_back_rounded,
-                  'main.tabs.pom'.tr(),
-                  'pom.create.title'.tr(),
-                  () => CreateShortScreen(userModel: _userModel!)),
-              _sheetItem(
-                  Icons.report_gmailerrorred_rounded,
+                  Icons.report_gmailerrorred_rounded, // 3. lostAndFound
                   'main.tabs.lostAndFound'.tr(),
                   'lostAndFound.form.title'.tr(),
                   () => CreateLostItemScreen(userModel: _userModel!)),
+              // 4) 중고거래
               _sheetItem(
-                  Icons.house_rounded,
+                  Icons.store_mall_directory_rounded, // 4. marketplace
+                  'main.tabs.marketplace'.tr(),
+                  'marketplace.registration.title'.tr(),
+                  () => const ProductRegistrationScreen()),
+              // 5) 동네업체
+              _sheetItem(
+                  Icons.storefront_rounded, // 5. localStores
+                  'main.tabs.localStores'.tr(),
+                  'localStores.create.title'.tr(),
+                  () => CreateShopScreen(userModel: _userModel!)),
+              // 6) 모임
+              _sheetItem(
+                  Icons.groups_rounded, // 6. clubs
+                  'main.tabs.clubs'.tr(),
+                  'clubs.create.title'.tr(),
+                  () => CreateClubScreen(userModel: _userModel!)),
+              // 7) 친구찾기
+              _sheetItem(
+                  Icons.sentiment_satisfied_alt_rounded, // 7. findFriends
+                  'main.tabs.findFriends'.tr(),
+                  'findfriend.form.title'.tr(),
+                  () => FindFriendFormScreen(userModel: _userModel!)),
+              // 8) 부동산
+              _sheetItem(
+                  Icons.house_rounded, // 8. realEstate
                   'main.tabs.realEstate'.tr(),
                   'realEstate.form.title'.tr(),
                   () => CreateRoomListingScreen(userModel: _userModel!)),
+              // 9) 경매
+              _sheetItem(
+                  Icons.gavel_rounded, // 9. auction
+                  'main.tabs.auction'.tr(),
+                  'auctions.create.title'.tr(),
+                  () => CreateAuctionScreen(userModel: _userModel!)),
+              // 10) 숏폼
+              _sheetItem(
+                  Icons.video_camera_back_rounded, // 10. pom
+                  'main.tabs.pom'.tr(),
+                  'pom.create.title'.tr(),
+                  () => CreateShortScreen(userModel: _userModel!)),
               const SizedBox(height: 12),
             ],
           ),
         );
       },
+    );
+  }
+
+  // ✅ '동네' 탭 비활성 상태 안내 팝업 및 Local News 작성 유도
+  void _showBoardActivationPopup() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('boards.popup.inactiveTitle'.tr()),
+        content: Text('boards.popup.inactiveBody'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('common.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const CreateLocalNewsScreen(),
+                ),
+              );
+            },
+            child: Text('boards.popup.writePost'.tr()),
+          ),
+        ],
+      ),
     );
   }
 
@@ -552,6 +689,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     switch (key) {
       case 'main.tabs.localNews':
         return AppSection.localNews;
+      case 'main.bottomNav.board':
+        return AppSection.board;
       case 'main.tabs.marketplace':
         return AppSection.marketplace;
       case 'main.tabs.findFriends':
@@ -586,7 +725,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             activeLocationFilter: _activeLocationFilter,
             // onIconTap 콜백은 이미 스크롤 위치 저장을 처리함 (_navigateToPage 내부)
             onIconTap: _navigateToPage,
-            onSearchChipTap: goToSearchTab, // ✅ 추가
+            onSearchChipTap: () => _homeSearchOpen.value = true,
+            openSearchNotifier: _homeSearchOpen,
+            onSearchSubmit: _onInlineSearchSubmit,
           ),
       if (_isKelurahanBoardActive && _userModel != null)
         KelurahanBoardScreen(userModel: _userModel!),
@@ -595,15 +736,73 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       const MyBlingScreen(),
     ];
 
-    int effectiveIndex =
-        _bottomNavIndex > 2 ? _bottomNavIndex - 1 : _bottomNavIndex;
+    // ✅ BottomAppBar 인덱스(0, [1], 3, 4, 5)를 실제 pages 인덱스에 매핑
+    // - '동네' 탭 활성: pages = [Home(0), Board(1), Search(2), Chat(3), My(4)]
+    //   => nav index >=3 는 -1, 그 외는 그대로
+    // - '동네' 탭 비활성: pages = [Home(0), Search(1), Chat(2), My(3)]
+    //   => nav index >=3 는 -2, 그 외(0)는 그대로
+    int effectiveIndex;
+    final hasBoardTab = _isKelurahanBoardActive && _userModel != null;
+    if (hasBoardTab) {
+      effectiveIndex = (_bottomNavIndex >= 3)
+          ? _bottomNavIndex - 1
+          : _bottomNavIndex; // 0 또는 1
+    } else {
+      effectiveIndex =
+          (_bottomNavIndex >= 3) ? _bottomNavIndex - 2 : _bottomNavIndex; // 0
+    }
+
+    // ✅ [검색] 상단 고정 검색바 (홈 화면에서는 숨김)
+    final bool isHomeVisible =
+        (effectiveIndex == 0) && _currentHomePageContent == null;
+    final Widget persistentSearchBar = (_isSearchActive && !isHomeVisible)
+        ? Container(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            color:
+                Theme.of(context).appBarTheme.backgroundColor ?? Colors.white,
+            child: TextField(
+              controller: _searchController,
+              focusNode: _searchFocusNode,
+              decoration: InputDecoration(
+                hintText: 'main.search.chipPlaceholder'.tr(), // '이웃, 소식, 장터...'
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.cancel),
+                  onPressed: () {
+                    setState(() {
+                      _isSearchActive = false;
+                      _searchController.clear();
+                      _searchFocusNode.unfocus();
+                    });
+                  },
+                  tooltip: 'common.cancel'.tr(),
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(999),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              textInputAction: TextInputAction.search,
+              onSubmitted: _submitSearch,
+            ),
+          )
+        : const SizedBox.shrink();
 
     return Scaffold(
       appBar: _buildAppBar(),
       drawer: _buildAppDrawer(_userModel),
-      body: IndexedStack(
-        index: effectiveIndex,
-        children: pages,
+      body: Column(
+        children: [
+          persistentSearchBar,
+          Expanded(
+            child: IndexedStack(
+              index: effectiveIndex,
+              children: pages,
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
@@ -612,9 +811,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             _buildBottomNavItem(icon: Icons.home, index: 0),
-            if (_isKelurahanBoardActive)
-              _buildBottomNavItem(
-                  icon: Icons.holiday_village_outlined, index: 1),
+            // ✅ '동네' 탭은 항상 표시. 비활성 상태면 흐리게 처리하고 탭 시 안내 팝업 노출
+            _buildBottomNavItem(icon: Icons.holiday_village_outlined, index: 1),
             const SizedBox(width: 40),
             _buildBottomNavItem(icon: Icons.search, index: 3),
             _buildBottomNavItem(
@@ -640,9 +838,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     if (index == 0) {
       tooltipKey = 'main.bottomNav.home';
     } else if (index == 1) {
-      tooltipKey = _isKelurahanBoardActive
-          ? 'main.bottomNav.board'
-          : 'main.bottomNav.search';
+      // ✅ 항상 '동네' 탭으로 표시
+      tooltipKey = 'main.bottomNav.board';
     } else if (index == 3) {
       tooltipKey = 'main.bottomNav.search';
     } else if (index == 4) {
@@ -650,10 +847,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     } else if (index == 5) {
       tooltipKey = 'main.bottomNav.myBling';
     }
-    final isSelected = _bottomNavIndex == index;
+    final hasBoardTab = _isKelurahanBoardActive && _userModel != null;
+    final bool isBoardDisabled = (index == 1 && !hasBoardTab);
+    final isSelected = _bottomNavIndex == index && !isBoardDisabled;
     Widget iconWidget = Icon(
       icon,
-      color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+      color: isBoardDisabled
+          ? Colors.grey.shade400
+          : (isSelected ? Theme.of(context).primaryColor : Colors.grey),
     );
     iconWidget = badgeCount > 0
         ? Badge(label: Text('$badgeCount'), child: iconWidget)
@@ -661,7 +862,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return IconButton(
       tooltip: tooltipKey.isNotEmpty ? tooltipKey.tr() : '',
       icon: iconWidget,
-      onPressed: () => _onBottomNavItemTapped(index),
+      onPressed: () {
+        if (isBoardDisabled) {
+          _showBoardActivationPopup();
+          return;
+        }
+        // 하단 검색 아이콘도 태그 입력으로 통일
+        if (index == 3) {
+          _onSearchRequested();
+          return;
+        }
+        _onBottomNavItemTapped(index);
+      },
     );
   }
 

@@ -11,6 +11,13 @@
 ///   - '알림 범위(scope)' Dropdown 및 '구독 태그(tags)' ChoiceChip UI 구현.
 ///   - 설정 저장 시 'pushPrefs' 맵을 'PushPrefsModel'을 사용해 업데이트.
 /// ============================================================================
+/// /// 2025-10-31 (작업 4, 7):
+///   - '하이브리드 기획안' 3) 푸시 구독 스키마 구현.
+///   - 기존 placeholder를 StatefulWidget으로 변경.
+///   - Firestore에서 'users.pushPrefs'를 로드하여 UI에 바인딩.
+///   - '알림 범위(scope)' Dropdown 및 '구독 태그(tags)' ChoiceChip UI 구현.
+///   - 설정 저장 시 'pushPrefs' 맵을 'PushPrefsModel'을 사용해 업데이트.
+/// ============================================================================
 library;
 // (파일 내용...)
 

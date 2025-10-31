@@ -131,7 +131,7 @@
       "addressDetailHint": "거래 장소",
       "descriptionHint": "상세 설명",
       "success": "상품이 성공적으로 등록되었습니다!",
-      "tagsHint": "예: 강아지, 무료나눔"
+      "tagsHint": "태그 추가 (스페이스바로 확정)"
     },
     "edit": {
       "title": "게시물 수정",
@@ -141,7 +141,7 @@
       "priceHint": "가격 수정 (Rp)",
       "negotiable": "가격 제안 수정",
       "descriptionHint": "상세 설명 수정",
-      "tagsHint": "예: 강아지, 무료나눔",
+      "tagsHint": "태그 추가 (스페이스바로 확정)",
       "success": "상품이 성공적으로 등록되었습니다!",
       "fail": "상품 수정 실패: {error}",
       "resetLocation": "위치 초기화",
@@ -196,7 +196,7 @@
       "error": "오류가 발생했습니다: {error}",
       "add_photo": "사진 추가",
       "skip": "건너뛰기",
-  "added_photo": "사진이 추가되었습니다: {}",
+      "added_photo": "사진이 추가되었습니다: {}",
       "skipped": "건너뜀"
     },
     "cta": {
@@ -399,7 +399,7 @@
   },
   "postCard": {
     "locationNotSet": "지역 미설정",
-    "location" : "위치"
+    "location": "위치"
   },
   "time": {
     "now": "방금 전",
@@ -456,8 +456,8 @@
       "categoryLabel": "카테고리",
       "titleLabel": "제목",
       "contentLabel": "내용을 입력하세요",
-      "tagsLabel": "태그 (쉼표로 구분)",
-      "tagsHint": "예: 강아지, 무료나눔"
+      "tagsLabel": "태그",
+      "tagsHint": "태그 추가 (스페이스바로 확정)"
     },
     "labels": {
       "title": "제목",
@@ -465,7 +465,6 @@
       "tags": "태그",
       "guidedTitle": "추가 정보 (선택)",
       "eventLocation": "이벤트/발생 장소"
-      
     },
     "hints": {
       "body": "동네 소식이나 질문을 자유롭게 공유해보세요...",
@@ -1220,5 +1219,15 @@
         "desc": "동네의 사건·사고 신고/알림."
       }
     }
+  },
+  "boards": {
+    "popup": {
+      "inactiveTitle": "동네 게시판이 아직 활성화되지 않았어요",
+      "inactiveBody": "동네 게시판을 활성화하려면 먼저 동네 소식을 한 번 작성해보세요. 이웃들의 참여가 생기면 게시판이 자동으로 열립니다.",
+      "writePost": "동네 소식 쓰기"
+    }
+  },
+  "search": {
+    "resultsTitle": "'{keyword}' 검색 결과"
   }
 }

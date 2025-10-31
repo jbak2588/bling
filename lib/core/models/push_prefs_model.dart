@@ -12,6 +12,11 @@
 // ignore: unintended_html_in_doc_comment
 ///   - Cloud Function(buildTopicsFromPrefs)과 호환되도록 'regionKeys'를 List가 아닌 Map<String, String>으로 정의.
 /// ============================================================================
+/// 2025-10-31 (작업 3, 6, 7):
+///   - '하이브리드 기획안' 3)을 기반으로 PushPrefsModel 신규 생성.
+// ignore: unintended_html_in_doc_comment
+///   - Cloud Function(buildTopicsFromPrefs)과 호환되도록 'regionKeys'를 List가 아닌 Map<String, String>으로 정의.
+/// ============================================================================
 library;
 // (파일 내용...)
 

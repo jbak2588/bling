@@ -12,7 +12,7 @@
 ///   - '하이브리드 기획안' 4)의 '피드 필터링' 로직 구현.
 ///   - 'locationParts.kel'을 기준으로 'posts' 컬렉션을 쿼리.
 ///   - (작업 13) AppBar에 채팅 아이콘 추가.
-///   - 채팅 아이콘 클릭 시 'chat_service.getOrCreateBoardChatRoom'을 호출하고
+///   -  AppBar에 채팅 아이콘 클릭 시 'chat_service.getOrCreateBoardChatRoom'을 호출하고
 ///     'ChatRoomScreen'을 'isGroupChat: true'로 푸시하는 로직 구현.
 /// ============================================================================
 library;
