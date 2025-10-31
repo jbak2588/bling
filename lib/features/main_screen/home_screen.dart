@@ -27,7 +27,14 @@
 /// - Kab 필터 도입은 사용자 경험과 비즈니스 전략 모두에서 매우 중요한 결정
 /// - 향후 개선: 지역 단위별 추천·광고·커뮤니티 연계, UI/UX(지도 시각화, 애니메이션 등) 강화, 데이터 기반 KPI/Analytics 연동
 /// - Todo: 통합 피드 스크롤 다운 후 즉시 화면 맨 위로 이동 기능 필요
+/// 2025-10-31 (작업 19, 20, 27):
+///   - [Phase 5] '하이퍼로컬 슈퍼 앱' 전략에 맞춰 아이콘 그리드(`menuItems`) 순서 재배치 (1.소식, 2.일자리, 3.분실물...).
+///   - [Phase 6] 통합 검색 UI 리팩토링:
+///     - `BlingSearchDelegate` 및 `showSearch` 관련 코드 모두 제거.
+///     - 검색칩(`_searchChip`)이 `main_navigation_screen`의 `onSearchChipTap` 콜백을 직접 호출하도록 단순화.
+/// ============================================================================
 library;
+// (파일 내용...)
 
 import 'package:bling_app/features/shared/grab_widgets.dart';
 
@@ -88,6 +95,8 @@ import 'package:bling_app/features/pom/screens/pom_screen.dart';
 import 'package:bling_app/features/lost_and_found/screens/lost_and_found_screen.dart';
 import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart';
 
+// ✅ [검색] 검색 네비게이션은 상위(main_navigation_screen)가 전담
+
 class MenuItem {
   final IconData? icon; // 기존 IconData 지원
   final String? svg; // 신규: SVG 에셋 경로
@@ -141,41 +150,6 @@ class HomeScreen extends StatelessWidget {
   }
 
   // (2) 검색 칩 위젯 헬퍼 - 디자인/텍스트 최신화
-  Widget _searchChip(VoidCallback? onTap) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: 44,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(999),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Row(
-            children: [
-              const Icon(Icons.search),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'main.search.chipPlaceholder'.tr(),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   // 접근성 대응: textScalerOf 기반 스케일 추출 유틸
   double effectiveTextScale(BuildContext context, {double basis = 16}) {
@@ -203,6 +177,10 @@ class HomeScreen extends StatelessWidget {
   final Function(Widget, String) onIconTap;
   // ✅ [스크롤 위치 보존] ScrollController 파라미터 추가
   final ScrollController controller;
+  // ✅ [검색] 홈 검색칩을 외부에서 열도록 제어하는 notifier
+  final ValueNotifier<bool>? openSearchNotifier;
+  // ✅ [검색] 제출 콜백 (keyword 전달)
+  final void Function(String)? onSearchSubmit;
 
   final List<FeedItemModel> allFeedItems;
   final int currentIndex;
@@ -216,6 +194,8 @@ class HomeScreen extends StatelessWidget {
     this.allFeedItems = const [],
     this.currentIndex = 0,
     required this.onSearchChipTap,
+    this.openSearchNotifier,
+    this.onSearchSubmit,
   });
 
   final VoidCallback? onSearchChipTap;
@@ -224,46 +204,56 @@ class HomeScreen extends StatelessWidget {
   static const String _iconsPath = 'assets/icons';
 
   static final List<MenuItem> menuItems = [
+    // 1. localNews (동네소식)
     MenuItem(
         svg: '$_iconsPath/ico_news.svg',
         labelKey: 'main.tabs.localNews',
         screen: const LocalNewsScreen()),
-    MenuItem(
-        svg: '$_iconsPath/ico_seconhand.svg',
-        labelKey: 'main.tabs.marketplace',
-        screen: const MarketplaceScreen()),
-    MenuItem(
-        svg: '$_iconsPath/ico_community.svg',
-        labelKey: 'main.tabs.clubs',
-        screen: const ClubsScreen()),
-    MenuItem(
-        svg: '$_iconsPath/ico_friend.svg',
-        labelKey: 'main.tabs.findFriends',
-        screen: const FindFriendsScreen()),
+    // 2. jobs (구인구직)
     MenuItem(
         svg: '$_iconsPath/ico_job.svg',
         labelKey: 'main.tabs.jobs',
         screen: const JobsScreen()),
-    MenuItem(
-        svg: '$_iconsPath/ico_store.svg',
-        labelKey: 'main.tabs.localStores',
-        screen: const LocalStoresScreen()),
-    MenuItem(
-        svg: '$_iconsPath/ico_auction.svg',
-        labelKey: 'main.tabs.auction',
-        screen: const AuctionScreen()),
-    MenuItem(
-        svg: '$_iconsPath/ico_pom.svg',
-        labelKey: 'main.tabs.pom',
-        screen: const PomScreen()),
+    // 3. lostAndFound (분실물찾기)
     MenuItem(
         svg: '$_iconsPath/ico_lost item.svg',
         labelKey: 'main.tabs.lostAndFound',
         screen: const LostAndFoundScreen()),
+    // 4. marketplace (중고거래)
+    MenuItem(
+        svg: '$_iconsPath/ico_seconhand.svg',
+        labelKey: 'main.tabs.marketplace',
+        screen: const MarketplaceScreen()),
+    // 5. localStores (동네업체)
+    MenuItem(
+        svg: '$_iconsPath/ico_store.svg',
+        labelKey: 'main.tabs.localStores',
+        screen: const LocalStoresScreen()),
+    // 6. clubs (모임)
+    MenuItem(
+        svg: '$_iconsPath/ico_community.svg',
+        labelKey: 'main.tabs.clubs',
+        screen: const ClubsScreen()),
+    // 7. findFriends (친구찾기)
+    MenuItem(
+        svg: '$_iconsPath/ico_friend.svg',
+        labelKey: 'main.tabs.findFriends',
+        screen: const FindFriendsScreen()),
+    // 8. realEstate (부동산)
     MenuItem(
         svg: '$_iconsPath/ico_real estate.svg',
         labelKey: 'main.tabs.realEstate',
         screen: const RealEstateScreen()),
+    // 9. auction (경매)
+    MenuItem(
+        svg: '$_iconsPath/ico_auction.svg',
+        labelKey: 'main.tabs.auction',
+        screen: const AuctionScreen()),
+    // 10. pom (숏폼)
+    MenuItem(
+        svg: '$_iconsPath/ico_pom.svg',
+        labelKey: 'main.tabs.pom',
+        screen: const PomScreen()),
   ];
 
   @override
@@ -292,14 +282,19 @@ class HomeScreen extends StatelessWidget {
 
     final double childAspectRatio = tileWidth / tileHeight;
 
-    // ✅ 탭 전환 콜백 준비: 주입받았으면 그걸 쓰고, 없으면 기존 플레이스홀더로 Fallback
-    final VoidCallback? searchAction = onSearchChipTap;
+    // ✅ 검색 칩 탭 시 내장 검색 UI 호출로 변경 (로컬 함수 선언으로 lint 대응)
 
     return CustomScrollView(
       controller: controller,
       slivers: [
-        // ✅ AppBar 바로 아래, 얇은 검색 칩만 노출(입력은 Search 탭에서)
-        SliverToBoxAdapter(child: _searchChip(searchAction)),
+        // ✅ AppBar 바로 아래, 얇은 검색 칩 (탭 시 자체가 입력필드로 확장)
+        SliverToBoxAdapter(
+          child: InlineSearchChip(
+            hintText: 'main.search.chipPlaceholder'.tr(),
+            openNotifier: openSearchNotifier,
+            onSubmitted: (kw) => onSearchSubmit?.call(kw),
+          ),
+        ),
 
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -469,9 +464,9 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              // 3-2. 가로 캐러셀 (MD: 5. 레이아웃/여백 가이드)
+              // 3-2. 가로 캐러셀 (MD: 2. 표준 썸네일 고정 크기 (220x240)
               SizedBox(
-                height: 240, // MD: 2. 표준 썸네일 고정 크기 (220x240)
+                height: 240,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(
@@ -1379,9 +1374,138 @@ class HomeScreen extends StatelessWidget {
   // ▲▲▲▲▲ [개편] 1, 2단계 완료 ▲▲▲▲▲
 }
 
-extension StringExtension on String {
-  String capitalize() {
-    if (isEmpty) return "";
-    return "${this[0].toUpperCase()}${substring(1)}";
+// ✅ [검색] 홈 화면 인라인 검색칩 위젯: 탭 시 자체가 입력필드로 확장되고 제출 시 콜백 호출
+class InlineSearchChip extends StatefulWidget {
+  final String hintText;
+  final ValueNotifier<bool>? openNotifier;
+  final ValueChanged<String>? onSubmitted;
+
+  const InlineSearchChip({
+    super.key,
+    required this.hintText,
+    this.openNotifier,
+    this.onSubmitted,
+  });
+
+  @override
+  State<InlineSearchChip> createState() => _InlineSearchChipState();
+}
+
+class _InlineSearchChipState extends State<InlineSearchChip> {
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  bool _editing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.openNotifier?.addListener(_handleExternalOpen);
+  }
+
+  void _handleExternalOpen() {
+    if (widget.openNotifier?.value == true) {
+      setState(() => _editing = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _focusNode.requestFocus();
+        }
+        // 자동으로 재오픈 방지: 즉시 false로 리셋
+        widget.openNotifier?.value = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.openNotifier?.removeListener(_handleExternalOpen);
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _cancel() {
+    setState(() => _editing = false);
+    _controller.clear();
+    _focusNode.unfocus();
+  }
+
+  void _submit(String value) {
+    final kw = value.trim();
+    if (kw.isEmpty) return;
+    widget.onSubmitted?.call(kw);
+    _cancel();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 스타일은 기존 칩과 동일하게 유지
+    final TextStyle? chipTextStyle =
+        Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14);
+    final container = Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: _editing
+          ? Row(
+              children: [
+                const Icon(Icons.search),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    style: chipTextStyle, // 클릭 후에도 작은 폰트 유지
+                    textAlignVertical: TextAlignVertical.center,
+                    decoration: InputDecoration(
+                      hintText: widget.hintText,
+                      hintStyle: chipTextStyle, // 힌트 폰트도 동일하게
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: _submit,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.cancel, size: 20),
+                  onPressed: _cancel,
+                  tooltip: 'common.cancel'.tr(),
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                const Icon(Icons.search),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.hintText,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      child: _editing
+          ? container
+          : GestureDetector(
+              onTap: () => setState(() => _editing = true),
+              child: container,
+            ),
+    );
   }
 }

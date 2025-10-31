@@ -130,7 +130,7 @@
       "addressHint": "Lokasi",
       "addressDetailHint": "Detail lokasi pertemuan",
       "descriptionHint": "Deskripsi Lengkap",
-      "tagsHint": "cth. anjing, gratisan",
+      "tagsHint": "Tambahkan tag (tekan spasi untuk menambahkan)",
       "success": "Produk berhasil didaftarkan!",
       "fail": "Gagal mendaftarkan produk: {error}"
     },
@@ -144,7 +144,8 @@
       "descriptionHint": "Ubah Deskripsi Lengkap",
       "success": "Produk berhasil diedit!",
       "fail": "Gagal memperbarui produk: {error}",
-      "resetLocation": "Atur ulang lokasi"
+      "resetLocation": "Atur ulang lokasi",
+      "save": "Simpan Perubahan"
     },
     "detail": {
       "makeOffer": "Tawarkan harga",
@@ -199,7 +200,7 @@
     "gallery_upload": {
       "title": "Unggah Foto (1/3)",
       "instruction": "Mari analisis barang {category} Anda.",
-       "min_photo_guide": "Pilih minimal {0} foto dari galeri Anda agar AI dapat mengenali barang tersebut.",
+      "min_photo_guide": "Pilih minimal {0} foto dari galeri Anda agar AI dapat mengenali barang tersebut.",
       "min_photo_error": "Diperlukan minimal {0} foto.",
       "next_button": "Langkah Berikutnya"
     },
@@ -370,7 +371,7 @@
   },
   "postCard": {
     "locationNotSet": "Lokasi belum diatur",
-    "location" : "Lokasi"
+    "location": "Lokasi"
   },
   "time": {
     "now": "Baru saja",
@@ -427,8 +428,8 @@
       "categoryLabel": "Kategori",
       "titleLabel": "Judul",
       "contentLabel": "Masukkan konten",
-      "tagsLabel": "Tag (pisahkan dengan koma)",
-      "tagsHint": "cth. anjing, gratisan"
+      "tagsLabel": "Tag",
+      "tagsHint": "Tambahkan tag (tekan spasi untuk menambahkan)"
     },
     "labels": {
       "title": "Judul",
@@ -436,7 +437,6 @@
       "tags": "Tag",
       "guidedTitle": "Info Tambahan (Opsional)",
       "eventLocation": "Lokasi Kejadian/Peristiwa"
-      
     },
     "hints": {
       "body": "Bagikan kabar lingkungan atau ajukan pertanyaan...",
@@ -1028,15 +1028,15 @@
   "community": {
     "title": "Halaman Komunitas"
   },
-    "shared": {
+  "shared": {
     "tagInput": {
       "defaultHint": "Tambahkan tag (tekan spasi untuk menambahkan)"
     }
   },
-    "linkPreview": {
-      "errorTitle": "Tidak dapat memuat pratinjau",
-      "errorBody": "Periksa tautannya atau coba lagi nanti."
-    },
+  "linkPreview": {
+    "errorTitle": "Tidak dapat memuat pratinjau",
+    "errorBody": "Periksa tautannya atau coba lagi nanti."
+  },
   "selectCategory": "Pilih kategori",
   "address_neighborhood": "Lingkungan",
   "address_detail_hint": "Alamat detail",
@@ -1191,5 +1191,15 @@
         "desc": "Laporan insiden dan kecelakaan di lingkungan."
       }
     }
+  },
+  "boards": {
+    "popup": {
+      "inactiveTitle": "Papan lingkungan belum aktif",
+      "inactiveBody": "Untuk mengaktifkan papan lingkungan, buat dulu satu postingan cerita lokal. Jika tetangga mulai ikut serta, papan akan terbuka otomatis.",
+      "writePost": "Tulis Cerita Lokal"
+    }
+  },
+  "search": {
+    "resultsTitle": "Hasil untuk '{keyword}'"
   }
 }

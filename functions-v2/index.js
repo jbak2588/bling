@@ -75,7 +75,18 @@
  * - '하이브리드 기획안' 4)에 따라 'posts' 문서 생성 감지.
  * - 'getKelKey' 헬퍼로 'boards/{kel_key}' 문서를 찾아 트랜잭션으로 'metrics.last30dPosts' 1 증가.
  * - [룰 완화] 'ACTIVATION_THRESHOLD = 10'을 적용, 10건 도달 시 'features.hasGroupChat'을 true로 설정.
+ * 2025-10-31 (작업 5, 7, 9, 10):
+ * 1. [푸시 스키마] 'onUserPushPrefsWrite' 함수 추가. (기획안 3)
+ * - 'users.pushPrefs' 변경 감지, 'buildTopicsFromPrefs' 헬퍼로 토픽 계산.
+ * - FCM 구독/해지(subscribe/unsubscribe)를 자동 동기화.
+ *
+ * 2. [동네 게시판] 'onLocalNewsPostCreate' 함수 추가. (기획안 4)
+ * - 'posts' 문서 생성 감지, 'getKelKey' 헬퍼로 'boards/{kel_key}' 문서를 찾아
+ * 트랜잭션으로 'metrics.last30dPosts' 업데이트.
+ * - [룰 완화] 'ACTIVATION_THRESHOLD = 10'을 적용, 10건 도달 시 'features.hasGroupChat'을 true로 설정.
+ * ============================================================================
  */
+// (파일 내용...)
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentUpdated, onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");

@@ -131,7 +131,7 @@
       "addressDetailHint": "Meeting Place",
       "descriptionHint": "Detailed Description",
       "success": "Product registered successfully!",
-      "tagsHint": "e.g. dog, freeshare"
+      "tagsHint": "Add tags (press space to confirm)"
     },
     "edit": {
       "title": "Edit Post",
@@ -141,7 +141,7 @@
       "priceHint": "Edit Price (Rp)",
       "negotiable": "Edit Negotiable",
       "descriptionHint": "Edit Description",
-      "tagsHint": "e.g. dog, freeshare",
+      "tagsHint": "Add tags (press space to confirm)",
       "success": "Product registered successfully!",
       "fail": "Failed to update product: {error}",
       "resetLocation": "Reset location",
@@ -196,7 +196,7 @@
       "error": "An error occurred: {error}",
       "add_photo": "Add Photo",
       "skip": "Skip",
-  "added_photo": "Photo added: {}",
+      "added_photo": "Photo added: {}",
       "skipped": "Skipped"
     },
     "cta": {
@@ -246,7 +246,7 @@
       "loading": "AI is generating the final report...",
       "error": "Failed to generate the report.",
       "submit_button": "Register for Sale",
-  "suggested_price": "AI suggested price ({})",
+      "suggested_price": "AI suggested price ({})",
       "summary": "Verification summary",
       "buyer_notes": "Notes for buyer (AI)",
       "key_specs": "Key specs",
@@ -399,7 +399,7 @@
   },
   "postCard": {
     "locationNotSet": "Location not set",
-    "location" : "Location"
+    "location": "Location"
   },
   "time": {
     "now": "Just now",
@@ -456,8 +456,8 @@
       "categoryLabel": "Category",
       "titleLabel": "Title",
       "contentLabel": "Enter content",
-      "tagsLabel": "Tags (comma-separated)",
-      "tagsHint": "e.g. dog, freeshare"
+      "tagsLabel": "Tags",
+      "tagsHint": "Add tags (press space to confirm)"
     },
     "labels": {
       "title": "Title",
@@ -465,7 +465,6 @@
       "tags": "Tags",
       "guidedTitle": "Additional Info (Optional)",
       "eventLocation": "Event/Incident Location"
-      
     },
     "hints": {
       "body": "Share your neighborhood news or ask questions...",
@@ -1218,5 +1217,15 @@
         "desc": "Reports of incidents and accidents in the neighborhood."
       }
     }
+  },
+  "boards": {
+    "popup": {
+      "inactiveTitle": "Neighborhood board is inactive",
+      "inactiveBody": "To activate your neighborhood board, create a local news post first. Once neighbors join in, the board will open automatically.",
+      "writePost": "Write Local News"
+    }
+  },
+  "search": {
+    "resultsTitle": "Results for '{keyword}'"
   }
 }
