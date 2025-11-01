@@ -26,7 +26,16 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(조회수, 지원수, 부스트 등).
 // - 필터 설명 및 에러 메시지 강화, 신뢰 등급/차단/신고 UI 노출 및 기능 강화.
 // - 구직자/구인자 모두를 위한 UX 개선(지원/채팅/알림 등).
-// =====================================================
+/// ============================================================================
+///
+/// 2025-10-31 (작업 35):
+///   - '하이브리드 기획안' 6단계: 'jobs_screen'의 필터 탭과 연동.
+///   - 'fetchJobs' 함수에 'String? jobType' 파라미터 추가.
+///   - 'jobType' 파라미터가 null이 아닐 경우, 'where('jobType', isEqualTo: jobType)'
+///     쿼리를 동적으로 추가하여 'regular'/'quick_gig' 필터링 구현.
+/// ============================================================================
+library;
+// (파일 내용...)
 
 import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
@@ -35,15 +44,30 @@ import 'package:bling_app/features/jobs/widgets/job_card.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'create_job_screen.dart';
+// ✅ [작업 31] 1. 일자리 유형 선택 화면 import
+import 'package:bling_app/features/jobs/constants/job_categories.dart';
 
-class JobsScreen extends StatelessWidget {
+class JobsScreen extends StatefulWidget {
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
   const JobsScreen({this.userModel, this.locationFilter, super.key});
 
+  @override
+  // ignore: library_private_types_in_public_api
+  _JobsScreenState createState() => _JobsScreenState();
+}
+
+class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
+  late final TabController _tabController;
+  // ✅ [작업 31] 6. 탭별 JobType 필터 값
+  final List<String?> _tabFilters = [
+    null, // 'all' (전체)
+    JobType.quickGig.name, // 'quick_gig' (단순 일자리)
+    JobType.regular.name, // 'regular' (정규직)
+  ];
+
   List<JobModel> _applyLocationFilter(List<JobModel> allJobs) {
-    final filter = locationFilter;
+    final filter = widget.locationFilter;
     if (filter == null) return allJobs;
 
     String? key;
@@ -68,9 +92,21 @@ class JobsScreen extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: _tabFilters.length, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final JobRepository jobRepository = JobRepository();
-    final userProvince = userModel?.locationParts?['prov'];
+    final userProvince = widget.userModel?.locationParts?['prov'];
 
     if (userProvince == null) {
       return Center(
@@ -84,47 +120,70 @@ class JobsScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      body: StreamBuilder<List<JobModel>>(
-        // [수정] Stream 타입을 JobModel 리스트로 변경
-        stream:
-          jobRepository.fetchJobs(locationFilter: locationFilter),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
+      body: Column(
+        children: [
+          TabBar(
+            controller: _tabController,
+            labelColor: Theme.of(context).primaryColor,
+            unselectedLabelColor: Colors.grey[600],
+            indicatorColor: Theme.of(context).primaryColor,
+            tabs: [
+              Tab(text: 'jobs.tabs.all'.tr()), // '전체'
+              Tab(text: 'jobs.tabs.quickGig'.tr()), // '단순 일자리'
+              Tab(text: 'jobs.tabs.regular'.tr()), // '정규/파트타임'
+            ],
+            // 탭 변경 시 화면을 다시 그리도록 리스너 추가
+            onTap: (index) => setState(() {}),
+          ),
+          Expanded(
+            child: StreamBuilder<List<JobModel>>(
+              // [수정] Stream 타입을 JobModel 리스트로 변경
+              stream: jobRepository.fetchJobs(
+                locationFilter: widget.locationFilter,
+                // ✅ [작업 31] 6. 현재 탭의 jobType 필터 전달
+                jobType: _tabFilters[_tabController.index],
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
 
-          final allJobs = snapshot.data ?? [];
-          // [수정] 2차 필터링 적용
-          final filteredJobs = _applyLocationFilter(allJobs);
+                final allJobs = snapshot.data ?? [];
+                // [수정] 2차 필터링 적용
+                final filteredJobs = _applyLocationFilter(allJobs);
 
-          if (filteredJobs.isEmpty) {
-            return Center(child: Text('jobs.screen.empty'.tr()));
-          }
+                if (filteredJobs.isEmpty) {
+                  return Center(child: Text('jobs.screen.empty'.tr()));
+                }
 
-          return ListView.builder(
-            itemCount: filteredJobs.length,
-            itemBuilder: (context, index) {
-              final job = filteredJobs[index]; // [수정]
-              return JobCard(job: job);
-            },
-          );
-        },
+                return ListView.builder(
+                  itemCount: filteredJobs.length,
+                  itemBuilder: (context, index) {
+                    final job = filteredJobs[index]; // [수정]
+                    return JobCard(job: job);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'jobs_fab', // HeroTag 추가
-        onPressed: () {
-          if (userModel != null) {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => CreateJobScreen(userModel: userModel!),
-            ));
-          }
-        },
-        tooltip: 'jobs.screen.createTooltip'.tr(),
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   heroTag: 'jobs_fab', // HeroTag 추가
+      //   onPressed: () {
+      //     // ✅ [작업 31] 3. 'CreateJobScreen' 대신 'SelectJobTypeScreen'으로 이동
+      //     if (widget.userModel != null) {
+      //       Navigator.of(context).push(MaterialPageRoute(
+      //         builder: (_) => SelectJobTypeScreen(userModel: widget.userModel!),
+      //       ));
+      //     }
+      //   },
+      //   tooltip: 'jobs.screen.createTooltip'.tr(),
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }

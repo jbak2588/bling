@@ -11,47 +11,12 @@
     },
     "links": {
       "findPassword": "Forgot password?",
-      "askForAccount": "Don’t have an account?",
-      "signUp": "Sign Up"
+      "askForAccount": "Don’t have an account?"
     },
     "alerts": {
       "invalidEmail": "Invalid email format.",
       "userNotFound": "User not found or wrong password.",
-      "wrongPassword": "Wrong password.",
-      "unknownError": "An unknown error occurred. Please try again."
-    }
-  },
-  "signup": {
-    "title": "Sign Up",
-    "emailHint": "Email Address",
-    "passwordHint": "Password (min 6 chars)",
-    "passwordConfirmHint": "Confirm Password",
-    "nicknameHint": "Nickname",
-    "subtitle": "Get started with Bling! Enter your info.",
-    "locationHint": "Your neighborhood (for local services)",
-    "locationNotice": "Your neighborhood is used to show local posts and is not disclosed to others.",
-    "buttons": {
-      "signup": "Sign Up",
-      "checkDuplicate": "Check"
-    },
-    "links": {
-      "askForLogin": "Already have an account?",
-      "login": "Log In"
-    },
-    "alerts": {
-      "passwordMismatch": "Passwords do not match.",
-      "passwordTooShort": "Password must be at least 6 characters.",
-      "emailInUse": "This email is already in use.",
-      "nicknameInUse": "This nickname is already in use.",
-      "nicknameAvailable": "This nickname is available.",
-      "nicknameNotChecked": "Please check nickname duplication.",
-      "signupSuccessLoginNotice": "Sign-up complete! Please log in to continue.",
-      "unknownError": "An unknown error occurred. Please try again."
-    },
-    "policy": {
-      "title": "Sign-up Policy",
-      "description": "Bling collects minimal information to keep the community safe. All data is stored securely and never disclosed without consent.",
-      "agree": "I agree and want to continue."
+      "wrongPassword": "Wrong password."
     }
   },
   "main": {
@@ -586,11 +551,23 @@
   "jobs": {
     "setLocationPrompt": "Set your location to see job posts!",
     "screen": {
-      "empty": "No job posts yet.",
+      "empty": "No job postings found in this area.",
       "createTooltip": "Post a Job"
     },
+    "tabs": {
+      "all": "All",
+      "quickGig": "Quick Gigs",
+      "regular": "Part-time/Full-time"
+    },
+    "selectType": {
+      "title": "Select Job Type",
+      "regularTitle": "Part-time / Full-time Job",
+      "regularDesc": "Regular work like cafe, restaurant, office",
+      "quickGigTitle": "Quick Gig / Simple Help",
+      "quickGigDesc": "Motorcycle delivery, moving, cleaning, etc."
+    },
     "form": {
-      "title": "Post a New Job",
+      "title": "Post a Job",
       "titleHint": "Job title",
       "descriptionPositionHint": "Describe the position",
       "categoryHint": "Category",
@@ -600,6 +577,26 @@
       "submit": "Post Job",
       "titleLabel": "Title",
       "titleValidator": "Please enter a title.",
+      "titleRegular": "Post Part-time/Full-time Job",
+      "titleQuickGig": "Post Quick Gig",
+      "validationError": "Please fill in all required fields.",
+      "saveSuccess": "Job posting saved successfully.",
+      "saveError": "Failed to save job posting: {error}",
+      "categoryLabel": "Category",
+      "titleHintQuickGig": "e.g., Motorcycle document delivery (ASAP)",
+      "salaryLabel": "Salary (IDR)",
+      "salaryHint": "Enter the salary amount",
+      "salaryValidator": "Please enter a valid salary.",
+      "totalPayLabel": "Total Pay (IDR)",
+      "totalPayHint": "Enter the total amount offered",
+      "totalPayValidator": "Please enter a valid amount.",
+      "negotiable": "Negotiable",
+      "workPeriodLabel": "Work Period",
+      "workPeriodHint": "Select work period",
+      "locationLabel": "Location / Workplace",
+      "locationValidator": "Please enter a location.",
+      "imageLabel": "Images (Optional, max 10)",
+      "descriptionHintQuickGig": "Please provide details (e.g., departure, destination, specific request).",
       "salaryInfoTitle": "Salary Info",
       "salaryTypeHint": "Type",
       "salaryAmountLabel": "Amount (IDR)",
@@ -620,12 +617,26 @@
       "cafe": "Cafe",
       "retail": "Retail",
       "delivery": "Delivery",
-      "etc": "Etc"
+      "etc": "Etc",
+      "service": "Service",
+      "sales_marketing": "Sales/Marketing",
+      "delivery_logistics": "Delivery/Logistics",
+      "it": "IT/Tech",
+      "design": "Design",
+      "education": "Education",
+      "quick_gig_delivery": "Motorcycle Delivery",
+      "quick_gig_transport": "Motorcycle Ride (Ojek)",
+      "quick_gig_moving": "Moving Help",
+      "quick_gig_cleaning": "Cleaning/Housework",
+      "quick_gig_queuing": "Wait in Line",
+      "quick_gig_etc": "Other Errands"
     },
     "salaryTypes": {
       "hourly": "Hourly",
       "daily": "Daily",
+      "weekly": "Weekly",
       "monthly": "Monthly",
+      "total": "Total Pay",
       "per_case": "Per case",
       "etc": "Etc"
     },
@@ -633,6 +644,12 @@
       "short_term": "Short term",
       "mid_term": "Mid term",
       "long_term": "Long term",
+      "one_time": "One-time",
+      "1_week": "1 Week",
+      "1_month": "1 Month",
+      "3_months": "3 Months",
+      "6_months_plus": "6 Months+",
+      "negotiable": "Negotiable",
       "etc": "Etc"
     },
     "detail": {

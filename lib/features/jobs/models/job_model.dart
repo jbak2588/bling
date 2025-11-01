@@ -21,6 +21,13 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(조회수, 지원수, 부스트 등).
 // - 신고/차단/신뢰 등급 필드 및 기능 강화, 데이터 유효성 검사 추가.
 // =====================================================
+/// 2025-10-31 (작업 31):
+///   - '하이브리드 기획안' (알바천국 + 당근 심부름) 구현을 위해 `jobType: String` 필드 추가.
+///   - ('regular': 정규/파트, 'quick_gig': 단순/일회성)
+///   - fromFirestore/toJson에 `jobType` 필드 반영 및 호환성을 위한 기본값 'regular' 설정.
+/// ============================================================================
+library;
+// (파일 내용...)
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -39,6 +46,8 @@ class JobModel {
   final String trustLevelRequired;
   final int viewsCount;
   final int likesCount;
+  // ✅ [작업 31] 'regular' (정규/파트) | 'quick_gig' (단순/일회성)
+  final String jobType;
   final bool isPaidListing;
   final String? salaryType; // 'hourly', 'daily', 'monthly', 'per_case'
   final int? salaryAmount;
@@ -58,6 +67,7 @@ class JobModel {
     this.geoPoint,
     required this.createdAt,
     this.trustLevelRequired = 'normal',
+    required this.jobType, // ✅ [작업 31]
     this.viewsCount = 0,
     this.likesCount = 0,
     this.isPaidListing = false,
@@ -84,6 +94,8 @@ class JobModel {
           : null,
       geoPoint: data['geoPoint'],
       createdAt: data['createdAt'] ?? Timestamp.now(),
+      // ✅ [작업 31] 'jobType' 필드 로드 (없을 시 'regular'로 기본값 처리하여 호환성 유지)
+      jobType: data['jobType'] as String? ?? 'regular',
       trustLevelRequired: data['trustLevelRequired'] ?? 'normal',
       viewsCount: data['viewsCount'] ?? 0,
       likesCount: data['likesCount'] ?? 0,
@@ -108,6 +120,7 @@ class JobModel {
       'locationParts': locationParts,
       'geoPoint': geoPoint,
       'createdAt': createdAt,
+      'jobType': jobType, // ✅ [작업 31]
       'trustLevelRequired': trustLevelRequired,
       'viewsCount': viewsCount,
       'likesCount': likesCount,

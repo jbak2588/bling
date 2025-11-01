@@ -18,19 +18,24 @@
 ///     - 하단 검색 아이콘(`_onSearchRequested`)이 팝업 대신 이 공용 검색창을 활성화하도록 수정.
 ///     - `_submitSearch` 로직 추가 (keyword를 `TagSearchResultScreen`으로 전달).
 /// ============================================================================
+/// 2025-10-31 (작업 36):
+///   - 'Jobs' 피처 이원화(regular/quick_gig)에 따른 FAB(+) 버튼 로직 수정.
+///   - 'AppSection.jobs' 케이스 및 '_showGlobalCreateSheet'의 '일자리' 항목이
+///     'CreateJobScreen' 대신 'SelectJobTypeScreen'을 호출하도록 변경.
+/// ============================================================================
 library;
 // (파일 내용...)
 
 // ===== 생성(등록) 화면: 각 Feature의 create 스크린들 =====
 // [추가] 문맥 자동분기용: 인디프렌드/동네가게 생성 화면
 import 'package:bling_app/features/find_friends/screens/findfriend_form_screen.dart';
+import 'package:bling_app/features/jobs/screens/select_job_type_screen.dart';
 import 'package:bling_app/features/local_stores/screens/create_shop_screen.dart';
 
 import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
 // import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
 import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
 import 'package:bling_app/features/clubs/screens/create_club_screen.dart';
-import 'package:bling_app/features/jobs/screens/create_job_screen.dart';
 import 'package:bling_app/features/pom/screens/create_short_screen.dart';
 import 'package:bling_app/features/lost_and_found/screens/create_lost_item_screen.dart';
 import 'package:bling_app/features/auction/screens/create_auction_screen.dart';
@@ -369,7 +374,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         target = CreateClubScreen(userModel: _userModel!);
         break;
       case AppSection.jobs:
-        target = CreateJobScreen(userModel: _userModel!);
+        // ✅ [작업 31] 일자리 생성 시, 유형 선택 화면으로 이동
+        target = SelectJobTypeScreen(userModel: _userModel!);
         break;
       case AppSection.localStores:
         target = CreateShopScreen(userModel: _userModel!);
@@ -426,7 +432,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   Icons.work_outline_rounded, // 2. jobs
                   'main.tabs.jobs'.tr(),
                   'jobs.form.title'.tr(),
-                  () => CreateJobScreen(userModel: _userModel!)),
+                  () =>
+                      SelectJobTypeScreen(userModel: _userModel!)), // ✅ [작업 31]
               // 3) 분실물센터
               _sheetItem(
                   Icons.report_gmailerrorred_rounded, // 3. lostAndFound
