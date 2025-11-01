@@ -87,7 +87,20 @@
     "myTown": "Kota Saya",
     "search": {
       "placeholder": "Halaman Pencarian",
-      "chipPlaceholder": "Cari tetangga, berita, Preloved, pekerjaan…"
+      "chipPlaceholder": "Cari tetangga, berita, Preloved, pekerjaan…",
+      "hint": {
+        "globalSheet": "Cari di {}",
+        "localNews": "Cari judul berita, konten, tag",
+        "jobs": "Cari pekerjaan, perusahaan, 'Help Me'",
+        "lostAndFound": "Cari barang hilang atau ditemukan",
+        "marketplace": "Cari produk yang dijual",
+        "localStores": "Cari toko lokal, layanan",
+        "findFriends": "Cari nama panggilan profil, minat",
+        "clubs": "Cari klub, minat, lokasi",
+        "realEstate": "Cari properti, area, harga",
+        "auction": "Cari barang lelang, merek",
+        "pom": "Cari POM, tag, pengguna"
+      }
     }
   },
   "drawer": {

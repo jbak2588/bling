@@ -40,11 +40,14 @@ library;
 // 아래부터 실제 코드
 
 import 'dart:async';
+import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
+import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // ❌ [태그 시스템] 기존 카테고리 import 제거
@@ -57,7 +60,17 @@ import 'local_news_detail_screen.dart';
 class LocalNewsScreen extends StatefulWidget {
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
-  const LocalNewsScreen({this.userModel, this.locationFilter, super.key});
+  // 검색 UX 옵션
+  final bool autoFocusSearch;
+  final ValueNotifier<AppSection?>? searchNotifier;
+
+  const LocalNewsScreen({
+    this.userModel,
+    this.locationFilter,
+    this.autoFocusSearch = false,
+    this.searchNotifier,
+    super.key,
+  });
 
   @override
   State<LocalNewsScreen> createState() => _LocalNewsScreenState();
@@ -68,6 +81,13 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
   // ... 이 클래스의 모든 코드는 원본과 동일하게 유지됩니다 ...
   late final TabController _tabController;
   bool _isMapView = false;
+  // 인라인 검색 칩 제어 및 키워드 상태
+  final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<String> _searchKeywordNotifier =
+      ValueNotifier<String>('');
+  VoidCallback? _externalSearchListener;
+  // 검색바 표시 여부 (칩 자체를 완전히 숨기기 위함)
+  bool _showSearchBar = false;
 
   // ✅ [태그 시스템] 카테고리 ID 목록 대신 태그 ID 목록으로 변경
   // (AppTags.localNewsTags 중에서 '상시 추천 태그'만 필터링)
@@ -115,6 +135,7 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
         tagId: tagId, // ✅ category -> tagId
         userModel: widget.userModel,
         locationFilter: widget.locationFilter,
+        searchKeywordListenable: _searchKeywordNotifier,
       );
     }).toList();
 
@@ -124,14 +145,56 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
         tagId: tagId, // ✅ category -> tagId
         userModel: widget.userModel,
         locationFilter: widget.locationFilter,
+        searchKeywordListenable: _searchKeywordNotifier,
       );
     }).toList();
+
+    // 검색 UX: 자동 포커스 요청 (전역 시트에서 진입한 경우)
+    if (widget.autoFocusSearch) {
+      _showSearchBar = true; // 처음엔 검색칩을 보여줌
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true; // 포커스 오픈
+      });
+    }
+
+    // 외부 전역 검색 활성화 신호 구독
+    if (widget.searchNotifier != null) {
+      _externalSearchListener = () {
+        if (widget.searchNotifier!.value == AppSection.localNews) {
+          // 피드 내부에서 하단 검색 아이콘을 눌렀을 때 검색칩을 노출하고 포커스
+          if (mounted) {
+            setState(() => _showSearchBar = true);
+            _chipOpenNotifier.value = true;
+          }
+        }
+      };
+      widget.searchNotifier!.addListener(_externalSearchListener!);
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _chipOpenNotifier.dispose();
+    _searchKeywordNotifier.dispose();
+    if (_externalSearchListener != null && widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener!);
+    }
     super.dispose();
+  }
+
+  // 인라인 검색칩 제출 처리
+  void _onSearchSubmitted(String keyword) {
+    final kw = keyword.trim().toLowerCase();
+    _searchKeywordNotifier.value = kw; // 빈 문자열도 허용 (검색 초기화)
+  }
+
+  // 검색창 닫기 요청 (X 버튼)
+  void _onSearchClosed() {
+    if (!mounted) return;
+    setState(() => _showSearchBar = false);
+    // 필터도 초기화
+    _searchKeywordNotifier.value = '';
   }
 
   @override
@@ -179,6 +242,14 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
     return Scaffold(
       body: Column(
         children: [
+          // 검색칩은 요청될 때만 보이고, X(취소) 시 완전히 사라집니다.
+          if (_showSearchBar)
+            InlineSearchChip(
+              hintText: 'main.search.hint.localNews'.tr(),
+              openNotifier: _chipOpenNotifier,
+              onSubmitted: _onSearchSubmitted,
+              onClose: _onSearchClosed,
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Row(
@@ -226,11 +297,13 @@ class _FeedListView extends StatefulWidget {
   final String tagId; // ✅ category -> tagId
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
+  final ValueListenable<String>? searchKeywordListenable;
   const _FeedListView(
       {super.key,
       required this.tagId, // ✅ category -> tagId
       this.userModel,
-      this.locationFilter});
+      this.locationFilter,
+      this.searchKeywordListenable});
 
   @override
   State<_FeedListView> createState() => _FeedListViewState();
@@ -242,6 +315,8 @@ class _FeedListViewState extends State<_FeedListView>
   // ✅ 3. wantKeepAlive를 true로 설정하여 탭이 전환되어도 이 목록의 상태를 유지시킵니다.
   @override
   bool get wantKeepAlive => true;
+
+  VoidCallback? _kwListener;
 
   // 기존 _buildQuery와 _applyLocationFilter 함수를 State 안으로 이동
   Query<Map<String, dynamic>> _buildQuery() {
@@ -257,6 +332,11 @@ class _FeedListViewState extends State<_FeedListView>
       // query = query.where('category', isEqualTo: widget.category); // ❌ 제거
       query = query.where('tags',
           arrayContains: widget.tagId); // ✅ 'tags' 필드에 해당 tagId가 포함되어 있는지
+    }
+    final kw = widget.searchKeywordListenable?.value.trim().toLowerCase() ?? '';
+    if (kw.isNotEmpty) {
+      // 간단한 태그 기반 검색
+      query = query.where('tags', arrayContains: kw);
     }
     return query.orderBy('createdAt', descending: true);
   }
@@ -295,6 +375,13 @@ class _FeedListViewState extends State<_FeedListView>
     // ✅ 4. super.build(context)를 호출해야 합니다.
     super.build(context);
 
+    // 키워드 변경 시 목록을 갱신
+    _kwListener ??= () {
+      if (mounted) setState(() {});
+    };
+    widget.searchKeywordListenable?.removeListener(_kwListener!);
+    widget.searchKeywordListenable?.addListener(_kwListener!);
+
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _buildQuery().snapshots(),
       builder: (context, snapshot) {
@@ -328,11 +415,13 @@ class _FeedMapView extends StatefulWidget {
   final String tagId; // ✅ category -> tagId
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
+  final ValueListenable<String>? searchKeywordListenable;
   const _FeedMapView(
       {super.key,
       required this.tagId, // ✅ category -> tagId
       this.userModel,
-      this.locationFilter});
+      this.locationFilter,
+      this.searchKeywordListenable});
 
   @override
   State<_FeedMapView> createState() => _FeedMapViewState();
@@ -386,6 +475,10 @@ class _FeedMapViewState extends State<_FeedMapView> {
       query = query.where('tags',
           arrayContains: widget.tagId); // ✅ 'tags' 필드에 해당 tagId가 포함되어 있는지
     }
+    final kw = widget.searchKeywordListenable?.value.trim().toLowerCase() ?? '';
+    if (kw.isNotEmpty) {
+      query = query.where('tags', arrayContains: kw);
+    }
     debugPrint('[지도 디버그] 카메라 위치 쿼리: ${query.parameters}');
     return query.orderBy('createdAt', descending: true);
   }
@@ -404,6 +497,11 @@ class _FeedMapViewState extends State<_FeedMapView> {
       // query = query.where('category', isEqualTo: widget.category); // ❌ 제거
       query = query.where('tags',
           arrayContains: widget.tagId); // ✅ 'tags' 필드에 해당 tagId가 포함되어 있는지
+    }
+    final kw2 =
+        widget.searchKeywordListenable?.value.trim().toLowerCase() ?? '';
+    if (kw2.isNotEmpty) {
+      query = query.where('tags', arrayContains: kw2);
     }
     debugPrint('[지도 디버그] 마커 생성 쿼리: ${query.parameters}');
     return query.orderBy('createdAt', descending: true);

@@ -27,18 +27,23 @@ import 'package:bling_app/features/location/screens/location_filter_screen.dart'
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'create_auction_screen.dart';
+import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
+import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class AuctionScreen extends StatefulWidget {
   final UserModel? userModel;
   // [추가] HomeScreen에서 locationFilter를 전달받습니다.
   final Map<String, String?>? locationFilter;
+  final bool autoFocusSearch;
+  final ValueNotifier<AppSection?>? searchNotifier;
 
-  const AuctionScreen({
-    this.userModel,
-    this.locationFilter, // [추가]
-    super.key
-  });
+  const AuctionScreen(
+      {this.userModel,
+      this.locationFilter, // [추가]
+      this.autoFocusSearch = false,
+      this.searchNotifier,
+      super.key});
 
   @override
   State<AuctionScreen> createState() => _AuctionScreenState();
@@ -47,12 +52,39 @@ class AuctionScreen extends StatefulWidget {
 class _AuctionScreenState extends State<AuctionScreen> {
   // [추가] 화면 내부의 필터 상태를 관리합니다.
   late Map<String, String?>? _locationFilter;
+  // 검색칩 상태
+  final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<String> _searchKeywordNotifier =
+      ValueNotifier<String>('');
+  bool _showSearchBar = false;
+  VoidCallback? _externalSearchListener;
 
   @override
   void initState() {
     super.initState();
     // [추가] HomeScreen에서 전달받은 필터 값으로 초기화합니다.
     _locationFilter = widget.locationFilter;
+
+    // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
+    if (widget.autoFocusSearch) {
+      _showSearchBar = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+    }
+
+    // 피드 내부 하단 검색 아이콘 → 검색칩 열기
+    if (widget.searchNotifier != null) {
+      _externalSearchListener = () {
+        if (widget.searchNotifier!.value == AppSection.auction) {
+          if (mounted) {
+            setState(() => _showSearchBar = true);
+            _chipOpenNotifier.value = true;
+          }
+        }
+      };
+      widget.searchNotifier!.addListener(_externalSearchListener!);
+    }
   }
 
   // [추가] 필터 화면을 여는 함수
@@ -78,6 +110,17 @@ class _AuctionScreenState extends State<AuctionScreen> {
     return Scaffold(
       body: Column(
         children: [
+          if (_showSearchBar)
+            InlineSearchChip(
+              hintText: 'main.search.hint.auction'.tr(),
+              openNotifier: _chipOpenNotifier,
+              onSubmitted: (kw) =>
+                  _searchKeywordNotifier.value = kw.trim().toLowerCase(),
+              onClose: () {
+                setState(() => _showSearchBar = false);
+                _searchKeywordNotifier.value = '';
+              },
+            ),
           // [추가] 필터 관리 UI
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -98,21 +141,35 @@ class _AuctionScreenState extends State<AuctionScreen> {
           Expanded(
             child: StreamBuilder<List<AuctionModel>>(
               // [수정] fetchAuctions 함수에 현재 필터 상태를 전달합니다.
-              stream: auctionRepository.fetchAuctions(locationFilter: _locationFilter),
+              stream: auctionRepository.fetchAuctions(
+                  locationFilter: _locationFilter),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
                   return Center(
-                      child: Text('auctions.errors.fetchFailed'
-                          .tr(namedArgs: {'error': snapshot.error.toString()})));
+                      child: Text('auctions.errors.fetchFailed'.tr(
+                          namedArgs: {'error': snapshot.error.toString()})));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(child: Text('auctions.empty'.tr()));
                 }
 
-                final auctions = snapshot.data!;
+                var auctions = snapshot.data!;
+                final kw = _searchKeywordNotifier.value;
+                if (kw.isNotEmpty) {
+                  auctions = auctions
+                      .where((a) =>
+                          (('${a.title} ${a.description} ${a.tags.join(' ')}')
+                              .toLowerCase()
+                              .contains(kw)))
+                      .toList();
+                }
+
+                if (auctions.isEmpty) {
+                  return Center(child: Text('auctions.empty'.tr()));
+                }
 
                 return ListView.builder(
                   padding: const EdgeInsets.only(bottom: 80), // FAB와의 여백 확보

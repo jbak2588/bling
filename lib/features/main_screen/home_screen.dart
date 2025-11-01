@@ -44,6 +44,7 @@ import 'package:bling_app/features/main_feed/data/feed_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 
 // 모든 card 위젯과 그에 필요한 model들을 import 합니다.
 
@@ -175,6 +176,9 @@ class HomeScreen extends StatelessWidget {
   final UserModel? userModel;
   final Map<String, String?>? activeLocationFilter;
   final Function(Widget, String) onIconTap;
+
+  // ✅ [신규] 시나리오 2 (피드 내 검색 활성화)를 위한 Notifier
+  final ValueNotifier<AppSection?>? searchNotifier;
   // ✅ [스크롤 위치 보존] ScrollController 파라미터 추가
   final ScrollController controller;
 
@@ -187,6 +191,7 @@ class HomeScreen extends StatelessWidget {
     required this.userModel,
     required this.activeLocationFilter,
     required this.onIconTap,
+    this.searchNotifier, // ✅ 생성자에 Notifier 추가
     this.allFeedItems = const [],
     this.currentIndex = 0,
   });
@@ -303,43 +308,74 @@ class HomeScreen extends StatelessWidget {
                   late Widget nextScreen;
                   if (screen is LocalNewsScreen) {
                     nextScreen = LocalNewsScreen(
-                        userModel: userModel,
-                        locationFilter: activeLocationFilter);
+                      userModel: userModel,
+                      locationFilter: activeLocationFilter,
+                      autoFocusSearch: false,
+                      searchNotifier: searchNotifier,
+                    );
                   } else if (screen is MarketplaceScreen) {
+                    // Marketplace now supports inline search chip
                     nextScreen = MarketplaceScreen(
                         userModel: userModel,
-                        locationFilter: activeLocationFilter);
+                        locationFilter: activeLocationFilter,
+                        autoFocusSearch: false,
+                        searchNotifier: searchNotifier);
                   } else if (screen is ClubsScreen) {
+                    // Clubs now supports inline search chip
                     nextScreen = ClubsScreen(
                         userModel: userModel,
-                        locationFilter: activeLocationFilter);
+                        locationFilter: activeLocationFilter,
+                        autoFocusSearch: false,
+                        searchNotifier: searchNotifier);
                   } else if (screen is FindFriendsScreen) {
-                    nextScreen = FindFriendsScreen(userModel: userModel);
+                    // FindFriends now supports inline search chip
+                    nextScreen = FindFriendsScreen(
+                        userModel: userModel,
+                        autoFocusSearch: false,
+                        searchNotifier: searchNotifier);
                   } else if (screen is JobsScreen) {
+                    // Jobs now supports inline search chip
                     nextScreen = JobsScreen(
                         userModel: userModel,
-                        locationFilter: activeLocationFilter);
+                        locationFilter: activeLocationFilter,
+                        autoFocusSearch: false,
+                        searchNotifier: searchNotifier);
                   } else if (screen is LocalStoresScreen) {
+                    // Local Stores now supports inline search chip
                     nextScreen = LocalStoresScreen(
                         userModel: userModel,
-                        locationFilter: activeLocationFilter);
+                        locationFilter: activeLocationFilter,
+                        autoFocusSearch: false,
+                        searchNotifier: searchNotifier);
                   } else if (screen is AuctionScreen) {
+                    // Auction now supports inline search chip
                     nextScreen = AuctionScreen(
                         userModel: userModel,
-                        locationFilter: activeLocationFilter);
+                        locationFilter: activeLocationFilter,
+                        autoFocusSearch: false,
+                        searchNotifier: searchNotifier);
                   } else if (screen is PomScreen) {
+                    // POM now supports inline search chip
                     nextScreen = PomScreen(
                         userModel: userModel,
                         initialShorts: null,
-                        initialIndex: 0);
+                        initialIndex: 0,
+                        autoFocusSearch: false,
+                        searchNotifier: searchNotifier);
                   } else if (screen is LostAndFoundScreen) {
+                    // Lost & Found now supports inline search chip
                     nextScreen = LostAndFoundScreen(
                         userModel: userModel,
-                        locationFilter: activeLocationFilter);
+                        locationFilter: activeLocationFilter,
+                        autoFocusSearch: false,
+                        searchNotifier: searchNotifier);
                   } else if (screen is RealEstateScreen) {
+                    // RealEstate now supports inline search chip
                     nextScreen = RealEstateScreen(
                         userModel: userModel,
-                        locationFilter: activeLocationFilter);
+                        locationFilter: activeLocationFilter,
+                        autoFocusSearch: false,
+                        searchNotifier: searchNotifier);
                   } else {
                     nextScreen = screen;
                   }

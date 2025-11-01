@@ -20,16 +20,22 @@ import 'package:bling_app/features/lost_and_found/data/lost_and_found_repository
 import 'package:bling_app/features/lost_and_found/widgets/lost_item_card.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
+import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class LostAndFoundScreen extends StatefulWidget {
   final UserModel? userModel;
   // [추가] HomeScreen에서 locationFilter를 전달받습니다.
   final Map<String, String?>? locationFilter;
+  final bool autoFocusSearch;
+  final ValueNotifier<AppSection?>? searchNotifier;
 
   const LostAndFoundScreen(
       {this.userModel,
       this.locationFilter, // [추가]
+      this.autoFocusSearch = false,
+      this.searchNotifier,
       super.key});
 
   @override
@@ -50,6 +56,13 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
     'found', // '습득'
   ];
 
+  // 검색칩 및 키워드 상태
+  final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<String> _searchKeywordNotifier =
+      ValueNotifier<String>('');
+  bool _showSearchBar = false;
+  VoidCallback? _externalSearchListener;
+
   @override
   void initState() {
     super.initState();
@@ -58,12 +71,38 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
 
     // ✅ [작업 39] 3. TabController 초기화
     _tabController = TabController(length: _tabFilters.length, vsync: this);
+
+    // 글로벌 전역 검색 진입(autoFocus)
+    if (widget.autoFocusSearch) {
+      _showSearchBar = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+    }
+
+    // 하단 검색 아이콘(피드 내) → 검색칩 열기
+    if (widget.searchNotifier != null) {
+      _externalSearchListener = () {
+        if (widget.searchNotifier!.value == AppSection.lostAndFound) {
+          if (mounted) {
+            setState(() => _showSearchBar = true);
+            _chipOpenNotifier.value = true;
+          }
+        }
+      };
+      widget.searchNotifier!.addListener(_externalSearchListener!);
+    }
   }
 
   // ✅ [작업 39] 4. TabController 해제
   @override
   void dispose() {
     _tabController.dispose();
+    _chipOpenNotifier.dispose();
+    _searchKeywordNotifier.dispose();
+    if (_externalSearchListener != null && widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener!);
+    }
     super.dispose();
   }
 
@@ -78,6 +117,18 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
     return Scaffold(
       body: Column(
         children: [
+          if (_showSearchBar)
+            InlineSearchChip(
+              hintText: 'main.search.hint.lostAndFound'.tr(),
+              openNotifier: _chipOpenNotifier,
+              onSubmitted: (kw) {
+                _searchKeywordNotifier.value = kw.trim().toLowerCase();
+              },
+              onClose: () {
+                setState(() => _showSearchBar = false);
+                _searchKeywordNotifier.value = '';
+              },
+            ),
           // [추가] 필터 관리 UI
           // Row(
           //   mainAxisAlignment: MainAxisAlignment.end,
@@ -129,7 +180,16 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                   return Center(child: Text('lostAndFound.empty'.tr()));
                 }
 
-                final items = snapshot.data!;
+                // 키워드가 있으면 간단한 클라이언트 사이드 필터 적용
+                final kw = _searchKeywordNotifier.value;
+                final items = kw.isEmpty
+                    ? snapshot.data!
+                    : snapshot.data!
+                        .where((e) =>
+                            ('${e.itemDescription} ${e.locationDescription} ${e.tags.join(' ')}')
+                                .toLowerCase()
+                                .contains(kw))
+                        .toList();
 
                 return ListView.builder(
                   itemCount: items.length,

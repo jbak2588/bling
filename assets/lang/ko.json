@@ -87,7 +87,20 @@
     "myTown": "우리 동네",
     "search": {
       "placeholder": "검색 화면",
-      "chipPlaceholder": "동네 이웃, 소식, 마켓플레이스, 일자리… 검색"
+      "chipPlaceholder": "동네 이웃, 소식, 마켓플레이스, 일자리… 검색",
+      "hint": {
+        "globalSheet": "{}에서 검색하기",
+        "localNews": "동네소식 제목, 내용, 태그 검색",
+        "jobs": "직종, 회사명, 'Help Me' 검색",
+        "lostAndFound": "분실물 또는 습득물 검색",
+        "marketplace": "중고거래 물품 검색",
+        "localStores": "동네 가게, 서비스, 업체명 검색",
+        "findFriends": "프로필 닉네임, 관심사 검색",
+        "clubs": "모임 이름, 관심사, 지역 검색",
+        "realEstate": "부동산 매물, 지역, 가격 검색",
+        "auction": "경매 물품명, 브랜드 검색",
+        "pom": "뽐 자랑, 태그, 사용자 검색"
+      }
     }
   },
   "drawer": {

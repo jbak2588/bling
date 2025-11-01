@@ -20,20 +20,26 @@ import 'package:bling_app/features/pom/data/short_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../widgets/short_player.dart';
+import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
+import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 class PomScreen extends StatefulWidget {
   final UserModel? userModel;
   final List<ShortModel>? initialShorts;
   final int initialIndex;
-  // [추가] HomeScreen에서 locationFilter를 전달받습니다.
   final Map<String, String?>? locationFilter;
+  final bool autoFocusSearch;
+  final ValueNotifier<AppSection?>? searchNotifier;
 
-  const PomScreen(
-      {this.userModel,
-      this.initialShorts,
-      this.initialIndex = 0,
-      this.locationFilter, // [추가]
-      super.key});
+  const PomScreen({
+    this.userModel,
+    this.initialShorts,
+    this.initialIndex = 0,
+    this.locationFilter,
+    this.autoFocusSearch = false,
+    this.searchNotifier,
+    super.key,
+  });
 
   @override
   State<PomScreen> createState() => _PomScreenState();
@@ -43,6 +49,12 @@ class _PomScreenState extends State<PomScreen> {
   final ShortRepository _shortRepository = ShortRepository();
   late Future<List<ShortModel>>? _shortsFuture;
   late final PageController _pageController;
+  // 검색칩 상태
+  final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<String> _searchKeywordNotifier =
+      ValueNotifier<String>('');
+  bool _showSearchBar = false;
+  VoidCallback? _externalSearchListener;
 
   @override
   void initState() {
@@ -56,11 +68,37 @@ class _PomScreenState extends State<PomScreen> {
     } else {
       _shortsFuture = null;
     }
+
+    // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
+    if (widget.autoFocusSearch) {
+      _showSearchBar = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+    }
+
+    // 피드 내부 하단 검색 아이콘 → 검색칩 열기
+    if (widget.searchNotifier != null) {
+      _externalSearchListener = () {
+        if (widget.searchNotifier!.value == AppSection.pom) {
+          if (mounted) {
+            setState(() => _showSearchBar = true);
+            _chipOpenNotifier.value = true;
+          }
+        }
+      };
+      widget.searchNotifier!.addListener(_externalSearchListener!);
+    }
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _chipOpenNotifier.dispose();
+    _searchKeywordNotifier.dispose();
+    if (_externalSearchListener != null && widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener!);
+    }
     super.dispose();
   }
 
@@ -68,32 +106,55 @@ class _PomScreenState extends State<PomScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: widget.initialShorts != null
-          ? _buildPageView(widget.initialShorts!)
-          : FutureBuilder<List<ShortModel>>(
-              future: _shortsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                      child: Text(
-                          'pom.errors.fetchFailed'.tr(
-                              namedArgs: {'error': snapshot.error.toString()}),
-                          style: const TextStyle(color: Colors.white)));
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                      child: Text('pom.empty'.tr(),
-                          style: const TextStyle(color: Colors.white)));
-                }
-
-                final shorts = snapshot.data!;
-
-                return _buildPageView(shorts);
+      body: Column(
+        children: [
+          if (_showSearchBar)
+            InlineSearchChip(
+              hintText: 'main.search.hint.pom'.tr(),
+              openNotifier: _chipOpenNotifier,
+              onSubmitted: (kw) =>
+                  _searchKeywordNotifier.value = kw.trim().toLowerCase(),
+              onClose: () {
+                setState(() => _showSearchBar = false);
+                _searchKeywordNotifier.value = '';
               },
             ),
+          Expanded(
+            child: widget.initialShorts != null
+                ? _buildPageView(_applyKeywordFilter(widget.initialShorts!))
+                : FutureBuilder<List<ShortModel>>(
+                    future: _shortsFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return Center(
+                            child: Text(
+                                'pom.errors.fetchFailed'.tr(namedArgs: {
+                                  'error': snapshot.error.toString()
+                                }),
+                                style: const TextStyle(color: Colors.white)));
+                      }
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Center(
+                            child: Text('pom.empty'.tr(),
+                                style: const TextStyle(color: Colors.white)));
+                      }
+
+                      final shorts = _applyKeywordFilter(snapshot.data!);
+                      if (shorts.isEmpty) {
+                        return Center(
+                            child: Text('pom.empty'.tr(),
+                                style: const TextStyle(color: Colors.white)));
+                      }
+
+                      return _buildPageView(shorts);
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -106,5 +167,16 @@ class _PomScreenState extends State<PomScreen> {
         return ShortPlayer(short: shorts[index], userModel: widget.userModel);
       },
     );
+  }
+
+  List<ShortModel> _applyKeywordFilter(List<ShortModel> items) {
+    final kw = _searchKeywordNotifier.value;
+    if (kw.isEmpty) return items;
+    return items
+        .where((s) =>
+            (('${s.title} ${s.description} ${(s.tags ?? const []).join(' ')}')
+                .toLowerCase()
+                .contains(kw)))
+        .toList();
   }
 }

@@ -52,7 +52,20 @@
     "myTown": "My Town",
     "search": {
       "placeholder": "Search",
-      "chipPlaceholder": "Search neighbors, news, preloved, jobs…"
+      "chipPlaceholder": "Search neighbors, news, preloved, jobs…",
+      "hint": {
+        "globalSheet": "Search in {}",
+        "localNews": "Search news title, content, tags",
+        "jobs": "Search jobs, company, 'Help Me'",
+        "lostAndFound": "Search lost or found items",
+        "marketplace": "Search products for sale",
+        "localStores": "Search local stores, services",
+        "findFriends": "Search profile nickname, interests",
+        "clubs": "Search clubs, interests, location",
+        "realEstate": "Search properties, area, price",
+        "auction": "Search auction items, brands",
+        "pom": "Search POMs, tags, users"
+      }
     }
   },
   "search": {
