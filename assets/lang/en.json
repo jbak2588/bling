@@ -40,6 +40,7 @@
     },
     "bottomNav": {
       "home": "Home",
+      "board": "Neighborhood",
       "search": "Search",
       "chat": "Chat",
       "myBling": "My Bling"
@@ -52,6 +53,34 @@
     "search": {
       "placeholder": "Search",
       "chipPlaceholder": "Search neighbors, news, preloved, jobs…"
+    }
+  },
+  "search": {
+    "resultsTitle": "Results for '{keyword}'",
+    "empty": "No results found for '{keyword}'.",
+    "prompt": "Type a keyword",
+    "sheet": {
+      "localNews": "Search Local News",
+      "localNewsDesc": "Search by title, content, tags",
+      "jobs": "Search Jobs",
+      "jobsDesc": "Search by role, company, tags",
+      "lostAndFound": "Search Lost & Found",
+      "lostAndFoundDesc": "Search by item name, place",
+      "marketplace": "Search Preloved",
+      "marketplaceDesc": "Search by item name, category, tags",
+      "localStores": "Search Local Stores",
+      "localStoresDesc": "Search by store name, business type, keywords",
+      "clubs": "Search Clubs",
+      "clubsDesc": "Search by club name, interests",
+      "findFriends": "Search Find Friends",
+      "findFriendsDesc": "Search by nickname, interests",
+      "realEstate": "Search Real Estate",
+      "realEstateDesc": "Search by listing title, area, tags",
+      "auction": "Search Auctions",
+      "auctionDesc": "Search by item name, tags",
+      "pom": "Search POM",
+      "pomDesc": "Search by title, hashtags",
+      "comingSoon": "Coming soon"
     }
   },
   "drawer": {
@@ -840,8 +869,16 @@
       "success": "Club info updated.",
       "fail": "Failed to update club: {error}"
     },
+    "create": {
+      "title": "Create Club"
+    },
     "repository": {
       "chatCreated": "Club chat room created."
+    }
+  },
+  "findfriend": {
+    "form": {
+      "title": "Create Find Friends Profile"
     }
   },
   "auctions": {
@@ -1264,9 +1301,5 @@
       "inactiveBody": "To activate your neighborhood board, create a local news post first. Once neighbors join in, the board will open automatically.",
       "writePost": "Write Local News"
     }
-  },
-  "search": {
-    "resultsTitle": "Results for '{keyword}'",
-    "empty": "No results found for '{keyword}'."
   }
 }

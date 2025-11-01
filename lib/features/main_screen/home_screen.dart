@@ -177,10 +177,6 @@ class HomeScreen extends StatelessWidget {
   final Function(Widget, String) onIconTap;
   // ✅ [스크롤 위치 보존] ScrollController 파라미터 추가
   final ScrollController controller;
-  // ✅ [검색] 홈 검색칩을 외부에서 열도록 제어하는 notifier
-  final ValueNotifier<bool>? openSearchNotifier;
-  // ✅ [검색] 제출 콜백 (keyword 전달)
-  final void Function(String)? onSearchSubmit;
 
   final List<FeedItemModel> allFeedItems;
   final int currentIndex;
@@ -193,12 +189,7 @@ class HomeScreen extends StatelessWidget {
     required this.onIconTap,
     this.allFeedItems = const [],
     this.currentIndex = 0,
-    required this.onSearchChipTap,
-    this.openSearchNotifier,
-    this.onSearchSubmit,
   });
-
-  final VoidCallback? onSearchChipTap;
 
   // SVG 아이콘 경로 기본 폴더
   static const String _iconsPath = 'assets/icons';
@@ -282,19 +273,10 @@ class HomeScreen extends StatelessWidget {
 
     final double childAspectRatio = tileWidth / tileHeight;
 
-    // ✅ 검색 칩 탭 시 내장 검색 UI 호출로 변경 (로컬 함수 선언으로 lint 대응)
-
     return CustomScrollView(
       controller: controller,
       slivers: [
-        // ✅ AppBar 바로 아래, 얇은 검색 칩 (탭 시 자체가 입력필드로 확장)
-        SliverToBoxAdapter(
-          child: InlineSearchChip(
-            hintText: 'main.search.chipPlaceholder'.tr(),
-            openNotifier: openSearchNotifier,
-            onSubmitted: (kw) => onSearchSubmit?.call(kw),
-          ),
-        ),
+        // ❌ [작업 47] _searchChip 호출 제거 (컴파일 에러 원인)
 
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -1374,138 +1356,4 @@ class HomeScreen extends StatelessWidget {
   // ▲▲▲▲▲ [개편] 1, 2단계 완료 ▲▲▲▲▲
 }
 
-// ✅ [검색] 홈 화면 인라인 검색칩 위젯: 탭 시 자체가 입력필드로 확장되고 제출 시 콜백 호출
-class InlineSearchChip extends StatefulWidget {
-  final String hintText;
-  final ValueNotifier<bool>? openNotifier;
-  final ValueChanged<String>? onSubmitted;
-
-  const InlineSearchChip({
-    super.key,
-    required this.hintText,
-    this.openNotifier,
-    this.onSubmitted,
-  });
-
-  @override
-  State<InlineSearchChip> createState() => _InlineSearchChipState();
-}
-
-class _InlineSearchChipState extends State<InlineSearchChip> {
-  final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-  bool _editing = false;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.openNotifier?.addListener(_handleExternalOpen);
-  }
-
-  void _handleExternalOpen() {
-    if (widget.openNotifier?.value == true) {
-      setState(() => _editing = true);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _focusNode.requestFocus();
-        }
-        // 자동으로 재오픈 방지: 즉시 false로 리셋
-        widget.openNotifier?.value = false;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.openNotifier?.removeListener(_handleExternalOpen);
-    _controller.dispose();
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  void _cancel() {
-    setState(() => _editing = false);
-    _controller.clear();
-    _focusNode.unfocus();
-  }
-
-  void _submit(String value) {
-    final kw = value.trim();
-    if (kw.isEmpty) return;
-    widget.onSubmitted?.call(kw);
-    _cancel();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // 스타일은 기존 칩과 동일하게 유지
-    final TextStyle? chipTextStyle =
-        Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14);
-    final container = Container(
-      height: 44,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: _editing
-          ? Row(
-              children: [
-                const Icon(Icons.search),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    style: chipTextStyle, // 클릭 후에도 작은 폰트 유지
-                    textAlignVertical: TextAlignVertical.center,
-                    decoration: InputDecoration(
-                      hintText: widget.hintText,
-                      hintStyle: chipTextStyle, // 힌트 폰트도 동일하게
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    textInputAction: TextInputAction.search,
-                    onSubmitted: _submit,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.cancel, size: 20),
-                  onPressed: _cancel,
-                  tooltip: 'common.cancel'.tr(),
-                ),
-              ],
-            )
-          : Row(
-              children: [
-                const Icon(Icons.search),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    widget.hintText,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      child: _editing
-          ? container
-          : GestureDetector(
-              onTap: () => setState(() => _editing = true),
-              child: container,
-            ),
-    );
-  }
-}
+// ❌ [작업 47] BlingSearchDelegate 클래스 전체를 제거합니다.

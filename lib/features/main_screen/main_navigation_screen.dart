@@ -100,12 +100,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   // ✅ [게시판] 동네 게시판 활성화 상태
   bool _isKelurahanBoardActive = false;
 
-  // ✅ [검색] 검색창 UI 상태
-  bool _isSearchActive = false;
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
-  // ✅ [검색] 홈 화면 인라인 검색칩 제어용
-  final ValueNotifier<bool> _homeSearchOpen = ValueNotifier<bool>(false);
+  // (삭제됨) 홈 화면 인라인 검색칩 제어용 notifier는 더 이상 사용하지 않습니다.
 
   // ✅ [스크롤 위치 보존] HomeScreen용 ScrollController 및 위치 저장 변수 추가
   final ScrollController _homeScrollController = ScrollController();
@@ -156,12 +151,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void dispose() {
     _userSubscription?.cancel();
     _unreadChatsSubscription?.cancel();
-    // ✅ [스크롤 위치 보존] ScrollController 해제
     _homeScrollController.dispose();
-    // ✅ [검색] 검색 리소스 해제
-    _searchController.dispose();
-    _searchFocusNode.dispose();
-    _homeSearchOpen.dispose();
     super.dispose();
   }
 
@@ -267,20 +257,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       _onFloatingActionButtonTapped();
       return;
     }
-    // 검색 아이콘(index 3)은 태그 입력 다이얼로그로 처리
+    // ✅ 검색 아이콘(index 3) 탭 시 전역 검색 시트 노출로 일원화
     if (index == 3) {
-      // 홈이 보이는 상태라면 인라인 칩을 열고, 그 외에는 상단 검색바 활성화
-      final hasBoardTab = _isKelurahanBoardActive && _userModel != null;
-      final effectiveIndex = hasBoardTab
-          ? (_bottomNavIndex >= 3 ? _bottomNavIndex - 1 : _bottomNavIndex)
-          : (_bottomNavIndex >= 3 ? _bottomNavIndex - 2 : _bottomNavIndex);
-      final isHomeVisible =
-          (effectiveIndex == 0) && _currentHomePageContent == null;
-      if (isHomeVisible) {
-        _homeSearchOpen.value = true;
-      } else {
-        _onSearchRequested();
-      }
+      _onSearchRequested();
       return;
     }
     if (index == 0 && _currentHomePageContent != null) {
@@ -295,43 +274,129 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
-  /// ✅ [검색] 'showDialog' 대신 상단 고정 검색바 활성화
+  /// ✅ [작업 46] '공용 검색 시트'를 표시
   Future<void> _onSearchRequested() async {
     if (!mounted) return;
-    setState(() {
-      _isSearchActive = true;
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _searchFocusNode.requestFocus();
-    });
+    _showGlobalSearchSheet();
   }
 
-  // ✅ [검색] 제출 처리: keyword로 결과 화면 이동
-  void _submitSearch(String query) {
-    final keyword = query.trim();
-    if (keyword.isEmpty) return;
-    setState(() {
-      _isSearchActive = false;
-      _searchController.clear();
-      _searchFocusNode.unfocus();
-    });
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => TagSearchResultScreen(keyword: keyword),
+  /// ✅ [작업 46] 메인(홈 루트)에서 사용되는 전역 검색 시트
+  void _showGlobalSearchSheet() {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
+      builder: (ctx) {
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              // ✅ [작업 49] '글쓰기' 시트 순서와 동일하게 10개 항목으로 재정렬
+              _sheetItem(
+                  Icons.article_outlined, // 1. localNews
+                  'search.sheet.localNews'.tr(),
+                  'search.sheet.localNewsDesc'.tr(),
+                  onTap: () => _triggerSearch(AppSection.localNews)),
+              // 2) 일자리 검색
+              _sheetItem(
+                  Icons.work_outline_rounded, // 2. jobs
+                  'search.sheet.jobs'.tr(),
+                  'search.sheet.jobsDesc'.tr(),
+                  onTap: () => _triggerSearch(AppSection.jobs)),
+              // 3) 분실물 검색
+              _sheetItem(
+                  Icons.report_gmailerrorred_rounded, // 3. lostAndFound
+                  'search.sheet.lostAndFound'.tr(),
+                  'search.sheet.lostAndFoundDesc'.tr(),
+                  onTap: () => _triggerSearch(AppSection.lostAndFound)),
+              // 4) 중고거래 검색
+              _sheetItem(
+                  Icons.store_mall_directory_outlined, // 4. marketplace
+                  'search.sheet.marketplace'.tr(),
+                  'search.sheet.marketplaceDesc'.tr(),
+                  onTap: () => _triggerSearch(AppSection.marketplace)),
+              // 5) 동네업체 검색
+              _sheetItem(
+                  Icons.storefront_outlined, // 5. localStores
+                  'search.sheet.localStores'.tr(),
+                  'search.sheet.localStoresDesc'.tr(),
+                  onTap: () => _triggerSearch(AppSection.localStores)),
+              // 6) 모임 검색
+              _sheetItem(
+                  Icons.groups_outlined, // 6. clubs
+                  'search.sheet.clubs'.tr(),
+                  'search.sheet.clubsDesc'.tr(),
+                  onTap: () => _triggerSearch(AppSection.clubs)),
+              // 7) 친구찾기 검색
+              _sheetItem(
+                  Icons.sentiment_satisfied_outlined, // 7. findFriends
+                  'search.sheet.findFriends'.tr(),
+                  'search.sheet.findFriendsDesc'.tr(),
+                  onTap: () => _triggerSearch(AppSection.findFriends)),
+              // 8) 부동산 검색
+              _sheetItem(
+                  Icons.house_outlined, // 8. realEstate
+                  'search.sheet.realEstate'.tr(),
+                  'search.sheet.realEstateDesc'.tr(),
+                  onTap: () => _triggerSearch(AppSection.realEstate)),
+              // 9) 경매 검색
+              _sheetItem(
+                  Icons.gavel_outlined, // 9. auction
+                  'search.sheet.auction'.tr(),
+                  'search.sheet.auctionDesc'.tr(),
+                  onTap: () => _triggerSearch(AppSection.auction)),
+              // 10) 숏폼 검색
+              _sheetItem(
+                  Icons.video_camera_back_outlined, // 10. pom
+                  'search.sheet.pom'.tr(),
+                  'search.sheet.pomDesc'.tr(),
+                  onTap: () => _triggerSearch(AppSection.pom)),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  // ✅ [검색] 홈 인라인 칩 제출 처리
-  void _onInlineSearchSubmit(String keyword) {
-    FocusScope.of(context).unfocus();
-    _homeSearchOpen.value = false;
-    if (keyword.trim().isEmpty) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => TagSearchResultScreen(keyword: keyword.trim()),
+  /// ✅ [작업 49] 검색 시트에서 항목을 탭했을 때,
+  /// 'showSearch'를 호출하여 실제 키워드를 입력받는 헬퍼 함수
+  Future<void> _triggerSearch(AppSection section) async {
+    // 1. 바텀 시트 닫기
+    Navigator.of(context).pop();
+
+    // 2. 검색 델리게이트를 통해 키워드 입력받기
+    // (home_screen.dart에 있던 BlingSearchDelegate를 이곳으로 이동/개조)
+    final String? keyword = await showSearch<String>(
+      context: context,
+      delegate: BlingSearchDelegate(
+        hintText:
+            'search.sheet.${section.name}Desc'.tr(), // "게시글의 제목, 내용, 태그 검색"
       ),
     );
+
+    if (keyword == null || keyword.trim().isEmpty || !mounted) return;
+
+    // 3. 키워드를 가지고 각 섹션에 맞는 검색 결과 화면으로 이동
+    // TODO: 현재는 'localNews'만 구현되어 있고 나머지는 임시 화면(SearchScreen)으로 연결
+    late Widget targetScreen;
+    switch (section) {
+      case AppSection.localNews:
+        targetScreen = TagSearchResultScreen(keyword: keyword.trim());
+        break;
+      case AppSection.marketplace:
+      // targetScreen = ProductSearchResultScreen(keyword: keyword.trim()); // TODO
+      case AppSection.jobs:
+      // targetScreen = JobSearchResultScreen(keyword: keyword.trim()); // TODO
+      default:
+        // 임시: 다른 피처들은 준비중인 검색 화면으로 연결
+        targetScreen = SearchScreen(tempSearchQuery: keyword.trim());
+    }
+
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => targetScreen));
   }
 
   Future<void> _onFloatingActionButtonTapped() async {
@@ -426,62 +491,63 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   Icons.article_rounded, // 1. localNews
                   'main.tabs.localNews'.tr(),
                   'localNewsCreate.appBarTitle'.tr(),
-                  () => const CreateLocalNewsScreen()),
+                  builder: () => const CreateLocalNewsScreen()),
               // 2) 동네 일자리
               _sheetItem(
                   Icons.work_outline_rounded, // 2. jobs
                   'main.tabs.jobs'.tr(),
                   'jobs.form.title'.tr(),
-                  () =>
+                  builder: () =>
                       SelectJobTypeScreen(userModel: _userModel!)), // ✅ [작업 31]
               // 3) 분실물센터
               _sheetItem(
                   Icons.report_gmailerrorred_rounded, // 3. lostAndFound
                   'main.tabs.lostAndFound'.tr(),
                   'lostAndFound.form.title'.tr(),
-                  () => CreateLostItemScreen(userModel: _userModel!)),
+                  builder: () => CreateLostItemScreen(userModel: _userModel!)),
               // 4) 중고거래
               _sheetItem(
                   Icons.store_mall_directory_rounded, // 4. marketplace
                   'main.tabs.marketplace'.tr(),
                   'marketplace.registration.title'.tr(),
-                  () => const ProductRegistrationScreen()),
+                  builder: () => const ProductRegistrationScreen()),
               // 5) 동네업체
               _sheetItem(
                   Icons.storefront_rounded, // 5. localStores
                   'main.tabs.localStores'.tr(),
                   'localStores.create.title'.tr(),
-                  () => CreateShopScreen(userModel: _userModel!)),
+                  builder: () => CreateShopScreen(userModel: _userModel!)),
               // 6) 모임
               _sheetItem(
                   Icons.groups_rounded, // 6. clubs
                   'main.tabs.clubs'.tr(),
                   'clubs.create.title'.tr(),
-                  () => CreateClubScreen(userModel: _userModel!)),
+                  builder: () => CreateClubScreen(userModel: _userModel!)),
               // 7) 친구찾기
               _sheetItem(
                   Icons.sentiment_satisfied_alt_rounded, // 7. findFriends
                   'main.tabs.findFriends'.tr(),
                   'findfriend.form.title'.tr(),
-                  () => FindFriendFormScreen(userModel: _userModel!)),
+                  builder: () => FindFriendFormScreen(userModel: _userModel!)),
               // 8) 부동산
               _sheetItem(
                   Icons.house_rounded, // 8. realEstate
                   'main.tabs.realEstate'.tr(),
                   'realEstate.form.title'.tr(),
-                  () => CreateRoomListingScreen(userModel: _userModel!)),
+                  builder: () =>
+                      CreateRoomListingScreen(userModel: _userModel!)),
               // 9) 경매
               _sheetItem(
                   Icons.gavel_rounded, // 9. auction
                   'main.tabs.auction'.tr(),
                   'auctions.create.title'.tr(),
-                  () => CreateAuctionScreen(userModel: _userModel!)),
+                  builder: () => CreateAuctionScreen(userModel: _userModel!)),
               // 10) 숏폼
               _sheetItem(
                   Icons.video_camera_back_rounded, // 10. pom
                   'main.tabs.pom'.tr(),
                   'pom.create.title'.tr(),
-                  () => CreateShortScreen(userModel: _userModel!)),
+                  builder: () => CreateShortScreen(userModel: _userModel!)),
               const SizedBox(height: 12),
             ],
           ),
@@ -518,8 +584,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  Widget _sheetItem(
-      IconData icon, String title, String sub, Widget Function() builder) {
+  Widget _sheetItem(IconData icon, String title, String sub,
+      {Widget Function()? builder, VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
@@ -527,8 +593,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       trailing: const Icon(Icons.chevron_right_rounded),
       onTap: () {
         Navigator.of(context).pop();
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => builder()));
+        if (onTap != null) {
+          onTap();
+          return;
+        }
+        if (builder != null) {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => builder()));
+        }
       },
     );
   }
@@ -732,9 +804,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             activeLocationFilter: _activeLocationFilter,
             // onIconTap 콜백은 이미 스크롤 위치 저장을 처리함 (_navigateToPage 내부)
             onIconTap: _navigateToPage,
-            onSearchChipTap: () => _homeSearchOpen.value = true,
-            openSearchNotifier: _homeSearchOpen,
-            onSearchSubmit: _onInlineSearchSubmit,
           ),
       if (_isKelurahanBoardActive && _userModel != null)
         KelurahanBoardScreen(userModel: _userModel!),
@@ -759,57 +828,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           (_bottomNavIndex >= 3) ? _bottomNavIndex - 2 : _bottomNavIndex; // 0
     }
 
-    // ✅ [검색] 상단 고정 검색바 (홈 화면에서는 숨김)
-    final bool isHomeVisible =
-        (effectiveIndex == 0) && _currentHomePageContent == null;
-    final Widget persistentSearchBar = (_isSearchActive && !isHomeVisible)
-        ? Container(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            color:
-                Theme.of(context).appBarTheme.backgroundColor ?? Colors.white,
-            child: TextField(
-              controller: _searchController,
-              focusNode: _searchFocusNode,
-              decoration: InputDecoration(
-                hintText: 'main.search.chipPlaceholder'.tr(), // '이웃, 소식, 장터...'
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.cancel),
-                  onPressed: () {
-                    setState(() {
-                      _isSearchActive = false;
-                      _searchController.clear();
-                      _searchFocusNode.unfocus();
-                    });
-                  },
-                  tooltip: 'common.cancel'.tr(),
-                ),
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(999),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              textInputAction: TextInputAction.search,
-              onSubmitted: _submitSearch,
-            ),
-          )
-        : const SizedBox.shrink();
-
     return Scaffold(
       appBar: _buildAppBar(),
       drawer: _buildAppDrawer(_userModel),
-      body: Column(
-        children: [
-          persistentSearchBar,
-          Expanded(
-            child: IndexedStack(
-              index: effectiveIndex,
-              children: pages,
-            ),
-          ),
-        ],
+      body: IndexedStack(
+        index: effectiveIndex,
+        children: pages,
       ),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
@@ -1123,12 +1147,18 @@ class _LanguageMenu extends StatelessWidget {
 }
 
 class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});
+  // ✅ [작업 49] 임시 검색 결과 표시용
+  final String? tempSearchQuery;
+  const SearchScreen({super.key, this.tempSearchQuery});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: GrabAppBarShell(title: Text('main.bottomNav.search'.tr())),
-      body: Center(child: Text('main.search.placeholder'.tr())),
+      appBar: GrabAppBarShell(
+          title: Text(tempSearchQuery ?? 'main.bottomNav.search'.tr())),
+      body: Center(
+          child: Text(tempSearchQuery != null
+              ? "'${tempSearchQuery}' ${'search.sheet.comingSoon'.tr()}"
+              : 'main.search.placeholder'.tr())),
     );
   }
 }
@@ -1189,6 +1219,60 @@ class TrustScoreBreakdownModal extends StatelessWidget {
               style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
         ],
       ),
+    );
+  }
+}
+
+// ✅ [작업 49] 'home_screen'에서 'main_navigation_screen'으로 SearchDelegate 이동
+/// 'showSearch'를 위한 검색 로직 구현체
+class BlingSearchDelegate extends SearchDelegate<String> {
+  final String hintText;
+
+  BlingSearchDelegate({this.hintText = '검색...'});
+
+  @override
+  String get searchFieldLabel => hintText;
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    // (우측) 검색어 지우기 버튼
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+          showSuggestions(context);
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    // (좌측) 뒤로가기 버튼
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, ''); // 검색어 없이 닫기
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // 사용자가 키보드에서 '검색'을 눌렀을 때
+    // 'query' (입력된 검색어)를 반환하며 닫기
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      close(context, query);
+    });
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    // (선택) 검색어 입력 시 추천 검색어 표시 (현재는 비워둠)
+    return Center(
+      child: Text('search.prompt'.tr()), // '검색어를 입력하세요.'
     );
   }
 }

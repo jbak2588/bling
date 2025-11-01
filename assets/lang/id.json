@@ -75,6 +75,7 @@
     },
     "bottomNav": {
       "home": "Beranda",
+      "board": "Lingkungan",
       "search": "Cari",
       "chat": "Obrolan",
       "myBling": "Bling Saya"
@@ -848,8 +849,16 @@
       "success": "Informasi Grup diperbarui.",
       "fail": "Gagal memperbarui Grup: {error}"
     },
+    "create": {
+      "title": "Buat Grup"
+    },
     "repository": {
       "chatCreated": "Ruang chat Grup telah dibuat."
+    }
+  },
+  "findfriend": {
+    "form": {
+      "title": "Buat Profil Cari Teman"
     }
   },
   "auctions": {
@@ -1275,6 +1284,30 @@
   },
   "search": {
     "resultsTitle": "Hasil untuk '{keyword}'",
-    "empty": "Tidak ada hasil ditemukan untuk '{keyword}'."
+    "empty": "Tidak ada hasil ditemukan untuk '{keyword}'.",
+    "prompt": "Masukkan kata kunci",
+    "sheet": {
+      "localNews": "Cari Cerita Lokal",
+      "localNewsDesc": "Cari berdasarkan judul, isi, tag",
+      "jobs": "Cari Lowongan",
+      "jobsDesc": "Cari berdasarkan posisi, perusahaan, tag",
+      "lostAndFound": "Cari Hilang & Temu",
+      "lostAndFoundDesc": "Cari berdasarkan nama barang, lokasi",
+      "marketplace": "Cari Preloved",
+      "marketplaceDesc": "Cari berdasarkan nama barang, kategori, tag",
+      "localStores": "Cari Toko Lokal",
+      "localStoresDesc": "Cari berdasarkan nama toko, jenis usaha, kata kunci",
+      "clubs": "Cari Grup",
+      "clubsDesc": "Cari berdasarkan nama grup, minat",
+      "findFriends": "Cari Teman",
+      "findFriendsDesc": "Cari berdasarkan nama panggilan, minat",
+      "realEstate": "Cari Properti",
+      "realEstateDesc": "Cari berdasarkan judul listing, area, tag",
+      "auction": "Cari Lelang",
+      "auctionDesc": "Cari berdasarkan nama barang, tag",
+      "pom": "Cari POM",
+      "pomDesc": "Cari berdasarkan judul, tagar",
+      "comingSoon": "Segera hadir"
+    }
   }
 }
