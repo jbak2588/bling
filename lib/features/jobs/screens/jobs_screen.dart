@@ -171,19 +171,6 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   heroTag: 'jobs_fab', // HeroTag 추가
-      //   onPressed: () {
-      //     // ✅ [작업 31] 3. 'CreateJobScreen' 대신 'SelectJobTypeScreen'으로 이동
-      //     if (widget.userModel != null) {
-      //       Navigator.of(context).push(MaterialPageRoute(
-      //         builder: (_) => SelectJobTypeScreen(userModel: widget.userModel!),
-      //       ));
-      //     }
-      //   },
-      //   tooltip: 'jobs.screen.createTooltip'.tr(),
-      //   child: const Icon(Icons.add),
-      // ),
     );
   }
 }

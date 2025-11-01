@@ -12,18 +12,21 @@ import 'reply_list_view.dart';
 
 class CommentListView extends StatefulWidget {
   final String postId;
+  // ✅ [작업 42] 1. 컬렉션 경로를 파라미터로 받음 (기본값: 'posts')
+  final String collectionPath;
   final String postOwnerId;
   final String? activeReplyCommentId;
-  final void Function(String commentId) onReplyTap;
-  final VoidCallback? onCommentDeleted;
+  final Function(String) onReplyTap;
+  final Function() onCommentDeleted; // 댓글 삭제 시 콜백
 
   const CommentListView({
     super.key,
     required this.postId,
+    this.collectionPath = 'posts', // ✅ [작업 42] 2. 기본값 설정
     required this.postOwnerId,
     required this.activeReplyCommentId,
     required this.onReplyTap,
-    this.onCommentDeleted,
+    required this.onCommentDeleted,
   });
 
   @override
@@ -66,7 +69,7 @@ class _CommentListViewState extends State<CommentListView> {
     setState(() => _likeLoading[commentId] = true);
 
     final commentRef = FirebaseFirestore.instance
-        .collection('posts')
+        .collection(widget.collectionPath)
         .doc(widget.postId)
         .collection('comments')
         .doc(commentId);
@@ -115,8 +118,9 @@ class _CommentListViewState extends State<CommentListView> {
     if (shouldDelete != true) return;
 
     try {
-      final postRef =
-          FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+      final postRef = FirebaseFirestore.instance
+          .collection(widget.collectionPath)
+          .doc(widget.postId);
       final commentRef = postRef.collection('comments').doc(commentId);
 
       await FirebaseFirestore.instance.runTransaction((transaction) async {
@@ -125,7 +129,7 @@ class _CommentListViewState extends State<CommentListView> {
             .update(postRef, {'commentsCount': FieldValue.increment(-1)});
       });
 
-      widget.onCommentDeleted?.call();
+      widget.onCommentDeleted();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +146,7 @@ class _CommentListViewState extends State<CommentListView> {
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('posts')
+          .collection(widget.collectionPath)
           .doc(widget.postId)
           .collection('comments')
           .orderBy('createdAt', descending: true)

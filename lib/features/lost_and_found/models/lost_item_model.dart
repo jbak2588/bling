@@ -26,9 +26,16 @@ class LostItemModel {
   final List<String> imageUrls;
   final Timestamp createdAt;
   final bool isHunted; // 현상금(Hunted) 여부
-  final int? bountyAmount; // 현상금 금액
-  // ✅ tags 필드를 추가합니다.
-  final List<String> tags;
+  final num? bountyAmount; // ✅ [수정] int? -> num? (정수/실수 모두 허용)
+  final List<String> tags; // ✅ [추가] 태그 목록
+
+  // ✅ [작업 41] '해결 완료' 기능 추가
+  final bool isResolved;
+  final Timestamp? resolvedAt;
+
+  // ✅ [작업 42] 댓글 및 조회수 기능 추가
+  final int viewsCount;
+  final int commentsCount;
 
   LostItemModel({
     required this.id,
@@ -43,6 +50,14 @@ class LostItemModel {
     this.isHunted = false,
     this.bountyAmount,
     this.tags = const [], // ✅ 생성자 추가
+
+    // ✅ [작업 41]
+    this.isResolved = false,
+    this.resolvedAt,
+
+    // ✅ [작업 42]
+    this.viewsCount = 0,
+    this.commentsCount = 0,
   });
 
   factory LostItemModel.fromFirestore(
@@ -64,6 +79,14 @@ class LostItemModel {
       bountyAmount: data['bountyAmount'],
       // ✅ Firestore 데이터로부터 tags 필드를 읽어옵니다.
       tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
+
+      // ✅ [작업 41]
+      isResolved: data['isResolved'] ?? false,
+      resolvedAt: data['resolvedAt'] as Timestamp?,
+
+      // ✅ [작업 42]
+      viewsCount: data['viewsCount'] ?? 0,
+      commentsCount: data['commentsCount'] ?? 0,
     );
   }
 
@@ -77,9 +100,19 @@ class LostItemModel {
       'geoPoint': geoPoint,
       'imageUrls': imageUrls,
       'createdAt': createdAt,
-      'isHunted': isHunted,
       'bountyAmount': bountyAmount,
-      'tags': tags, // ✅ JSON 변환 시 tags 필드를 포함합니다.
+      'tags': tags, // ✅ Firestore에 저장
+
+      // ✅ [작업 41]
+      'isResolved': isResolved,
+      'resolvedAt': resolvedAt,
+
+      // ✅ [작업 42]
+      'viewsCount': viewsCount,
+      'commentsCount': commentsCount,
+
+      // [수정] 'isHunted' 필드도 저장되도록 추가합니다.
+      'isHunted': isHunted,
     };
   }
 }

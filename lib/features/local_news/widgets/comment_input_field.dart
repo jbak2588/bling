@@ -7,13 +7,18 @@ import 'package:easy_localization/easy_localization.dart';
 
 class CommentInputField extends StatefulWidget {
   final String postId;
-  final void Function(Map<String, dynamic> newComment)? onCommentAdded;
+  // ✅ [작업 42] 1. 컬렉션 경로를 파라미터로 받음 (기본값: 'posts')
+  final String collectionPath;
+  final Function(Map<String, dynamic>) onCommentAdded;
+  final String hintText;
 
-  const CommentInputField(
-      {super.key,
-      required this.postId,
-      this.onCommentAdded,
-      required String hintText});
+  const CommentInputField({
+    super.key,
+    required this.postId,
+    this.collectionPath = 'posts', // ✅ [작업 42] 2. 기본값 설정
+    required this.onCommentAdded,
+    required this.hintText,
+  });
 
   @override
   State<CommentInputField> createState() => _CommentInputFieldState();
@@ -43,8 +48,9 @@ class _CommentInputFieldState extends State<CommentInputField> {
     };
 
     try {
-      final postRef =
-          FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+      final postRef = FirebaseFirestore.instance
+          .collection(widget.collectionPath)
+          .doc(widget.postId);
 
       // [수정] Firestore 트랜잭션 로직을 올바른 문법으로 수정합니다.
       await FirebaseFirestore.instance.runTransaction((transaction) async {
@@ -60,7 +66,7 @@ class _CommentInputFieldState extends State<CommentInputField> {
 
       _controller.clear();
       setState(() => _isSecret = false);
-      if (widget.onCommentAdded != null) widget.onCommentAdded!(commentData);
+      widget.onCommentAdded(commentData);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -108,8 +114,10 @@ class _CommentInputFieldState extends State<CommentInputField> {
             child: TextField(
               controller: _controller,
               decoration: InputDecoration(
-                // ✅ [다국어 수정] 힌트 텍스트
-                hintText: 'commentInputField.hintText'.tr(),
+                // ✅ [다국어 수정] 힌트 텍스트 (외부 제공값이 우선)
+                hintText: widget.hintText.isNotEmpty
+                    ? widget.hintText
+                    : 'commentInputField.hintText'.tr(),
                 border: const OutlineInputBorder(),
                 isDense: true,
               ),

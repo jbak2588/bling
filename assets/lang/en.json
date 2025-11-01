@@ -507,7 +507,11 @@
     "moreOptions": "More options",
     "viewAll": "View all",
     "new": "New",
-    "updated": "Updated"
+    "updated": "Updated",
+    "comments": "Comments"
+  },
+  "commom": {
+    "commets": "Comments"
   },
   "reportDialog": {
     "title": "Report Post",
@@ -1023,9 +1027,21 @@
   "lostAndFound": {
     "empty": "No lost/found items yet.",
     "error": "An error occurred: {error}",
-    "create": "Add lost/found item",
+      "create": "Add lost/found item",
+      "resolve": {
+        "confirmTitle": "Mark as resolved?",
+        "confirmBody": "This will mark the item as resolved.",
+        "success": "Marked as resolved.",
+        "badgeLost": "Found!",
+        "badgeFound": "Returned!"
+      },
     "lost": "Lost",
     "found": "Found",
+    "tabs": {
+      "all": "All",
+      "lost": "Lost",
+      "found": "Found"
+    },
     "card": {
       "location": "Location: {location}"
     },
@@ -1042,6 +1058,10 @@
       "itemError": "Please describe the item.",
       "locationLabel": "Where was it lost or found?",
       "locationError": "Please describe the location.",
+      "bountyTitle": "Set bounty (optional)",
+      "bountyDesc": "When enabled, a bounty tag will appear on your post.",
+      "bountyAmount": "Bounty amount (IDR)",
+      "bountyAmountError": "Enter a bounty amount to enable bounty.",
       "success": "Registered.",
       "fail": "Failed to register: {error}"
     },
@@ -1054,8 +1074,11 @@
     "detail": {
       "title": "Lost & Found",
       "location": "Location",
+      "bounty": "Bounty",
       "registrant": "Registrant",
       "contact": "Contact",
+      "resolved": "Resolved",
+      "markAsResolved": "Mark as Resolved",
       "deleteTitle": "Delete Post",
       "deleteContent": "Are you sure you want to delete this post? This action cannot be undone.",
       "delete": "Delete",
@@ -1243,6 +1266,7 @@
     }
   },
   "search": {
-    "resultsTitle": "Results for '{keyword}'"
+    "resultsTitle": "Results for '{keyword}'",
+    "empty": "No results found for '{keyword}'."
   }
 }

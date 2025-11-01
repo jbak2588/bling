@@ -4,6 +4,7 @@ import 'package:bling_app/features/lost_and_found/screens/lost_item_detail_scree
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart'; // 다국어 지원
+// ✅ 현상금 포맷을 위해 추가
 
 /// [개편] 10단계: 메인 피드용 표준 썸네일 (LostItem 전용)
 ///
@@ -62,7 +63,8 @@ class LostItemThumb extends StatelessWidget {
     //
     final imageUrl = (item.imageUrls.isNotEmpty) ? item.imageUrls.first : null;
 
-    return (imageUrl != null)
+    // ✅ Stack으로 감싸서 현상금 배지 오버레이
+    Widget base = (imageUrl != null)
         ? CachedNetworkImage(
             imageUrl: imageUrl,
             height: imageHeight,
@@ -98,6 +100,29 @@ class LostItemThumb extends StatelessWidget {
                     color: Colors.grey[400],
                     size: 40)),
           );
+
+    return Stack(
+      children: [
+        base,
+        if (item.isHunted && (item.bountyAmount ?? 0) > 0)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Chip(
+              label: Text(
+                'Rp ${NumberFormat.compact(locale: context.locale.toString()).format(item.bountyAmount)}',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold),
+              ),
+              backgroundColor: Colors.orange.shade700.withValues(alpha: 0.9),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+              visualDensity: VisualDensity.compact,
+            ),
+          ),
+      ],
+    );
   }
 
   // --- 하단 메타 (물건 설명 + 장소 설명) ---
