@@ -20,6 +20,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // 숫자 입력 포맷팅
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -43,6 +44,10 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
   final List<XFile> _images = [];
   bool _isSaving = false;
 
+  // ✅ 현상금(Bounty) 상태
+  bool _isHunted = false;
+  final _bountyAmountController = TextEditingController();
+
   final LostAndFoundRepository _repository = LostAndFoundRepository();
   final ImagePicker _picker = ImagePicker();
 
@@ -50,6 +55,7 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
   void dispose() {
     _itemDescriptionController.dispose();
     _locationDescriptionController.dispose();
+    _bountyAmountController.dispose();
     super.dispose();
   }
 
@@ -104,6 +110,10 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
         imageUrls: imageUrls,
         createdAt: Timestamp.now(),
         tags: _tags, // ✅ 저장 시 태그 목록을 전달
+        // ✅ 현상금 정보 저장
+        isHunted: _isHunted,
+        bountyAmount:
+            _isHunted ? num.tryParse(_bountyAmountController.text) : null,
       );
 
       // [수정] 주석을 해제하여 DB 저장 기능을 활성화합니다.
@@ -229,6 +239,9 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
                       : null,
                 ),
                 const SizedBox(height: 16),
+                // ✅ 현상금(Bounty) 섹션
+                _buildBountySection(),
+
                 TextFormField(
                   controller: _locationDescriptionController,
                   decoration: InputDecoration(
@@ -258,6 +271,47 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
                 child: const Center(child: CircularProgressIndicator())),
         ],
       ),
+    );
+  }
+
+  // ✅ 현상금(Bounty) 입력 UI 위젯
+  Widget _buildBountySection() {
+    return Column(
+      children: [
+        SwitchListTile(
+          title: Text('lostAndFound.form.bountyTitle'.tr()),
+          subtitle: Text('lostAndFound.form.bountyDesc'.tr()),
+          value: _isHunted,
+          onChanged: (bool value) {
+            setState(() {
+              _isHunted = value;
+            });
+          },
+        ),
+        if (_isHunted)
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: TextFormField(
+              controller: _bountyAmountController,
+              decoration: InputDecoration(
+                labelText: 'lostAndFound.form.bountyAmount'.tr(),
+                hintText: '50000',
+                prefixText: 'Rp ',
+                border: const OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (value) {
+                if (_isHunted && (value == null || value.trim().isEmpty)) {
+                  return 'lostAndFound.form.bountyAmountError'.tr();
+                }
+                return null;
+              },
+            ),
+          ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/services.dart'; // 숫자 입력 포맷팅
 
 class EditLostItemScreen extends StatefulWidget {
   final LostItemModel item;
@@ -38,6 +39,10 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
   final List<dynamic> _images = [];
   bool _isSaving = false;
 
+  // ✅ 현상금(Bounty)
+  bool _isHunted = false;
+  final TextEditingController _bountyAmountController = TextEditingController();
+
   final LostAndFoundRepository _repository = LostAndFoundRepository();
   final ImagePicker _picker = ImagePicker();
 
@@ -50,12 +55,20 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         TextEditingController(text: widget.item.locationDescription);
     _type = widget.item.type;
     _images.addAll(widget.item.imageUrls);
+
+    // ✅ 기존 현상금 정보 로드
+    _isHunted = widget.item.isHunted;
+    final amount = widget.item.bountyAmount;
+    _bountyAmountController.text = amount == null
+        ? ''
+        : (amount is int ? amount.toString() : amount.toStringAsFixed(0));
   }
 
   @override
   void dispose() {
     _itemDescriptionController.dispose();
     _locationDescriptionController.dispose();
+    _bountyAmountController.dispose();
     super.dispose();
   }
 
@@ -106,6 +119,10 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         imageUrls: imageUrls,
         createdAt: widget.item.createdAt,
         geoPoint: widget.item.geoPoint,
+        // ✅ 현상금 정보 저장
+        isHunted: _isHunted,
+        bountyAmount:
+            _isHunted ? num.tryParse(_bountyAmountController.text) : null,
       );
 
       await _repository.updateItem(updatedItem);
@@ -161,6 +178,9 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
                       setState(() => _type = newSelection.first),
                 ),
                 const SizedBox(height: 24),
+
+                // ✅ 현상금(Bounty) 섹션 UI
+                _buildBountySection(),
                 // V V V --- [복원] 누락되었던 이미지 선택/수정 UI --- V V V
                 SizedBox(
                   height: 100,
@@ -250,6 +270,47 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
                 child: const Center(child: CircularProgressIndicator())),
         ],
       ),
+    );
+  }
+
+  // ✅ 현상금(Bounty) 입력 UI 위젯
+  Widget _buildBountySection() {
+    return Column(
+      children: [
+        SwitchListTile(
+          title: Text('lostAndFound.form.bountyTitle'.tr()),
+          subtitle: Text('lostAndFound.form.bountyDesc'.tr()),
+          value: _isHunted,
+          onChanged: (bool value) {
+            setState(() {
+              _isHunted = value;
+            });
+          },
+        ),
+        if (_isHunted)
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: TextFormField(
+              controller: _bountyAmountController,
+              decoration: InputDecoration(
+                labelText: 'lostAndFound.form.bountyAmount'.tr(),
+                hintText: '50000',
+                prefixText: 'Rp ',
+                border: const OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (value) {
+                if (_isHunted && (value == null || value.trim().isEmpty)) {
+                  return 'lostAndFound.form.bountyAmountError'.tr();
+                }
+                return null;
+              },
+            ),
+          ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

@@ -12,7 +12,8 @@ class LostAndFoundRepository {
 
   // V V V --- [수정] fetchItems 함수에 locationFilter를 적용합니다 --- V V V
   Stream<List<LostItemModel>> fetchItems(
-      {Map<String, String?>? locationFilter}) {
+      {Map<String, String?>? locationFilter, String? itemType}) {
+    // ✅ [작업 39] 'lost'/'found' 필터 파라미터 추가
     Query<Map<String, dynamic>> query = _firestore
         .collection('lost_and_found')
         .orderBy('createdAt', descending: true);
@@ -36,6 +37,11 @@ class LostAndFoundRepository {
         query =
             query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
       }
+    }
+
+    // ✅ [작업 39] itemType이 null이 아니면(즉, 'all' 탭이 아니면) 'type' 필드 필터링
+    if (itemType != null && itemType.isNotEmpty) {
+      query = query.where('type', isEqualTo: itemType);
     }
 
     return query.snapshots().asyncMap((snapshot) async {

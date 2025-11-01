@@ -18,10 +18,8 @@ import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/lost_and_found/data/lost_and_found_repository.dart';
 import 'package:bling_app/features/lost_and_found/widgets/lost_item_card.dart';
-import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'create_lost_item_screen.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class LostAndFoundScreen extends StatefulWidget {
@@ -38,32 +36,40 @@ class LostAndFoundScreen extends StatefulWidget {
   State<LostAndFoundScreen> createState() => _LostAndFoundScreenState();
 }
 
-class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
+// ✅ [작업 39] 1. TabController를 사용하기 위해 TickerProviderStateMixin 추가
+class _LostAndFoundScreenState extends State<LostAndFoundScreen>
+    with TickerProviderStateMixin {
   // [추가] 화면 내부의 필터 상태를 관리합니다.
   late Map<String, String?>? _locationFilter;
+
+  // ✅ [작업 39] 2. TabController 및 필터 값 정의
+  late final TabController _tabController;
+  final List<String?> _tabFilters = [
+    null, // 'all' (전체)
+    'lost', // '분실'
+    'found', // '습득'
+  ];
 
   @override
   void initState() {
     super.initState();
     // [추가] HomeScreen에서 전달받은 필터 값으로 초기화합니다.
     _locationFilter = widget.locationFilter;
+
+    // ✅ [작업 39] 3. TabController 초기화
+    _tabController = TabController(length: _tabFilters.length, vsync: this);
+  }
+
+  // ✅ [작업 39] 4. TabController 해제
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   // [추가] 필터 화면을 여는 함수
-  void _openFilter() async {
-    final result = await Navigator.of(context).push<Map<String, String?>>(
-      MaterialPageRoute(
-          builder: (_) => LocationFilterScreen(userModel: widget.userModel)),
-    );
-    if (result != null) {
-      setState(() => _locationFilter = result);
-    }
-  }
 
   // [추가] 필터를 제거하는 함수
-  void _clearFilter() {
-    setState(() => _locationFilter = null);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,26 +79,43 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
       body: Column(
         children: [
           // [추가] 필터 관리 UI
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (_locationFilter != null)
-                IconButton(
-                  icon: const Icon(Icons.clear),
-                  tooltip: 'Clear Filter',
-                  onPressed: _clearFilter,
-                ),
-              IconButton(
-                icon: const Icon(Icons.filter_alt_outlined),
-                tooltip: 'Filter',
-                onPressed: _openFilter,
-              ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.end,
+          //   children: [
+          //     if (_locationFilter != null)
+          //       IconButton(
+          //         icon: const Icon(Icons.clear),
+          //         tooltip: 'Clear Filter',
+          //         onPressed: _clearFilter,
+          //       ),
+          //     IconButton(
+          //       icon: const Icon(Icons.filter_alt_outlined),
+          //       tooltip: 'Filter',
+          //       onPressed: _openFilter,
+          //     ),
+          //   ],
+          // ),
+          // ✅ [작업 39] 5. '분실'/'습득' 필터링을 위한 TabBar 추가
+          TabBar(
+            controller: _tabController,
+            labelColor: Theme.of(context).primaryColor,
+            unselectedLabelColor: Colors.grey[600],
+            indicatorColor: Theme.of(context).primaryColor,
+            tabs: [
+              Tab(text: 'lostAndFound.tabs.all'.tr()), // '전체'
+              Tab(text: 'lostAndFound.tabs.lost'.tr()), // '분실했어요'
+              Tab(text: 'lostAndFound.tabs.found'.tr()), // '주웠어요'
             ],
+            // 탭 변경 시 StreamBuilder를 재실행하기 위해 setState 호출
+            onTap: (index) => setState(() {}),
           ),
           Expanded(
             child: StreamBuilder<List<LostItemModel>>(
-              // [수정] fetchItems 함수에 현재 필터 상태를 전달합니다.
-              stream: repository.fetchItems(locationFilter: _locationFilter),
+              // ✅ [작업 39] 6. fetchItems에 locationFilter와 itemType 필터를 함께 전달
+              stream: repository.fetchItems(
+                locationFilter: _locationFilter,
+                itemType: _tabFilters[_tabController.index], // 현재 탭의 필터 값
+              ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -120,22 +143,6 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
           ),
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     if (widget.userModel != null) {
-      //       Navigator.of(context).push(
-      //         MaterialPageRoute(
-      //           builder: (_) => CreateLostItemScreen(userModel: widget.userModel!),
-      //         ),
-      //       );
-      //     } else {
-      //       ScaffoldMessenger.of(context).showSnackBar(
-      //           SnackBar(content: Text('main.errors.loginRequired'.tr())));
-      //     }
-      //   },
-      //   tooltip: 'lostAndFound.create'.tr(),
-      //   child: const Icon(Icons.add),
-      // ),
     );
   }
 }

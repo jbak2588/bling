@@ -542,7 +542,11 @@
     "moreOptions": "더보기",
     "viewAll": "모두 보기",
     "new": "신규",
-    "updated": "업데이트"
+    "updated": "업데이트",
+    "comments": "댓글"
+  },
+  "commom": {
+    "commets": "댓글"
   },
   "reportDialog": {
     "title": "게시물 신고",
@@ -1062,6 +1066,11 @@
     "create": "새 분실/습득물 등록",
     "lost": "분실",
     "found": "습득",
+    "tabs": {
+      "all": "전체",
+      "lost": "분실했어요",
+      "found": "주웠어요"
+    },
     "card": {
       "location": "장소: {location}"
     },
@@ -1078,6 +1087,10 @@
       "itemError": "물건 설명을 입력해주세요.",
       "locationLabel": "어디서 잃어버렸거나 주우셨나요?",
       "locationError": "장소 설명을 입력해주세요.",
+      "bountyTitle": "현상금 설정 (선택)",
+      "bountyDesc": "설정하면 게시물에 현상금 태그가 표시됩니다.",
+      "bountyAmount": "현상금액 (IDR)",
+      "bountyAmountError": "현상금을 설정하려면 금액을 입력하세요.",
       "success": "등록되었습니다.",
       "fail": "등록에 실패했습니다: {error}"
     },
@@ -1087,11 +1100,21 @@
       "success": "수정되었습니다.",
       "fail": "수정에 실패했습니다: {error}"
     },
+    "resolve": {
+      "confirmTitle": "해결 완료로 표시할까요?",
+      "confirmBody": "이 게시물을 해결 완료로 표시합니다.",
+      "success": "해결 완료로 표시했습니다.",
+      "badgeLost": "찾았어요!",
+      "badgeFound": "돌려줬어요!"
+    },
     "detail": {
       "title": "분실/습득물",
       "location": "장소",
+      "bounty": "현상금",
       "registrant": "등록자",
       "contact": "연락하기",
+      "resolved": "해결 완료",
+      "markAsResolved": "해결 완료로 표시",
       "deleteTitle": "게시글 삭제",
       "deleteContent": "정말로 이 게시글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
       "delete": "삭제",
@@ -1279,6 +1302,7 @@
     }
   },
   "search": {
-    "resultsTitle": "'{keyword}' 검색 결과"
+    "resultsTitle": "'{keyword}' 검색 결과",
+    "empty": "'{keyword}'에 대한 검색 결과가 없습니다."
   }
 }
