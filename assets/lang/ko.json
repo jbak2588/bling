@@ -586,11 +586,23 @@
   "jobs": {
     "setLocationPrompt": "구인글을 보려면 먼저 내 동네를 설정해주세요!",
     "screen": {
-      "empty": "아직 등록된 구인글이 없습니다.",
+      "empty": "해당 지역에 등록된 구인 게시글이 없습니다.",
       "createTooltip": "새 구인글 등록"
     },
+    "tabs": {
+      "all": "전체",
+      "quickGig": "단기 심부름",
+      "regular": "파트타임/정규직"
+    },
+    "selectType": {
+      "title": "일자리 유형 선택",
+      "regularTitle": "파트타임 / 정규직",
+      "regularDesc": "카페·식당·사무 등 일반 근무",
+      "quickGigTitle": "퀵긱 / 단기 심부름",
+      "quickGigDesc": "오토바이 심부름, 이사, 청소 등"
+    },
     "form": {
-      "title": "새 구인글 등록",
+      "title": "구인글 등록",
       "titleHint": "공고 제목",
       "descriptionPositionHint": "업무 내용을 입력",
       "categoryHint": "직종 카테고리",
@@ -598,8 +610,28 @@
       "categoryValidator": "직종을 선택해주세요.",
       "locationHint": "근무 위치",
       "submit": "구인 등록",
-      "titleLabel": "제목",
-      "titleValidator": "제목을 입력해주세요.",
+  "titleLabel": "제목",
+  "titleValidator": "제목을 입력해주세요.",
+  "titleRegular": "파트타임/정규직 구인 등록",
+  "titleQuickGig": "퀵긱 구인 등록",
+  "validationError": "필수 항목을 모두 입력해주세요.",
+  "saveSuccess": "구인글이 저장되었습니다.",
+  "saveError": "구인글 저장에 실패했습니다: {error}",
+  "categoryLabel": "카테고리",
+  "titleHintQuickGig": "예: 오토바이 서류 배달 (긴급)",
+  "salaryLabel": "급여 (IDR)",
+  "salaryHint": "급여 금액을 입력하세요",
+  "salaryValidator": "유효한 급여를 입력해주세요.",
+  "totalPayLabel": "총 보수 (IDR)",
+  "totalPayHint": "제공할 총 금액을 입력",
+  "totalPayValidator": "유효한 금액을 입력해주세요.",
+  "negotiable": "협의 가능",
+  "workPeriodLabel": "근무 기간",
+  "workPeriodHint": "근무 기간 선택",
+  "locationLabel": "근무지/장소",
+  "locationValidator": "근무지를 입력해주세요.",
+  "imageLabel": "이미지 (선택, 최대 10장)",
+  "descriptionHintQuickGig": "출발지/도착지, 요청사항 등 상세 정보를 입력해주세요.",
       "salaryInfoTitle": "급여 정보",
       "salaryTypeHint": "종류",
       "salaryAmountLabel": "금액 (IDR)",
@@ -620,7 +652,19 @@
       "cafe": "카페",
       "retail": "소매",
       "delivery": "배달",
-      "etc": "기타"
+      "etc": "기타",
+      "service": "서비스",
+      "sales_marketing": "영업/마케팅",
+      "delivery_logistics": "배달/물류",
+      "it": "IT/기술",
+      "design": "디자인",
+      "education": "교육",
+      "quick_gig_delivery": "오토바이 심부름/배달",
+      "quick_gig_transport": "오토바이 이동(오젝)",
+      "quick_gig_moving": "이사/짐 나르기",
+      "quick_gig_cleaning": "청소/집안일",
+      "quick_gig_queuing": "줄서기",
+      "quick_gig_etc": "기타 심부름"
     },
     "salaryTypes": {
       "hourly": "시급",
@@ -629,12 +673,19 @@
       "monthly": "월급",
       "yearly": "연봉",
       "per_case": "건당",
-      "etc": "기타"
+      "etc": "기타",
+      "total": "총 보수"
     },
     "workPeriods": {
       "short_term": "단기",
       "mid_term": "중기",
       "long_term": "장기",
+      "one_time": "1회성",
+      "1_week": "1주",
+      "1_month": "1개월",
+      "3_months": "3개월",
+      "6_months_plus": "6개월 이상",
+      "negotiable": "협의 가능",
       "etc": "기타"
     },
     "detail": {

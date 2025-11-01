@@ -558,11 +558,23 @@
   "jobs": {
     "setLocationPrompt": "Silakan atur lokasi Anda untuk melihat lowongan!",
     "screen": {
-      "empty": "Belum ada lowongan.",
+      "empty": "Tidak ada lowongan di area ini.",
       "createTooltip": "Pasang Lowongan Baru"
     },
+    "tabs": {
+      "all": "Semua",
+      "quickGig": "Gig Cepat",
+      "regular": "Paruh Waktu/Penuh Waktu"
+    },
+    "selectType": {
+      "title": "Pilih Jenis Lowongan",
+      "regularTitle": "Pekerjaan Paruh Waktu / Penuh Waktu",
+      "regularDesc": "Kerja reguler seperti kafe, restoran, kantor",
+      "quickGigTitle": "Gig Cepat / Bantuan Sederhana",
+      "quickGigDesc": "Kurir motor, bantu pindahan, bersih-bersih, dll."
+    },
     "form": {
-      "title": "Pasang Lowongan Baru",
+      "title": "Pasang Lowongan",
       "titleHint": "Judul pekerjaan",
       "descriptionPositionHint": "Deskripsikan posisi",
       "categoryHint": "Kategori",
@@ -570,8 +582,28 @@
       "categoryValidator": "Silakan pilih kategori.",
       "locationHint": "Lokasi",
       "submit": "Pasang Lowongan",
-      "titleLabel": "Judul",
-      "titleValidator": "Silakan masukkan judul.",
+  "titleLabel": "Judul",
+  "titleValidator": "Silakan masukkan judul.",
+  "titleRegular": "Pasang Lowongan Paruh/Penuh Waktu",
+  "titleQuickGig": "Pasang Gig Cepat",
+  "validationError": "Harap lengkapi semua kolom wajib.",
+  "saveSuccess": "Lowongan berhasil disimpan.",
+  "saveError": "Gagal menyimpan lowongan: {error}",
+  "categoryLabel": "Kategori",
+  "titleHintQuickGig": "mis., Antar dokumen dengan motor (SEGERA)",
+  "salaryLabel": "Gaji (IDR)",
+  "salaryHint": "Masukkan nominal gaji",
+  "salaryValidator": "Masukkan gaji yang valid.",
+  "totalPayLabel": "Total Bayaran (IDR)",
+  "totalPayHint": "Masukkan total nominal yang ditawarkan",
+  "totalPayValidator": "Masukkan nominal yang valid.",
+  "negotiable": "Bisa nego",
+  "workPeriodLabel": "Periode Kerja",
+  "workPeriodHint": "Pilih periode kerja",
+  "locationLabel": "Lokasi/Tempat Kerja",
+  "locationValidator": "Masukkan lokasi.",
+  "imageLabel": "Gambar (Opsional, maks 10)",
+  "descriptionHintQuickGig": "Jelaskan detail (mis., titik berangkat, tujuan, permintaan khusus).",
       "salaryInfoTitle": "Informasi Gaji",
       "salaryTypeHint": "Jenis",
       "salaryAmountLabel": "Jumlah (IDR)",
@@ -592,7 +624,19 @@
       "cafe": "Kafe",
       "retail": "Ritel",
       "delivery": "Pengiriman",
-      "etc": "Lainnya"
+      "etc": "Lainnya",
+      "service": "Layanan",
+      "sales_marketing": "Penjualan/Pemasaran",
+      "delivery_logistics": "Kurir/Logistik",
+      "it": "IT/Teknologi",
+      "design": "Desain",
+      "education": "Pendidikan",
+      "quick_gig_delivery": "Antar Motor",
+      "quick_gig_transport": "Ojek (Antar Orang)",
+      "quick_gig_moving": "Bantu Pindahan",
+      "quick_gig_cleaning": "Bersih-bersih/Rumah",
+      "quick_gig_queuing": "Joki Antrian",
+      "quick_gig_etc": "Jasa lainnya"
     },
     "salaryTypes": {
       "hourly": "Per jam",
@@ -601,12 +645,19 @@
       "monthly": "Bulanan",
       "yearly": "Tahunan",
       "per_case": "Per kasus",
-      "etc": "Lainnya"
+      "etc": "Lainnya",
+      "total": "Total Bayaran"
     },
     "workPeriods": {
       "short_term": "Jangka pendek",
       "mid_term": "Jangka menengah",
       "long_term": "Jangka panjang",
+      "one_time": "Sekali jalan",
+      "1_week": "1 Minggu",
+      "1_month": "1 Bulan",
+      "3_months": "3 Bulan",
+      "6_months_plus": "6 Bulan+",
+      "negotiable": "Bisa nego",
       "etc": "Lainnya"
     },
     "detail": {

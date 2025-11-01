@@ -25,13 +25,13 @@ import '../../../core/models/user_model.dart';
 import '../../local_news/widgets/post_card.dart';
 import '../../marketplace/widgets/product_card.dart';
 
-
 /// MyBling 화면의 '관심목록' 탭에 표시될 위젯입니다.
 class UserBookmarkList extends StatelessWidget {
   const UserBookmarkList({super.key});
 
   // 여러 컬렉션에서 데이터를 비동기적으로 가져오는 함수
-  Future<List<dynamic>> _fetchBookmarkedItems(List<String> postIds, List<String> productIds) async {
+  Future<List<dynamic>> _fetchBookmarkedItems(
+      List<String> postIds, List<String> productIds) async {
     final List<Future> futures = [];
 
     // 찜한 게시물 가져오기
@@ -49,7 +49,7 @@ class UserBookmarkList extends StatelessWidget {
           .where(FieldPath.documentId, whereIn: productIds)
           .get());
     }
-    
+
     // 모든 요청이 끝날 때까지 기다림
     final results = await Future.wait(futures);
     final List<dynamic> items = [];
@@ -78,12 +78,13 @@ class UserBookmarkList extends StatelessWidget {
 
     // 1. 사용자 정보를 먼저 가져옴
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
+      stream:
+          FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
       builder: (context, userSnapshot) {
         if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
           return const Center(child: Text("사용자 정보를 찾을 수 없습니다."));
         }
-        
+
         final user = UserModel.fromFirestore(userSnapshot.data!);
         final postIds = user.bookmarkedPostIds ?? [];
         final productIds = user.bookmarkedProductIds ?? [];
@@ -91,7 +92,7 @@ class UserBookmarkList extends StatelessWidget {
         if (postIds.isEmpty && productIds.isEmpty) {
           return const Center(child: Text("찜한 항목이 없습니다."));
         }
-        
+
         // 2. 찜한 ID 목록을 기반으로 실제 데이터들을 가져옴
         return FutureBuilder<List<dynamic>>(
           future: _fetchBookmarkedItems(postIds, productIds),
@@ -99,12 +100,14 @@ class UserBookmarkList extends StatelessWidget {
             if (itemsSnapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (itemsSnapshot.hasError || !itemsSnapshot.hasData || itemsSnapshot.data!.isEmpty) {
+            if (itemsSnapshot.hasError ||
+                !itemsSnapshot.hasData ||
+                itemsSnapshot.data!.isEmpty) {
               return const Center(child: Text("관심 목록을 불러올 수 없습니다."));
             }
 
             final items = itemsSnapshot.data!;
-            
+
             return ListView.builder(
               itemCount: items.length,
               itemBuilder: (context, index) {

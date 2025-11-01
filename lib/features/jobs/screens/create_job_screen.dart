@@ -23,6 +23,15 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(게시글 부스트, 조회수, 지원수 등).
 // - 필수 입력값, 에러 메시지, UX 강화. 신고/차단/신뢰 등급 UI 노출 및 기능 강화.
 // =====================================================
+/// 2025-10-31 (작업 33):
+///   - '하이브리드 기획안' 4단계: '정규직/파트타임' (regular) 전용 폼으로 수정.
+///   - 'jobType' 파라미터를 생성자(constructor)로 받음.
+///   - 카테고리 드롭다운이 'AppJobCategories.getCategoriesByType(JobType.regular)'를
+///     호출하여 'regular' 카테고리만 표시하도록 수정.
+///   - 저장 시 'jobType: "regular"' 필드 포함.
+/// ============================================================================
+library;
+// (파일 내용...)
 
 import 'dart:io';
 import 'package:bling_app/features/jobs/models/job_model.dart';
@@ -36,10 +45,14 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../constants/job_categories.dart';
 
 class CreateJobScreen extends StatefulWidget {
   final UserModel userModel;
-  const CreateJobScreen({super.key, required this.userModel});
+  final JobType jobType;
+
+  const CreateJobScreen(
+      {super.key, required this.userModel, this.jobType = JobType.regular});
 
   @override
   State<CreateJobScreen> createState() => _CreateJobScreenState();
@@ -57,7 +70,8 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
   bool _isSalaryNegotiable = false;
 
   bool _isSaving = false;
-  String? _selectedCategory;
+  List<JobCategory> _categories = [];
+  JobCategory? _selectedCategory;
 
   final List<XFile> _images = [];
   final ImagePicker _picker = ImagePicker();
@@ -108,7 +122,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         userId: user.uid,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
-        category: _selectedCategory!,
+        category: _selectedCategory!.id, // ✅ [작업 31] JobCategory의 id를 전달
         locationName: widget.userModel.locationName,
         locationParts: widget.userModel.locationParts,
         geoPoint: widget.userModel.geoPoint,
@@ -119,6 +133,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         workPeriod: _selectedWorkPeriod,
         workHours: _workHoursController.text.trim(),
         imageUrls: imageUrls, // [수정] 업로드된 이미지 URL 목록 전달
+        jobType: widget.jobType.name,
       );
       await _repository.createJob(newJob);
 
@@ -146,10 +161,18 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // ✅ [작업 31] 4. 'regular' 타입의 카테고리만 로드
+    _categories = AppJobCategories.getCategoriesByType(widget.jobType);
+    _selectedCategory = _categories.isNotEmpty ? _categories.first : null;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('jobs.form.title'.tr()),
+        title: Text('jobs.form.titleRegular'.tr()),
         actions: [
           if (!_isSaving)
             TextButton(
@@ -166,26 +189,24 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
               padding: const EdgeInsets.all(16.0),
               children: [
                 // --- 직종 선택 ---
-                DropdownButtonFormField<String>(
+                DropdownButtonFormField<JobCategory>(
                   initialValue: _selectedCategory,
-                  hint: Text('jobs.form.categorySelectHint'.tr()),
-                  items: [
-                    'restaurant',
-                    'cafe',
-                    'retail',
-                    'delivery',
-                    'etc'
-                  ] // 예시 카테고리
-                      .map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text('jobs.categories.$value'.tr()),
+                  items: _categories.map((category) {
+                    return DropdownMenuItem<JobCategory>(
+                      value: category,
+                      child: Row(
+                        children: [
+                          Text(category.icon), // ✅ [작업 31] 9. 아이콘 표시
+                          const SizedBox(width: 8),
+                          Text(category.nameKey.tr()), // ✅ [작업 31] 10. 다국어 키 이름
+                        ],
+                      ),
                     );
                   }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedCategory = newValue;
-                    });
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _selectedCategory = value);
+                    }
                   },
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),

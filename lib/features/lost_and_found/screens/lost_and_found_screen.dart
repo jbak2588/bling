@@ -29,11 +29,10 @@ class LostAndFoundScreen extends StatefulWidget {
   // [추가] HomeScreen에서 locationFilter를 전달받습니다.
   final Map<String, String?>? locationFilter;
 
-  const LostAndFoundScreen({
-    this.userModel,
-    this.locationFilter, // [추가]
-    super.key
-  });
+  const LostAndFoundScreen(
+      {this.userModel,
+      this.locationFilter, // [추가]
+      super.key});
 
   @override
   State<LostAndFoundScreen> createState() => _LostAndFoundScreenState();
@@ -100,8 +99,8 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                 }
                 if (snapshot.hasError) {
                   return Center(
-                      child: Text('lostAndFound.error'
-                          .tr(namedArgs: {'error': snapshot.error.toString()})));
+                      child: Text('lostAndFound.error'.tr(
+                          namedArgs: {'error': snapshot.error.toString()})));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(child: Text('lostAndFound.empty'.tr()));
@@ -121,22 +120,22 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (widget.userModel != null) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => CreateLostItemScreen(userModel: widget.userModel!),
-              ),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('main.errors.loginRequired'.tr())));
-          }
-        },
-        tooltip: 'lostAndFound.create'.tr(),
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     if (widget.userModel != null) {
+      //       Navigator.of(context).push(
+      //         MaterialPageRoute(
+      //           builder: (_) => CreateLostItemScreen(userModel: widget.userModel!),
+      //         ),
+      //       );
+      //     } else {
+      //       ScaffoldMessenger.of(context).showSnackBar(
+      //           SnackBar(content: Text('main.errors.loginRequired'.tr())));
+      //     }
+      //   },
+      //   tooltip: 'lostAndFound.create'.tr(),
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }
