@@ -29,11 +29,22 @@ library;
 // ===== 생성(등록) 화면: 각 Feature의 create 스크린들 =====
 // [추가] 문맥 자동분기용: 인디프렌드/동네가게 생성 화면
 import 'package:bling_app/features/find_friends/screens/findfriend_form_screen.dart';
+
+// ✅ [신규] 검색 로직을 위해 모든 피드 스크린 import
+import 'package:bling_app/features/local_news/screens/local_news_screen.dart';
+import 'package:bling_app/features/jobs/screens/jobs_screen.dart';
+import 'package:bling_app/features/lost_and_found/screens/lost_and_found_screen.dart';
+import 'package:bling_app/features/marketplace/screens/marketplace_screen.dart';
+import 'package:bling_app/features/local_stores/screens/local_stores_screen.dart';
+import 'package:bling_app/features/find_friends/screens/find_friends_screen.dart';
+import 'package:bling_app/features/clubs/screens/clubs_screen.dart';
+import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart';
+import 'package:bling_app/features/auction/screens/auction_screen.dart';
+import 'package:bling_app/features/pom/screens/pom_screen.dart';
 import 'package:bling_app/features/jobs/screens/select_job_type_screen.dart';
 import 'package:bling_app/features/local_stores/screens/create_shop_screen.dart';
 
 import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
-// import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
 import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
 import 'package:bling_app/features/clubs/screens/create_club_screen.dart';
 import 'package:bling_app/features/pom/screens/create_short_screen.dart';
@@ -59,7 +70,7 @@ import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
 import 'home_screen.dart';
 import 'package:bling_app/features/boards/screens/kelurahan_board_screen.dart';
-import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
+// ❌ [삭제] import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
 
 import 'package:bling_app/features/admin/screens/admin_screen.dart'; // ✅ 관리자 화면 import
 import 'package:bling_app/core/utils/ai_rule_uploader.dart';
@@ -100,7 +111,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   // ✅ [게시판] 동네 게시판 활성화 상태
   bool _isKelurahanBoardActive = false;
 
-  // (삭제됨) 홈 화면 인라인 검색칩 제어용 notifier는 더 이상 사용하지 않습니다.
+  // ✅ [신규] 시나리오 2 (피드 내 검색 활성화)를 위한 Notifier
+  final ValueNotifier<AppSection?> _searchActivationNotifier =
+      ValueNotifier<AppSection?>(null);
 
   // ✅ [스크롤 위치 보존] HomeScreen용 ScrollController 및 위치 저장 변수 추가
   final ScrollController _homeScrollController = ScrollController();
@@ -152,6 +165,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _userSubscription?.cancel();
     _unreadChatsSubscription?.cancel();
     _homeScrollController.dispose();
+    _searchActivationNotifier.dispose(); // ✅ Notifier 해제
     super.dispose();
   }
 
@@ -274,86 +288,49 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
-  /// ✅ [작업 46] '공용 검색 시트'를 표시
-  Future<void> _onSearchRequested() async {
+  /// ✅ [신규] 하단 검색 아이콘 탭 시 메인 로직
+  void _onSearchRequested() {
     if (!mounted) return;
-    _showGlobalSearchSheet();
+    if (_currentSection == AppSection.home) {
+      // 시나리오 1: 홈이면 전역 검색 시트
+      _showGlobalSearchSheet(context);
+    } else {
+      // 시나리오 2: 피드 내부면 인라인 검색 활성화 신호
+      _searchActivationNotifier.value = _currentSection;
+    }
   }
 
-  /// ✅ [작업 46] 메인(홈 루트)에서 사용되는 전역 검색 시트
-  void _showGlobalSearchSheet() {
+  /// ✅ [신규] 메인(홈 루트)에서 사용되는 전역 검색 시트
+  void _showGlobalSearchSheet(BuildContext ctx) {
     showModalBottomSheet(
-      context: context,
+      context: ctx,
       showDragHandle: true,
-      isScrollControlled: false,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) {
+      isScrollControlled: true,
+      builder: (bctx) {
         return SafeArea(
           child: ListView(
             shrinkWrap: true,
             children: [
-              // ✅ [작업 49] '글쓰기' 시트 순서와 동일하게 10개 항목으로 재정렬
-              _sheetItem(
-                  Icons.article_outlined, // 1. localNews
-                  'search.sheet.localNews'.tr(),
-                  'search.sheet.localNewsDesc'.tr(),
-                  onTap: () => _triggerSearch(AppSection.localNews)),
-              // 2) 일자리 검색
-              _sheetItem(
-                  Icons.work_outline_rounded, // 2. jobs
-                  'search.sheet.jobs'.tr(),
-                  'search.sheet.jobsDesc'.tr(),
-                  onTap: () => _triggerSearch(AppSection.jobs)),
-              // 3) 분실물 검색
-              _sheetItem(
-                  Icons.report_gmailerrorred_rounded, // 3. lostAndFound
-                  'search.sheet.lostAndFound'.tr(),
-                  'search.sheet.lostAndFoundDesc'.tr(),
-                  onTap: () => _triggerSearch(AppSection.lostAndFound)),
-              // 4) 중고거래 검색
-              _sheetItem(
-                  Icons.store_mall_directory_outlined, // 4. marketplace
-                  'search.sheet.marketplace'.tr(),
-                  'search.sheet.marketplaceDesc'.tr(),
-                  onTap: () => _triggerSearch(AppSection.marketplace)),
-              // 5) 동네업체 검색
-              _sheetItem(
-                  Icons.storefront_outlined, // 5. localStores
-                  'search.sheet.localStores'.tr(),
-                  'search.sheet.localStoresDesc'.tr(),
-                  onTap: () => _triggerSearch(AppSection.localStores)),
-              // 6) 모임 검색
-              _sheetItem(
-                  Icons.groups_outlined, // 6. clubs
-                  'search.sheet.clubs'.tr(),
-                  'search.sheet.clubsDesc'.tr(),
-                  onTap: () => _triggerSearch(AppSection.clubs)),
-              // 7) 친구찾기 검색
-              _sheetItem(
-                  Icons.sentiment_satisfied_outlined, // 7. findFriends
-                  'search.sheet.findFriends'.tr(),
-                  'search.sheet.findFriendsDesc'.tr(),
-                  onTap: () => _triggerSearch(AppSection.findFriends)),
-              // 8) 부동산 검색
-              _sheetItem(
-                  Icons.house_outlined, // 8. realEstate
-                  'search.sheet.realEstate'.tr(),
-                  'search.sheet.realEstateDesc'.tr(),
-                  onTap: () => _triggerSearch(AppSection.realEstate)),
-              // 9) 경매 검색
-              _sheetItem(
-                  Icons.gavel_outlined, // 9. auction
-                  'search.sheet.auction'.tr(),
-                  'search.sheet.auctionDesc'.tr(),
-                  onTap: () => _triggerSearch(AppSection.auction)),
-              // 10) 숏폼 검색
-              _sheetItem(
-                  Icons.video_camera_back_outlined, // 10. pom
-                  'search.sheet.pom'.tr(),
-                  'search.sheet.pomDesc'.tr(),
-                  onTap: () => _triggerSearch(AppSection.pom)),
+              _searchSheetItem(bctx, Icons.article_rounded,
+                  'main.tabs.localNews', AppSection.localNews),
+              _searchSheetItem(bctx, Icons.work_outline_rounded,
+                  'main.tabs.jobs', AppSection.jobs),
+              _searchSheetItem(bctx, Icons.report_gmailerrorred_rounded,
+                  'main.tabs.lostAndFound', AppSection.lostAndFound),
+              _searchSheetItem(bctx, Icons.store_mall_directory_rounded,
+                  'main.tabs.marketplace', AppSection.marketplace),
+              _searchSheetItem(bctx, Icons.storefront_rounded,
+                  'main.tabs.localStores', AppSection.localStores),
+              _searchSheetItem(bctx, Icons.sentiment_satisfied_alt_rounded,
+                  'main.tabs.findFriends', AppSection.findFriends),
+              _searchSheetItem(bctx, Icons.groups_rounded, 'main.tabs.clubs',
+                  AppSection.clubs),
+              _searchSheetItem(bctx, Icons.house_rounded,
+                  'main.tabs.realEstate', AppSection.realEstate),
+              _searchSheetItem(bctx, Icons.gavel_rounded, 'main.tabs.auction',
+                  AppSection.auction),
+              _searchSheetItem(bctx, Icons.video_camera_back_rounded,
+                  'main.tabs.pom', AppSection.pom),
               const SizedBox(height: 12),
             ],
           ),
@@ -362,41 +339,130 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  /// ✅ [작업 49] 검색 시트에서 항목을 탭했을 때,
-  /// 'showSearch'를 호출하여 실제 키워드를 입력받는 헬퍼 함수
-  Future<void> _triggerSearch(AppSection section) async {
-    // 1. 바텀 시트 닫기
-    Navigator.of(context).pop();
-
-    // 2. 검색 델리게이트를 통해 키워드 입력받기
-    // (home_screen.dart에 있던 BlingSearchDelegate를 이곳으로 이동/개조)
-    final String? keyword = await showSearch<String>(
-      context: context,
-      delegate: BlingSearchDelegate(
-        hintText:
-            'search.sheet.${section.name}Desc'.tr(), // "게시글의 제목, 내용, 태그 검색"
-      ),
+  /// ✅ [신규] 전역 검색 시트 아이템
+  Widget _searchSheetItem(BuildContext sheetContext, IconData icon,
+      String titleKey, AppSection section) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(titleKey.tr()),
+      subtitle: Text('main.search.hint.globalSheet'.tr(args: [titleKey.tr()])),
+      trailing: const Icon(Icons.search_rounded),
+      onTap: () {
+        Navigator.of(sheetContext).pop();
+        _buildFeedScreen(section, autoFocus: true);
+      },
     );
+  }
 
-    if (keyword == null || keyword.trim().isEmpty || !mounted) return;
-
-    // 3. 키워드를 가지고 각 섹션에 맞는 검색 결과 화면으로 이동
-    // TODO: 현재는 'localNews'만 구현되어 있고 나머지는 임시 화면(SearchScreen)으로 연결
-    late Widget targetScreen;
-    switch (section) {
-      case AppSection.localNews:
-        targetScreen = TagSearchResultScreen(keyword: keyword.trim());
-        break;
-      case AppSection.marketplace:
-      // targetScreen = ProductSearchResultScreen(keyword: keyword.trim()); // TODO
-      case AppSection.jobs:
-      // targetScreen = JobSearchResultScreen(keyword: keyword.trim()); // TODO
-      default:
-        // 임시: 다른 피처들은 준비중인 검색 화면으로 연결
-        targetScreen = SearchScreen(tempSearchQuery: keyword.trim());
+  /// ✅ [신규] AppSection 기반으로 피드 화면을 생성하고 이동
+  void _buildFeedScreen(AppSection section, {bool autoFocus = false}) {
+    final userModel = _userModel;
+    final activeLocationFilter = _activeLocationFilter;
+    if (userModel == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('user.notLoggedIn'.tr())));
+      return;
     }
 
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => targetScreen));
+    late Widget nextScreen;
+    late String titleKey;
+    switch (section) {
+      case AppSection.localNews:
+        titleKey = 'main.tabs.localNews';
+        nextScreen = LocalNewsScreen(
+          userModel: userModel,
+          locationFilter: activeLocationFilter,
+          autoFocusSearch: autoFocus,
+          searchNotifier: _searchActivationNotifier,
+        );
+        break;
+      case AppSection.jobs:
+        titleKey = 'main.tabs.jobs';
+        nextScreen = JobsScreen(
+          userModel: userModel,
+          locationFilter: activeLocationFilter,
+          autoFocusSearch: autoFocus,
+          searchNotifier: _searchActivationNotifier,
+        );
+        break;
+      case AppSection.lostAndFound:
+        titleKey = 'main.tabs.lostAndFound';
+        nextScreen = LostAndFoundScreen(
+          userModel: userModel,
+          locationFilter: activeLocationFilter,
+          autoFocusSearch: autoFocus,
+          searchNotifier: _searchActivationNotifier,
+        );
+        break;
+      case AppSection.marketplace:
+        titleKey = 'main.tabs.marketplace';
+        nextScreen = MarketplaceScreen(
+          userModel: userModel,
+          locationFilter: activeLocationFilter,
+          autoFocusSearch: autoFocus,
+          searchNotifier: _searchActivationNotifier,
+        );
+        break;
+      case AppSection.localStores:
+        titleKey = 'main.tabs.localStores';
+        nextScreen = LocalStoresScreen(
+          userModel: userModel,
+          locationFilter: activeLocationFilter,
+          autoFocusSearch: autoFocus,
+          searchNotifier: _searchActivationNotifier,
+        );
+        break;
+      case AppSection.findFriends:
+        titleKey = 'main.tabs.findFriends';
+        nextScreen = FindFriendsScreen(
+          userModel: userModel,
+          autoFocusSearch: autoFocus,
+          searchNotifier: _searchActivationNotifier,
+        );
+        break;
+      case AppSection.clubs:
+        titleKey = 'main.tabs.clubs';
+        nextScreen = ClubsScreen(
+          userModel: userModel,
+          locationFilter: activeLocationFilter,
+          autoFocusSearch: autoFocus,
+          searchNotifier: _searchActivationNotifier,
+        );
+        break;
+      case AppSection.realEstate:
+        titleKey = 'main.tabs.realEstate';
+        nextScreen = RealEstateScreen(
+          userModel: userModel,
+          locationFilter: activeLocationFilter,
+          autoFocusSearch: autoFocus,
+          searchNotifier: _searchActivationNotifier,
+        );
+        break;
+      case AppSection.auction:
+        titleKey = 'main.tabs.auction';
+        nextScreen = AuctionScreen(
+          userModel: userModel,
+          locationFilter: activeLocationFilter,
+          autoFocusSearch: autoFocus,
+          searchNotifier: _searchActivationNotifier,
+        );
+        break;
+      case AppSection.pom:
+        titleKey = 'main.tabs.pom';
+        nextScreen = PomScreen(
+          userModel: userModel,
+          initialShorts: null,
+          initialIndex: 0,
+          autoFocusSearch: autoFocus,
+          searchNotifier: _searchActivationNotifier,
+        );
+        break;
+      case AppSection.home:
+      case AppSection.board:
+        return;
+    }
+
+    _navigateToPage(nextScreen, titleKey);
   }
 
   Future<void> _onFloatingActionButtonTapped() async {
@@ -802,6 +868,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             controller: _homeScrollController,
             userModel: _userModel,
             activeLocationFilter: _activeLocationFilter,
+            searchNotifier: _searchActivationNotifier, // ✅ Notifier 전달
             // onIconTap 콜백은 이미 스크롤 위치 저장을 처리함 (_navigateToPage 내부)
             onIconTap: _navigateToPage,
           ),
@@ -1157,7 +1224,7 @@ class SearchScreen extends StatelessWidget {
           title: Text(tempSearchQuery ?? 'main.bottomNav.search'.tr())),
       body: Center(
           child: Text(tempSearchQuery != null
-              ? "'${tempSearchQuery}' ${'search.sheet.comingSoon'.tr()}"
+              ? "'$tempSearchQuery' ${'search.sheet.comingSoon'.tr()}"
               : 'main.search.placeholder'.tr())),
     );
   }
@@ -1223,56 +1290,4 @@ class TrustScoreBreakdownModal extends StatelessWidget {
   }
 }
 
-// ✅ [작업 49] 'home_screen'에서 'main_navigation_screen'으로 SearchDelegate 이동
-/// 'showSearch'를 위한 검색 로직 구현체
-class BlingSearchDelegate extends SearchDelegate<String> {
-  final String hintText;
-
-  BlingSearchDelegate({this.hintText = '검색...'});
-
-  @override
-  String get searchFieldLabel => hintText;
-
-  @override
-  List<Widget>? buildActions(BuildContext context) {
-    // (우측) 검색어 지우기 버튼
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-          showSuggestions(context);
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget? buildLeading(BuildContext context) {
-    // (좌측) 뒤로가기 버튼
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, ''); // 검색어 없이 닫기
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    // 사용자가 키보드에서 '검색'을 눌렀을 때
-    // 'query' (입력된 검색어)를 반환하며 닫기
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      close(context, query);
-    });
-    return const Center(child: CircularProgressIndicator());
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    // (선택) 검색어 입력 시 추천 검색어 표시 (현재는 비워둠)
-    return Center(
-      child: Text('search.prompt'.tr()), // '검색어를 입력하세요.'
-    );
-  }
-}
+// ❌ [삭제] 파일 끝의 BlingSearchDelegate 구현을 제거했습니다.

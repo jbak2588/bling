@@ -23,6 +23,7 @@
 library;
 // 아래부터 실제 코드
 
+import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
@@ -31,10 +32,19 @@ import 'package:bling_app/features/location/screens/location_filter_screen.dart'
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'findfriend_form_screen.dart';
+import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 class FindFriendsScreen extends StatefulWidget {
   final UserModel? userModel;
-  const FindFriendsScreen({this.userModel, super.key});
+  final bool autoFocusSearch;
+  final ValueNotifier<AppSection?>? searchNotifier;
+
+  const FindFriendsScreen({
+    this.userModel,
+    this.autoFocusSearch = false,
+    this.searchNotifier,
+    super.key,
+  });
 
   @override
   State<FindFriendsScreen> createState() => _FindFriendsScreenState();
@@ -42,6 +52,46 @@ class FindFriendsScreen extends StatefulWidget {
 
 class _FindFriendsScreenState extends State<FindFriendsScreen> {
   Map<String, String?>? _locationFilter;
+  // 검색칩 상태
+  final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<String> _searchKeywordNotifier =
+      ValueNotifier<String>('');
+  bool _showSearchBar = false;
+  VoidCallback? _externalSearchListener;
+
+  @override
+  void initState() {
+    super.initState();
+    // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
+    if (widget.autoFocusSearch) {
+      _showSearchBar = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+    }
+    // 피드 내부 하단 검색 아이콘 → 검색칩 열기
+    if (widget.searchNotifier != null) {
+      _externalSearchListener = () {
+        if (widget.searchNotifier!.value == AppSection.findFriends) {
+          if (mounted) {
+            setState(() => _showSearchBar = true);
+            _chipOpenNotifier.value = true;
+          }
+        }
+      };
+      widget.searchNotifier!.addListener(_externalSearchListener!);
+    }
+  }
+
+  @override
+  void dispose() {
+    _chipOpenNotifier.dispose();
+    _searchKeywordNotifier.dispose();
+    if (_externalSearchListener != null && widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener!);
+    }
+    super.dispose();
+  }
 
   Future<void> _openLocationFilter() async {
     final raw = await Navigator.push<Map<String, String?>>(
@@ -105,40 +155,71 @@ class _FindFriendsScreenState extends State<FindFriendsScreen> {
     }
 
     return Scaffold(
-      body: StreamBuilder<List<UserModel>>(
-        stream: FindFriendRepository()
-            .getUsersForFindFriends(userModel, locationFilter: _locationFilter),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text("findFriend.noFriendsFound".tr()));
-          }
+      body: Column(
+        children: [
+          if (_showSearchBar)
+            InlineSearchChip(
+              hintText: 'main.search.hint.findFriends'.tr(),
+              openNotifier: _chipOpenNotifier,
+              onSubmitted: (kw) =>
+                  _searchKeywordNotifier.value = kw.trim().toLowerCase(),
+              onClose: () {
+                setState(() => _showSearchBar = false);
+                _searchKeywordNotifier.value = '';
+              },
+            ),
+          Expanded(
+            child: StreamBuilder<List<UserModel>>(
+              stream: FindFriendRepository().getUsersForFindFriends(userModel,
+                  locationFilter: _locationFilter),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text("findFriend.noFriendsFound".tr()));
+                }
 
-          final userList = snapshot.data!;
-          return ListView.builder(
-            padding: const EdgeInsets.all(8.0),
-            itemCount: userList.length,
-            itemBuilder: (context, index) {
-              final user = userList[index];
-              return InkWell(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => FindFriendDetailScreen(
-                          user: user, currentUserModel: userModel),
-                    ),
-                  );
-                },
-                child: FindFriendCard(user: user),
-              );
-            },
-          );
-        },
+                var userList = snapshot.data!;
+                final kw = _searchKeywordNotifier.value;
+                if (kw.isNotEmpty) {
+                  userList = userList
+                      .where((u) =>
+                          (('${u.nickname} ${u.bio ?? ''} ${(u.interests ?? const []).join(' ')}')
+                              .toLowerCase()
+                              .contains(kw)))
+                      .toList();
+                }
+
+                if (userList.isEmpty) {
+                  return Center(child: Text("findFriend.noFriendsFound".tr()));
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(8.0),
+                  itemCount: userList.length,
+                  itemBuilder: (context, index) {
+                    final user = userList[index];
+                    return InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => FindFriendDetailScreen(
+                                user: user, currentUserModel: userModel),
+                          ),
+                        );
+                      },
+                      child: FindFriendCard(user: user),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,

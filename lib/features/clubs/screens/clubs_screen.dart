@@ -44,17 +44,21 @@ import 'package:bling_app/features/clubs/widgets/club_card.dart';
 import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
+import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 class ClubsScreen extends StatefulWidget {
   final UserModel? userModel;
-  // V V V --- [추가] HomeScreen에서 locationFilter를 전달받습니다 --- V V V
   final Map<String, String?>? locationFilter;
-  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
+  final bool autoFocusSearch;
+  final ValueNotifier<AppSection?>? searchNotifier;
 
   const ClubsScreen({
     this.userModel,
-    this.locationFilter, // [추가]
-    super.key
+    this.locationFilter,
+    this.autoFocusSearch = false,
+    this.searchNotifier,
+    super.key,
   });
 
   @override
@@ -64,12 +68,39 @@ class ClubsScreen extends StatefulWidget {
 class _ClubsScreenState extends State<ClubsScreen> {
   // [수정] 화면 내부 필터 상태를 late로 선언합니다.
   late Map<String, String?>? _locationFilter;
+  // 검색칩 상태
+  final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<String> _searchKeywordNotifier =
+      ValueNotifier<String>('');
+  bool _showSearchBar = false;
+  VoidCallback? _externalSearchListener;
 
   @override
   void initState() {
     super.initState();
     // [수정] 화면이 처음 생성될 때, HomeScreen에서 전달받은 필터 값으로 초기화합니다.
     _locationFilter = widget.locationFilter;
+
+    // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
+    if (widget.autoFocusSearch) {
+      _showSearchBar = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+    }
+
+    // 피드 내부 하단 검색 아이콘 → 검색칩 열기
+    if (widget.searchNotifier != null) {
+      _externalSearchListener = () {
+        if (widget.searchNotifier!.value == AppSection.clubs) {
+          if (mounted) {
+            setState(() => _showSearchBar = true);
+            _chipOpenNotifier.value = true;
+          }
+        }
+      };
+      widget.searchNotifier!.addListener(_externalSearchListener!);
+    }
   }
 
   void _openFilter() async {
@@ -93,6 +124,17 @@ class _ClubsScreenState extends State<ClubsScreen> {
     return Scaffold(
       body: Column(
         children: [
+          if (_showSearchBar)
+            InlineSearchChip(
+              hintText: 'main.search.hint.clubs'.tr(),
+              openNotifier: _chipOpenNotifier,
+              onSubmitted: (kw) =>
+                  _searchKeywordNotifier.value = kw.trim().toLowerCase(),
+              onClose: () {
+                setState(() => _showSearchBar = false);
+                _searchKeywordNotifier.value = '';
+              },
+            ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -127,7 +169,20 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   return Center(child: Text('clubs.screen.empty'.tr()));
                 }
 
-                final clubs = snapshot.data!;
+                var clubs = snapshot.data!;
+                final kw = _searchKeywordNotifier.value;
+                if (kw.isNotEmpty) {
+                  clubs = clubs
+                      .where((c) =>
+                          (('${c.title} ${c.description} ${c.mainCategory} ${c.interestTags.join(' ')}')
+                              .toLowerCase()
+                              .contains(kw)))
+                      .toList();
+                }
+
+                if (clubs.isEmpty) {
+                  return Center(child: Text('clubs.screen.empty'.tr()));
+                }
 
                 return ListView.builder(
                   itemCount: clubs.length,

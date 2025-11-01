@@ -40,10 +40,12 @@
 library;
 
 /// 아래부터 실제 코드
+import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 import '../models/product_model.dart';
 import '../widgets/product_card.dart';
@@ -51,13 +53,28 @@ import '../widgets/product_card.dart';
 class MarketplaceScreen extends StatefulWidget {
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
-  const MarketplaceScreen({super.key, this.userModel, this.locationFilter});
+  final bool autoFocusSearch;
+  final ValueNotifier<AppSection?>? searchNotifier;
+
+  const MarketplaceScreen({
+    this.userModel,
+    this.locationFilter,
+    this.autoFocusSearch = false,
+    this.searchNotifier,
+    super.key,
+  });
 
   @override
   State<MarketplaceScreen> createState() => _MarketplaceScreenState();
 }
 
 class _MarketplaceScreenState extends State<MarketplaceScreen> {
+  // 검색칩 상태
+  final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<String> _searchKeywordNotifier =
+      ValueNotifier<String>('');
+  bool _showSearchBar = false;
+  VoidCallback? _externalSearchListener;
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyLocationFilter(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
     final filter = widget.locationFilter;
@@ -89,6 +106,25 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 전역 검색 진입/피드 내 검색 아이콘에 대응
+    if (!_showSearchBar && widget.autoFocusSearch) {
+      _showSearchBar = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+    }
+    if (widget.searchNotifier != null && _externalSearchListener == null) {
+      _externalSearchListener = () {
+        if (widget.searchNotifier!.value == AppSection.marketplace) {
+          if (mounted) {
+            setState(() => _showSearchBar = true);
+            _chipOpenNotifier.value = true;
+          }
+        }
+      };
+      widget.searchNotifier!.addListener(_externalSearchListener!);
+    }
+
     Query<Map<String, dynamic>> buildQuery() {
       final userProv = widget.userModel?.locationParts?['prov'];
 
@@ -124,47 +160,87 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     }
 
     return Scaffold(
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: buildQuery().snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-                child: Text('marketplace.error'
-                    .tr(namedArgs: {'error': snapshot.error.toString()})));
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(
-                child: Text('marketplace.empty'.tr(),
-                    textAlign: TextAlign.center));
-          }
-
-          final allDocs = snapshot.data!.docs;
-          final productsDocs = _applyLocationFilter(allDocs);
-
-          return ListView.separated(
-            itemCount: productsDocs.length,
-            separatorBuilder: (context, index) => const Divider(
-              height: 1,
-              thickness: 1,
-              indent: 16,
-              endIndent: 16,
+      body: Column(
+        children: [
+          if (_showSearchBar)
+            InlineSearchChip(
+              hintText: 'main.search.hint.marketplace'.tr(),
+              openNotifier: _chipOpenNotifier,
+              onSubmitted: (kw) =>
+                  _searchKeywordNotifier.value = kw.trim().toLowerCase(),
+              onClose: () {
+                setState(() => _showSearchBar = false);
+                _searchKeywordNotifier.value = '';
+              },
             ),
-            itemBuilder: (context, index) {
-              final product = ProductModel.fromFirestore(productsDocs[index]);
+          Expanded(
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: buildQuery().snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                      child: Text('marketplace.error'.tr(
+                          namedArgs: {'error': snapshot.error.toString()})));
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                      child: Text('marketplace.empty'.tr(),
+                          textAlign: TextAlign.center));
+                }
 
-              // 이제 ProductCard가 AI 뱃지 표시를 스스로 책임지므로,
-              // 여기서는 ProductCard만 호출하면 됩니다.
-              return ProductCard(
-                key: ValueKey(product.id),
-                product: product,
-              );
-            },
-          );
-        },
+                final allDocs = snapshot.data!.docs;
+                // 위치 필터
+                var productsDocs = _applyLocationFilter(allDocs);
+                // 키워드 필터 (제목/설명/태그)
+                final kw = _searchKeywordNotifier.value;
+                if (kw.isNotEmpty) {
+                  productsDocs = productsDocs.where((d) {
+                    final p = ProductModel.fromFirestore(d);
+                    final hay =
+                        ('${p.title} ${p.description} ${p.tags.join(' ')}')
+                            .toLowerCase();
+                    return hay.contains(kw);
+                  }).toList();
+                }
+
+                return ListView.separated(
+                  itemCount: productsDocs.length,
+                  separatorBuilder: (context, index) => const Divider(
+                    height: 1,
+                    thickness: 1,
+                    indent: 16,
+                    endIndent: 16,
+                  ),
+                  itemBuilder: (context, index) {
+                    final product =
+                        ProductModel.fromFirestore(productsDocs[index]);
+
+                    // 이제 ProductCard가 AI 뱃지 표시를 스스로 책임지므로,
+                    // 여기서는 ProductCard만 호출하면 됩니다.
+                    return ProductCard(
+                      key: ValueKey(product.id),
+                      product: product,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _chipOpenNotifier.dispose();
+    _searchKeywordNotifier.dispose();
+    if (_externalSearchListener != null && widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener!);
+    }
+    super.dispose();
   }
 }

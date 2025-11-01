@@ -37,6 +37,7 @@
 library;
 // (파일 내용...)
 
+import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/jobs/data/job_repository.dart';
@@ -46,11 +47,21 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 // ✅ [작업 31] 1. 일자리 유형 선택 화면 import
 import 'package:bling_app/features/jobs/constants/job_categories.dart';
+import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 class JobsScreen extends StatefulWidget {
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
-  const JobsScreen({this.userModel, this.locationFilter, super.key});
+  final bool autoFocusSearch;
+  final ValueNotifier<AppSection?>? searchNotifier;
+
+  const JobsScreen({
+    this.userModel,
+    this.locationFilter,
+    this.autoFocusSearch = false,
+    this.searchNotifier,
+    super.key,
+  });
 
   @override
   // ignore: library_private_types_in_public_api
@@ -65,6 +76,13 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
     JobType.quickGig.name, // 'quick_gig' (단순 일자리)
     JobType.regular.name, // 'regular' (정규직)
   ];
+
+  // 검색칩 상태
+  final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<String> _searchKeywordNotifier =
+      ValueNotifier<String>('');
+  bool _showSearchBar = false;
+  VoidCallback? _externalSearchListener;
 
   List<JobModel> _applyLocationFilter(List<JobModel> allJobs) {
     final filter = widget.locationFilter;
@@ -95,11 +113,37 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabFilters.length, vsync: this);
+
+    // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
+    if (widget.autoFocusSearch) {
+      _showSearchBar = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+    }
+
+    // 피드 내부 하단 검색 아이콘 → 검색칩 열기
+    if (widget.searchNotifier != null) {
+      _externalSearchListener = () {
+        if (widget.searchNotifier!.value == AppSection.jobs) {
+          if (mounted) {
+            setState(() => _showSearchBar = true);
+            _chipOpenNotifier.value = true;
+          }
+        }
+      };
+      widget.searchNotifier!.addListener(_externalSearchListener!);
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _chipOpenNotifier.dispose();
+    _searchKeywordNotifier.dispose();
+    if (_externalSearchListener != null && widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener!);
+    }
     super.dispose();
   }
 
@@ -122,6 +166,17 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
     return Scaffold(
       body: Column(
         children: [
+          if (_showSearchBar)
+            InlineSearchChip(
+              hintText: 'main.search.hint.jobs'.tr(),
+              openNotifier: _chipOpenNotifier,
+              onSubmitted: (kw) =>
+                  _searchKeywordNotifier.value = kw.trim().toLowerCase(),
+              onClose: () {
+                setState(() => _showSearchBar = false);
+                _searchKeywordNotifier.value = '';
+              },
+            ),
           TabBar(
             controller: _tabController,
             labelColor: Theme.of(context).primaryColor,
@@ -152,8 +207,17 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
                 }
 
                 final allJobs = snapshot.data ?? [];
-                // [수정] 2차 필터링 적용
-                final filteredJobs = _applyLocationFilter(allJobs);
+                // [수정] 2차 필터링 적용 (위치)
+                var filteredJobs = _applyLocationFilter(allJobs);
+                // 키워드 필터 (제목/설명)
+                final kw = _searchKeywordNotifier.value;
+                if (kw.isNotEmpty) {
+                  filteredJobs = filteredJobs
+                      .where((j) => ('${j.title} ${j.description}')
+                          .toLowerCase()
+                          .contains(kw))
+                      .toList();
+                }
 
                 if (filteredJobs.isEmpty) {
                   return Center(child: Text('jobs.screen.empty'.tr()));
