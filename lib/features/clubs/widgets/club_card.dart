@@ -14,6 +14,10 @@
 // - 카드에 신뢰 등급, 비공개, 관심사 태그 등 추가 정보 표시.
 // - 운영자를 위한 빠른 관리/수정 액션 지원.
 // =====================================================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 9-2) 기획서 6.1.5 '수익 모델' 반영.
+// 2. 'club.isSponsored'가 true일 때 '스폰서' 배지(라벨)를 표시하는 UI 추가.
+// =====================================================
 
 import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/features/clubs/screens/club_detail_screen.dart';
@@ -42,6 +46,10 @@ class _ClubCardState extends State<ClubCard>
 
     // State 클래스 내에서는 widget.club으로 데이터에 접근합니다.
     final club = widget.club;
+    final now = DateTime.now();
+    final bool hasExpired =
+        club.adExpiryDate != null && club.adExpiryDate!.toDate().isBefore(now);
+    final bool showSponsored = club.isSponsored && !hasExpired;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -78,6 +86,26 @@ class _ClubCardState extends State<ClubCard>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // [추가] 스폰서 배지 (만료일 체크)
+                    if (showSponsored)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .primaryColor
+                                .withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text('common.sponsored'.tr(),
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                      ),
                     Text(
                       club.title,
                       style: const TextStyle(

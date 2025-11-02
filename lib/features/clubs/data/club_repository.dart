@@ -1,6 +1,19 @@
+// ===================== DocHeader =====================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 9-2) 기획서 6.1 '모임 제안' 로직 구현 (V2.0).
+// 2. '_clubProposals' 컬렉션 참조 추가.
+// 3. 'createClubProposal': '모임 제안' 생성 함수 추가.
+// 4. 'joinClubProposal': '제안 참여' 및 '목표 인원 도달 시 자동 생성' 로직 추가 (트랜잭션).
+// 5. '_convertProposalToClub': '제안'을 '정식 클럽'으로 전환하는 내부 함수 (클럽 생성, 채팅방 생성, 멤버 자동 등록, 제안 삭제).
+// 6. 'getClubProposalsStream': '모임 제안' 탭 목록 스트림 추가.
+// 7. 'getClubsStream': '스폰서' 클럽 우선 정렬 로직 추가.
+// 8. (Task 12) 'getMyClubsStream': '내가 가입한 모임' 카로셀을 위한 스트림 추가.
+// 9. (Task 10) 'deletePost': [버그 수정] 게시글 삭제 시 하위 'comments' 컬렉션을 일괄 삭제(batch delete)하도록 수정.
+// =====================================================
 // lib/features/clubs/data/club_repository.dart
 
 import 'package:bling_app/features/clubs/models/club_member_model.dart';
+import 'package:bling_app/features/clubs/models/club_proposal_model.dart'; // new
 import 'package:bling_app/features/clubs/models/club_post_model.dart';
 import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
@@ -16,6 +29,8 @@ class ClubRepository {
 
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection('users');
+  CollectionReference<Map<String, dynamic>> get _clubProposals =>
+      _firestore.collection('club_proposals'); // 제안(프로포절) 컬렉션
   CollectionReference<Map<String, dynamic>> get _clubs =>
       _firestore.collection('clubs');
   CollectionReference<Map<String, dynamic>> get _chats =>
@@ -37,7 +52,7 @@ class ClubRepository {
     final chatRoomData = {
       'isGroupChat': true,
       'groupName': club.title,
-      'groupImage': null, // TODO: 동호회 대표 이미지 필드 추가 시 연동
+      'groupImage': club.imageUrl ?? '', // [수정] club.imageUrl 연동
       'participants': [club.ownerId], // 첫 참여자는 개설자
       'lastMessage': 'clubs.repository.chatCreated'.tr(),
       'lastMessageTimestamp': FieldValue.serverTimestamp(),
@@ -63,6 +78,142 @@ class ClubRepository {
 
     debugPrint("동호회 및 그룹 채팅방 생성 완료: $clubId");
     return clubId;
+  }
+
+  /// Create a club proposal document (club_proposals) for proposals that
+  /// will be converted to ClubModel when target is met.
+  Future<String> createClubProposal(ClubProposalModel proposal) async {
+    final doc = await _clubProposals.add(proposal.toJson());
+    return doc.id;
+  }
+
+  /// Join a club proposal: add user to memberIds and increment currentMemberCount.
+  /// If the target is reached, convert the proposal to an official club.
+  Future<void> joinClubProposal(String proposalId, String userId) async {
+    final proposalRef = _clubProposals.doc(proposalId);
+
+    ClubProposalModel? proposal;
+
+    // Transaction 1: add participant and increment count
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(proposalRef);
+      if (!snapshot.exists) {
+        throw Exception("Proposal does not exist!");
+      }
+
+      proposal = ClubProposalModel.fromFirestore(snapshot);
+
+      if (proposal!.memberIds.contains(userId)) {
+        // already joined
+        return;
+      }
+
+      transaction.update(proposalRef, {
+        'memberIds': FieldValue.arrayUnion([userId]),
+        'currentMemberCount': FieldValue.increment(1),
+      });
+    });
+
+    if (proposal == null) return;
+
+    // After transaction: check if target reached (proposal count is from before +1)
+    if ((proposal!.currentMemberCount + 1) >= proposal!.targetMemberCount) {
+      await _convertProposalToClub(proposalRef.id, proposal!);
+    }
+  }
+
+  /// Convert a proposal to an official club. This should ideally be done in Cloud Functions,
+  /// but provided here for client-side flow.
+  Future<void> _convertProposalToClub(
+      String proposalId, ClubProposalModel proposal) async {
+    final clubRef = _clubs.doc();
+    final proposalRef = _clubProposals.doc(proposalId);
+    final chatRoomRef = _chats.doc(clubRef.id);
+
+    // Build new ClubModel from proposal
+    final newClub = ClubModel(
+      id: clubRef.id,
+      title: proposal.title,
+      description: proposal.description,
+      ownerId: proposal.ownerId,
+      location: proposal.location,
+      locationParts: proposal.locationParts,
+      geoPoint: proposal.geoPoint,
+      mainCategory: proposal.mainCategory,
+      interestTags: proposal.interestTags,
+      membersCount: proposal.currentMemberCount + 1,
+      isPrivate: false,
+      trustLevelRequired: 'normal',
+      createdAt: Timestamp.now(),
+      kickedMembers: const [],
+      pendingMembers: const [],
+      imageUrl: proposal.imageUrl,
+    );
+
+    final batch = _firestore.batch();
+
+    // Create club document
+    batch.set(clubRef, newClub.toJson());
+
+    // Participants: ensure uniqueness and include the current user if present
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
+    final allMemberIdsSet = <String>{...proposal.memberIds};
+    if (currentUid != null) {
+      allMemberIdsSet.add(currentUid);
+    }
+    final allMemberIds = allMemberIdsSet.toList();
+
+    // Create group chat document (use existing schema)
+    final unreadCounts = {for (var id in allMemberIds) id: 0};
+    batch.set(chatRoomRef, {
+      'isGroupChat': true,
+      'groupName': newClub.title,
+      'groupImage': newClub.imageUrl ?? '',
+      'participants': allMemberIds,
+      'lastMessage': 'clubs.repository.chatCreated'.tr(),
+      'lastMessageTimestamp': FieldValue.serverTimestamp(),
+      'unreadCounts': unreadCounts,
+    });
+
+    // Add members subcollection and update users' clubs
+    for (final memberId in allMemberIds) {
+      final memberRef = clubRef.collection('members').doc(memberId);
+      final newMember = ClubMemberModel(
+        id: memberId,
+        userId: memberId,
+        joinedAt: Timestamp.now(),
+      );
+      batch.set(memberRef, newMember.toJson());
+
+      final userRef = _users.doc(memberId);
+      batch.update(userRef, {
+        'clubs': FieldValue.arrayUnion([clubRef.id])
+      });
+    }
+
+    // Delete proposal after conversion
+    batch.delete(proposalRef);
+
+    await batch.commit();
+  }
+
+  /// Stream proposals (optionally add location filtering later)
+  Stream<List<ClubProposalModel>> getClubProposalsStream() {
+    Query<Map<String, dynamic>> query = _clubProposals;
+    query = query.orderBy('createdAt', descending: true);
+    return query.snapshots().map((snapshot) =>
+        snapshot.docs.map(ClubProposalModel.fromFirestore).toList());
+  }
+
+  /// Leave a club proposal (decrement count and remove from memberIds)
+  Future<void> leaveClubProposal(String proposalId, String userId) async {
+    final proposalRef = _clubProposals.doc(proposalId);
+    await _firestore.runTransaction((transaction) async {
+      transaction.update(proposalRef, {
+        'memberIds': FieldValue.arrayRemove([userId]),
+        'currentMemberCount': FieldValue.increment(-1),
+      });
+    });
   }
 
   Future<void> updateClub(ClubModel club) async {
@@ -112,12 +263,49 @@ class ClubRepository {
     });
   }
 
+  // [신규] 기존 fetchClubs와 동일한 동작을 하는 별칭 스트림 함수
+  Stream<List<ClubModel>> getClubsStream(
+      {Map<String, String?>? locationFilter}) {
+    return fetchClubs(locationFilter: locationFilter);
+  }
+
   // V V V --- [추가] 특정 동호회 정보를 실시간으로 가져오는 Stream 함수 --- V V V
   Stream<ClubModel> getClubStream(String clubId) {
     return _clubs
         .doc(clubId)
         .snapshots()
         .map((snapshot) => ClubModel.fromFirestore(snapshot));
+  }
+
+  // [신규] '내가 가입한 모임' 목록을 가져오는 스트림 (하이브리드 UI용)
+  Stream<List<ClubModel>> getMyClubsStream(String userId) {
+    return _users.doc(userId).snapshots().asyncMap((userDoc) async {
+      if (!userDoc.exists) {
+        return [];
+      }
+      final userData = userDoc.data() ?? {};
+      final List<String> myClubIds = List<String>.from(userData['clubs'] ?? []);
+
+      if (myClubIds.isEmpty) {
+        return [];
+      }
+
+      // Firestore 'whereIn' 쿼리는 한 번에 30개 ID만 조회 가능합니다.
+      // (개선) 사용자가 30개 이상 가입 시, 쿼리를 분할해야 하나 현재는 30개로 제한합니다.
+      final queryBatches = <List<String>>[];
+      for (var i = 0; i < myClubIds.length; i += 30) {
+        queryBatches.add(myClubIds.sublist(
+            i, i + 30 > myClubIds.length ? myClubIds.length : i + 30));
+      }
+
+      final allClubs = <ClubModel>[];
+      for (final batchIds in queryBatches) {
+        final snapshot =
+            await _clubs.where(FieldPath.documentId, whereIn: batchIds).get();
+        allClubs.addAll(snapshot.docs.map(ClubModel.fromFirestore));
+      }
+      return allClubs;
+    });
   }
   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
@@ -282,11 +470,24 @@ class ClubRepository {
     return _clubs.doc(clubId).collection('posts').doc(postId).snapshots();
   }
 
-  // V V V --- [추가] 방장이 게시글을 삭제하는 함수 --- V V V
+  // V V V --- [수정] 방장이 게시글을 삭제하는 함수: 하위 댓글까지 일괄 삭제 --- V V V
   Future<void> deleteClubPost(String clubId, String postId) async {
     final postRef = _clubs.doc(clubId).collection('posts').doc(postId);
-    // TODO: 게시글에 달린 댓글, 좋아요 등도 함께 삭제하는 로직 추가 필요
-    await postRef.delete();
+    final commentsRef = postRef.collection('comments');
+
+    // [수정] 게시글 삭제 시 하위 댓글(comments)을 먼저 배치 삭제한 뒤, 원본 게시글 삭제
+    final batch = _firestore.batch();
+
+    // 1) 모든 댓글 문서 읽어서 배치 삭제에 추가
+    final commentsSnapshot = await commentsRef.get();
+    for (final doc in commentsSnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // 2) 원본 게시글 삭제
+    batch.delete(postRef);
+
+    await batch.commit();
   }
 
   /// 특정 게시글에 새로운 댓글을 작성하고, 게시글의 댓글 수를 1 증가시킵니다.

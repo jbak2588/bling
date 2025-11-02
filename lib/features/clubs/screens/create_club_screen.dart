@@ -1,7 +1,15 @@
+// ===================== DocHeader =====================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 9-2) 기획서 6.1 '모임 제안' V2.0 로직 적용.
+// 2. '클럽 즉시 생성'에서 '모임 제안하기' 화면으로 변경.
+// 3. 'ClubModel' 대신 'ClubProposalModel'을 생성하도록 수정.
+// 4. 'repository.createClubProposal'을 호출하도록 변경.
+// 5. (Task 11) [UI 추가] '목표 인원' (targetMemberCount)을 설정하는 'Slider' 위젯 추가.
+// =====================================================
 // lib/features/clubs/screens/create_club_screen.dart
 
 import 'dart:io'; // [추가] File 클래스 사용
-import 'package:bling_app/features/clubs/models/club_model.dart';
+import 'package:bling_app/features/clubs/models/club_proposal_model.dart'; // [수정] ClubModel -> ClubProposalModel
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:bling_app/features/location/screens/location_filter_screen.dart';
@@ -9,6 +17,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart'; // [추가] Firebase Storage
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // [추가] image_picker
+import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart'; // [추가] 고유 파일명 생성
 import 'package:easy_localization/easy_localization.dart';
 
@@ -27,17 +36,30 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final TextEditingController _targetCountController =
+      TextEditingController(text: '5');
 
   // final List<String> _selectedInterests = [];
 
   // ✅ 새로운 태그 상태 변수를 추가합니다.
-  List<String> _interestTags = [];
+  // ignore: unused_field, prefer_final_fields
+  String _locationName = '';
+  // ignore: unused_field
+  GeoPoint? _geoPoint;
 
-  bool _isPrivate = false;
+  // ignore: prefer_final_fields
+  String _mainCategory = 'sports'; // [추가]
+  List<String> _interestTags = []; // [추가]
+
+  // [추가] 목표 인원 설정
+  // ignore: prefer_final_fields
+  double _targetMemberCount = 5.0; // Slider의 기본값
+
+  bool _isPrivate = false; // [수정] 비공개 여부 (제안에서는 제거해도 무방하나 유지)
   bool _isSaving = false;
   Map<String, String?>? _selectedLocationParts;
 
-  XFile? _selectedImage;
+  XFile? _image;
   final ImagePicker _picker = ImagePicker();
 
   final ClubRepository _repository = ClubRepository();
@@ -78,7 +100,14 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _targetCountController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _targetCountController.text = _targetMemberCount.toInt().toString();
   }
 
   // [추가] 이미지 선택 함수
@@ -87,7 +116,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
         await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (pickedFile != null) {
       setState(() {
-        _selectedImage = pickedFile;
+        _image = pickedFile;
       });
     }
   }
@@ -128,18 +157,20 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
     try {
       String? imageUrl;
       // [수정] 이미지가 선택되었으면 Storage에 업로드
-      if (_selectedImage != null) {
+      if (_image != null) {
         final fileName = const Uuid().v4();
-        final ref =
-            FirebaseStorage.instance.ref().child('club_images/$fileName');
-        await ref.putFile(File(_selectedImage!.path));
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('club_images/${widget.userModel.uid}/$fileName');
+        await ref.putFile(File(_image!.path));
         imageUrl = await ref.getDownloadURL();
       }
 
       final parts = widget.userModel.locationParts;
 
-      final newClub = ClubModel(
-        id: '', // ID는 Firestore에서 자동으로 생성됩니다.
+      // [수정] ClubModel 대신 ClubProposalModel 생성
+      final newProposal = ClubProposalModel(
+        id: '', // Firestore에서 자동 생성
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         ownerId: widget.userModel.uid,
@@ -150,34 +181,22 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
             parts?['prov'] ??
             'Unknown',
         locationParts: parts,
-        // ✅ 개설자의 geoPoint를 동호회 위치 정보로 저장합니다.
         geoPoint: widget.userModel.geoPoint,
-
-        // interests: _selectedInterests, // Removed or renamed as per ClubModel definition
-        isPrivate: _isPrivate,
-        createdAt: Timestamp.now(),
-        membersCount: 1, // 개설자는 자동으로 멤버 1명이 됩니다.
-        imageUrl: imageUrl, // [수정] 업로드된 이미지 URL 전달
-        // mainCategory: _selectedInterests.isNotEmpty
-        //     ? _interestCategories.entries
-        //         .firstWhere(
-        //           (entry) => entry.value.contains(_selectedInterests.first),
-        //           orElse: () => _interestCategories.entries.first,
-        //         )
-        //         .key
-        //     : '', // 첫 번째 선택된 관심사의 카테고리, 없으면 빈 문자열
-        // interestTags: _selectedInterests, // 선택된 관심사 리스트
-        // ✅ mainCategory는 첫 번째 태그를 기반으로 임시 지정하거나, 별도 UI를 통해 받을 수 있습니다.
-        mainCategory: _interestTags.isNotEmpty ? _interestTags.first : 'etc',
-        // ✅ 새로운 태그 상태 변수를 사용합니다.
+        mainCategory: _mainCategory,
         interestTags: _interestTags,
+        imageUrl: imageUrl ?? '',
+        createdAt: Timestamp.now(),
+        targetMemberCount: _targetMemberCount.toInt(), // 목표 인원
+        currentMemberCount: 1,
+        memberIds: [widget.userModel.uid],
       );
 
-      await _repository.createClub(newClub);
+      // [수정] createClub -> createClubProposal 호출
+      await _repository.createClubProposal(newProposal);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('clubs.createClub.success'.tr()),
+          content: Text('clubs.proposal.createSuccess'.tr()),
           backgroundColor: Colors.green,
         ));
         Navigator.of(context).pop();
@@ -185,8 +204,8 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'clubs.createClub.fail'.tr(namedArgs: {'error': e.toString()})),
+          content: Text('clubs.proposal.createFail'
+              .tr(namedArgs: {'error': e.toString()})),
           backgroundColor: Colors.red,
         ));
       }
@@ -201,7 +220,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('clubs.createClub.title'.tr()),
+        title: Text('clubs.proposal.createTitle'.tr()), // "모임 제안하기"
         actions: [
           // [수정] _isSaving 상태에 따라 버튼 활성화/비활성화
           if (!_isSaving)
@@ -225,10 +244,10 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                       CircleAvatar(
                         radius: 50,
                         backgroundColor: Colors.grey[200],
-                        backgroundImage: _selectedImage != null
-                            ? FileImage(File(_selectedImage!.path))
+                        backgroundImage: _image != null
+                            ? FileImage(File(_image!.path))
                             : null,
-                        child: _selectedImage == null
+                        child: _image == null
                             ? Icon(Icons.groups,
                                 size: 40, color: Colors.grey[600])
                             : null,
@@ -307,7 +326,6 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 // ),
                 // const SizedBox(height: 8),
                 // ..._interestCategories.entries.map((entry) {
-                //   final categoryKey = entry.key;
                 //   final interestKeys = entry.value;
                 //   return ExpansionTile(
                 //     title: Text("interests.$categoryKey".tr(),
@@ -358,12 +376,83 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                         fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 8),
                 CustomTagInputField(
-                  hintText: 'clubs.createClub.tagsHint'.tr(),
+                  hintText: 'clubs.proposal.tagsHint'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _interestTags = tags;
                     });
                   },
+                ),
+
+                // [추가] 목표 인원 설정: 슬라이더 + 직접 입력
+                const SizedBox(height: 24),
+                Text(
+                  'clubs.proposal.targetMembers'.tr(),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    // 슬라이더
+                    Expanded(
+                      child: Slider(
+                        value: _targetMemberCount,
+                        min: 3,
+                        max: 50,
+                        divisions: 47,
+                        label: _targetMemberCount.toInt().toString(),
+                        onChanged: (value) {
+                          setState(() {
+                            _targetMemberCount = value;
+                            _targetCountController.text =
+                                value.toInt().toString();
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // 숫자 직접 입력 필드
+                    SizedBox(
+                      width: 80,
+                      child: TextField(
+                        controller: _targetCountController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (val) {
+                          final parsed = int.tryParse(val);
+                          if (parsed != null) {
+                            final clamped = parsed.clamp(3, 50);
+                            if (clamped != parsed) {
+                              // 범위 밖이면 즉시 보정
+                              _targetCountController.text = clamped.toString();
+                              _targetCountController.selection =
+                                  TextSelection.fromPosition(
+                                TextPosition(
+                                    offset: _targetCountController.text.length),
+                              );
+                            }
+                            setState(() {
+                              _targetMemberCount = clamped.toDouble();
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  'clubs.proposal.targetMembersCount'.tr(namedArgs: {
+                    'count': _targetMemberCount.toInt().toString()
+                  }),
                 ),
 
                 const SizedBox(height: 24),

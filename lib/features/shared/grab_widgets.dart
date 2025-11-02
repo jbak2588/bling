@@ -115,6 +115,7 @@ class GrabAppBarShell extends StatelessWidget implements PreferredSizeWidget {
   final double height;
   final bool pillActions;
   final bool? centerTitle; // ✅ 추가됨
+  final PreferredSizeWidget? bottom; // ✅ 추가: AppBar bottom (e.g., TabBar)
 
   final double actionChipSize; // 기본 36
   final EdgeInsets actionMargin; // 칩 사이 간격
@@ -127,6 +128,7 @@ class GrabAppBarShell extends StatelessWidget implements PreferredSizeWidget {
     this.height = kToolbarHeight + 6,
     this.pillActions = true,
     this.centerTitle, // ✅ 추가됨
+    this.bottom, // ✅ 추가됨
     this.actionChipSize = 36, // << 작게
     this.actionMargin = const EdgeInsets.only(right: 6),
   });
@@ -186,6 +188,7 @@ class GrabAppBarShell extends StatelessWidget implements PreferredSizeWidget {
       title: title,
       actions: wrappedActions,
       centerTitle: centerTitle, // ✅ AppBar에 전달
+      bottom: bottom, // ✅ 전달
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

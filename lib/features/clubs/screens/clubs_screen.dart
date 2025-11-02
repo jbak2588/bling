@@ -16,7 +16,6 @@
 // - 동호회는 Firestore에 제목, 설명, 운영자, 위치, 관심사, 비공개 여부, 신뢰 등급, 멤버 관리 등의 필드로 구성됩니다.
 // - 동호회 내 게시글은 `clubs/{clubId}/posts`에 저장되며, 이미지, 좋아요, 댓글을 지원합니다.
 // - 매칭 및 추천 로직은 위치, 관심사, 연령대, 신뢰 등급을 우선적으로 고려합니다.
-// - 주요 TODO: 프로필 입력(관심사/소개/연령대), 팔로우 구조, GEO 쿼리, 매칭 로직, 데이팅 프로필 옵션, 1:1 채팅 연동 등.
 //
 // [구현 요약]
 // - 동호회 목록, 위치 필터, 상세 화면(탭: 게시판/멤버) 기능을 제공합니다.
@@ -36,12 +35,25 @@
 // - 민감한 동호회를 위한 비공개 옵션 및 신뢰 등급 제한 확대.
 // - 동호회 탐색 및 가입 UX/UI 개선.
 // =====================================================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 9-2) 기획서 6.1 '모임 제안' V2.0 UI로 전면 개편.
+// 2. (Task 20) [버그 수정] 'IndexedStack'과 'AppBar(bottom: ...)'의 Ticker 충돌 해결.
+// 3. 'DefaultTabController'를 사용하고, 'AppBar'의 'bottom' 속성을 제거함.
+// 4. 'TabBar'를 'Scaffold'의 'body' 영역(Column)으로 이동하여 Ticker 충돌을 원천 차단함.
+// 5. 'body'를 2개의 탭('모임 제안', '활동 중인 모임')으로 분리.
+// 6. (Task 12) '활동 중인 모임' 탭 내부에 '내가 가입한 모임' (카로셀) + '모든 모임 탐색' (리스트)의 하이브리드 UI 적용.
+// 7. (Task 15) 'FloatingActionButton' 제거 (main_navigation_screen의 중앙 FAB로 통합).
+// =====================================================
+// lib/features/clubs/screens/clubs_screen.dart
 
 import 'package:bling_app/features/clubs/models/club_model.dart';
+import 'package:bling_app/features/clubs/models/club_proposal_model.dart'; // [추가]
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:bling_app/features/clubs/widgets/club_card.dart';
-import 'package:bling_app/features/location/screens/location_filter_screen.dart';
+import 'package:bling_app/features/clubs/widgets/club_proposal_card.dart'; // [추가]
+import 'package:bling_app/features/clubs/screens/club_detail_screen.dart';
+// import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
@@ -52,12 +64,16 @@ class ClubsScreen extends StatefulWidget {
   final Map<String, String?>? locationFilter;
   final bool autoFocusSearch;
   final ValueNotifier<AppSection?>? searchNotifier;
+  final TabController? tabController; // 부모로부터 TabController 받을 수 있음(선택)
+  final bool showInnerAppBar; // 내부 AppBar 노출 여부 (기본 표시)
 
   const ClubsScreen({
     this.userModel,
     this.locationFilter,
     this.autoFocusSearch = false,
     this.searchNotifier,
+    this.tabController,
+    this.showInnerAppBar = true,
     super.key,
   });
 
@@ -66,8 +82,7 @@ class ClubsScreen extends StatefulWidget {
 }
 
 class _ClubsScreenState extends State<ClubsScreen> {
-  // [수정] 화면 내부 필터 상태를 late로 선언합니다.
-  late Map<String, String?>? _locationFilter;
+  // 내부 위치 필터 상태 제거됨: 상위(AppBar)의 위치 필터를 사용합니다.
   // 검색칩 상태
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchKeywordNotifier =
@@ -75,13 +90,13 @@ class _ClubsScreenState extends State<ClubsScreen> {
   bool _showSearchBar = false;
   VoidCallback? _externalSearchListener;
 
+  // 저장소 인스턴스 (탭별 StreamBuilder에서 재사용)
+  final ClubRepository _repository = ClubRepository();
+
   @override
   void initState() {
     super.initState();
-    // [수정] 화면이 처음 생성될 때, HomeScreen에서 전달받은 필터 값으로 초기화합니다.
-    _locationFilter = widget.locationFilter;
 
-    // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
     if (widget.autoFocusSearch) {
       _showSearchBar = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -89,47 +104,35 @@ class _ClubsScreenState extends State<ClubsScreen> {
       });
     }
 
-    // 피드 내부 하단 검색 아이콘 → 검색칩 열기
     if (widget.searchNotifier != null) {
       _externalSearchListener = () {
         if (widget.searchNotifier!.value == AppSection.clubs) {
-          if (mounted) {
-            setState(() => _showSearchBar = true);
+          // setState during build 방지: 프레임 이후로 지연
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            if (!_showSearchBar) {
+              setState(() => _showSearchBar = true);
+            }
             _chipOpenNotifier.value = true;
-          }
+          });
         }
       };
       widget.searchNotifier!.addListener(_externalSearchListener!);
     }
 
-    // ✅ [버그 수정 1] 키워드가 변경될 때마다 setState를 호출하여 화면을 다시 그리도록 리스너 추가
     _searchKeywordNotifier.addListener(_onKeywordChanged);
   }
 
-  // ✅ [버그 수정 1] 키워드 변경 시 setState 호출
   void _onKeywordChanged() {
     if (mounted) setState(() {});
   }
 
-  void _openFilter() async {
-    final result = await Navigator.of(context).push<Map<String, String?>>(
-      MaterialPageRoute(
-          builder: (_) => LocationFilterScreen(userModel: widget.userModel)),
-    );
-    if (result != null) {
-      setState(() => _locationFilter = result);
-    }
-  }
+  // 위치 필터 시트는 현재 탭 UI에서 사용하지 않습니다. (필요 시 복원)
 
-  void _clearFilter() {
-    setState(() => _locationFilter = null);
-  }
-
-  // ✅ [버그 수정 2] 메모리 누수 방지를 위해 dispose 메서드 추가
   @override
   void dispose() {
     _chipOpenNotifier.dispose();
-    _searchKeywordNotifier.removeListener(_onKeywordChanged); // 리스너 제거
+    _searchKeywordNotifier.removeListener(_onKeywordChanged);
     _searchKeywordNotifier.dispose();
     if (_externalSearchListener != null && widget.searchNotifier != null) {
       widget.searchNotifier!.removeListener(_externalSearchListener!);
@@ -139,10 +142,59 @@ class _ClubsScreenState extends State<ClubsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ClubRepository clubRepository = ClubRepository();
-
-    return Scaffold(
-      body: Column(
+    // Dual-mode:
+    // - showInnerAppBar == true: self-contained (Scaffold + AppBar with TabBar)
+    // - showInnerAppBar == false: parent manages TabBar; requires external controller
+    if (widget.showInnerAppBar) {
+      return DefaultTabController(
+        length: 2,
+        child: Builder(builder: (ctx) {
+          final controller =
+              widget.tabController ?? DefaultTabController.of(ctx);
+          return Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              toolbarHeight: 0,
+              bottom: TabBar(
+                controller: controller,
+                tabs: [
+                  Tab(text: 'clubs.tabs.proposals'.tr()),
+                  Tab(text: 'clubs.tabs.activeClubs'.tr()),
+                ],
+              ),
+            ),
+            body: Column(
+              children: [
+                if (_showSearchBar)
+                  InlineSearchChip(
+                    hintText: 'main.search.hint.clubs'.tr(),
+                    openNotifier: _chipOpenNotifier,
+                    onSubmitted: (kw) =>
+                        _searchKeywordNotifier.value = kw.trim().toLowerCase(),
+                    onClose: () {
+                      setState(() => _showSearchBar = false);
+                      _searchKeywordNotifier.value = '';
+                    },
+                  ),
+                Expanded(
+                  child: TabBarView(
+                    controller: controller,
+                    children: [
+                      _buildProposalList(),
+                      _buildActiveClubList(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      );
+    } else {
+      final controller = widget.tabController;
+      assert(controller != null,
+          'When showInnerAppBar is false, a TabController must be provided.');
+      return Column(
         children: [
           if (_showSearchBar)
             InlineSearchChip(
@@ -155,67 +207,210 @@ class _ClubsScreenState extends State<ClubsScreen> {
                 _searchKeywordNotifier.value = '';
               },
             ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (_locationFilter != null)
-                IconButton(
-                  icon: const Icon(Icons.clear),
-                  tooltip: 'Clear',
-                  onPressed: _clearFilter,
-                ),
-              IconButton(
-                icon: const Icon(Icons.filter_alt_outlined),
-                tooltip: 'Filter',
-                onPressed: _openFilter,
-              ),
-            ],
-          ),
           Expanded(
-            child: StreamBuilder<List<ClubModel>>(
-              stream:
-                  // StreamBuilder는 이제 항상 화면의 최신 _locationFilter 상태를 사용합니다.
-                  clubRepository.fetchClubs(locationFilter: _locationFilter),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                      child: Text('clubs.screen.error'.tr(
-                          namedArgs: {'error': snapshot.error.toString()})));
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('clubs.screen.empty'.tr()));
-                }
-
-                var clubs = snapshot.data!;
-                final kw = _searchKeywordNotifier.value;
-                if (kw.isNotEmpty) {
-                  clubs = clubs
-                      .where((c) =>
-                          (('${c.title} ${c.description} ${c.mainCategory} ${c.interestTags.join(' ')}')
-                              .toLowerCase()
-                              .contains(kw)))
-                      .toList();
-                }
-
-                if (clubs.isEmpty) {
-                  return Center(child: Text('clubs.screen.empty'.tr()));
-                }
-
-                return ListView.builder(
-                  itemCount: clubs.length,
-                  itemBuilder: (context, index) {
-                    final club = clubs[index];
-                    // ✅ 각 카드에 고유한 ValueKey를 부여합니다.
-                    return ClubCard(key: ValueKey(club.id), club: club);
-                  },
-                );
-              },
+            child: TabBarView(
+              controller: controller,
+              children: [
+                _buildProposalList(),
+                _buildActiveClubList(),
+              ],
             ),
           ),
         ],
+      );
+    }
+  }
+
+  // 모임 제안 목록 탭
+  Widget _buildProposalList() {
+    return StreamBuilder<List<ClubProposalModel>>(
+      stream: _repository.getClubProposalsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(
+              child: Text('clubs.screen.error'
+                  .tr(namedArgs: {'error': snapshot.error.toString()})));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('clubs.proposal.empty'.tr()));
+        }
+
+        var proposals = snapshot.data!;
+        final kw = _searchKeywordNotifier.value;
+        if (kw.isNotEmpty) {
+          proposals = proposals
+              .where((c) =>
+                  (("${c.title} ${c.description} ${c.mainCategory} ${c.interestTags.join(' ')}")
+                      .toLowerCase()
+                      .contains(kw)))
+              .toList();
+        }
+
+        if (proposals.isEmpty) {
+          return Center(child: Text('clubs.proposal.empty'.tr()));
+        }
+
+        return ListView.builder(
+          itemCount: proposals.length,
+          itemBuilder: (context, index) {
+            final proposal = proposals[index];
+            return ClubProposalCard(
+                key: ValueKey(proposal.id), proposal: proposal);
+          },
+        );
+      },
+    );
+  }
+
+  // 활동 중인 모임 목록 탭
+  Widget _buildActiveClubList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildMyClubsCarousel(),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'clubs.tabs.exploreClubs'.tr(),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Expanded(child: _buildAllActiveClubsList()),
+      ],
+    );
+  }
+
+  // 전체 클럽 목록 (스폰서 우선 정렬)
+  Widget _buildAllActiveClubsList() {
+    return StreamBuilder<List<ClubModel>>(
+      stream: _repository.fetchClubs(locationFilter: widget.locationFilter),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(
+              child: Text('clubs.screen.error'
+                  .tr(namedArgs: {'error': snapshot.error.toString()})));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('clubs.screen.empty'.tr()));
+        }
+
+        var clubs = snapshot.data!;
+        final kw = _searchKeywordNotifier.value;
+        if (kw.isNotEmpty) {
+          clubs = clubs
+              .where((c) =>
+                  (("${c.title} ${c.description} ${c.mainCategory} ${c.interestTags.join(' ')}")
+                      .toLowerCase()
+                      .contains(kw)))
+              .toList();
+        }
+
+        if (clubs.isEmpty) {
+          return Center(child: Text('clubs.screen.empty'.tr()));
+        }
+
+        final sponsoredClubs = clubs.where((c) => c.isSponsored).toList();
+        final normalClubs = clubs.where((c) => !c.isSponsored).toList();
+        final sortedClubs = sponsoredClubs + normalClubs;
+
+        return ListView.builder(
+          padding: EdgeInsets.zero,
+          itemCount: sortedClubs.length,
+          itemBuilder: (context, index) {
+            final club = sortedClubs[index];
+            return ClubCard(key: ValueKey(club.id), club: club);
+          },
+        );
+      },
+    );
+  }
+
+  // 내가 가입한 모임 카로셀
+  Widget _buildMyClubsCarousel() {
+    if (widget.userModel == null) {
+      return const SizedBox.shrink();
+    }
+    return StreamBuilder<List<ClubModel>>(
+      stream: _repository.getMyClubsStream(widget.userModel!.uid),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        final myClubs = snapshot.data!;
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          color: Colors.white,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'clubs.tabs.myClubs'.tr(),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 120,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: myClubs.length,
+                  itemBuilder: (context, index) {
+                    final club = myClubs[index];
+                    return _buildMyClubTile(club);
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMyClubTile(ClubModel club) {
+    return SizedBox(
+      width: 100,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ClubDetailScreen(club: club),
+            ),
+          );
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              radius: 35,
+              backgroundImage:
+                  (club.imageUrl != null && club.imageUrl!.isNotEmpty)
+                      ? NetworkImage(club.imageUrl!)
+                      : null,
+              child: (club.imageUrl == null || club.imageUrl!.isEmpty)
+                  ? const Icon(Icons.groups)
+                  : null,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              club.title,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,6 +1,5 @@
 // lib/core/models/club_model.dart
 // ===================== DocHeader =====================
-// ===================== DocHeader =====================
 // [기획 요약]
 // - Firestore 동호회 모델은 제목, 설명, 운영자, 위치, 관심사, 비공개 여부, 신뢰 등급, 멤버 관리, 생성일 등의 필드를 포함합니다.
 // - 위치, 관심사, 연령, 신뢰 등급을 활용한 고급 매칭 및 추천을 지원합니다.
@@ -9,14 +8,16 @@
 // - Dart 모델은 Firestore 구조와 동일하게 id, title, description, ownerId, location, locationParts, mainCategory, interestTags, membersCount, isPrivate, trustLevelRequired, createdAt, kickedMembers, pendingMembers, imageUrl을 포함합니다.
 // - 동호회 생성, 표시, 멤버 관리에 사용됩니다.
 //
-// [차이점 및 부족한 부분]
-// - 매칭 로직과 통계 기능은 모델에 직접 구현되어 있지 않습니다.
-// - 운영자 기능과 고급 비공개 설정이 부족합니다.
-//
 // [개선 제안]
 // - 통계, 운영자 상태, 고급 비공개 옵션 필드 추가.
 // - 더 세분화된 신뢰 등급 및 멤버 역할 지원 고려.
 // =====================================================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 9-2) 기획서 6.1.5 '수익 모델' 반영.
+// 2. 'isSponsored': (bool) 유료 광고(상단 고정) 여부 필드 추가.
+// 3. 'adExpiryDate': (Timestamp) 광고 만료일 필드 추가.
+// =====================================================
+// lib/features/clubs/models/club_model.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -39,6 +40,8 @@ class ClubModel {
 
   // V V V --- [추가] 동호회 대표 이미지 URL 필드 --- V V V
   final String? imageUrl;
+  final bool isSponsored; // [추가] 광고 여부
+  final Timestamp? adExpiryDate; // [추가] 광고 만료일
 
   ClubModel({
     required this.id,
@@ -57,6 +60,8 @@ class ClubModel {
     this.kickedMembers,
     this.pendingMembers,
     this.imageUrl, // [추가] 생성자에 추가
+    this.isSponsored = false, // [추가]
+    this.adExpiryDate, // [추가]
   });
 
   factory ClubModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -86,6 +91,8 @@ class ClubModel {
           ? List<String>.from(data['pendingMembers'])
           : [],
       imageUrl: data['imageUrl'], // [추가] Firestore에서 이미지 URL 불러오기
+      isSponsored: data['isSponsored'] ?? false, // [추가]
+      adExpiryDate: data['adExpiryDate'], // [추가]
     );
   }
 
@@ -106,6 +113,8 @@ class ClubModel {
       'kickedMembers': kickedMembers,
       'pendingMembers': pendingMembers,
       'imageUrl': imageUrl, // [추가] Firestore에 이미지 URL 저장
+      'isSponsored': isSponsored,
+      'adExpiryDate': adExpiryDate,
     };
   }
 }

@@ -229,7 +229,8 @@ class HomeScreen extends StatelessWidget {
     MenuItem(
         svg: '$_iconsPath/ico_community.svg',
         labelKey: 'main.tabs.clubs',
-        screen: const ClubsScreen()),
+        // Placeholder only for routing metadata; real screen is built in onTap
+        screen: const Placeholder()),
     // 7. findFriends (친구찾기)
     MenuItem(
         svg: '$_iconsPath/ico_friend.svg',
@@ -320,13 +321,20 @@ class HomeScreen extends StatelessWidget {
                         locationFilter: activeLocationFilter,
                         autoFocusSearch: false,
                         searchNotifier: searchNotifier);
-                  } else if (screen is ClubsScreen) {
-                    // Clubs now supports inline search chip
-                    nextScreen = ClubsScreen(
-                        userModel: userModel,
-                        locationFilter: activeLocationFilter,
-                        autoFocusSearch: false,
-                        searchNotifier: searchNotifier);
+                  } else if (item.labelKey == 'main.tabs.clubs') {
+                    // Clubs: uses an external TabController via a local DefaultTabController wrapper
+                    nextScreen = DefaultTabController(
+                      length: 2,
+                      child: Builder(
+                        builder: (ctx) => ClubsScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                          autoFocusSearch: false,
+                          searchNotifier: searchNotifier,
+                          tabController: DefaultTabController.of(ctx),
+                        ),
+                      ),
+                    );
                   } else if (screen is FindFriendsScreen) {
                     // FindFriends now supports inline search chip
                     nextScreen = FindFriendsScreen(
@@ -667,9 +675,15 @@ class HomeScreen extends StatelessWidget {
                           );
                           return;
                         }
-                        final nextScreen = ClubsScreen(
-                          userModel: userModel,
-                          locationFilter: activeLocationFilter,
+                        final nextScreen = DefaultTabController(
+                          length: 2,
+                          child: Builder(
+                            builder: (ctx) => ClubsScreen(
+                              userModel: userModel,
+                              locationFilter: activeLocationFilter,
+                              tabController: DefaultTabController.of(ctx),
+                            ),
+                          ),
                         );
                         onIconTap(nextScreen, 'main.tabs.clubs');
                       },
