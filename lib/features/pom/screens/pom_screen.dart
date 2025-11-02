@@ -89,12 +89,22 @@ class _PomScreenState extends State<PomScreen> {
       };
       widget.searchNotifier!.addListener(_externalSearchListener!);
     }
+
+    // ✅ [버그 수정] 키워드가 변경될 때마다 setState를 호출하여 화면을 다시 그리도록 리스너 추가
+    _searchKeywordNotifier.addListener(_onKeywordChanged);
+  }
+
+  // ✅ [버그 수정] 키워드 변경 시 setState 호출
+  void _onKeywordChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     _chipOpenNotifier.dispose();
+    _searchKeywordNotifier
+        .removeListener(_onKeywordChanged); // ✅ [버그 수정] 리스너 제거
     _searchKeywordNotifier.dispose();
     if (_externalSearchListener != null && widget.searchNotifier != null) {
       widget.searchNotifier!.removeListener(_externalSearchListener!);

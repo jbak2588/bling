@@ -104,16 +104,21 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
         .toList();
   }
 
+  // ✅ [수정] initState 추가
   @override
-  Widget build(BuildContext context) {
-    // 전역 검색 진입/피드 내 검색 아이콘에 대응
-    if (!_showSearchBar && widget.autoFocusSearch) {
+  void initState() {
+    super.initState();
+
+    // ✅ [이동] autoFocusSearch 로직을 build -> initState로 이동
+    if (widget.autoFocusSearch) {
       _showSearchBar = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _chipOpenNotifier.value = true;
       });
     }
-    if (widget.searchNotifier != null && _externalSearchListener == null) {
+
+    // ✅ [이동] externalSearchListener 등록 로직을 build -> initState로 이동
+    if (widget.searchNotifier != null) {
       _externalSearchListener = () {
         if (widget.searchNotifier!.value == AppSection.marketplace) {
           if (mounted) {
@@ -124,6 +129,19 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
       };
       widget.searchNotifier!.addListener(_externalSearchListener!);
     }
+
+    // ✅ [버그 수정] 키워드 변경 시 setState 호출 리스너 추가
+    _searchKeywordNotifier.addListener(_onKeywordChanged);
+  }
+
+  // ✅ [버그 수정] 키워드 변경 시 setState 호출
+  void _onKeywordChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ✅ [삭제] build 메서드 내부에 있던 리스너 등록 로직 삭제
 
     Query<Map<String, dynamic>> buildQuery() {
       final userProv = widget.userModel?.locationParts?['prov'];
@@ -237,10 +255,12 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
   @override
   void dispose() {
     _chipOpenNotifier.dispose();
-    _searchKeywordNotifier.dispose();
     if (_externalSearchListener != null && widget.searchNotifier != null) {
       widget.searchNotifier!.removeListener(_externalSearchListener!);
     }
+    // ✅ [버그 수정] 리스너 제거를 먼저 수행한 다음 notifier를 폐기합니다.
+    _searchKeywordNotifier.removeListener(_onKeywordChanged);
+    _searchKeywordNotifier.dispose();
     super.dispose();
   }
 }

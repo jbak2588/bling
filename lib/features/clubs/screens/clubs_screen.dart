@@ -101,6 +101,14 @@ class _ClubsScreenState extends State<ClubsScreen> {
       };
       widget.searchNotifier!.addListener(_externalSearchListener!);
     }
+
+    // ✅ [버그 수정 1] 키워드가 변경될 때마다 setState를 호출하여 화면을 다시 그리도록 리스너 추가
+    _searchKeywordNotifier.addListener(_onKeywordChanged);
+  }
+
+  // ✅ [버그 수정 1] 키워드 변경 시 setState 호출
+  void _onKeywordChanged() {
+    if (mounted) setState(() {});
   }
 
   void _openFilter() async {
@@ -115,6 +123,18 @@ class _ClubsScreenState extends State<ClubsScreen> {
 
   void _clearFilter() {
     setState(() => _locationFilter = null);
+  }
+
+  // ✅ [버그 수정 2] 메모리 누수 방지를 위해 dispose 메서드 추가
+  @override
+  void dispose() {
+    _chipOpenNotifier.dispose();
+    _searchKeywordNotifier.removeListener(_onKeywordChanged); // 리스너 제거
+    _searchKeywordNotifier.dispose();
+    if (_externalSearchListener != null && widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener!);
+    }
+    super.dispose();
   }
 
   @override

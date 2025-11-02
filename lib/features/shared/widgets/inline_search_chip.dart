@@ -102,7 +102,7 @@ class _InlineSearchChipState extends State<InlineSearchChip> {
     // (디자인 로직은 home_screen.dart 백업본과 동일)
     final TextStyle? chipTextStyle =
         Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14);
-    final container = Container(
+    final mainContainer = Container(
       height: 44,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -144,12 +144,6 @@ class _InlineSearchChipState extends State<InlineSearchChip> {
                   onPressed: _clearText,
                   tooltip: 'common.clear'.tr(),
                 ),
-                // 검색창 닫기
-                IconButton(
-                  icon: const Icon(Icons.close, size: 20),
-                  onPressed: _cancel,
-                  tooltip: 'common.cancel'.tr(),
-                ),
               ],
             )
           : Row(
@@ -169,7 +163,22 @@ class _InlineSearchChipState extends State<InlineSearchChip> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: _editing
-          ? container
+          ? Row(
+              // ✅ [신규] Row로 감싸기
+              children: [
+                // ✅ [신규] 검색창 본체
+                Expanded(
+                  child: mainContainer,
+                ),
+                // ✅ [신규] 닫기(X) 버튼을 검색창 *바깥*에 배치
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 24),
+                  onPressed: _cancel,
+                  tooltip: 'common.cancel'.tr(),
+                ),
+              ],
+            )
           : GestureDetector(
               onTap: () {
                 if (mounted) setState(() => _editing = true);
@@ -177,7 +186,7 @@ class _InlineSearchChipState extends State<InlineSearchChip> {
                   if (mounted) _focusNode.requestFocus();
                 });
               },
-              child: container,
+              child: mainContainer, // 닫혀있을 땐 mainContainer만 보임
             ),
     );
   }
