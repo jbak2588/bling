@@ -50,9 +50,20 @@ import '../constants/job_categories.dart';
 class CreateJobScreen extends StatefulWidget {
   final UserModel userModel;
   final JobType jobType;
+  // [추가] 상점 상세에서 전달받는 초기값들 (선택)
+  final String? initialCompanyName;
+  final String? initialLocation;
+  final GeoPoint? initialGeoPoint;
+  final Map<String, dynamic>? initialLocationParts;
 
   const CreateJobScreen(
-      {super.key, required this.userModel, this.jobType = JobType.regular});
+      {super.key,
+      required this.userModel,
+      this.jobType = JobType.regular,
+      this.initialCompanyName,
+      this.initialLocation,
+      this.initialGeoPoint,
+      this.initialLocationParts});
 
   @override
   State<CreateJobScreen> createState() => _CreateJobScreenState();
@@ -123,9 +134,10 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         category: _selectedCategory!.id, // ✅ [작업 31] JobCategory의 id를 전달
-        locationName: widget.userModel.locationName,
-        locationParts: widget.userModel.locationParts,
-        geoPoint: widget.userModel.geoPoint,
+        locationName: widget.initialLocation ?? widget.userModel.locationName,
+        locationParts:
+            widget.initialLocationParts ?? widget.userModel.locationParts,
+        geoPoint: widget.initialGeoPoint ?? widget.userModel.geoPoint,
         createdAt: Timestamp.now(),
         salaryType: _selectedSalaryType,
         salaryAmount: int.tryParse(_salaryAmountController.text),
@@ -166,6 +178,11 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
     // ✅ [작업 31] 4. 'regular' 타입의 카테고리만 로드
     _categories = AppJobCategories.getCategoriesByType(widget.jobType);
     _selectedCategory = _categories.isNotEmpty ? _categories.first : null;
+    // [추가] 상점명 초기값이 있으면 제목에 채워 넣기
+    if (widget.initialCompanyName != null &&
+        widget.initialCompanyName!.trim().isNotEmpty) {
+      _titleController.text = widget.initialCompanyName!.trim();
+    }
   }
 
   @override

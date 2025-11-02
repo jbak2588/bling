@@ -30,16 +30,24 @@ class ShopRepository {
     return ShopModel.fromFirestore(doc);
   }
 
- Stream<QuerySnapshot<Map<String, dynamic>>> fetchShops(
+  /// [추가] 상점 조회수를 1 증가시킵니다. (KPI)
+  Future<void> incrementShopView(String shopId) async {
+    // (개선) Cloud Function에서 처리하는 것이 좋으나, 클라이언트에서도 구현 가능
+    await _shopsCollection.doc(shopId).update({
+      'viewsCount': FieldValue.increment(1),
+    });
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> fetchShops(
       {Map<String, String?>? locationFilter}) {
     Query<Map<String, dynamic>> query = _shopsCollection;
 
-     final String? kab = locationFilter?['kab'];
+    final String? kab = locationFilter?['kab'];
     if (kab != null && kab.isNotEmpty) {
       query = query.where('locationParts.kab', isEqualTo: kab);
     }
 
-   query = query.orderBy('createdAt', descending: true);
+    query = query.orderBy('createdAt', descending: true);
 
     return query.snapshots().asyncMap((snapshot) async {
       if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
@@ -60,12 +68,37 @@ class ShopRepository {
         .map((snapshot) => ShopModel.fromFirestore(snapshot));
   }
 
+  // [수정] 리뷰 추가 시 평균 별점 업데이트 로직
   Future<String> addReview(String shopId, ShopReviewModel review) async {
-    final doc = await _shopsCollection
-        .doc(shopId)
-        .collection('reviews')
-        .add(review.toJson());
-    return doc.id;
+    // 트랜잭션으로 리뷰 추가 + 상점 별점 업데이트
+    final reviewCol = _shopsCollection.doc(shopId).collection('reviews');
+    final shopDoc = _shopsCollection.doc(shopId);
+
+    final newReviewRef = reviewCol.doc();
+
+    await _firestore.runTransaction((transaction) async {
+      final shopSnapshot = await transaction.get(shopDoc);
+      if (!shopSnapshot.exists) {
+        throw Exception("Shop does not exist!");
+      }
+
+      final currentReviewCount = shopSnapshot.data()!['reviewCount'] ?? 0;
+      final currentAverageRating =
+          (shopSnapshot.data()!['averageRating'] ?? 0.0).toDouble();
+
+      final newReviewCount = currentReviewCount + 1;
+      final newAverageRating =
+          ((currentAverageRating * currentReviewCount) + review.rating) /
+              newReviewCount;
+
+      transaction.set(newReviewRef, review.toJson());
+      transaction.update(shopDoc, {
+        'reviewCount': newReviewCount,
+        'averageRating': newAverageRating,
+      });
+    });
+
+    return newReviewRef.id;
   }
 
   Future<void> updateReview(String shopId, ShopReviewModel review) async {
@@ -77,11 +110,43 @@ class ShopRepository {
   }
 
   Future<void> deleteReview(String shopId, String reviewId) async {
-    await _shopsCollection
-        .doc(shopId)
-        .collection('reviews')
-        .doc(reviewId)
-        .delete();
+    // [수정] 리뷰 삭제 시 트랜잭션을 사용하여 평균 별점 및 리뷰 수 재계산
+    final shopDoc = _shopsCollection.doc(shopId);
+    final reviewDoc = shopDoc.collection('reviews').doc(reviewId);
+
+    await _firestore.runTransaction((transaction) async {
+      final shopSnapshot = await transaction.get(shopDoc);
+      final reviewSnapshot = await transaction.get(reviewDoc);
+
+      if (!shopSnapshot.exists) {
+        throw Exception("Shop does not exist!");
+      }
+      if (!reviewSnapshot.exists) {
+        throw Exception("Review does not exist!");
+      }
+
+      final currentReviewCount = (shopSnapshot.data()!['reviewCount'] ?? 0);
+      final currentAverageRating =
+          (shopSnapshot.data()!['averageRating'] ?? 0.0).toDouble();
+      final deletedRating = (reviewSnapshot.data()!['rating'] ?? 0).toDouble();
+
+      final newReviewCount = currentReviewCount - 1;
+      final double newAverageRating;
+
+      if (newReviewCount > 0) {
+        newAverageRating =
+            ((currentAverageRating * currentReviewCount) - deletedRating) /
+                newReviewCount;
+      } else {
+        newAverageRating = 0.0; // 리뷰가 없으면 0점으로 리셋
+      }
+
+      transaction.delete(reviewDoc);
+      transaction.update(shopDoc, {
+        'reviewCount': newReviewCount,
+        'averageRating': newAverageRating,
+      });
+    });
   }
 
   Stream<List<ShopReviewModel>> fetchReviews(String shopId) {
@@ -90,9 +155,7 @@ class ShopRepository {
         .collection('reviews')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map(ShopReviewModel.fromFirestore)
-            .toList());
+        .map((snapshot) =>
+            snapshot.docs.map(ShopReviewModel.fromFirestore).toList());
   }
 }
-

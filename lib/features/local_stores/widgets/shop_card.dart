@@ -23,16 +23,43 @@
 // =====================================================
 
 import 'package:bling_app/features/local_stores/models/shop_model.dart';
-import 'package:bling_app/features/local_stores/screens/shop_detail_screen.dart'; // [추가] 상세 화면 임포트
+import 'package:bling_app/core/models/user_model.dart';
+import 'package:bling_app/features/local_stores/screens/shop_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+// [추가] 거리 계산을 위해 geolocator 임포트
+import 'package:geolocator/geolocator.dart';
+// [추가] GeoPoint 타입 사용을 위해 cloud_firestore 임포트
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ShopCard extends StatelessWidget {
   final ShopModel shop;
-  const ShopCard({super.key, required this.shop});
+  final UserModel? userModel;
+  const ShopCard({super.key, required this.shop, this.userModel});
 
   @override
   Widget build(BuildContext context) {
+    // [추가] 사용자 위치 가져오기 (예시: Provider 또는 Riverpod 사용)
+    // final userGeoPoint = context.watch<UserModel?>()?.geoPoint;
+
+    // 사용자 위치 (연동되면 거리 계산에 사용)
+    final GeoPoint? userGeoPoint = userModel?.geoPoint;
+
+    String distanceText = '';
+    if (userGeoPoint != null && shop.geoPoint != null) {
+      final double distanceInMeters = Geolocator.distanceBetween(
+        userGeoPoint.latitude,
+        userGeoPoint.longitude,
+        shop.geoPoint!.latitude,
+        shop.geoPoint!.longitude,
+      );
+      if (distanceInMeters < 1000) {
+        distanceText = '${distanceInMeters.toStringAsFixed(0)}m';
+      } else {
+        distanceText = '${(distanceInMeters / 1000).toStringAsFixed(1)}km';
+      }
+    }
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
@@ -42,7 +69,9 @@ class ShopCard extends StatelessWidget {
         onTap: () {
           // 탭하면 ShopDetailScreen으로 이동하며, 선택된 shop 정보를 전달합니다.
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => ShopDetailScreen(shop: shop)),
+            MaterialPageRoute(
+                builder: (_) =>
+                    ShopDetailScreen(shop: shop, userModel: userModel)),
           );
         },
         child: Padding(
@@ -63,11 +92,41 @@ class ShopCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
               ],
+              // [추가] 스폰서 배지
+              if (shop.isSponsored)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'common.sponsored'.tr(),
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
               // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-              Text(
-                shop.name,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      shop.name, // 가게 이름
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  // [추가] 인증 배지
+                  if (shop.trustLevelVerified) ...[
+                    const SizedBox(width: 8),
+                    Icon(Icons.verified,
+                        size: 18, color: Theme.of(context).primaryColor),
+                  ]
+                ],
               ),
               const SizedBox(height: 4),
               Text(
@@ -77,6 +136,27 @@ class ShopCard extends StatelessWidget {
                 style: TextStyle(color: Colors.grey[700]),
               ),
               const Divider(height: 24),
+              // [수정] 기존 Row를 Row와 별점 Row로 분리
+              Row(
+                children: [
+                  Icon(Icons.star, size: 16, color: Colors.yellow[700]),
+                  const SizedBox(width: 4),
+                  Text(
+                    shop.averageRating.toStringAsFixed(1), // 평균 별점
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 4),
+                  Text('(${shop.reviewCount})'), // 리뷰 개수
+                  const SizedBox(width: 12),
+                  Icon(Icons.watch_later_outlined,
+                      size: 16, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Expanded(
+                      child: Text(shop.openHours,
+                          maxLines: 1, overflow: TextOverflow.ellipsis)),
+                ],
+              ),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Icon(Icons.location_on_outlined,
@@ -89,11 +169,17 @@ class ShopCard extends StatelessWidget {
                       maxLines: 1,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Icon(Icons.watch_later_outlined,
-                      size: 16, color: Colors.grey[600]),
-                  const SizedBox(width: 4),
-                  Text(shop.openHours),
+                  // [추가] 거리 표시
+                  if (distanceText.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      distanceText,
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ]
                 ],
               )
             ],
@@ -101,5 +187,5 @@ class ShopCard extends StatelessWidget {
         ),
       ),
     );
-    }
   }
+}

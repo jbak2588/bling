@@ -529,7 +529,13 @@
     "viewAll": "Lihat semua",
     "new": "Baru",
     "updated": "Diperbarui",
-    "comments": "Komentar"
+    "comments": "Komentar",
+    "sponsored": "Sponsor",
+    "sort": {
+      "default": "Bawaan",
+      "distance": "Jarak",
+      "popular": "Populer"
+    }
   },
   "commom": {
     "commets": "Komentar"
@@ -977,10 +983,27 @@
       "descriptionError": "Harap masukkan deskripsi toko.",
       "contactLabel": "Kontak",
       "hoursLabel": "Jam Operasional",
-      "hoursHint": "mis. 09:00 - 18:00"
+      "hoursHint": "mis. 09:00 - 18:00",
+      "photoLabel": "Foto (maks {count})",
+      "categoryLabel": "Kategori",
+      "categoryError": "Silakan pilih kategori.",
+      "productsLabel": "Produk/Layanan Utama",
+      "productsHint": "Pisahkan dengan koma, mis. Potong rambut, Pewarnaan, Perm"
+    },
+    "categories": {
+      "food": "Restoran",
+      "cafe": "Kafe",
+      "massage": "Pijat",
+      "beauty": "Kecantikan",
+      "nail": "Perawatan Kuku",
+      "auto": "Otomotif/Bengkel",
+      "kids": "Produk & Layanan Anak",
+      "hospital": "Rumah Sakit/Klinik",
+      "etc": "Lainnya"
     },
     "detail": {
       "description": "Deskripsi Toko",
+      "products": "Produk/Layanan",
       "deleteTitle": "Hapus Toko",
       "deleteContent": "Apakah Anda yakin ingin menghapus toko ini? Tindakan ini tidak dapat dibatalkan.",
       "deleteTooltip": "Hapus toko",
