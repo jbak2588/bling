@@ -27,6 +27,14 @@
 // - 필터 설명 및 에러 메시지 강화, 신뢰 등급/차단/신고 UI 노출 및 기능 강화.
 // - 상점주/이용자 모두를 위한 UX 개선(리뷰/채팅/알림 등).
 // =====================================================
+// ===================== DocHeader =====================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 1) '업종 카테고리' 필터링: 상단에 ChoiceChip 기반 칩 리스트 UI 추가.
+// 2. (Task 1) '정렬' 기능: '거리순', '인기순' 정렬을 위한 DropdownButton 및 정렬 로직 추가. (Geolocator 사용)
+// 3. (Task 1) '광고' 로직: 'isSponsored'가 true인 가게를 정렬과 무관하게 항상 최상단에 노출시키는 로직 추가.
+// 4. (Task 6) 'Jobs' 연동: 'ShopDetailScreen'으로 'userModel'을 전달하기 위해 ShopCard에 userModel을 prop으로 전달.
+// =====================================================
+// lib/features/local_stores/screens/local_stores_screen.dart
 
 import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:bling_app/core/models/user_model.dart';

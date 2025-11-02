@@ -9,18 +9,15 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(조회수, 리뷰, 부스트 등).
 // - 신뢰 등급/차단/신고 UI 노출 및 기능 강화, 카드 UX 개선.
 // =====================================================
-// lib/features/local_stores/widgets/shop_card.dart
 // ===================== DocHeader =====================
-// [기획 요약]
-// - 상점 카드. 대표 이미지, 상호명, 위치, 연락처 등 요약 정보 표시, 상세 화면 연동.
-//
-// [실제 구현 비교]
-// - 대표 이미지, 상호명, 위치, 연락처 등 모든 정보 정상 표시. 상세 화면 연동 및 UI/UX 완비.
-//
-// [개선 제안]
-// - KPI/통계/프리미엄 기능 실제 구현 필요(조회수, 리뷰, 부스트 등).
-// - 신뢰 등급/차단/신고 UI 노출 및 기능 강화, 카드 UX 개선.
+// [작업 이력 (2025-11-02)]
+// 1. (Task 1) '평점/리뷰 수' 표시: 'averageRating'과 'reviewCount'를 카드에 표시.
+// 2. (Task 1) '광고' 라벨: 'isSponsored'가 true일 때 "스폰서" 라벨 표시.
+// 3. (Task 1) '거리' 표시: 'userModel'의 GeoPoint와 'shop.geoPoint'를 Geolocator로 계산하여 m/km 단위로 거리 표시.
+// 4. (Task 4) '인증 배지' UI: 가게 이름 옆에 'trustLevelVerified' 값에 따라 인증 아이콘(Icons.verified) 표시.
+// 5. (Task 6) 'Jobs' 연동: 'ShopDetailScreen'으로 'userModel'을 전달하기 위해 생성자에서 userModel을 받도록 수정.
 // =====================================================
+// lib/features/local_stores/widgets/shop_card.dart
 
 import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
