@@ -23,6 +23,17 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(조회수, 리뷰, 부스트 등).
 // - 신고/차단/신뢰 등급 UI 노출 및 기능 강화, 알림/리뷰 UX 개선.
 // =====================================================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 1) '조회수(KPI)' 증가: initState에서 repository.incrementShopView(shop.id) 호출.
+// 2. (Task 1) '리뷰/평점' 표시: '_buildReviewSection' 위젯을 추가하여 평점 요약 및 리뷰 목록(Stream) 표시.
+// 3. (Task 4) '인증 배지' UI: 가게 이름 옆에 'trustLevelVerified' 값에 따라 인증 아이콘(Icons.verified) 표시.
+// 4. (Task 5) '대표 상품' UI: 'products' 리스트를 'Wrap' 및 'Chip' 위젯을 사용해 태그 형태로 표시.
+// 5. (Task 6) 'Jobs' 연동:
+//    - 생성자에서 'userModel'을 받도록 수정.
+//    - 가게 주인(isOwner)일 경우 AppBar에 '알바 구하기'(Icons.work_outline) 버튼 표시.
+//    - 버튼 클릭 시 'CreateJobScreen'으로 가게 이름/위치 정보를 자동 입력하여 이동.
+// =====================================================
+// lib/features/local_stores/screens/shop_detail_screen.dart
 
 import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:bling_app/core/models/user_model.dart';

@@ -23,6 +23,13 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(상점 부스트, 조회수, 리뷰 등).
 // - 필수 입력값, 에러 메시지, UX 강화. 신고/차단/신뢰 등급 UI 노출 및 기능 강화.
 // =====================================================
+// ===================== DocHeader =====================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 1) 확장된 ShopModel에 맞춰 수정 UI 필드 추가.
+// 2. '업종 카테고리' (category): DropdownButtonFormField 추가 (기존 값 로드).
+// 3. '대표 상품/서비스' (products): 쉼표(,)로 구분하여 입력받는 TextFormField 추가 (기존 값 로드).
+// =====================================================
+// lib/features/local_stores/screens/edit_shop_screen.dart
 
 import 'dart:io';
 import 'package:bling_app/features/local_stores/models/shop_model.dart';

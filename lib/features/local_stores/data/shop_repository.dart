@@ -1,3 +1,10 @@
+// ===================== DocHeader =====================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 1) 'incrementShopView': 상세 페이지 조회수(KPI) 1 증가 함수 추가.
+// 2. (Task 1) 'addReview': 리뷰 추가 시, Firestore Transaction을 사용해 'averageRating' 및 'reviewCount'를 원자적으로 재계산/업데이트하는 로직 추가.
+// 3. (Task 3) 'deleteReview': [버그 수정] 기존 평점 재계산 로직이 누락되었던 문제 해결. Transaction을 사용해 리뷰 삭제 시 평점/개수를 정확히 차감하여 재계산/업데이트.
+// =====================================================
+
 // lib/features/local_stores/data/shop_repository.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';

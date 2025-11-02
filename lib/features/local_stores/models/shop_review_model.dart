@@ -21,6 +21,12 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(리뷰 부스트, 신고/차단 등).
 // - 신고/차단/신뢰 등급 필드 및 기능 강화, 데이터 유효성 검사 추가.
 // =====================================================
+// ===================== DocHeader =====================
+// [작업 이력 (2025-11-02)]
+// - (Task 1) 기획서 검토 완료.
+// - 현재 모델(ID, shopId, userId, rating, comment, createdAt)이 기획서의 리뷰 요구사항을 충족하므로 변경 사항 없음.
+// =====================================================
+// lib/features/local_stores/models/shop_review_model.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -65,4 +71,3 @@ class ShopReviewModel {
     };
   }
 }
-
