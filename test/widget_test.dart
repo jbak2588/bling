@@ -7,24 +7,33 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'package:bling_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const BlingApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  // Note: Avoid EasyLocalization.ensureInitialized in tests to prevent
+  // SharedPreferences plugin access. Configure EasyLocalization inline.
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('App builds with EasyLocalization', (WidgetTester tester) async {
+    // Wrap BlingApp with EasyLocalization so context.* localization is available.
+    await tester.pumpWidget(
+      EasyLocalization(
+        supportedLocales: const [Locale('en'), Locale('ko'), Locale('id')],
+        path: 'assets/lang',
+        fallbackLocale: const Locale('en'),
+        startLocale: const Locale('en'),
+        saveLocale: false,
+        child: const BlingApp(isTest: true),
+      ),
+    );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Allow first frame and localization init.
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+
+    // Smoke: MaterialApp should be present without throwing.
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }

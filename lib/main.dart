@@ -168,7 +168,8 @@ void _handleDeepLink(Uri deepLink) async {
 }
 
 class BlingApp extends StatelessWidget {
-  const BlingApp({super.key});
+  final bool isTest; // when true, avoid Firebase-dependent home
+  const BlingApp({super.key, this.isTest = false});
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +184,7 @@ class BlingApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const AuthGate(),
+      home: isTest ? const Scaffold(body: SizedBox()) : const AuthGate(),
     );
   }
 }

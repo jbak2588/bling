@@ -405,6 +405,9 @@
   },
   "categories": {
     "post": {
+      "jalan-perbaikin": {
+        "name": "Perbaiki Jalan"
+      },
       "daily_life": {
         "name": "Harian/Tanya",
         "description": "Bagikan kehidupan sehari-hari atau ajukan pertanyaan."
@@ -787,6 +790,12 @@
     "reset": "Reset"
   },
   "clubs": {
+    "tabs": {
+      "proposals": "Usulan Grup",
+      "activeClubs": "Grup Aktif",
+      "myClubs": "Grup Saya",
+      "exploreClubs": "Jelajahi Semua Grup"
+    },
     "screen": {
       "error": "Kesalahan: {error}",
       "empty": "Belum ada Grup."
@@ -858,6 +867,7 @@
       "nameError": "Silakan masukkan nama Grup.",
       "descriptionLabel": "Deskripsi Grup",
       "descriptionError": "Silakan masukkan deskripsi Grup.",
+  "tagsHint": "Ketik tag lalu tekan spasi untuk menambahkan",
       "maxInterests": "Anda dapat memilih hingga 3 minat.",
       "privateClub": "Grup Privat",
       "privateDescription": "Hanya bisa bergabung lewat undangan."
@@ -873,6 +883,17 @@
     },
     "repository": {
       "chatCreated": "Ruang chat Grup telah dibuat."
+    },
+    "proposal": {
+      "createTitle": "Ajukan Grup",
+      "imageError": "Silakan pilih gambar sampul.",
+      "createSuccess": "Usulan Grup Anda berhasil dibuat.",
+      "createFail": "Gagal membuat usulan: {error}",
+      "tagsHint": "Ketik tag lalu tekan spasi untuk menambahkan",
+      "targetMembers": "Target anggota",
+      "targetMembersCount": "Total {count} orang",
+      "empty": "Belum ada usulan Grup.",
+      "memberStatus": "{current} orang / {target} orang"
     }
   },
   "findfriend": {
@@ -991,6 +1012,7 @@
       "productsHint": "Pisahkan dengan koma, mis. Potong rambut, Pewarnaan, Perm"
     },
     "categories": {
+      "all": "Semua",
       "food": "Restoran",
       "cafe": "Kafe",
       "massage": "Pijat",
@@ -1041,6 +1063,9 @@
     "priceUnits": {
       "monthly": "bulan",
       "yearly": "tahun"
+    },
+    "priceUnit": {
+      "monthly": "/bulan"
     },
     "form": {
       "title": "Daftarkan Listing",

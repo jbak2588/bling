@@ -426,6 +426,9 @@
   },
   "categories": {
     "post": {
+      "jalan-perbaikin": {
+        "name": "Road Repair"
+      },
       "daily_life": {
         "name": "Daily/Questions",
         "description": "Share daily life or ask questions."
@@ -807,6 +810,12 @@
     "reset": "Reset"
   },
   "clubs": {
+    "tabs": {
+      "proposals": "Proposals",
+      "activeClubs": "Active Clubs",
+      "myClubs": "My Clubs",
+      "exploreClubs": "Explore Clubs"
+    },
     "screen": {
       "error": "Error: {error}",
       "empty": "No clubs yet."
@@ -878,6 +887,7 @@
       "nameError": "Please enter a club name.",
       "descriptionLabel": "Club Description",
       "descriptionError": "Please enter a club description.",
+  "tagsHint": "Type a tag and press Space to add",
       "maxInterests": "You can select up to 3 interests.",
       "privateClub": "Private Club",
       "privateDescription": "Invitation only."
@@ -893,6 +903,17 @@
     },
     "repository": {
       "chatCreated": "Club chat room created."
+    },
+    "proposal": {
+      "createTitle": "Propose a Club",
+      "imageError": "Please select a cover image.",
+      "createSuccess": "Your club proposal has been created.",
+      "createFail": "Failed to create proposal: {error}",
+      "tagsHint": "Type a tag and press Space to add",
+      "targetMembers": "Target members",
+      "targetMembersCount": "Total {count} members",
+      "empty": "No proposals yet.",
+      "memberStatus": "{current} / {target} members"
     }
   },
   "findfriend": {
@@ -1011,6 +1032,7 @@
       "productsHint": "Comma-separated, e.g. Haircut, Coloring, Perm"
     },
     "categories": {
+      "all": "All",
       "food": "Restaurant",
       "cafe": "Cafe",
       "massage": "Massage",
@@ -1061,6 +1083,9 @@
     "priceUnits": {
       "monthly": "month",
       "yearly": "year"
+    },
+    "priceUnit": {
+      "monthly": "/month"
     },
     "form": {
       "title": "Register Listing",

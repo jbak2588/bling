@@ -1,4 +1,10 @@
 // lib/features/clubs/screens/edit_club_screen.dart
+// ===================== DocHeader =====================
+// [작업 이력 (2025-11-02)]
+// - (Task 9) 기획서 검토 완료.
+// - '모임 제안' V2.0 로직 개편으로 인해 이 파일은 현재 직접 수정 사항 없음.
+// - (참고) 이 화면은 '모임 제안' 단계가 아닌, 생성된 '정식 클럽'의 정보 수정용임.
+// =====================================================
 
 import 'dart:io';
 import 'package:bling_app/features/clubs/models/club_model.dart';
@@ -152,7 +158,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
       }
 
       // ClubModel 객체를 업데이트된 정보로 새로 만듭니다.
-     final updatedClub = ClubModel(
+      final updatedClub = ClubModel(
         id: widget.club.id,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -165,7 +171,9 @@ class _EditClubScreenState extends State<EditClubScreen> {
         locationParts: _locationParts,
         geoPoint: _geoPoint,
         // 수정되지 않는 나머지 필드들은 기존 값을 그대로 사용
-        mainCategory: _interestTags.isNotEmpty ? _interestTags.first : widget.club.mainCategory,
+        mainCategory: _interestTags.isNotEmpty
+            ? _interestTags.first
+            : widget.club.mainCategory,
         membersCount: widget.club.membersCount,
         createdAt: widget.club.createdAt,
         kickedMembers: widget.club.kickedMembers,
