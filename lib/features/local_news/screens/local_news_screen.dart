@@ -316,7 +316,39 @@ class _FeedListViewState extends State<_FeedListView>
   @override
   bool get wantKeepAlive => true;
 
+  // 키워드 변경 수신용 리스너와 현재 바인딩된 Listenable 참조
   VoidCallback? _kwListener;
+  ValueListenable<String>? _currentKeywordListenable;
+
+  @override
+  void initState() {
+    super.initState();
+    _kwListener = () {
+      if (mounted) setState(() {});
+    };
+    _currentKeywordListenable = widget.searchKeywordListenable;
+    _currentKeywordListenable?.addListener(_kwListener!);
+  }
+
+  @override
+  void didUpdateWidget(covariant _FeedListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchKeywordListenable != widget.searchKeywordListenable) {
+      // 이전 Listenable에서 분리 후 새 Listenable에 연결
+      _currentKeywordListenable?.removeListener(_kwListener!);
+      _currentKeywordListenable = widget.searchKeywordListenable;
+      _currentKeywordListenable?.addListener(_kwListener!);
+    }
+  }
+
+  @override
+  void dispose() {
+    // 메모리 누수 방지: 리스너를 반드시 제거
+    if (_kwListener != null) {
+      _currentKeywordListenable?.removeListener(_kwListener!);
+    }
+    super.dispose();
+  }
 
   // 기존 _buildQuery와 _applyLocationFilter 함수를 State 안으로 이동
   Query<Map<String, dynamic>> _buildQuery() {
@@ -375,13 +407,6 @@ class _FeedListViewState extends State<_FeedListView>
     // ✅ 4. super.build(context)를 호출해야 합니다.
     super.build(context);
 
-    // 키워드 변경 시 목록을 갱신
-    _kwListener ??= () {
-      if (mounted) setState(() {});
-    };
-    widget.searchKeywordListenable?.removeListener(_kwListener!);
-    widget.searchKeywordListenable?.addListener(_kwListener!);
-
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _buildQuery().snapshots(),
       builder: (context, snapshot) {
@@ -429,6 +454,36 @@ class _FeedMapView extends StatefulWidget {
 
 class _FeedMapViewState extends State<_FeedMapView> {
   final Completer<GoogleMapController> _controller = Completer();
+  VoidCallback? _kwListener;
+  ValueListenable<String>? _currentKeywordListenable;
+
+  @override
+  void initState() {
+    super.initState();
+    _kwListener = () {
+      if (mounted) setState(() {});
+    };
+    _currentKeywordListenable = widget.searchKeywordListenable;
+    _currentKeywordListenable?.addListener(_kwListener!);
+  }
+
+  @override
+  void didUpdateWidget(covariant _FeedMapView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchKeywordListenable != widget.searchKeywordListenable) {
+      _currentKeywordListenable?.removeListener(_kwListener!);
+      _currentKeywordListenable = widget.searchKeywordListenable;
+      _currentKeywordListenable?.addListener(_kwListener!);
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_kwListener != null) {
+      _currentKeywordListenable?.removeListener(_kwListener!);
+    }
+    super.dispose();
+  }
 
   Future<CameraPosition> _getInitialCameraPosition() async {
     final snapshot = await _buildInitialCameraQuery().limit(1).get();

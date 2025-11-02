@@ -296,7 +296,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       _showGlobalSearchSheet(context);
     } else {
       // 시나리오 2: 피드 내부면 인라인 검색 활성화 신호
-      _searchActivationNotifier.value = _currentSection;
+
+      // ❗ [버그 수정]
+      // 동일한 값을 다시 할당하면 ValueNotifier가 리스너를 호출하지 않습니다.
+      // _searchActivationNotifier.value = _currentSection; // ❌ 기존 로직
+
+      // ✅ [수정] null로 먼저 초기화하여 값이 '변경'되었음을 보장합니다.
+      _searchActivationNotifier.value = null;
+      // 다음 프레임에서 실제 값으로 설정합니다.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _searchActivationNotifier.value = _currentSection;
+        }
+      });
     }
   }
 
@@ -906,18 +918,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          // [수정] mainAxisAlignment 제거
           children: <Widget>[
-            _buildBottomNavItem(icon: Icons.home, index: 0),
             // ✅ '동네' 탭은 항상 표시. 비활성 상태면 흐리게 처리하고 탭 시 안내 팝업 노출
-            _buildBottomNavItem(icon: Icons.holiday_village_outlined, index: 1),
+            Expanded(child: _buildBottomNavItem(icon: Icons.home, index: 0)),
+            Expanded(
+                child: _buildBottomNavItem(
+                    icon: Icons.holiday_village_outlined, index: 1)),
             const SizedBox(width: 40),
-            _buildBottomNavItem(icon: Icons.search, index: 3),
-            _buildBottomNavItem(
-                icon: Icons.chat_bubble_outline,
-                index: 4,
-                badgeCount: _totalUnreadCount),
-            _buildBottomNavItem(icon: Icons.person_outline, index: 5),
+            Expanded(child: _buildBottomNavItem(icon: Icons.search, index: 3)),
+            Expanded(
+                child: _buildBottomNavItem(
+                    icon: Icons.chat_bubble_outline,
+                    index: 4,
+                    badgeCount: _totalUnreadCount)),
+            Expanded(
+                child:
+                    _buildBottomNavItem(icon: Icons.person_outline, index: 5)),
           ],
         ),
       ),
@@ -1289,5 +1306,3 @@ class TrustScoreBreakdownModal extends StatelessWidget {
     );
   }
 }
-
-// ❌ [삭제] 파일 끝의 BlingSearchDelegate 구현을 제거했습니다.
