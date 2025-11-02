@@ -47,6 +47,20 @@ class _EditShopScreenState extends State<EditShopScreen> {
   late final TextEditingController _descriptionController;
   late final TextEditingController _contactController;
   late final TextEditingController _hoursController;
+  // [추가] 카테고리/상품 편집을 위한 상태와 컨트롤러
+  final List<String> _shopCategories = [
+    'food',
+    'cafe',
+    'massage',
+    'beauty',
+    'nail',
+    'auto',
+    'kids',
+    'hospital',
+    'etc'
+  ];
+  late String _selectedCategory;
+  late final TextEditingController _productsController;
 
   // [수정] 기존 URL(String)과 새로운 파일(XFile)을 모두 담는 List
   final List<dynamic> _images = [];
@@ -60,9 +74,13 @@ class _EditShopScreenState extends State<EditShopScreen> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.shop.name);
-    _descriptionController = TextEditingController(text: widget.shop.description);
+    _descriptionController =
+        TextEditingController(text: widget.shop.description);
     _contactController = TextEditingController(text: widget.shop.contactNumber);
     _hoursController = TextEditingController(text: widget.shop.openHours);
+    _selectedCategory = widget.shop.category;
+    _productsController =
+        TextEditingController(text: (widget.shop.products ?? []).join(', '));
     _images.addAll(widget.shop.imageUrls);
   }
 
@@ -72,14 +90,16 @@ class _EditShopScreenState extends State<EditShopScreen> {
     _descriptionController.dispose();
     _contactController.dispose();
     _hoursController.dispose();
+    _productsController.dispose();
     super.dispose();
   }
 
-   Future<void> _pickImages() async {
+  Future<void> _pickImages() async {
     if (_isPickingImages || _images.length >= 10) return;
     setState(() => _isPickingImages = true);
     try {
-      final pickedFiles = await _picker.pickMultiImage(imageQuality: 70, limit: 10 - _images.length);
+      final pickedFiles = await _picker.pickMultiImage(
+          imageQuality: 70, limit: 10 - _images.length);
       if (pickedFiles.isNotEmpty && mounted) {
         setState(() => _images.addAll(pickedFiles));
       }
@@ -97,7 +117,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
 
   Future<void> _updateShop() async {
     if (!_formKey.currentState!.validate() || _isSaving) return;
-    
+
     setState(() => _isSaving = true);
 
     try {
@@ -105,7 +125,9 @@ class _EditShopScreenState extends State<EditShopScreen> {
       for (var image in _images) {
         if (image is XFile) {
           final fileName = Uuid().v4();
-          final ref = FirebaseStorage.instance.ref().child('shop_images/${widget.shop.ownerId}/$fileName');
+          final ref = FirebaseStorage.instance
+              .ref()
+              .child('shop_images/${widget.shop.ownerId}/$fileName');
           await ref.putFile(File(image.path));
           imageUrls.add(await ref.getDownloadURL());
         } else if (image is String) {
@@ -117,6 +139,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
         id: widget.shop.id,
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
+        category: _selectedCategory, // [추가]
         contactNumber: _contactController.text.trim(),
         openHours: _hoursController.text.trim(),
         imageUrls: imageUrls, // [수정]
@@ -125,7 +148,14 @@ class _EditShopScreenState extends State<EditShopScreen> {
         locationParts: widget.shop.locationParts,
         geoPoint: widget.shop.geoPoint,
         createdAt: widget.shop.createdAt,
-        products: widget.shop.products,
+        products: _productsController.text.trim().isEmpty
+            ? []
+            : _productsController.text
+                .trim()
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList(), // [추가]
         trustLevelVerified: widget.shop.trustLevelVerified,
         viewsCount: widget.shop.viewsCount,
         likesCount: widget.shop.likesCount,
@@ -134,12 +164,17 @@ class _EditShopScreenState extends State<EditShopScreen> {
       await _repository.updateShop(updatedShop);
 
       if (mounted) {
-       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('localStores.edit.success'.tr()), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('localStores.edit.success'.tr()),
+            backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('localStores.edit.fail'.tr(namedArgs: {'error': e.toString()})), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'localStores.edit.fail'.tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -153,7 +188,9 @@ class _EditShopScreenState extends State<EditShopScreen> {
         title: Text('localStores.edit.title'.tr()),
         actions: [
           if (!_isSaving)
-            TextButton(onPressed: _updateShop, child: Text('localStores.edit.save'.tr())),
+            TextButton(
+                onPressed: _updateShop,
+                child: Text('localStores.edit.save'.tr())),
         ],
       ),
       body: Stack(
@@ -163,7 +200,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-               // --- [수정] 다중 이미지 수정 UI ---
+                // --- [수정] 다중 이미지 수정 UI ---
                 SizedBox(
                   height: 100,
                   child: ListView(
@@ -184,13 +221,22 @@ class _EditShopScreenState extends State<EditShopScreen> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
-                                child: Image(image: imageProvider, width: 100, height: 100, fit: BoxFit.cover),
+                                child: Image(
+                                    image: imageProvider,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover),
                               ),
                               Positioned(
-                                top: 4, right: 4,
+                                top: 4,
+                                right: 4,
                                 child: InkWell(
                                   onTap: () => _removeImage(index),
-                                  child: const CircleAvatar(radius: 12, backgroundColor: Colors.black54, child: Icon(Icons.close, color: Colors.white, size: 16)),
+                                  child: const CircleAvatar(
+                                      radius: 12,
+                                      backgroundColor: Colors.black54,
+                                      child: Icon(Icons.close,
+                                          color: Colors.white, size: 16)),
                                 ),
                               ),
                             ],
@@ -201,9 +247,13 @@ class _EditShopScreenState extends State<EditShopScreen> {
                         GestureDetector(
                           onTap: _pickImages,
                           child: Container(
-                            width: 100, height: 100,
-                            decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
-                            child: const Icon(Icons.add_a_photo_outlined, color: Colors.grey),
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8)),
+                            child: const Icon(Icons.add_a_photo_outlined,
+                                color: Colors.grey),
                           ),
                         ),
                     ],
@@ -212,32 +262,76 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(labelText: 'localStores.form.nameLabel'.tr(), border: const OutlineInputBorder()),
-                  validator: (value) => (value == null || value.trim().isEmpty) ? 'localStores.form.nameError'.tr() : null,
+                  decoration: InputDecoration(
+                      labelText: 'localStores.form.nameLabel'.tr(),
+                      border: const OutlineInputBorder()),
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'localStores.form.nameError'.tr()
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: InputDecoration(labelText: 'localStores.form.descriptionLabel'.tr(), border: const OutlineInputBorder()),
+                  decoration: InputDecoration(
+                      labelText: 'localStores.form.descriptionLabel'.tr(),
+                      border: const OutlineInputBorder()),
                   maxLines: 4,
-                  validator: (value) => (value == null || value.trim().isEmpty) ? 'localStores.form.descriptionError'.tr() : null,
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'localStores.form.descriptionError'.tr()
+                      : null,
+                ),
+                // [추가] 카테고리 선택
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedCategory,
+                  decoration: InputDecoration(
+                      labelText: 'localStores.form.categoryLabel'.tr(),
+                      border: const OutlineInputBorder()),
+                  items: _shopCategories.map((category) {
+                    return DropdownMenuItem(
+                      value: category,
+                      child: Text('localStores.categories.$category'.tr()),
+                    );
+                  }).toList(),
+                  onChanged: (value) =>
+                      setState(() => _selectedCategory = value!),
+                  validator: (value) => value == null
+                      ? 'localStores.form.categoryError'.tr()
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _contactController,
-                  decoration: InputDecoration(labelText: 'localStores.form.contactLabel'.tr(), border: const OutlineInputBorder()),
+                  decoration: InputDecoration(
+                      labelText: 'localStores.form.contactLabel'.tr(),
+                      border: const OutlineInputBorder()),
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _hoursController,
-                  decoration: InputDecoration(labelText: 'localStores.form.hoursLabel'.tr(), hintText: 'localStores.form.hoursHint'.tr(), border: const OutlineInputBorder()),
+                  decoration: InputDecoration(
+                      labelText: 'localStores.form.hoursLabel'.tr(),
+                      hintText: 'localStores.form.hoursHint'.tr(),
+                      border: const OutlineInputBorder()),
+                ),
+                // [추가] 대표 상품/서비스 입력
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _productsController,
+                  decoration: InputDecoration(
+                      labelText: 'localStores.form.productsLabel'.tr(),
+                      hintText: 'localStores.form.productsHint'.tr(),
+                      border: const OutlineInputBorder()),
                 ),
               ],
             ),
           ),
           if (_isSaving)
-            Container(color: Colors.black54, child: const Center(child: CircularProgressIndicator(color: Colors.white))),
+            Container(
+                color: Colors.black54,
+                child: const Center(
+                    child: CircularProgressIndicator(color: Colors.white))),
         ],
       ),
     );

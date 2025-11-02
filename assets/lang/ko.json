@@ -557,7 +557,13 @@
     "viewAll": "모두 보기",
     "new": "신규",
     "updated": "업데이트",
-    "comments": "댓글"
+    "comments": "댓글",
+    "sponsored": "스폰서드",
+    "sort": {
+      "default": "기본",
+      "distance": "거리순",
+      "popular": "인기순"
+    }
   },
   "commom": {
     "commets": "댓글"
@@ -1005,10 +1011,27 @@
       "descriptionError": "상점 소개를 입력해주세요.",
       "contactLabel": "연락처",
       "hoursLabel": "영업 시간",
-      "hoursHint": "예) 09:00 - 18:00"
+      "hoursHint": "예) 09:00 - 18:00",
+      "photoLabel": "사진 (최대 {count}장)",
+      "categoryLabel": "카테고리",
+      "categoryError": "카테고리를 선택해주세요.",
+      "productsLabel": "대표 상품/서비스",
+      "productsHint": "쉼표로 구분, 예: 커트, 염색, 펌"
+    },
+    "categories": {
+      "food": "음식점",
+      "cafe": "카페",
+      "massage": "마사지",
+      "beauty": "뷰티",
+      "nail": "네일",
+      "auto": "자동차/정비",
+      "kids": "키즈",
+      "hospital": "병원/클리닉",
+      "etc": "기타"
     },
     "detail": {
       "description": "상점 소개",
+      "products": "대표 상품/서비스",
       "deleteTitle": "상점 삭제",
       "deleteContent": "정말로 이 상점을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
       "deleteTooltip": "상점 삭제",

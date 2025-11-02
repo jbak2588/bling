@@ -550,7 +550,13 @@
     "viewAll": "View all",
     "new": "New",
     "updated": "Updated",
-    "comments": "Comments"
+    "comments": "Comments",
+    "sponsored": "Sponsored",
+    "sort": {
+      "default": "Default",
+      "distance": "Distance",
+      "popular": "Popular"
+    }
   },
   "commom": {
     "commets": "Comments"
@@ -997,10 +1003,27 @@
       "descriptionError": "Please enter a store description.",
       "contactLabel": "Contact",
       "hoursLabel": "Hours",
-      "hoursHint": "e.g. 09:00 - 18:00"
+      "hoursHint": "e.g. 09:00 - 18:00",
+      "photoLabel": "Photos (max {count})",
+      "categoryLabel": "Category",
+      "categoryError": "Please select a category.",
+      "productsLabel": "Representative Products/Services",
+      "productsHint": "Comma-separated, e.g. Haircut, Coloring, Perm"
+    },
+    "categories": {
+      "food": "Restaurant",
+      "cafe": "Cafe",
+      "massage": "Massage",
+      "beauty": "Beauty",
+      "nail": "Nail",
+      "auto": "Auto Repair",
+      "kids": "Kids",
+      "hospital": "Hospital/Clinic",
+      "etc": "Others"
     },
     "detail": {
       "description": "Store Description",
+      "products": "Products/Services",
       "deleteTitle": "Delete Store",
       "deleteContent": "Are you sure you want to delete this store? This action cannot be undone.",
       "deleteTooltip": "Delete store",

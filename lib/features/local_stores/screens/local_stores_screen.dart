@@ -34,6 +34,7 @@ import 'package:bling_app/features/local_stores/data/shop_repository.dart';
 import 'package:bling_app/features/local_stores/widgets/shop_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart'; // [추가]
 import 'package:easy_localization/easy_localization.dart';
 import 'create_shop_screen.dart'; // [추가]
 import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
@@ -125,6 +126,10 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
 
     // ✅ [버그 수정] 키워드가 변경될 때마다 setState를 호출하여 화면을 다시 그리도록 리스너 추가
     _searchKeywordNotifier.addListener(_onKeywordChanged);
+
+    // [추가] 카테고리 필터 초기화
+    _categories.insert(0, 'all');
+    _selectedCategory = _categories[0];
   }
 
   @override
@@ -142,6 +147,35 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
   // ✅ [버그 수정] 키워드 변경 시 setState 호출
   void _onKeywordChanged() {
     if (mounted) setState(() {});
+  }
+
+  // [추가] 카테고리 필터 로직
+  final List<String> _categories = [
+    'food',
+    'cafe',
+    'massage',
+    'beauty',
+    'nail',
+    'auto',
+    'kids',
+    'hospital',
+    'etc'
+  ];
+  String _selectedCategory = 'all';
+
+  // [추가] 정렬 옵션
+  String _sortOption = 'default'; // 'default', 'distance', 'popular'
+
+  // [추가] 거리 계산 함수
+  double _calculateDistance(GeoPoint? shopPoint) {
+    final userPoint = widget.userModel?.geoPoint;
+    if (userPoint == null || shopPoint == null) return double.maxFinite;
+    return Geolocator.distanceBetween(
+      userPoint.latitude,
+      userPoint.longitude,
+      shopPoint.latitude,
+      shopPoint.longitude,
+    );
   }
 
   @override
@@ -174,6 +208,57 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                 _searchKeywordNotifier.value = '';
               },
             ),
+          // [추가] 카테고리 필터 칩 리스트
+          SizedBox(
+            height: 50,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              itemCount: _categories.length,
+              itemBuilder: (context, index) {
+                final category = _categories[index];
+                final bool isSelected = category == _selectedCategory;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: ChoiceChip(
+                    label: Text('localStores.categories.$category'
+                        .tr()), // 'all' 번역도 필요
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() => _selectedCategory = category);
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+          // [추가] 정렬 옵션 UI
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                DropdownButton<String>(
+                  value: _sortOption,
+                  items: [
+                    DropdownMenuItem(
+                        value: 'default',
+                        child: Text('common.sort.default'.tr())), // 최신순
+                    DropdownMenuItem(
+                        value: 'distance',
+                        child: Text('common.sort.distance'.tr())), // 거리순
+                    DropdownMenuItem(
+                        value: 'popular',
+                        child: Text('common.sort.popular'.tr())), // 인기순
+                  ],
+                  onChanged: (value) => setState(() => _sortOption = value!),
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: shopRepository.fetchShops(
@@ -191,6 +276,13 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                 final allDocs = snapshot.data?.docs ?? [];
                 var shops = _applyLocationFilter(allDocs);
 
+                // [추가] 카테고리 필터 적용
+                if (_selectedCategory != 'all') {
+                  shops = shops
+                      .where((s) => s.category == _selectedCategory)
+                      .toList();
+                }
+
                 final kw = _searchKeywordNotifier.value;
                 if (kw.isNotEmpty) {
                   shops = shops
@@ -201,6 +293,29 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                       .toList();
                 }
 
+                // [수정] 정렬 로직
+                // [추가] 거리순 정렬
+                if (_sortOption == 'distance') {
+                  shops.sort((a, b) => _calculateDistance(a.geoPoint)
+                      .compareTo(_calculateDistance(b.geoPoint)));
+                } else if (_sortOption == 'popular') {
+                  // (개선) 인기순 정렬 (예: 리뷰수 * 별점 + 조회수)
+                  shops.sort((a, b) {
+                    final double scoreA =
+                        (a.reviewCount * a.averageRating) + a.viewsCount;
+                    final double scoreB =
+                        (b.reviewCount * b.averageRating) + b.viewsCount;
+                    return scoreB.compareTo(scoreA);
+                  });
+                }
+                // 'default'는 기본값 (createdAt 내림차순 - Repository에서 이미 처리됨)
+
+                // [추가] 스폰서 상품(광고) 을 항상 최상단으로 (정렬과 무관하게)
+                final sponsoredShops =
+                    shops.where((s) => s.isSponsored).toList();
+                final normalShops = shops.where((s) => !s.isSponsored).toList();
+                shops = sponsoredShops + normalShops;
+
                 if (shops.isEmpty) {
                   return Center(child: Text('localStores.empty'.tr()));
                 }
@@ -208,7 +323,8 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                 return ListView.builder(
                   itemCount: shops.length,
                   itemBuilder: (context, index) {
-                    return ShopCard(shop: shops[index]);
+                    return ShopCard(
+                        shop: shops[index], userModel: widget.userModel);
                   },
                 );
               },

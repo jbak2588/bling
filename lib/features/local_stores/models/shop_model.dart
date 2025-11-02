@@ -34,6 +34,7 @@ class ShopModel {
   final String? locationName;
   final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
+  final String category; // [추가] 업종 카테고리
   final List<String>? products; // 간단한 대표 상품/서비스 이름 목록
   final String contactNumber;
   final String openHours;
@@ -41,7 +42,11 @@ class ShopModel {
   final Timestamp createdAt;
   final int viewsCount;
   final int likesCount;
-  
+  final double averageRating; // [추가] 평균 별점
+  final int reviewCount; // [추가] 리뷰 개수
+  final bool isSponsored; // [추가] 유료 광고 여부
+  final Timestamp? adExpiryDate; // [추가] 광고 만료일
+
   // V V V --- [수정] 단일 이미지(String)에서 이미지 목록(List<String>)으로 변경 --- V V V
   final List<String> imageUrls; // 상점 대표 이미지
 
@@ -53,6 +58,7 @@ class ShopModel {
     this.locationName,
     this.locationParts,
     this.geoPoint,
+    required this.category,
     this.products,
     required this.contactNumber,
     required this.openHours,
@@ -60,6 +66,10 @@ class ShopModel {
     required this.createdAt,
     this.viewsCount = 0,
     this.likesCount = 0,
+    this.averageRating = 0.0,
+    this.reviewCount = 0,
+    this.isSponsored = false,
+    this.adExpiryDate,
     // [수정] 생성자 필드 변경
     required this.imageUrls,
   });
@@ -75,6 +85,7 @@ class ShopModel {
       locationParts: data['locationParts'] != null
           ? Map<String, dynamic>.from(data['locationParts'])
           : null,
+      category: data['category'] ?? 'etc', // [추가]
       geoPoint: data['geoPoint'],
       products:
           data['products'] != null ? List<String>.from(data['products']) : [],
@@ -84,8 +95,13 @@ class ShopModel {
       createdAt: data['createdAt'] ?? Timestamp.now(),
       viewsCount: data['viewsCount'] ?? 0,
       likesCount: data['likesCount'] ?? 0,
+      averageRating: (data['averageRating'] ?? 0.0).toDouble(),
+      reviewCount: data['reviewCount'] ?? 0,
+      isSponsored: data['isSponsored'] ?? false,
+      adExpiryDate: data['adExpiryDate'],
       // [수정] Firestore에서 이미지 목록 불러오기
-      imageUrls: data['imageUrls'] != null ? List<String>.from(data['imageUrls']) : [],
+      imageUrls:
+          data['imageUrls'] != null ? List<String>.from(data['imageUrls']) : [],
     );
   }
 
@@ -97,6 +113,7 @@ class ShopModel {
       'locationName': locationName,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
+      'category': category, // [추가]
       'products': products,
       'contactNumber': contactNumber,
       'openHours': openHours,
@@ -104,6 +121,10 @@ class ShopModel {
       'createdAt': createdAt,
       'viewsCount': viewsCount,
       'likesCount': likesCount,
+      'averageRating': averageRating,
+      'reviewCount': reviewCount,
+      'isSponsored': isSponsored,
+      'adExpiryDate': adExpiryDate,
       // [수정] Firestore에 이미지 목록 저장
       'imageUrls': imageUrls,
     };

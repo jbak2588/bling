@@ -28,18 +28,24 @@ import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
+import 'package:bling_app/features/local_stores/models/shop_review_model.dart'; // [추가]
 import 'package:bling_app/features/local_stores/data/shop_repository.dart';
 import 'package:bling_app/features/local_stores/screens/edit_shop_screen.dart';
+import 'package:bling_app/features/jobs/screens/create_job_screen.dart'; // [추가] Jobs 연동
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+// [추가] 리뷰 작성을 위한 위젯 (예: flutter_rating_bar)
+// import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+// [추가] 날짜 포매팅을 위한 intl
 
 class ShopDetailScreen extends StatefulWidget {
   final ShopModel shop;
-  const ShopDetailScreen({super.key, required this.shop});
+  final UserModel? userModel; // [추가]
+  const ShopDetailScreen({super.key, required this.shop, this.userModel});
 
   @override
   State<ShopDetailScreen> createState() => _ShopDetailScreenState();
@@ -50,7 +56,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
   final ChatService _chatService = ChatService();
   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
- // V V V --- [수정] 이미지 슬라이더와 썸네일을 동기화하기 위한 PageController 추가 --- V V V
+  // V V V --- [수정] 이미지 슬라이더와 썸네일을 동기화하기 위한 PageController 추가 --- V V V
   late final PageController _pageController;
   int _currentImageIndex = 0;
 
@@ -58,6 +64,8 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    // [추가] 상세 페이지 진입 시 조회수 1 증가
+    _repository.incrementShopView(widget.shop.id);
   }
 
   @override
@@ -72,10 +80,13 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         otherUserId: widget.shop.ownerId,
         shopId: widget.shop.id,
         shopName: widget.shop.name,
-        shopImage: widget.shop.imageUrls.isNotEmpty ? widget.shop.imageUrls.first : null,
+        shopImage: widget.shop.imageUrls.isNotEmpty
+            ? widget.shop.imageUrls.first
+            : null,
       );
 
-      final otherUser = await _chatService.getOtherUserInfo(widget.shop.ownerId);
+      final otherUser =
+          await _chatService.getOtherUserInfo(widget.shop.ownerId);
 
       if (!context.mounted) return;
 
@@ -108,8 +119,13 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         title: Text('localStores.detail.deleteTitle'.tr()),
         content: Text('localStores.detail.deleteContent'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('common.cancel'.tr())),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text('common.delete'.tr(), style: const TextStyle(color: Colors.red))),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('common.cancel'.tr())),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('common.delete'.tr(),
+                  style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -117,10 +133,15 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
     if (confirmed == true && mounted) {
       try {
         await _repository.deleteShop(widget.shop.id);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('localStores.detail.deleteSuccess'.tr()), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('localStores.detail.deleteSuccess'.tr()),
+            backgroundColor: Colors.green));
         Navigator.of(context).pop();
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('localStores.detail.deleteFail'.tr(namedArgs: {'error': e.toString()})), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('localStores.detail.deleteFail'
+                .tr(namedArgs: {'error': e.toString()})),
+            backgroundColor: Colors.red));
       }
     }
   }
@@ -161,7 +182,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
             ),
           ),
         ),
-        
+
         // --- 2. 하단 썸네일 목록 ---
         if (images.length > 1)
           Container(
@@ -212,7 +233,8 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
       stream: _repository.getShopStream(widget.shop.id),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
         final shop = snapshot.data!;
         final isOwner = shop.ownerId == _currentUserId;
@@ -221,6 +243,26 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
           appBar: AppBar(
             title: Text(shop.name),
             actions: [
+              // [추가] 'Jobs' 연동 (알바 구하기 버튼)
+              if (isOwner && widget.userModel != null)
+                IconButton(
+                  icon: const Icon(Icons.work_outline),
+                  tooltip: 'jobs.create.title'.tr(), // "알바 구하기"
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CreateJobScreen(
+                          userModel: widget.userModel!,
+                          // [자동 채우기] 가게 정보 전달
+                          initialCompanyName: shop.name,
+                          initialLocation: shop.locationName,
+                          initialGeoPoint: shop.geoPoint,
+                          initialLocationParts: shop.locationParts,
+                        ),
+                      ),
+                    );
+                  },
+                ),
               if (isOwner)
                 IconButton(
                   icon: const Icon(Icons.edit_note_outlined),
@@ -243,8 +285,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
             ],
           ),
           body: ListView(
-            padding:
-                const EdgeInsets.fromLTRB(0, 0, 0, 100.0),
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 100.0),
             children: [
               // [수정] 기존 Image.network를 새로 이식한 _buildImageSlider로 교체
               _buildImageSlider(shop.imageUrls),
@@ -253,11 +294,24 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(shop.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold)),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(shop.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold)),
+                        ),
+                        // [추가] 인증 배지
+                        if (shop.trustLevelVerified) ...[
+                          const SizedBox(width: 8),
+                          Icon(Icons.verified,
+                              color: Theme.of(context).primaryColor, size: 24),
+                        ]
+                      ],
+                    ),
                     const SizedBox(height: 8),
                     _buildInfoRow(context, Icons.location_on_outlined,
                         shop.locationName ?? 'localStores.noLocation'.tr()),
@@ -268,12 +322,35 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                     _buildInfoRow(
                         context, Icons.phone_outlined, shop.contactNumber),
                     const Divider(height: 32),
+                    // [추가] 대표 상품/서비스 칩
+                    if (shop.products != null && shop.products!.isNotEmpty) ...[
+                      Text('localStores.detail.products'.tr(), // "대표 상품 및 서비스"
+                          style: Theme.of(context).textTheme.titleLarge),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8.0, // 칩 사이의 가로 간격
+                        runSpacing: 4.0, // 칩 사이의 세로 간격
+                        children: shop.products!
+                            .map((product) => Chip(label: Text(product.trim())))
+                            .toList(),
+                      ),
+                      const Divider(height: 32),
+                    ],
                     Text('localStores.detail.description'.tr(),
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 8),
                     Text(shop.description,
                         style: const TextStyle(fontSize: 16, height: 1.5)),
                     const Divider(height: 32),
+                    // [추가] 리뷰 섹션
+                    Text(
+                        'localStores.detail.reviews'.tr(
+                            namedArgs: {'count': shop.reviewCount.toString()}),
+                        style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 8),
+                    _buildReviewSection(shop), // 리뷰 목록 및 작성 UI
+                    const Divider(height: 32),
+                    // [끝] 리뷰 섹션
                     _buildOwnerInfo(shop.ownerId),
                   ],
                 ),
@@ -302,14 +379,19 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
       children: [
         Icon(icon, color: Colors.grey[600], size: 18),
         const SizedBox(width: 8),
-        Expanded(child: Text(text, style: TextStyle(fontSize: 15, color: Colors.grey[800]))),
+        Expanded(
+            child: Text(text,
+                style: TextStyle(fontSize: 15, color: Colors.grey[800]))),
       ],
     );
   }
 
   Widget _buildOwnerInfo(String userId) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
           return ListTile(title: Text('localStores.detail.noOwnerInfo'.tr()));
@@ -320,14 +402,123 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
           color: Colors.grey.shade100,
           child: ListTile(
             leading: CircleAvatar(
-              backgroundImage: (user.photoUrl != null && user.photoUrl!.isNotEmpty) ? NetworkImage(user.photoUrl!) : null,
-              child: (user.photoUrl == null || user.photoUrl!.isEmpty) ? const Icon(Icons.person) : null,
+              backgroundImage:
+                  (user.photoUrl != null && user.photoUrl!.isNotEmpty)
+                      ? NetworkImage(user.photoUrl!)
+                      : null,
+              child: (user.photoUrl == null || user.photoUrl!.isEmpty)
+                  ? const Icon(Icons.person)
+                  : null,
             ),
-            title: Text(user.nickname, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(user.nickname,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(user.locationName ?? ''),
           ),
         );
       },
+    );
+  }
+
+  // [추가] 리뷰 섹션 UI 빌더
+  Widget _buildReviewSection(ShopModel shop) {
+    // (가정) 현재 사용자가 리뷰를 작성할 수 있는지 (주인X, 구매이력O 등)
+    final bool canReview = shop.ownerId != _currentUserId;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // --- 별점 요약 ---
+        Row(
+          children: [
+            Text(shop.averageRating.toStringAsFixed(1),
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineMedium
+                    ?.copyWith(color: Colors.black87)),
+            const SizedBox(width: 8),
+            // (가정) RatingBar.builder 같은 위젯 사용
+            Text(
+                "★" * shop.averageRating.round() +
+                    "☆" * (5 - shop.averageRating.round()),
+                style: TextStyle(color: Colors.yellow[700], fontSize: 20)),
+            const SizedBox(width: 8),
+            Text('localStores.detail.reviews'
+                .tr(namedArgs: {'count': shop.reviewCount.toString()})),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // --- 리뷰 작성 버튼 ---
+        if (canReview)
+          OutlinedButton.icon(
+            icon: const Icon(Icons.rate_review_outlined),
+            label: Text('localStores.detail.writeReview'.tr()),
+            onPressed: () {
+              _showWriteReviewDialog(shop.id);
+            },
+          ),
+        const SizedBox(height: 16),
+
+        // --- 리뷰 목록 ---
+        StreamBuilder<List<ShopReviewModel>>(
+          stream: _repository.fetchReviews(shop.id),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(child: Text('localStores.detail.noReviews'.tr()));
+            }
+            final reviews = snapshot.data!;
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: reviews.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (context, index) {
+                final review = reviews[index];
+                return ListTile(
+                  title: Text("★" * review.rating + "☆" * (5 - review.rating),
+                      style: TextStyle(color: Colors.yellow[700])),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(review.comment),
+                      const SizedBox(height: 4),
+                      // (개선) userId 대신 닉네임 표시 필요 (FutureBuilder 사용)
+                      Text(
+                          "by ${review.userId.substring(0, 6)}... · ${DateFormat.yMd().format(review.createdAt.toDate())}",
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // [추가] 리뷰 작성 다이얼로그 (간단 예시)
+  void _showWriteReviewDialog(String shopId) {
+    // (개선) 이 부분은 별도 Stateful 위젯으로 분리해야 함 (Rating, TextEditingController)
+    // 아래는 단순화된 예시
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('localStores.detail.writeReview'.tr()),
+        content: Text('localStores.detail.reviewDialogContent'
+            .tr()), // 실제로는 별점 선택 + 텍스트 입력 필드
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('common.cancel'.tr())),
+          TextButton(
+              onPressed: () {
+                /* (개선) _repository.addReview(...) 호출 */ Navigator.of(context)
+                    .pop();
+              },
+              child: Text('common.submit'.tr())),
+        ],
+      ),
     );
   }
 }
@@ -357,7 +548,7 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: _currentIndex);
   }
-  
+
   @override
   void dispose() {
     _pageController.dispose();
