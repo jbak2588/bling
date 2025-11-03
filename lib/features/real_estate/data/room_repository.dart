@@ -69,7 +69,34 @@ class RoomRepository {
           final roomCountMatch = filters.roomCount == null ||
               room.roomCount == filters.roomCount ||
               (filters.roomCount == 4 && room.roomCount >= 4);
-          return areaMatch && roomCountMatch;
+
+          // [추가] Task 38: 신규 필터 (클라이언트 측)
+          final furnishedMatch = filters.furnishedStatus == null ||
+              room.furnishedStatus == filters.furnishedStatus;
+          final rentPeriodMatch = filters.rentPeriod == null ||
+              room.rentPeriod == filters.rentPeriod;
+          // amenities는 'AND' 조건 (선택한 모든 편의시설을 포함해야 함)
+          final amenitiesMatch = filters.amenities.isEmpty ||
+              room.amenities.toSet().containsAll(filters.amenities);
+
+          // [추가] Task 40: 상업용 전용 필터 (보증금, 층수)
+          final depositMatch = (room.deposit == null) ||
+              (room.deposit! >= filters.depositMin &&
+                  room.deposit! <= filters.depositMax);
+          final floorMatch = (filters.floorInfoFilter == null ||
+                  filters.floorInfoFilter!.trim().isEmpty)
+              ? true
+              : ((room.floorInfo ?? '')
+                  .toLowerCase()
+                  .contains(filters.floorInfoFilter!.toLowerCase().trim()));
+
+          return areaMatch &&
+              roomCountMatch &&
+              furnishedMatch &&
+              rentPeriodMatch &&
+              amenitiesMatch &&
+              depositMatch &&
+              floorMatch;
         }).toList();
       }
 
@@ -91,7 +118,33 @@ class RoomRepository {
           final roomCountMatch = filters.roomCount == null ||
               room.roomCount == filters.roomCount ||
               (filters.roomCount == 4 && room.roomCount >= 4);
-          return areaMatch && roomCountMatch;
+
+          // [추가] Task 38: Fallback에도 신규 필터 적용
+          final furnishedMatch = filters.furnishedStatus == null ||
+              room.furnishedStatus == filters.furnishedStatus;
+          final rentPeriodMatch = filters.rentPeriod == null ||
+              room.rentPeriod == filters.rentPeriod;
+          final amenitiesMatch = filters.amenities.isEmpty ||
+              room.amenities.toSet().containsAll(filters.amenities);
+
+          // [추가] Task 40: 상업용 전용 필터 (보증금, 층수) - fallback에도 적용
+          final depositMatch = (room.deposit == null) ||
+              (room.deposit! >= filters.depositMin &&
+                  room.deposit! <= filters.depositMax);
+          final floorMatch = (filters.floorInfoFilter == null ||
+                  filters.floorInfoFilter!.trim().isEmpty)
+              ? true
+              : ((room.floorInfo ?? '')
+                  .toLowerCase()
+                  .contains(filters.floorInfoFilter!.toLowerCase().trim()));
+
+          return areaMatch &&
+              roomCountMatch &&
+              furnishedMatch &&
+              rentPeriodMatch &&
+              amenitiesMatch &&
+              depositMatch &&
+              floorMatch;
         }).toList();
       }
 

@@ -55,6 +55,16 @@ class RoomListingModel {
   final bool isVerified; // 인증 매물 여부 (중개사/집주인 인증)
   final int viewCount; // 조회수
 
+  // [추가] Task 38: '직방' 및 'rumah123' 상세 필터용 필드
+  // (Kos, Apartemen, Kontrakan)
+  final String? furnishedStatus; // 'furnished', 'semi_furnished', 'unfurnished'
+  final String? rentPeriod; // 'daily', 'monthly', 'yearly'
+  final int? maintenanceFee; // 관리비
+  // (Kontrakan, Ruko, Kantor)
+  final int? deposit; // 보증금
+  // (Apartemen, Ruko, Kantor)
+  final String? floorInfo; // 층수 (예: "Lantai 5", "Middle")
+
   // ✅ tags 필드를 추가합니다.
   final List<String> tags;
 
@@ -82,6 +92,12 @@ class RoomListingModel {
     this.isSponsored = false,
     this.isVerified = false,
     this.viewCount = 0,
+    // [추가] Task 38
+    this.furnishedStatus,
+    this.rentPeriod,
+    this.maintenanceFee,
+    this.deposit,
+    this.floorInfo,
     this.tags = const [], // ✅ 생성자에 추가
   });
 
@@ -115,6 +131,12 @@ class RoomListingModel {
       isSponsored: data['isSponsored'] ?? false,
       isVerified: data['isVerified'] ?? false,
       viewCount: data['viewCount'] ?? 0,
+      // [추가] Task 38: '직방' 및 'rumah123' 상세 필터용 필드
+      furnishedStatus: data['furnishedStatus'],
+      rentPeriod: data['rentPeriod'],
+      maintenanceFee: data['maintenanceFee'],
+      deposit: data['deposit'],
+      floorInfo: data['floorInfo'],
       // ✅ Firestore 데이터로부터 tags 필드를 읽어옵니다.
       tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
     );
@@ -146,6 +168,12 @@ class RoomListingModel {
       'isSponsored': isSponsored,
       'isVerified': isVerified,
       'viewCount': viewCount,
+      // [추가] Task 38
+      'furnishedStatus': furnishedStatus,
+      'rentPeriod': rentPeriod,
+      'maintenanceFee': maintenanceFee,
+      'deposit': deposit,
+      'floorInfo': floorInfo,
 
       'tags': tags, // ✅ JSON 변환 시 tags 필드를 포함합니다.
     };

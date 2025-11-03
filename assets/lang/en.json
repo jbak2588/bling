@@ -867,6 +867,7 @@
       },
       "joinChat": "Join chat",
       "joinClub": "Join Club",
+  "owner": "Admin",
       "info": {
         "members": "Members",
         "location": "Location"
@@ -1148,12 +1149,38 @@
         "ac": "AC",
         "parking": "Parking",
         "kitchen": "Kitchen"
-      }
+      },
+      "details": "Listing Details",
+      "maintenanceFee": "Monthly maintenance fee",
+      "maintenanceFeeHint": "Maintenance fee (per month, Rp)",
+      "deposit": "Deposit",
+      "depositHint": "Deposit (Rp)",
+      "floorInfo": "Floor info",
+      "floorInfoHint": "e.g., Floor 1 / 3 of 5"
     },
     "filter": {
       "title": "Advanced filters",
       "priceRange": "Price range",
-      "areaRange": "Area range (m²)"
+      "areaRange": "Area range (m²)",
+      "depositRange": "Deposit range",
+      "floorInfo": "Floor info",
+  "depositMin": "Min deposit",
+  "depositMax": "Max deposit",
+  "clearFloorInfo": "Clear",
+      "furnishedStatus": "Furnishing",
+      "rentPeriod": "Rent period",
+      "selectFurnished": "Select furnishing",
+      "selectRentPeriod": "Select rent period",
+      "rentPeriods": {
+        "daily": "Daily",
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      },
+      "furnishedTypes": {
+        "furnished": "Furnished",
+        "semi_furnished": "Semi-furnished",
+        "unfurnished": "Unfurnished"
+      }
     },
     "info": {
       "bed": "Bed",
@@ -1166,7 +1193,8 @@
       "save": "Save",
       "success": "Listing updated.",
       "fail": "Failed to update listing: {error}"
-    }
+    },
+    "disclaimer": "Bling is an online advertising/board platform and is not a real estate broker or agent. The truthfulness of listings, ownership/title status, price, and terms are the sole responsibility of the poster. Users must conduct their own checks and verify all information directly with the poster and relevant authorities before proceeding."
   },
   "lostAndFound": {
     "empty": "No lost/found items yet.",
