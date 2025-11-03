@@ -873,6 +873,7 @@
       },
       "joinChat": "채팅 참여하기",
       "joinClub": "동호회 가입하기",
+  "owner": "Admin",
       "info": {
         "members": "멤버",
         "location": "지역"
@@ -1154,12 +1155,38 @@
         "ac": "에어컨",
         "parking": "주차장",
         "kitchen": "주방"
-      }
+      },
+      "details": "상세 정보",
+      "maintenanceFee": "관리비 (월)",
+      "maintenanceFeeHint": "월 관리비 (Rp)",
+      "deposit": "보증금",
+      "depositHint": "보증금 (Rp)",
+      "floorInfo": "층수 정보",
+      "floorInfoHint": "예: 1층 / 5층 중 3층"
     },
     "filter": {
       "title": "상세 필터",
       "priceRange": "가격 범위",
-      "areaRange": "면적 범위 (m²)"
+      "areaRange": "면적 범위 (m²)",
+      "depositRange": "보증금 범위",
+      "floorInfo": "층수 정보",
+  "depositMin": "최소 보증금",
+  "depositMax": "최대 보증금",
+  "clearFloorInfo": "지우기",
+      "furnishedStatus": "가구 상태",
+      "rentPeriod": "임대 기간",
+      "selectFurnished": "가구 상태 선택",
+      "selectRentPeriod": "임대 기간 선택",
+      "rentPeriods": {
+        "daily": "일간",
+        "monthly": "월간",
+        "yearly": "연간"
+      },
+      "furnishedTypes": {
+        "furnished": "가구 포함",
+        "semi_furnished": "부분 가구 포함",
+        "unfurnished": "가구 없음"
+      }
     },
     "info": {
       "bed": "방",
@@ -1172,7 +1199,8 @@
       "save": "저장",
       "success": "매물 정보가 수정되었습니다.",
       "fail": "수정에 실패했습니다: {error}"
-    }
+    },
+    "disclaimer": "블링은 온라인 광고/게시판 플랫폼으로, 거래 당사자가 아닙니다. 게시된 매물의 진위, 권리관계, 가격 및 조건에 대한 책임은 게시자에게 있으며, 사용자는 거래 전 관련 사실을 게시자 및 관계기관을 통해 직접 확인해야 합니다."
   },
   "lostAndFound": {
     "empty": "아직 등록된 분실/습득물이 없습니다.",

@@ -54,6 +54,14 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
   late final TextEditingController _bathroomCountController; // 욕실 수
   DateTime? _selectedMoveInDate; // 입주 가능일
 
+  // [추가] Task 40: 카테고리별 상세 필드
+  String?
+      _selectedFurnishedStatus; // 'furnished', 'semi_furnished', 'unfurnished'
+  String? _selectedRentPeriod; // 'daily', 'monthly', 'yearly'
+  late final TextEditingController _maintenanceFeeController; // 관리비
+  late final TextEditingController _depositController; // 보증금
+  late final TextEditingController _floorInfoController; // 층수 정보
+
   final RoomRepository _repository = RoomRepository();
   final ImagePicker _picker = ImagePicker();
 
@@ -79,6 +87,16 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
     _bathroomCountController =
         TextEditingController(text: widget.room.bathroomCount.toString());
     _selectedMoveInDate = widget.room.moveInDate?.toDate();
+
+    // [추가] Task 40: 카테고리별 필드 로드
+    _selectedFurnishedStatus = widget.room.furnishedStatus;
+    _selectedRentPeriod = widget.room.rentPeriod;
+    _maintenanceFeeController = TextEditingController(
+        text: widget.room.maintenanceFee?.toString() ?? '');
+    _depositController =
+        TextEditingController(text: widget.room.deposit?.toString() ?? '');
+    _floorInfoController =
+        TextEditingController(text: widget.room.floorInfo ?? '');
   }
 
   @override
@@ -90,6 +108,10 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
     _areaController.dispose();
     _roomCountController.dispose();
     _bathroomCountController.dispose();
+    // [추가] Task 40
+    _maintenanceFeeController.dispose();
+    _depositController.dispose();
+    _floorInfoController.dispose();
     super.dispose();
   }
 
@@ -149,6 +171,12 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
         moveInDate: _selectedMoveInDate != null
             ? Timestamp.fromDate(_selectedMoveInDate!)
             : null,
+        // [추가] Task 40: 카테고리별 필드 저장
+        furnishedStatus: _selectedFurnishedStatus,
+        rentPeriod: _selectedRentPeriod,
+        maintenanceFee: int.tryParse(_maintenanceFeeController.text.trim()),
+        deposit: int.tryParse(_depositController.text.trim()),
+        floorInfo: _floorInfoController.text.trim(),
         // --- 기존 정보 보존 ---
         locationName: widget.room.locationName,
         locationParts: widget.room.locationParts,
@@ -459,7 +487,89 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                     onPressed: () => setState(() => _selectedMoveInDate = null),
                   ),
 
-                // ...existing code...
+                // [추가] Task 40: 카테고리별 동적 입력 필드
+                // --- 1. 주거용 필드 (Kos, Apartment, Kontrakan, House) ---
+                if (['kos', 'apartment', 'kontrakan', 'house']
+                    .contains(_type)) ...[
+                  const SizedBox(height: 16),
+                  // 가구 상태
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedFurnishedStatus,
+                    decoration: InputDecoration(
+                      labelText: 'realEstate.filter.furnishedStatus'.tr(),
+                      border: const OutlineInputBorder(),
+                    ),
+                    hint: Text('realEstate.filter.selectFurnished'.tr()),
+                    items: ['furnished', 'semi_furnished', 'unfurnished']
+                        .map((status) {
+                      return DropdownMenuItem(
+                        value: status,
+                        child: Text(
+                            'realEstate.filter.furnishedTypes.$status'.tr()),
+                      );
+                    }).toList(),
+                    onChanged: (value) =>
+                        setState(() => _selectedFurnishedStatus = value),
+                  ),
+                  const SizedBox(height: 16),
+                  // 임대 기간 (Kos/Kontrakan 에만)
+                  if (['kos', 'kontrakan'].contains(_type))
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedRentPeriod,
+                      decoration: InputDecoration(
+                        labelText: 'realEstate.filter.rentPeriod'.tr(),
+                        border: const OutlineInputBorder(),
+                      ),
+                      hint: Text('realEstate.filter.selectRentPeriod'.tr()),
+                      items: ['daily', 'monthly', 'yearly'].map((period) {
+                        return DropdownMenuItem(
+                          value: period,
+                          child: Text(
+                              'realEstate.filter.rentPeriods.$period'.tr()),
+                        );
+                      }).toList(),
+                      onChanged: (value) =>
+                          setState(() => _selectedRentPeriod = value),
+                    ),
+                  const SizedBox(height: 16),
+                  // 월 관리비
+                  TextFormField(
+                    controller: _maintenanceFeeController,
+                    decoration: InputDecoration(
+                      labelText: 'realEstate.form.maintenanceFee'.tr(),
+                      hintText: 'realEstate.form.maintenanceFeeHint'.tr(),
+                      border: const OutlineInputBorder(),
+                      suffixText: 'Rp',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+
+                // --- 2. 상업용 필드 (Ruko, Kantor) ---
+                if (['ruko', 'kantor'].contains(_type)) ...[
+                  const SizedBox(height: 16),
+                  // 보증금 (Deposit)
+                  TextFormField(
+                    controller: _depositController,
+                    decoration: InputDecoration(
+                      labelText: 'realEstate.form.deposit'.tr(),
+                      hintText: 'realEstate.form.depositHint'.tr(),
+                      border: const OutlineInputBorder(),
+                      suffixText: 'Rp',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  // 층수 정보
+                  TextFormField(
+                    controller: _floorInfoController,
+                    decoration: InputDecoration(
+                      labelText: 'realEstate.form.floorInfo'.tr(),
+                      hintText: 'realEstate.form.floorInfoHint'.tr(),
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

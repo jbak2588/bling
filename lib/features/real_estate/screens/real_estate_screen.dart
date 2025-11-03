@@ -3,6 +3,11 @@
 // 1. (Task 31, 33) '직방' 모델 도입.
 // 2. 이 화면을 '매물 리스트'에서 '카테고리 런처(Launcher)' 화면으로 전면 개편.
 // 3. 기존 리스트/필터 로직은 'room_list_screen.dart' 파일로 이전됨.
+//
+// [LEGAL DISCLAIMER - 절대 삭제 금지]
+// 아래 고지 문구는 각 섹션 및 화면 하단에 공통적으로 노출되어야 하며,
+// 현지 법률의 미묘한 차이를 고려하되 동일한 취지를 유지해야 합니다.
+// 번역 키: 'realEstate.disclaimer' (ko/en/id 모두 존재)
 // =====================================================
 
 import 'package:flutter/material.dart';
@@ -41,9 +46,14 @@ class RealEstateScreen extends StatelessWidget {
         'labelKey': 'realEstate.form.roomTypes.apartment'
       },
       {
-        'type': 'kontrakan',
-        'icon': Icons.house_outlined,
+        'type': 'kontrakan', // Kontrakan (월/연세 - 원룸/빌라)
+        'icon': Icons.house_siding_outlined,
         'labelKey': 'realEstate.form.roomTypes.kontrakan'
+      },
+      {
+        'type': 'house', // House (주택)
+        'icon': Icons.house_outlined,
+        'labelKey': 'realEstate.form.roomTypes.house'
       },
       {
         'type': 'ruko',
@@ -81,7 +91,7 @@ class RealEstateScreen extends StatelessWidget {
                 final category = categories[index];
                 return _buildCategoryCard(
                   context,
-                  icon: category['icon'],
+                  icon: category['icon'] as IconData,
                   label: (category['labelKey'] as String).tr(),
                   onTap: () {
                     // 다음 화면 (RoomListScreen)으로 이동
@@ -90,13 +100,27 @@ class RealEstateScreen extends StatelessWidget {
                         builder: (_) => RoomListScreen(
                           userModel: userModel,
                           locationFilter: locationFilter,
-                          roomType: category['type'], // 선택된 카테고리 전달
+                          roomType: category['type'] as String, // 선택된 카테고리 전달
                         ),
                       ),
                     );
                   },
                 );
               },
+            ),
+          ),
+          // [LEGAL DISCLAIMER - 절대 삭제 금지]
+          // 각 현지 법률의 미묘한 차이는 번역 문구에서 반영되며, 본 앱은 광고/게시판 플랫폼임을 고지합니다.
+          // 아래 문구는 카테고리 그리드 하단에 항상 노출되어야 합니다.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Text(
+              'realEstate.disclaimer'.tr(),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: Colors.grey[600], height: 1.3),
+              textAlign: TextAlign.center,
             ),
           ),
         ],

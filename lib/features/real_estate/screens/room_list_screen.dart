@@ -7,6 +7,7 @@ import 'package:bling_app/features/real_estate/widgets/room_card.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/services.dart';
 
 /// '직방' 모델의 카테고리(예: 'Kos')를 선택한 후,
 /// 실제 매물 목록을 보여주고 상세 필터링하는 화면입니다.
@@ -93,6 +94,16 @@ class _RoomListScreenState extends State<RoomListScreen> {
                     controller: controller,
                     padding: const EdgeInsets.all(16.0),
                     children: [
+                      // [수정] Task 38: 카테고리별 동적 필터
+                      // 'kos', 'apartment', 'kontrakan', 'house'는 주거용 필터
+                      if (['kos', 'apartment', 'kontrakan', 'house']
+                          .contains(widget.roomType))
+                        _buildResidentialFilters(setModalState, tempFilters)
+                      else // 'ruko', 'kantor', 'etc'는 상업용 필터
+                        _buildCommercialFilters(setModalState, tempFilters),
+
+                      const Divider(height: 32),
+
                       // [수정] 카테고리(roomType)는 이미 선택되었으므로 필터에서 비활성화(읽기 전용)
                       Text('realEstate.form.typeLabel'.tr(),
                           style: Theme.of(context).textTheme.titleMedium),
@@ -102,6 +113,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                           'kos',
                           'apartment',
                           'kontrakan',
+                          'house', // [추가]
                           'ruko',
                           'kantor',
                           'etc'
@@ -111,83 +123,6 @@ class _RoomListScreenState extends State<RoomListScreen> {
                             selected: tempFilters.roomType == type,
                             // 이미 선택된 카테고리는 변경 불가 (선택 효과 없음)
                             onSelected: (selected) {},
-                          );
-                        }).toList(),
-                      ),
-                      const Divider(height: 32),
-
-                      // --- 매물 유형 (임대/매매) ---
-                      Text('realEstate.form.listingType'.tr(),
-                          style: Theme.of(context).textTheme.titleMedium),
-                      Wrap(
-                        spacing: 8.0,
-                        children: ['rent', 'sale'].map((type) {
-                          return ChoiceChip(
-                            label:
-                                Text('realEstate.form.listingTypes.$type'.tr()),
-                            selected: tempFilters.listingType == type,
-                            onSelected: (selected) => setModalState(() =>
-                                tempFilters.listingType =
-                                    selected ? type : null),
-                          );
-                        }).toList(),
-                      ),
-                      const Divider(height: 32),
-
-                      // --- 가격 범위 ---
-                      Text('realEstate.filter.priceRange'.tr(),
-                          style: Theme.of(context).textTheme.titleMedium),
-                      RangeSlider(
-                        values: RangeValues(
-                            tempFilters.minPrice, tempFilters.maxPrice),
-                        min: 0,
-                        max: 50000000, // 50 Juta
-                        divisions: 50,
-                        labels: RangeLabels(
-                          NumberFormat.compactSimpleCurrency(locale: 'id_ID')
-                              .format(tempFilters.minPrice),
-                          NumberFormat.compactSimpleCurrency(locale: 'id_ID')
-                              .format(tempFilters.maxPrice),
-                        ),
-                        onChanged: (values) => setModalState(() {
-                          tempFilters.minPrice = values.start;
-                          tempFilters.maxPrice = values.end;
-                        }),
-                      ),
-                      const Divider(height: 32),
-
-                      // --- 면적 범위 ---
-                      Text('realEstate.filter.areaRange'.tr(),
-                          style: Theme.of(context).textTheme.titleMedium),
-                      RangeSlider(
-                        values: RangeValues(
-                            tempFilters.minArea, tempFilters.maxArea),
-                        min: 0,
-                        max: 100, // 100 m²
-                        divisions: 20,
-                        labels: RangeLabels('${tempFilters.minArea.round()} m²',
-                            '${tempFilters.maxArea.round()} m²'),
-                        onChanged: (values) => setModalState(() {
-                          tempFilters.minArea = values.start;
-                          tempFilters.maxArea = values.end;
-                        }),
-                      ),
-                      const Divider(height: 32),
-
-                      // --- 방 개수 ---
-                      Text('realEstate.form.rooms'.tr(),
-                          style: Theme.of(context).textTheme.titleMedium),
-                      Wrap(
-                        spacing: 8.0,
-                        children: [1, 2, 3, 4].map((roomCountValue) {
-                          // 4는 4+
-                          return ChoiceChip(
-                            label: Text(
-                                roomCountValue == 4 ? '4+' : '$roomCountValue'),
-                            selected: tempFilters.roomCount == roomCountValue,
-                            onSelected: (selected) => setModalState(() =>
-                                tempFilters.roomCount =
-                                    selected ? roomCountValue : null),
                           );
                         }).toList(),
                       ),
@@ -239,6 +174,12 @@ class _RoomListScreenState extends State<RoomListScreen> {
     if (filters.roomCount != null) count++;
     if (filters.minPrice > 0 || filters.maxPrice < 50000000) count++;
     if (filters.minArea > 0 || filters.maxArea < 100) count++;
+    if (filters.furnishedStatus != null) count++; // [추가]
+    if (filters.rentPeriod != null) count++; // [추가]
+    count += filters.amenities.length; // [추가]
+    // [추가] Task 40: 상업용 필터 카운트
+    if (filters.depositMin > 0 || filters.depositMax < 50000000) count++;
+    if ((filters.floorInfoFilter ?? '').trim().isNotEmpty) count++;
     return count;
   }
 
@@ -332,6 +273,247 @@ class _RoomListScreenState extends State<RoomListScreen> {
       ),
       // [작업 25 수정] FAB 삭제
       floatingActionButton: null,
+    );
+  }
+
+  // [신규] Task 38: 공통 필터 (가격, 면적, 거래유형)
+  Widget _buildCommonFilters(
+      StateSetter setModalState, RoomFilters tempFilters) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // --- 매물 유형 (임대/매매) ---
+        Text('realEstate.form.listingType'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        Wrap(
+          spacing: 8.0,
+          children: ['rent', 'sale'].map((type) {
+            return ChoiceChip(
+              label: Text('realEstate.form.listingTypes.$type'.tr()),
+              selected: tempFilters.listingType == type,
+              onSelected: (selected) => setModalState(
+                  () => tempFilters.listingType = selected ? type : null),
+            );
+          }).toList(),
+        ),
+        const Divider(height: 32),
+
+        // --- 가격 범위 ---
+        Text('realEstate.filter.priceRange'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        RangeSlider(
+          values: RangeValues(tempFilters.minPrice, tempFilters.maxPrice),
+          min: 0,
+          max: 50000000, // 50 Juta
+          divisions: 50,
+          labels: RangeLabels(
+            NumberFormat.compactSimpleCurrency(locale: 'id_ID')
+                .format(tempFilters.minPrice),
+            NumberFormat.compactSimpleCurrency(locale: 'id_ID')
+                .format(tempFilters.maxPrice),
+          ),
+          onChanged: (values) => setModalState(() {
+            tempFilters.minPrice = values.start;
+            tempFilters.maxPrice = values.end;
+          }),
+        ),
+        const Divider(height: 32),
+
+        // --- 면적 범위 ---
+        Text('realEstate.filter.areaRange'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        RangeSlider(
+          values: RangeValues(tempFilters.minArea, tempFilters.maxArea),
+          min: 0,
+          max: 100, // 100 m²
+          divisions: 20,
+          labels: RangeLabels('${tempFilters.minArea.round()} m²',
+              '${tempFilters.maxArea.round()} m²'),
+          onChanged: (values) => setModalState(() {
+            tempFilters.minArea = values.start;
+            tempFilters.maxArea = values.end;
+          }),
+        ),
+        const Divider(height: 32),
+      ],
+    );
+  }
+
+  // [신규] Task 38: 주거용 필터 (Kos, Apartment, Kontrakan)
+  Widget _buildResidentialFilters(
+      StateSetter setModalState, RoomFilters tempFilters) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 공통 필터 (가격, 면적, 거래유형)
+        _buildCommonFilters(setModalState, tempFilters),
+
+        // --- 방 개수 ---
+        Text('realEstate.form.rooms'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        Wrap(
+          spacing: 8.0,
+          children: [1, 2, 3, 4].map((roomCountValue) {
+            // 4는 4+
+            return ChoiceChip(
+              label: Text(roomCountValue == 4 ? '4+' : '$roomCountValue'),
+              selected: tempFilters.roomCount == roomCountValue,
+              onSelected: (selected) => setModalState(() =>
+                  tempFilters.roomCount = selected ? roomCountValue : null),
+            );
+          }).toList(),
+        ),
+        const Divider(height: 32),
+
+        // --- 가구 상태 ---
+        Text('realEstate.filter.furnishedStatus'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        Wrap(
+          spacing: 8.0,
+          children:
+              ['furnished', 'semi_furnished', 'unfurnished'].map((status) {
+            return ChoiceChip(
+              label: Text('realEstate.filter.furnishedTypes.$status'.tr()),
+              selected: tempFilters.furnishedStatus == status,
+              onSelected: (selected) => setModalState(
+                  () => tempFilters.furnishedStatus = selected ? status : null),
+            );
+          }).toList(),
+        ),
+        const Divider(height: 32),
+
+        // --- 편의시설 (Amenities) ---
+        Text('realEstate.form.amenities'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        Wrap(
+          spacing: 8.0,
+          children: ['wifi', 'ac', 'parking', 'kitchen'].map((amenity) {
+            // TODO: 이 리스트는 공용 상수 파일로 관리
+            return FilterChip(
+              label: Text('realEstate.form.amenity.$amenity'.tr()),
+              selected: tempFilters.amenities.contains(amenity),
+              onSelected: (selected) => setModalState(() {
+                if (selected) {
+                  tempFilters.amenities.add(amenity);
+                } else {
+                  tempFilters.amenities.remove(amenity);
+                }
+              }),
+            );
+          }).toList(),
+        ),
+        const Divider(height: 32),
+      ],
+    );
+  }
+
+  // [신규] Task 38: 상업용 필터 (Ruko, Kantor)
+  Widget _buildCommercialFilters(
+      StateSetter setModalState, RoomFilters tempFilters) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 공통 필터 (가격, 면적, 거래유형)
+        _buildCommonFilters(setModalState, tempFilters),
+
+        // --- 보증금 범위 ---
+        Text('realEstate.filter.depositRange'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        RangeSlider(
+          values: RangeValues(tempFilters.depositMin, tempFilters.depositMax),
+          min: 0,
+          max: 50000000, // 50 Juta
+          divisions: 50,
+          labels: RangeLabels(
+            NumberFormat.compactSimpleCurrency(locale: 'id_ID')
+                .format(tempFilters.depositMin),
+            NumberFormat.compactSimpleCurrency(locale: 'id_ID')
+                .format(tempFilters.depositMax),
+          ),
+          onChanged: (values) => setModalState(() {
+            tempFilters.depositMin = values.start;
+            tempFilters.depositMax = values.end;
+          }),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                key: ValueKey(
+                    'depositMin_${tempFilters.depositMin.toStringAsFixed(0)}'),
+                initialValue: tempFilters.depositMin.round().toString(),
+                decoration: InputDecoration(
+                  labelText: 'realEstate.filter.depositMin'.tr(),
+                  suffixText: 'Rp',
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onChanged: (value) => setModalState(() {
+                  final v = double.tryParse(value) ?? 0;
+                  final clamped = v.clamp(0, 50000000).toDouble();
+                  tempFilters.depositMin = clamped <= tempFilters.depositMax
+                      ? clamped
+                      : tempFilters.depositMax;
+                }),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextFormField(
+                key: ValueKey(
+                    'depositMax_${tempFilters.depositMax.toStringAsFixed(0)}'),
+                initialValue: tempFilters.depositMax.round().toString(),
+                decoration: InputDecoration(
+                  labelText: 'realEstate.filter.depositMax'.tr(),
+                  suffixText: 'Rp',
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onChanged: (value) => setModalState(() {
+                  final v = double.tryParse(value) ?? 0;
+                  final clamped = v.clamp(0, 50000000).toDouble();
+                  tempFilters.depositMax = clamped >= tempFilters.depositMin
+                      ? clamped
+                      : tempFilters.depositMin;
+                }),
+              ),
+            ),
+          ],
+        ),
+        const Divider(height: 32),
+
+        // --- 층수/층 정보 텍스트 ---
+        Text('realEstate.filter.floorInfo'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        TextFormField(
+          decoration: InputDecoration(
+            hintText: 'realEstate.form.floorInfoHint'.tr(),
+            border: const OutlineInputBorder(),
+            isDense: true,
+            suffixIcon: (tempFilters.floorInfoFilter ?? '').trim().isEmpty
+                ? null
+                : IconButton(
+                    tooltip: 'realEstate.filter.clearFloorInfo'.tr(),
+                    icon: const Icon(Icons.clear),
+                    onPressed: () => setModalState(() {
+                      tempFilters.floorInfoFilter = '';
+                    }),
+                  ),
+          ),
+          key: ValueKey('floor_${(tempFilters.floorInfoFilter ?? '')}'),
+          initialValue: tempFilters.floorInfoFilter ?? '',
+          onChanged: (value) => setModalState(() {
+            tempFilters.floorInfoFilter = value;
+          }),
+        ),
+        const Divider(height: 32),
+      ],
     );
   }
 }

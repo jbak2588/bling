@@ -28,7 +28,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
-// [추가] DateFormat 사용
 
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
@@ -54,6 +53,16 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
   bool _isSaving = false;
   List<String> _tags = []; // ✅ 태그 상태 변수 추가
 
+  // [추가] Task 38, 40: 카테고리별 상세 필드
+  // 주거용 (Kos, Apartment, Kontrakan)
+  String?
+      _selectedFurnishedStatus; // 'furnished', 'semi_furnished', 'unfurnished'
+  String? _selectedRentPeriod; // 'daily', 'monthly', 'yearly'
+  final _maintenanceFeeController = TextEditingController(); // 관리비
+  // 상업용 (Ruko, Kantor)
+  final _depositController = TextEditingController(); // 보증금
+  final _floorInfoController = TextEditingController(); // 층수
+
   // [추가] Phase 1 신규 메타 필드 상태
   String _selectedListingType = 'rent'; // 'rent', 'sale'
   String _selectedPublisherType = 'individual'; // 'individual', 'agent'
@@ -73,6 +82,10 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
     _areaController.dispose();
     _roomCountController.dispose();
     _bathroomCountController.dispose();
+    // [추가] Task 40
+    _maintenanceFeeController.dispose();
+    _depositController.dispose();
+    _floorInfoController.dispose();
     super.dispose();
   }
 
@@ -139,6 +152,12 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         moveInDate: _selectedMoveInDate != null
             ? Timestamp.fromDate(_selectedMoveInDate!)
             : null,
+        // [추가] Task 40: 카테고리별 필드 저장
+        furnishedStatus: _selectedFurnishedStatus,
+        rentPeriod: _selectedRentPeriod,
+        maintenanceFee: int.tryParse(_maintenanceFeeController.text.trim()),
+        deposit: int.tryParse(_depositController.text.trim()),
+        floorInfo: _floorInfoController.text.trim(),
       );
 
       await _repository.createRoomListing(newListing);
@@ -236,6 +255,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 ),
                 const SizedBox(height: 24),
                 // --- 매물 종류 (직방 스타일 카테고리) ---
+                // [수정] '직방' 모델 카테고리 적용: kos/apartment/kontrakan/ruko/kantor/etc
                 DropdownButtonFormField<String>(
                   initialValue: _type,
                   decoration: InputDecoration(
@@ -352,6 +372,11 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 ),
 
                 // [추가] 면적, 방 수, 욕실 수
+                const SizedBox(height: 24),
+                Text(
+                  'realEstate.form.details'.tr(), // "매물 상세 정보"
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _areaController,
@@ -390,6 +415,98 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                     ),
                   ],
                 ),
+
+                // [추가] Task 40: 카테고리별 동적 입력 필드
+                // --- 1. 주거용 필드 (Kos, Apartment, Kontrakan, House) ---
+                if (['kos', 'apartment', 'kontrakan', 'house']
+                    .contains(_type)) ...[
+                  const SizedBox(height: 16),
+                  // 가구 상태
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedFurnishedStatus,
+                    decoration: InputDecoration(
+                      labelText:
+                          'realEstate.filter.furnishedStatus'.tr(), // "가구 상태"
+                      border: const OutlineInputBorder(),
+                    ),
+                    hint: Text(
+                        'realEstate.filter.selectFurnished'.tr()), // "가구 상태 선택"
+                    items: ['furnished', 'semi_furnished', 'unfurnished']
+                        .map((status) {
+                      return DropdownMenuItem(
+                        value: status,
+                        child: Text(
+                            'realEstate.filter.furnishedTypes.$status'.tr()),
+                      );
+                    }).toList(),
+                    onChanged: (value) =>
+                        setState(() => _selectedFurnishedStatus = value),
+                  ),
+                  const SizedBox(height: 16),
+                  // 임대 기간 (Kos/Kontrakan 에만)
+                  if (['kos', 'kontrakan'].contains(_type))
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedRentPeriod,
+                      decoration: InputDecoration(
+                        labelText:
+                            'realEstate.filter.rentPeriod'.tr(), // "임대 기간"
+                        border: const OutlineInputBorder(),
+                      ),
+                      hint: Text('realEstate.filter.selectRentPeriod'
+                          .tr()), // "임대 기간 선택"
+                      items: ['daily', 'monthly', 'yearly'].map((period) {
+                        return DropdownMenuItem(
+                          value: period,
+                          child: Text(
+                              'realEstate.filter.rentPeriods.$period'.tr()),
+                        );
+                      }).toList(),
+                      onChanged: (value) =>
+                          setState(() => _selectedRentPeriod = value),
+                    ),
+                  const SizedBox(height: 16),
+                  // 월 관리비
+                  TextFormField(
+                    controller: _maintenanceFeeController,
+                    decoration: InputDecoration(
+                      labelText:
+                          'realEstate.form.maintenanceFee'.tr(), // "월 관리비"
+                      hintText: 'realEstate.form.maintenanceFeeHint'
+                          .tr(), // "관리비 (월, Rp)"
+                      border: const OutlineInputBorder(),
+                      suffixText: 'Rp',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+
+                // --- 2. 상업용 필드 (Ruko, Kantor) ---
+                if (['ruko', 'kantor'].contains(_type)) ...[
+                  const SizedBox(height: 16),
+                  // 보증금 (Deposit)
+                  TextFormField(
+                    controller: _depositController,
+                    decoration: InputDecoration(
+                      labelText: 'realEstate.form.deposit'.tr(), // "보증금"
+                      hintText:
+                          'realEstate.form.depositHint'.tr(), // "보증금 (Rp)"
+                      border: const OutlineInputBorder(),
+                      suffixText: 'Rp',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  // 층수 정보
+                  TextFormField(
+                    controller: _floorInfoController,
+                    decoration: InputDecoration(
+                      labelText: 'realEstate.form.floorInfo'.tr(), // "층수"
+                      hintText: 'realEstate.form.floorInfoHint'
+                          .tr(), // "예: 1층 / 총 5층 중 3층"
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ],
 
                 // [추가] 입주 가능일
                 const SizedBox(height: 16),

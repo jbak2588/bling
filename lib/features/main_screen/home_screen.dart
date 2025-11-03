@@ -212,12 +212,12 @@ class HomeScreen extends StatelessWidget {
         screen: const JobsScreen()),
     // 3. lostAndFound (분실물찾기)
     MenuItem(
-        svg: '$_iconsPath/ico_lost item.svg',
+        svg: '$_iconsPath/ico_lost_item.svg',
         labelKey: 'main.tabs.lostAndFound',
         screen: const LostAndFoundScreen()),
     // 4. marketplace (중고거래)
     MenuItem(
-        svg: '$_iconsPath/ico_seconhand.svg',
+        svg: '$_iconsPath/ico_secondhand.svg',
         labelKey: 'main.tabs.marketplace',
         screen: const MarketplaceScreen()),
     // 5. localStores (동네업체)
@@ -238,7 +238,7 @@ class HomeScreen extends StatelessWidget {
         screen: const FindFriendsScreen()),
     // 8. realEstate (부동산)
     MenuItem(
-        svg: '$_iconsPath/ico_real estate.svg',
+        svg: '$_iconsPath/ico_real_estate.svg',
         labelKey: 'main.tabs.realEstate',
         screen: const RealEstateScreen()),
     // 9. auction (경매)
