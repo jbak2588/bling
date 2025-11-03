@@ -12,18 +12,26 @@
 // - 필터 설명 및 에러 메시지 강화, 신고/차단/신뢰 등급 UI 노출 및 기능 강화.
 // - 임대인/임차인 모두를 위한 UX 개선(채팅/알림/편의시설 등).
 // =====================================================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 22) '직방' 핵심 필터 (Gap 2) 구현.
+// 2. 'RoomFilters' (신규 모델) 상태 변수 추가.
+// 3. '_showFilterSheet': '가격', '면적', '방 개수', '매물 유형' 등 상세 필터를 설정하는 BottomSheet UI 구현.
+// 4. 'StreamBuilder': 'fetchRooms' 호출 시 'RoomFilters'를 전달하여 상세 필터링된 목록을 표시.
+// 5. (Task 24) [버그 수정] 'RoomFilters' 클래스를 외부 파일로 분리하여 순환 참조 에러 해결.
+// 6. (Task 25, 27) [UI 정리] 중복되는 'FloatingActionButton' 및 구(舊) 위치 필터(_openFilter) 코드 제거.
+// 7. (Task 26) [버그 수정] 'easy_localization' 번역 키 누락으로 인한 '_Map' 타입 에러 (JSON 파일 수정 필요).
+// =====================================================
 // lib/features/real_estate/screens/real_estate_screen.dart
 
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/real_estate/data/room_repository.dart';
 import 'package:bling_app/features/real_estate/widgets/room_card.dart';
-import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'create_room_listing_screen.dart';
 import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import 'package:bling_app/features/real_estate/models/room_filters_model.dart'; // [추가] 순환 참조 해결
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class RealEstateScreen extends StatefulWidget {
@@ -45,8 +53,6 @@ class RealEstateScreen extends StatefulWidget {
 }
 
 class _RealEstateScreenState extends State<RealEstateScreen> {
-  // [추가] 화면 내부의 필터 상태를 관리합니다.
-  late Map<String, String?>? _locationFilter;
   // 검색칩 상태
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchKeywordNotifier =
@@ -54,11 +60,13 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
   bool _showSearchBar = false;
   VoidCallback? _externalSearchListener;
 
+  // [추가] '직방' 상세 필터 상태
+  RoomFilters _activeFilters = RoomFilters();
+  int _filterCount = 0; // 적용된 필터 개수
+
   @override
   void initState() {
     super.initState();
-    // [추가] HomeScreen에서 전달받은 필터 값으로 초기화합니다.
-    _locationFilter = widget.locationFilter;
 
     // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
     if (widget.autoFocusSearch) {
@@ -80,42 +88,191 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
       };
       widget.searchNotifier!.addListener(_externalSearchListener!);
     }
-
-    // ✅ [버그 수정 1] 키워드가 변경될 때마다 setState를 호출하여 화면을 다시 그리도록 리스너 추가
-    _searchKeywordNotifier.addListener(_onKeywordChanged);
   }
 
-  // ✅ [버그 수정 1] 키워드 변경 시 setState 호출
-  void _onKeywordChanged() {
-    if (mounted) setState(() {});
+  int _calculateFilterCount(RoomFilters filters) {
+    int count = 0;
+
+    // 기본값이 아닌 경우 카운트 증가
+    if (filters.listingType != null) count++;
+    if (filters.roomType != null) count++;
+    if (filters.roomCount != null) count++;
+    // 가격 범위가 기본값(0 ~ 50M)이 아닌 경우
+    if (filters.minPrice > 0 || filters.maxPrice < 50000000) count++;
+    // 면적 범위가 기본값(0 ~ 100)이 아닌 경우
+    if (filters.minArea > 0 || filters.maxArea < 100) count++;
+
+    return count;
   }
 
-  // [추가] 필터 화면을 여는 함수
-  void _openFilter() async {
-    final result = await Navigator.of(context).push<Map<String, String?>>(
-      MaterialPageRoute(
-          builder: (_) => LocationFilterScreen(userModel: widget.userModel)),
-    );
-    if (result != null) {
-      setState(() => _locationFilter = result);
-    }
-  }
-
-  // [추가] 필터를 제거하는 함수
-  void _clearFilter() {
-    setState(() => _locationFilter = null);
-  }
-
-  // ✅ [버그 수정 2] 메모리 누수 방지를 위해 dispose 메서드 추가
+  // ✅ 메모리 누수 방지를 위해 리스너/노티파이어 정리
   @override
   void dispose() {
-    _chipOpenNotifier.dispose();
-    _searchKeywordNotifier.removeListener(_onKeywordChanged); // 리스너 제거
-    _searchKeywordNotifier.dispose();
-    if (_externalSearchListener != null && widget.searchNotifier != null) {
+    if (widget.searchNotifier != null && _externalSearchListener != null) {
       widget.searchNotifier!.removeListener(_externalSearchListener!);
     }
+    _chipOpenNotifier.dispose();
+    _searchKeywordNotifier.dispose();
     super.dispose();
+  }
+
+  // [추가] '직방' 상세 필터 BottomSheet 표시
+  void _showFilterSheet() async {
+    // [수정] tempFilters를 StatefulBuilder 밖에서 '먼저' 생성합니다.
+    // 이렇게 하면 setModalState가 호출되어도 tempFilters가 리셋되지 않습니다.
+    RoomFilters tempFilters = _activeFilters.copy();
+
+    final RoomFilters? newFilters = await showModalBottomSheet<RoomFilters>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.8, // 시트 높이
+              maxChildSize: 0.9,
+              minChildSize: 0.5,
+              builder: (_, controller) {
+                return Scaffold(
+                  appBar: AppBar(
+                    title: Text('realEstate.filter.title'.tr()),
+                    automaticallyImplyLeading: false,
+                    actions: [
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                      )
+                    ],
+                  ),
+                  body: ListView(
+                    controller: controller,
+                    padding: const EdgeInsets.all(16.0),
+                    children: [
+                      // --- 매물 유형 (임대/매매) ---
+                      Text('realEstate.form.listingType'.tr(),
+                          style: Theme.of(context).textTheme.titleMedium),
+                      Wrap(
+                        spacing: 8.0,
+                        children: ['rent', 'sale'].map((type) {
+                          return ChoiceChip(
+                            label:
+                                Text('realEstate.form.listingTypes.$type'.tr()),
+                            selected: tempFilters.listingType == type,
+                            onSelected: (selected) => setModalState(() =>
+                                tempFilters.listingType =
+                                    selected ? type : null),
+                          );
+                        }).toList(),
+                      ),
+                      const Divider(height: 32),
+
+                      // --- 방 유형 (Kos/Kontrakan/Sewa) ---
+                      Text('realEstate.form.typeLabel'.tr(),
+                          style: Theme.of(context).textTheme.titleMedium),
+                      Wrap(
+                        spacing: 8.0,
+                        children: ['kos', 'kontrakan', 'sewa'].map((type) {
+                          return ChoiceChip(
+                            label: Text('realEstate.form.roomTypes.$type'.tr()),
+                            selected: tempFilters.roomType == type,
+                            onSelected: (selected) => setModalState(() =>
+                                tempFilters.roomType = selected ? type : null),
+                          );
+                        }).toList(),
+                      ),
+                      const Divider(height: 32),
+
+                      // --- 가격 범위 ---
+                      Text('realEstate.filter.priceRange'.tr(),
+                          style: Theme.of(context).textTheme.titleMedium),
+                      RangeSlider(
+                        values: RangeValues(
+                            tempFilters.minPrice, tempFilters.maxPrice),
+                        min: 0,
+                        max: 50000000, // 50 Juta
+                        divisions: 50,
+                        labels: RangeLabels(
+                          NumberFormat.compactSimpleCurrency(locale: 'id_ID')
+                              .format(tempFilters.minPrice),
+                          NumberFormat.compactSimpleCurrency(locale: 'id_ID')
+                              .format(tempFilters.maxPrice),
+                        ),
+                        onChanged: (values) => setModalState(() {
+                          tempFilters.minPrice = values.start;
+                          tempFilters.maxPrice = values.end;
+                        }),
+                      ),
+                      const Divider(height: 32),
+
+                      // --- 면적 범위 ---
+                      Text('realEstate.filter.areaRange'.tr(),
+                          style: Theme.of(context).textTheme.titleMedium),
+                      RangeSlider(
+                        values: RangeValues(
+                            tempFilters.minArea, tempFilters.maxArea),
+                        min: 0,
+                        max: 100, // 100 m²
+                        divisions: 20,
+                        labels: RangeLabels('${tempFilters.minArea.round()} m²',
+                            '${tempFilters.maxArea.round()} m²'),
+                        onChanged: (values) => setModalState(() {
+                          tempFilters.minArea = values.start;
+                          tempFilters.maxArea = values.end;
+                        }),
+                      ),
+                      const Divider(height: 32),
+
+                      // --- 방 개수 ---
+                      Text('realEstate.form.rooms'.tr(),
+                          style: Theme.of(context).textTheme.titleMedium),
+                      Wrap(
+                        spacing: 8.0,
+                        children: [1, 2, 3, 4].map((count) {
+                          // 4는 4+
+                          return ChoiceChip(
+                            label: Text(count == 4 ? '4+' : '$count'),
+                            selected: tempFilters.roomCount == count,
+                            onSelected: (selected) => setModalState(() =>
+                                tempFilters.roomCount =
+                                    selected ? count : null),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                  bottomNavigationBar: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        TextButton(
+                          child: Text('common.reset'.tr()),
+                          onPressed: () =>
+                              setModalState(() => tempFilters.clear()),
+                        ),
+                        const Spacer(),
+                        ElevatedButton(
+                          child: Text('common.apply'.tr()),
+                          onPressed: () =>
+                              Navigator.of(context).pop(tempFilters), // 적용
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+
+    if (newFilters != null) {
+      setState(() {
+        _activeFilters = newFilters;
+        _filterCount = _calculateFilterCount(_activeFilters);
+      });
+    }
   }
 
   @override
@@ -136,28 +293,34 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
                 _searchKeywordNotifier.value = '';
               },
             ),
-          // [추가] 필터 관리 UI
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (_locationFilter != null)
-                IconButton(
-                  icon: const Icon(Icons.clear),
-                  tooltip: 'Clear Filter',
-                  onPressed: _clearFilter,
+          // 위치 필터 UI는 메인 네비게이션(AppBar)에서 처리합니다.
+          // [추가] '직방' 상세 필터 버튼
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // 상세 필터 버튼
+                Badge(
+                  label: Text('$_filterCount'),
+                  isLabelVisible: _filterCount > 0,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.filter_list),
+                    label: Text('common.filter'.tr()),
+                    onPressed: _showFilterSheet,
+                  ),
                 ),
-              IconButton(
-                icon: const Icon(Icons.filter_alt_outlined),
-                tooltip: 'Filter',
-                onPressed: _openFilter,
-              ),
-            ],
+              ],
+            ),
           ),
           Expanded(
             child: StreamBuilder<List<RoomListingModel>>(
-              // [수정] fetchRooms 함수에 현재 필터 상태를 전달합니다.
-              stream:
-                  roomRepository.fetchRooms(locationFilter: _locationFilter),
+              // [수정] 활성화된 필터를 Stream에 전달
+              stream: roomRepository.fetchRooms(
+                locationFilter: widget.locationFilter,
+                filters: _activeFilters,
+              ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -201,22 +364,7 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (widget.userModel != null) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                  builder: (_) =>
-                      CreateRoomListingScreen(userModel: widget.userModel!)),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('main.errors.loginRequired'.tr())));
-          }
-        },
-        tooltip: 'realEstate.create'.tr(),
-        child: const Icon(Icons.add_home_outlined),
-      ),
+      floatingActionButton: null,
     );
   }
 }

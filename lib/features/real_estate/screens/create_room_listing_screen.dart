@@ -10,8 +10,12 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(매물 부스트, 조회수 등).
 // - 필수 입력값, 에러 메시지, UX 강화. 신고/차단/신뢰 등급 UI 노출 및 기능 강화.
 // =====================================================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 23) '직방' 모델 도입 (Gap 1, 4).
+// 2. [Gap 1] UI 추가: 'area'(면적), 'roomCount'(방 수), 'bathroomCount'(욕실 수), 'moveInDate'(입주 가능일) 입력 필드 추가.
+// 3. [Gap 4] UI 추가: 'listingType'(임대/매매), 'publisherType'(직거래/중개인) 선택 Dropdown 추가.
+// =====================================================
 // lib/features/real_estate/screens/create_room_listing_screen.dart
-
 
 import 'dart:io';
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
@@ -24,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+// [추가] DateFormat 사용
 
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
@@ -47,7 +52,15 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
   final List<XFile> _images = [];
   final Set<String> _amenities = {};
   bool _isSaving = false;
-   List<String> _tags = []; // ✅ 태그 상태 변수 추가
+  List<String> _tags = []; // ✅ 태그 상태 변수 추가
+
+  // [추가] Phase 1 신규 메타 필드 상태
+  String _selectedListingType = 'rent'; // 'rent', 'sale'
+  String _selectedPublisherType = 'individual'; // 'individual', 'agent'
+  final _areaController = TextEditingController(); // 면적
+  final _roomCountController = TextEditingController(text: '1'); // 방 수
+  final _bathroomCountController = TextEditingController(text: '1'); // 욕실 수
+  DateTime? _selectedMoveInDate; // 입주 가능일
 
   final RoomRepository _repository = RoomRepository();
   final ImagePicker _picker = ImagePicker();
@@ -57,6 +70,9 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
+    _areaController.dispose();
+    _roomCountController.dispose();
+    _bathroomCountController.dispose();
     super.dispose();
   }
 
@@ -113,7 +129,16 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         imageUrls: imageUrls,
         amenities: _amenities.toList(),
         createdAt: Timestamp.now(),
-           tags: _tags, // ✅ 저장 시 태그 목록을 전달
+        tags: _tags, // ✅ 태그 저장
+        // [추가] Gap 1, 4 필드 저장
+        listingType: _selectedListingType,
+        publisherType: _selectedPublisherType,
+        area: double.tryParse(_areaController.text.trim()) ?? 0.0,
+        roomCount: int.tryParse(_roomCountController.text.trim()) ?? 1,
+        bathroomCount: int.tryParse(_bathroomCountController.text.trim()) ?? 1,
+        moveInDate: _selectedMoveInDate != null
+            ? Timestamp.fromDate(_selectedMoveInDate!)
+            : null,
       );
 
       await _repository.createRoomListing(newListing);
@@ -279,6 +304,122 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                       border: const OutlineInputBorder()),
                   maxLines: 3,
                 ),
+
+                // [추가] 거래 유형 (임대/매매), 게시자 유형 (직거래/중개인)
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _selectedListingType,
+                        decoration: InputDecoration(
+                            labelText: 'realEstate.form.listingType'.tr(),
+                            border: const OutlineInputBorder()),
+                        items: ['rent', 'sale'].map((type) {
+                          return DropdownMenuItem(
+                              value: type,
+                              child: Text(
+                                  'realEstate.form.listingTypes.$type'.tr()));
+                        }).toList(),
+                        onChanged: (value) =>
+                            setState(() => _selectedListingType = value!),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _selectedPublisherType,
+                        decoration: InputDecoration(
+                            labelText: 'realEstate.form.publisherType'.tr(),
+                            border: const OutlineInputBorder()),
+                        items: ['individual', 'agent'].map((type) {
+                          return DropdownMenuItem(
+                              value: type,
+                              child: Text(
+                                  'realEstate.form.publisherTypes.$type'.tr()));
+                        }).toList(),
+                        onChanged: (value) =>
+                            setState(() => _selectedPublisherType = value!),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // [추가] 면적, 방 수, 욕실 수
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _areaController,
+                  decoration: InputDecoration(
+                    labelText: 'realEstate.form.area'.tr(), // 면적 (m²)
+                    hintText: 'realEstate.form.areaHint'.tr(), // 예: 33
+                    border: const OutlineInputBorder(),
+                    suffixText: 'm²',
+                  ),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _roomCountController,
+                        decoration: InputDecoration(
+                          labelText: 'realEstate.form.rooms'.tr(), // 방 수
+                          border: const OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _bathroomCountController,
+                        decoration: InputDecoration(
+                          labelText: 'realEstate.form.bathrooms'.tr(), // 욕실 수
+                          border: const OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // [추가] 입주 가능일
+                const SizedBox(height: 16),
+                Text('realEstate.form.moveInDate'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.calendar_today_outlined),
+                  label: Text(
+                    _selectedMoveInDate == null
+                        ? 'realEstate.form.selectDate'.tr()
+                        : DateFormat('yyyy-MM-dd').format(_selectedMoveInDate!),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 12),
+                    alignment: Alignment.centerLeft,
+                  ),
+                  onPressed: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedMoveInDate ?? DateTime.now(),
+                      firstDate:
+                          DateTime.now().subtract(const Duration(days: 30)),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (pickedDate != null) {
+                      setState(() => _selectedMoveInDate = pickedDate);
+                    }
+                  },
+                ),
+                if (_selectedMoveInDate != null)
+                  TextButton(
+                    child: Text('realEstate.form.clearDate'.tr()),
+                    onPressed: () => setState(() => _selectedMoveInDate = null),
+                  ),
                 const SizedBox(height: 24),
                 // --- 편의시설 ---
                 Text('realEstate.form.amenities'.tr(),

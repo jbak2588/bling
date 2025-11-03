@@ -555,6 +555,11 @@
     "updated": "Updated",
     "comments": "Comments",
     "sponsored": "Sponsored",
+    "filter": "Filter",
+    "reset": "Reset",
+    "apply": "Apply",
+    "verified": "Verified",
+    "bookmark": "Bookmark",
     "sort": {
       "default": "Default",
       "distance": "Distance",
@@ -887,7 +892,7 @@
       "nameError": "Please enter a club name.",
       "descriptionLabel": "Club Description",
       "descriptionError": "Please enter a club description.",
-  "tagsHint": "Type a tag and press Space to add",
+      "tagsHint": "Type a tag and press Space to add",
       "maxInterests": "You can select up to 3 interests.",
       "privateClub": "Private Club",
       "privateDescription": "Invitation only."
@@ -1107,6 +1112,34 @@
       "titleLabel": "Title",
       "titleRequired": "Enter a title.",
       "descriptionLabel": "Description",
+      "typeLabel": "Room type",
+      "roomTypes": {
+        "kos": "Boarding house",
+        "kontrakan": "Monthly rent",
+        "sewa": "Lease",
+        "apartment": "Apartment",
+        "house": "House",
+        "etc": "Other"
+      },
+      "listingType": "Transaction type",
+      "listingTypes": {
+        "rent": "Rent",
+        "sale": "Sale"
+      },
+      "publisherType": "Publisher",
+      "publisherTypes": {
+        "individual": "Individual",
+        "agent": "Agent"
+      },
+      "area": "Area",
+      "areaHint": "e.g. 33",
+      "rooms": "Rooms",
+      "bathrooms": "Bathrooms",
+      "bedAbbr": "Bed",
+      "bathAbbr": "Bath",
+      "moveInDate": "Move-in date",
+      "selectDate": "Select date",
+      "clearDate": "Clear date",
       "amenities": "Amenities",
       "amenity": {
         "wifi": "Wi-Fi",
@@ -1114,6 +1147,17 @@
         "parking": "Parking",
         "kitchen": "Kitchen"
       }
+    },
+    "filter": {
+      "title": "Advanced filters",
+      "priceRange": "Price range",
+      "areaRange": "Area range (m²)"
+    },
+    "info": {
+      "bed": "Bed",
+      "bath": "Bath",
+      "anytime": "Anytime",
+      "verifiedPublisher": "Verified publisher"
     },
     "edit": {
       "title": "Edit Listing",
@@ -1125,14 +1169,14 @@
   "lostAndFound": {
     "empty": "No lost/found items yet.",
     "error": "An error occurred: {error}",
-      "create": "Add lost/found item",
-      "resolve": {
-        "confirmTitle": "Mark as resolved?",
-        "confirmBody": "This will mark the item as resolved.",
-        "success": "Marked as resolved.",
-        "badgeLost": "Found!",
-        "badgeFound": "Returned!"
-      },
+    "create": "Add lost/found item",
+    "resolve": {
+      "confirmTitle": "Mark as resolved?",
+      "confirmBody": "This will mark the item as resolved.",
+      "success": "Marked as resolved.",
+      "badgeLost": "Found!",
+      "badgeFound": "Returned!"
+    },
     "lost": "Lost",
     "found": "Found",
     "tabs": {
