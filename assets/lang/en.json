@@ -1119,6 +1119,8 @@
         "sewa": "Lease",
         "apartment": "Apartment",
         "house": "House",
+        "ruko": "Shophouse",
+        "kantor": "Office",
         "etc": "Other"
       },
       "listingType": "Transaction type",
