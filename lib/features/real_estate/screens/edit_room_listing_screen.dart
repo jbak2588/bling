@@ -10,8 +10,11 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(매물 부스트, 조회수 등).
 // - 필수 입력값, 에러 메시지, UX 강화. 신고/차단/신뢰 등급 UI 노출 및 기능 강화.
 // =====================================================
+// [작업 이력 (2025-11-02)]
+// 1. (Task 23) '직방' 모델 도입 (Gap 1, 4).
+// 2. [Gap 1, 4] UI 추가: 'area', 'roomCount', 'bathroomCount', 'moveInDate', 'listingType', 'publisherType' 필드를 로드하고 수정할 수 있도록 UI 추가.
+// =====================================================
 // lib/features/real_estate/screens/edit_room_listing_screen.dart
-
 
 import 'dart:io';
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
@@ -21,7 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart'; // [추가] Timestamp 클래스
 
 class EditRoomListingScreen extends StatefulWidget {
   final RoomListingModel room;
@@ -43,6 +46,14 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
   late Set<String> _amenities;
   bool _isSaving = false;
 
+  // [추가] 새 필드: 매물 유형, 게시자 유형, 면적, 방 수, 욕실 수, 입주 가능일
+  late String _selectedListingType;
+  late String _selectedPublisherType;
+  late final TextEditingController _areaController; // 면적
+  late final TextEditingController _roomCountController; // 방 수
+  late final TextEditingController _bathroomCountController; // 욕실 수
+  DateTime? _selectedMoveInDate; // 입주 가능일
+
   final RoomRepository _repository = RoomRepository();
   final ImagePicker _picker = ImagePicker();
 
@@ -50,12 +61,24 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.room.title);
-    _descriptionController = TextEditingController(text: widget.room.description);
-    _priceController = TextEditingController(text: widget.room.price.toString());
+    _descriptionController =
+        TextEditingController(text: widget.room.description);
+    _priceController =
+        TextEditingController(text: widget.room.price.toString());
     _type = widget.room.type;
     _priceUnit = widget.room.priceUnit;
     _images.addAll(widget.room.imageUrls);
     _amenities = Set<String>.from(widget.room.amenities);
+
+    // [추가] 새 필드 초기화
+    _selectedListingType = widget.room.listingType;
+    _selectedPublisherType = widget.room.publisherType;
+    _areaController = TextEditingController(text: widget.room.area.toString());
+    _roomCountController =
+        TextEditingController(text: widget.room.roomCount.toString());
+    _bathroomCountController =
+        TextEditingController(text: widget.room.bathroomCount.toString());
+    _selectedMoveInDate = widget.room.moveInDate?.toDate();
   }
 
   @override
@@ -63,25 +86,32 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
+    // [추가] 새 필드에 대한 컨트롤러 해제
+    _areaController.dispose();
+    _roomCountController.dispose();
+    _bathroomCountController.dispose();
     super.dispose();
   }
 
   Future<void> _pickImages() async {
     if (_images.length >= 10) return;
-    final pickedFiles = await _picker.pickMultiImage(imageQuality: 70, limit: 10 - _images.length);
+    final pickedFiles = await _picker.pickMultiImage(
+        imageQuality: 70, limit: 10 - _images.length);
     if (pickedFiles.isNotEmpty && mounted) {
       setState(() => _images.addAll(pickedFiles));
     }
   }
 
   void _removeImage(int index) {
-      if(mounted) {
-        setState(() => _images.removeAt(index));
-      }
+    if (mounted) {
+      setState(() => _images.removeAt(index));
+    }
   }
 
   Future<void> _updateListing() async {
-    if (!_formKey.currentState!.validate() || _isSaving || _images.isEmpty) return;
+    if (!_formKey.currentState!.validate() || _isSaving || _images.isEmpty) {
+      return;
+    }
 
     setState(() => _isSaving = true);
 
@@ -90,7 +120,9 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
       for (var image in _images) {
         if (image is XFile) {
           final fileName = Uuid().v4();
-          final ref = FirebaseStorage.instance.ref().child('room_listings/${widget.room.userId}/$fileName');
+          final ref = FirebaseStorage.instance
+              .ref()
+              .child('room_listings/${widget.room.userId}/$fileName');
           await ref.putFile(File(image.path));
           imageUrls.add(await ref.getDownloadURL());
         } else if (image is String) {
@@ -109,6 +141,14 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
         priceUnit: _priceUnit,
         imageUrls: imageUrls,
         amenities: _amenities.toList(),
+        listingType: _selectedListingType,
+        publisherType: _selectedPublisherType,
+        area: double.tryParse(_areaController.text.trim()) ?? 0.0,
+        roomCount: int.tryParse(_roomCountController.text.trim()) ?? 1,
+        bathroomCount: int.tryParse(_bathroomCountController.text.trim()) ?? 1,
+        moveInDate: _selectedMoveInDate != null
+            ? Timestamp.fromDate(_selectedMoveInDate!)
+            : null,
         // --- 기존 정보 보존 ---
         locationName: widget.room.locationName,
         locationParts: widget.room.locationParts,
@@ -121,14 +161,16 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
       await _repository.updateRoomListing(updatedListing);
 
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('realEstate.edit.success'.tr()), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('realEstate.edit.success'.tr()),
+            backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('realEstate.edit.fail'.tr(namedArgs: {'error': e.toString()})),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'realEstate.edit.fail'.tr(namedArgs: {'error': e.toString()})),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -140,10 +182,12 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text('realEstate.edit.title'.tr()),
+        title: Text('realEstate.edit.title'.tr()),
         actions: [
           if (!_isSaving)
-            TextButton(onPressed: _updateListing, child: Text('realEstate.edit.save'.tr()))
+            TextButton(
+                onPressed: _updateListing,
+                child: Text('realEstate.edit.save'.tr()))
         ],
       ),
       body: Stack(
@@ -173,13 +217,22 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
-                                child: Image(image: imageProvider, width: 100, height: 100, fit: BoxFit.cover),
+                                child: Image(
+                                    image: imageProvider,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover),
                               ),
                               Positioned(
-                                top: 4, right: 4,
+                                top: 4,
+                                right: 4,
                                 child: InkWell(
                                   onTap: () => _removeImage(index),
-                                  child: const CircleAvatar(radius: 12, backgroundColor: Colors.black54, child: Icon(Icons.close, color: Colors.white, size: 16)),
+                                  child: const CircleAvatar(
+                                      radius: 12,
+                                      backgroundColor: Colors.black54,
+                                      child: Icon(Icons.close,
+                                          color: Colors.white, size: 16)),
                                 ),
                               ),
                             ],
@@ -190,9 +243,13 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                         GestureDetector(
                           onTap: _pickImages,
                           child: Container(
-                            width: 100, height: 100,
-                            decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
-                            child: const Icon(Icons.add_a_photo_outlined, color: Colors.grey),
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8)),
+                            child: const Icon(Icons.add_a_photo_outlined,
+                                color: Colors.grey),
                           ),
                         ),
                     ],
@@ -200,17 +257,20 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                 ),
                 const SizedBox(height: 24),
                 SegmentedButton<String>(
-                    segments: [
+                  segments: [
                     ButtonSegment(
-                        value: 'kos', label: Text('realEstate.form.type.kos'.tr())),
+                        value: 'kos',
+                        label: Text('realEstate.form.type.kos'.tr())),
                     ButtonSegment(
                         value: 'kontrakan',
                         label: Text('realEstate.form.type.kontrakan'.tr())),
                     ButtonSegment(
-                        value: 'sewa', label: Text('realEstate.form.type.sewa'.tr())),
+                        value: 'sewa',
+                        label: Text('realEstate.form.type.sewa'.tr())),
                   ],
                   selected: {_type},
-                  onSelectionChanged: (newSelection) => setState(() => _type = newSelection.first),
+                  onSelectionChanged: (newSelection) =>
+                      setState(() => _type = newSelection.first),
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -218,11 +278,11 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                     Expanded(
                       child: TextFormField(
                         controller: _priceController,
-                         decoration: InputDecoration(
+                        decoration: InputDecoration(
                             labelText: 'realEstate.form.priceLabel'.tr(),
                             border: const OutlineInputBorder()),
                         keyboardType: TextInputType.number,
-                          validator: (v) => (v == null || v.isEmpty)
+                        validator: (v) => (v == null || v.isEmpty)
                             ? 'realEstate.form.priceRequired'.tr()
                             : null,
                       ),
@@ -230,7 +290,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                     const SizedBox(width: 8),
                     DropdownButton<String>(
                       value: _priceUnit,
-                          items: [
+                      items: [
                         DropdownMenuItem(
                             value: 'monthly',
                             child:
@@ -247,7 +307,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _titleController,
-                decoration: InputDecoration(
+                  decoration: InputDecoration(
                       labelText: 'realEstate.form.titleLabel'.tr(),
                       border: const OutlineInputBorder()),
                   validator: (v) => (v == null || v.isEmpty)
@@ -257,13 +317,13 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                    decoration: InputDecoration(
+                  decoration: InputDecoration(
                       labelText: 'realEstate.form.descriptionLabel'.tr(),
                       border: const OutlineInputBorder()),
                   maxLines: 3,
                 ),
                 const SizedBox(height: 24),
-                   Text('realEstate.form.amenities'.tr(),
+                Text('realEstate.form.amenities'.tr(),
                     style: Theme.of(context).textTheme.titleMedium),
                 Wrap(
                   spacing: 8.0,
@@ -283,11 +343,130 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                     );
                   }).toList(),
                 ),
+
+                // [추가] Gap 4: 거래 유형, 게시자 유형
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _selectedListingType,
+                        decoration: InputDecoration(
+                            labelText: 'realEstate.form.listingType'.tr(),
+                            border: const OutlineInputBorder()),
+                        items: ['rent', 'sale'].map((type) {
+                          return DropdownMenuItem(
+                              value: type,
+                              child: Text(
+                                  'realEstate.form.listingTypes.$type'.tr()));
+                        }).toList(),
+                        onChanged: (value) =>
+                            setState(() => _selectedListingType = value!),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _selectedPublisherType,
+                        decoration: InputDecoration(
+                            labelText: 'realEstate.form.publisherType'.tr(),
+                            border: const OutlineInputBorder()),
+                        items: ['individual', 'agent'].map((type) {
+                          return DropdownMenuItem(
+                              value: type,
+                              child: Text(
+                                  'realEstate.form.publisherTypes.$type'.tr()));
+                        }).toList(),
+                        onChanged: (value) =>
+                            setState(() => _selectedPublisherType = value!),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // [추가] Gap 1: 면적, 방 수, 욕실 수
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _areaController,
+                  decoration: InputDecoration(
+                    labelText: 'realEstate.form.area'.tr(), // 면적 (m²)
+                    border: const OutlineInputBorder(),
+                    suffixText: 'm²',
+                  ),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _roomCountController,
+                        decoration: InputDecoration(
+                          labelText: 'realEstate.form.rooms'.tr(), // 방 수
+                          border: const OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _bathroomCountController,
+                        decoration: InputDecoration(
+                          labelText: 'realEstate.form.bathrooms'.tr(), // 욕실 수
+                          border: const OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // [추가] Gap 1: 입주 가능일
+                const SizedBox(height: 16),
+                Text('realEstate.form.moveInDate'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.calendar_today_outlined),
+                  label: Text(
+                    _selectedMoveInDate == null
+                        ? 'realEstate.form.selectDate'.tr()
+                        : DateFormat('yyyy-MM-dd').format(_selectedMoveInDate!),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 12),
+                    alignment: Alignment.centerLeft,
+                  ),
+                  onPressed: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedMoveInDate ?? DateTime.now(),
+                      firstDate:
+                          DateTime.now().subtract(const Duration(days: 365)),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (pickedDate != null) {
+                      setState(() => _selectedMoveInDate = pickedDate);
+                    }
+                  },
+                ),
+                if (_selectedMoveInDate != null)
+                  TextButton(
+                    child: Text('realEstate.form.clearDate'.tr()),
+                    onPressed: () => setState(() => _selectedMoveInDate = null),
+                  ),
+
+                // ...existing code...
               ],
             ),
           ),
           if (_isSaving)
-            Container(color: Colors.black.withValues(alpha: 0.5), child: const Center(child: CircularProgressIndicator())),
+            Container(
+                color: Colors.black.withValues(alpha: 0.5),
+                child: const Center(child: CircularProgressIndicator())),
         ],
       ),
     );

@@ -534,6 +534,11 @@
     "updated": "Diperbarui",
     "comments": "Komentar",
     "sponsored": "Sponsor",
+    "filter": "Filter",
+    "reset": "Reset",
+    "apply": "Terapkan",
+    "verified": "Terverifikasi",
+    "bookmark": "Bookmark",
     "sort": {
       "default": "Bawaan",
       "distance": "Jarak",
@@ -1087,6 +1092,34 @@
       "titleLabel": "Judul",
       "titleRequired": "Masukkan judul.",
       "descriptionLabel": "Deskripsi",
+      "typeLabel": "Tipe kamar",
+      "roomTypes": {
+        "kos": "Kos",
+        "kontrakan": "Kontrakan",
+        "sewa": "Sewa",
+        "apartment": "Apartemen",
+        "house": "Rumah",
+        "etc": "Lainnya"
+      },
+      "listingType": "Tipe transaksi",
+      "listingTypes": {
+        "rent": "Sewa",
+        "sale": "Jual"
+      },
+      "publisherType": "Tipe pengiklan",
+      "publisherTypes": {
+        "individual": "Perorangan",
+        "agent": "Agen"
+      },
+      "area": "Luas",
+      "areaHint": "mis. 33",
+      "rooms": "Jumlah kamar",
+      "bathrooms": "Kamar mandi",
+  "bedAbbr": "KT",
+  "bathAbbr": "KM",
+      "moveInDate": "Tanggal masuk",
+      "selectDate": "Pilih tanggal",
+      "clearDate": "Hapus tanggal",
       "amenities": "Fasilitas",
       "amenity": {
         "wifi": "Wi-Fi",
@@ -1094,6 +1127,17 @@
         "parking": "Parkir",
         "kitchen": "Dapur"
       }
+    },
+    "filter": {
+      "title": "Filter lanjutan",
+      "priceRange": "Rentang harga",
+      "areaRange": "Rentang luas (m²)"
+    },
+    "info": {
+      "bed": "KT",
+      "bath": "KM",
+      "anytime": "Kapan saja",
+      "verifiedPublisher": "Pengiklan terverifikasi"
     },
     "edit": {
       "title": "Ubah Listing",
