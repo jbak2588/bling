@@ -1125,6 +1125,8 @@
         "sewa": "Sewa (임대)",
         "apartment": "아파트",
         "house": "주택",
+        "ruko": "루코(상가주택)",
+        "kantor": "사무실",
         "etc": "기타"
       },
       "listingType": "거래 유형",

@@ -235,22 +235,28 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // --- 매물 종류 ---
-                SegmentedButton<String>(
-                  segments: [
-                    ButtonSegment(
-                        value: 'kos',
-                        label: Text('realEstate.form.type.kos'.tr())),
-                    ButtonSegment(
-                        value: 'kontrakan',
-                        label: Text('realEstate.form.type.kontrakan'.tr())),
-                    ButtonSegment(
-                        value: 'sewa',
-                        label: Text('realEstate.form.type.sewa'.tr())),
-                  ],
-                  selected: {_type},
-                  onSelectionChanged: (newSelection) =>
-                      setState(() => _type = newSelection.first),
+                // --- 매물 종류 (직방 스타일 카테고리) ---
+                DropdownButtonFormField<String>(
+                  initialValue: _type,
+                  decoration: InputDecoration(
+                    labelText: 'realEstate.form.typeLabel'.tr(),
+                    border: const OutlineInputBorder(),
+                  ),
+                  // 'kos', 'apartment', 'kontrakan', 'ruko', 'kantor', 'etc'
+                  items: const [
+                    'kos',
+                    'apartment',
+                    'kontrakan',
+                    'ruko',
+                    'kantor',
+                    'etc'
+                  ].map<DropdownMenuItem<String>>((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text('realEstate.form.roomTypes.$type'.tr()),
+                    );
+                  }).toList(),
+                  onChanged: (value) => setState(() => _type = value!),
                 ),
                 const SizedBox(height: 16),
                 // --- 가격 정보 ---
