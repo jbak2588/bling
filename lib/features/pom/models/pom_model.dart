@@ -6,6 +6,15 @@
 // - 'videoUrl' 중심에서 사진(image)과 비디오(video)를 모두 지원하는 '멀티 콘텐츠' 모델로 변경.
 // - mediaType (enum), mediaUrls (List<String>) 추가.
 // =====================================================
+// - '뽐' (Pom) 콘텐츠의 데이터 모델. Firestore 'pom' 컬렉션과 매칭.
+// [V2 - 2025-11-03]
+// - 'shorts'에서 'pom'으로 리네이밍.
+// - 'videoUrl'(단일 비디오)에서 'mediaType'(enum), 'mediaUrls'(List<String>) (사진/비디오 멀티콘텐츠)로 변경.
+// - 'videoUrl' 하위 호환성 지원 (데이터 마이그레이션용).
+// [V3 - 2025-11-04]
+// - 'searchIndex' (List<String>) 필드를 toJson에 추가하여 서버사이드 검색 지원.
+// =====================================================
+
 // lib/features/pom/models/pom_model.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -84,7 +93,7 @@ class PomModel {
     final data = doc.data() ?? {};
 
     // --- [V2 개선] ---
-    // Handle legacy video-only data ('videoUrl') and new multi-content data
+    // Handle new multi-content data (V2). Legacy 'videoUrl' fallback removed.
     final mediaType = _mediaTypeFromString(data['mediaType']);
     List<String> mediaUrls = [];
     String thumbnailUrl = data['thumbnailUrl'] ?? '';
@@ -92,10 +101,6 @@ class PomModel {
     if (data['mediaUrls'] != null) {
       // New V2 format
       mediaUrls = List<String>.from(data['mediaUrls']);
-    } else if (data['videoUrl'] != null) {
-      // Legacy V1 format
-      mediaUrls = [data['videoUrl']];
-      // mediaType would be 'video' (or default 'image' if field missing, but it's video)
     }
 
     if (thumbnailUrl.isEmpty &&

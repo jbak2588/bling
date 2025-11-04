@@ -472,7 +472,7 @@ ${_itemsController.text.split(',').map((e) => "- ${e.trim()}").join('\n')}
               if (_registrationType == RegistrationType.auction) ...[
                 const SizedBox(height: 16),
                 DropdownButtonFormField<int>(
-                  value: _durationInDays,
+                  initialValue: _durationInDays,
                   decoration: InputDecoration(
                       labelText: 'auctions.create.form.duration'.tr(),
                       border: const OutlineInputBorder()),

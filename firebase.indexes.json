@@ -74,7 +74,7 @@
     },
 
     {
-      "collectionGroup": "shorts",
+      "collectionGroup": "pom",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
@@ -82,7 +82,7 @@
       ]
     },
     {
-      "collectionGroup": "shorts",
+      "collectionGroup": "pom",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "locationParts.prov", "order": "ASCENDING" },
@@ -195,7 +195,7 @@
     { "collectionGroup": "jobs", "fieldPath": "description", "indexes": [] },
     { "collectionGroup": "jobs", "fieldPath": "imageUrls", "indexes": [] },
 
-    { "collectionGroup": "shorts", "fieldPath": "description", "indexes": [] },
+  { "collectionGroup": "pom", "fieldPath": "description", "indexes": [] },
 
     { "collectionGroup": "room_listings", "fieldPath": "description", "indexes": [] },
     { "collectionGroup": "room_listings", "fieldPath": "imageUrls", "indexes": [] },

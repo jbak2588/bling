@@ -1116,8 +1116,8 @@ class HomeScreen extends StatelessWidget {
     final feedRepository = FeedRepository();
 
     return FutureBuilder<List<FeedItemModel>>(
-      // 1. Repository에서 Short 최신 20개를 가져옵니다.
-      future: feedRepository.fetchLatestShorts(limit: 20),
+      // 1. Repository에서 POM 최신 20개를 가져옵니다.
+      future: feedRepository.fetchLatestPoms(limit: 20),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // 로딩 중: 스켈레톤 섹션

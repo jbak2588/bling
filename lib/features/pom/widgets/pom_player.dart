@@ -3,6 +3,14 @@
 // - POM 플레이어 (v2). 이미지/영상 모두 지원하는 PomModel 기반 플레이어.
 // - 좋아요/댓글/조회수, 작성자/현재 사용자 정보 연동.
 // =====================================================
+// - 풀스크린(틱톡/릴스 스타일) 상세 뷰어의 개별 페이지 위젯.
+// [V2 - 2025-11-03]
+// - 'short_player'에서 리네이밍. 'PomModel' 기반으로 수정.
+// [V3 - 2025-11-04]
+// - 'PomPagerScreen'에 의해 호출됨.
+// - 'showAppBar' 옵션을 추가하여 'PomPagerScreen'의 오버레이 백버튼과 충돌 방지.
+// - 재생 오류(Source Error) 대응 로직 (데이터 마이그레이션 후 현재는 안정화됨).
+// =====================================================
 // 파일 경로: lib/features/pom/widgets/pom_player.dart
 
 import 'package:bling_app/features/pom/models/pom_model.dart';
@@ -15,12 +23,19 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'pom_comments_sheet.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PomPlayer extends StatefulWidget {
   final PomModel pom;
   final UserModel? userModel;
+  final bool showAppBar; // 전체 화면 오버레이 백버튼 사용 시 false로 설정
 
-  const PomPlayer({super.key, required this.pom, this.userModel});
+  const PomPlayer({
+    super.key,
+    required this.pom,
+    this.userModel,
+    this.showAppBar = true,
+  });
 
   @override
   State<PomPlayer> createState() => _PomPlayerState();
@@ -58,6 +73,9 @@ class _PomPlayerState extends State<PomPlayer> {
               _isPlaying.value = true;
             });
           }
+        }).catchError((error) {
+          // 초기화 실패 시 로그만 남김
+          debugPrint('PomPlayer initialize error: $error');
         });
     }
   }
@@ -79,8 +97,7 @@ class _PomPlayerState extends State<PomPlayer> {
       if (mounted) {
         setState(() {
           _isLiked =
-              _currentUserModel!.likedShortIds?.contains(widget.pom.id) ??
-                  false;
+              _currentUserModel!.likedPomIds?.contains(widget.pom.id) ?? false;
         });
       }
     } else if (_currentUserId != null) {
@@ -92,7 +109,7 @@ class _PomPlayerState extends State<PomPlayer> {
         final user = UserModel.fromFirestore(currentUserDoc);
         setState(() {
           _currentUserModel = user;
-          _isLiked = user.likedShortIds?.contains(widget.pom.id) ?? false;
+          _isLiked = user.likedPomIds?.contains(widget.pom.id) ?? false;
         });
       }
     }
@@ -135,6 +152,13 @@ class _PomPlayerState extends State<PomPlayer> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.black,
+      appBar: widget.showAppBar
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              iconTheme: const IconThemeData(color: Colors.white),
+            )
+          : null,
       body: GestureDetector(
         onTap: _togglePlayPause,
         child: Stack(
@@ -286,8 +310,27 @@ class _PomPlayerState extends State<PomPlayer> {
               );
             }),
         const SizedBox(height: 20),
-        _buildActionButton(icon: Icons.share, label: 'pom.share'.tr()),
+        InkWell(
+          onTap: _onShare,
+          child: _buildActionButton(icon: Icons.share, label: 'pom.share'.tr()),
+        ),
       ],
+    );
+  }
+
+  void _onShare() {
+    const String kHostingBaseUrl =
+        'https://blingbling-app.web.app'; // Assumption: Firebase Hosting URL
+    final String title =
+        (widget.pom.title.isNotEmpty) ? widget.pom.title : 'POM';
+    final String link = '$kHostingBaseUrl/pom/${widget.pom.id}';
+    final String message = 'Check out this POM on Bling!';
+
+    SharePlus.instance.share(
+      ShareParams(
+        text: '$title\n\n$message\n$link',
+        subject: title,
+      ),
     );
   }
 

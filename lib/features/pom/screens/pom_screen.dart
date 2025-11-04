@@ -12,16 +12,27 @@
 // - 필터 설명 및 에러 메시지 강화, 신뢰 등급/차단/신고 UI 노출 및 기능 강화.
 // - 크리에이터/시청자 모두를 위한 UX 개선(댓글/알림/추천 등).
 // =====================================================
+// - '뽐' (Pom) 메인 화면. 4개의 탭과 검색 기능 제공.
+// [V2 - 2025-11-03]
+// - 'shorts' 스크린에서 리팩토링.
+// - 'DefaultTabController' (우리동네, 전체, 인기, 내 뽐) 기반 UI.
+// [V3 - 2025-11-04]
+// - 'InlineSearchChip' (검색칩) UI 통합.
+// - FAB (CreatePomScreen)에서 'pop(true)' 반환 값을 감지.
+// - '_refreshToken'을 'PomFeedList'로 전달하여 업로드 후 피드 자동 갱신 구현.
+// =====================================================
+
 // lib/features/pom/screens/pom_screen.dart
 
-import 'package:bling_app/features/pom/models/pom_model.dart';
+import 'package:bling_app/features/pom/screens/create_pom_screen.dart'; // [V2]
+import 'package:bling_app/features/pom/screens/pom_pager_screen.dart';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/features/pom/data/pom_repository.dart';
+import 'package:bling_app/features/pom/models/pom_model.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../widgets/pom_player.dart'; // [V2] Renaming short_player -> pom_player
 import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import '../widgets/pom_feed_list.dart';
 
 class PomScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -46,35 +57,23 @@ class PomScreen extends StatefulWidget {
 }
 
 class _PomScreenState extends State<PomScreen> {
-  final PomRepository _pomRepository = PomRepository();
-  late Future<List<PomModel>>? _pomsFuture;
-  late final PageController _pageController;
-  // 검색칩 상태
+  // [V2] TabBarView로 변경 - 내부 데이터 로드는 PomFeedList가 담당
+  VoidCallback? _externalSearchListener;
+  // 검색 칩/키워드 상태 (하단 검색 아이콘으로 토글됨)
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
-  VoidCallback? _externalSearchListener;
+  int _refreshToken = 0; // bump to trigger feed reloads
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: widget.initialIndex);
-
-    if (widget.initialPoms == null) {
-      // [수정] fetchPomsOnce 함수에 locationFilter를 전달합니다.
-      _pomsFuture =
-          _pomRepository.fetchPomsOnce(locationFilter: widget.locationFilter);
-    } else {
-      _pomsFuture = null;
-    }
+    // [V2] PageController 및 즉시 데이터 로드는 사용하지 않음 (PomFeedList가 처리)
 
     // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
     if (widget.autoFocusSearch) {
-      _showSearchBar = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _chipOpenNotifier.value = true;
-      });
+      // (V2) 검색바 자동 노출은 현재 미사용
     }
 
     // 피드 내부 하단 검색 아이콘 → 검색칩 열기
@@ -90,104 +89,138 @@ class _PomScreenState extends State<PomScreen> {
       widget.searchNotifier!.addListener(_externalSearchListener!);
     }
 
-    // ✅ [버그 수정] 키워드가 변경될 때마다 setState를 호출하여 화면을 다시 그리도록 리스너 추가
-    _searchKeywordNotifier.addListener(_onKeywordChanged);
+    // 초기 진입이 썸네일에서의 상세 요청인 경우: 선택한 인덱스로 상세 뷰어를 즉시 오픈
+    if (widget.initialPoms != null && widget.initialPoms!.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final int startIndex =
+            widget.initialIndex.clamp(0, widget.initialPoms!.length - 1);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PomPagerScreen(
+              poms: widget.initialPoms!,
+              startIndex: startIndex,
+              userModel: widget.userModel,
+            ),
+          ),
+        );
+      });
+    }
   }
 
   // ✅ [버그 수정] 키워드 변경 시 setState 호출
-  void _onKeywordChanged() {
-    if (mounted) setState(() {});
-  }
+  // 검색 키워드 변경 리스너는 Tab 구조에서는 사용하지 않음
 
   @override
   void dispose() {
-    _pageController.dispose();
-    _chipOpenNotifier.dispose();
-    _searchKeywordNotifier
-        .removeListener(_onKeywordChanged); // ✅ [버그 수정] 리스너 제거
-    _searchKeywordNotifier.dispose();
+    // (V2) 페이지 컨트롤러 및 검색 노티파이어 미사용
     if (_externalSearchListener != null && widget.searchNotifier != null) {
       widget.searchNotifier!.removeListener(_externalSearchListener!);
     }
+    _chipOpenNotifier.dispose();
+    _searchKeywordNotifier.dispose();
     super.dispose();
+  }
+
+  void _onSearchSubmitted(String keyword) {
+    final kw = keyword.trim().toLowerCase();
+    _searchKeywordNotifier.value = kw;
+  }
+
+  void _onSearchClosed() {
+    if (!mounted) return;
+    setState(() => _showSearchBar = false);
+    _searchKeywordNotifier.value = '';
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Column(
-        children: [
-          if (_showSearchBar)
-            InlineSearchChip(
-              hintText: 'main.search.hint.pom'.tr(),
-              openNotifier: _chipOpenNotifier,
-              onSubmitted: (kw) =>
-                  _searchKeywordNotifier.value = kw.trim().toLowerCase(),
-              onClose: () {
-                setState(() => _showSearchBar = false);
-                _searchKeywordNotifier.value = '';
-              },
+    // [V2] 기획서(백서) 기반 탭 구조로 변경
+    final List<String> tabs = [
+      'pom.tabs.local'.tr(),
+      'pom.tabs.all'.tr(),
+      'pom.tabs.popular'.tr(), // [V2]
+      'pom.tabs.myPoms'.tr(), // [V2]
+    ];
+
+    // 상세 진입 시에는 탭 인덱스는 강제로 0(첫 탭)으로 시작, 그 외에는 전달값을 안전하게 사용
+    final int safeTabIndex =
+        (widget.initialPoms == null || widget.initialPoms!.isEmpty)
+            ? widget.initialIndex.clamp(0, tabs.length - 1)
+            : 0;
+
+    return DefaultTabController(
+      length: tabs.length,
+      initialIndex: safeTabIndex,
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade100,
+        body: Column(
+          children: [
+            if (_showSearchBar)
+              InlineSearchChip(
+                hintText: 'pom.search.hint'.tr(),
+                openNotifier: _chipOpenNotifier,
+                onSubmitted: _onSearchSubmitted,
+                onClose: _onSearchClosed,
+              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: TabBar(
+                tabs: tabs.map((name) => Tab(text: name)).toList(),
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                labelColor: const Color(0xFF00A66C),
+                unselectedLabelColor: const Color(0xFF616161),
+                indicatorColor: const Color(0xFF00A66C),
+              ),
             ),
-          Expanded(
-            child: widget.initialPoms != null
-                ? _buildPageView(_applyKeywordFilter(widget.initialPoms!))
-                : FutureBuilder<List<PomModel>>(
-                    future: _pomsFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        return Center(
-                            child: Text(
-                                'pom.errors.fetchFailed'.tr(namedArgs: {
-                                  'error': snapshot.error.toString()
-                                }),
-                                style: const TextStyle(color: Colors.white)));
-                      }
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Center(
-                            child: Text('pom.empty'.tr(),
-                                style: const TextStyle(color: Colors.white)));
-                      }
-
-                      final poms = _applyKeywordFilter(snapshot.data!);
-                      if (poms.isEmpty) {
-                        return Center(
-                            child: Text('pom.empty'.tr(),
-                                style: const TextStyle(color: Colors.white)));
-                      }
-
-                      return _buildPageView(poms);
-                    },
+            Expanded(
+              child: TabBarView(
+                children: [
+                  PomFeedList(
+                    feedType: PomFeedType.local,
+                    userModel: widget.userModel,
+                    locationFilter: widget.locationFilter,
+                    searchKeywordListenable: _searchKeywordNotifier,
+                    refreshToken: _refreshToken,
                   ),
-          ),
-        ],
+                  PomFeedList(
+                    feedType: PomFeedType.all,
+                    userModel: widget.userModel,
+                    searchKeywordListenable: _searchKeywordNotifier,
+                    refreshToken: _refreshToken,
+                  ),
+                  PomFeedList(
+                    feedType: PomFeedType.popular,
+                    userModel: widget.userModel,
+                    locationFilter: widget.locationFilter,
+                    searchKeywordListenable: _searchKeywordNotifier,
+                    refreshToken: _refreshToken,
+                  ),
+                  PomFeedList(
+                    feedType: PomFeedType.myPoms,
+                    userModel: widget.userModel,
+                    searchKeywordListenable: _searchKeywordNotifier,
+                    refreshToken: _refreshToken,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            final created = await Navigator.of(context).push<bool>(
+              MaterialPageRoute(
+                builder: (_) => CreatePomScreen(userModel: widget.userModel!),
+              ),
+            );
+            if (created == true && mounted) {
+              setState(() => _refreshToken++);
+            }
+          },
+          child: const Icon(Icons.add_a_photo_outlined),
+        ),
       ),
     );
-  }
-
-  Widget _buildPageView(List<PomModel> poms) {
-    return PageView.builder(
-      controller: _pageController,
-      scrollDirection: Axis.vertical,
-      itemCount: poms.length,
-      itemBuilder: (context, index) {
-        return PomPlayer(
-            pom: poms[index], userModel: widget.userModel); // [V2] Renaming
-      },
-    );
-  }
-
-  List<PomModel> _applyKeywordFilter(List<PomModel> items) {
-    final kw = _searchKeywordNotifier.value;
-    if (kw.isEmpty) return items;
-    return items
-        .where((s) =>
-            (('${s.title} ${s.description} ${(s.tags ?? const []).join(' ')}')
-                .toLowerCase()
-                .contains(kw)))
-        .toList();
   }
 }

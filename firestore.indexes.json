@@ -217,6 +217,31 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "pom",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "searchIndex", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pom",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "searchIndex", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pom",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

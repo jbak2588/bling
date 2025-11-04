@@ -47,7 +47,7 @@ import 'package:bling_app/features/local_stores/screens/create_shop_screen.dart'
 import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
 import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
 import 'package:bling_app/features/clubs/screens/create_club_screen.dart';
-import 'package:bling_app/features/pom/screens/create_short_screen.dart';
+import 'package:bling_app/features/pom/screens/create_pom_screen.dart';
 import 'package:bling_app/features/lost_and_found/screens/create_lost_item_screen.dart';
 import 'package:bling_app/features/auction/screens/create_auction_screen.dart';
 import 'package:bling_app/features/real_estate/screens/create_room_listing_screen.dart';
@@ -527,7 +527,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         target = CreateAuctionScreen(userModel: _userModel!);
         break;
       case AppSection.pom:
-        target = CreateShortScreen(userModel: _userModel!);
+        target = CreatePomScreen(userModel: _userModel!);
         break;
       case AppSection.lostAndFound:
         target = CreateLostItemScreen(userModel: _userModel!);
@@ -625,7 +625,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   Icons.video_camera_back_rounded, // 10. pom
                   'main.tabs.pom'.tr(),
                   'pom.create.title'.tr(),
-                  builder: () => CreateShortScreen(userModel: _userModel!)),
+                  builder: () => CreatePomScreen(userModel: _userModel!)),
               const SizedBox(height: 12),
             ],
           ),

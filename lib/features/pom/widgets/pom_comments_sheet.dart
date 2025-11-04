@@ -3,6 +3,7 @@
 // - POM 댓글 시트. 댓글 목록, 작성, 삭제 등 다양한 기능 지원.
 // [V2 - 2025-11-03]
 // - Short → Pom 네이밍 정리, 경로: pom/{pomId}/comments
+// - TODO: 댓글 신고 기능 추가 필요 (현재 게시물 신고만 구현됨).
 // =====================================================
 // lib/features/pom/widgets/pom_comments_sheet.dart
 

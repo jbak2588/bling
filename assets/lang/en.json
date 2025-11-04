@@ -427,6 +427,9 @@
   "categories": {
     "post": {
       "jalan-perbaikin": {
+      "search": {
+        "hint": "Search POMs, tags, users"
+      },
         "name": "Road Repair"
       },
       "daily_life": {
@@ -558,6 +561,7 @@
     "confirm": "Confirm",
     "delete": "Delete",
     "done": "Done",
+    "clear": "Clear",
     "report": "Report",
     "moreOptions": "More options",
     "viewAll": "View all",
@@ -1091,18 +1095,49 @@
     "noLocation": "No location info"
   },
   "pom": {
+    "title": "POM",
+    "search": {
+      "hint": "Search POMs, tags, users"
+    },
+    "tabs": {
+      "local": "Local",
+      "all": "All",
+      "popular": "Popular",
+      "myPoms": "My POMs"
+    },
+    "more": "More",
+    "less": "Less",
+    "likesCount": "{} likes",
+    "report": "Report {}",
+    "block": "Block {}",
+    "emptyPopular": "No popular POMs yet.",
+    "emptyMine": "You haven't uploaded any POMs yet.",
+    "emptyHintPopular": "Try the All tab to see the latest POMs.",
+    "emptyCtaMine": "Tap + to upload your first POM.",
     "share": "Share",
     "empty": "No POM uploaded.",
     "errors": {
-      "fetchFailed": "An error occurred: {error}"
+      "fetchFailed": "An error occurred: {error}",
+      "videoSource": "Can't play this video. The source is unavailable or blocked."
+    },
+    "comments": {
+      "title": "Comments",
+      "viewAll": "View all {} comments",
+      "empty": "No comments yet.",
+      "placeholder": "Write a comment...",
+      "fail": "Failed to add comment: {error}"
     },
     "create": {
       "title": "Upload New POM",
+      "photo": "Photo",
+      "video": "Video",
+      "titleImage": "Upload Photos",
       "submit": "Upload",
       "success": "POM uploaded.",
       "fail": "Failed to upload POM: {error}",
       "form": {
-        "descriptionLabel": "Video description"
+        "titleLabel": "Title",
+        "descriptionLabel": "Description"
       }
     }
   },

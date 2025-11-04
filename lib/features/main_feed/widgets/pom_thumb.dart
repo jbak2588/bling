@@ -37,13 +37,20 @@ class _PomThumbState extends State<PomThumb> {
   VideoPlayerController? _controller;
   Future<void>? _initializeVideoPlayerFuture;
   bool _hasError = false;
+  late final bool _isVideo;
+  late final bool _hasImage;
 
   @override
   void initState() {
     super.initState();
-    //
+    // 미디어 타입 판정
+    _isVideo = widget.short.mediaType == PomMediaType.video;
+    _hasImage = widget.short.mediaType == PomMediaType.image &&
+        widget.short.mediaUrls.isNotEmpty &&
+        (Uri.tryParse(widget.short.mediaUrls.first)?.isAbsolute == true);
+
     // 비디오 URL이 유효한 경우에만 컨트롤러 초기화
-    if (widget.short.mediaType == PomMediaType.video &&
+    if (_isVideo &&
         widget.short.mediaUrls.isNotEmpty &&
         Uri.tryParse(widget.short.mediaUrls.first)?.isAbsolute == true) {
       _controller = VideoPlayerController.networkUrl(
@@ -63,8 +70,6 @@ class _PomThumbState extends State<PomThumb> {
         debugPrint("===== VideoPlayer Init Error: $error =====");
         if (mounted) setState(() => _hasError = true);
       });
-    } else {
-      _hasError = true;
     }
   }
 
@@ -107,8 +112,8 @@ class _PomThumbState extends State<PomThumb> {
           child: Stack(
             alignment: Alignment.center, // 기본 정렬을 중앙으로
             children: [
-              // 1. 비디오 플레이어 (Stack의 배경 역할)
-              _buildVideoPlayerArea(context),
+              // 1. 미디어 영역 (비디오/이미지)
+              _buildMediaArea(context),
               // 2. 제목 텍스트 (비디오 위에 오버레이)
               _buildOverlayMeta(context),
             ],
@@ -118,77 +123,102 @@ class _PomThumbState extends State<PomThumb> {
     );
   }
 
-  // --- 상단 비디오 플레이어 영역 ---
-  Widget _buildVideoPlayerArea(BuildContext context) {
+  // --- 미디어 영역: 비디오 또는 이미지 ---
+  Widget _buildMediaArea(BuildContext context) {
     // ✅ [수정] 카드 전체 높이(240px)를 사용하도록 변경
     const double playerHeight = 240.0;
 
-    return VisibilityDetector(
-      key: Key(widget.short.id), // 고유 키
-      onVisibilityChanged: (visibilityInfo) {
-        if (!mounted ||
-            _controller == null ||
-            !_controller!.value.isInitialized ||
-            _hasError) {
-          return;
-        }
-        // MD: "카드가 화면에 ‘완전 노출(=100%)’일 때만 재생"
-        final isFullyVisible = visibilityInfo.visibleFraction == 1.0;
+    if (_isVideo) {
+      return VisibilityDetector(
+        key: Key(widget.short.id), // 고유 키
+        onVisibilityChanged: (visibilityInfo) {
+          if (!mounted ||
+              _controller == null ||
+              !_controller!.value.isInitialized ||
+              _hasError) {
+            return;
+          }
+          // MD: "카드가 화면에 ‘완전 노출(=100%)’일 때만 재생"
+          final isFullyVisible = visibilityInfo.visibleFraction == 1.0;
 
-        if (isFullyVisible && !_controller!.value.isPlaying) {
-          _controller!.play();
-        } else if (!isFullyVisible && _controller!.value.isPlaying) {
-          _controller!.pause();
-        }
-      },
-      child: SizedBox(
-        height: playerHeight,
-        // ✅ [수정] 너비도 카드 전체 너비(220px) 사용
-        width: 220,
-        child: (_hasError || _controller == null)
-            ? _buildPlaceholder(Icons.videocam_off_outlined) // 에러 시 아이콘
-            : FutureBuilder(
-                future: _initializeVideoPlayerFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done &&
-                      !_hasError) {
-                    // 비디오 비율에 맞춰 AspectRatio 사용
-                    // ✅ [수정] FittedBox 추가하여 contain 스케일링 적용
-                    return AspectRatio(
-                      aspectRatio: _controller!.value.aspectRatio > 0
-                          ? _controller!.value.aspectRatio
-                          : 16 / 9, // 비율 정보 없으면 16:9 가정
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: SizedBox(
-                          width: _controller!.value.size.width,
-                          height: _controller!.value.size.height,
-                          child: VideoPlayer(_controller!),
+          if (isFullyVisible && !_controller!.value.isPlaying) {
+            _controller!.play();
+          } else if (!isFullyVisible && _controller!.value.isPlaying) {
+            _controller!.pause();
+          }
+        },
+        child: SizedBox(
+          height: playerHeight,
+          width: 220,
+          child: (_hasError || _controller == null)
+              ? _buildPlaceholder(Icons.videocam_off_outlined)
+              : FutureBuilder(
+                  future: _initializeVideoPlayerFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        !_hasError) {
+                      return AspectRatio(
+                        aspectRatio: _controller!.value.aspectRatio > 0
+                            ? _controller!.value.aspectRatio
+                            : 16 / 9,
+                        child: FittedBox(
+                          fit: BoxFit.contain,
+                          child: SizedBox(
+                            width: _controller!.value.size.width,
+                            height: _controller!.value.size.height,
+                            child: VideoPlayer(_controller!),
+                          ),
                         ),
-                      ),
-                    );
-                  } else if (snapshot.hasError) {
-                    return _buildPlaceholder(Icons.error_outline); // 초기화 에러
-                  } else {
-                    // 로딩 중: 썸네일 이미지 또는 Placeholder 표시
-                    //
-                    return (widget.short.thumbnailUrl.isNotEmpty)
-                        ? Image.network(
-                            widget.short.thumbnailUrl,
-                            height: playerHeight, width: 220, fit: BoxFit.cover,
-                            loadingBuilder: (context, child, progress) =>
-                                progress == null
-                                    ? child
-                                    : _buildPlaceholder(null), // 로딩 중 아이콘 없음
-                            errorBuilder: (context, error, stack) =>
-                                _buildPlaceholder(
-                                    Icons.image_not_supported), // 썸네일 로드 에러
-                          )
-                        : _buildPlaceholder(null); // 썸네일 없고 로딩 중
-                  }
-                },
+                      );
+                    } else if (snapshot.hasError) {
+                      return _buildPlaceholder(Icons.error_outline);
+                    } else {
+                      return (widget.short.thumbnailUrl.isNotEmpty)
+                          ? Image.network(
+                              widget.short.thumbnailUrl,
+                              height: playerHeight,
+                              width: 220,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, progress) =>
+                                  progress == null
+                                      ? child
+                                      : _buildPlaceholder(null),
+                              errorBuilder: (context, error, stack) =>
+                                  _buildPlaceholder(Icons.image_not_supported),
+                            )
+                          : _buildPlaceholder(null);
+                    }
+                  },
+                ),
+        ),
+      );
+    }
+
+    // 이미지 타입: 첫 번째 이미지 URL 또는 썸네일 표시
+    final String? imageUrl = _hasImage
+        ? widget.short.mediaUrls.first
+        : (widget.short.thumbnailUrl.isNotEmpty
+            ? widget.short.thumbnailUrl
+            : null);
+
+    return SizedBox(
+      height: playerHeight,
+      width: 220,
+      child: imageUrl != null
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(0),
+              child: Image.network(
+                imageUrl,
+                height: playerHeight,
+                width: 220,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) =>
+                    progress == null ? child : _buildPlaceholder(null),
+                errorBuilder: (context, error, stack) =>
+                    _buildPlaceholder(Icons.image_not_supported),
               ),
-      ),
+            )
+          : _buildPlaceholder(Icons.image_not_supported),
     );
   }
 

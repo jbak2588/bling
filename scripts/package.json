@@ -4,7 +4,8 @@
   "description": "One-off scripts for Bling app maintenance.",
   "main": "migrate_categories.js",
   "scripts": {
-    "start": "node migrate_categories.js"
+    "start": "node migrate_categories.js",
+    "audit:pom-shorts": "node audit_pom_shorts_urls.js"
   },
   "dependencies": {
     "firebase-admin": "^12.7.0"
