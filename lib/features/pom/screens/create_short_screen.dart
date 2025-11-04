@@ -12,11 +12,10 @@
 // =====================================================
 // lib/features/pom/screens/create_short_screen.dart
 
-
 import 'dart:io';
-import 'package:bling_app/features/pom/models/short_model.dart';
+import 'package:bling_app/features/pom/models/pom_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/features/pom/data/short_repository.dart';
+import 'package:bling_app/features/pom/data/pom_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -36,7 +35,7 @@ class CreateShortScreen extends StatefulWidget {
 
 class _CreateShortScreenState extends State<CreateShortScreen> {
   final _descriptionController = TextEditingController();
-  final ShortRepository _repository = ShortRepository();
+  final PomRepository _repository = PomRepository();
   final ImagePicker _picker = ImagePicker();
 
   XFile? _videoFile;
@@ -82,14 +81,15 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
       final snapshot = await uploadTask.whenComplete(() {});
       final videoUrl = await snapshot.ref.getDownloadURL();
 
-      // 2. ShortModel 생성
-      final newShort = ShortModel(
+      // 2. PomModel 생성
+      final newShort = PomModel(
         id: '',
         userId: user.uid,
-        videoUrl: videoUrl,
+        mediaType: PomMediaType.video, // [V2] Fix
+        mediaUrls: [videoUrl], // [V2] Fix
+        thumbnailUrl: '', // [V2] Fix (TODO: Generate thumbnail)
         title: _descriptionController.text
             .trim(), // You may want a separate title field
-        thumbnailUrl: '', // Provide a valid thumbnail URL if available
         description: _descriptionController.text.trim(),
         location: widget.userModel.locationName ?? 'Unknown',
         locationParts: widget.userModel.locationParts,
@@ -98,7 +98,7 @@ class _CreateShortScreenState extends State<CreateShortScreen> {
       );
 
       // 3. Firestore에 저장
-      await _repository.createShort(newShort);
+      await _repository.createPom(newShort);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

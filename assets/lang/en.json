@@ -457,6 +457,15 @@
         "name": "Etc.",
         "description": "Share other stories freely."
       }
+    },
+    "auction": {
+      "all": "All",
+      "collectibles": { "name": "Collectibles", "description": "Toys, cards, figures, and more." },
+      "digital": { "name": "Digital", "description": "Digital goods and assets." },
+      "fashion": { "name": "Fashion", "description": "Clothing, accessories, and beauty." },
+      "vintage": { "name": "Vintage", "description": "Retro and classic items." },
+      "art_craft": { "name": "Art & Craft", "description": "Artwork and handmade crafts." },
+      "etc": { "name": "Other", "description": "Other auction items." }
     }
   },
   "localNewsCreate": {
@@ -963,6 +972,9 @@
         "title": "Title",
         "description": "Description",
         "startPrice": "Start price",
+        "category": "Category",
+        "categoryHint": "Select a category",
+        "tagsHint": "Type a tag and press Space to add",
         "duration": "Duration",
         "durationOption": "{days} days",
         "location": "Location"
@@ -978,7 +990,8 @@
     "form": {
       "titleRequired": "Please enter a title.",
       "descriptionRequired": "Please enter a description.",
-      "startPriceRequired": "Please enter a start price."
+      "startPriceRequired": "Please enter a start price.",
+      "categoryRequired": "Please select a category."
     },
     "delete": {
       "tooltip": "Delete auction",
@@ -991,6 +1004,8 @@
       "currentBid": "Current bid: {amount}",
       "location": "Location",
       "seller": "Seller",
+      "qnaTitle": "Q&A",
+      "qnaHint": "Ask the seller...",
       "endTime": "End time: {time}",
       "bidsTitle": "Bids",
       "noBids": "No bids yet.",

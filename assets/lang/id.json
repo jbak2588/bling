@@ -436,6 +436,15 @@
         "name": "Lain-lain",
         "description": "Bagikan cerita lain dengan bebas."
       }
+    },
+    "auction": {
+      "all": "Semua",
+      "collectibles": { "name": "Koleksi", "description": "Mainan, kartu, figur, dan lainnya." },
+      "digital": { "name": "Digital", "description": "Barang dan aset digital." },
+      "fashion": { "name": "Fashion", "description": "Pakaian, aksesori, dan kecantikan." },
+      "vintage": { "name": "Vintage", "description": "Barang retro dan klasik." },
+      "art_craft": { "name": "Seni & Kerajinan", "description": "Karya seni dan kerajinan tangan." },
+      "etc": { "name": "Lainnya", "description": "Item lelang lainnya." }
     }
   },
   "localNewsCreate": {
@@ -943,6 +952,9 @@
         "title": "Judul",
         "description": "Deskripsi",
         "startPrice": "Harga awal",
+        "category": "Kategori",
+        "categoryHint": "Pilih kategori",
+        "tagsHint": "Ketik tag lalu tekan spasi untuk menambahkan",
         "duration": "Durasi",
         "durationOption": "{days} hari",
         "location": "Lokasi"
@@ -958,7 +970,8 @@
     "form": {
       "titleRequired": "Silakan masukkan judul.",
       "descriptionRequired": "Silakan masukkan deskripsi.",
-      "startPriceRequired": "Silakan masukkan harga awal."
+      "startPriceRequired": "Silakan masukkan harga awal.",
+      "categoryRequired": "Harap pilih kategori."
     },
     "delete": {
       "tooltip": "Hapus lelang",
@@ -971,6 +984,8 @@
       "currentBid": "Tawaran saat ini: {amount}",
       "location": "Lokasi",
       "seller": "Penjual",
+      "qnaTitle": "Tanya Jawab",
+      "qnaHint": "Tanyakan pada penjual...",
       "endTime": "Waktu berakhir: {time}",
       "bidsTitle": "Daftar tawaran",
       "noBids": "Belum ada tawaran.",

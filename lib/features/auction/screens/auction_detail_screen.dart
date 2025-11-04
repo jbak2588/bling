@@ -10,6 +10,12 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/auction/screens/edit_auction_screen.dart';
 
+// ✅ [커뮤니티] 1. Q&A (댓글) 위젯 및 모델 import
+import 'package:bling_app/features/local_news/widgets/comment_input_field.dart';
+import 'package:bling_app/features/local_news/widgets/comment_list_view.dart';
+
+// ✅ [하이퍼로컬] 1. 거리 계산 헬퍼 import
+import 'package:bling_app/core/utils/location_helper.dart';
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
 import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
@@ -18,7 +24,8 @@ import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 
 class AuctionDetailScreen extends StatefulWidget {
   final AuctionModel auction;
-  const AuctionDetailScreen({super.key, required this.auction});
+  final UserModel? userModel; // optional for hyperlocal features
+  const AuctionDetailScreen({super.key, required this.auction, this.userModel});
 
   @override
   State<AuctionDetailScreen> createState() => _AuctionDetailScreenState();
@@ -30,6 +37,10 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
   // int _currentImageIndex = 0; // [추가] 현재 보이는 이미지 인덱스
 
   bool _isBidding = false; // [추가] 입찰 중 상태
+
+  // ✅ [커뮤니티] 2. Q&A (댓글/답글) 상태 변수 추가
+  String? _activeReplyCommentId;
+  UniqueKey _qnaInputKey = UniqueKey();
 
   @override
   void dispose() {
@@ -142,6 +153,9 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
         }
         final auction = snapshot.data!;
         final isOwner = auction.ownerId == currentUserId;
+        // ✅ [하이퍼로컬] 3. 거리 계산 (auction을 받은 이후 계산)
+        final String? distance =
+            formatDistanceBetween(widget.userModel?.geoPoint, auction.geoPoint);
 
         return Scaffold(
           appBar: AppBar(
@@ -235,6 +249,24 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                                   .headlineSmall
                                   ?.copyWith(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 12),
+
+                          // ✅ [하이퍼로컬] 4. 위치 및 거리 표시
+                          Row(
+                            children: [
+                              Icon(Icons.location_on_outlined,
+                                  size: 16, color: Colors.grey[600]),
+                              const SizedBox(width: 4),
+                              Text(auction.location,
+                                  style: TextStyle(
+                                      color: Colors.grey[700], fontSize: 16)),
+                              if (distance != null)
+                                Text('  ·  $distance',
+                                    style: TextStyle(
+                                        color: Colors.red.shade700,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16)),
+                            ],
+                          ),
                           Text('auctions.detail.currentBid'.tr(namedArgs: {
                             'amount': currencyFormat.format(auction.currentBid)
                           })),
@@ -264,6 +296,44 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                               style: Theme.of(context).textTheme.titleLarge),
                           const SizedBox(height: 12),
                           AuthorProfileTile(userId: auction.ownerId),
+
+                          // ✅ [커뮤니티] 3. Q&A 섹션 추가 (댓글/답글)
+                          const Divider(height: 32),
+                          Text('auctions.detail.qnaTitle'.tr(),
+                              style: Theme.of(context).textTheme.titleLarge),
+                          const SizedBox(height: 12),
+                          // Q&A 입력 필드
+                          CommentInputField(
+                            key: _qnaInputKey, // 댓글 작성 후 초기화를 위한 Key
+                            postId: auction.id,
+                            // 'auctions' 컬렉션을 바라보도록 설정
+                            // (내부적으로 'auctions/{id}/comments'에 저장됨)
+                            collectionPath: 'auctions',
+                            hintText: 'auctions.detail.qnaHint'.tr(),
+                            onCommentAdded: (commentData) {
+                              // 댓글 등록 성공 시
+                              setState(() {
+                                _qnaInputKey = UniqueKey(); // 입력창 리셋
+                                _activeReplyCommentId = null; // 답글 상태 초기화
+                              });
+                              FocusScope.of(context).unfocus(); // 키보드 숨기기
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          // Q&A 목록 뷰
+                          CommentListView(
+                            postId: auction.id,
+                            collectionPath:
+                                'auctions', // 'auctions/{id}/comments'에서 읽어옴
+                            postOwnerId: auction.ownerId,
+                            activeReplyCommentId: _activeReplyCommentId,
+                            onReplyTap: (commentId) {
+                              setState(() => _activeReplyCommentId = commentId);
+                            },
+                            onCommentDeleted: () {
+                              // TODO: (선택) 경매의 Q&A 카운트 업데이트
+                            },
+                          ),
                         ],
                       ),
                     ),

@@ -30,9 +30,13 @@ class AuctionRepository {
   }
 
   // V V V --- [수정] locationFilter를 적용하고, 정렬 기준을 'endAt'으로 되돌립니다 --- V V V
-  Stream<List<AuctionModel>> fetchAuctions({Map<String, String?>? locationFilter}) {
-    Query query = _auctionsCollection
-        .orderBy('endAt', descending: false); // [핵심] 마감 임박 순으로 정렬
+  // ✅ [탐색 기능] 1. categoryId 파라미터 추가
+  Stream<List<AuctionModel>> fetchAuctions({
+    Map<String, String?>? locationFilter,
+    String? categoryId,
+  }) {
+    Query query = _auctionsCollection.orderBy('endAt',
+        descending: false); // [핵심] 마감 임박 순으로 정렬
 
     // locationFilter가 null이 아닐 경우, 필터링 쿼리를 동적으로 추가합니다.
     if (locationFilter != null) {
@@ -43,9 +47,15 @@ class AuctionRepository {
       // 다른 지역 단위(kec, kel)에 대한 필터가 필요하면 여기에 추가합니다.
     }
 
+    // ✅ [탐색 기능] 2. categoryId가 'all'이 아니면 쿼리에 필터 추가
+    if (categoryId != null && categoryId != 'all') {
+      query = query.where('category', isEqualTo: categoryId);
+    }
+
     return query.snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => AuctionModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>))
+          .map((doc) => AuctionModel.fromFirestore(
+              doc as DocumentSnapshot<Map<String, dynamic>>))
           .toList();
     });
   }

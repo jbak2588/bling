@@ -1,29 +1,30 @@
-// lib/features/pom/data/short_repository.dart
+// lib/features/pom/data/pom_repository.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/short_model.dart';
-import '../models/short_comment_model.dart';
+import '../models/pom_model.dart';
+import '../models/pom_comment_model.dart';
 
-class ShortRepository {
+class PomRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  CollectionReference<Map<String, dynamic>> get _shortsCollection =>
-      _firestore.collection('shorts');
+  // [V2 개선] 컬렉션 이름을 'shorts'에서 'pom'으로 변경
+  CollectionReference<Map<String, dynamic>> get _pomCollection =>
+      _firestore.collection('pom');
   CollectionReference<Map<String, dynamic>> get _usersCollection =>
       _firestore.collection('users');
 
-// V V V --- [추가] 특정 POM 영상 하나만 실시간으로 감시하는 함수 --- V V V
-  Stream<ShortModel> getShortStream(String shortId) {
-    return _shortsCollection
-        .doc(shortId)
+// V V V --- [V2 개선] PomModel 반환 --- V V V
+  Stream<PomModel> getPomStream(String pomId) {
+    return _pomCollection
+        .doc(pomId)
         .snapshots()
-        .map((snapshot) => ShortModel.fromFirestore(snapshot));
+        .map((snapshot) => PomModel.fromFirestore(snapshot));
   }
 
-  Stream<List<ShortModel>> fetchShorts({Map<String, String?>? locationFilter}) {
-    Query<Map<String, dynamic>> query = _shortsCollection;
+  Stream<List<PomModel>> fetchPoms({Map<String, String?>? locationFilter}) {
+    Query<Map<String, dynamic>> query = _pomCollection;
     final String? kab = locationFilter?['kab'];
     if (kab != null && kab.isNotEmpty) {
       query = query.where('locationParts.kab', isEqualTo: kab);
@@ -32,24 +33,24 @@ class ShortRepository {
 
     return query.snapshots().asyncMap((snapshot) async {
       if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
-        final fallbackSnapshot = await _shortsCollection
+        final fallbackSnapshot = await _pomCollection
             .where('locationParts.kab', isEqualTo: 'Tangerang')
             .orderBy('createdAt', descending: true)
             .limit(20)
             .get();
         return fallbackSnapshot.docs
-            .map((doc) => ShortModel.fromFirestore(doc))
+            .map((doc) => PomModel.fromFirestore(doc))
             .toList();
       }
-      return snapshot.docs.map((doc) => ShortModel.fromFirestore(doc)).toList();
+      return snapshot.docs.map((doc) => PomModel.fromFirestore(doc)).toList();
     });
   }
 
-// V V V --- [추가] POM 목록을 한 번만 가져오는 함수 --- V V V
-  Future<List<ShortModel>> fetchShortsOnce(
+// V V V --- [V2 개선] PomModel 반환 --- V V V
+  Future<List<PomModel>> fetchPomsOnce(
       {Map<String, String?>? locationFilter}) async {
     Query<Map<String, dynamic>> query =
-        _firestore.collection('shorts').orderBy('createdAt', descending: true);
+        _pomCollection.orderBy('createdAt', descending: true);
     final String? kab = locationFilter?['kab'];
 
     if (kab != null && kab.isNotEmpty) {
@@ -76,76 +77,74 @@ class ShortRepository {
     query = query.limit(20);
     final snapshot = await query.get();
     if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
-      final fallbackSnapshot = await _firestore
-          .collection('shorts')
+      final fallbackSnapshot = await _pomCollection
           .where('locationParts.kab', isEqualTo: 'Tangerang')
           .orderBy('createdAt', descending: true)
           .limit(20)
           .get();
       return fallbackSnapshot.docs
-          .map((doc) => ShortModel.fromFirestore(doc))
+          .map((doc) => PomModel.fromFirestore(doc))
           .toList();
     }
-    return snapshot.docs.map((doc) => ShortModel.fromFirestore(doc)).toList();
+    return snapshot.docs.map((doc) => PomModel.fromFirestore(doc)).toList();
   }
 
-  Future<String> createShort(ShortModel short) async {
-    final docRef = await _shortsCollection.add(short.toJson());
+  Future<String> createPom(PomModel pom) async {
+    final docRef = await _pomCollection.add(pom.toJson());
     return docRef.id;
   }
 
-  // V V V --- [추가] POM '좋아요' 토글 함수 --- V V V
-  Future<void> toggleShortLike(String shortId, bool isLiked) async {
+  // V V V --- [V2 개선] 'Short' -> 'Pom' --- V V V
+  Future<void> togglePomLike(String pomId, bool isLiked) async {
     final currentUserId = _auth.currentUser?.uid;
     if (currentUserId == null) return;
 
-    final shortRef = _shortsCollection.doc(shortId);
+    final pomRef = _pomCollection.doc(pomId);
     final userRef = _usersCollection.doc(currentUserId);
 
     final batch = _firestore.batch();
 
     if (isLiked) {
       // 좋아요 취소
-      batch.update(shortRef, {
+      batch.update(pomRef, {
         'likesCount': FieldValue.increment(-1),
         'likes': FieldValue.arrayRemove([currentUserId])
       });
       batch.update(userRef, {
-        'likedShortIds': FieldValue.arrayRemove([shortId])
+        'likedPomIds': FieldValue.arrayRemove([pomId]) // [V2] 필드명 변경 제안
       });
     } else {
       // 좋아요 누르기
-      batch.update(shortRef, {
+      batch.update(pomRef, {
         'likesCount': FieldValue.increment(1),
         'likes': FieldValue.arrayUnion([currentUserId])
       });
       batch.update(userRef, {
-        'likedShortIds': FieldValue.arrayUnion([shortId])
+        'likedPomIds': FieldValue.arrayUnion([pomId]) // [V2] 필드명 변경 제안
       });
     }
     await batch.commit();
   }
-  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
-  Stream<List<ShortCommentModel>> getShortCommentsStream(String shortId) {
-    return _shortsCollection
-        .doc(shortId)
+  // V V V --- [V2 개선] 'Short' -> 'Pom' --- V V V
+  Stream<List<PomCommentModel>> getPomCommentsStream(String pomId) {
+    return _pomCollection
+        .doc(pomId)
         .collection('comments')
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => ShortCommentModel.fromFirestore(doc))
+            .map((doc) => PomCommentModel.fromFirestore(doc))
             .toList());
   }
 
-  Future<void> addShortComment(
-      String shortId, ShortCommentModel comment) async {
-    final shortRef = _shortsCollection.doc(shortId);
-    final commentRef = shortRef.collection('comments').doc();
+  Future<void> addPomComment(String pomId, PomCommentModel comment) async {
+    final pomRef = _pomCollection.doc(pomId);
+    final commentRef = pomRef.collection('comments').doc();
 
     final batch = _firestore.batch();
     batch.set(commentRef, comment.toJson());
-    batch.update(shortRef, {'commentsCount': FieldValue.increment(1)});
+    batch.update(pomRef, {'commentsCount': FieldValue.increment(1)});
     await batch.commit();
   }
 }

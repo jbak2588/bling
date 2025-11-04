@@ -14,18 +14,18 @@
 // =====================================================
 // lib/features/pom/screens/pom_screen.dart
 
-import 'package:bling_app/features/pom/models/short_model.dart';
+import 'package:bling_app/features/pom/models/pom_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/features/pom/data/short_repository.dart';
+import 'package:bling_app/features/pom/data/pom_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../widgets/short_player.dart';
+import '../widgets/pom_player.dart'; // [V2] Renaming short_player -> pom_player
 import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 class PomScreen extends StatefulWidget {
   final UserModel? userModel;
-  final List<ShortModel>? initialShorts;
+  final List<PomModel>? initialPoms;
   final int initialIndex;
   final Map<String, String?>? locationFilter;
   final bool autoFocusSearch;
@@ -33,7 +33,7 @@ class PomScreen extends StatefulWidget {
 
   const PomScreen({
     this.userModel,
-    this.initialShorts,
+    this.initialPoms,
     this.initialIndex = 0,
     this.locationFilter,
     this.autoFocusSearch = false,
@@ -46,8 +46,8 @@ class PomScreen extends StatefulWidget {
 }
 
 class _PomScreenState extends State<PomScreen> {
-  final ShortRepository _shortRepository = ShortRepository();
-  late Future<List<ShortModel>>? _shortsFuture;
+  final PomRepository _pomRepository = PomRepository();
+  late Future<List<PomModel>>? _pomsFuture;
   late final PageController _pageController;
   // 검색칩 상태
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
@@ -61,12 +61,12 @@ class _PomScreenState extends State<PomScreen> {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
 
-    if (widget.initialShorts == null) {
-      // [수정] fetchShortsOnce 함수에 locationFilter를 전달합니다.
-      _shortsFuture = _shortRepository.fetchShortsOnce(
-          locationFilter: widget.locationFilter);
+    if (widget.initialPoms == null) {
+      // [수정] fetchPomsOnce 함수에 locationFilter를 전달합니다.
+      _pomsFuture =
+          _pomRepository.fetchPomsOnce(locationFilter: widget.locationFilter);
     } else {
-      _shortsFuture = null;
+      _pomsFuture = null;
     }
 
     // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
@@ -130,10 +130,10 @@ class _PomScreenState extends State<PomScreen> {
               },
             ),
           Expanded(
-            child: widget.initialShorts != null
-                ? _buildPageView(_applyKeywordFilter(widget.initialShorts!))
-                : FutureBuilder<List<ShortModel>>(
-                    future: _shortsFuture,
+            child: widget.initialPoms != null
+                ? _buildPageView(_applyKeywordFilter(widget.initialPoms!))
+                : FutureBuilder<List<PomModel>>(
+                    future: _pomsFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -152,14 +152,14 @@ class _PomScreenState extends State<PomScreen> {
                                 style: const TextStyle(color: Colors.white)));
                       }
 
-                      final shorts = _applyKeywordFilter(snapshot.data!);
-                      if (shorts.isEmpty) {
+                      final poms = _applyKeywordFilter(snapshot.data!);
+                      if (poms.isEmpty) {
                         return Center(
                             child: Text('pom.empty'.tr(),
                                 style: const TextStyle(color: Colors.white)));
                       }
 
-                      return _buildPageView(shorts);
+                      return _buildPageView(poms);
                     },
                   ),
           ),
@@ -168,18 +168,19 @@ class _PomScreenState extends State<PomScreen> {
     );
   }
 
-  Widget _buildPageView(List<ShortModel> shorts) {
+  Widget _buildPageView(List<PomModel> poms) {
     return PageView.builder(
       controller: _pageController,
       scrollDirection: Axis.vertical,
-      itemCount: shorts.length,
+      itemCount: poms.length,
       itemBuilder: (context, index) {
-        return ShortPlayer(short: shorts[index], userModel: widget.userModel);
+        return PomPlayer(
+            pom: poms[index], userModel: widget.userModel); // [V2] Renaming
       },
     );
   }
 
-  List<ShortModel> _applyKeywordFilter(List<ShortModel> items) {
+  List<PomModel> _applyKeywordFilter(List<PomModel> items) {
     final kw = _searchKeywordNotifier.value;
     if (kw.isEmpty) return items;
     return items

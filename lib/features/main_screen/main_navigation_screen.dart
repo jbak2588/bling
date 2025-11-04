@@ -463,7 +463,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         titleKey = 'main.tabs.pom';
         nextScreen = PomScreen(
           userModel: userModel,
-          initialShorts: null,
+          initialPoms: null,
           initialIndex: 0,
           autoFocusSearch: autoFocus,
           searchNotifier: _searchActivationNotifier,
@@ -761,8 +761,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             setState(() {
               _activeLocationFilter =
                   processedFilter.isNotEmpty ? processedFilter : null;
-              _appBarTitleKey = newTitleKey; // 키 저장
+              // 홈 루트일 때만 상단 타이틀을 '내 동네' 키로 변경
+              if (_currentHomePageContent == null) {
+                _appBarTitleKey = newTitleKey; // 키 저장
+              }
+              // 섹션 화면에서는 타이틀을 유지(예: main.tabs.auction)
             });
+
+            // ✅ [Option A - refined] 섹션 화면이 열려 있으면 해당 섹션을 재생성하여 필터 반영
+            if (_currentHomePageContent != null &&
+                _currentSection != AppSection.home &&
+                _currentSection != AppSection.board) {
+              _buildFeedScreen(_currentSection);
+            }
           }
         },
         child: Row(

@@ -22,22 +22,31 @@ import 'package:bling_app/features/auction/screens/auction_detail_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+
+// ✅ [하이퍼로컬] 1. 거리 계산 헬퍼와 UserModel import
+import 'package:bling_app/core/utils/location_helper.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경하여 Timer를 관리
 class AuctionCard extends StatefulWidget {
   final AuctionModel auction;
-  const AuctionCard({super.key, required this.auction});
+  final UserModel? userModel; // ✅ [하이퍼로컬] 2. userModel 추가
+  const AuctionCard(
+      {super.key,
+      required this.auction,
+      this.userModel}); // ✅ [하이퍼로컬] 2. 생성자 수정
 
   @override
   State<AuctionCard> createState() => _AuctionCardState();
 }
 
-class _AuctionCardState extends State<AuctionCard> with AutomaticKeepAliveClientMixin { // ✅ KeepAlive 추가
+class _AuctionCardState extends State<AuctionCard>
+    with AutomaticKeepAliveClientMixin {
+  // ✅ KeepAlive 추가
   Timer? _timer;
   Duration _timeLeft = Duration.zero;
 
-   @override
+  @override
   bool get wantKeepAlive => true; // ✅ 상태 유지
 
   @override
@@ -72,13 +81,12 @@ class _AuctionCardState extends State<AuctionCard> with AutomaticKeepAliveClient
       return 'auctions.card.ended'.tr();
     }
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-     final days = d.inDays;
+    final days = d.inDays;
     final hours = twoDigits(d.inHours.remainder(24));
     final minutes = twoDigits(d.inMinutes.remainder(60));
     final seconds = twoDigits(d.inSeconds.remainder(60));
     if (days > 0) {
-      return 'auctions.card.timeLeftDays'
-          .tr(namedArgs: {
+      return 'auctions.card.timeLeftDays'.tr(namedArgs: {
         'days': days.toString(),
         'hours': hours,
         'minutes': minutes,
@@ -97,7 +105,11 @@ class _AuctionCardState extends State<AuctionCard> with AutomaticKeepAliveClient
     super.build(context); // ✅ KeepAlive를 위해 추가
     final NumberFormat currencyFormat =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-    
+
+    // ✅ [하이퍼로컬] 3. 거리 계산
+    final String? distance = formatDistanceBetween(
+        widget.userModel?.geoPoint, widget.auction.geoPoint);
+
     final bool isEnded = _timeLeft.inSeconds <= 0;
 
     return Card(
@@ -110,7 +122,9 @@ class _AuctionCardState extends State<AuctionCard> with AutomaticKeepAliveClient
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => AuctionDetailScreen(auction: widget.auction),
+              // ✅ [하이퍼로컬] 4. 상세 화면으로 userModel 전달
+              builder: (_) => AuctionDetailScreen(
+                  auction: widget.auction, userModel: widget.userModel),
             ),
           );
         },
@@ -119,7 +133,7 @@ class _AuctionCardState extends State<AuctionCard> with AutomaticKeepAliveClient
           children: [
             Stack(
               children: [
-                       // ✅ 기존 Image.network를 공용 ImageCarouselCard로 교체
+                // ✅ 기존 Image.network를 공용 ImageCarouselCard로 교체
                 if (widget.auction.images.isNotEmpty)
                   ImageCarouselCard(
                     storageId: widget.auction.id,
@@ -162,7 +176,37 @@ class _AuctionCardState extends State<AuctionCard> with AutomaticKeepAliveClient
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
-                  
+
+                  // ✅ [하이퍼로컬] 5. 위치 및 거리 표시
+                  Row(
+                    children: [
+                      Icon(Icons.location_on_outlined,
+                          size: 16, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          widget.auction.location,
+                          style: TextStyle(color: Colors.grey[700]),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (distance != null)
+                        Flexible(
+                          child: Text(
+                            '  ·  $distance',
+                            style: TextStyle(
+                                color: Colors.red.shade700,
+                                fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: false,
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                    ],
+                  ),
+
                   // V V V --- [통합] 경매 상태에 따라 다른 정보를 표시합니다 --- V V V
                   if (isEnded) ...[
                     // --- 경매 종료 시 ---
@@ -194,8 +238,9 @@ class _AuctionCardState extends State<AuctionCard> with AutomaticKeepAliveClient
   }
 
   // [유지] 기존 헬퍼 함수들은 그대로 사용합니다.
-  Widget _buildInfoRow(String label, String value, {bool isPrice = false, bool isTime = false}) {
- return Row(
+  Widget _buildInfoRow(String label, String value,
+      {bool isPrice = false, bool isTime = false}) {
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: TextStyle(color: Colors.grey[600])),
@@ -206,7 +251,9 @@ class _AuctionCardState extends State<AuctionCard> with AutomaticKeepAliveClient
             textAlign: TextAlign.end, // 오른쪽 정렬 유지
             style: TextStyle(
               fontSize: isPrice ? 20 : 15,
-              color: isPrice ? Colors.deepPurple : (isTime ? Colors.redAccent : Colors.black),
+              color: isPrice
+                  ? Colors.deepPurple
+                  : (isTime ? Colors.redAccent : Colors.black),
               fontWeight: isPrice ? FontWeight.bold : FontWeight.w500,
             ),
           ),
@@ -217,18 +264,22 @@ class _AuctionCardState extends State<AuctionCard> with AutomaticKeepAliveClient
 
   Widget _buildWinnerInfo(AuctionModel auction) {
     if (auction.bidHistory.isEmpty) {
-      return _buildInfoRow('auctions.card.winner'.tr(), 'auctions.card.noBidders'.tr());
+      return _buildInfoRow(
+          'auctions.card.winner'.tr(), 'auctions.card.noBidders'.tr());
     }
 
     final winnerId = auction.bidHistory.last['userId'];
 
     return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance.collection('users').doc(winnerId).get(),
+      future:
+          FirebaseFirestore.instance.collection('users').doc(winnerId).get(),
       builder: (context, userSnapshot) {
         if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-          return _buildInfoRow('auctions.card.winner'.tr(), 'auctions.card.unknownBidder'.tr());
+          return _buildInfoRow(
+              'auctions.card.winner'.tr(), 'auctions.card.unknownBidder'.tr());
         }
-        final winner = UserModel.fromFirestore(userSnapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
+        final winner = UserModel.fromFirestore(
+            userSnapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
         return _buildInfoRow('auctions.card.winner'.tr(), winner.nickname);
       },
     );
