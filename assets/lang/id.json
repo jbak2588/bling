@@ -406,6 +406,9 @@
   "categories": {
     "post": {
       "jalan-perbaikin": {
+      "search": {
+        "hint": "Cari POM, tag, pengguna"
+      },
         "name": "Perbaiki Jalan"
       },
       "daily_life": {
@@ -537,6 +540,7 @@
     "confirm": "Konfirmasi",
     "delete": "Hapus",
     "done": "Selesai",
+    "clear": "Hapus",
     "report": "Laporkan",
     "moreOptions": "Opsi lainnya",
     "viewAll": "Lihat semua",
@@ -1070,18 +1074,49 @@
     "noLocation": "Tidak ada info lokasi"
   },
   "pom": {
+    "title": "POM",
+    "search": {
+      "hint": "Cari POM, tag, pengguna"
+    },
+    "tabs": {
+      "local": "Lokal",
+      "all": "Semua",
+      "popular": "Populer",
+      "myPoms": "POM Saya"
+    },
+    "more": "Selengkapnya",
+    "less": "Lebih sedikit",
+    "likesCount": "{} suka",
+    "report": "Laporkan {}",
+    "block": "Blokir {}",
+    "emptyPopular": "Belum ada POM populer.",
+    "emptyMine": "Anda belum mengunggah POM.",
+    "emptyHintPopular": "Coba tab Semua untuk melihat POM terbaru.",
+    "emptyCtaMine": "Ketuk + untuk mengunggah POM pertamamu.",
     "share": "Bagikan",
     "empty": "Belum ada POM yang diunggah.",
     "errors": {
-      "fetchFailed": "Terjadi kesalahan: {error}"
+      "fetchFailed": "Terjadi kesalahan: {error}",
+      "videoSource": "Tidak dapat memutar video ini. Sumber tidak tersedia atau diblokir."
+    },
+    "comments": {
+      "title": "Komentar",
+      "viewAll": "Lihat semua {} komentar",
+      "empty": "Belum ada komentar.",
+      "placeholder": "Tulis komentar...",
+      "fail": "Gagal menambahkan komentar: {error}"
     },
     "create": {
       "title": "Unggah POM Baru",
+      "photo": "Foto",
+      "video": "Video",
+      "titleImage": "Unggah Foto",
       "submit": "Unggah",
       "success": "POM berhasil diunggah.",
       "fail": "Gagal mengunggah POM: {error}",
       "form": {
-        "descriptionLabel": "Deskripsi video"
+        "titleLabel": "Judul",
+        "descriptionLabel": "Deskripsi"
       }
     }
   },

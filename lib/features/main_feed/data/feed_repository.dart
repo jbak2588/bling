@@ -45,7 +45,7 @@ class FeedRepository {
       _fetchLatestAuctions(),
       _fetchLatestClubPosts(),
       _fetchLatestLostItems(),
-      _fetchLatestShorts(),
+      _fetchLatestPoms(),
       _fetchLatestRoomListings(),
       _fetchLatestShops(),
     ]);
@@ -108,11 +108,11 @@ class FeedRepository {
     return _fetchLatestAuctions(limit: limit);
   }
 
-  // ▼▼▼▼▼ [개편] 9단계: HomeScreen의 POM 캐러셀이 호출할 공개(public) 메소드 추가 ▼▼▼▼▼
+  // ▼▼▼▼▼ [개편] 9단계: HomeScreen의 POM 캐러셀이 호출할 공개(public) 메소드 ▼▼▼▼▼
   //
-  Future<List<FeedItemModel>> fetchLatestShorts({int limit = 20}) async {
-    // 비공개(_fetchLatestShorts) 메소드를 호출하여 결과를 반환합니다.
-    return _fetchLatestShorts(limit: limit);
+  Future<List<FeedItemModel>> fetchLatestPoms({int limit = 20}) async {
+    // 비공개(_fetchLatestPoms) 메소드를 호출하여 결과를 반환합니다.
+    return _fetchLatestPoms(limit: limit);
   }
 
   // ▼▼▼▼▼ [개편] 10단계: HomeScreen의 Lost&Found 캐러셀이 호출할 공개 메소드 추가 ▼▼▼▼▼
@@ -296,11 +296,11 @@ class FeedRepository {
   }
 
   // [수정] 디버깅을 위해 이 함수에서만 일시적으로 try-catch를 제거합니다.
-  Future<List<FeedItemModel>> _fetchLatestShorts({int limit = 5}) async {
+  Future<List<FeedItemModel>> _fetchLatestPoms({int limit = 5}) async {
     try {
       // [수정] timestamp -> createdAt 로 정렬 필드를 정확히 수정합니다.
       final snapshot = await _firestore
-          .collection('shorts')
+          .collection('pom')
           .orderBy('createdAt', descending: true)
           .limit(limit)
           .get();

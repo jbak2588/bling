@@ -59,7 +59,7 @@ class UserModel {
 
   // V V V --- [추가] 동호회 게시글 좋아요 목록 --- V V V
   final List<String>? bookmarkedClubPostIds;
-  final List<String>? likedShortIds;
+  final List<String>? likedPomIds;
   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
   // --- Trust System Fields ---
@@ -115,7 +115,7 @@ class UserModel {
     this.bookmarkedClubPostIds, // [추가]
     // this.rt,
     // this.rw,
-    this.likedShortIds, // [추가]
+    this.likedPomIds, // [추가]
     this.trustScore = 0,
     this.phoneNumber,
     this.feedThanksReceived = 0,
@@ -182,8 +182,8 @@ class UserModel {
       bookmarkedClubPostIds: data['bookmarkedClubPostIds'] != null
           ? List<String>.from(data['bookmarkedClubPostIds'])
           : null, // [추가]
-      likedShortIds: data['likedShortIds'] != null
-          ? List<String>.from(data['likedShortIds'])
+      likedPomIds: data['likedPomIds'] != null
+          ? List<String>.from(data['likedPomIds'])
           : null, // [추가]
       trustScore: data['trustScore'] ?? 0,
       phoneNumber: data['phoneNumber'],
@@ -256,7 +256,7 @@ class UserModel {
       'bookmarkedClubPostIds': bookmarkedClubPostIds, // [추가]
       // 'rt': rt,
       // 'rw': rw,
-      'likedShortIds': likedShortIds, // [추가]
+      'likedPomIds': likedPomIds, // [추가]
       'trustScore': trustScore,
       'phoneNumber': phoneNumber,
       'feedThanksReceived': feedThanksReceived,

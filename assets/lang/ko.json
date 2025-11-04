@@ -563,6 +563,7 @@
     "confirm": "확인",
     "delete": "삭제",
     "done": "완료",
+    "clear": "지우기",
     "report": "신고",
     "moreOptions": "더보기",
     "viewAll": "모두 보기",
@@ -1097,18 +1098,49 @@
     "noLocation": "위치 정보 없음"
   },
   "pom": {
+    "title": "POM",
+    "search": {
+      "hint": "뽐 자랑, 태그, 사용자 검색"
+    },
+    "tabs": {
+      "local": "우리 동네",
+      "all": "전체",
+      "popular": "인기",
+      "myPoms": "내 POM"
+    },
+    "more": "더보기",
+    "less": "접기",
+    "likesCount": "좋아요 {}개",
+    "report": "{} 신고하기",
+    "block": "{} 차단하기",
+    "emptyPopular": "인기 POM이 아직 없습니다.",
+    "emptyMine": "내가 올린 POM이 없습니다.",
+    "emptyHintPopular": "전체 탭에서 최신 POM을 확인해보세요.",
+    "emptyCtaMine": "+ 버튼을 눌러 첫 번째 POM을 올려보세요.",
     "share": "공유",
     "empty": "등록된 POM이 없습니다.",
     "errors": {
-      "fetchFailed": "오류가 발생했습니다: {error}"
+      "fetchFailed": "오류가 발생했습니다: {error}",
+      "videoSource": "동영상을 재생할 수 없습니다. 소스가 차단되었거나 사용할 수 없습니다."
+    },
+    "comments": {
+      "title": "댓글",
+      "viewAll": "댓글 {}개 모두 보기",
+      "empty": "아직 댓글이 없습니다.",
+      "placeholder": "댓글을 입력하세요...",
+      "fail": "댓글 등록에 실패했습니다: {error}"
     },
     "create": {
       "title": "새 POM 등록",
+      "photo": "사진",
+      "video": "동영상",
+      "titleImage": "사진 올리기",
       "submit": "등록",
       "success": "POM이 등록되었습니다.",
       "fail": "POM 등록에 실패했습니다: {error}",
       "form": {
-        "descriptionLabel": "영상 설명"
+        "titleLabel": "제목",
+        "descriptionLabel": "설명"
       }
     }
   },

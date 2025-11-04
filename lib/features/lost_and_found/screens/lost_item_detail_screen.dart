@@ -93,7 +93,6 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
   }
 
   Future<void> _handleCommentDeleted() async {
-    // TODO: 댓글 삭제 시 카운트 감소 반영
     // ✅ [작업 43] 새로고침 대신 카운트 즉시 차감
     setState(() => _commentCount--);
   }

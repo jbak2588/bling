@@ -1,8 +1,9 @@
 // ===================== DocHeader =====================
 // [기획 요약]
-// - 숏폼 영상(POM) 댓글 데이터 모델. Firestore shorts/{shortId}/comments 컬렉션 구조와 1:1 매칭, 본문/작성자/작성일 등 필드 지원.
-// [V2 - 2025-11-03 개선]
-// - 'Shorts'에서 'Pom'으로 리네이밍. (pom/{pomId}/comments)
+// - '뽐' (Pom) 댓글 데이터 모델.
+// - Firestore 경로: pom/{pomId}/comments
+// [V2 - 2025-11-03]
+// - 'shorts_comment_model'에서 'pom_comment_model'로 리네이밍.
 // =====================================================
 // lib/features/pom/models/pom_comment_model.dart
 
