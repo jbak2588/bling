@@ -555,6 +555,7 @@
   },
   "common": {
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "delete": "Delete",
     "done": "Done",
     "report": "Report",
@@ -610,6 +611,7 @@
     },
     "failure": "Failed to add reply: {error}"
   },
+  
   "chat_list": {
     "appBarTitle": "Chats",
     "empty": "No conversations yet."
@@ -962,8 +964,16 @@
     "create": {
       "tooltip": "Create Auction",
       "title": "Create Auction",
+      "registrationType": "Registration type",
+      "type": {
+        "sale": "Sale",
+        "auction": "Auction"
+      },
       "success": "Auction created.",
       "fail": "Failed to create auction: {error}",
+      "submit_button": "Start Auction",
+      "confirmTitle": "List as an auction?",
+      "confirmContent": "Once listed as an auction, you can't switch back to a normal sale. A 5% fee will be charged upon a successful bid. Continue?",
       "errors": {
         "noPhoto": "Please add at least one photo."
       },
