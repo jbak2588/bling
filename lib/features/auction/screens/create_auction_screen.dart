@@ -14,6 +14,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+// ✅ [탐색 기능] 1. AppCategories import
+import 'package:bling_app/core/constants/app_categories.dart';
 
 class CreateAuctionScreen extends StatefulWidget {
   final UserModel userModel;
@@ -29,6 +31,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
   final _descriptionController = TextEditingController();
   final _startPriceController = TextEditingController();
   List<String> _tags = []; // ✅ 태그 상태 변수 추가
+  String? _selectedCategory; // ✅ [탐색 기능] 2. 선택된 카테고리 상태 변수
 
   final List<XFile> _images = [];
   int _durationInDays = 3;
@@ -115,6 +118,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
         startAt: now,
         endAt: endAt,
         ownerId: user.uid,
+        category: _selectedCategory, // ✅ [탐색 기능] 3. 저장 시 category 전달
         tags: _tags, // ✅ 저장 시 태그 목록을 전달
       );
 
@@ -242,6 +246,28 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                   validator: (value) => (value == null || value.trim().isEmpty)
                       ? 'auctions.form.startPriceRequired'.tr()
                       : null,
+                ),
+                const SizedBox(height: 16),
+                // ✅ [탐색 기능] 4. 카테고리 선택 드롭다운 추가
+                DropdownButtonFormField<String>(
+                  value: _selectedCategory,
+                  decoration: InputDecoration(
+                      labelText: 'auctions.create.form.category'.tr(),
+                      border: const OutlineInputBorder()),
+                  hint: Text('auctions.create.form.categoryHint'.tr()),
+                  validator: (value) => (value == null || value.isEmpty)
+                      ? 'auctions.form.categoryRequired'.tr()
+                      : null,
+                  items: AppCategories.auctionCategories
+                      .map((category) => DropdownMenuItem(
+                            value: category.categoryId,
+                            child: Text(
+                                "${category.emoji} ${category.nameKey.tr()}"),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() => _selectedCategory = value);
+                  },
                 ),
                 // ✅ 상세 설명 다음, 기간 설정 전에 태그 입력 필드를 추가합니다.
                 const SizedBox(height: 16),

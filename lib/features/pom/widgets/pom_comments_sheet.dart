@@ -1,36 +1,29 @@
 // ===================== DocHeader =====================
 // [기획 요약]
-// - 숏폼 영상(POM) 댓글 시트. 댓글 목록, 작성, 삭제 등 다양한 기능 지원.
-//
-// [실제 구현 비교]
-// - 댓글 목록, 작성, 삭제 등 모든 주요 기능 정상 동작. UI/UX 완비.
-//
-// [개선 제안]
-// - KPI/통계/프리미엄 기능 실제 구현 필요(댓글 부스트, 신고/차단 등).
-// - 신고/차단/신뢰 등급 UI 노출 및 기능 강화, UX 개선.
+// - POM 댓글 시트. 댓글 목록, 작성, 삭제 등 다양한 기능 지원.
+// [V2 - 2025-11-03]
+// - Short → Pom 네이밍 정리, 경로: pom/{pomId}/comments
 // =====================================================
-// lib/features/pom/widgets/short_comments_sheet.dart
-// ===================== DocHeader =====================
+// lib/features/pom/widgets/pom_comments_sheet.dart
 
-
-import 'package:bling_app/features/pom/models/short_comment_model.dart';
+import 'package:bling_app/features/pom/models/pom_comment_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/features/pom/data/short_repository.dart';
+import 'package:bling_app/features/pom/data/pom_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class ShortCommentsSheet extends StatefulWidget {
-  final String shortId;
-  const ShortCommentsSheet({super.key, required this.shortId});
+class PomCommentsSheet extends StatefulWidget {
+  final String pomId;
+  const PomCommentsSheet({super.key, required this.pomId});
 
   @override
-  State<ShortCommentsSheet> createState() => _ShortCommentsSheetState();
+  State<PomCommentsSheet> createState() => _PomCommentsSheetState();
 }
 
-class _ShortCommentsSheetState extends State<ShortCommentsSheet> {
-  final ShortRepository _repository = ShortRepository();
+class _PomCommentsSheetState extends State<PomCommentsSheet> {
+  final PomRepository _repository = PomRepository();
   final _commentController = TextEditingController();
   bool _isSending = false;
 
@@ -40,28 +33,23 @@ class _ShortCommentsSheetState extends State<ShortCommentsSheet> {
     super.dispose();
   }
 
-  // V V V --- [수정] ShortCommentModel 객체를 생성하여 전달하도록 변경 --- V V V
   Future<void> _submitComment() async {
     final body = _commentController.text.trim();
     final user = FirebaseAuth.instance.currentUser;
 
-    if (body.isEmpty || _isSending || user == null) return;
-
-    if (body.isEmpty || _isSending) return;
+    if (body.isEmpty || _isSavingOrNoUser(user)) return;
 
     setState(() => _isSending = true);
 
     try {
-      // Repository의 addShortComment 함수는 이제 commentBody(String)를 직접 받습니다.
-      // (short_repository.dart 파일도 함께 수정되었습니다.)
-      final newComment = ShortCommentModel(
-        id: '', // ID는 Firestore에서 자동 생성됩니다.
-        userId: user.uid,
+      final newComment = PomCommentModel(
+        id: '',
+        userId: user!.uid,
         body: body,
         createdAt: Timestamp.now(),
       );
 
-      await _repository.addShortComment(widget.shortId, newComment);
+      await _repository.addPomComment(widget.pomId, newComment);
       _commentController.clear();
       FocusScope.of(context).unfocus();
     } catch (e) {
@@ -77,7 +65,8 @@ class _ShortCommentsSheetState extends State<ShortCommentsSheet> {
       if (mounted) setState(() => _isSending = false);
     }
   }
-  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+
+  bool _isSavingOrNoUser(User? user) => _isSending || user == null;
 
   @override
   Widget build(BuildContext context) {
@@ -94,8 +83,8 @@ class _ShortCommentsSheetState extends State<ShortCommentsSheet> {
           ),
           const Divider(height: 1),
           Expanded(
-            child: StreamBuilder<List<ShortCommentModel>>(
-              stream: _repository.getShortCommentsStream(widget.shortId),
+            child: StreamBuilder<List<PomCommentModel>>(
+              stream: _repository.getPomCommentsStream(widget.pomId),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
@@ -150,7 +139,7 @@ class _ShortCommentsSheetState extends State<ShortCommentsSheet> {
     );
   }
 
-  Widget _buildCommentItem(ShortCommentModel comment) {
+  Widget _buildCommentItem(PomCommentModel comment) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
       child: StreamBuilder<DocumentSnapshot>(

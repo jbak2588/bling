@@ -22,13 +22,18 @@ library;
 import 'package:bling_app/features/auction/models/auction_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/auction/data/auction_repository.dart';
+import 'package:bling_app/features/auction/screens/auction_detail_screen.dart'; // ✅ [지도뷰] 1. 상세화면 import
 import 'package:bling_app/features/auction/widgets/auction_card.dart';
-import 'package:bling_app/features/location/screens/location_filter_screen.dart'; // [추가]
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'create_auction_screen.dart';
 import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+// ✅ [지도뷰] 2. 구글맵 및 관련 의존성 import
+// ✅ [탐색 기능] 1. AppCategories import
+import 'package:bling_app/core/constants/app_categories.dart';
+import 'package:bling_app/features/auction/models/auction_category_model.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:async';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class AuctionScreen extends StatefulWidget {
@@ -50,20 +55,19 @@ class AuctionScreen extends StatefulWidget {
 }
 
 class _AuctionScreenState extends State<AuctionScreen> {
-  // [추가] 화면 내부의 필터 상태를 관리합니다.
-  late Map<String, String?>? _locationFilter;
+  // 위치 필터는 상위(MainNavigation)에서 주입되는 widget.locationFilter 를 직접 사용합니다.
   // 검색칩 상태
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
+  bool _isMapView = false; // ✅ [지도뷰] 3. 맵/리스트 토글 상태 변수 추가
+  String _selectedCategoryId = 'all'; // ✅ [탐색 기능] 2. 카테고리 상태 변수 추가
   VoidCallback? _externalSearchListener;
 
   @override
   void initState() {
     super.initState();
-    // [추가] HomeScreen에서 전달받은 필터 값으로 초기화합니다.
-    _locationFilter = widget.locationFilter;
 
     // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
     if (widget.autoFocusSearch) {
@@ -95,21 +99,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
     if (mounted) setState(() {});
   }
 
-  // [추가] 필터 화면을 여는 함수
-  void _openFilter() async {
-    final result = await Navigator.of(context).push<Map<String, String?>>(
-      MaterialPageRoute(
-          builder: (_) => LocationFilterScreen(userModel: widget.userModel)),
-    );
-    if (result != null) {
-      setState(() => _locationFilter = result);
-    }
-  }
-
-  // [추가] 필터를 제거하는 함수
-  void _clearFilter() {
-    setState(() => _locationFilter = null);
-  }
+  // 위치 필터 UI는 상위(MainNavigation)에서 관리합니다. 이 화면에서는 상태만 초기화해 사용합니다.
 
   // ✅ [버그 수정 2] 메모리 누수 방지를 위해 dispose 메서드 추가
   @override
@@ -142,19 +132,22 @@ class _AuctionScreenState extends State<AuctionScreen> {
               },
             ),
           // [추가] 필터 관리 UI
+          // ✅ [탐색 기능] 3. 카테고리 칩 리스트 빌더 추가
+          _buildCategoryChips(),
+          // ✅ [정리] 위치 필터 버튼 제거. 지도/리스트 토글만 유지.
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              if (_locationFilter != null)
-                IconButton(
-                  icon: const Icon(Icons.clear),
-                  tooltip: 'auctions.filter.clearTooltip'.tr(),
-                  onPressed: _clearFilter,
-                ),
               IconButton(
-                icon: const Icon(Icons.filter_alt_outlined),
-                tooltip: 'auctions.filter.tooltip'.tr(),
-                onPressed: _openFilter,
+                icon: Icon(
+                    _isMapView ? Icons.list_alt_outlined : Icons.map_outlined,
+                    color: Colors.grey.shade700),
+                tooltip: _isMapView
+                    ? 'main.mapView.showList'.tr()
+                    : 'main.mapView.showMap'.tr(),
+                onPressed: () {
+                  setState(() => _isMapView = !_isMapView);
+                },
               ),
             ],
           ),
@@ -162,7 +155,9 @@ class _AuctionScreenState extends State<AuctionScreen> {
             child: StreamBuilder<List<AuctionModel>>(
               // [수정] fetchAuctions 함수에 현재 필터 상태를 전달합니다.
               stream: auctionRepository.fetchAuctions(
-                  locationFilter: _locationFilter),
+                  locationFilter: widget.locationFilter,
+                  categoryId:
+                      _selectedCategoryId), // ✅ [탐색 기능] 4. categoryId 전달
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -191,33 +186,175 @@ class _AuctionScreenState extends State<AuctionScreen> {
                   return Center(child: Text('auctions.empty'.tr()));
                 }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 80), // FAB와의 여백 확보
-                  itemCount: auctions.length,
-                  itemBuilder: (context, index) {
-                    final auction = auctions[index];
-                    return AuctionCard(auction: auction);
-                  },
-                );
+                // ✅ [지도뷰] 5. _isMapView 상태에 따라 리스트뷰 또는 맵뷰를 표시
+                return _isMapView
+                    ? _AuctionMapView(
+                        key: PageStorageKey(
+                            'auction_map_${widget.locationFilter?.hashCode ?? 0}'),
+                        auctions: auctions,
+                        userModel: widget.userModel,
+                      )
+                    : ListView.builder(
+                        padding:
+                            const EdgeInsets.only(bottom: 80), // FAB와의 여백 확보
+                        itemCount: auctions.length,
+                        itemBuilder: (context, index) {
+                          final auction = auctions[index];
+                          return AuctionCard(
+                              auction: auction,
+                              userModel: widget.userModel); // userModel 전달
+                        },
+                      );
               },
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (widget.userModel != null) {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => CreateAuctionScreen(userModel: widget.userModel!),
-            ));
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('main.errors.loginRequired'.tr())));
-          }
+    );
+  }
+
+  // ✅ [탐색 기능] 5. 카테고리 칩 목록을 생성하는 헬퍼 위젯
+  Widget _buildCategoryChips() {
+    // '전체' 카테고리 모델을 동적으로 생성
+    final allCategory = const AuctionCategoryModel(
+      categoryId: 'all',
+      emoji: '💎',
+      nameKey: 'categories.auction.all', // '전체'
+    );
+
+    final categories = [allCategory, ...AppCategories.auctionCategories];
+
+    return Container(
+      height: 50,
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          final isSelected = category.categoryId == _selectedCategoryId;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: ChoiceChip(
+              label: Text(
+                "${category.emoji} ${category.nameKey.tr()}",
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.black87,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+              selected: isSelected,
+              selectedColor: Theme.of(context).primaryColor,
+              onSelected: (selected) {
+                if (selected) {
+                  setState(() => _selectedCategoryId = category.categoryId);
+                }
+              },
+            ),
+          );
         },
-        tooltip: 'auctions.create.tooltip'.tr(),
-        child: const Icon(Icons.add),
       ),
+    );
+  }
+}
+
+// ✅ [지도뷰] 6. LocalNewsScreen을 참고하여 _AuctionMapView 위젯 추가
+
+class _AuctionMapView extends StatefulWidget {
+  final List<AuctionModel> auctions;
+  final UserModel? userModel;
+
+  const _AuctionMapView({
+    super.key,
+    required this.auctions,
+    this.userModel,
+  });
+
+  @override
+  State<_AuctionMapView> createState() => _AuctionMapViewState();
+}
+
+class _AuctionMapViewState extends State<_AuctionMapView> {
+  final Completer<GoogleMapController> _controller = Completer();
+
+  // 초기 카메라 위치 설정 (사용자 위치 또는 자카르타 기본값)
+  CameraPosition _getInitialCameraPosition() {
+    LatLng target;
+    if (widget.userModel?.geoPoint != null) {
+      target = LatLng(
+        widget.userModel!.geoPoint!.latitude,
+        widget.userModel!.geoPoint!.longitude,
+      );
+    } else {
+      // 자카르타 기본 위치
+      target = const LatLng(-6.2088, 106.8456);
+    }
+    return CameraPosition(target: target, zoom: 12);
+  }
+
+  // 경매 목록으로부터 마커 세트 생성
+  Set<Marker> _createMarkers() {
+    final Set<Marker> markers = {};
+    final NumberFormat currencyFormat =
+        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+    for (final auction in widget.auctions) {
+      if (auction.geoPoint != null) {
+        // 경매가 종료되었는지 확인
+        final bool isEnded = auction.endAt.toDate().isBefore(DateTime.now());
+
+        markers.add(Marker(
+          markerId: MarkerId(auction.id),
+          position: LatLng(
+            auction.geoPoint!.latitude,
+            auction.geoPoint!.longitude,
+          ),
+          // 종료된 경매는 회색으로 표시
+          icon: isEnded
+              ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure)
+              : BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueViolet),
+          infoWindow: InfoWindow(
+            title: auction.title,
+            snippet: isEnded
+                ? 'auctions.card.ended'.tr()
+                : currencyFormat.format(auction.currentBid),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => AuctionDetailScreen(
+                    auction: auction,
+                    userModel: widget.userModel,
+                  ),
+                ),
+              );
+            },
+          ),
+        ));
+      }
+    }
+    return markers;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final markers = _createMarkers();
+
+    return GoogleMap(
+      initialCameraPosition: _getInitialCameraPosition(),
+      onMapCreated: (GoogleMapController controller) {
+        if (!_controller.isCompleted) {
+          _controller.complete(controller);
+        }
+      },
+      markers: markers,
+      // 지도에 내 위치 표시 (userModel이 있는 경우)
+      myLocationEnabled: widget.userModel?.geoPoint != null,
+      myLocationButtonEnabled: true,
+      // 지도 타입 (일반)
+      mapType: MapType.normal,
+      // 줌 제어 버튼 활성화
+      zoomControlsEnabled: true,
     );
   }
 }

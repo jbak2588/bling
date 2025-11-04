@@ -41,6 +41,8 @@ class AuctionModel {
   final bool isAiVerified;
   // ✅ tags 필드를 추가합니다.
   final List<String> tags;
+  // ✅ [탐색 기능] 1. category 필드 추가
+  final String? category;
 
   AuctionModel({
     required this.id,
@@ -59,6 +61,7 @@ class AuctionModel {
     this.trustLevelVerified = false,
     this.isAiVerified = false,
     this.tags = const [], // ✅ 생성자에 추가
+    this.category, // ✅ [탐색 기능] 2. 생성자에 추가
   });
 
   factory AuctionModel.fromFirestore(
@@ -87,6 +90,8 @@ class AuctionModel {
       isAiVerified: data['isAiVerified'] ?? false,
       // ✅ Firestore 데이터로부터 tags 필드를 읽어옵니다.
       tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
+      // ✅ [탐색 기능] 3. Firestore에서 category 읽기
+      category: data['category'],
     );
   }
 
@@ -107,6 +112,7 @@ class AuctionModel {
       'trustLevelVerified': trustLevelVerified,
       'isAiVerified': isAiVerified,
       'tags': tags, // ✅ JSON 변환 시 tags 필드를 포함합니다.
+      'category': category, // ✅ [탐색 기능] 4. JSON에 category 포함
     };
   }
 }

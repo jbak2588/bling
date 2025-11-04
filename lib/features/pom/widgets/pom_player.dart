@@ -1,87 +1,72 @@
 // ===================== DocHeader =====================
-// [기획 요약]
-// - 숏폼 영상(POM) 플레이어. 영상 재생, 좋아요/댓글/조회수, AI 인증, 신뢰 등급 등 다양한 기능 지원.
-//
-// [실제 구현 비교]
-// - 영상 재생, 좋아요/댓글/조회수, AI 인증, 신뢰 등급 등 모든 주요 기능 정상 동작.
-// - UI/UX 완비, 크리에이터/시청자 정보 연동 및 상호작용 구현됨.
-//
-// [개선 제안]
-// - KPI/통계/프리미엄 기능 실제 구현 필요(조회수, 부스트, AI 인증 등).
-// - 신고/차단/신뢰 등급 UI 노출 및 기능 강화, 플레이어 UX 개선.
+// [개요]
+// - POM 플레이어 (v2). 이미지/영상 모두 지원하는 PomModel 기반 플레이어.
+// - 좋아요/댓글/조회수, 작성자/현재 사용자 정보 연동.
 // =====================================================
-// 파일 경로: lib/features/pom/widgets/short_player.dart
+// 파일 경로: lib/features/pom/widgets/pom_player.dart
 
-import 'package:bling_app/features/pom/models/short_model.dart';
+import 'package:bling_app/features/pom/models/pom_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
-import 'package:bling_app/features/pom/data/short_repository.dart';
+import 'package:bling_app/features/pom/data/pom_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'short_comments_sheet.dart';
+import 'pom_comments_sheet.dart';
 
-class ShortPlayer extends StatefulWidget {
-  final ShortModel short;
-  // [신규] pom_screen.dart로부터 현재 사용자 정보를 직접 전달받기 위한 파라미터
+class PomPlayer extends StatefulWidget {
+  final PomModel pom;
   final UserModel? userModel;
 
-  const ShortPlayer(
-      {super.key,
-      required this.short,
-      this.userModel}); // [수정] 생성자에 userModel 추가
+  const PomPlayer({super.key, required this.pom, this.userModel});
 
   @override
-  State<ShortPlayer> createState() => _ShortPlayerState();
+  State<PomPlayer> createState() => _PomPlayerState();
 }
 
-class _ShortPlayerState extends State<ShortPlayer> {
-  late VideoPlayerController _controller;
+class _PomPlayerState extends State<PomPlayer> {
+  VideoPlayerController? _controller;
   final ValueNotifier<bool> _isPlaying = ValueNotifier(false);
-  final ShortRepository _repository = ShortRepository();
+  final PomRepository _repository = PomRepository();
   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
   bool _isLiked = false;
   int _likesCount = 0;
 
-  // [유지] DB 조회를 최소화하기 위한 상태 변수는 그대로 유지합니다.
   UserModel? _author;
-  // [수정] _currentUserModel은 이제 외부(widget.userModel)에서 주입받습니다.
   UserModel? _currentUserModel;
 
   @override
   void initState() {
     super.initState();
-    _likesCount = widget.short.likesCount;
+    _likesCount = widget.pom.likesCount;
 
-    // [업그레이드]
-    // 1. 외부에서 받은 userModel을 현재 사용자 모델로 즉시 설정합니다.
     _currentUserModel = widget.userModel;
-    // 2. 나머지 초기 데이터를 불러옵니다.
     _fetchInitialData();
 
-    _controller =
-        VideoPlayerController.networkUrl(Uri.parse(widget.short.videoUrl))
-          ..initialize().then((_) {
-            if (mounted) {
-              setState(() {
-                _controller.play();
-                _controller.setLooping(true);
-                _isPlaying.value = true;
-              });
-            }
-          });
+    if (widget.pom.mediaType == PomMediaType.video &&
+        widget.pom.mediaUrls.isNotEmpty) {
+      final url = widget.pom.mediaUrls.first;
+      _controller = VideoPlayerController.networkUrl(Uri.parse(url))
+        ..initialize().then((_) {
+          if (mounted) {
+            setState(() {
+              _controller!.play();
+              _controller!.setLooping(true);
+              _isPlaying.value = true;
+            });
+          }
+        });
+    }
   }
 
-  // [업그레이드] 이제 이 함수는 '작성자' 정보만 불러오거나,
-  // 외부에서 userModel을 받지 못한 비상시에만 현재 사용자 정보를 불러옵니다.
   Future<void> _fetchInitialData() async {
-    // 1. 동영상 작성자 정보 가져오기 (기존 로직 유지)
+    // 작성자 정보
     final authorDoc = await FirebaseFirestore.instance
         .collection('users')
-        .doc(widget.short.userId)
+        .doc(widget.pom.userId)
         .get();
     if (authorDoc.exists && mounted) {
       setState(() {
@@ -89,18 +74,16 @@ class _ShortPlayerState extends State<ShortPlayer> {
       });
     }
 
-    // 2. 현재 로그인한 사용자 정보 처리
+    // 현재 사용자 정보 및 좋아요 상태
     if (_currentUserModel != null) {
-      // 이미 외부에서 userModel을 받았다면, '좋아요' 상태만 갱신합니다.
       if (mounted) {
         setState(() {
           _isLiked =
-              _currentUserModel!.likedShortIds?.contains(widget.short.id) ??
+              _currentUserModel!.likedShortIds?.contains(widget.pom.id) ??
                   false;
         });
       }
     } else if (_currentUserId != null) {
-      // 외부에서 userModel을 받지 못한 경우에만, 기존 방식대로 DB에서 직접 가져옵니다.
       final currentUserDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(_currentUserId)
@@ -109,7 +92,7 @@ class _ShortPlayerState extends State<ShortPlayer> {
         final user = UserModel.fromFirestore(currentUserDoc);
         setState(() {
           _currentUserModel = user;
-          _isLiked = user.likedShortIds?.contains(widget.short.id) ?? false;
+          _isLiked = user.likedShortIds?.contains(widget.pom.id) ?? false;
         });
       }
     }
@@ -117,17 +100,18 @@ class _ShortPlayerState extends State<ShortPlayer> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     _isPlaying.dispose();
     super.dispose();
   }
 
   void _togglePlayPause() {
-    if (_controller.value.isPlaying) {
-      _controller.pause();
+    if (_controller == null) return;
+    if (_controller!.value.isPlaying) {
+      _controller!.pause();
       _isPlaying.value = false;
     } else {
-      _controller.play();
+      _controller!.play();
       _isPlaying.value = true;
     }
   }
@@ -136,20 +120,19 @@ class _ShortPlayerState extends State<ShortPlayer> {
     if (_currentUserId == null) return;
     setState(() {
       _isLiked = !_isLiked;
-      if (_isLiked) {
-        _likesCount++;
-      } else {
-        _likesCount--;
-      }
+      _likesCount += _isLiked ? 1 : -1;
     });
-    _repository.toggleShortLike(widget.short.id, !_isLiked);
+    _repository.togglePomLike(widget.pom.id, !_isLiked);
   }
 
   @override
   Widget build(BuildContext context) {
-    // [유지] build 메서드의 모든 UI 로직은 보스의 최적화된 코드를 그대로 유지합니다.
+    final isVideo = widget.pom.mediaType == PomMediaType.video &&
+        widget.pom.mediaUrls.isNotEmpty;
+    final hasImage = widget.pom.mediaType == PomMediaType.image &&
+        widget.pom.mediaUrls.isNotEmpty;
+
     return Scaffold(
-      // ✅ 전체 화면 오버레이에서 키보드에 의해 레이아웃이 가려지지 않도록 명시
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.black,
       body: GestureDetector(
@@ -157,30 +140,44 @@ class _ShortPlayerState extends State<ShortPlayer> {
         child: Stack(
           children: [
             Center(
-              child: _controller.value.isInitialized
-                  ? SizedBox.expand(
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: SizedBox(
-                          width: _controller.value.size.width,
-                          height: _controller.value.size.height,
-                          child: VideoPlayer(_controller),
-                        ),
-                      ),
-                    )
-                  : const CircularProgressIndicator(color: Colors.white),
+              child: isVideo
+                  ? (_controller != null && _controller!.value.isInitialized)
+                      ? SizedBox.expand(
+                          child: FittedBox(
+                            fit: BoxFit.cover,
+                            child: SizedBox(
+                              width: _controller!.value.size.width,
+                              height: _controller!.value.size.height,
+                              child: VideoPlayer(_controller!),
+                            ),
+                          ),
+                        )
+                      : const CircularProgressIndicator(color: Colors.white)
+                  : hasImage
+                      ? SizedBox.expand(
+                          child: FittedBox(
+                            fit: BoxFit.cover,
+                            child: Image.network(
+                              widget.pom.mediaUrls.first,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        )
+                      : const Icon(Icons.photo,
+                          color: Colors.white70, size: 64),
             ),
-            ValueListenableBuilder<bool>(
-              valueListenable: _isPlaying,
-              builder: (context, isPlaying, _) {
-                return !isPlaying
-                    ? Center(
-                        child: Icon(Icons.play_arrow,
-                            size: 80,
-                            color: Colors.white.withValues(alpha: 0.7)))
-                    : const SizedBox.shrink();
-              },
-            ),
+            if (isVideo)
+              ValueListenableBuilder<bool>(
+                valueListenable: _isPlaying,
+                builder: (context, isPlaying, _) {
+                  return !isPlaying
+                      ? Center(
+                          child: Icon(Icons.play_arrow,
+                              size: 80,
+                              color: Colors.white.withValues(alpha: 0.7)))
+                      : const SizedBox.shrink();
+                },
+              ),
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
@@ -189,7 +186,7 @@ class _ShortPlayerState extends State<ShortPlayer> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Expanded(child: _buildVideoInfo()),
+                      Expanded(child: _buildInfo()),
                       _buildActionButtons(),
                     ],
                   ),
@@ -202,7 +199,7 @@ class _ShortPlayerState extends State<ShortPlayer> {
     );
   }
 
-  Widget _buildVideoInfo() {
+  Widget _buildInfo() {
     if (_author == null) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,7 +212,7 @@ class _ShortPlayerState extends State<ShortPlayer> {
                 fontSize: 16,
                 shadows: [Shadow(blurRadius: 2)])),
         const SizedBox(height: 8),
-        Text(widget.short.description, // null safety 추가
+        Text(widget.pom.description,
             style: const TextStyle(
                 color: Colors.white,
                 fontSize: 15,
@@ -263,11 +260,11 @@ class _ShortPlayerState extends State<ShortPlayer> {
           ),
         ),
         const SizedBox(height: 20),
-        StreamBuilder<ShortModel>(
-            stream: _repository.getShortStream(widget.short.id),
-            builder: (context, shortSnapshot) {
-              final liveCommentsCount = shortSnapshot.data?.commentsCount ??
-                  widget.short.commentsCount;
+        StreamBuilder<PomModel>(
+            stream: _repository.getPomStream(widget.pom.id),
+            builder: (context, pomSnapshot) {
+              final liveCommentsCount =
+                  pomSnapshot.data?.commentsCount ?? widget.pom.commentsCount;
               return InkWell(
                 onTap: () {
                   showModalBottomSheet(
@@ -280,7 +277,7 @@ class _ShortPlayerState extends State<ShortPlayer> {
                     ),
                     builder: (context) => SizedBox(
                       height: MediaQuery.of(context).size.height * 0.75,
-                      child: ShortCommentsSheet(shortId: widget.short.id),
+                      child: PomCommentsSheet(pomId: widget.pom.id),
                     ),
                   );
                 },

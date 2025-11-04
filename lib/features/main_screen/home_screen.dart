@@ -73,7 +73,7 @@ import 'package:bling_app/features/auction/models/auction_model.dart';
 import 'package:bling_app/features/main_feed/widgets/auction_thumb.dart';
 
 // ▼▼▼▼▼ [개편] 8단계: POM 썸네일 및 모델 import ▼▼▼▼▼
-import 'package:bling_app/features/pom/models/short_model.dart';
+import 'package:bling_app/features/pom/models/pom_model.dart';
 import 'package:bling_app/features/main_feed/widgets/pom_thumb.dart';
 // ▼▼▼▼▼ [개편] 9단계: Lost & Found 썸네일 및 모델 import ▼▼▼▼▼
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
@@ -366,7 +366,7 @@ class HomeScreen extends StatelessWidget {
                     // POM now supports inline search chip
                     nextScreen = PomScreen(
                         userModel: userModel,
-                        initialShorts: null,
+                        initialPoms: null,
                         initialIndex: 0,
                         autoFocusSearch: false,
                         searchNotifier: searchNotifier);
@@ -1135,9 +1135,9 @@ class HomeScreen extends StatelessWidget {
           return const SliverToBoxAdapter(child: SizedBox.shrink());
         }
 
-        // 3. FeedItemModel 리스트를 ShortModel 리스트로 변환 (전체 목록 전달용)
+        // 3. FeedItemModel 리스트를 PomModel 리스트로 변환 (전체 목록 전달용)
         final allShorts = snapshot.data!
-            .map((item) => ShortModel.fromFirestore(
+            .map((item) => PomModel.fromFirestore(
                 item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
             .toList();
 
@@ -1171,7 +1171,7 @@ class HomeScreen extends StatelessWidget {
                           final nextScreen = PomScreen(
                             userModel: userModel,
                             locationFilter: activeLocationFilter,
-                            initialShorts: null,
+                            initialPoms: null,
                             initialIndex: 0,
                           );
                           onIconTap(nextScreen, 'main.tabs.pom');

@@ -1,6 +1,6 @@
 // lib/features/main_feed/widgets/pom_thumb.dart
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/features/pom/models/short_model.dart';
+import 'package:bling_app/features/pom/models/pom_model.dart';
 import 'package:bling_app/features/pom/screens/pom_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -16,8 +16,8 @@ import 'package:provider/provider.dart'; // UserModel 가져오기 위해
 /// 4. 오버플로우 방지 (maxLines, ellipsis)
 /// 5. 스켈레톤/플레이스홀더
 class PomThumb extends StatefulWidget {
-  final ShortModel short;
-  final List<ShortModel> allShorts; // 전체 POM 목록 (상세 화면 이동 시 필요)
+  final PomModel short;
+  final List<PomModel> allShorts; // 전체 POM 목록 (상세 화면 이동 시 필요)
   final int currentIndex; // 현재 POM의 인덱스 (상세 화면 이동 시 필요)
   final void Function(Widget, String)? onIconTap;
 
@@ -42,9 +42,17 @@ class _PomThumbState extends State<PomThumb> {
   void initState() {
     super.initState();
     //
-    if (widget.short.videoUrl.isNotEmpty) {
-      final videoUri = Uri.parse(widget.short.videoUrl);
-      _controller = VideoPlayerController.networkUrl(videoUri);
+    // 비디오 URL이 유효한 경우에만 컨트롤러 초기화
+    if (widget.short.mediaType == PomMediaType.video &&
+        widget.short.mediaUrls.isNotEmpty &&
+        Uri.tryParse(widget.short.mediaUrls.first)?.isAbsolute == true) {
+      _controller = VideoPlayerController.networkUrl(
+        Uri.parse(widget.short.mediaUrls.first),
+        videoPlayerOptions: VideoPlayerOptions(
+          allowBackgroundPlayback: false,
+          mixWithOthers: true,
+        ),
+      );
 
       _initializeVideoPlayerFuture = _controller!.initialize().then((_) {
         // MD: "메인 피드에서는 무음"
@@ -78,7 +86,7 @@ class _PomThumbState extends State<PomThumb> {
           final userModel = Provider.of<UserModel?>(context, listen: false);
           final pomScreen = PomScreen(
             userModel: userModel,
-            initialShorts: widget.allShorts,
+            initialPoms: widget.allShorts,
             initialIndex: widget.currentIndex,
           );
           if (widget.onIconTap != null) {

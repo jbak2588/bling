@@ -28,7 +28,7 @@ import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/features/auction/models/auction_model.dart';
 import 'package:bling_app/features/clubs/models/club_post_model.dart';
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
-import 'package:bling_app/features/pom/models/short_model.dart';
+import 'package:bling_app/features/pom/models/pom_model.dart';
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:flutter/foundation.dart';
@@ -306,7 +306,7 @@ class FeedRepository {
           .get();
 
       return snapshot.docs.map((doc) {
-        final short = ShortModel.fromFirestore(doc);
+        final short = PomModel.fromFirestore(doc);
         return FeedItemModel(
           id: doc.id,
           userId: short.userId,

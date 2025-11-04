@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
 
 class EditAuctionScreen extends StatefulWidget {
   final AuctionModel auction;
@@ -24,6 +25,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
 
   List<dynamic> _images = []; // 기존 URL(String)과 새로운 파일(XFile)을 모두 담기 위함
   bool _isSaving = false;
+  String? _selectedCategory; // ✅ 카테고리 선택 상태
 
   final AuctionRepository _repository = AuctionRepository();
   final ImagePicker _picker = ImagePicker();
@@ -36,6 +38,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
     _descriptionController =
         TextEditingController(text: widget.auction.description);
     _images = List.from(widget.auction.images);
+    _selectedCategory = widget.auction.category; // ✅ 초기 카테고리
   }
 
   @override
@@ -100,6 +103,8 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
         startAt: widget.auction.startAt,
         endAt: widget.auction.endAt,
         ownerId: widget.auction.ownerId,
+        category: _selectedCategory,
+        tags: widget.auction.tags,
       );
 
       await _repository.updateAuction(updatedAuction);
@@ -201,6 +206,29 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                // ✅ 카테고리 선택 드롭다운
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedCategory,
+                  decoration: InputDecoration(
+                      labelText: 'auctions.create.form.category'.tr(),
+                      border: const OutlineInputBorder()),
+                  hint: Text('auctions.create.form.categoryHint'.tr()),
+                  validator: (value) => (value == null || value.isEmpty)
+                      ? 'auctions.form.categoryRequired'.tr()
+                      : null,
+                  items: AppCategories.auctionCategories
+                      .map((category) => DropdownMenuItem(
+                            value: category.categoryId,
+                            child: Text(
+                                "${category.emoji} ${category.nameKey.tr()}"),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() => _selectedCategory = value);
+                  },
+                ),
+                const SizedBox(height: 16),
 
                 TextFormField(
                   controller: _titleController,
