@@ -17,6 +17,8 @@ import 'package:bling_app/features/local_news/widgets/comment_list_view.dart';
 // ✅ [하이퍼로컬] 1. 거리 계산 헬퍼 import
 import 'package:bling_app/core/utils/location_helper.dart';
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
+// ✅ [신뢰] 1. AI 검증 배지 import
+import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart';
 import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
@@ -248,6 +250,12 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                                   .textTheme
                                   .headlineSmall
                                   ?.copyWith(fontWeight: FontWeight.bold)),
+                          // ✅ [신뢰] 2. AI 검증 배지 표시 (isAiVerified가 true일 때)
+                          if (auction.isAiVerified)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: const AiVerificationBadge(),
+                            ),
                           const SizedBox(height: 12),
 
                           // ✅ [하이퍼로컬] 4. 위치 및 거리 표시

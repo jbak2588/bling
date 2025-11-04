@@ -28,6 +28,8 @@ class AuctionModel {
   final int currentBid;
   final List<Map<String, dynamic>> bidHistory;
   final String location;
+  // ✅ 거래 장소(직거래 희망 위치 등) 선택 입력
+  final String? transactionPlace;
 
   // V V V --- [추가] 지역 필터링을 위한 locationParts 필드 --- V V V
   final Map<String, dynamic>? locationParts;
@@ -53,6 +55,7 @@ class AuctionModel {
     required this.currentBid,
     required this.bidHistory,
     required this.location,
+    this.transactionPlace,
     this.locationParts, // [추가]
     this.geoPoint,
     required this.startAt,
@@ -78,6 +81,7 @@ class AuctionModel {
           ? List<Map<String, dynamic>>.from(data['bidHistory'])
           : [],
       location: data['location'] ?? '',
+      transactionPlace: data['transactionPlace'],
       // [추가] Firestore에서 locationParts 데이터를 불러옵니다.
       locationParts: data['locationParts'] != null
           ? Map<String, dynamic>.from(data['locationParts'])
@@ -104,6 +108,7 @@ class AuctionModel {
       'currentBid': currentBid,
       'bidHistory': bidHistory,
       'location': location,
+      'transactionPlace': transactionPlace,
       'locationParts': locationParts, // [추가]
       'geoPoint': geoPoint,
       'startAt': startAt,

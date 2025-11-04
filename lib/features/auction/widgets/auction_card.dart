@@ -26,6 +26,8 @@ import 'package:easy_localization/easy_localization.dart';
 // ✅ [하이퍼로컬] 1. 거리 계산 헬퍼와 UserModel import
 import 'package:bling_app/core/utils/location_helper.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+// ✅ [신뢰] 1. AI 검증 배지 import
+import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경하여 Timer를 관리
 class AuctionCard extends StatefulWidget {
@@ -168,6 +170,11 @@ class _AuctionCardState extends State<AuctionCard>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // ✅ [신뢰] 2. AI 검증 배지 표시 (isAiVerified가 true일 때)
+                  if (widget.auction.isAiVerified) ...[
+                    const AiVerificationBadge(),
+                    const SizedBox(height: 8),
+                  ],
                   Text(
                     widget.auction.title,
                     style: const TextStyle(

@@ -534,6 +534,7 @@
   },
   "common": {
     "cancel": "Batal",
+    "confirm": "Konfirmasi",
     "delete": "Hapus",
     "done": "Selesai",
     "report": "Laporkan",
@@ -942,8 +943,16 @@
     "create": {
       "tooltip": "Buat Lelang",
       "title": "Buat Lelang",
+      "registrationType": "Jenis Pendaftaran",
+      "type": {
+        "sale": "Jual Biasa",
+        "auction": "Daftar Lelang"
+      },
       "success": "Lelang berhasil dibuat.",
       "fail": "Gagal membuat lelang: {error}",
+      "submit_button": "Mulai Lelang",
+      "confirmTitle": "Daftar sebagai Lelang?",
+      "confirmContent": "Setelah terdaftar sebagai lelang, Anda tidak dapat kembali ke penjualan biasa. Biaya komisi (5%) akan dikenakan saat lelang berhasil. Lanjutkan?",
       "errors": {
         "noPhoto": "Harap tambahkan minimal satu foto."
       },
