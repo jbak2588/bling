@@ -9,6 +9,11 @@
 // 현지 법률의 미묘한 차이를 고려하되 동일한 취지를 유지해야 합니다.
 // 번역 키: 'realEstate.disclaimer' (ko/en/id 모두 존재)
 // =====================================================
+// [V2.0 작업 이력 (2025-11-05)]
+// 1. (Task 5) 인도네시아 현지 수요('rumah123' 분석)를 반영하여 'Gudang'(창고) 카테고리 추가.
+// 2. (기존) '직방' 모델(Task 31)에 따라 카테고리 런처 화면으로 개편됨.
+// =====================================================
+// lib/features/real_estate/screens/real_estate_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -59,6 +64,12 @@ class RealEstateScreen extends StatelessWidget {
         'type': 'ruko',
         'icon': Icons.storefront_outlined,
         'labelKey': 'realEstate.form.roomTypes.ruko'
+      },
+      {
+        // [추가] Gudang (창고)
+        'type': 'gudang',
+        'icon': Icons.warehouse_outlined, // 창고 아이콘
+        'labelKey': 'realEstate.form.roomTypes.gudang'
       },
       {
         'type': 'kantor',

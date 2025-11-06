@@ -233,7 +233,10 @@ class HomeScreen extends StatelessWidget {
         screen: const Placeholder()),
     // 7. findFriends (친구찾기)
     MenuItem(
-        svg: '$_iconsPath/ico_friend.svg',
+        // svg: '$_iconsPath/ico_friend_theme_combo.svg',
+        // svg: '$_iconsPath/ico_friend_theme_combo_peachPerson.svg',
+        // svg: '$_iconsPath/ico_friend.svg',
+        svg: '$_iconsPath/ico_friend_origin.svg',
         labelKey: 'main.tabs.findFriends',
         screen: const FindFriendsScreen()),
     // 8. realEstate (부동산)

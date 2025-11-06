@@ -1183,7 +1183,8 @@
         "sewa": "Sewa (임대)",
         "apartment": "아파트",
         "house": "주택",
-        "ruko": "루코(상가주택)",
+  "ruko": "루코(상가주택)",
+  "gudang": "창고",
         "kantor": "사무실",
         "etc": "기타"
       },
@@ -1199,6 +1200,7 @@
       },
       "area": "면적 (m²)",
       "areaHint": "예: 33",
+  "landArea": "토지 면적",
       "rooms": "방 개수",
       "bathrooms": "욕실 수",
   "bedAbbr": "침실",
@@ -1219,12 +1221,77 @@
       "deposit": "보증금",
       "depositHint": "보증금 (Rp)",
       "floorInfo": "층수 정보",
-      "floorInfoHint": "예: 1층 / 5층 중 3층"
+  "floorInfoHint": "예: 5층, 중간층"
     },
     "filter": {
+      "amenities": {
+        "ac": "에어컨",
+        "bed": "침대",
+        "closet": "옷장",
+        "desk": "책상",
+        "wifi": "와이파이",
+        "kitchen": "주방",
+        "living_room": "거실",
+        "refrigerator": "냉장고",
+        "parking_motorcycle": "오토바이 주차",
+        "parking_car": "자동차 주차",
+        "pool": "수영장",
+        "gym": "헬스장",
+        "security_24h": "24시간 경비",
+        "atm_center": "ATM 센터",
+        "minimarket": "미니마켓",
+        "mall_access": "몰 접근",
+        "playground": "놀이터",
+        "carport": "카포트",
+        "garden": "정원",
+        "pam": "상수도",
+        "telephone": "전화",
+        "water_heater": "온수기",
+        "parking_area": "주차 공간",
+        "electricity": "전기 (전력)",
+        "container_access": "컨테이너 진입 가능",
+        "kos_room": {
+          "ac": "에어컨",
+          "bed": "침대",
+          "closet": "옷장",
+          "desk": "책상",
+          "wifi": "와이파이"
+        },
+        "kos_public": {
+          "kitchen": "주방",
+          "living_room": "거실",
+          "refrigerator": "냉장고",
+          "parking_motorcycle": "오토바이 주차",
+          "parking_car": "자동차 주차"
+        },
+        "apartment": {
+          "pool": "수영장",
+          "gym": "헬스장",
+          "security_24h": "24시간 보안",
+          "atm_center": "ATM",
+          "minimarket": "미니마켓",
+          "mall_access": "쇼핑몰 접근",
+          "playground": "놀이터"
+        },
+        "house": {
+          "carport": "차고",
+          "garden": "정원",
+          "pam": "시수도",
+          "telephone": "전화",
+          "water_heater": "온수기"
+        },
+        "commercial": {
+          "parking_area": "주차 공간",
+          "security_24h": "24시간 보안",
+          "telephone": "전화",
+          "electricity": "전기",
+          "container_access": "컨테이너 접근"
+        }
+      },
       "title": "상세 필터",
       "priceRange": "가격 범위",
       "areaRange": "면적 범위 (m²)",
+  "landAreaRange": "토지 면적 (m²)",
       "depositRange": "보증금 범위",
       "floorInfo": "층수 정보",
   "depositMin": "최소 보증금",
@@ -1233,11 +1300,40 @@
       "furnishedStatus": "가구 상태",
       "rentPeriod": "임대 기간",
       "selectFurnished": "가구 상태 선택",
+  "furnishedHint": "가구 상태 선택",
       "selectRentPeriod": "임대 기간 선택",
       "rentPeriods": {
         "daily": "일간",
         "monthly": "월간",
         "yearly": "연간"
+      },
+      "kos": {
+        "bathroomType": "욕실 타입",
+        "bathroomTypes": {
+          "in_room": "방 내부 욕실",
+          "out_room": "공용 욕실"
+        },
+        "maxOccupants": "최대 거주 인원",
+        "hintBathroomType": "욕실 타입 선택",
+        "hintMaxOccupants": "거주 인원 선택",
+        "electricityIncluded": "전기세 포함",
+        "roomFacilities": "방 시설",
+        "publicFacilities": "공용 시설",
+        "occupant": "명"
+      },
+      "apartment": {
+        "facilities": "아파트 시설"
+      },
+      "house": {
+        "facilities": "주택 시설"
+      },
+      "commercial": {
+        "facilities": "상업용 시설"
+      },
+      "propertyCondition": "매물 상태",
+      "propertyConditions": {
+        "new": "신규",
+        "used": "중고"
       },
       "furnishedTypes": {
         "furnished": "가구 포함",
@@ -1250,6 +1346,18 @@
       "bath": "욕실",
       "anytime": "즉시 입주",
       "verifiedPublisher": "인증된 게시자"
+    },
+    "detail": {
+      "deleteTitle": "매물 삭제",
+      "deleteContent": "정말로 이 매물을 삭제하시겠습니까?",
+      "cancel": "취소",
+      "deleteConfirm": "삭제",
+      "deleteSuccess": "매물이 삭제되었습니다.",
+      "deleteFail": "삭제에 실패했습니다: {error}",
+      "chatError": "채팅을 시작할 수 없습니다: {error}",
+      "location": "위치",
+      "publisherInfo": "게시자 정보",
+      "contact": "문의하기"
     },
     "edit": {
       "title": "매물 정보 수정",

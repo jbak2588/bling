@@ -68,6 +68,7 @@ dependencies:
   collection: ^1.19.1
   percent_indicator: ^4.2.5
   timeago: ^3.7.1
+  async: ^2.13.0
 
 
   

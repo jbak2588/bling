@@ -10,13 +10,20 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(매물 부스트, 조회수 등).
 // - 필수 입력값, 에러 메시지, UX 강화. 신고/차단/신뢰 등급 UI 노출 및 기능 강화.
 // =====================================================
-// [작업 이력 (2025-11-02)]
-// 1. (Task 23) '직방' 모델 도입 (Gap 1, 4).
-// 2. [Gap 1, 4] UI 추가: 'area', 'roomCount', 'bathroomCount', 'moveInDate', 'listingType', 'publisherType' 필드를 로드하고 수정할 수 있도록 UI 추가.
+// - V2.0: 부동산 매물 수정 화면.
+// - 'roomType'에 따라 동적으로 상세 필드(예: 'Kos' 전용)를 로드하고 수정.
+// [V2.0 작업 이력 (2025-11-05)]
+// 1. (Task 7) 기존 'amenities' 로직 제거. `_buildDynamicFacilityInputs`를 추가하여
+//    'roomType'에 맞는 시설(예: `kosRoomFacilities`)을 동적으로 표시.
+// 2. (Task 13) `initState`: `RoomListingModel`에서 신규 상세 필드
+//    (예: `furnishedStatus`, `kosBathroomType`)를 로드하도록 수정.
+// 3. (Task 13) `_buildDynamicDetailInputs` 등 헬퍼를 추가하여 신규 필드 수정 UI 구현.
+// 4. (Task 13) `_saveForm`: 수정된 모든 신규 필드를 `RoomListingModel`에 저장하도록 로직 수정.
 // =====================================================
 // lib/features/real_estate/screens/edit_room_listing_screen.dart
 
 import 'dart:io';
+import 'package:bling_app/features/real_estate/constants/real_estate_facilities.dart';
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:bling_app/features/real_estate/data/room_repository.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -43,13 +50,26 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
   late String _type;
   late String _priceUnit;
   final List<dynamic> _images = []; // 기존 URL(String)과 새로운 파일(XFile)을 모두 담음
-  late Set<String> _amenities;
+  // [수정] 'amenities'를 타입별 Set으로 분리
+  late Set<String> _kosRoomFacilities;
+  late Set<String> _kosPublicFacilities;
+  late Set<String> _apartmentFacilities;
+  late Set<String> _houseFacilities;
+  late Set<String> _commercialFacilities;
   bool _isSaving = false;
 
   // [추가] 새 필드: 매물 유형, 게시자 유형, 면적, 방 수, 욕실 수, 입주 가능일
   late String _selectedListingType;
   late String _selectedPublisherType;
   late final TextEditingController _areaController; // 면적
+  late final TextEditingController _landAreaController; // 토지 면적
+
+  // [신규] '작업 13': 상세 필드 상태
+  String? _furnishedStatus;
+  String? _propertyCondition;
+  String? _kosBathroomType;
+  bool? _isElectricityIncluded;
+  int? _maxOccupants;
   late final TextEditingController _roomCountController; // 방 수
   late final TextEditingController _bathroomCountController; // 욕실 수
   DateTime? _selectedMoveInDate; // 입주 가능일
@@ -76,7 +96,12 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
     _type = widget.room.type;
     _priceUnit = widget.room.priceUnit;
     _images.addAll(widget.room.imageUrls);
-    _amenities = Set<String>.from(widget.room.amenities);
+    // [수정] 'amenities' 대신 타입별 시설 로드
+    _kosRoomFacilities = Set<String>.from(widget.room.kosRoomFacilities);
+    _kosPublicFacilities = Set<String>.from(widget.room.kosPublicFacilities);
+    _apartmentFacilities = Set<String>.from(widget.room.apartmentFacilities);
+    _houseFacilities = Set<String>.from(widget.room.houseFacilities);
+    _commercialFacilities = Set<String>.from(widget.room.commercialFacilities);
 
     // [추가] 새 필드 초기화
     _selectedListingType = widget.room.listingType;
@@ -97,6 +122,17 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
         TextEditingController(text: widget.room.deposit?.toString() ?? '');
     _floorInfoController =
         TextEditingController(text: widget.room.floorInfo ?? '');
+    _landAreaController = TextEditingController(
+        text: widget.room.landArea != null
+            ? widget.room.landArea!.toStringAsFixed(0)
+            : '');
+
+    // [신규] '작업 13': 상세 필드 로드
+    _furnishedStatus = widget.room.furnishedStatus;
+    _propertyCondition = widget.room.propertyCondition;
+    _kosBathroomType = widget.room.kosBathroomType;
+    _isElectricityIncluded = widget.room.isElectricityIncluded;
+    _maxOccupants = widget.room.maxOccupants;
   }
 
   @override
@@ -112,6 +148,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
     _maintenanceFeeController.dispose();
     _depositController.dispose();
     _floorInfoController.dispose();
+    _landAreaController.dispose();
     super.dispose();
   }
 
@@ -160,23 +197,35 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
         description: _descriptionController.text.trim(),
         type: _type,
         price: int.tryParse(_priceController.text) ?? 0,
-        priceUnit: _priceUnit,
+        // [수정] '작업 27': 'sale'일 경우 'priceUnit'을 기본값('monthly')으로 강제
+        priceUnit: _selectedListingType == 'rent' ? _priceUnit : 'monthly',
         imageUrls: imageUrls,
-        amenities: _amenities.toList(),
+        // [수정] 'amenities' 대신 타입별 시설 저장
+        kosRoomFacilities: _kosRoomFacilities.toList(),
+        kosPublicFacilities: _kosPublicFacilities.toList(),
+        apartmentFacilities: _apartmentFacilities.toList(),
+        houseFacilities: _houseFacilities.toList(),
+        commercialFacilities: _commercialFacilities.toList(),
         listingType: _selectedListingType,
         publisherType: _selectedPublisherType,
         area: double.tryParse(_areaController.text.trim()) ?? 0.0,
+        landArea: double.tryParse(_landAreaController.text.trim()),
         roomCount: int.tryParse(_roomCountController.text.trim()) ?? 1,
         bathroomCount: int.tryParse(_bathroomCountController.text.trim()) ?? 1,
         moveInDate: _selectedMoveInDate != null
             ? Timestamp.fromDate(_selectedMoveInDate!)
             : null,
         // [추가] Task 40: 카테고리별 필드 저장
-        furnishedStatus: _selectedFurnishedStatus,
+        furnishedStatus: _furnishedStatus,
+        propertyCondition: _propertyCondition,
         rentPeriod: _selectedRentPeriod,
         maintenanceFee: int.tryParse(_maintenanceFeeController.text.trim()),
         deposit: int.tryParse(_depositController.text.trim()),
         floorInfo: _floorInfoController.text.trim(),
+        // [신규] '작업 13': Kos 전용 필드 저장
+        kosBathroomType: _kosBathroomType,
+        isElectricityIncluded: _isElectricityIncluded,
+        maxOccupants: _maxOccupants,
         // --- 기존 정보 보존 ---
         locationName: widget.room.locationName,
         locationParts: widget.room.locationParts,
@@ -284,6 +333,25 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
+                // [수정] '작업 27': 'listingType'을 'roomType' 앞으로 이동
+                Text('realEstate.form.listingType'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
+                _buildDropdown<String?>(
+                  value: _selectedListingType,
+                  hint: "Pilih Tipe Transaksi", // TODO: 다국어
+                  items: const ['rent', 'sale'],
+                  itemBuilder: (type) => DropdownMenuItem(
+                    value: type,
+                    child: Text('realEstate.form.listingTypes.$type'.tr()),
+                  ),
+                  onChanged: (val) {
+                    // [수정] '작업 27': 수정 시에도 listingType 변경 허용 (UX 일관성)
+                    setState(() {
+                      _selectedListingType = val ?? 'rent';
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
                 SegmentedButton<String>(
                   segments: [
                     ButtonSegment(
@@ -315,21 +383,31 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                             : null,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    DropdownButton<String>(
-                      value: _priceUnit,
-                      items: [
-                        DropdownMenuItem(
-                            value: 'monthly',
-                            child:
-                                Text('realEstate.form.priceUnit.monthly'.tr())),
-                        DropdownMenuItem(
-                            value: 'yearly',
-                            child:
-                                Text('realEstate.form.priceUnit.yearly'.tr())),
-                      ],
-                      onChanged: (val) => setState(() => _priceUnit = val!),
-                    ),
+                    // [수정] '작업 27': 'listingType'이 'rent'일 때만 가격 단위 표시
+                    if (_selectedListingType == 'rent') ...[
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _priceUnit,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          items: const ['monthly', 'yearly']
+                              .map((String value) => DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(
+                                        'realEstate.form.priceUnit.$value'
+                                            .tr()),
+                                  ))
+                              .toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _priceUnit = newValue ?? 'monthly';
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -350,66 +428,36 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                       border: const OutlineInputBorder()),
                   maxLines: 3,
                 ),
-                const SizedBox(height: 24),
-                Text('realEstate.form.amenities'.tr(),
-                    style: Theme.of(context).textTheme.titleMedium),
-                Wrap(
-                  spacing: 8.0,
-                  children: ['wifi', 'ac', 'parking', 'kitchen'].map((amenity) {
-                    return FilterChip(
-                      label: Text('realEstate.form.amenity.$amenity'.tr()),
-                      selected: _amenities.contains(amenity),
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _amenities.add(amenity);
-                          } else {
-                            _amenities.remove(amenity);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
+                // [신규] 타입별 시설 입력 UI
+                _buildDynamicFacilityInputs(),
 
-                // [추가] Gap 4: 거래 유형, 게시자 유형
+                const SizedBox(height: 24),
+
+                // [신규] '작업 13': 가구 상태 (모든 타입 공통)
+                _buildFurnishedStatusInput(),
+
+                // [신규] '작업 13': 매물 상태 (모든 타입 공통)
+                _buildPropertyConditionInput(),
+
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        initialValue: _selectedListingType,
-                        decoration: InputDecoration(
-                            labelText: 'realEstate.form.listingType'.tr(),
-                            border: const OutlineInputBorder()),
-                        items: ['rent', 'sale'].map((type) {
-                          return DropdownMenuItem(
-                              value: type,
-                              child: Text(
-                                  'realEstate.form.listingTypes.$type'.tr()));
-                        }).toList(),
-                        onChanged: (value) =>
-                            setState(() => _selectedListingType = value!),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        initialValue: _selectedPublisherType,
-                        decoration: InputDecoration(
-                            labelText: 'realEstate.form.publisherType'.tr(),
-                            border: const OutlineInputBorder()),
-                        items: ['individual', 'agent'].map((type) {
-                          return DropdownMenuItem(
-                              value: type,
-                              child: Text(
-                                  'realEstate.form.publisherTypes.$type'.tr()));
-                        }).toList(),
-                        onChanged: (value) =>
-                            setState(() => _selectedPublisherType = value!),
-                      ),
-                    ),
-                  ],
+
+                // [신규] 타입별 상세 입력 UI (토지 면적 등)
+                _buildDynamicDetailInputs(),
+
+                // [수정] 게시자 유형 (listingType은 위로 이동)
+                const SizedBox(height: 16),
+                Text('realEstate.form.publisherType'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
+                _buildDropdown<String?>(
+                  value: _selectedPublisherType,
+                  hint: 'realEstate.form.publisherType'.tr(),
+                  items: const ['individual', 'agent'],
+                  itemBuilder: (type) => DropdownMenuItem(
+                    value: type,
+                    child: Text('realEstate.form.publisherTypes.$type'.tr()),
+                  ),
+                  onChanged: (value) => setState(
+                      () => _selectedPublisherType = value ?? 'individual'),
                 ),
 
                 // [추가] Gap 1: 면적, 방 수, 욕실 수
@@ -545,31 +593,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                   ),
                 ],
 
-                // --- 2. 상업용 필드 (Ruko, Kantor) ---
-                if (['ruko', 'kantor'].contains(_type)) ...[
-                  const SizedBox(height: 16),
-                  // 보증금 (Deposit)
-                  TextFormField(
-                    controller: _depositController,
-                    decoration: InputDecoration(
-                      labelText: 'realEstate.form.deposit'.tr(),
-                      hintText: 'realEstate.form.depositHint'.tr(),
-                      border: const OutlineInputBorder(),
-                      suffixText: 'Rp',
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
-                  // 층수 정보
-                  TextFormField(
-                    controller: _floorInfoController,
-                    decoration: InputDecoration(
-                      labelText: 'realEstate.form.floorInfo'.tr(),
-                      hintText: 'realEstate.form.floorInfoHint'.tr(),
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                ],
+                // 상업용 상세 입력은 _buildDynamicDetailInputs()에서 처리합니다.
               ],
             ),
           ),
@@ -579,6 +603,237 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                 child: const Center(child: CircularProgressIndicator())),
         ],
       ),
+    );
+  }
+
+  // --- 동적 시설 UI ---
+  Widget _buildDynamicFacilityInputs() {
+    switch (_type) {
+      case 'kos':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            Text('realEstate.filter.kos.roomFacilities'.tr(),
+                style: Theme.of(context).textTheme.titleMedium),
+            _buildFacilityChips(
+                RealEstateFacilities.kosRoomFacilities, _kosRoomFacilities),
+            const SizedBox(height: 24),
+            Text('realEstate.filter.kos.publicFacilities'.tr(),
+                style: Theme.of(context).textTheme.titleMedium),
+            _buildFacilityChips(
+                RealEstateFacilities.kosPublicFacilities, _kosPublicFacilities),
+          ],
+        );
+      case 'apartment':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            Text('realEstate.filter.apartment.facilities'.tr(),
+                style: Theme.of(context).textTheme.titleMedium),
+            _buildFacilityChips(
+                RealEstateFacilities.apartmentFacilities, _apartmentFacilities),
+          ],
+        );
+      case 'house':
+      case 'kontrakan':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            Text('realEstate.filter.house.facilities'.tr(),
+                style: Theme.of(context).textTheme.titleMedium),
+            _buildFacilityChips(
+                RealEstateFacilities.houseFacilities, _houseFacilities),
+          ],
+        );
+      case 'ruko':
+      case 'kantor':
+      case 'gudang':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            // i18n key may be missing; fallback to key string
+            Text('realEstate.filter.commercial.facilities'.tr(),
+                style: Theme.of(context).textTheme.titleMedium),
+            _buildFacilityChips(RealEstateFacilities.commercialFacilities,
+                _commercialFacilities),
+          ],
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  // --- 동적 상세 UI (Kos 전용 필드 + 토지면적 + 상업용 보증금/층수) ---
+  Widget _buildDynamicDetailInputs() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // --- 'Kos' 전용 필드 ---
+        if (_type == 'kos') ...[
+          Text('realEstate.filter.kos.bathroomType'.tr(),
+              style: Theme.of(context).textTheme.titleMedium),
+          _buildDropdown<String?>(
+            value: _kosBathroomType,
+            hint: 'realEstate.filter.kos.bathroomType'.tr(),
+            items: const ['in_room', 'out_room'],
+            itemBuilder: (type) => DropdownMenuItem(
+              value: type,
+              child: Text('realEstate.filter.kos.bathroomTypes.${type ?? ''}')
+                  .tr(),
+            ),
+            onChanged: (val) => setState(() => _kosBathroomType = val),
+          ),
+          const SizedBox(height: 16),
+          Text('realEstate.filter.kos.maxOccupants'.tr(),
+              style: Theme.of(context).textTheme.titleMedium),
+          _buildDropdown<int?>(
+            value: _maxOccupants,
+            hint: 'realEstate.filter.kos.maxOccupants'.tr(),
+            items: const [1, 2, 3],
+            itemBuilder: (val) => DropdownMenuItem(
+              value: val,
+              child: Text(val == 3 ? '3+' : '$val'),
+            ),
+            onChanged: (val) => setState(() => _maxOccupants = val),
+          ),
+          SwitchListTile(
+            title: Text('realEstate.filter.kos.electricityIncluded'.tr()),
+            value: _isElectricityIncluded ?? false,
+            onChanged: (value) =>
+                setState(() => _isElectricityIncluded = value),
+            contentPadding: EdgeInsets.zero,
+          ),
+          const Divider(height: 24),
+        ],
+
+        // --- 'Kos'가 아닐 경우: 토지 면적 ---
+        if (_type != 'kos') ...[
+          TextFormField(
+            controller: _landAreaController,
+            decoration: InputDecoration(
+              labelText: 'realEstate.form.landArea'.tr(),
+              hintText: '0',
+              border: const OutlineInputBorder(),
+              suffixText: 'm²',
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // --- 상업용: 보증금, 층수 ---
+        if (['ruko', 'kantor', 'gudang'].contains(_type)) ...[
+          TextFormField(
+            controller: _depositController,
+            decoration: InputDecoration(
+              labelText: 'realEstate.form.deposit'.tr(),
+              hintText: 'realEstate.form.depositHint'.tr(),
+              border: const OutlineInputBorder(),
+              suffixText: 'Rp',
+            ),
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _floorInfoController,
+            decoration: InputDecoration(
+              labelText: 'realEstate.form.floorInfo'.tr(),
+              hintText: 'realEstate.form.floorInfoHint'.tr(),
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ]
+      ],
+    );
+  }
+
+  /// [신규] '작업 13': 가구 상태 입력
+  Widget _buildFurnishedStatusInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('realEstate.filter.furnishedStatus'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        _buildDropdown<String?>(
+          value: _furnishedStatus,
+          hint: 'realEstate.filter.furnishedHint'.tr(),
+          items: const ['furnished', 'semi_furnished', 'unfurnished'],
+          itemBuilder: (status) => DropdownMenuItem(
+            value: status,
+            child:
+                Text('realEstate.filter.furnishedTypes.${status ?? ''}').tr(),
+          ),
+          onChanged: (val) => setState(() => _furnishedStatus = val),
+        ),
+      ],
+    );
+  }
+
+  /// [신규] '작업 13': 매물 상태 입력
+  Widget _buildPropertyConditionInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('realEstate.filter.propertyCondition'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        _buildDropdown<String?>(
+          value: _propertyCondition,
+          hint: 'realEstate.filter.propertyCondition'.tr(),
+          items: const ['new', 'used'],
+          itemBuilder: (status) => DropdownMenuItem(
+            value: status,
+            child: Text('realEstate.filter.propertyConditions.${status ?? ''}')
+                .tr(),
+          ),
+          onChanged: (val) => setState(() => _propertyCondition = val),
+        ),
+      ],
+    );
+  }
+
+  /// [신규] '작업 13': 공용 드롭다운 위젯
+  Widget _buildDropdown<T>({
+    required T value,
+    required String hint,
+    required List<T> items,
+    required DropdownMenuItem<T> Function(T) itemBuilder,
+    required void Function(T?) onChanged,
+  }) {
+    return DropdownButtonFormField<T>(
+      initialValue: value,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      hint: Text(hint),
+      isExpanded: true,
+      items: items.map<DropdownMenuItem<T>>(itemBuilder).toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _buildFacilityChips(List<String> keys, Set<String> selected) {
+    return Wrap(
+      spacing: 8.0,
+      children: keys.map((key) {
+        return FilterChip(
+          label: Text('realEstate.filter.amenities.$key'.tr()),
+          selected: selected.contains(key),
+          onSelected: (isSel) {
+            setState(() {
+              if (isSel) {
+                selected.add(key);
+              } else {
+                selected.remove(key);
+              }
+            });
+          },
+        );
+      }).toList(),
     );
   }
 }
