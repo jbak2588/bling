@@ -1159,7 +1159,8 @@
         "sewa": "Sewa",
         "apartment": "Apartemen",
         "house": "Rumah",
-        "ruko": "Ruko",
+  "ruko": "Ruko",
+  "gudang": "Gudang",
         "kantor": "Kantor",
         "etc": "Lainnya"
       },
@@ -1175,6 +1176,7 @@
       },
       "area": "Luas",
       "areaHint": "mis. 33",
+  "landArea": "Luas Tanah",
       "rooms": "Jumlah kamar",
       "bathrooms": "Kamar mandi",
   "bedAbbr": "KT",
@@ -1193,27 +1195,121 @@
       "maintenanceFee": "Biaya perawatan bulanan",
       "maintenanceFeeHint": "Biaya perawatan (per bulan, Rp)",
       "deposit": "Deposit",
-      "depositHint": "Deposit (Rp)",
-      "floorInfo": "Info lantai",
-      "floorInfoHint": "mis. Lantai 1 / 3 dari 5"
+  "depositHint": "Jumlah deposit (Rp)",
+  "floorInfo": "Informasi Lantai",
+  "floorInfoHint": "Contoh: Lantai 5, Lantai Tengah"
     },
     "filter": {
+      "amenities": {
+        "ac": "AC",
+        "bed": "Kasur",
+        "closet": "Lemari",
+        "desk": "Meja",
+        "wifi": "Wi‑Fi",
+        "kitchen": "Dapur",
+        "living_room": "Ruang tamu",
+        "refrigerator": "Kulkas",
+        "parking_motorcycle": "Parkir motor",
+        "parking_car": "Parkir mobil",
+        "pool": "Kolam renang",
+        "gym": "Gym",
+        "security_24h": "Keamanan 24 jam",
+        "atm_center": "Pusat ATM",
+        "minimarket": "Minimarket",
+        "mall_access": "Akses mal",
+        "playground": "Taman bermain",
+        "carport": "Carport",
+        "garden": "Taman",
+        "pam": "Air PAM",
+        "telephone": "Telepon",
+        "water_heater": "Pemanas air",
+        "parking_area": "Area parkir",
+        "electricity": "Listrik",
+        "container_access": "Akses kontainer",
+        "kos_room": {
+          "ac": "AC",
+          "bed": "Tempat Tidur",
+          "closet": "Lemari",
+          "desk": "Meja",
+          "wifi": "Wifi"
+        },
+        "kos_public": {
+          "kitchen": "Dapur",
+          "living_room": "Ruang Tamu",
+          "refrigerator": "Kulkas",
+          "parking_motorcycle": "Parkir Motor",
+          "parking_car": "Parkir Mobil"
+        },
+        "apartment": {
+          "pool": "Kolam Renang",
+          "gym": "Gym",
+          "security_24h": "Keamanan 24 Jam",
+          "atm_center": "Pusat ATM",
+          "minimarket": "Minimarket",
+          "mall_access": "Akses Mall",
+          "playground": "Taman Bermain"
+        },
+        "house": {
+          "carport": "Carport",
+          "garden": "Taman",
+          "pam": "PAM (Air Ledeng)",
+          "telephone": "Telepon",
+          "water_heater": "Pemanas Air"
+        },
+        "commercial": {
+          "parking_area": "Area Parkir",
+          "security_24h": "Keamanan 24 Jam",
+          "telephone": "Telepon",
+          "electricity": "Listrik",
+          "container_access": "Akses Kontainer"
+        }
+      },
       "title": "Filter lanjutan",
       "priceRange": "Rentang harga",
       "areaRange": "Rentang luas (m²)",
+  "landAreaRange": "Luas Tanah (m²)",
       "depositRange": "Rentang deposit",
       "floorInfo": "Info lantai",
   "depositMin": "Deposit minimum",
   "depositMax": "Deposit maksimum",
   "clearFloorInfo": "Hapus",
-      "furnishedStatus": "Status perabot",
-      "rentPeriod": "Periode sewa",
-      "selectFurnished": "Pilih status perabot",
+    "furnishedStatus": "Status perabot",
+    "rentPeriod": "Periode Sewa",
+    "selectFurnished": "Pilih status perabot",
+  "furnishedHint": "Pilih Kondisi Furnitur",
       "selectRentPeriod": "Pilih periode sewa",
       "rentPeriods": {
         "daily": "Harian",
         "monthly": "Bulanan",
         "yearly": "Tahunan"
+      },
+      "kos": {
+        "bathroomType": "Tipe Kamar Mandi",
+        "bathroomTypes": {
+          "in_room": "Kamar mandi di dalam",
+          "out_room": "Kamar mandi di luar"
+        },
+        "maxOccupants": "Maks. Penghuni",
+        "electricityIncluded": "Termasuk Listrik",
+        "roomFacilities": "Fasilitas Kamar",
+        "publicFacilities": "Fasilitas Umum",
+        "hintBathroomType": "Pilih Tipe Kamar Mandi",
+        "hintMaxOccupants": "Pilih Jumlah Orang",
+        "occupant": "Orang"
+      },
+      "apartment": {
+        "facilities": "Fasilitas Apartemen"
+      },
+      "house": {
+        "facilities": "Fasilitas Rumah"
+      },
+      "commercial": {
+        "facilities": "Fasilitas Komersial"
+      },
+      "propertyCondition": "Kondisi Properti",
+      "propertyConditions": {
+        "new": "Baru",
+        "used": "Bekas"
       },
       "furnishedTypes": {
         "furnished": "Berperabot",
@@ -1226,6 +1322,18 @@
       "bath": "KM",
       "anytime": "Kapan saja",
       "verifiedPublisher": "Pengiklan terverifikasi"
+    },
+    "detail": {
+      "deleteTitle": "Hapus listing",
+      "deleteContent": "Yakin ingin menghapus listing ini?",
+      "cancel": "Batal",
+      "deleteConfirm": "Hapus",
+      "deleteSuccess": "Listing dihapus.",
+      "deleteFail": "Gagal menghapus listing: {error}",
+      "chatError": "Tidak dapat memulai chat: {error}",
+      "location": "Lokasi",
+      "publisherInfo": "Info pengiklan",
+      "contact": "Hubungi"
     },
     "edit": {
       "title": "Ubah Listing",

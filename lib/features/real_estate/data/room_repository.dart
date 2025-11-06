@@ -6,9 +6,31 @@
 // 4. [Gap 3] '찜하기' 기능: 'isBookmarkedStream' (찜 상태 스트림), 'toggleBookmark' (찜 토글) 함수 추가.
 // 5. (Task 22) 'fetchRooms': 'RoomFilters' 객체를 파라미터로 받아 가격(서버), 면적/방 개수(클라이언트) 등 상세 필터링 로직 추가.
 // 6. (Task 24) [버그 수정] 순환 참조 해결을 위해 'room_filters_model.dart'를 import 하도록 수정.
+// 7. [수정] (Task 9) 'fetchRooms', 'getRoomsStream': 성능 최적화를 위해 대부분의 필터를 서버 사이드(Query 'where')로 이동.
+// 8. [수정] (Task 12) 'fetchRooms', 'getRoomsStream': 'isSponsored' 우선 정렬 및 Firestore 'price' 범위 필터 제약 동시 충족을 위해 "Two-Query" 접근 방식 적용.
 // =====================================================
+// - 부동산 매물 CRUD 및 '찜하기', '조회수' 관리.
+// - V2.0: 'rumah123' 벤치마킹 및 Firestore 제약사항 해결.
+// - '광고 우선 정렬'과 '가격 범위 필터'를 동시에 지원하기 위해 "Two-Query" 로직 도입.
+// - `firestore.indexes.json` 파일과 쿼리를 일치시켜 복합 인덱스 문제 해결.
+//
+// [V2.0 작업 이력 (2025-11-05)]
+// 1. (Task 7) 'amenities' 필터링 로직을 `_filterByFacilities` 헬퍼로 분리하고,
+//    'roomType'별 신규 시설 필드(예: kosRoomFacilities)를 비교하도록 수정.
+// 2. (Task 9, 11) Firestore의 '범위/정렬' 제약(orderBy 'price' first) 발견.
+// 3. (Task 12) 'fetchRooms'/'getRoomsStream'을 "Two-Query" 방식으로 전면 수정.
+//    - `_buildFilteredQuery`: `isSponsoredQuery` 파라미터를 받아 쿼리 분리. `orderBy('price')`를 우선 정렬.
+//    - `StreamZip`을 사용해 (광고 스트림 + 일반 스트림)을 클라이언트에서 병합.
+// 4. (Task 12-fix) `_buildFilteredQuery`: `where('isAvailable', isEqualTo: true)`를 추가하여
+//    `firestore.indexes.json`의 복합 인덱스와 쿼리를 일치시킴.
+// 5. (Task 12-fix) `_applyClientFilters`: 인덱스 조합 폭발을 막기 위해 `bathroomCount`,
+//    `furnishedStatus` 등 일부 공통 필터를 클라이언트 필터로 재이동. (성능/유연성 트레이드오프)
+// =====================================================
+
 // lib/features/real_estate/data/room_repository.dart
 
+import 'dart:async'; // [신규] '작업 12': Stream 관련
+import 'package:async/async.dart'; // [신규] '작업 12': StreamZip 사용
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:bling_app/features/real_estate/models/room_filters_model.dart'; // [수정] 순환 참조 해결
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,135 +43,164 @@ class RoomRepository {
   CollectionReference<Map<String, dynamic>> get _usersCollection =>
       _firestore.collection('users');
 
+  /// [신규] '작업 9': 서버 사이드 필터링 쿼리를 구축하는 헬퍼 함수
+  Query<Map<String, dynamic>> _buildFilteredQuery(
+      Map<String, String?>? locationFilter, RoomFilters? filters,
+      {required bool isSponsoredQuery}) {
+    // [신규] '작업 12': firestore.indexes.json과 일치시키기 위해 'isAvailable' 필터 추가
+    // 이는 사용 가능한 매물만 보여주기 위한 필수 비즈니스 로직임.
+    Query<Map<String, dynamic>> query =
+        _roomsCollection.where('isAvailable', isEqualTo: true);
+
+    // 1) Location (Server)
+    final String? kab = locationFilter?['kab'];
+    if (kab != null) {
+      query = query.where('locationParts.kab', isEqualTo: kab);
+    }
+
+    if (filters != null) {
+      // 2) Equality filters (Server)
+      // [신규] '작업 12': 'isSponsored'로 쿼리 분리
+      query = query.where('isSponsored', isEqualTo: isSponsoredQuery);
+      if (filters.listingType != null) {
+        query = query.where('listingType', isEqualTo: filters.listingType);
+      }
+      if (filters.roomType != null) {
+        query = query.where('type', isEqualTo: filters.roomType);
+      }
+      if (filters.roomCount != null) {
+        query = query.where('roomCount', isEqualTo: filters.roomCount);
+      }
+      if (filters.bathroomCount != null) {
+        query = query.where('bathroomCount', isEqualTo: filters.bathroomCount);
+      }
+      if (filters.furnishedStatus != null) {
+        query =
+            query.where('furnishedStatus', isEqualTo: filters.furnishedStatus);
+      }
+      if (filters.propertyCondition != null) {
+        query = query.where('propertyCondition',
+            isEqualTo: filters.propertyCondition);
+      }
+
+      // Kos specific
+      if (filters.roomType == 'kos') {
+        if (filters.kosBathroomType != null) {
+          query = query.where('kosBathroomType',
+              isEqualTo: filters.kosBathroomType);
+        }
+        if (filters.isElectricityIncluded != null) {
+          query = query.where('isElectricityIncluded',
+              isEqualTo: filters.isElectricityIncluded);
+        }
+      }
+
+      // 3) Price range (Server) – Firestore limitation: single range field
+      if (filters.minPrice > 0) {
+        query = query.where('price', isGreaterThanOrEqualTo: filters.minPrice);
+      }
+      if (filters.maxPrice < 50000000) {
+        query = query.where('price', isLessThanOrEqualTo: filters.maxPrice);
+      }
+    }
+
+    // 4) Sorting (Server). Requires composite indexes in Firestore.
+    // [수정] '작업 11/12': price가 범위 필터일 수 있어 첫 번째 정렬로 고정
+    query = query.orderBy('price').orderBy('createdAt', descending: true);
+
+    return query;
+  }
+
   // V V V --- [수정] locationFilter를 적용한 최종 fetchRooms 함수 --- V V V
   // [수정] isSponsored (광고) 매물을 우선 정렬합니다.
   // [수정] '직방' 스타일 상세 필터(RoomFilters) 적용
   Stream<List<RoomListingModel>> fetchRooms(
       {Map<String, String?>? locationFilter, RoomFilters? filters}) {
-    Query<Map<String, dynamic>> query = _roomsCollection
-        .where('isAvailable', isEqualTo: true)
-        .orderBy('isSponsored', descending: true) // [추가] 광고 매물 우선
-        .orderBy('createdAt', descending: true);
+    // [작업 12] 광고/일반 분리 쿼리 구성
+    final queryA =
+        _buildFilteredQuery(locationFilter, filters, isSponsoredQuery: true);
+    final queryB =
+        _buildFilteredQuery(locationFilter, filters, isSponsoredQuery: false);
 
-    final String? kab = locationFilter?['kab'];
-    if (kab != null && kab.isNotEmpty) {
-      query = query.where('locationParts.kab', isEqualTo: kab);
-    }
+    final streamA = queryA.snapshots().map(_mapSnapshots); // 광고 매물 목록 스트림
+    final streamB = queryB.snapshots().map(_mapSnapshots); // 일반 매물 목록 스트림
 
-    // --- [추가] 1. Firestore(서버) 필터 적용 ---
-    if (filters != null) {
-      // 매물 유형 (임대/매매)
-      if (filters.listingType != null) {
-        query = query.where('listingType', isEqualTo: filters.listingType);
-      }
-      // 방 유형 (Kos/Kontrakan/Sewa)
-      if (filters.roomType != null) {
-        query = query.where('type', isEqualTo: filters.roomType);
-      }
-      // 가격 범위 (Firestore의 유일한 범위 필터)
-      if (filters.minPrice > 0) {
-        query = query.where('price', isGreaterThanOrEqualTo: filters.minPrice);
-      }
-      if (filters.maxPrice < 50000000) {
-        // 50Juta (최대값) 이하일 때만 적용
-        query = query.where('price', isLessThanOrEqualTo: filters.maxPrice);
-      }
-    }
-
-    return query.snapshots().asyncMap((snapshot) async {
-      // --- [추가] 2. 클라이언트(앱) 필터 적용 (면적, 방 개수) ---
-      List<RoomListingModel> rooms = snapshot.docs
-          .map((doc) => RoomListingModel.fromFirestore(doc))
-          .toList();
-
-      if (filters != null) {
-        rooms = rooms.where((room) {
-          final areaMatch =
-              room.area >= filters.minArea && room.area <= filters.maxArea;
-          final roomCountMatch = filters.roomCount == null ||
-              room.roomCount == filters.roomCount ||
-              (filters.roomCount == 4 && room.roomCount >= 4);
-
-          // [추가] Task 38: 신규 필터 (클라이언트 측)
-          final furnishedMatch = filters.furnishedStatus == null ||
-              room.furnishedStatus == filters.furnishedStatus;
-          final rentPeriodMatch = filters.rentPeriod == null ||
-              room.rentPeriod == filters.rentPeriod;
-          // amenities는 'AND' 조건 (선택한 모든 편의시설을 포함해야 함)
-          final amenitiesMatch = filters.amenities.isEmpty ||
-              room.amenities.toSet().containsAll(filters.amenities);
-
-          // [추가] Task 40: 상업용 전용 필터 (보증금, 층수)
-          final depositMatch = (room.deposit == null) ||
-              (room.deposit! >= filters.depositMin &&
-                  room.deposit! <= filters.depositMax);
-          final floorMatch = (filters.floorInfoFilter == null ||
-                  filters.floorInfoFilter!.trim().isEmpty)
-              ? true
-              : ((room.floorInfo ?? '')
-                  .toLowerCase()
-                  .contains(filters.floorInfoFilter!.toLowerCase().trim()));
-
-          return areaMatch &&
-              roomCountMatch &&
-              furnishedMatch &&
-              rentPeriodMatch &&
-              amenitiesMatch &&
-              depositMatch &&
-              floorMatch;
-        }).toList();
-      }
-
-      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
-        final fallbackSnapshot = await _roomsCollection
-            .where('isAvailable', isEqualTo: true)
-            .where('locationParts.kab', isEqualTo: 'Tangerang')
-            .orderBy('isSponsored', descending: true) // [추가]
-            .orderBy('createdAt', descending: true)
-            .get();
-
-        // [수정] Fallback에도 클라이언트 필터 적용
-        return fallbackSnapshot.docs
-            .map((doc) => RoomListingModel.fromFirestore(doc))
-            .where((room) {
-          if (filters == null) return true;
-          final areaMatch =
-              room.area >= filters.minArea && room.area <= filters.maxArea;
-          final roomCountMatch = filters.roomCount == null ||
-              room.roomCount == filters.roomCount ||
-              (filters.roomCount == 4 && room.roomCount >= 4);
-
-          // [추가] Task 38: Fallback에도 신규 필터 적용
-          final furnishedMatch = filters.furnishedStatus == null ||
-              room.furnishedStatus == filters.furnishedStatus;
-          final rentPeriodMatch = filters.rentPeriod == null ||
-              room.rentPeriod == filters.rentPeriod;
-          final amenitiesMatch = filters.amenities.isEmpty ||
-              room.amenities.toSet().containsAll(filters.amenities);
-
-          // [추가] Task 40: 상업용 전용 필터 (보증금, 층수) - fallback에도 적용
-          final depositMatch = (room.deposit == null) ||
-              (room.deposit! >= filters.depositMin &&
-                  room.deposit! <= filters.depositMax);
-          final floorMatch = (filters.floorInfoFilter == null ||
-                  filters.floorInfoFilter!.trim().isEmpty)
-              ? true
-              : ((room.floorInfo ?? '')
-                  .toLowerCase()
-                  .contains(filters.floorInfoFilter!.toLowerCase().trim()));
-
-          return areaMatch &&
-              roomCountMatch &&
-              furnishedMatch &&
-              rentPeriodMatch &&
-              amenitiesMatch &&
-              depositMatch &&
-              floorMatch;
-        }).toList();
-      }
-
-      return rooms; // 최종 필터된 목록 반환
+    // 두 스트림을 zip 결합 후 클라이언트 필터 적용 및 병합
+    return StreamZip([streamA, streamB]).map((pair) {
+      final sponsored = pair[0];
+      final normal = pair[1];
+      final filteredA = _applyClientFilters(sponsored, filters);
+      final filteredB = _applyClientFilters(normal, filters);
+      return [...filteredA, ...filteredB];
     });
+  }
+
+  /// [신규] '작업 12': 쿼리 스냅샷을 모델 리스트로 매핑
+  List<RoomListingModel> _mapSnapshots(
+      QuerySnapshot<Map<String, dynamic>> snapshot) {
+    return snapshot.docs
+        .map((doc) => RoomListingModel.fromFirestore(doc))
+        .toList();
+  }
+
+  /// [신규] '작업 12': 클라이언트 사이드 범위/시설 필터 적용
+  List<RoomListingModel> _applyClientFilters(
+      List<RoomListingModel> rooms, RoomFilters? filters) {
+    if (filters == null) return rooms;
+    return rooms.where((room) {
+      final areaMatch =
+          (filters.minArea <= 0 || room.area >= filters.minArea) &&
+              (filters.maxArea >= 100 || room.area <= filters.maxArea);
+
+      final landAreaMatch = (filters.minLandArea <= 0 ||
+              (room.landArea ?? 0) >= filters.minLandArea) &&
+          (filters.maxLandArea >= 1000 ||
+              (room.landArea ?? 0) <= filters.maxLandArea);
+
+      final depositMatch = (filters.depositMin <= 0 ||
+              (room.deposit ?? 0) >= filters.depositMin) &&
+          (filters.depositMax >= 50000000 ||
+              (room.deposit ?? 0) <= filters.depositMax);
+
+      final facilitiesMatch = _filterByFacilities(room, filters);
+
+      return areaMatch && landAreaMatch && depositMatch && facilitiesMatch;
+    }).toList();
+  }
+
+  /// [신규] '작업 7': 'amenities' 제거 후 'roomType'별 상세 시설 필터링 로직
+  bool _filterByFacilities(RoomListingModel room, RoomFilters filters) {
+    switch (room.type) {
+      case 'kos':
+        final roomFacMatch = filters.kosRoomFacilities.isEmpty ||
+            room.kosRoomFacilities
+                .toSet()
+                .containsAll(filters.kosRoomFacilities);
+        final publicFacMatch = filters.kosPublicFacilities.isEmpty ||
+            room.kosPublicFacilities
+                .toSet()
+                .containsAll(filters.kosPublicFacilities);
+        return roomFacMatch && publicFacMatch;
+      case 'apartment':
+        return filters.apartmentFacilities.isEmpty ||
+            room.apartmentFacilities
+                .toSet()
+                .containsAll(filters.apartmentFacilities);
+      case 'house':
+      case 'kontrakan':
+        return filters.houseFacilities.isEmpty ||
+            room.houseFacilities.toSet().containsAll(filters.houseFacilities);
+      case 'ruko':
+      case 'kantor':
+      case 'gudang':
+        return filters.commercialFacilities.isEmpty ||
+            room.commercialFacilities
+                .toSet()
+                .containsAll(filters.commercialFacilities);
+      default:
+        // 'etc' 또는 알 수 없는 타입은 필터링하지 않음
+        return true;
+    }
   }
   // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
@@ -193,6 +244,26 @@ class RoomRepository {
 
   Future<void> deleteRoomListing(String roomId) async {
     await _roomsCollection.doc(roomId).delete();
+  }
+
+  // [신규] '작업 12': 실시간 리스트 스트림 API (광고/일반 병합)
+  Stream<List<RoomListingModel>> getRoomsStream(
+      {Map<String, String?>? locationFilter, RoomFilters? filters}) {
+    final queryA =
+        _buildFilteredQuery(locationFilter, filters, isSponsoredQuery: true);
+    final queryB =
+        _buildFilteredQuery(locationFilter, filters, isSponsoredQuery: false);
+
+    final streamA = queryA.snapshots().map(_mapSnapshots);
+    final streamB = queryB.snapshots().map(_mapSnapshots);
+
+    return StreamZip([streamA, streamB]).map((pair) {
+      final sponsored = pair[0];
+      final normal = pair[1];
+      final filteredA = _applyClientFilters(sponsored, filters);
+      final filteredB = _applyClientFilters(normal, filters);
+      return [...filteredA, ...filteredB];
+    });
   }
 
   Stream<RoomListingModel> getRoomStream(String roomId) {

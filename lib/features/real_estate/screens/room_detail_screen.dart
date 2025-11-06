@@ -13,10 +13,20 @@
 // =====================================================
 // [작업 이력 (2025-11-02)]
 // 1. (Task 23) '직방' 모델 도입 (Gap 1, 3, 5).
+// 2. [수정] (Task 23) 'amenities' 제거, 'roomType'별 상세 시설(Fasilitas) 표시 로직 추가.
 // 2. [Gap 5] 'initState': 조회수 증가를 위해 'repository.incrementViewCount' 호출.
 // 3. [Gap 3] '찜하기' 버튼: 'AppBar'에 'isBookmarkedStream'과 연동된 찜하기 아이콘 버튼 추가.
 // 4. [Gap 1] 핵심 정보 UI: '면적', '방 수', '욕실 수', '입주 가능일'을 표시하는 그리드 UI 추가.
 // 5. [Gap 5] '인증' 배지: 'isVerified'가 true일 때 게시자 정보란에 '인증된 게시자' 배지 표시.
+// =====================================================
+// - 부동산 매물 상세 화면.
+// - V2.0: 'roomType'에 따라 현지화된 상세 시설 정보를 동적으로 표시.
+//
+// [V2.0 작업 이력 (2025-11-05)]
+// 1. (Task 8) `_buildDynamicFacilityLists` 헬퍼 함수 신규 추가.
+// 2. (Task 8) `room.type`을 `switch`하여 'Kos'의 경우 '방 시설', '공용 시설'을,
+//    'Apartment'의 경우 '아파트 시설'을 구분하여 칩(Chip) 목록으로 표시.
+// 3. (기존) '직방' 모델(Task 23)의 '조회수 증가', '찜하기', '핵심 정보 그리드' 기능 유지.
 // =====================================================
 
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
@@ -81,7 +91,9 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('채팅을 시작할 수 없습니다: $e'), backgroundColor: Colors.red),
+              content: Text('realEstate.detail.chatError'
+                  .tr(namedArgs: {'error': e.toString()})),
+              backgroundColor: Colors.red),
         );
       }
     }
@@ -91,15 +103,16 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('매물 삭제'),
-        content: Text('정말로 이 매물을 삭제하시겠습니까?'),
+        title: Text('realEstate.detail.deleteTitle'.tr()),
+        content: Text('realEstate.detail.deleteContent'.tr()),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('취소')),
+              child: Text('realEstate.detail.cancel'.tr())),
           TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text('삭제', style: TextStyle(color: Colors.red))),
+              child: Text('realEstate.detail.deleteConfirm'.tr(),
+                  style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -109,13 +122,16 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
         await _repository.deleteRoomListing(widget.room.id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('매물이 삭제되었습니다.'), backgroundColor: Colors.green));
+              content: Text('realEstate.detail.deleteSuccess'.tr()),
+              backgroundColor: Colors.green));
           Navigator.of(context).pop();
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('삭제에 실패했습니다: $e'), backgroundColor: Colors.red));
+              content: Text('realEstate.detail.deleteFail'
+                  .tr(namedArgs: {'error': e.toString()})),
+              backgroundColor: Colors.red));
         }
       }
     }
@@ -241,8 +257,11 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
 
                     // [추가] Gap 1: 방/욕실/면적/입주
                     _buildInfoGrid(room),
+
+                    // [신규] '작업 8': 'amenities' 대신 'roomType'별 시설 목록 표시
+                    _buildDynamicFacilityLists(context, room),
                     const Divider(height: 32),
-                    Text('상세 정보',
+                    Text('realEstate.form.details'.tr(),
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 8),
                     Text(room.description,
@@ -253,13 +272,14 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                     ClickableTagList(tags: room.tags),
                     if (room.geoPoint != null) ...[
                       const Divider(height: 32),
-                      Text('위치', style: Theme.of(context).textTheme.titleLarge),
+                      Text('realEstate.detail.location'.tr(),
+                          style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 12),
                       MiniMapView(location: room.geoPoint!, markerId: room.id),
                     ],
                     const Divider(height: 32),
 
-                    Text('게시자 정보',
+                    Text('realEstate.detail.publisherInfo'.tr(),
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 12),
                     // ✅ 기존 _buildOwnerInfo를 공용 AuthorProfileTile로 교체
@@ -294,11 +314,81 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: Text('문의하기'),
+                    child: Text('realEstate.detail.contact'.tr()),
                   ),
                 ),
         );
       },
+    );
+  }
+
+  // [신규] '작업 8': 'roomType'에 따라 동적 시설 목록 UI 빌드
+  Widget _buildDynamicFacilityLists(
+      BuildContext context, RoomListingModel room) {
+    switch (room.type) {
+      case 'kos':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildFacilityList(
+              context,
+              'realEstate.filter.kos.roomFacilities'.tr(),
+              room.kosRoomFacilities,
+            ),
+            _buildFacilityList(
+              context,
+              'realEstate.filter.kos.publicFacilities'.tr(),
+              room.kosPublicFacilities,
+            ),
+          ],
+        );
+      case 'apartment':
+        return _buildFacilityList(
+          context,
+          'realEstate.filter.apartment.facilities'.tr(),
+          room.apartmentFacilities,
+        );
+      case 'house':
+      case 'kontrakan':
+        return _buildFacilityList(
+          context,
+          'realEstate.filter.house.facilities'.tr(),
+          room.houseFacilities,
+        );
+      case 'ruko':
+      case 'kantor':
+      case 'gudang':
+        return _buildFacilityList(
+          context,
+          'realEstate.filter.commercial.facilities'.tr(),
+          room.commercialFacilities,
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  /// [신규] '작업 8': 시설 목록 UI를 그리는 헬퍼
+  Widget _buildFacilityList(
+      BuildContext context, String title, List<String> facilityKeys) {
+    if (facilityKeys.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
+            children: facilityKeys.map((key) {
+              return Chip(label: Text('realEstate.filter.amenities.$key').tr());
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 

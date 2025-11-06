@@ -11,7 +11,8 @@
     },
     "links": {
       "findPassword": "Forgot password?",
-      "askForAccount": "Don’t have an account?"
+      "askForAccount": "Don’t have an account?",
+      "signUp": "Sign up"
     },
     "alerts": {
       "invalidEmail": "Invalid email format.",
@@ -427,9 +428,9 @@
   "categories": {
     "post": {
       "jalan-perbaikin": {
-      "search": {
-        "hint": "Search POMs, tags, users"
-      },
+        "search": {
+          "hint": "Search POMs, tags, users"
+        },
         "name": "Road Repair"
       },
       "daily_life": {
@@ -463,12 +464,30 @@
     },
     "auction": {
       "all": "All",
-      "collectibles": { "name": "Collectibles", "description": "Toys, cards, figures, and more." },
-      "digital": { "name": "Digital", "description": "Digital goods and assets." },
-      "fashion": { "name": "Fashion", "description": "Clothing, accessories, and beauty." },
-      "vintage": { "name": "Vintage", "description": "Retro and classic items." },
-      "art_craft": { "name": "Art & Craft", "description": "Artwork and handmade crafts." },
-      "etc": { "name": "Other", "description": "Other auction items." }
+      "collectibles": {
+        "name": "Collectibles",
+        "description": "Toys, cards, figures, and more."
+      },
+      "digital": {
+        "name": "Digital",
+        "description": "Digital goods and assets."
+      },
+      "fashion": {
+        "name": "Fashion",
+        "description": "Clothing, accessories, and beauty."
+      },
+      "vintage": {
+        "name": "Vintage",
+        "description": "Retro and classic items."
+      },
+      "art_craft": {
+        "name": "Art & Craft",
+        "description": "Artwork and handmade crafts."
+      },
+      "etc": {
+        "name": "Other",
+        "description": "Other auction items."
+      }
     }
   },
   "localNewsCreate": {
@@ -615,7 +634,6 @@
     },
     "failure": "Failed to add reply: {error}"
   },
-  
   "chat_list": {
     "appBarTitle": "Chats",
     "empty": "No conversations yet."
@@ -882,7 +900,7 @@
       },
       "joinChat": "Join chat",
       "joinClub": "Join Club",
-  "owner": "Admin",
+      "owner": "Admin",
       "info": {
         "members": "Members",
         "location": "Location"
@@ -1181,6 +1199,7 @@
         "apartment": "Apartment",
         "house": "House",
         "ruko": "Shophouse",
+        "gudang": "Warehouse",
         "kantor": "Office",
         "etc": "Other"
       },
@@ -1196,6 +1215,7 @@
       },
       "area": "Area",
       "areaHint": "e.g. 33",
+      "landArea": "Land area",
       "rooms": "Rooms",
       "bathrooms": "Bathrooms",
       "bedAbbr": "Bed",
@@ -1219,22 +1239,116 @@
       "floorInfoHint": "e.g., Floor 1 / 3 of 5"
     },
     "filter": {
+      "amenities": {
+        "ac": "AC",
+        "bed": "Bed",
+        "closet": "Wardrobe",
+        "desk": "Desk",
+        "wifi": "Wi‑Fi",
+        "kitchen": "Kitchen",
+        "living_room": "Living room",
+        "refrigerator": "Refrigerator",
+        "parking_motorcycle": "Motorcycle parking",
+        "parking_car": "Car parking",
+        "pool": "Swimming pool",
+        "gym": "Gym",
+        "security_24h": "24h Security",
+        "atm_center": "ATM center",
+        "minimarket": "Minimarket",
+        "mall_access": "Mall access",
+        "playground": "Playground",
+        "carport": "Carport",
+        "garden": "Garden",
+        "pam": "Piped water (PAM)",
+        "telephone": "Telephone",
+        "water_heater": "Water heater",
+        "parking_area": "Parking area",
+        "electricity": "Electricity (power)",
+        "container_access": "Container access",
+        "kos_room": {
+          "ac": "AC",
+          "bed": "Bed",
+          "closet": "Closet",
+          "desk": "Desk",
+          "wifi": "Wifi"
+        },
+        "kos_public": {
+          "kitchen": "Kitchen",
+          "living_room": "Living Room",
+          "refrigerator": "Refrigerator",
+          "parking_motorcycle": "Motorcycle Parking",
+          "parking_car": "Car Parking"
+        },
+        "apartment": {
+          "pool": "Swimming Pool",
+          "gym": "Gym",
+          "security_24h": "24h Security",
+          "atm_center": "ATM Center",
+          "minimarket": "Minimarket",
+          "mall_access": "Mall Access",
+          "playground": "Playground"
+        },
+        "house": {
+          "carport": "Carport",
+          "garden": "Garden",
+          "pam": "PAM (Water)",
+          "telephone": "Telephone",
+          "water_heater": "Water Heater"
+        },
+        "commercial": {
+          "parking_area": "Parking Area",
+          "security_24h": "24h Security",
+          "telephone": "Telephone",
+          "electricity": "Electricity",
+          "container_access": "Container Access"
+        }
+      },
       "title": "Advanced filters",
       "priceRange": "Price range",
       "areaRange": "Area range (m²)",
+      "landAreaRange": "Land area range (m²)",
       "depositRange": "Deposit range",
       "floorInfo": "Floor info",
-  "depositMin": "Min deposit",
-  "depositMax": "Max deposit",
-  "clearFloorInfo": "Clear",
+      "depositMin": "Min deposit",
+      "depositMax": "Max deposit",
+      "clearFloorInfo": "Clear",
       "furnishedStatus": "Furnishing",
       "rentPeriod": "Rent period",
       "selectFurnished": "Select furnishing",
+      "furnishedHint": "Select furnishing",
       "selectRentPeriod": "Select rent period",
       "rentPeriods": {
         "daily": "Daily",
         "monthly": "Monthly",
         "yearly": "Yearly"
+      },
+      "kos": {
+        "bathroomType": "Bathroom type",
+        "bathroomTypes": {
+          "in_room": "Inside room",
+          "out_room": "Outside room"
+        },
+        "maxOccupants": "Max occupants",
+        "hintBathroomType": "Select bathroom type",
+        "hintMaxOccupants": "Select number of occupants",
+        "electricityIncluded": "Electricity included",
+        "roomFacilities": "Room facilities",
+        "publicFacilities": "Shared facilities",
+        "occupant": "Person(s)"
+      },
+      "apartment": {
+        "facilities": "Apartment facilities"
+      },
+      "house": {
+        "facilities": "House facilities"
+      },
+      "commercial": {
+        "facilities": "Commercial facilities"
+      },
+      "propertyCondition": "Property condition",
+      "propertyConditions": {
+        "new": "New",
+        "used": "Used"
       },
       "furnishedTypes": {
         "furnished": "Furnished",
@@ -1247,6 +1361,18 @@
       "bath": "Bath",
       "anytime": "Anytime",
       "verifiedPublisher": "Verified publisher"
+    },
+    "detail": {
+      "deleteTitle": "Delete listing",
+      "deleteContent": "Are you sure you want to delete this listing?",
+      "cancel": "Cancel",
+      "deleteConfirm": "Delete",
+      "deleteSuccess": "Listing deleted.",
+      "deleteFail": "Failed to delete listing: {error}",
+      "chatError": "Could not start chat: {error}",
+      "location": "Location",
+      "publisherInfo": "Publisher Info",
+      "contact": "Contact"
     },
     "edit": {
       "title": "Edit Listing",

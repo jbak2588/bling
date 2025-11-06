@@ -18,7 +18,18 @@
 // 3. [Gap 4] 매물/게시자 유형 필드 추가: 'listingType'(임대/매매), 'publisherType'(직거래/중개인).
 // 4. [Gap 5] 수익화/KPI 필드 추가: 'isSponsored'(광고), 'isVerified'(인증), 'viewCount'(조회수).
 // =====================================================
-// lib/core/models/room_listing_model.dart
+// - 부동산(월세/하숙) 매물 데이터 모델. Firestore room_listings 컬렉션 구조와 1:1 매칭.
+// - V2.0: 'rumah123' 벤치마킹. 기존 'amenities' 필드를 제거하고, 'Kos', 'Apartment' 등
+// - 타입별 상세 필드(예: kosBathroomType, apartmentFacilities) 및 공통 상세 필드(landArea) 추가.
+//
+// [V2.0 작업 이력 (2025-11-05)]
+// 1. (Task 6) 'amenities' 필드 제거.
+// 2. (Task 6) 'Kos' 전용 필드 (kosBathroomType, isElectricityIncluded, maxOccupants, kosRoomFacilities, kosPublicFacilities) 추가.
+// 3. (Task 6) 'Apartment', 'House', 'Commercial' 타입별 시설 리스트(apartmentFacilities 등) 추가.
+// 4. (Task 6, 13) 공통 상세 필드 (landArea, propertyCondition, furnishedStatus, rentPeriod, deposit, floorInfo) 추가.
+// 5. (기존) '직방' 모델 (area, roomCount, bathroomCount) 및 수익화 (isSponsored, viewCount) 필드 유지.
+// =====================================================
+// lib/features/real_estate/models/room_listing_model.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -37,7 +48,6 @@ class RoomListingModel {
   final String priceUnit; // 'monthly', 'yearly' (월세/연세)
 
   final List<String> imageUrls;
-  final List<String> amenities; // 'wifi', 'ac', 'parking' 등 편의시설 목록
 
   final Timestamp createdAt;
   final bool isAvailable;
@@ -46,7 +56,7 @@ class RoomListingModel {
   final String listingType; // 'rent' (임대), 'sale' (매매)
   final String publisherType; // 'individual' (직거래), 'agent' (중개인)
   final double area; // 면적 (m²)
-  final int roomCount; // 방 수
+  final int roomCount; // 침실 수
   final int bathroomCount; // 욕실 수
   final Timestamp? moveInDate; // 입주 가능일
 
@@ -54,6 +64,10 @@ class RoomListingModel {
   final bool isSponsored; // 광고(상단 고정) 여부
   final bool isVerified; // 인증 매물 여부 (중개사/집주인 인증)
   final int viewCount; // 조회수
+
+  // [신규] Task 4/5: 'rumah123' 상세 필드
+  final double? landArea; // 토지 면적 (m²)
+  final String? propertyCondition; // 'new', 'used'
 
   // [추가] Task 38: '직방' 및 'rumah123' 상세 필터용 필드
   // (Kos, Apartemen, Kontrakan)
@@ -64,6 +78,22 @@ class RoomListingModel {
   final int? deposit; // 보증금
   // (Apartemen, Ruko, Kantor)
   final String? floorInfo; // 층수 (예: "Lantai 5", "Middle")
+
+  // [신규] 'Kos' (Sewa Kamar) 전용 필드
+  final String? kosBathroomType; // 'in_room', 'out_room'
+  final bool? isElectricityIncluded;
+  final int? maxOccupants;
+  final List<String> kosRoomFacilities; // (ac, bed, closet)
+  final List<String> kosPublicFacilities; // (kitchen, living_room)
+
+  // [신규] 'Apartment' 전용 필드
+  final List<String> apartmentFacilities; // (pool, gym, security)
+
+  // [신규] 'Rumah' (주택) 전용 필드
+  final List<String> houseFacilities; // (carport, garden, pam)
+
+  // [신규] 'Ruko', 'Kantor', 'Gudang' (상업용) 전용 필드
+  final List<String> commercialFacilities; // (parking, security)
 
   // ✅ tags 필드를 추가합니다.
   final List<String> tags;
@@ -80,7 +110,6 @@ class RoomListingModel {
     required this.price,
     required this.priceUnit,
     required this.imageUrls,
-    required this.amenities,
     required this.createdAt,
     this.isAvailable = true,
     this.listingType = 'rent',
@@ -92,12 +121,24 @@ class RoomListingModel {
     this.isSponsored = false,
     this.isVerified = false,
     this.viewCount = 0,
+    // [신규]
+    this.landArea,
+    this.propertyCondition,
     // [추가] Task 38
     this.furnishedStatus,
     this.rentPeriod,
     this.maintenanceFee,
     this.deposit,
     this.floorInfo,
+    // [신규]
+    this.kosBathroomType,
+    this.isElectricityIncluded,
+    this.maxOccupants,
+    this.kosRoomFacilities = const [],
+    this.kosPublicFacilities = const [],
+    this.apartmentFacilities = const [],
+    this.houseFacilities = const [],
+    this.commercialFacilities = const [],
     this.tags = const [], // ✅ 생성자에 추가
   });
 
@@ -118,7 +159,6 @@ class RoomListingModel {
       price: data['price'] ?? 0,
       priceUnit: data['priceUnit'] ?? 'monthly',
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
-      amenities: List<String>.from(data['amenities'] ?? []),
       createdAt: data['createdAt'] ?? Timestamp.now(),
       isAvailable: data['isAvailable'] ?? true,
       // [추가]
@@ -131,12 +171,25 @@ class RoomListingModel {
       isSponsored: data['isSponsored'] ?? false,
       isVerified: data['isVerified'] ?? false,
       viewCount: data['viewCount'] ?? 0,
+      // [신규]
+      landArea: (data['landArea'] ?? 0.0).toDouble(),
+      propertyCondition: data['propertyCondition'],
       // [추가] Task 38: '직방' 및 'rumah123' 상세 필터용 필드
       furnishedStatus: data['furnishedStatus'],
       rentPeriod: data['rentPeriod'],
       maintenanceFee: data['maintenanceFee'],
       deposit: data['deposit'],
       floorInfo: data['floorInfo'],
+      // [신규]
+      kosBathroomType: data['kosBathroomType'],
+      isElectricityIncluded: data['isElectricityIncluded'],
+      maxOccupants: data['maxOccupants'],
+      kosRoomFacilities: List<String>.from(data['kosRoomFacilities'] ?? []),
+      kosPublicFacilities: List<String>.from(data['kosPublicFacilities'] ?? []),
+      apartmentFacilities: List<String>.from(data['apartmentFacilities'] ?? []),
+      houseFacilities: List<String>.from(data['houseFacilities'] ?? []),
+      commercialFacilities:
+          List<String>.from(data['commercialFacilities'] ?? []),
       // ✅ Firestore 데이터로부터 tags 필드를 읽어옵니다.
       tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
     );
@@ -154,7 +207,6 @@ class RoomListingModel {
       'price': price,
       'priceUnit': priceUnit,
       'imageUrls': imageUrls,
-      'amenities': amenities,
       'createdAt': createdAt,
       'isAvailable': isAvailable,
 
@@ -168,12 +220,24 @@ class RoomListingModel {
       'isSponsored': isSponsored,
       'isVerified': isVerified,
       'viewCount': viewCount,
+      // [신규]
+      'landArea': landArea,
+      'propertyCondition': propertyCondition,
       // [추가] Task 38
       'furnishedStatus': furnishedStatus,
       'rentPeriod': rentPeriod,
       'maintenanceFee': maintenanceFee,
       'deposit': deposit,
       'floorInfo': floorInfo,
+      // [신규]
+      'kosBathroomType': kosBathroomType,
+      'isElectricityIncluded': isElectricityIncluded,
+      'maxOccupants': maxOccupants,
+      'kosRoomFacilities': kosRoomFacilities,
+      'kosPublicFacilities': kosPublicFacilities,
+      'apartmentFacilities': apartmentFacilities,
+      'houseFacilities': houseFacilities,
+      'commercialFacilities': commercialFacilities,
 
       'tags': tags, // ✅ JSON 변환 시 tags 필드를 포함합니다.
     };

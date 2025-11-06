@@ -1,3 +1,19 @@
+// ===================== DocHeader =====================
+// [기획 요약]
+// - 'RoomListingModel'의 'fromFirestore' (역직렬화) 및 'toJson' (직렬화) 테스트.
+//
+// [V2.0 작업 이력 (2025-11-05)]
+// 1. (Task 7) 'amenities' 필드 테스트 제거.
+// 2. (Task 18) 'fullData' 테스트 케이스에 'landArea', 'propertyCondition',
+//    'kosBathroomType', 'isElectricityIncluded', 'maxOccupants', 'kosRoomFacilities' 등
+//    V2.0에서 추가된 모든 신규 필드를 추가하여 검증.
+// 3. (Task 18) 'minimalData' (기본값) 테스트 케이스에도 신규 필드들의
+//    null 또는 빈 리스트([]) 기본값을 검증하도록 추가.
+// =====================================================
+// test/room_listing_model_test.dart
+
+// ... (파일 내용)
+
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
@@ -11,16 +27,18 @@ void main() {
 
       final data = <String, dynamic>{
         'userId': 'user_1',
-        'title': 'Bright 2BR near subway',
-        'description': 'South-facing, renovated, quiet street',
+        'title': 'Kamar kos 2BR dekat MRT',
+        'description': 'Menghadap selatan, renovasi baru, lingkungan tenang',
         'type': 'kos',
-        'locationName': 'Gangnam-gu, Seoul',
-        'locationParts': {'city': 'Seoul', 'district': 'Gangnam-gu'},
-        'geoPoint': const GeoPoint(37.4979, 127.0276),
+        'locationName': 'Kebayoran Baru, Jakarta Selatan',
+        'locationParts': {
+          'city': 'Jakarta Selatan',
+          'district': 'Kebayoran Baru'
+        },
+        'geoPoint': const GeoPoint(-6.2435, 106.7997),
         'price': 500000,
         'priceUnit': 'monthly',
         'imageUrls': ['https://img/1.jpg', 'https://img/2.jpg'],
-        'amenities': ['wifi', 'ac', 'parking'],
         'createdAt': createdAt,
         'isAvailable': true,
 
@@ -34,6 +52,21 @@ void main() {
         'isSponsored': true,
         'isVerified': true,
         'viewCount': 123,
+
+        // Facilities + property extras
+        'landArea': 120.0,
+        'propertyCondition': 'new',
+        'kosRoomFacilities': ['ac', 'bed'],
+        // [신규] '작업 6/13' 추가 필드 테스트
+        'furnishedStatus': 'furnished',
+        'rentPeriod': 'yearly',
+        'deposit': 500000,
+        'floorInfo': 'Lantai 5',
+        'kosBathroomType': 'in_room',
+        'isElectricityIncluded': true,
+        'maxOccupants': 2,
+        'kosPublicFacilities': ['kitchen'],
+        'apartmentFacilities': ['pool'],
 
         // Tags
         'tags': ['near-subway', 'pet-friendly'],
@@ -57,7 +90,6 @@ void main() {
       expect(model.price, data['price']);
       expect(model.priceUnit, data['priceUnit']);
       expect(model.imageUrls, data['imageUrls']);
-      expect(model.amenities, data['amenities']);
       expect(model.createdAt, createdAt);
       expect(model.isAvailable, true);
 
@@ -71,6 +103,21 @@ void main() {
       expect(model.isSponsored, data['isSponsored']);
       expect(model.isVerified, data['isVerified']);
       expect(model.viewCount, data['viewCount']);
+
+      // Facilities + property extras
+      expect(model.landArea, data['landArea']);
+      expect(model.propertyCondition, data['propertyCondition']);
+      expect(model.kosRoomFacilities, data['kosRoomFacilities']);
+      // [신규] '작업 6/13' 추가 필드 검증
+      expect(model.furnishedStatus, data['furnishedStatus']);
+      expect(model.rentPeriod, data['rentPeriod']);
+      expect(model.deposit, data['deposit']);
+      expect(model.floorInfo, data['floorInfo']);
+      expect(model.kosBathroomType, data['kosBathroomType']);
+      expect(model.isElectricityIncluded, data['isElectricityIncluded']);
+      expect(model.maxOccupants, data['maxOccupants']);
+      expect(model.kosPublicFacilities, data['kosPublicFacilities']);
+      expect(model.apartmentFacilities, data['apartmentFacilities']);
 
       // Tags
       expect(model.tags, data['tags']);
@@ -87,7 +134,6 @@ void main() {
       expect(json['price'], data['price']);
       expect(json['priceUnit'], data['priceUnit']);
       expect(json['imageUrls'], data['imageUrls']);
-      expect(json['amenities'], data['amenities']);
       expect(json['createdAt'], createdAt);
       expect(json['isAvailable'], true);
 
@@ -135,7 +181,22 @@ void main() {
 
       // Media/Amenities defaults
       expect(model.imageUrls, isEmpty);
-      expect(model.amenities, isEmpty);
+      // Facilities defaults
+      expect(model.landArea, 0.0);
+      expect(model.propertyCondition, isNull);
+      expect(model.furnishedStatus, isNull);
+      expect(model.kosBathroomType, isNull);
+      expect(model.kosRoomFacilities, isEmpty);
+      expect(model.kosPublicFacilities, isEmpty);
+      expect(model.apartmentFacilities, isEmpty);
+      expect(model.houseFacilities, isEmpty);
+      expect(model.commercialFacilities, isEmpty);
+      // [신규] '작업 6/13' 기본값 검증
+      expect(model.rentPeriod, isNull);
+      expect(model.deposit, isNull);
+      expect(model.floorInfo, isNull);
+      expect(model.isElectricityIncluded, isNull);
+      expect(model.maxOccupants, isNull);
 
       // Timestamps and availability
       expect(model.createdAt, isA<Timestamp>());
@@ -167,7 +228,6 @@ void main() {
       expect(json['price'], 0);
       expect(json['priceUnit'], 'monthly');
       expect(json['imageUrls'], isEmpty);
-      expect(json['amenities'], isEmpty);
       expect(json['createdAt'], model.createdAt);
       expect(json['isAvailable'], isTrue);
 

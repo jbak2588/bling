@@ -10,14 +10,22 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(매물 부스트, 조회수 등).
 // - 필수 입력값, 에러 메시지, UX 강화. 신고/차단/신뢰 등급 UI 노출 및 기능 강화.
 // =====================================================
-// [작업 이력 (2025-11-02)]
-// 1. (Task 23) '직방' 모델 도입 (Gap 1, 4).
-// 2. [Gap 1] UI 추가: 'area'(면적), 'roomCount'(방 수), 'bathroomCount'(욕실 수), 'moveInDate'(입주 가능일) 입력 필드 추가.
-// 3. [Gap 4] UI 추가: 'listingType'(임대/매매), 'publisherType'(직거래/중개인) 선택 Dropdown 추가.
+// [기획 요약]
+// - V2.0: 부동산 매물 등록 화면.
+// - 'roomType'에 따라 동적으로 상세 입력 필드(예: 'Kos' 전용)를 제공.
+//
+// [V2.0 작업 이력 (2025-11-05)]
+// 1. (Task 7) 기존 'amenities' 칩 UI를 제거. `_buildDynamicFacilityInputs` 헬퍼를 추가하여
+//    'roomType'에 맞는 시설(예: `kosRoomFacilities`) 입력 UI를 동적으로 빌드.
+// 2. (Task 13) `_buildDynamicDetailInputs`, `_buildFurnishedStatusInput` 등 헬퍼를 추가하여
+//    '가구 상태', '매물 상태', 'Kos' 전용 상세 필드(욕실 타입, 전기세) 입력 UI(Dropdown, Switch) 구현.
+// 3. (Task 13) `_saveForm`: `RoomListingModel`의 모든 신규 필드
+//    (예: `kosBathroomType`, `propertyCondition`, `landArea`)에 입력값을 저장하도록 로직 수정.
 // =====================================================
 // lib/features/real_estate/screens/create_room_listing_screen.dart
 
 import 'dart:io';
+import 'package:bling_app/features/real_estate/constants/real_estate_facilities.dart';
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/real_estate/data/room_repository.dart';
@@ -49,9 +57,21 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
   String _type = 'kos'; // 'kos', 'kontrakan', 'sewa'
   String _priceUnit = 'monthly'; // 'monthly', 'yearly'
   final List<XFile> _images = [];
-  final Set<String> _amenities = {};
+  // [수정] 'amenities'를 타입별 Set으로 분리
+  final Set<String> _kosRoomFacilities = <String>{};
+  final Set<String> _kosPublicFacilities = <String>{};
+  final Set<String> _apartmentFacilities = <String>{};
+  final Set<String> _houseFacilities = <String>{};
+  final Set<String> _commercialFacilities = <String>{};
   bool _isSaving = false;
   List<String> _tags = []; // ✅ 태그 상태 변수 추가
+
+  // [신규] '작업 13': 상세 필드 상태
+  String? _furnishedStatus;
+  String? _propertyCondition;
+  String? _kosBathroomType;
+  bool? _isElectricityIncluded;
+  int? _maxOccupants;
 
   // [추가] Task 38, 40: 카테고리별 상세 필드
   // 주거용 (Kos, Apartment, Kontrakan)
@@ -67,6 +87,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
   String _selectedListingType = 'rent'; // 'rent', 'sale'
   String _selectedPublisherType = 'individual'; // 'individual', 'agent'
   final _areaController = TextEditingController(); // 면적
+  final _landAreaController = TextEditingController(text: '0'); // 토지 면적
   final _roomCountController = TextEditingController(text: '1'); // 방 수
   final _bathroomCountController = TextEditingController(text: '1'); // 욕실 수
   DateTime? _selectedMoveInDate; // 입주 가능일
@@ -80,6 +101,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
     _descriptionController.dispose();
     _priceController.dispose();
     _areaController.dispose();
+    _landAreaController.dispose();
     _roomCountController.dispose();
     _bathroomCountController.dispose();
     // [추가] Task 40
@@ -138,26 +160,39 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         locationParts: widget.userModel.locationParts,
         geoPoint: widget.userModel.geoPoint,
         price: int.tryParse(_priceController.text) ?? 0,
-        priceUnit: _priceUnit,
+        // [수정] '작업 27': 'sale'일 경우 'priceUnit'을 기본값('monthly')으로 강제
+        priceUnit: _selectedListingType == 'rent' ? _priceUnit : 'monthly',
         imageUrls: imageUrls,
-        amenities: _amenities.toList(),
+        // [수정] 'amenities' 대신 타입별 시설 저장
+        kosRoomFacilities: _kosRoomFacilities.toList(),
+        kosPublicFacilities: _kosPublicFacilities.toList(),
+        apartmentFacilities: _apartmentFacilities.toList(),
+        houseFacilities: _houseFacilities.toList(),
+        commercialFacilities: _commercialFacilities.toList(),
         createdAt: Timestamp.now(),
         tags: _tags, // ✅ 태그 저장
         // [추가] Gap 1, 4 필드 저장
         listingType: _selectedListingType,
         publisherType: _selectedPublisherType,
         area: double.tryParse(_areaController.text.trim()) ?? 0.0,
+        landArea: double.tryParse(_landAreaController.text.trim()),
         roomCount: int.tryParse(_roomCountController.text.trim()) ?? 1,
         bathroomCount: int.tryParse(_bathroomCountController.text.trim()) ?? 1,
         moveInDate: _selectedMoveInDate != null
             ? Timestamp.fromDate(_selectedMoveInDate!)
             : null,
         // [추가] Task 40: 카테고리별 필드 저장
-        furnishedStatus: _selectedFurnishedStatus,
+        furnishedStatus:
+            _furnishedStatus ?? _selectedFurnishedStatus, // [수정] '작업 13'
+        propertyCondition: _propertyCondition, // [수정] '작업 13'
         rentPeriod: _selectedRentPeriod,
         maintenanceFee: int.tryParse(_maintenanceFeeController.text.trim()),
         deposit: int.tryParse(_depositController.text.trim()),
         floorInfo: _floorInfoController.text.trim(),
+        // [신규] '작업 13': Kos 전용 필드 저장
+        kosBathroomType: _kosBathroomType,
+        isElectricityIncluded: _isElectricityIncluded,
+        maxOccupants: _maxOccupants,
       );
 
       await _repository.createRoomListing(newListing);
@@ -254,6 +289,23 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
+                // [수정] '작업 27': 'listingType'을 'roomType' 앞으로 이동
+                Text('realEstate.form.listingType'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
+                _buildDropdown<String?>(
+                  value: _selectedListingType,
+                  hint: "Pilih Tipe Transaksi", // TODO: 다국어
+                  items: const ['rent', 'sale'],
+                  itemBuilder: (type) => DropdownMenuItem(
+                    value: type,
+                    child: Text('realEstate.form.listingTypes.$type'.tr()),
+                  ),
+                  onChanged: (val) {
+                    setState(() => _selectedListingType = val ?? 'rent');
+                  },
+                ),
+                const SizedBox(height: 16),
+
                 // --- 매물 종류 (직방 스타일 카테고리) ---
                 // [수정] '직방' 모델 카테고리 적용: kos/apartment/kontrakan/ruko/kantor/etc
                 DropdownButtonFormField<String>(
@@ -262,11 +314,13 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                     labelText: 'realEstate.form.typeLabel'.tr(),
                     border: const OutlineInputBorder(),
                   ),
-                  // 'kos', 'apartment', 'kontrakan', 'ruko', 'kantor', 'etc'
+                  // 'kos', 'apartment', 'kontrakan', 'house', 'gudang', 'ruko', 'kantor', 'etc'
                   items: const [
                     'kos',
                     'apartment',
                     'kontrakan',
+                    'house',
+                    'gudang', // [추가] '작업 5'
                     'ruko',
                     'kantor',
                     'etc'
@@ -294,21 +348,31 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                             : null,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    DropdownButton<String>(
-                      value: _priceUnit,
-                      items: [
-                        DropdownMenuItem(
-                            value: 'monthly',
-                            child:
-                                Text('realEstate.form.priceUnit.monthly'.tr())),
-                        DropdownMenuItem(
-                            value: 'yearly',
-                            child:
-                                Text('realEstate.form.priceUnit.yearly'.tr())),
-                      ],
-                      onChanged: (val) => setState(() => _priceUnit = val!),
-                    ),
+                    // [수정] '작업 27': 'listingType'이 'rent'일 때만 가격 단위 표시
+                    if (_selectedListingType == 'rent') ...[
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _priceUnit,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                          items: const ['monthly', 'yearly']
+                              .map((String value) => DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(
+                                        'realEstate.form.priceUnit.$value'
+                                            .tr()),
+                                  ))
+                              .toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _priceUnit = newValue ?? 'monthly';
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -331,44 +395,20 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                   maxLines: 3,
                 ),
 
-                // [추가] 거래 유형 (임대/매매), 게시자 유형 (직거래/중개인)
+                // [수정] 게시자 유형 (listingType은 위로 이동)
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        initialValue: _selectedListingType,
-                        decoration: InputDecoration(
-                            labelText: 'realEstate.form.listingType'.tr(),
-                            border: const OutlineInputBorder()),
-                        items: ['rent', 'sale'].map((type) {
-                          return DropdownMenuItem(
-                              value: type,
-                              child: Text(
-                                  'realEstate.form.listingTypes.$type'.tr()));
-                        }).toList(),
-                        onChanged: (value) =>
-                            setState(() => _selectedListingType = value!),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        initialValue: _selectedPublisherType,
-                        decoration: InputDecoration(
-                            labelText: 'realEstate.form.publisherType'.tr(),
-                            border: const OutlineInputBorder()),
-                        items: ['individual', 'agent'].map((type) {
-                          return DropdownMenuItem(
-                              value: type,
-                              child: Text(
-                                  'realEstate.form.publisherTypes.$type'.tr()));
-                        }).toList(),
-                        onChanged: (value) =>
-                            setState(() => _selectedPublisherType = value!),
-                      ),
-                    ),
-                  ],
+                Text('realEstate.form.publisherType'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
+                _buildDropdown<String?>(
+                  value: _selectedPublisherType,
+                  hint: 'realEstate.form.publisherType'.tr(),
+                  items: const ['individual', 'agent'],
+                  itemBuilder: (type) => DropdownMenuItem(
+                    value: type,
+                    child: Text('realEstate.form.publisherTypes.$type'.tr()),
+                  ),
+                  onChanged: (value) => setState(
+                      () => _selectedPublisherType = value ?? 'individual'),
                 ),
 
                 // [추가] 면적, 방 수, 욕실 수
@@ -543,28 +583,22 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                     child: Text('realEstate.form.clearDate'.tr()),
                     onPressed: () => setState(() => _selectedMoveInDate = null),
                   ),
+                // [신규] '작업 7': 'roomType'에 따라 동적으로 시설 입력 UI 표시
+                // _type이 변경될 때마다 이 부분이 다시 빌드됩니다.
+                _buildDynamicFacilityInputs(),
+
                 const SizedBox(height: 24),
-                // --- 편의시설 ---
-                Text('realEstate.form.amenities'.tr(),
-                    style: Theme.of(context).textTheme.titleMedium),
-                Wrap(
-                  spacing: 8.0,
-                  children: ['wifi', 'ac', 'parking', 'kitchen'].map((amenity) {
-                    return FilterChip(
-                      label: Text('realEstate.form.amenity.$amenity'.tr()),
-                      selected: _amenities.contains(amenity),
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _amenities.add(amenity);
-                          } else {
-                            _amenities.remove(amenity);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
+
+                // [신규] '작업 13': 가구 상태 (모든 타입 공통)
+                _buildFurnishedStatusInput(),
+
+                // [신규] '작업 13': 매물 상태 (모든 타입 공통)
+                _buildPropertyConditionInput(),
+
+                const SizedBox(height: 16),
+
+                // [신규] '작업 7': 'roomType'에 따라 동적 상세 필드 UI 표시
+                _buildDynamicDetailInputs(),
 // ✅ 편의시설 다음에 태그 입력 필드를 추가합니다.
                 const SizedBox(height: 24),
                 Text('Tags', style: Theme.of(context).textTheme.titleMedium),
@@ -586,6 +620,239 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 child: const Center(child: CircularProgressIndicator())),
         ],
       ),
+    );
+  }
+
+  /// [신규] '작업 7': 'roomType'에 따라 동적인 시설(Facility) 입력 UI를 빌드
+  Widget _buildDynamicFacilityInputs() {
+    switch (_type) {
+      case 'kos':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            Text('realEstate.filter.kos.roomFacilities'.tr(),
+                style: Theme.of(context).textTheme.titleMedium),
+            _buildFacilityChips(
+                RealEstateFacilities.kosRoomFacilities, _kosRoomFacilities),
+            const SizedBox(height: 24),
+            Text('realEstate.filter.kos.publicFacilities'.tr(),
+                style: Theme.of(context).textTheme.titleMedium),
+            _buildFacilityChips(
+                RealEstateFacilities.kosPublicFacilities, _kosPublicFacilities),
+          ],
+        );
+      case 'apartment':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            Text('realEstate.filter.apartment.facilities'.tr(),
+                style: Theme.of(context).textTheme.titleMedium),
+            _buildFacilityChips(
+                RealEstateFacilities.apartmentFacilities, _apartmentFacilities),
+          ],
+        );
+      case 'house':
+      case 'kontrakan':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            Text('realEstate.filter.house.facilities'.tr(),
+                style: Theme.of(context).textTheme.titleMedium),
+            _buildFacilityChips(
+                RealEstateFacilities.houseFacilities, _houseFacilities),
+          ],
+        );
+      case 'ruko':
+      case 'kantor':
+      case 'gudang':
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            Text('realEstate.filter.commercial.facilities'.tr(),
+                style: Theme.of(context).textTheme.titleMedium),
+            _buildFacilityChips(RealEstateFacilities.commercialFacilities,
+                _commercialFacilities),
+          ],
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  /// [신규] '작업 7': 'roomType'에 따라 토지 면적, 보증금 등 동적 필드 UI 빌드
+  Widget _buildDynamicDetailInputs() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // --- 'Kos' 전용 필드 ---
+        if (_type == 'kos') ...[
+          Text('realEstate.filter.kos.bathroomType'.tr(),
+              style: Theme.of(context).textTheme.titleMedium),
+          _buildDropdown<String?>(
+            value: _kosBathroomType,
+            hint: 'realEstate.filter.kos.hintBathroomType'.tr(),
+            items: const ['in_room', 'out_room'],
+            itemBuilder: (type) => DropdownMenuItem(
+              value: type,
+              child: Text('realEstate.filter.kos.bathroomTypes.${type ?? ''}')
+                  .tr(),
+            ),
+            onChanged: (val) => setState(() => _kosBathroomType = val),
+          ),
+          const SizedBox(height: 16),
+          Text('realEstate.filter.kos.maxOccupants'.tr(),
+              style: Theme.of(context).textTheme.titleMedium),
+          _buildDropdown<int?>(
+            value: _maxOccupants,
+            hint: 'realEstate.filter.kos.hintMaxOccupants'.tr(),
+            items: const [1, 2, 3], // 1, 2, 3+
+            itemBuilder: (val) => DropdownMenuItem(
+              value: val,
+              child: Text(val == 3 ? '3+' : '$val'),
+            ),
+            onChanged: (val) => setState(() => _maxOccupants = val),
+          ),
+          SwitchListTile(
+            title: Text('realEstate.filter.kos.electricityIncluded'.tr()),
+            value: _isElectricityIncluded ?? false,
+            onChanged: (value) =>
+                setState(() => _isElectricityIncluded = value),
+            contentPadding: EdgeInsets.zero,
+          ),
+          const Divider(height: 24),
+        ],
+
+        // --- 'Kos'가 아닌 경우: 토지 면적 입력 ---
+        if (_type != 'kos') ...[
+          TextFormField(
+            controller: _landAreaController,
+            // TODO: 다국어 키 추가: realEstate.form.landArea
+            decoration: InputDecoration(
+              labelText: 'realEstate.form.landArea'.tr(),
+              hintText: '0',
+              border: const OutlineInputBorder(),
+              suffixText: 'm²',
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // --- 상업용: 보증금, 층수 ---
+        if (['ruko', 'kantor', 'gudang'].contains(_type)) ...[
+          TextFormField(
+            controller: _depositController,
+            decoration: InputDecoration(
+              labelText: 'realEstate.form.deposit'.tr(),
+              hintText: 'realEstate.form.depositHint'.tr(), // "보증금 (Rp)"
+              border: const OutlineInputBorder(),
+              suffixText: 'Rp',
+            ),
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _floorInfoController,
+            decoration: InputDecoration(
+              labelText: 'realEstate.form.floorInfo'.tr(),
+              hintText: 'realEstate.form.floorInfoHint'.tr(),
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ]
+      ],
+    );
+  }
+
+  /// [신규] '작업 13': 가구 상태 입력
+  Widget _buildFurnishedStatusInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('realEstate.filter.furnishedStatus'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        _buildDropdown<String?>(
+          value: _furnishedStatus,
+          hint: 'realEstate.filter.furnishedHint'.tr(),
+          items: const ['furnished', 'semi_furnished', 'unfurnished'],
+          itemBuilder: (status) => DropdownMenuItem(
+            value: status,
+            child:
+                Text('realEstate.filter.furnishedTypes.${status ?? ''}').tr(),
+          ),
+          onChanged: (val) => setState(() => _furnishedStatus = val),
+        ),
+      ],
+    );
+  }
+
+  /// [신규] '작업 13': 매물 상태 입력
+  Widget _buildPropertyConditionInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('realEstate.filter.propertyCondition'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        _buildDropdown<String?>(
+          value: _propertyCondition,
+          hint: 'realEstate.filter.propertyCondition'.tr(),
+          items: const ['new', 'used'],
+          itemBuilder: (status) => DropdownMenuItem(
+            value: status,
+            child: Text('realEstate.filter.propertyConditions.${status ?? ''}')
+                .tr(),
+          ),
+          onChanged: (val) => setState(() => _propertyCondition = val),
+        ),
+      ],
+    );
+  }
+
+  /// [신규] '작업 13': 공용 드롭다운 위젯
+  Widget _buildDropdown<T>({
+    required T value,
+    required String hint,
+    required List<T> items,
+    required DropdownMenuItem<T> Function(T) itemBuilder,
+    required void Function(T?) onChanged,
+  }) {
+    return DropdownButtonFormField<T>(
+      initialValue: value,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      hint: Text(hint),
+      isExpanded: true,
+      items: items.map<DropdownMenuItem<T>>(itemBuilder).toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  /// [신규] '작업 7': 시설(Facility) 칩 목록을 생성하는 헬퍼 위젯
+  Widget _buildFacilityChips(
+      List<String> facilityKeys, Set<String> selectedSet) {
+    return Wrap(
+      spacing: 8.0,
+      children: facilityKeys.map((key) {
+        return FilterChip(
+          label: Text('realEstate.filter.amenities.$key').tr(),
+          selected: selectedSet.contains(key),
+          onSelected: (selected) {
+            setState(() {
+              if (selected) {
+                selectedSet.add(key);
+              } else {
+                selectedSet.remove(key);
+              }
+            });
+          },
+        );
+      }).toList(),
     );
   }
 }

@@ -15,6 +15,14 @@
 // 3. [Gap 3] '찜하기' 버튼: 'ImageCarouselCard'의 'topRightWidget'에 찜하기 토글 버튼 추가 (StreamBuilder 연동).
 // 4. [Gap 5] '광고/인증' 배지: 'topLeftWidget'에 'isSponsored'(광고) 및 'isVerified'(인증) 배지 표시.
 // 5. 'StatelessWidget' -> 'StatefulWidget'으로 변경 (찜하기 상태 관리를 위함).
+// 6. [수정] (Task 14): 'room.type'에 따라 'Kos' 전용 핵심 정보(욕실, 가구)를 표시하도록 `_buildKeyInfoRow` 수정.
+// =====================================================
+// [V2.0 작업 이력 (2025-11-05)]
+// 1. (Task 17) `_buildKeyInfoRow` 로직 수정.
+// 2. (Task 17) `room.type == 'kos'`일 경우:
+//    - 기존 '방/욕실/면적' 대신 '욕실 타입'(예: 방 내부 욕실)과 '가구 상태'(예: 가구 완비)를 표시.
+// 3. (Task 17) 'Kos' 외 다른 타입은 기존 '방/욕실/면적' 정보 표시 유지.
+// 4. (기존) '직방' 모델(Task 23)의 '찜하기', '광고/인증' 배지 기능 유지.
 // =====================================================
 // lib/features/real_estate/widgets/room_card.dart
 
@@ -160,15 +168,8 @@ class _RoomCardState extends State<RoomCard>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // [추가] Gap 1: 면적, 방/욕실 수 표시 (직방 스타일)
-                  Text(
-                    '${'realEstate.form.roomTypes.${room.type}'.tr()} | ${room.roomCount} ${'realEstate.info.bed'.tr()} | ${room.bathroomCount} ${'realEstate.info.bath'.tr()} | ${room.area.toStringAsFixed(0)} m²',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  // [수정] (Task 14): 타입에 따른 핵심 정보 표시 (Kos: 욕실/가구, 기타: 면적/방/욕실)
+                  _buildKeyInfoRow(context, room),
                   const SizedBox(height: 4),
                   Text(
                     room.title,
@@ -222,6 +223,90 @@ class _RoomCardState extends State<RoomCard>
         child: Text(label,
             style: const TextStyle(color: Colors.white, fontSize: 12)),
       ),
+    );
+  }
+
+  /// [추가] Gap 1: '직방' 모델의 핵심 정보 (방/욕실/면적) 표시줄
+  /// [수정] (Task 14): 'room.type'에 따라 'Kos' 전용 정보(욕실 타입/가구 상태) 또는 기본 정보(면적/방/욕실)를 표시
+  Widget _buildKeyInfoRow(BuildContext context, RoomListingModel room) {
+    // 'Kos' 타입일 경우, "욕실 타입"과 "가구 상태"를 표시
+    if (room.type == 'kos') {
+      // 욕실 타입 텍스트
+      final bathroomText = room.kosBathroomType == 'in_room'
+          ? 'realEstate.filter.kos.bathroomTypes.in_room'.tr()
+          : (room.kosBathroomType == 'out_room'
+              ? 'realEstate.filter.kos.bathroomTypes.out_room'.tr()
+              // 예외 처리 기본값
+              : 'Info Kamar Mandi');
+
+      // 가구 상태 텍스트
+      final furnishedText = room.furnishedStatus != null
+          ? 'realEstate.filter.furnishedTypes.${room.furnishedStatus!}'.tr()
+          : 'Info Furnitur';
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildRoomInfoItem(
+            context,
+            icon: Icons.bathtub_outlined,
+            label: bathroomText,
+          ),
+          _buildRoomInfoItem(
+            context,
+            icon: Icons.chair_outlined,
+            label: furnishedText,
+          ),
+        ],
+      );
+    }
+
+    // 기타 타입: 면적/방/욕실 표시
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildRoomInfoItem(
+          context,
+          icon: Icons.fullscreen_outlined,
+          label: '${room.area.toStringAsFixed(0)} m²',
+        ),
+        _buildRoomInfoItem(
+          context,
+          icon: Icons.king_bed_outlined,
+          label: 'realEstate.form.rooms'
+              .tr(namedArgs: {'count': '${room.roomCount}'}),
+        ),
+        _buildRoomInfoItem(
+          context,
+          icon: Icons.bathtub_outlined,
+          label: 'realEstate.form.bathrooms'
+              .tr(namedArgs: {'count': '${room.bathroomCount}'}),
+        ),
+      ],
+    );
+  }
+
+  /// 아이콘 + 라벨로 구성된 핵심 정보 아이템 위젯
+  Widget _buildRoomInfoItem(BuildContext context,
+      {required IconData icon, required String label}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: Theme.of(context).primaryColor),
+        const SizedBox(width: 6),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 120),
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13,
+              color: Theme.of(context).primaryColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
