@@ -388,7 +388,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _priceUnit,
+                          initialValue: _priceUnit,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                           ),
