@@ -622,11 +622,11 @@ class HomeScreen extends StatelessWidget {
         // ▼▼▼▼▼ [개편] 7단계: Auction 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildAuctionCarousel(context),
 
-        // ▼▼▼▼▼ [개편] 8단계: POM 캐러셀 섹션 추가 ▼▼▼▼▼
-        _buildPomCarousel(context),
-
         // ▼▼▼▼▼ [개편] 10단계: Real Estate 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildRealEstateCarousel(context),
+
+        // ▼▼▼▼▼ [개편] 8단계: POM 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildPomCarousel(context),
       ],
     );
   }
