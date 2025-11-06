@@ -1,5 +1,4 @@
 // lib/features/main_screen/home_screen.dart
-
 /// [기획 문서: 00 Mainscreen & 런처 & Tab & Drawer QA.md]
 /// - 기획 요약: 메인 화면의 AppBar, 슬라이드 탭, Drawer, BottomNavigationBar, 주요 컴포넌트(FeedCard, Comment Bubble, Chat Bubble, FAB 등) 구조와 반응형/애니메이션/접근성 정책
 /// - 실제 코드 기능: 다양한 피드/카드/모듈 위젯을 통합하여 메인 홈 화면을 구성, 각 기능별 화면 import, 반응형 UI 및 다양한 카드/버블/버튼 구현
@@ -34,9 +33,32 @@
 ///     - 검색칩(`_searchChip`)이 `main_navigation_screen`의 `onSearchChipTap` 콜백을 직접 호출하도록 단순화.
 /// ============================================================================
 library;
+
+/**
+ * [2025-11-06] 작업 내역 및 변경 설명
+ *
+ * 1. 홈 그리드 UI 2차 개편 적용
+ *    - 기존 GrabIconTile 기반에서 InkWell + Container + SvgPicture/아이콘 조합으로 변경
+ *    - 아이콘 박스에 흰색 배경, 그림자, 둥근 모서리 적용
+ *    - SVG 아이콘 지원을 위해 flutter_svg 패키지 import 및 사용
+ *    - 기존 onTap 라우팅 로직은 그대로 유지
+ *    - GrabIconTile 관련 import 제거
+ *
+ * 2. 코드 스타일 및 경고 대응
+ *    - withOpacity 사용 부분을 withValues(alpha: )로 변경 필요 (Flutter 3.22+)
+ *      → 현재 일부 위치에서 withOpacity가 남아있으므로, 반드시 withValues(alpha: )로 교체해야 함
+ *      → 예시: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8)
+ *    - 관련 경고: 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss
+ *
+ * 3. 기타
+ *    - flutter_svg 패키지는 pubspec.yaml에 이미 선언되어 있음
+ *    - 불필요한 import 및 주석 정리
+ *
+ * [변경자] GitHub Copilot
+ */
 // (파일 내용...)
 
-import 'package:bling_app/features/shared/grab_widgets.dart';
+// import removed: GrabIconTile no longer used in v2 grid UI
 
 import 'package:bling_app/core/models/feed_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
@@ -96,6 +118,7 @@ import 'package:bling_app/features/pom/screens/pom_screen.dart';
 import 'package:bling_app/features/lost_and_found/screens/lost_and_found_screen.dart';
 import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart';
 
+import 'package:flutter_svg/flutter_svg.dart'; // 2차 버전 UI(SVG) 렌더링을 위해 추가
 // ✅ [검색] 검색 네비게이션은 상위(main_navigation_screen)가 전담
 
 class MenuItem {
@@ -235,8 +258,7 @@ class HomeScreen extends StatelessWidget {
     MenuItem(
         // svg: '$_iconsPath/ico_friend_theme_combo.svg',
         // svg: '$_iconsPath/ico_friend_theme_combo_peachPerson.svg',
-        // svg: '$_iconsPath/ico_friend.svg',
-        svg: '$_iconsPath/ico_friend_origin.svg',
+        svg: '$_iconsPath/ico_friend.svg',
         labelKey: 'main.tabs.findFriends',
         screen: const FindFriendsScreen()),
     // 8. realEstate (부동산)
@@ -295,11 +317,129 @@ class HomeScreen extends StatelessWidget {
             mainAxisSpacing: 12,
             childAspectRatio: childAspectRatio,
             children: menuItems.map((item) {
+              // 홈그리드 1차 버전 코드 니펫
+              /*
               return GrabIconTile(
-                compact: gridCount == 5,
-                icon: item.icon,
-                svgAsset: item.svg,
-                label: item.labelKey.tr(),
+                  compact: gridCount == 5,
+                  icon: item.icon,
+                  svgAsset: item.svg,
+                  label: item.labelKey.tr(),
+                  onTap: () {
+                    // ⬇️ 기존 onTap 로직 그대로 (절대 수정 X)
+                    if (userModel == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('user.notLoggedIn'.tr())),
+                      );
+                      return;
+                    }
+                    final screen = item.screen;
+                    late Widget nextScreen;
+                    if (screen is LocalNewsScreen) {
+                      nextScreen = LocalNewsScreen(
+                        userModel: userModel,
+                        locationFilter: activeLocationFilter,
+                        autoFocusSearch: false,
+                        searchNotifier: searchNotifier,
+                      );
+                    } else if (screen is MarketplaceScreen) {
+                      // Marketplace now supports inline search chip
+                      nextScreen = MarketplaceScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                          autoFocusSearch: false,
+                          searchNotifier: searchNotifier);
+                    } else if (item.labelKey == 'main.tabs.clubs') {
+                      // Clubs: uses an external TabController via a local DefaultTabController wrapper
+                      nextScreen = DefaultTabController(
+                        length: 2,
+                        child: Builder(
+                          builder: (ctx) => ClubsScreen(
+                            userModel: userModel,
+                            locationFilter: activeLocationFilter,
+                            autoFocusSearch: false,
+                            searchNotifier: searchNotifier,
+                            tabController: DefaultTabController.of(ctx),
+                          ),
+                        ),
+                      );
+                    } else if (screen is FindFriendsScreen) {
+                      // FindFriends now supports inline search chip
+                      nextScreen = FindFriendsScreen(
+                          userModel: userModel,
+                          autoFocusSearch: false,
+                          searchNotifier: searchNotifier);
+                    } else if (screen is JobsScreen) {
+                      // Jobs now supports inline search chip
+                      nextScreen = JobsScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                          autoFocusSearch: false,
+                          searchNotifier: searchNotifier);
+                    } else if (screen is LocalStoresScreen) {
+                      // Local Stores now supports inline search chip
+                      nextScreen = LocalStoresScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                          autoFocusSearch: false,
+                          searchNotifier: searchNotifier);
+                    } else if (screen is AuctionScreen) {
+                      // Auction now supports inline search chip
+                      nextScreen = AuctionScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                          autoFocusSearch: false,
+                          searchNotifier: searchNotifier);
+                    } else if (screen is PomScreen) {
+                      // POM now supports inline search chip
+                      nextScreen = PomScreen(
+                          userModel: userModel,
+                          initialPoms: null,
+                          initialIndex: 0,
+                          autoFocusSearch: false,
+                          searchNotifier: searchNotifier);
+                    } else if (screen is LostAndFoundScreen) {
+                      // Lost & Found now supports inline search chip
+                      nextScreen = LostAndFoundScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                          autoFocusSearch: false,
+                          searchNotifier: searchNotifier);
+                    } else if (screen is RealEstateScreen) {
+                      // RealEstate now supports inline search chip
+                      nextScreen = RealEstateScreen(
+                          userModel: userModel,
+                          locationFilter: activeLocationFilter,
+                          autoFocusSearch: false,
+                          searchNotifier: searchNotifier);
+                    } else {
+                      nextScreen = screen;
+                    }
+                    onIconTap(nextScreen, item.labelKey);
+                  },
+                );
+              */
+
+              // 홈그리드 2차 버전 코드 니펫 시작
+
+              // [작업] 변수 선언(final textStyle, minTextHeight)을 InkWell builder 함수 시작 부분으로 이동
+              final textStyle = (gridCount == 5
+                      ? Theme.of(context).textTheme.labelSmall
+                      : Theme.of(context).textTheme.bodySmall)
+                  ?.copyWith(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.8),
+                fontWeight: FontWeight.w500,
+                height: 1.1, // 줄간격
+              );
+
+              final minTextHeight = (textStyle?.fontSize ?? 12.0) *
+                  (textStyle?.height ?? 1.1) *
+                  2;
+
+              // 1. 탭 로직 (기존 onIconTap 로직을 InkWell의 onTap으로 이동)
+              return InkWell(
                 onTap: () {
                   // ⬇️ 기존 onTap 로직 그대로 (절대 수정 X)
                   if (userModel == null) {
@@ -392,7 +532,66 @@ class HomeScreen extends StatelessWidget {
                   }
                   onIconTap(nextScreen, item.labelKey);
                 },
+                borderRadius:
+                    BorderRadius.circular(12.0), // 탭 효과를 위한 둥근 모서리 (조정값)
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // 2-1. 아이콘을 감싸는 흰색/그림자 박스
+                    Container(
+                      width: tileWidth * 0.999, // 타일 폭의 62% (조정값)
+                      height: tileWidth * 0.999, // 정사각형 (조정값)
+                      decoration: BoxDecoration(
+                        color: Colors.white, // 2. 아이콘 박스 배경색 흰색
+                        borderRadius: BorderRadius.circular(
+                            16.0), // 3. 띄어진 느낌을 위한 둥근 모서리 (조정값)
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(
+                                alpha: 0.08), // 3. 띄어진 느낌을 위한 그림자 (연하게)
+                            blurRadius: 10.0, // 3. 그림자 부드럽게 (조정값)
+                            offset: Offset(0, 4), // 3. 그림자 위치 (아래쪽)
+                          ),
+                        ],
+                      ),
+                      // 아이콘과 박스 테두리 사이 여백 (조정값)
+                      // GrabIconTile의 compact 모드(5열) 여부에 따라 패딩 조정
+                      padding: EdgeInsets.all(gridCount == 5 ? 10.0 : 12.0),
+                      child: item.svg != null
+                          ? SvgPicture.asset(
+                              // SVG 렌더링
+                              item.svg!,
+                              width: double.infinity,
+                              height: double.infinity,
+                              // 1. 그림자 삭제 (SvgPicture는 기본적으로 그림자 없음)
+                            )
+                          : Icon(
+                              // IconData 폴백
+                              item.icon,
+                              size: 28.0, // (조정값)
+                              color: Theme.of(context).primaryColor, // (임의의 색상)
+                            ),
+                    ),
+                    SizedBox(
+                        height: gridCount == 5
+                            ? 4.0 // 5열 (조정값 6.0 -> 4.0)
+                            : 6.0), // 4열 (조정값 8.0 -> 6.0) // 1.4px 오버플로우 수정
+                    Container(
+                      height: minTextHeight, // 텍스트 2줄 높이로 고정
+                      alignment: Alignment
+                          .topCenter, // 1줄 텍스트가 (2줄 높이 박스) 상단 중앙에 정렬되도록
+                      child: Text(
+                        item.labelKey.tr(),
+                        textAlign: TextAlign.center,
+                        maxLines: 2, // 2줄까지 허용
+                        overflow: TextOverflow.ellipsis,
+                        style: textStyle, // 미리 정의한 스타일 적용
+                      ),
+                    ),
+                  ],
+                ),
               );
+              // 홈그리드 2차 버전 코드 니펫 끝
             }).toList(),
           ),
         ),
@@ -400,24 +599,32 @@ class HomeScreen extends StatelessWidget {
             child: Divider(height: 8, thickness: 8, color: Color(0xFFF0F2F5))),
 
         // ▼▼▼▼▼ [개편] 1단계: 기존 통합 피드를 삭제하고, Post 캐러셀 섹션으로 교체 ▼▼▼▼▼
-        //
         _buildPostCarousel(context),
-        // ▼▼▼▼▼ [개편] 2단계: Product 캐러셀 섹션 추가 ▼▼▼▼▼
-        _buildProductCarousel(context),
-        // ▼▼▼▼▼ [개편] 3단계: Club 캐러셀 섹션 추가 ▼▼▼▼▼
-        _buildClubCarousel(context),
-        // ▼▼▼▼▼ [개편] 4단계: Find Friend 캐러셀 섹션 추가 ▼▼▼▼▼
-        _buildFindFriendCarousel(context),
+
         // ▼▼▼▼▼ [개편] 5단계: Job 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildJobCarousel(context),
-        // ▼▼▼▼▼ [개편] 6단계: Local Store 캐러셀 섹션 추가 ▼▼▼▼▼
-        _buildLocalStoreCarousel(context),
-        // ▼▼▼▼▼ [개편] 7단계: Auction 캐러셀 섹션 추가 ▼▼▼▼▼
-        _buildAuctionCarousel(context),
-        // ▼▼▼▼▼ [개편] 8단계: POM 캐러셀 섹션 추가 ▼▼▼▼▼
-        _buildPomCarousel(context),
+
         // ▼▼▼▼▼ [개편] 9단계: Lost & Found 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildLostAndFoundCarousel(context),
+
+        // ▼▼▼▼▼ [개편] 2단계: Product 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildProductCarousel(context),
+
+        // ▼▼▼▼▼ [개편] 6단계: Local Store 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildLocalStoreCarousel(context),
+
+        // ▼▼▼▼▼ [개편] 3단계: Club 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildClubCarousel(context),
+
+        // ▼▼▼▼▼ [개편] 4단계: Find Friend 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildFindFriendCarousel(context),
+
+        // ▼▼▼▼▼ [개편] 7단계: Auction 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildAuctionCarousel(context),
+
+        // ▼▼▼▼▼ [개편] 8단계: POM 캐러셀 섹션 추가 ▼▼▼▼▼
+        _buildPomCarousel(context),
+
         // ▼▼▼▼▼ [개편] 10단계: Real Estate 캐러셀 섹션 추가 ▼▼▼▼▼
         _buildRealEstateCarousel(context),
       ],
