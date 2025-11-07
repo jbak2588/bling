@@ -111,7 +111,10 @@ class _PostCardState extends State<PostCard>
                             style:
                                 GoogleFonts.inter(fontWeight: FontWeight.bold)),
                         const SizedBox(width: 4),
-                        TrustLevelBadge(trustLevel: user.trustLevel),
+                        // [v2.1] 뱃지 파라미터 수정 (int -> String Label)
+                        TrustLevelBadge(
+                            trustLevelLabel: user.trustLevelLabel,
+                            showText: false),
                       ],
                     ),
                     Text(

@@ -57,10 +57,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:uuid/uuid.dart';
 
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseStorage _storage =
+      FirebaseStorage.instance; // [v2.1] Storage 추가
 
   CollectionReference<Map<String, dynamic>> get _chats =>
       _firestore.collection('chats');
@@ -313,7 +318,9 @@ class ChatService {
     } else if (otherUserId != null) {
       updateData['unreadCounts.$otherUserId'] = FieldValue.increment(1);
     }
-    batch.update(chatRoomRef, updateData);
+    // [v2.1] 버그 수정: .update()는 문서가 없으면 실패함. .set(..., merge: true)로 변경하여
+    // '동네 친구'의 첫 메시지 전송 시 채팅방 문서를 생성하도록 함.
+    batch.set(chatRoomRef, updateData, SetOptions(merge: true));
 
     await batch.commit();
   }
@@ -349,6 +356,69 @@ class ChatService {
       }
     }
     // 5. 모든 업데이트를 한 번에 실행합니다.
+    await batch.commit();
+  }
+
+  // [v2.1] 이미지 메시지 전송 기능 (신규 추가)
+  Future<void> sendImageMessage(
+    String chatId,
+    File imageFile,
+    String? otherUserId, // 1:1 채팅 시
+    {
+    List<String>? participants, // 그룹 채팅 시
+  }) async {
+    final myUid = _auth.currentUser?.uid;
+    if (myUid == null) return;
+
+    // 1. 이미지를 Storage에 업로드
+    final String fileName = Uuid().v4();
+    final Reference storageRef = _storage
+        .ref()
+        .child('chat_images')
+        .child(chatId)
+        .child('$fileName.jpg');
+
+    final UploadTask uploadTask = storageRef.putFile(imageFile);
+    final TaskSnapshot snapshot = await uploadTask;
+    final String imageUrl = await snapshot.ref.getDownloadURL();
+
+    // 2. 메시지 데이터 생성 (imageUrl 포함)
+    final timestamp = Timestamp.now();
+    final messageData = {
+      'senderId': myUid,
+      'text': '', // 이미지는 텍스트 없음
+      'imageUrl': imageUrl, // [v2.1] 이미지 URL 추가
+      'timestamp': timestamp,
+      'readBy': [myUid],
+    };
+
+    // 3. Firestore Batch 작업 (채팅방 업데이트 + 메시지 추가)
+    final chatRoomRef = _firestore.collection('chats').doc(chatId);
+    final messageRef = chatRoomRef.collection('messages').doc();
+
+    final batch = _firestore.batch();
+    batch.set(messageRef, messageData);
+
+    // 4. 채팅방 lastMessage 및 unreadCounts 업데이트
+    final Map<String, dynamic> updateData = {
+      'lastMessage': 'chatRoom.imageMessage'.tr(), // "이미지"
+      'lastTimestamp': timestamp,
+      'unreadCounts.$myUid': 0,
+    };
+
+    // ... (기존 sendMessage와 동일한 안읽음 카운트 로직) ...
+    if (participants != null && participants.isNotEmpty) {
+      for (var userId in participants) {
+        if (userId != myUid) {
+          updateData['unreadCounts.$userId'] = FieldValue.increment(1);
+        }
+      }
+    } else if (otherUserId != null) {
+      updateData['unreadCounts.$otherUserId'] = FieldValue.increment(1);
+    }
+
+    batch.set(chatRoomRef, updateData, SetOptions(merge: true));
+
     await batch.commit();
   }
 }

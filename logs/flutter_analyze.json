@@ -1,0 +1,10 @@
+﻿flutter.bat : Could not find an option named "--format".
+At C:\bling\bling_app\.vscode\scripts\save_problems.ps1:24 char:16
++     $jsonOut = & flutter analyze --format=json 2>&1
++                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Could not find ...med "--format".:String) [], RemoteExceptio 
+   n
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.

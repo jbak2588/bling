@@ -7,6 +7,7 @@
 library;
 
 import 'dart:async'; // ✅ StreamSubscription 사용 위해 추가
+import 'dart:io';
 
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 // ✅ app_links 및 링크 처리 관련 import 추가 (uni_links 대체)
 import 'package:app_links/app_links.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,6 +33,87 @@ Future<void> _ensureGoogleMapRenderer() async {
   }
 }
 
+/// Decide whether to apply the App Check debug token on this runtime.
+///
+/// This uses lightweight heuristics so you can scope debug tokens to a
+/// particular emulator or simulator (for example `emulator-5556`). It first
+/// checks environment variables commonly set by host tooling, then falls back
+/// to other approaches (commented examples using `device_info_plus`).
+Future<bool> _shouldUseDebugToken() async {
+  // Only consider enabling debug tokens in debug builds.
+  if (!kDebugMode) return false;
+
+  try {
+    final env = Platform.environment;
+
+    // Android emulator/device serial reported by adb / flutter tool
+    final String? androidSerial =
+        env['ANDROID_SERIAL'] ?? env['ANDROID_DEVICE'];
+    if (androidSerial != null) {
+      const allowedAndroid = ['emulator-5554', 'RR8N109B4JM'];
+      if (allowedAndroid.contains(androidSerial)) {
+        debugPrint(
+            'AppCheck debug-token: matched environment Android serial: $androidSerial');
+        return true;
+      }
+    }
+
+    // iOS simulator environment (set by some host tooling)
+    final String? simName =
+        env['SIMULATOR_DEVICE_NAME'] ?? env['SIMULATOR_UDID'];
+    if (simName != null) {
+      const allowedIosSimulators = ['iPhone 14', 'iPhone 14 Pro'];
+      if (allowedIosSimulators.contains(simName)) {
+        debugPrint(
+            'AppCheck debug-token: matched environment iOS simulator: $simName');
+        return true;
+      }
+    }
+  } catch (_) {
+    // ignore
+  }
+
+  // For a more reliable approach across platforms, use device_info_plus to
+  // identify devices by model or vendor id. The code below uses
+  // DeviceInfoPlugin to inspect platform identifiers and compare them to
+  // whitelists. Replace the placeholder IDs in `allowedAndroidIds` and
+  // `allowedIosIds` with the IDs for your test devices.
+  try {
+    final deviceInfo = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      final info = await deviceInfo.androidInfo;
+      // `info.id` is a stable id on many devices; some platforms provide
+      // `androidId` as well in other versions of the plugin. Replace the
+      // placeholder below with the actual androidId from `adb shell settings`.
+      final String androidId = info.id;
+      // Whitelist device ids for debug-token activation. Added the
+      // android_id observed on the connected device (8aae416b0618741d).
+      const allowedAndroidIds = <String>['RR8N109B4JM', '8aae416b0618741d'];
+      if (allowedAndroidIds.contains(androidId)) {
+        debugPrint(
+            'AppCheck debug-token: matched device_info Android id: $androidId');
+        return true;
+      }
+    }
+
+    if (Platform.isIOS) {
+      final info = await deviceInfo.iosInfo;
+      final String? iosId = info.identifierForVendor;
+      const allowedIosIds = <String>['00008101-000c60380A88001E'];
+      if (iosId != null && allowedIosIds.contains(iosId)) {
+        debugPrint('AppCheck debug-token: matched device_info iOS id: $iosId');
+        return true;
+      }
+    }
+  } catch (_) {
+    debugPrint(
+        'AppCheck debug-token: device_info_plus check failed or unavailable');
+  }
+  debugPrint(
+      'AppCheck debug-token: no matching heuristic found; debug token disabled');
+  return false;
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
@@ -41,17 +124,18 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // 🔥 [최종 수정] App Check 활성화 로직 변경
-  // 현재 앱이 디버그 모드인지 릴리즈 모드인지에 따라
-  // 올바른 App Check 제공자를 선택하도록 명확하게 설정합니다.
-  // ignore: deprecated_member_use
+  // App Check activation: only use debug token for whitelisted dev devices.
+  final bool useDebugToken = await _shouldUseDebugToken();
+
   await FirebaseAppCheck.instance.activate(
-    androidProvider: kDebugMode
-        ? AndroidProvider.debug
-        : AndroidProvider.playIntegrity, // 배포 시 playIntegrity
-    appleProvider: kDebugMode
-        ? AppleProvider.debug
-        : AppleProvider.appAttestWithDeviceCheckFallback, // 배포 시 App Attest 우선
+    providerAndroid: useDebugToken
+        ? const AndroidDebugProvider(
+            debugToken: 'd7fc630c-5342-4f2e-85f5-fdb1ea2b1ded')
+        : const AndroidPlayIntegrityProvider(),
+    providerApple: useDebugToken
+        ? const AppleDebugProvider(
+            debugToken: 'd7fc630c-5342-4f2e-85f5-fdb1ea2b1ded')
+        : const AppleAppAttestWithDeviceCheckFallbackProvider(),
   );
 
   try {

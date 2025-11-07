@@ -17,7 +17,10 @@ class AuthorProfileTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').doc(userId).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // 데이터를 기다리는 동안 간단한 플레이스홀더를 보여줄 수 있습니다.
@@ -28,9 +31,11 @@ class AuthorProfileTile extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(width: 80, height: 16, child: LinearProgressIndicator()),
+                  SizedBox(
+                      width: 80, height: 16, child: LinearProgressIndicator()),
                   SizedBox(height: 4),
-                  SizedBox(width: 120, height: 12, child: LinearProgressIndicator()),
+                  SizedBox(
+                      width: 120, height: 12, child: LinearProgressIndicator()),
                 ],
               )
             ],
@@ -52,8 +57,11 @@ class AuthorProfileTile extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 22,
-                backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-                child: user.photoUrl == null ? const Icon(Icons.person, size: 22) : null,
+                backgroundImage:
+                    user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                child: user.photoUrl == null
+                    ? const Icon(Icons.person, size: 22)
+                    : null,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -62,17 +70,23 @@ class AuthorProfileTile extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(user.nickname, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                        Text(user.nickname,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 15)),
                         const SizedBox(width: 4),
-                        TrustLevelBadge(trustLevel: user.trustLevel, showText: false),
+                        // [v2.1] 뱃지 파라미터 수정 (int -> String Label)
+                        TrustLevelBadge(
+                            trustLevelLabel: user.trustLevelLabel,
+                            showText: false),
                       ],
                     ),
-                    if(user.locationName != null && user.locationName!.isNotEmpty)
-                    Text(
-                      user.locationName!,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    if (user.locationName != null &&
+                        user.locationName!.isNotEmpty)
+                      Text(
+                        user.locationName!,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                   ],
                 ),
               )

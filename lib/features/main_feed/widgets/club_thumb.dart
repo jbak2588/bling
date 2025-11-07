@@ -211,8 +211,9 @@ class ClubThumb extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 4),
+              // [v2.1] 뱃지 파라미터 수정 (int -> String Label)
               TrustLevelBadge(
-                trustLevel: user.trustLevel,
+                trustLevelLabel: user.trustLevelLabel,
                 showText: false,
               ), // 신뢰 배지 (아이콘만)
             ],

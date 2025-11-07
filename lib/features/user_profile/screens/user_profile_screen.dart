@@ -89,8 +89,11 @@ class UserProfileScreen extends StatelessWidget {
                           fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 8),
+                    // [v2.1] 뱃지 파라미터 수정 (int -> String Label)
                     TrustLevelBadge(
-                        trustLevel: user.trustLevel, showText: true),
+                      trustLevelLabel: user.trustLevelLabel,
+                      showText: true,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),

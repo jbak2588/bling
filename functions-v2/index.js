@@ -190,6 +190,8 @@ const CALL_OPTS = {
 // 이미지 다운로드 공통 제한
 const MAX_IMAGE_BYTES = 7_500_000; // 7.5MB 안전선
 const FETCH_TIMEOUT_MS = 45000; // 45s (네트워크/Storage 지연 대비)
+// [v2.1] '동네 친구' 일일 신규 채팅 한도
+const DAILY_CHAT_LIMIT = 5; // 하루 5명으로 제한
 
 // Treat Gemini model resolution issues as "not found" to allow graceful fallback.
 function isModelNotFoundError(err) {
@@ -1301,5 +1303,98 @@ exports.onLocalNewsPostCreate = onDocumentCreated(
     } catch (error) {
       logger.error(`Failed to update board metrics for ${kelKey}:`, error);
     }
+  });
+
+// ============================================================================
+// [v2.1] 신규: '동네 친구' 신규 채팅 한도 확인 및 시작
+// ============================================================================
+
+/**
+ * UTC 기준 오늘 날짜를 YYYY-MM-DD 형식으로 반환합니다.
+ * @return {string} 오늘 날짜 (예: "2025-11-06")
+ */
+function getTodayUTC() {
+  const now = new Date();
+  return now.toISOString().split("T")[0];
+}
+
+/**
+ * '동네 친구'를 통해 새 채팅을 시작할 수 있는지 확인하고, 가능한 경우 카운트를 증가시킵니다.
+ *
+ * @param {onCall.Request} request
+ * @param {string} request.data.otherUserId - 대화를 시도할 상대방 UID
+ * @return {Promise<{allow: boolean, isExisting: boolean, limit?: number, count?: number}>}
+ */
+exports.startFriendChat = onCall(CALL_OPTS, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "인증이 필요합니다.");
   }
-);
+
+  const uid = request.auth.uid;
+  const {otherUserId} = request.data;
+
+  if (!otherUserId) {
+    throw new HttpsError("invalid-argument", "상대방 ID(otherUserId)가 필요합니다.");
+  }
+
+  if (uid === otherUserId) {
+    throw new HttpsError("invalid-argument", "자신과 대화할 수 없습니다.");
+  }
+
+  const db = getFirestore(); // getFirestore()는 이미 상단에서 가져옴
+  const userRef = db.collection("users").doc(uid);
+
+  // 1. 기존 채팅방이 있는지 확인합니다. (기존 채팅방은 한도와 무관)
+  const ids = [uid, otherUserId];
+  ids.sort();
+  const chatId = ids.join("_");
+  const chatRoomRef = db.collection("chats").doc(chatId);
+
+  const chatRoomDoc = await chatRoomRef.get();
+  if (chatRoomDoc.exists) {
+    return {allow: true, isExisting: true}; // 한도 확인 불필요
+  }
+
+  // 2. 신규 채팅인 경우, 한도를 확인합니다.
+  const userDoc = await userRef.get();
+  if (!userDoc.exists) {
+    throw new HttpsError("not-found", "사용자 문서를 찾을 수 없습니다.");
+  }
+
+  const chatLimits = userDoc.data()?.chatLimits || {};
+  const currentCount = chatLimits.findFriendCount || 0;
+  const lastReset = chatLimits.findFriendLastReset || ""; // YYYY-MM-DD
+  const today = getTodayUTC();
+
+  let newCount = currentCount;
+
+  // 3. 날짜가 다르면 카운트 리셋
+  if (lastReset !== today) {
+    newCount = 0;
+  }
+
+  // 4. 한도 확인
+  if (newCount < DAILY_CHAT_LIMIT) {
+    // 5. 한도 미만: 허용, 카운트 1 증가
+    try {
+      await userRef.update({
+        "chatLimits.findFriendCount": FieldValue.increment(1),
+        "chatLimits.findFriendLastReset": today,
+      });
+      return {allow: true, isExisting: false, count: newCount + 1};
+    } catch (error) {
+      logger.error("startFriendChat 카운트 업데이트 실패:", error);
+      throw new HttpsError("internal", "카운트 업데이트 중 오류가 발생했습니다.");
+    }
+  } else {
+    // 6. 한도 도달: 거부
+    return {
+      allow: false,
+      isExisting: false,
+      limit: DAILY_CHAT_LIMIT,
+      count: newCount,
+    };
+  }
+});
+
+    

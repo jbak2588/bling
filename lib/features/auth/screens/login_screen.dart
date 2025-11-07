@@ -85,8 +85,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // 2. authenticate()로 로그인 플로우 시작
 
-
-      final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate();
+      final GoogleSignInAccount googleUser =
+          await GoogleSignIn.instance.authenticate();
 
       // idToken 추출 (authentication.idToken)
       final googleAuth = googleUser.authentication;
@@ -100,11 +100,14 @@ class _LoginScreenState extends State<LoginScreen> {
         idToken: idToken,
       );
 
-      final result = await FirebaseAuth.instance.signInWithCredential(credential);
+      final result =
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
       if (result.user != null) {
         // 신규 가입자일 경우 UserModel 생성
-        final userDocRef = FirebaseFirestore.instance.collection('users').doc(result.user!.uid);
+        final userDocRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(result.user!.uid);
         final userDoc = await userDocRef.get();
 
         if (!userDoc.exists) {
@@ -114,7 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
             email: result.user!.email ?? '',
             photoUrl: result.user!.photoURL,
             createdAt: Timestamp.now(),
-            isDatingProfile: false,
           );
           await userDocRef.set(newUser.toJson());
         }

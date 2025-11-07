@@ -81,12 +81,13 @@ class UserModel {
   // [친구찾기/데이팅]
   // [관리자/운영]
   final bool isAdmin; // [추가]
-  final bool isDatingProfile; // 친구찾기 기능 활성화 여부 (ON/OFF)
-  final int? age; // 실제 나이
-  final String? ageRange; // 허용 나이대 범위
-  final String? gender; // 성별
-  final List<String>? findfriendProfileImages; // 친구찾기용 추가 이미지
-  final bool isVisibleInList; // 내 프로필 노출 여부
+  // [v2.1] 데이팅 관련 필드 삭제
+  // final bool isDatingProfile; // 친구찾기 기능 활성화 여부 (ON/OFF)
+  // final int? age; // 실제 나이
+  // final String? ageRange; // 허용 나이대 범위
+  // final String? gender; // 성별
+  // final List<String>? findfriendProfileImages; // 친구찾기용 추가 이미지
+  final bool? isVisibleInList; // 내 프로필 노출 여부
   final List<String>? likesGiven; // 내가 좋아요 누른 유저 ID
   final List<String>? likesReceived; // 나를 좋아요한 유저 ID
   final List<Map<String, dynamic>>? friendRequests; // 친구 요청 상태
@@ -94,6 +95,8 @@ class UserModel {
   final int likeCount; // 받은 좋아요 수
   final List<String>? rejectedUsers;
   final List<String>? clubs; // [추가] 가입한 동호회 목록
+  final bool? neighborhoodVerified; // 동네 인증 여부
+  final Timestamp? lastActiveAt; // 최근 활동 타임스탬프
 
   UserModel({
     required this.uid,
@@ -129,11 +132,8 @@ class UserModel {
     this.blockedUsers,
     this.profileCompleted = false,
     required this.createdAt,
-    required this.isDatingProfile,
-    this.age,
-    this.ageRange,
-    this.gender,
-    this.findfriendProfileImages,
+    this.neighborhoodVerified,
+    this.lastActiveAt,
     this.isVisibleInList = true,
     this.likesGiven,
     this.likesReceived,
@@ -205,13 +205,7 @@ class UserModel {
           ? List<String>.from(data['blockedUsers'])
           : null,
       profileCompleted: data['profileCompleted'] ?? false,
-      age: data['age'],
-      ageRange: data['ageRange'],
-      gender: data['gender'],
-      findfriendProfileImages: data['findfriend_profileImages'] != null
-          ? List<String>.from(data['findfriend_profileImages'])
-          : null,
-      isVisibleInList: data['isVisibleInList'] ?? true,
+      isVisibleInList: data['isVisibleInList'],
       likesGiven: data['likesGiven'] != null
           ? List<String>.from(data['likesGiven'])
           : null,
@@ -225,7 +219,8 @@ class UserModel {
           data['friends'] != null ? List<String>.from(data['friends']) : null,
       likeCount: data['likeCount'] ?? 0,
       createdAt: data['createdAt'] ?? Timestamp.now(),
-      isDatingProfile: data['isDatingProfile'] ?? false,
+      neighborhoodVerified: data['neighborhoodVerified'] ?? false,
+      lastActiveAt: data['lastActiveAt'],
       rejectedUsers: data['rejectedUsers'] != null
           ? List<String>.from(data['rejectedUsers'])
           : null,
@@ -274,11 +269,11 @@ class UserModel {
       'blockedUsers': blockedUsers,
       'profileCompleted': profileCompleted,
       'createdAt': createdAt,
-      'isDatingProfile': isDatingProfile,
-      'age': age,
-      'ageRange': ageRange,
-      'gender': gender,
-      'findfriend_profileImages': findfriendProfileImages,
+      'isDatingProfile': null, // [v2.1] null로 덮어쓰기
+      'age': null, // [v2.1] null로 덮어쓰기
+      'ageRange': null, // [v2.1] null로 덮어쓰기
+      'gender': null, // [v2.1] null로 덮어쓰기
+      'findfriend_profileImages': null, // [v2.1] null로 덮어쓰기
       'isVisibleInList': isVisibleInList,
       'likesGiven': likesGiven,
       'likesReceived': likesReceived,
@@ -286,7 +281,14 @@ class UserModel {
       'friends': friends,
       'likeCount': likeCount,
       'rejectedUsers': rejectedUsers,
+      'neighborhoodVerified': neighborhoodVerified,
+      'lastActiveAt': lastActiveAt,
       'clubs': clubs, // [추가]
     };
   }
+
+  /// Compatibility getter for the newer UI API that expects a string label
+  /// property named `trustLevelLabel`. This maps existing `trustLevel` to
+  /// the label used by widgets without requiring a schema migration.
+  String get trustLevelLabel => trustLevel;
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class TrustLevelBadge extends StatelessWidget {
-  final String trustLevel;
+  final String trustLevelLabel; // [v2.1] 파라미터명 변경 (int -> String Label)
   final bool showText;
 
   const TrustLevelBadge({
     super.key,
-    required this.trustLevel,
+    required this.trustLevelLabel, // [v2.1] 파라미터명 변경
     this.showText = true,
   });
 
@@ -16,7 +16,8 @@ class TrustLevelBadge extends StatelessWidget {
     late Color color;
     late String text;
 
-    switch (trustLevel) {
+    // [v2.1] int가 아닌 String 라벨로 switch
+    switch (trustLevelLabel) {
       case 'trusted':
         icon = Icons.verified_user;
         color = Colors.blue[400]!;

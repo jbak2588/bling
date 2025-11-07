@@ -59,6 +59,11 @@ import 'package:bling_app/features/jobs/screens/job_detail_screen.dart';
 // TODO: ProductRepository 및 ProductDetailScreen import 필요
 // import 'package:bling_app/features/marketplace/data/product_repository.dart';
 // import 'package:bling_app/features/marketplace/screens/product_detail_screen.dart';
+import 'dart:io'; // [v2.1] 이미지 파일(File) 사용을 위해 import
+import 'dart:ui' as ui; // [v2.1] 이미지 블러(ImageFiltered)를 위해 import
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart'; // [v2.1] 이미지 전송 기능 구현을 위해 import
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +77,8 @@ class ChatRoomScreen extends StatefulWidget {
   final String? otherUserId;
   final String? productTitle; // 구인글 제목 등 컨텍스트 제목으로 재활용
   final List<String>? participants;
+  // [v2.1] '동네 친구'에서 신규 입장 시 true로 설정
+  final bool isNewChat;
 
   const ChatRoomScreen({
     super.key,
@@ -82,6 +89,7 @@ class ChatRoomScreen extends StatefulWidget {
     this.otherUserId,
     this.productTitle,
     this.participants,
+    this.isNewChat = false, // 기본값은 false
   });
 
   @override
@@ -94,6 +102,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final _audioPlayer = AudioPlayer();
   final ChatService _chatService = ChatService();
 
+  final ScrollController _scrollController = ScrollController();
+
+  // [v2.1] 보호 모드 상태 변수 (State 변수로 승격)
+  bool _isProtectionActive = false;
+  final ImagePicker _picker = ImagePicker(); // [v2.1] 이미지 피커 인스턴스
+  // [v2.1] 이 채팅이 '친구(1:1) 채팅'인지 여부 (보호 모드 적용 대상 판단용)
+  bool _isFriendChat = false;
+
   Map<String, UserModel> _participantsInfo = {};
   bool _isLoadingParticipants = true;
 
@@ -103,12 +119,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   // ChatRoomModel? _chatRoomModel;
   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
+  bool get isNewChat => widget.isNewChat;
+
   @override
   void initState() {
     super.initState();
     _loadParticipantsData();
     // [수정] 그룹/1:1 채팅 모두에서 '읽음'으로 표시하는 함수를 호출합니다.
     _chatService.markMessagesAsRead(widget.chatId);
+    // 보호 모드는 채팅 컨텍스트를 확인한 뒤(친구 채팅인지) 결정합니다.
     _loadChatContext(); // [추가] 컨텍스트 정보 로딩 함수 호출
   }
 
@@ -145,6 +164,18 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       final chatRoom = await _chatService.getChatRoom(widget.chatId);
       if (chatRoom == null || !mounted) return;
 
+      // Determine whether this is a plain 1:1 friend chat (no product/job/context)
+      final bool isFriend = (chatRoom.isGroupChat == false) &&
+          (chatRoom.contextType == null || chatRoom.contextType!.isEmpty) &&
+          (chatRoom.participants.length == 2);
+      if (mounted) {
+        setState(() {
+          _isFriendChat = isFriend;
+          // Only enable initial protection when this was explicitly started as a new friend chat
+          _isProtectionActive = widget.isNewChat && _isFriendChat;
+        });
+      }
+
       // setState(() => _chatRoomModel = chatRoom);
 
       // [수정] _chatRoomModel 변수에 저장하는 대신, 직접 사용
@@ -176,6 +207,34 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       otherUserId: widget.isGroupChat ? null : widget.otherUserId,
       allParticipantIds: widget.isGroupChat ? widget.participants : null,
     );
+  }
+
+  // [v2.1] 이미지 전송 로직 (신규 추가)
+  Future<void> _pickImage(ImageSource source) async {
+    // [v2.1] 보호 모드일 때는 이미지 선택 자체를 차단 (버튼이 disabled지만 2중 방어)
+    if (_isProtectionActive) return;
+
+    try {
+      final XFile? image = await _picker.pickImage(source: source);
+      if (image != null) {
+        final File imageFile = File(image.path);
+        // chat_service.dart의 sendImageMessage 호출
+        await _chatService.sendImageMessage(
+          widget.chatId,
+          imageFile,
+          widget.otherUserId, // 1:1 채팅 기준
+        );
+      }
+    } catch (e) {
+      // 오류 무시 또는 로깅
+      debugPrint('Image pick/send failed: $e');
+    }
+  }
+
+  // [v2.1] 아이스브레이커용 메시지 전송
+  void _sendMessageWithSuggestion(String text) {
+    _messageController.text = text;
+    _sendMessage();
   }
 
   // [복원 및 업그레이드] 읽음 확인 아이콘을 그리는 위젯
@@ -234,12 +293,42 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (snapshot.data!.isEmpty) {
+                        // [v2.1] 새 채팅이고 메시지가 없으면 아이스브레이커 표시
+                        if (isNewChat) {
+                          return _buildIcebreakers();
+                        }
                         return Center(
                             child: Text('chat_room.placeholder'.tr()));
                       }
 
                       final messages = snapshot.data!;
+
+                      // [v2.1] 24시간 보호 모드 로직 (친구 채팅에만 적용)
+                      bool calculatedProtectionActive = false;
+                      if (_isFriendChat && isNewChat && messages.isNotEmpty) {
+                        // 가장 오래된 메시지(첫 메시지)의 타임스탬프
+                        final firstMessageTime =
+                            messages.last.timestamp.toDate();
+                        final now = DateTime.now();
+                        // 24시간(86400초)이 지나지 않았으면 보호 모드 활성화
+                        calculatedProtectionActive =
+                            now.difference(firstMessageTime).inSeconds < 86400;
+                      }
+
+                      // [v2.1] StreamBuilder가 재실행될 때마다 setState가 호출되는 것을 방지
+                      // 상태가 실제로 변경될 때만(예: 24시간이 방금 지남) setState 호출
+                      if (calculatedProtectionActive != _isProtectionActive) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            setState(() {
+                              _isProtectionActive = calculatedProtectionActive;
+                            });
+                          }
+                        });
+                      }
+
                       return ListView.builder(
+                        controller: _scrollController,
                         reverse: true,
                         padding: const EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 8.0),
@@ -248,7 +337,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                           final message = messages[index];
                           final sender = _participantsInfo[message.senderId];
                           final isMe = message.senderId == _myUid;
-                          return _buildMessageItem(message, sender, isMe);
+                          return _buildMessageItem(message, sender, isMe,
+                              isProtectionMode: _isProtectionActive);
                         },
                       );
                     },
@@ -266,28 +356,116 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   // ✅ 메시지 입력창 UI를 별도의 함수로 분리합니다.
   Widget _buildMessageInputField() {
-    return Padding(
-      // viewInsets.bottom은 bottomNavigationBar가 자동으로 처리하므로 제거합니다.
-      padding: const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: InputDecoration(
-                  hintText: 'chat_room.placeholder'.tr(),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16)),
-              onSubmitted: (_) => _sendMessage(),
+    final theme = Theme.of(context);
+    // [v2.1] 보호 모드 배너 및 입력창
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // [v2.1] 보호 모드가 활성화되면 배너 표시
+        if (_isProtectionActive)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            color: Colors.grey[200],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.shield_outlined, size: 16, color: Colors.grey[700]),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    'chatRoom.mediaBlocked'.tr(),
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: Colors.grey[700]),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.send, color: Colors.teal),
-            onPressed: _sendMessage,
+        Padding(
+          // viewInsets.bottom은 bottomNavigationBar가 자동으로 처리하므로 제거합니다.
+          padding: const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 12),
+          child: Row(
+            children: [
+              // [v2.1] 이미지/미디어 전송 버튼 (보호 모드 시 비활성화)
+              IconButton(
+                icon: Icon(Icons.photo_camera_outlined,
+                    color:
+                        _isProtectionActive ? Colors.grey : theme.primaryColor),
+                onPressed: _isProtectionActive
+                    ? null
+                    : () => _pickImage(ImageSource.camera),
+              ),
+              IconButton(
+                icon: Icon(Icons.attach_file_outlined,
+                    color:
+                        _isProtectionActive ? Colors.grey : theme.primaryColor),
+                onPressed: _isProtectionActive
+                    ? null
+                    : () => _pickImage(ImageSource.gallery),
+              ),
+              Expanded(
+                child: TextField(
+                  controller: _messageController,
+                  decoration: InputDecoration(
+                      hintText: 'chat_room.placeholder'.tr(),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24)),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16)),
+                  onSubmitted: (_) => _sendMessage(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                  icon: const Icon(Icons.send, color: Colors.teal),
+                  onPressed: _sendMessage),
+            ],
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  // [v2.1] 아이스브레이커 위젯
+  Widget _buildIcebreakers() {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'chatRoom.startConversation'.tr(),
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 8.0,
+              alignment: WrapAlignment.center,
+              children: [
+                ActionChip(
+                  label: Text('chatRoom.icebreaker1'.tr()),
+                  onPressed: () =>
+                      _sendMessageWithSuggestion('chatRoom.icebreaker1'.tr()),
+                ),
+                ActionChip(
+                  label: Text('chatRoom.icebreaker2'.tr()),
+                  onPressed: () =>
+                      _sendMessageWithSuggestion('chatRoom.icebreaker2'.tr()),
+                ),
+                ActionChip(
+                  label: Text('chatRoom.icebreaker3'.tr()),
+                  onPressed: () =>
+                      _sendMessageWithSuggestion('chatRoom.icebreaker3'.tr()),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -369,7 +547,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   Widget _buildMessageItem(
-      ChatMessageModel message, UserModel? sender, bool isMe) {
+      ChatMessageModel message, UserModel? sender, bool isMe,
+      {bool isProtectionMode = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -407,7 +586,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   decoration: BoxDecoration(
                       color: isMe ? Colors.teal[50] : Colors.grey[200],
                       borderRadius: BorderRadius.circular(16)),
-                  child: Text(message.text),
+                  // [v2.1] 이미지 또는 텍스트 표시
+                  child:
+                      (message.imageUrl != null && message.imageUrl!.isNotEmpty)
+                          // 이미지가 있을 경우
+                          ? _buildImageMessage(
+                              context, message.imageUrl!, isProtectionMode)
+                          // 텍스트만 있을 경우
+                          : Text(_maskMessage(message.text, isProtectionMode)),
                 ),
               ],
             ),
@@ -418,6 +604,50 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           ],
         ],
       ),
+    );
+  }
+
+  // [v2.1] 24시간 보호 모드: 링크 및 전화번호 마스킹
+  String _maskMessage(String text, bool isProtectionMode) {
+    if (!isProtectionMode) return text;
+
+    // 8자리 이상의 숫자 시퀀스 (전화번호)
+    final RegExp phoneRegex = RegExp(r'(\+?[0-9][0-9\s-]{7,}[0-9])');
+    // URL
+    final RegExp linkRegex = RegExp(
+        r'http[s]?:\/\/[^\n+\s]+|www\.[^\s]+|[\w-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?\/[^\s]*');
+
+    return text
+        .replaceAll(linkRegex, '[${'chatRoom.linkHidden'.tr()}]')
+        .replaceAll(phoneRegex, '[${'chatRoom.contactHidden'.tr()}]');
+  }
+
+  // [v2.1] 이미지 메시지 위젯 (보호 모드 블러 처리)
+  Widget _buildImageMessage(
+      BuildContext context, String imageUrl, bool isProtectionMode) {
+    Widget imageWidget = CachedNetworkImage(
+      imageUrl: imageUrl,
+      placeholder: (context, url) =>
+          const Center(child: CircularProgressIndicator()),
+      errorWidget: (context, url, error) =>
+          const Icon(Icons.broken_image, color: Colors.grey),
+      fit: BoxFit.cover,
+    );
+
+    if (isProtectionMode) {
+      // [v2.1] 보호 모드일 때 블러(Blur) 처리
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: ImageFiltered(
+          imageFilter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+          child: imageWidget,
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: imageWidget,
     );
   }
 }
