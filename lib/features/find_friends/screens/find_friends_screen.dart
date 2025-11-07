@@ -25,6 +25,14 @@
 /// - `ProfileEditScreen`에서 '리스트에 나를 노출' 토글을 관리.
 ///
 library;
+
+// [v2.1 리팩토링 이력: Job 6-45]
+// - (Job 6, 9) 'FindFriendFormScreen' (데이팅 프로필) FAB를 'ProfileEditScreen'으로 변경.
+// - (Job 32-34) UI 구조를 'Column'에서 'TabBar' + 'TabBarView'로 변경하여 '친구'와 '모임' 탭 통합.
+// - (Job 35-36) 'autoFocusSearch' 및 '_showSearchBar' 관련 검색 로직 복원 (탭 추가 시 누락됨).
+// - (Job 36, 37) '친구/모임' 탭의 StreamBuilder가 올바른 초기 필터(_currentLocationFilter)를 사용하도록 수정 (빈 리스트 문제 해결).
+// - (Job 39, 45) '모임' 탭(_buildClubsList)이 'Active Clubs'와 'Proposals'를 모두 렌더링하도록 수정.
+// - (Job 45) [임시 조치] 'Active Clubs'의 Firestore 인덱스 문제로, 'getClubsByLocationStream' 대신 'getClubsStream' (필터 없음)을 호출.
 // 아래부터 실제 코드
 
 import 'package:bling_app/features/main_screen/main_navigation_screen.dart'

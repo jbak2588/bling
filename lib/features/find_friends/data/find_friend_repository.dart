@@ -1,3 +1,8 @@
+// [v2.1 리팩토링 이력: Job 6-25, 45]
+// - (Job 6) 'isDatingProfile' 필터를 쿼리에서 제거.
+// - (Job 6, 7, 8) 'friend_requests' 관련 로직(sendFriendRequest, getRequestStatus 등) 전체 삭제.
+// - (Job 20, 22, 24, 25) 'getFindFriendListStream'에 클라이언트 측 정렬 로직 추가.
+//   (정렬 순서: neighborhoodVerified -> trustLevel -> interests -> lastActiveAt)
 // lib/features/find_friends/data/find_friend_repository.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';

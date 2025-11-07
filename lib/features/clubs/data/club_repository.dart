@@ -10,6 +10,12 @@
 // 8. (Task 12) 'getMyClubsStream': '내가 가입한 모임' 카로셀을 위한 스트림 추가.
 // 9. (Task 10) 'deletePost': [버그 수정] 게시글 삭제 시 하위 'comments' 컬렉션을 일괄 삭제(batch delete)하도록 수정.
 // =====================================================
+// [v2.1 리팩토링 이력: Job 32, 38-45]
+// - (Job 32) 'getClubsByLocationStream' (위치 기반 'Active Clubs') 스트림 추가.
+// - (Job 39) 'getClubProposalsByLocationStream' (위치 기반 'Proposals') 스트림 추가.
+// - (Job 38-44) 'getClubsByLocationStream'의 Firestore 복합 인덱스 문제 디버깅.
+// - (Job 43) 쿼리 단순화를 위해 위치 필터 시 'orderBy' 제거 (클라이언트 정렬 활용).
+// - (Job 45) 'Expected to find }' 컴파일 에러 수정 (괄호 누락) 및 'unused_element' 경고 수정.
 // lib/features/clubs/data/club_repository.dart
 
 import 'package:bling_app/features/clubs/models/club_member_model.dart';

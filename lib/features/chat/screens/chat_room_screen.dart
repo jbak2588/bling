@@ -43,6 +43,21 @@
 ///   - [버그 수정] Scaffold에 'resizeToAvoidBottomInset: true' 속성을 추가.
 ///   - 핸드폰 키보드가 올라올 때 채팅 입력창이 가려지는 현상 수정.
 /// ============================================================================
+// [v2.1 리팩토링 이력: Job 15-19]
+// - (Job 15) 'isNewChat' 파라미터 추가.
+// - (Job 15) 'isNewChat'이 true이고 메시지가 없으면 '아이스브레이커' 질문 칩 표시.
+// - (Job 15) 'isNewChat'이 true일 때 24시간(86400초) '보호 모드'(_isProtectionActive) 활성화.
+// - (Job 15) '_maskMessage' 함수: 보호 모드 시 링크(http) 및 전화번호(8자리 이상) 마스킹.
+// - (Job 17) 'sendImageMessage' 및 '_buildImageMessage' 기능 추가.
+// - (Job 17) 보호 모드 시 미디어 전송 버튼(카메라/갤러리) 비활성화.
+// - (Job 17) 보호 모드 시 수신 이미지 'BackdropFilter'로 블러(Blur) 처리.
+// - (Job 19) 'unused_field'(_scrollController) 및 'Unnecessary Container' 경고 수정.
+// [v2.1 리팩토링 이력: Job 15]
+// - (Job 15) 'sendMessage'의 'batch.update'를 'batch.set(..., merge: true)'로 변경.
+//   (사유: '동네 친구' 첫 대화 시 채팅방 문서가 존재하지 않아도 생성되도록 보장 - 버그 수정)
+// [v2.1 리팩토링 이력: Job 7, 9, 25]
+// - (Job 7, 9) 'isDatingProfile', 'age', 'ageRange', 'gender' 등 데이팅 관련 필드 삭제/null 처리.
+// - (Job 25) 'trustLevelLabel' (String) 필드 추가 (Firestore 데이터와 동기화).
 library;
 
 // 아래부터 실제 코드

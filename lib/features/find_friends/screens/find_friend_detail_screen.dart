@@ -23,6 +23,13 @@
 /// - FAB UI 및 로직 변경 (icon: person_add -> chat, action: sendRequest -> startChat).
 /// - [작업 10] ChatRoomScreen 탐색 로직을 chatId 기반으로 수정 (user_friend_list.dart 참조)
 /// ============================================================================
+/// // [v2.1 리팩토링 이력: Job 6-31]
+// - (Job 6) 'StreamBuilder' 및 'sendFriendRequest' 로직 삭제.
+// - (Job 6, 10, 11) FAB를 '친구 요청'에서 '대화 시작하기'로 변경.
+// - (Job 10) 'ChatRoomScreen'의 생성자 변경에 따라 'chatId'를 생성하여 전달하도록 수정.
+// - (Job 15, 17) 'isNewChat: true' 플래그를 'ChatRoomScreen'으로 전달.
+// - (Job 29-31) 'startFriendChat' Cloud Function을 호출하는 스팸 방지 로직(일일 한도) 적용.
+
 library;
 
 import 'package:flutter/material.dart';

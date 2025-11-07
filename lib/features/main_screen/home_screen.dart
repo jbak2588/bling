@@ -56,6 +56,11 @@ library;
  *
  * [변경자] GitHub Copilot
  */
+// [작업 이력: 0-3]
+// - (Job 0) 'GrabIconTile' UI 수정: 그림자 제거, 흰색 배경 및 BoxShadow 적용.
+// - (Job 1) Column 오버플로우(1.4px) 해결을 위해 SizedBox 높이 조정.
+// - (Job 2) 2줄 라벨로 인한 아이콘 상단 밀림 현상 해결 (Container 높이 고정).
+// - (Job 3) 'children' 내 'final' 변수 선언으로 인한 컴파일 에러 수정 (변수 선언 위치 이동).
 // (파일 내용...)
 
 // import removed: GrabIconTile no longer used in v2 grid UI
