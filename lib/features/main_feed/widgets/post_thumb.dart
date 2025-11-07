@@ -206,7 +206,8 @@ class PostThumb extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      TrustLevelBadge(trustLevel: user.trustLevel),
+                      // [v2.1] 뱃지 파라미터 수정 (int -> String Label)
+                      TrustLevelBadge(trustLevelLabel: user.trustLevelLabel),
                     ],
                   );
                 }

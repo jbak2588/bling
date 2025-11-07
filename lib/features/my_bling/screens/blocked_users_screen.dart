@@ -18,19 +18,20 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
   final FindFriendRepository _repository = FindFriendRepository();
   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
-  // [수정] '차단 해제'가 아닌 '거절 해제' 로직
-  Future<void> _showUnrejectConfirmationDialog(
-      String rejectedUserId, String nickname) async {
+  // [v2.1] '거절 해제' 로직을 '차단 해제' 로직으로 변경
+  Future<void> _showUnblockConfirmationDialog(
+      String blockedUserId, String nickname) async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'rejectedUsers.unrejectDialog.title'
+            'blockedUsers.unblockDialog.title'
                 .tr(namedArgs: {'nickname': nickname}),
           ),
           content: Text(
-            'rejectedUsers.unrejectDialog.content'.tr(),
+            'blockedUsers.unblockDialog.content'
+                .tr(namedArgs: {'nickname': nickname}),
           ),
           actions: [
             TextButton(
@@ -40,7 +41,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: Text(
-                'rejectedUsers.unreject'.tr(),
+                'blockedUsers.unblock'.tr(namedArgs: {'nickname': nickname}),
                 style: const TextStyle(color: Colors.red),
               ),
             ),
@@ -51,12 +52,13 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
 
     if (confirmed == true && mounted) {
       try {
-        // [수정] Repository에 unrejectUser 함수를 추가해야 합니다 (다음 단계에서 진행)
-        await _repository.unrejectUser(_currentUserId!, rejectedUserId);
+        await _repository.updateUserProfile(_currentUserId!, {
+          'blockedUsers': FieldValue.arrayRemove([blockedUserId])
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'rejectedUsers.unrejectSuccess'
+              'blockedUsers.unblockSuccess'
                   .tr(namedArgs: {'nickname': nickname}),
             ),
             backgroundColor: Colors.green,
@@ -66,7 +68,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'rejectedUsers.unrejectFailure'
+              'blockedUsers.unblockFailure'
                   .tr(namedArgs: {'error': e.toString()}),
             ),
             backgroundColor: Colors.red,
@@ -95,12 +97,14 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
   Widget build(BuildContext context) {
     if (_currentUserId == null) {
       return Scaffold(
-          appBar: AppBar(), body: Center(child: Text('로그인이 필요합니다.')));
+        appBar: AppBar(),
+        body: Center(child: Text('common.loginRequired'.tr())),
+      );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('rejectedUsers.title'.tr()),
+        title: Text('blockedUsers.title'.tr()),
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
@@ -113,50 +117,45 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
           }
           final currentUser = UserModel.fromFirestore(
               snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
-          // V V V --- [핵심 수정] 'blockedUsers'가 아닌 'rejectedUsers' 필드를 읽어옵니다 --- V V V
-          final rejectedUids = currentUser.rejectedUsers ?? [];
-          // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+          final blockedUids = currentUser.blockedUsers ?? [];
 
-          if (rejectedUids.isEmpty) {
+          if (blockedUids.isEmpty) {
             return Center(
-              child: Text('rejectedUsers.noRejectedUsers'.tr()),
+              child: Text('blockedUsers.empty'.tr()),
             );
           }
 
           return ListView.builder(
-            itemCount: rejectedUids.length,
+            itemCount: blockedUids.length,
             itemBuilder: (context, index) {
-              final rejectedUserId = rejectedUids[index];
+              final blockedUserId = blockedUids[index];
               return FutureBuilder<UserModel?>(
-                future: _getUserData(rejectedUserId),
+                future: _getUserData(blockedUserId),
                 builder: (context, userSnapshot) {
-                  if (userSnapshot.connectionState == ConnectionState.waiting) {
-                    return const ListTile(title: Text('...'));
-                  }
                   if (!userSnapshot.hasData || userSnapshot.data == null) {
                     return ListTile(
-                      title: Text('알 수 없는 사용자'),
-                      subtitle: Text(rejectedUserId),
+                      title: Text('common.unknownUser'.tr()),
+                      subtitle: Text(blockedUserId),
                     );
                   }
-
-                  final rejectedUser = userSnapshot.data!;
+                  final blockedUser = userSnapshot.data!;
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: (rejectedUser.photoUrl != null &&
-                              rejectedUser.photoUrl!.isNotEmpty)
-                          ? NetworkImage(rejectedUser.photoUrl!)
+                      backgroundImage: (blockedUser.photoUrl != null &&
+                              blockedUser.photoUrl!.isNotEmpty)
+                          ? NetworkImage(blockedUser.photoUrl!)
                           : null,
-                      child: (rejectedUser.photoUrl == null ||
-                              rejectedUser.photoUrl!.isEmpty)
+                      child: (blockedUser.photoUrl == null ||
+                              blockedUser.photoUrl!.isEmpty)
                           ? const Icon(Icons.person)
                           : null,
                     ),
-                    title: Text(rejectedUser.nickname),
+                    title: Text(blockedUser.nickname),
                     trailing: OutlinedButton(
-                      onPressed: () => _showUnrejectConfirmationDialog(
-                          rejectedUser.uid, rejectedUser.nickname),
-                      child: Text('rejectedUsers.unreject'.tr()),
+                      onPressed: () => _showUnblockConfirmationDialog(
+                          blockedUser.uid, blockedUser.nickname),
+                      child: Text('blockedUsers.unblock'
+                          .tr(namedArgs: {'nickname': blockedUser.nickname})),
                     ),
                   );
                 },

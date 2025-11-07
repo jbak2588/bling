@@ -27,6 +27,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../../core/models/user_model.dart';
+import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 
 /// Card displaying basic information for a FindFriend profile.
 class FindFriendCard extends StatelessWidget {
@@ -45,11 +46,9 @@ class FindFriendCard extends StatelessWidget {
               tag: 'profile-image-${user.uid}',
               child: CircleAvatar(
                 radius: 30,
-                backgroundImage: user.photoUrl != null
-                    ? NetworkImage(user.photoUrl!)
-                    : null,
-                child:
-                    user.photoUrl == null ? const Icon(Icons.person) : null,
+                backgroundImage:
+                    user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                child: user.photoUrl == null ? const Icon(Icons.person) : null,
               ),
             ),
             const SizedBox(width: 16),
@@ -57,12 +56,45 @@ class FindFriendCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user.nickname,
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold)),
-                  if (user.age != null)
-                    Text('${user.age}',
-                        style: const TextStyle(fontSize: 14)),
+                  // [v2.1] 닉네임과 신뢰 뱃지를 Row로 묶음
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          user.nickname,
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TrustLevelBadge(
+                        trustLevelLabel: user.trustLevelLabel,
+                        showText: true, // [작업 27] 뱃지 텍스트 표시
+                      ),
+                    ],
+                  ),
+                  // [v2.1] 'age' 대신 'interests' 표시
+                  if (user.interests != null && user.interests!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Wrap(
+                        spacing: 4.0,
+                        runSpacing: 4.0,
+                        children: user.interests!
+                            .take(3) // 최대 3개만 표시
+                            .map((interest) => Chip(
+                                  label: Text(interest,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall),
+                                  padding: EdgeInsets.zero,
+                                  visualDensity: VisualDensity.compact,
+                                ))
+                            .toList(),
+                      ),
+                    ),
                   if (user.locationName != null)
                     Text(user.locationName!,
                         style:

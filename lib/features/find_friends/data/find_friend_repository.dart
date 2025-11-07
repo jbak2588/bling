@@ -1,11 +1,10 @@
 // lib/features/find_friends/data/find_friend_repository.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 
-import '../models/friend_request_model.dart';
+// [v2.1] '친구 요청' 모델 삭제 (컴파일 에러 1번 원인)
+// import '../models/friend_request_model.dart';
 import '../../../core/models/user_model.dart';
 
 // import 'package:firebase_auth/firebase_auth.dart';
@@ -21,8 +20,10 @@ class FindFriendRepository {
 
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection('users');
-  CollectionReference<Map<String, dynamic>> get _requests =>
-      _firestore.collection('friend_requests');
+
+  // [v2.1] '친구 요청' 컬렉션 참조 삭제
+  // CollectionReference<Map<String, dynamic>> get _requests =>
+  //     _firestore.collection('friend_requests');
 
   Future<void> saveProfile(String uid, Map<String, dynamic> data) async {
     await _users.doc(uid).set(data, SetOptions(merge: true));
@@ -30,182 +31,123 @@ class FindFriendRepository {
 
   Stream<List<UserModel>> getNearbyFriends(String kab) {
     return _users
-        .where('isDatingProfile', isEqualTo: true)
+        // [v2.1] isDatingProfile 필터 삭제
         .where('isVisibleInList', isEqualTo: true)
-        .where('neighborhoodVerified', isEqualTo: true)
         .where('locationParts.kab', isEqualTo: kab)
         .snapshots()
-        .map((s) => s.docs.map(UserModel.fromFirestore).toList());
-  }
-
-  // V V V --- [수정] 누락되었던 친구 추가 로직을 복원한 최종 버전 --- V V V
-  Future<void> acceptFriendRequest(
-      String requestId, String fromUserId, String toUserId) async {
-    try {
-      debugPrint("--- 친구 요청 수락 시작 ---");
-      final batch = _firestore.batch();
-
-      // 1. friend_requests 컬렉션에서 해당 요청 문서의 status를 'accepted'로 변경
-      final requestRef = _requests.doc(requestId);
-      batch.update(requestRef, {'status': 'accepted'});
-
-      // 2. [복원] 요청을 보낸 사람(fromUser)의 friends 목록에 받는 사람(toUser)의 ID를 추가
-      final fromUserRef = _users.doc(fromUserId);
-      batch.update(fromUserRef, {
-        'friends': FieldValue.arrayUnion([toUserId])
-      });
-
-      // 3. [복원] 요청을 받은 사람(toUser)의 friends 목록에 보낸 사람(fromUser)의 ID를 추가
-      final toUserRef = _users.doc(toUserId);
-      batch.update(toUserRef, {
-        'friends': FieldValue.arrayUnion([fromUserId])
-      });
-
-      // 4. 새로운 1:1 채팅방 생성 로직
-      List<String> ids = [fromUserId, toUserId];
-      ids.sort();
-      String chatRoomId = ids.join('_');
-      final chatRoomRef = _firestore.collection('chats').doc(chatRoomId);
-      final chatRoomData = {
-        'participants': [fromUserId, toUserId],
-        'lastMessage': 'friendRequests.defaultChatMessage'.tr(),
-        'lastMessageTimestamp': FieldValue.serverTimestamp(),
-        'unreadCounts': {fromUserId: 0, toUserId: 0},
-      };
-      batch.set(chatRoomRef, chatRoomData, SetOptions(merge: true));
-
-      // 5. 모든 작업을 한 번에 실행
-      await batch.commit();
-      debugPrint("--- 친구 요청 수락 성공 (Batch Commit 완료) ---");
-    } catch (e) {
-      debugPrint("!!! 친구 요청 수락 중 에러 발생: $e !!!");
-      rethrow;
-    }
-  }
-
-  // V V V --- [수정] 친구 요청 거절 시, 거절당한 사람을 목록에 추가하는 로직 --- V V V
-  Future<void> rejectFriendRequest(
-      String requestId, String fromUserId, String toUserId) async {
-    final batch = _firestore.batch();
-
-    // 1. 요청 문서의 status를 'rejected'로 변경
-    final requestRef = _requests.doc(requestId);
-    batch.update(requestRef, {'status': 'rejected'});
-
-    // 2. 요청을 받은 사람(toUser, 거절한 사람)의 rejectedUsers 목록에 요청 보낸 사람(fromUser)의 ID를 추가
-    final toUserRef = _users.doc(toUserId);
-    batch.update(toUserRef, {
-      'rejectedUsers': FieldValue.arrayUnion([fromUserId])
-    });
-
-    await batch.commit();
-  }
-  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-   Future<void> unrejectUser(String currentUserId, String rejectedUserId) async {
-    await _users.doc(currentUserId).update({
-      'rejectedUsers': FieldValue.arrayRemove([rejectedUserId])
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
     });
   }
 
-   // V V V --- [추가] 사용자 차단 해제 함수 --- V V V
-  Future<void> unblockUser(String currentUserId, String blockedUserId) async {
-    await _users.doc(currentUserId).update({
-      'blockedUsers': FieldValue.arrayRemove([blockedUserId])
-    });
-  }
-
-  Future<void> sendFriendRequest(String fromUserId, String toUserId) async {
-    final existing = await _requests
-        .where('fromUserId', isEqualTo: fromUserId)
-        .where('toUserId', isEqualTo: toUserId)
-        .get();
-    if (existing.docs.isNotEmpty) return;
-    await _requests.add({
-      'fromUserId': fromUserId,
-      'toUserId': toUserId,
-      'status': 'pending',
-      'createdAt': Timestamp.now(),
-    });
-  }
-
-  // V V V --- [수정] 친구 목록을 불러올 때, 거절/차단한 사용자를 제외하는 로직 --- V V V
-  Stream<List<UserModel>> getUsersForFindFriends(UserModel currentUser,
-      {Map<String, String?>? locationFilter}) {
-    Query query = _firestore
-        .collection('users')
-        .where('isDatingProfile', isEqualTo: true)
+  /// Fetches a stream of users based on location filters.
+  ///
+  /// [v2.1] Removed 'isDatingProfile' filter.
+  /// TODO: Implement v2.1 sorting (trustLevel, interests)
+  Stream<List<UserModel>> getFindFriendListStream({
+    required Map<String, String?> locationFilter,
+    // [v2.1] 클라이언트 측 정렬을 위해 현재 유저 정보 추가
+    required UserModel currentUser,
+    // [v2.1] isDatingProfile 파라미터 삭제
+    // required bool isDatingProfile,
+  }) {
+    Query query = _users
+        // [v2.1] isDatingProfile 필터 삭제
         .where('isVisibleInList', isEqualTo: true);
 
-    final rejectedUids = currentUser.rejectedUsers ?? [];
-    final blockedUids = currentUser.blockedUsers ?? [];
-    final excludedUids =
-        {...rejectedUids, ...blockedUids, currentUser.uid}.toList();
+    // Apply location filters dynamically
+    // (이 로직은 v2.1과 호환되므로 유지)
+    if (locationFilter['prov'] != null) {
+      query =
+          query.where('locationParts.prov', isEqualTo: locationFilter['prov']);
 
-    if (excludedUids.isNotEmpty) {
-      query = query.where(FieldPath.documentId,
-          whereNotIn: excludedUids.take(10).toList());
-    }
-
-    final genderPreference = currentUser.privacySettings?['genderPreference'];
-    if (genderPreference == 'male') {
-      query = query.where('gender', isEqualTo: 'male');
-    } else if (genderPreference == 'female') {
-      query = query.where('gender', isEqualTo: 'female');
-    }
-
-    if (locationFilter != null) {
-      if (locationFilter['prov'] != null) {
-        query = query.where('locationParts.prov',
-            isEqualTo: locationFilter['prov']);
-      }
       if (locationFilter['kab'] != null) {
-        query = query.where('locationParts.kab',
-            isEqualTo: locationFilter['kab']);
-      }
-      if (locationFilter['kec'] != null) {
-        query = query.where('locationParts.kec',
-            isEqualTo: locationFilter['kec']);
-      }
-      if (locationFilter['kel'] != null) {
-        query = query.where('locationParts.kel',
-            isEqualTo: locationFilter['kel']);
+        query =
+            query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+
+        if (locationFilter['kec'] != null) {
+          query = query.where('locationParts.kec',
+              isEqualTo: locationFilter['kec']);
+        }
+        if (locationFilter['kel'] != null) {
+          query = query.where('locationParts.kel',
+              isEqualTo: locationFilter['kel']);
+        }
       }
     }
 
     return query.snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => UserModel.fromFirestore(
-              doc as QueryDocumentSnapshot<Map<String, dynamic>>))
-          .toList();
+      // [v2.1] 정렬 로직 (Job 20)
+      // 1. Firestore에서 문서를 UserModel로 변환
+      List<UserModel> users = snapshot.docs.map((doc) {
+        return UserModel.fromFirestore(
+            doc as QueryDocumentSnapshot<Map<String, dynamic>>);
+      }).toList();
+
+      // 2. 자기 자신은 리스트에서 제거
+      users.removeWhere((user) => user.uid == currentUser.uid);
+
+      // 3. 클라이언트(Dart) 측에서 정렬 수행
+      // 안전한 비교를 위해 문자열 trustLevel을 숫자 순위로 매핑하고,
+      // neighborhoodVerified는 bool->int로 변환해 비교합니다.
+      int trustLevelRank(dynamic level) {
+        // Accept String labels like 'unverified','normal','verified','trusted'
+        // Also accept numeric values stored as num or numeric string.
+        if (level == null) return 1; // default 'normal'
+        if (level is int) return level;
+        if (level is num) return level.toInt();
+        if (level is String) {
+          final l = level.toLowerCase();
+          if (l == 'unverified') return 0;
+          if (l == 'normal' || l == 'norm') return 1;
+          if (l == 'verified') return 2;
+          if (l == 'trusted' || l == 'trust') return 3;
+          // try parse numeric string
+          final n = int.tryParse(level);
+          if (n != null) return n;
+        }
+        return 1;
+      }
+
+      users.sort((a, b) {
+        // [v2.1] 1순위: 동네 인증 (neighborhoodVerified) (true가 먼저 오도록)
+        // (내림차순: b.compareTo(a))
+        int verifiedA = (a.neighborhoodVerified ?? false) ? 1 : 0;
+        int verifiedB = (b.neighborhoodVerified ?? false) ? 1 : 0;
+        int verifiedCompare = verifiedB.compareTo(verifiedA);
+        if (verifiedCompare != 0) return verifiedCompare;
+
+        // [v2.1] 2순위: 신뢰 등급 (trustLevel) 높은 순 (내림차순)
+        // (내림차순: b.compareTo(a))
+        int aTrustRank = trustLevelRank(a.trustLevel);
+        int bTrustRank = trustLevelRank(b.trustLevel);
+        int trustCompare = bTrustRank.compareTo(aTrustRank);
+        if (trustCompare != 0) return trustCompare;
+
+        // [v2.1] 3순위: 공통 관심사 (interests) 많은 순 (내림차순)
+        final currentUserInterests = currentUser.interests?.toSet() ?? {};
+        if (currentUserInterests.isNotEmpty) {
+          final aInterests = a.interests?.toSet() ?? {};
+          final bInterests = b.interests?.toSet() ?? {};
+
+          int aCommon = aInterests.intersection(currentUserInterests).length;
+          int bCommon = bInterests.intersection(currentUserInterests).length;
+
+          int interestCompare = bCommon.compareTo(aCommon);
+          if (interestCompare != 0) return interestCompare;
+        }
+
+        // [v2.1] 4순위 (동점일 경우): 최근 접속일 (lastActiveAt) 최신 순 (내림차순)
+        // (내림차순: b.compareTo(a))
+        return (b.lastActiveAt ?? Timestamp(0, 0))
+            .compareTo(a.lastActiveAt ?? Timestamp(0, 0));
+      });
+
+      return users;
     });
   }
-  // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
-  Stream<QuerySnapshot> getRequestStatus(String fromUserId, String toUserId) {
-    return _requests
-        .where('fromUserId', isEqualTo: fromUserId)
-        .where('toUserId', isEqualTo: toUserId)
-        .where('status', isEqualTo: 'pending')
-        .limit(1) // 요청은 하나만 존재할 것이므로
-        .snapshots();
-  }
-
-  Future<void> respondRequest(String requestId, String status) async {
-    await _requests.doc(requestId).update({'status': status});
-  }
-
-  Stream<List<FriendRequestModel>> getReceivedRequests(String userId) {
-    return _requests
-        .where('toUserId', isEqualTo: userId)
-        .where('status', isEqualTo: 'pending') // 이 조건이 핵심입니다.
-        .snapshots()
-        .map((s) => s.docs.map(FriendRequestModel.fromFirestore).toList());
-  }
-
-  Stream<List<FriendRequestModel>> getSentRequests(String userId) {
-    return _requests
-        .where('fromUserId', isEqualTo: userId)
-        .snapshots()
-        .map((s) => s.docs.map(FriendRequestModel.fromFirestore).toList());
-  }
-}
+  // [v2.1] '친구 요청' 관련 메서드 전체 삭제 (sendFriendRequest, getRequestStatus, respondRequest, getReceivedRequests, getSentRequests)
+  // (컴파일 에러 2번 원인 - 이 함수들이 삭제되지 않거나,
+  // 이 함수들을 삭제하면서 클래스의 마지막 '}'가 함께 삭제되어 syntax error 발생)
+} // <-- 이 닫는 괄호가 누락되었을 가능성이 높습니다.

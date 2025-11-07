@@ -413,6 +413,83 @@
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
+    
+    {
+      "collectionGroup": "clubs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "locationParts.prov", "order": "ASCENDING" },
+        { "fieldPath": "isSponsored", "order": "DESCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "clubs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
+        { "fieldPath": "isSponsored", "order": "DESCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "clubs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "locationParts.kec", "order": "ASCENDING" },
+        { "fieldPath": "isSponsored", "order": "DESCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "clubs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "locationParts.kel", "order": "ASCENDING" },
+        { "fieldPath": "isSponsored", "order": "DESCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "clubs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isSponsored", "order": "DESCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "club_proposals",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "locationParts.prov", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "club_proposals",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "locationParts.kab", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "club_proposals",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "locationParts.kec", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "club_proposals",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "locationParts.kel", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
     {
       "collectionGroup": "room_listings",
       "queryScope": "COLLECTION",

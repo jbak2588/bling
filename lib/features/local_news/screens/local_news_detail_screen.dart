@@ -234,8 +234,9 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                               style:
                                   const TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(width: 4),
+                          // [v2.1] 뱃지 파라미터 수정 (int -> String Label)
                           TrustLevelBadge(
-                              trustLevel: user.trustLevel, showText: true),
+                              trustLevelLabel: user.trustLevelLabel),
                         ],
                       ),
                       Text(

@@ -1,5 +1,5 @@
 {
-  "login": {
+    "login": {
     "title": "Log In",
     "subtitle": "Buy and sell lightly with Bling!",
     "emailHint": "Email Address",
@@ -51,6 +51,9 @@
       "userNotFound": "User not found."
     },
     "myTown": "My Town",
+    "mapView": {
+      "showMap": "Show map"
+    },
     "search": {
       "placeholder": "Search",
       "chipPlaceholder": "Search neighbors, news, preloved, jobs…",
@@ -278,6 +281,10 @@
     "title": "My Bling",
     "editProfile": "Edit Profile",
     "settings": "Settings",
+    "posts": "Posts",
+    "followers": "Followers",
+    "neighbors": "Neighbors",
+    "friends": "Friends",
     "stats": {
       "posts": "Posts",
       "followers": "Followers",
@@ -336,7 +343,7 @@
     "unblock": "Unblock",
     "unblockDialog": {
       "title": "Unblock {nickname}?",
-      "content": "If unblocked, this user can find you and send friend requests again."
+      "content": "After unblocking, this user may appear in your Find Friends list again."
     },
     "unblockSuccess": "Unblocked {nickname}.",
     "unblockFailure": "Failed to unblock: {error}",
@@ -448,6 +455,12 @@
       "local_news": {
         "name": "Local News",
         "description": "Share news and info about our neighborhood."
+      },
+      "november": {
+        "name": "November"
+      },
+      "rain": {
+        "name": "Rain"
       },
       "daily_question": {
         "name": "Have a Question",
@@ -641,6 +654,16 @@
   "chat_room": {
     "placeholder": "Type a message..."
   },
+  "chatRoom": {
+    "startConversation": "Start a conversation",
+    "icebreaker1": "Hi there! 👋",
+    "icebreaker2": "What do you usually do on weekends?",
+    "icebreaker3": "Any favorite spots nearby?",
+    "mediaBlocked": "For safety, media sending is restricted for 24 hours.",
+    "imageMessage": "Image",
+    "linkHidden": "Protection mode: link hidden",
+    "contactHidden": "Protection mode: contact hidden"
+  },
   "jobs": {
     "setLocationPrompt": "Set your location to see job posts!",
     "screen": {
@@ -758,6 +781,11 @@
   },
   "findFriend": {
     "title": "Find Friends",
+    "tabs": {
+      "friends": "Friends",
+      "groups": "Groups",
+      "clubs": "Clubs"
+    },
     "editTitle": "Edit FindFriend Profile",
     "editProfileTitle": "Edit Profile",
     "save": "Save",
@@ -783,7 +811,9 @@
     "loginRequired": "Login is required.",
     "noFriendsFound": "No nearby friends found.",
     "prompt_title": "To meet new friends,\nplease create your profile first!",
-    "prompt_button": "Create My Profile"
+    "prompt_button": "Create My Profile",
+    "chatLimitReached": "You have reached your daily limit ({limit}) for starting new chats.",
+    "chatChecking": "Checking..."
   },
   "interests": {
     "title": "Interests",
@@ -834,6 +864,10 @@
     "requestSent": "Sent",
     "alreadyFriends": "Already Friends",
     "requestFailed": "Request failed:",
+    "chatError": "Could not start chat.",
+    "startChat": "Start Chat",
+    "block": "Block",
+    "report": "Report",
     "loginRequired": "Login is required."
   },
   "locationFilter": {
@@ -853,6 +887,10 @@
       "activeClubs": "Active Clubs",
       "myClubs": "My Clubs",
       "exploreClubs": "Explore Clubs"
+    },
+    "sections": {
+      "active": "Official clubs",
+      "proposals": "Club proposals"
     },
     "screen": {
       "error": "Error: {error}",
@@ -904,7 +942,13 @@
       "info": {
         "members": "Members",
         "location": "Location"
-      }
+      },
+      "location": "Location",
+      "leaveConfirmTitle": "Leave club",
+      "leaveConfirmContent": "Are you sure you want to leave {title}?",
+      "leave": "Leave",
+      "leaveSuccess": "You have left {title}",
+      "leaveFail": "Failed to leave: {error}"
     },
     "memberList": {
       "pendingMembers": "Pending Members",
@@ -952,7 +996,17 @@
       "targetMembers": "Target members",
       "targetMembersCount": "Total {count} members",
       "empty": "No proposals yet.",
-      "memberStatus": "{current} / {target} members"
+      "memberStatus": "{current} / {target} members",
+      "join": "Join",
+      "leave": "Leave",
+      "members": "Members",
+      "noMembers": "No members yet.",
+      "detail": {
+        "joined": "You joined the proposal!",
+        "left": "You left the proposal.",
+        "loginRequired": "Please log in to join.",
+        "error": "An error occurred: {error}"
+      }
     }
   },
   "findfriend": {

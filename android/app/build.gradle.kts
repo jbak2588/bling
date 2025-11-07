@@ -62,7 +62,6 @@ flutter {
 }
 
 dependencies {
-   dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
@@ -73,7 +72,6 @@ dependencies {
 
     // 디버그용 App Check
     debugImplementation("com.google.firebase:firebase-appcheck-debug")
-}
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

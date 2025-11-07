@@ -197,12 +197,100 @@ class ClubRepository {
     await batch.commit();
   }
 
+  /// [v2.1] '동네 친구'의 '모임' 탭을 위한 하이퍼로컬 필터 스트림
+  Stream<List<ClubModel>> getClubsByLocationStream({
+    required Map<String, String?> locationFilter,
+  }) {
+    Query query = _clubs; // Initialize query
+
+    // 'find_friend_repository.dart'와 동일한 동적 위치 필터 적용
+    // [작업 41] 필터가 비어 있지 않은지 확인 ({} != null은 true가 아님)
+    if (locationFilter.isNotEmpty && locationFilter['prov'] != null) {
+      // --- 1. 'where' (필터) 절을 모두 적용 ---
+      query =
+          query.where('locationParts.prov', isEqualTo: locationFilter['prov']);
+
+      if (locationFilter['kab'] != null) {
+        query =
+            query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+
+        if (locationFilter['kec'] != null) {
+          query = query.where('locationParts.kec',
+              isEqualTo: locationFilter['kec']);
+        }
+        if (locationFilter['kel'] != null) {
+          query = query.where('locationParts.kel',
+              isEqualTo: locationFilter['kel']);
+        }
+      }
+
+      // --- 2. 'orderBy' (정렬) 절 ---
+      // [작업 43] 'where' 필터와 'orderBy' 필드가 다르므로, 복합 인덱스가 필요함.
+      query = query
+          .orderBy('isSponsored', descending: true)
+          .orderBy('createdAt', descending: true);
+    } else {
+      // [작업 41] 위치 필터가 없는 경우 (locationFilter: {})
+      // 'Test' 탭과 동일한 쿼리를 실행하여 'Active Clubs' 3개가 보이도록 함
+      query = query
+          .orderBy('isSponsored', descending: true)
+          .orderBy('createdAt', descending: true);
+    }
+
+    return query.snapshots().map((snapshot) => snapshot.docs
+        .map((doc) => ClubModel.fromFirestore(
+            doc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList());
+  }
+
   /// Stream proposals (optionally add location filtering later)
   Stream<List<ClubProposalModel>> getClubProposalsStream() {
     Query<Map<String, dynamic>> query = _clubProposals;
     query = query.orderBy('createdAt', descending: true);
     return query.snapshots().map((snapshot) =>
         snapshot.docs.map(ClubProposalModel.fromFirestore).toList());
+  }
+
+  /// [v2.1] '동네 친구'의 '모임' 탭을 위한 하이퍼로컬 '제안' 필터 스트림
+  Stream<List<ClubProposalModel>> getClubProposalsByLocationStream({
+    required Map<String, String?> locationFilter,
+  }) {
+    // '제안'은 'clubProposals' 컬렉션에서 가져옴
+    Query<Map<String, dynamic>> query = _clubProposals;
+
+    // 'find_friend_repository.dart'와 동일한 동적 위치 필터 적용
+    // [작업 41] 필터가 비어 있지 않은지 확인
+    if (locationFilter.isNotEmpty && locationFilter['prov'] != null) {
+      // --- 1. 'where' (필터) 절 ---
+      query =
+          query.where('locationParts.prov', isEqualTo: locationFilter['prov']);
+
+      if (locationFilter['kab'] != null) {
+        query =
+            query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+
+        if (locationFilter['kec'] != null) {
+          query = query.where('locationParts.kec',
+              isEqualTo: locationFilter['kec']);
+        }
+        if (locationFilter['kel'] != null) {
+          query = query.where('locationParts.kel',
+              isEqualTo: locationFilter['kel']);
+        }
+      }
+
+      // --- 2. 'orderBy' (정렬) 절 ---
+      // [작업 43] 'where' 필터와 'orderBy' 필드가 다르므로, 복합 인덱스가 필요함.
+      query = query.orderBy('createdAt', descending: true);
+    } else {
+      // [작업 41] 위치 필터가 없는 경우, 'createdAt'으로만 정렬 (Proposals가 1개 보였던 이유)
+      query = query.orderBy('createdAt', descending: true);
+    }
+
+    return query.snapshots().map((snapshot) => snapshot.docs
+        .map((doc) => ClubProposalModel.fromFirestore(
+            doc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList());
   }
 
   /// Leave a club proposal (decrement count and remove from memberIds)

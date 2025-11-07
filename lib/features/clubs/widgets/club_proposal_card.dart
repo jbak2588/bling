@@ -10,6 +10,7 @@ import 'package:bling_app/features/clubs/models/club_proposal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:bling_app/features/clubs/screens/club_proposal_detail_screen.dart';
 
 // [신규] '모임 제안'을 표시하기 위한 카드 위젯
 class ClubProposalCard extends StatelessWidget {
@@ -28,9 +29,9 @@ class ClubProposalCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
-          // Navigator.of(context).push(MaterialPageRoute(
-          //   builder: (_) => ClubProposalDetailScreen(proposal: proposal),
-          // ));
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => ClubProposalDetailScreen(proposal: proposal),
+          ));
         },
         child: Padding(
           padding: const EdgeInsets.all(16.0),

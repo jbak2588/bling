@@ -28,7 +28,7 @@ library;
 
 // ===== 생성(등록) 화면: 각 Feature의 create 스크린들 =====
 // [추가] 문맥 자동분기용: 인디프렌드/동네가게 생성 화면
-import 'package:bling_app/features/find_friends/screens/findfriend_form_screen.dart';
+// import 'package:bling_app/features/find_friends/screens/findfriend_form_screen.dart'; // [삭제됨]
 
 // ✅ [신규] 검색 로직을 위해 모든 피드 스크린 import
 import 'package:bling_app/features/local_news/screens/local_news_screen.dart';
@@ -60,6 +60,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/core/models/user_model.dart';
@@ -180,8 +181,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         setState(() {
           _userModel = UserModel.fromFirestore(doc);
           // [수정] _currentAddress를 locationName 대신 locationParts['kab']으로 초기화 시도
-          _currentAddress = _userModel!.locationParts?['kab'] ??
-              _userModel!.locationName ??
+          _currentAddress = _userModel?.locationParts?['kab'] ??
+              _userModel?.locationName ??
               'main.appBar.locationNotSet'.tr();
           _isLocationLoading = false;
         });
@@ -214,7 +215,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       return;
     }
 
-    final kelKey = _getKelKey(_userModel!.locationParts);
+    final kelKey = _getKelKey(_userModel?.locationParts);
     // kelKey가 없으면 비활성화로 유지/변경
     if (kelKey == null) {
       if (_isKelurahanBoardActive) {
@@ -490,6 +491,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     }
 
     if (_userModel == null) return; // _userModel이 로드될 때까지 기다리는 방어 코드
+    // 안전하게 지역 변수로 복사하여 이후에 `userModel`를 사용합니다.
+    final userModel = _userModel as UserModel;
 
     // 홈 루트(아이콘 그리드/탭 진입 전)에서는 전역 시트 노출
     if (_bottomNavIndex == 0 && _currentHomePageContent == null) {
@@ -511,31 +514,31 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         target = const ProductRegistrationScreen();
         break;
       case AppSection.findFriends:
-        target = FindFriendFormScreen(userModel: _userModel!);
+        target = const ProfileEditScreen(); // [v2.1] ProfileEditScreen으로 변경
         break;
       case AppSection.clubs:
-        target = CreateClubScreen(userModel: _userModel!);
+        target = CreateClubScreen(userModel: userModel);
         break;
       case AppSection.jobs:
         // ✅ [작업 31] 일자리 생성 시, 유형 선택 화면으로 이동
-        target = SelectJobTypeScreen(userModel: _userModel!);
+        target = SelectJobTypeScreen(userModel: userModel);
         break;
       case AppSection.localStores:
-        target = CreateShopScreen(userModel: _userModel!);
+        target = CreateShopScreen(userModel: userModel);
         break;
       case AppSection.auction:
-        target = CreateAuctionScreen(userModel: _userModel!);
+        target = CreateAuctionScreen(userModel: userModel);
         break;
       case AppSection.pom:
-        target = CreatePomScreen(userModel: _userModel!);
+        target = CreatePomScreen(userModel: userModel);
         break;
       case AppSection.lostAndFound:
-        target = CreateLostItemScreen(userModel: _userModel!);
+        target = CreateLostItemScreen(userModel: userModel);
         break;
       case AppSection.realEstate:
         await Navigator.of(context).push<bool>(
           MaterialPageRoute(
-            builder: (_) => CreateRoomListingScreen(userModel: _userModel!),
+            builder: (_) => CreateRoomListingScreen(userModel: userModel),
           ),
         );
         if (!mounted) return;
@@ -551,6 +554,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   /// 메인(홈 루트)에서만 사용되는 전역 생성 시트
   void _showGlobalCreateSheet() {
+    if (_userModel == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다. 다시 시도해주세요.')),
+      );
+      return;
+    }
+    final userModel = _userModel as UserModel;
+
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -576,13 +587,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   'main.tabs.jobs'.tr(),
                   'jobs.form.title'.tr(),
                   builder: () =>
-                      SelectJobTypeScreen(userModel: _userModel!)), // ✅ [작업 31]
+                      SelectJobTypeScreen(userModel: userModel)), // ✅ [작업 31]
               // 3) 분실물센터
               _sheetItem(
                   Icons.report_gmailerrorred_rounded, // 3. lostAndFound
                   'main.tabs.lostAndFound'.tr(),
                   'lostAndFound.form.title'.tr(),
-                  builder: () => CreateLostItemScreen(userModel: _userModel!)),
+                  builder: () => CreateLostItemScreen(userModel: userModel)),
               // 4) 중고거래
               _sheetItem(
                   Icons.store_mall_directory_rounded, // 4. marketplace
@@ -594,38 +605,38 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   Icons.storefront_rounded, // 5. localStores
                   'main.tabs.localStores'.tr(),
                   'localStores.create.title'.tr(),
-                  builder: () => CreateShopScreen(userModel: _userModel!)),
+                  builder: () => CreateShopScreen(userModel: userModel)),
               // 6) 모임
               _sheetItem(
                   Icons.groups_rounded, // 6. clubs
                   'main.tabs.clubs'.tr(),
                   'clubs.create.title'.tr(),
-                  builder: () => CreateClubScreen(userModel: _userModel!)),
+                  builder: () => CreateClubScreen(userModel: userModel)),
               // 7) 친구찾기
               _sheetItem(
                   Icons.sentiment_satisfied_alt_rounded, // 7. findFriends
                   'main.tabs.findFriends'.tr(),
-                  'findfriend.form.title'.tr(),
-                  builder: () => FindFriendFormScreen(userModel: _userModel!)),
+                  'myBling.editProfile'.tr(), // [v2.1] 툴팁 변경
+                  builder: () =>
+                      const ProfileEditScreen()), // [v2.1] ProfileEditScreen으로 변경
               // 8) 부동산
               _sheetItem(
                   Icons.house_rounded, // 8. realEstate
                   'main.tabs.realEstate'.tr(),
                   'realEstate.form.title'.tr(),
-                  builder: () =>
-                      CreateRoomListingScreen(userModel: _userModel!)),
+                  builder: () => CreateRoomListingScreen(userModel: userModel)),
               // 9) 경매
               _sheetItem(
                   Icons.gavel_rounded, // 9. auction
                   'main.tabs.auction'.tr(),
                   'auctions.create.title'.tr(),
-                  builder: () => CreateAuctionScreen(userModel: _userModel!)),
+                  builder: () => CreateAuctionScreen(userModel: userModel)),
               // 10) 숏폼
               _sheetItem(
                   Icons.video_camera_back_rounded, // 10. pom
                   'main.tabs.pom'.tr(),
                   'pom.create.title'.tr(),
-                  builder: () => CreatePomScreen(userModel: _userModel!)),
+                  builder: () => CreatePomScreen(userModel: userModel)),
               const SizedBox(height: 12),
             ],
           ),
@@ -686,6 +697,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   PreferredSizeWidget _buildAppBar() {
     // ✅ locale 의존성만 생성(교체X, 리빌드O)
     final _ = context.locale;
+    final photoUrl = _userModel?.photoUrl;
     return GrabAppBarShell(
       // ↓↓↓ 기존 leading 로직 그대로
       leading: (_bottomNavIndex == 0 && _currentHomePageContent != null)
@@ -714,12 +726,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 //   Scaffold.of(context).openDrawer();
                 // },
                 icon: CircleAvatar(
-                  backgroundImage: (_userModel?.photoUrl != null &&
-                          _userModel!.photoUrl!.isNotEmpty)
-                      ? NetworkImage(_userModel!.photoUrl!)
+                  backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
+                      ? CachedNetworkImageProvider(photoUrl)
                       : null,
-                  child: (_userModel?.photoUrl == null ||
-                          _userModel!.photoUrl!.isEmpty)
+                  child: (photoUrl == null || photoUrl.isEmpty)
                       ? const Icon(Icons.person)
                       : null,
                 ),
@@ -896,10 +906,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             onIconTap: _navigateToPage,
           ),
       if (_isKelurahanBoardActive && _userModel != null)
-        KelurahanBoardScreen(userModel: _userModel!),
+        KelurahanBoardScreen(userModel: _userModel as UserModel),
       const SearchScreen(),
       const ChatListScreen(),
-      const MyBlingScreen(),
+      // Avoid forcing a null value into MyBlingScreen. If _userModel is not
+      // yet available, show a lightweight loading placeholder instead of
+      // using the null-check operator which causes a runtime exception.
+      (_userModel != null)
+          ? MyBlingScreen(
+              userModel: _userModel as UserModel, onIconTap: _navigateToPage)
+          : const Center(child: CircularProgressIndicator()),
     ];
 
     // ✅ BottomAppBar 인덱스(0, [1], 3, 4, 5)를 실제 pages 인덱스에 매핑
@@ -1045,7 +1061,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                         fontSize: 18,
                                         color: Colors.white)),
                                 TrustLevelBadge(
-                                    trustLevel: userModel.trustLevel,
+                                    // [v2.1] 런타임 예외 수정: _userModel이 null일 때를 대비
+                                    // [v2.1] 뱃지 파라미터 수정 (int -> String Label)
+                                    trustLevelLabel:
+                                        _userModel?.trustLevelLabel ?? 'normal',
                                     showText: true),
                                 Text('(${userModel.trustScore})',
                                     style: GoogleFonts.inter(

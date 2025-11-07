@@ -92,12 +92,13 @@ class FindFriendThumb extends StatelessWidget {
 
   // --- 하단 메타 (닉네임 + 나이 + 지역) ---
   Widget _buildMeta(BuildContext context) {
-    // 하단 영역 높이: 240 - 140 = 100
-    //
+    // [v2.1] 'age' 및 'ageRange' 필드 삭제됨.
+    // final interests = user.interests ?? []; // 'interests'로 대체
+    final interests = user.interests?.take(2).toList() ?? []; // 최대 2개만 표시
+
+    // 지역명 추출 (Kelurahan 우선, 없으면 Kecamatan)
     final location =
         user.locationParts?['kab'] ?? user.locationParts?['kota'] ?? '';
-    final ageString =
-        (user.age != null) ? '${user.age}歳' : ''; // 나이 표시 (예: 30歳)
 
     return Expanded(
       child: Padding(
@@ -115,13 +116,22 @@ class FindFriendThumb extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
-            // 나이
-            if (ageString.isNotEmpty)
-              Text(
-                ageString,
-                style: Theme.of(context).textTheme.bodyMedium,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            // [v2.1] 'age' 대신 'interests' 표시 (최대 2개)
+            if (interests.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Wrap(
+                  spacing: 4.0,
+                  runSpacing: 4.0,
+                  children: interests
+                      .map((interest) => Chip(
+                            label: Text(interest,
+                                style: Theme.of(context).textTheme.labelSmall),
+                            padding: EdgeInsets.zero,
+                            visualDensity: VisualDensity.compact,
+                          ))
+                      .toList(),
+                ),
               ),
 
             const Spacer(), // 하단으로 밀기

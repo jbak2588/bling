@@ -16,7 +16,6 @@
 /// 5. 신뢰등급 변화, KPI 기반 추천/분석 기능 추가 권장.
 library;
 
-
 import 'dart:io';
 
 import 'package:bling_app/core/models/user_model.dart';
@@ -49,13 +48,36 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   List<String> _interests = [];
   bool _showLocationOnMap = true;
   bool _allowFriendRequests = true;
+  bool _isVisibleInList = false; // [v2.1] '동네 친구' 리스트 노출 여부 상태 변수
   bool _isLoading = true;
   bool _isSaving = false;
 
   final Map<String, List<String>> _interestCategories = {
-    'category_creative': ['drawing', 'instrument', 'photography', 'writing', 'crafting', 'gardening'],
-    'category_sports': ['soccer', 'hiking', 'camping', 'running', 'biking', 'golf', 'workout'],
-    'category_food_drink': ['foodie', 'cooking', 'baking', 'coffee', 'wine', 'tea'],
+    'category_creative': [
+      'drawing',
+      'instrument',
+      'photography',
+      'writing',
+      'crafting',
+      'gardening'
+    ],
+    'category_sports': [
+      'soccer',
+      'hiking',
+      'camping',
+      'running',
+      'biking',
+      'golf',
+      'workout'
+    ],
+    'category_food_drink': [
+      'foodie',
+      'cooking',
+      'baking',
+      'coffee',
+      'wine',
+      'tea'
+    ],
     'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
     'category_growth': ['reading', 'investing', 'language', 'coding'],
     'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
@@ -83,20 +105,27 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       if (mounted) setState(() => _isLoading = false);
       return;
     }
-    final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
     if (doc.exists && mounted) {
       _userModel = UserModel.fromFirestore(doc);
       setState(() {
-        _nicknameController.text = _userModel!.nickname;
-        _bioController.text = _userModel!.bio ?? '';
-        _phoneController.text = _userModel!.phoneNumber ?? '';
+        final um = _userModel;
+        _nicknameController.text = um?.nickname ?? '';
+        _bioController.text = um?.bio ?? '';
+        _phoneController.text = um?.phoneNumber ?? '';
         // ✅✅✅ 핵심 수정: locationParts 맵에서 rt와 rw 값을 가져옵니다. ✅✅✅
-        _rtController.text = _userModel!.locationParts?['rt'] ?? '';
-        _rwController.text = _userModel!.locationParts?['rw'] ?? '';
-        _initialPhotoUrl = _userModel!.photoUrl;
-        _interests = List<String>.from(_userModel!.interests ?? []);
-        _showLocationOnMap = _userModel!.privacySettings?['showLocationOnMap'] ?? true;
-        _allowFriendRequests = _userModel!.privacySettings?['allowFriendRequests'] ?? true;
+        _rtController.text = um?.locationParts?['rt'] ?? '';
+        _rwController.text = um?.locationParts?['rw'] ?? '';
+        _initialPhotoUrl = um?.photoUrl;
+        _interests = List<String>.from(um?.interests ?? []);
+        _showLocationOnMap = um?.privacySettings?['showLocationOnMap'] ?? true;
+        _allowFriendRequests =
+            um?.privacySettings?['allowFriendRequests'] ?? true;
+        // [v2.1] 기존 설정값으로 초기화
+        _isVisibleInList = um?.isVisibleInList ?? false;
         _isLoading = false;
       });
     } else {
@@ -106,7 +135,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+    final pickedFile =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
@@ -128,7 +158,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('profileEdit.errors.noUser'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('profileEdit.errors.noUser'.tr())));
         setState(() => _isSaving = false);
       }
       return;
@@ -137,12 +168,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     try {
       String? newPhotoUrl = _initialPhotoUrl;
       if (_selectedImage != null) {
-        final ref = FirebaseStorage.instance.ref().child('profile_pictures').child(user.uid);
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('profile_pictures')
+            .child(user.uid);
         await ref.putFile(_selectedImage!);
         newPhotoUrl = await ref.getDownloadURL();
       }
 
-      final Map<String, dynamic> updatedLocationParts = Map<String, dynamic>.from(_userModel?.locationParts ?? {});
+      final Map<String, dynamic> updatedLocationParts =
+          Map<String, dynamic>.from(_userModel?.locationParts ?? {});
       updatedLocationParts['rt'] = _rtController.text.trim();
       updatedLocationParts['rw'] = _rwController.text.trim();
 
@@ -158,19 +193,27 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           'showLocationOnMap': _showLocationOnMap,
           'allowFriendRequests': _allowFriendRequests,
         },
+        // [v2.1] '동네 친구' 노출 여부 저장
+        'isVisibleInList': _isVisibleInList,
         'profileCompleted': true,
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(dataToUpdate);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update(dataToUpdate);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('profileEdit.successMessage'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('profileEdit.successMessage'.tr())));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('profileEdit.errors.updateFailed'.tr(args: [e.toString()]))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'profileEdit.errors.updateFailed'.tr(args: [e.toString()]))));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -400,6 +443,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                             setState(() {
                               _allowFriendRequests = val;
                             });
+                          },
+                        ),
+                        // [v2.1] '동네 친구' 리스트 노출 토글 (findfriend_form_screen.dart에서 이관)
+                        const SizedBox(height: 16),
+                        SwitchListTile(
+                          title: Text("findFriend.showProfileLabel".tr()),
+                          subtitle: Text("findFriend.showProfileSubtitle".tr()),
+                          value: _isVisibleInList,
+                          onChanged: (value) {
+                            setState(() => _isVisibleInList = value);
                           },
                         ),
                       ],
