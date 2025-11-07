@@ -124,6 +124,7 @@ import 'package:bling_app/features/lost_and_found/screens/lost_and_found_screen.
 import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart';
 
 import 'package:flutter_svg/flutter_svg.dart'; // 2차 버전 UI(SVG) 렌더링을 위해 추가
+import 'dart:math' as math;
 // ✅ [검색] 검색 네비게이션은 상위(main_navigation_screen)가 전담
 
 class MenuItem {
@@ -441,6 +442,13 @@ class HomeScreen extends StatelessWidget {
                   (textStyle?.height ?? 1.1) *
                   2;
 
+              // Ensure the icon box doesn't grow taller than the grid tile height.
+              // On wide screens (tablets) tileWidth can become very large which
+              // would overflow the fixed tile height. Clamp the icon size to a
+              // fraction of the tileHeight to keep layout stable across devices.
+              final iconBoxSize =
+                  math.min(tileWidth * 0.999, tileHeight * 0.68);
+
               // 1. 탭 로직 (기존 onIconTap 로직을 InkWell의 onTap으로 이동)
               return InkWell(
                 onTap: () {
@@ -542,8 +550,10 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     // 2-1. 아이콘을 감싸는 흰색/그림자 박스
                     Container(
-                      width: tileWidth * 0.999, // 타일 폭의 62% (조정값)
-                      height: tileWidth * 0.999, // 정사각형 (조정값)
+                      width:
+                          iconBoxSize, // constrained square to avoid overflow on tablets
+                      height:
+                          iconBoxSize, // constrained square to avoid overflow on tablets
                       decoration: BoxDecoration(
                         color: Colors.white, // 2. 아이콘 박스 배경색 흰색
                         borderRadius: BorderRadius.circular(
