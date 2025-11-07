@@ -1,0 +1,61 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter: Run (Debug)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart"
+    },
+    {
+      "name": "Flutter: Run (Profile)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "Flutter: Run (Release)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "Firebase Functions: Debug",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/functions-v2/index.js",
+      "cwd": "${workspaceFolder}/functions-v2",
+      "runtimeArgs": [
+        "--max-old-space-size=4096"
+      ],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Firebase Emulator",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "serve",
+        "--",
+        "--inspect-functions"
+      ],
+      "cwd": "${workspaceFolder}/functions-v2",
+      "env": {
+        "NODE_OPTIONS": "--max-old-space-size=4096"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}

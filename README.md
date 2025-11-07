@@ -391,6 +391,42 @@ npm run deploy
 
 ---
 
+## ✅ VS Code Configuration
+
+이 프로젝트는 대규모 Flutter 앱과 Firebase Functions를 포함하고 있어 VS Code 메모리 최적화가 권장됩니다.
+
+### V8 메모리 설정
+
+1. **Extension Host 메모리 증가** (VS Code 자체):
+   - `Cmd+Shift+P` (macOS) 또는 `Ctrl+Shift+P` (Windows/Linux)
+   - "Configure Runtime Arguments" 입력
+   - 다음 라인 추가: `"js-flags": "--max-old-space-size=4096"`
+   - VS Code 재시작
+
+2. **Firebase Functions 디버깅**:
+   - `.vscode/launch.json`에 이미 설정되어 있음
+   - "Firebase Functions: Debug" 또는 "Firebase Emulator" 구성 사용
+   - Node.js 20 필요 (`node --version`로 확인)
+   - Firebase CLI 설치 필요 (`firebase --version`로 확인)
+
+**문제 해결**:
+- VS Code가 느려지거나 충돌하는 경우: `argv.json`의 메모리 값을 `--max-old-space-size=8192`로 증가 (8GB, 시스템에 충분한 RAM 필요)
+- Firebase 디버깅이 작동하지 않는 경우: `functions-v2` 폴더에서 `npm install` 실행
+- Flutter 디버깅 문제: `flutter doctor` 실행하여 환경 확인
+
+자세한 내용은 [.vscode/README.md](.vscode/README.md)를 참고하세요.
+
+### 권장 확장
+
+VS Code에서 이 워크스페이스를 열면 다음 확장이 자동으로 권장됩니다:
+- Dart
+- Flutter
+- ESLint
+- Code Spell Checker
+- Prettier
+
+---
+
 ## ✅ DevOps & AI 협업
 
 - **GPT**:  문서제작
