@@ -156,16 +156,6 @@ class _AiEvidenceSuggestionScreenState
                   children: [
                     Text('ai_flow.guided_camera.guide'.tr()),
                     const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _submitting ? null : _continue,
-                      child: _submitting
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text('ai_flow.guided_camera.next_button'.tr()),
-                    ),
                   ],
                 ),
               ),

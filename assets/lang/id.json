@@ -285,6 +285,7 @@
       "title": "Tinjauan Iklan oleh AI",
       "loading": "AI sedang menulis iklan penjualan terakhir...",
       "error": "Gagal membuat laporan. Silakan coba lagi.",
+      "success": "Laporan akhir berhasil dibuat.",
       "guide": "Ini adalah draf iklan penjualan yang dibuat oleh AI. Periksa dan ubah isinya sebelum dipublikasikan.",
       "submit_button": "Daftarkan"
     }
