@@ -9,7 +9,7 @@
 /// Data Model    : Firestore `users` 프로필 필드.
 /// Location Scope: 사용자 프로필의 `locationName`을 표시하여 지역 매칭에 사용합니다.
 /// Trust Policy  : `trustLevel` 배지를 보여 주며 신고 시 상대방 점수가 감소합니다.
-/// Monetization  : 향후 프리미엄 프로필 강조 예정; TODO: 정의.
+/// Monetization  : 향후 프리미엄 프로필 강조 예정;
 /// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_friend_profile`, `start_chat`.
 /// Analytics     : 페이지 조회와 채팅 전환을 추적합니다.
 /// I18N          : 키 `findFriend.bioLabel`, `interests.title` (assets/lang/*.json)
@@ -43,6 +43,7 @@ import 'package:cloud_functions/cloud_functions.dart'; // [v2.1] 스팸 방지 �
 // import 'package:bling_app/features/chat/data/chat_service.dart';
 // import 'package:bling_app/core/models/chat_room_model.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
+import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 
 class FindFriendDetailScreen extends StatefulWidget {
   final UserModel user;
@@ -77,6 +78,13 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: AppBarIcon(
+            icon: Icons.arrow_back,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
         title: Text(user.nickname),
         actions: [
           PopupMenuButton<String>(

@@ -17,6 +17,7 @@ import 'package:any_link_preview/any_link_preview.dart'; // ✅ 링크 미리보
 // ✅ [수정] url_launcher import 경로 확인 (기존 코드에 없었을 수 있음)
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart'; // ✅ SharePlus import 확인
+import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 // ❌ [태그 시스템] 기존 카테고리 import 제거
 // import '../../../core/constants/app_categories.dart';
 // ✅ [태그 시스템] 태그 사전 import 추가
@@ -263,36 +264,43 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: AppBarIcon(
+            icon: Icons.arrow_back,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
         title: Text(_currentPost.title ?? 'localNewsDetail.appBarTitle'.tr()),
         actions: [
           if (currentUserId != null && currentUserId == _currentPost.userId)
-            IconButton(
-              icon: const Icon(Icons.edit_outlined),
-              tooltip: 'localNewsDetail.menu.edit'.tr(),
-              onPressed: () async {
-                final result = await Navigator.of(context).push<bool>(
-                  MaterialPageRoute(
-                    builder: (_) => EditLocalNewsScreen(post: _currentPost),
-                  ),
-                );
-                if (result == true) {
-                  _refreshPostData();
-                }
-              },
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: AppBarIcon(
+                icon: Icons.edit_outlined,
+                onPressed: () async {
+                  final result = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => EditLocalNewsScreen(post: _currentPost),
+                    ),
+                  );
+                  if (result == true) {
+                    _refreshPostData();
+                  }
+                },
+              ),
             ),
           PopupMenuButton<String>(
             itemBuilder: (context) => _buildPopupMenuItems(context),
             onSelected: (value) => _handleMenuSelection(context, value),
           ),
           // 공유 버튼 추가
-          IconButton(
-            icon: const Icon(Icons.share),
-            // ✅ 링크 생성 중에는 버튼 비활성화 -> 제거
-            // onPressed: _isCreatingLink ? null : _sharePost,
-            // tooltip: _isCreatingLink ? 'common.creatingLink'.tr() : 'common.share'.tr(), // 다국어 필요
-            // ✅ [수정] onPressed에 바로 _sharePost 연결
-            onPressed: _sharePost,
-            tooltip: 'common.share'.tr(), // 다국어 키 추가 필요
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: AppBarIcon(
+              icon: Icons.share,
+              onPressed: _sharePost,
+            ),
           ),
         ],
       ),

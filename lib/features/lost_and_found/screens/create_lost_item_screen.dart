@@ -146,7 +146,10 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
           if (!_isSaving)
             TextButton(
                 onPressed: _submitItem,
-                child: Text('lostAndFound.form.submit'.tr())),
+                child: Text('lostAndFound.form.submit'.tr(),
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold))),
         ],
       ),
       body: Stack(
@@ -261,6 +264,20 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
                       _tags = tags;
                     });
                   },
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _isSaving ? null : _submitItem,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        )
+                      : Text('lostAndFound.form.submit'.tr()),
                 ),
               ],
             ),

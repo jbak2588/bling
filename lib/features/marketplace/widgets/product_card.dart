@@ -166,6 +166,20 @@ class _ProductCardState extends State<ProductCard>
                       padding: EdgeInsets.only(bottom: 8.0),
                       child: AiVerificationBadge(),
                     ),
+                  // [Fix #2] '예약중' 또는 '판매완료' 뱃지 표시
+                  if (product.status == 'reserved')
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: _buildStatusBadge(
+                          'marketplace.status.reserved'.tr(),
+                          Colors.blue.shade700),
+                    ),
+                  if (product.status == 'sold')
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: _buildStatusBadge(
+                          'marketplace.status.sold'.tr(), Colors.grey.shade700),
+                    ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -256,6 +270,20 @@ class _ProductCardState extends State<ProductCard>
               );
             }),
       ),
+    );
+  }
+
+  // [Fix #2] 상태 뱃지를 위한 헬퍼 위젯
+  Widget _buildStatusBadge(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(4.0),
+      ),
+      child: Text(label,
+          style: const TextStyle(
+              color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
     );
   }
 }

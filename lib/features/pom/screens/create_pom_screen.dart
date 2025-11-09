@@ -190,7 +190,7 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('pom.create.success'.tr()), // TODO: i18n ensure
+            content: Text('pom.create.success'.tr()),
             backgroundColor: Colors.green));
         // Return a simple success flag to trigger feed refresh
         Navigator.of(context).pop(true);
@@ -198,8 +198,8 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('pom.create.fail'
-                .tr(namedArgs: {'error': e.toString()})), // TODO: i18n ensure
+            content:
+                Text('pom.create.fail'.tr(namedArgs: {'error': e.toString()})),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -215,7 +215,11 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
         actions: [
           if (!_isSaving)
             TextButton(
-                onPressed: _submitShort, child: Text('pom.create.submit'.tr())),
+                onPressed: _submitShort,
+                child: Text('pom.create.submit'.tr(),
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold))),
         ],
       ),
       body: Stack(
@@ -228,12 +232,12 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
                 segments: [
                   ButtonSegment(
                     value: PomMediaType.image,
-                    label: Text('pom.create.photo'.tr()), // TODO: i18n ensure
+                    label: Text('pom.create.photo'.tr()),
                     icon: const Icon(Icons.photo_library_outlined),
                   ),
                   ButtonSegment(
                     value: PomMediaType.video,
-                    label: Text('pom.create.video'.tr()), // TODO: i18n ensure
+                    label: Text('pom.create.video'.tr()),
                     icon: const Icon(Icons.videocam_outlined),
                   ),
                 ],

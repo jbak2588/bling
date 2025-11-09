@@ -134,7 +134,7 @@
     "empty": "No products yet.\nTap the + button to add your first one!",
     "registration": {
       "title": "New Post",
-      "done": "Done",
+  "done": "Save",
       "titleHint": "Item Name",
       "priceHint": "Price (Rp)",
       "negotiable": "Allow Offers",
@@ -156,7 +156,7 @@
       "success": "Product registered successfully!",
       "fail": "Failed to update product: {error}",
       "resetLocation": "Reset location",
-      "save": "Save Changes"
+  "save": "Save changes"
     },
     "detail": {
       "makeOffer": "Make an offer",
@@ -200,6 +200,41 @@
       "new": "New",
       "used": "Used"
     },
+    "reservation": {
+      "title": "10% deposit payment",
+      "content": "To reserve an AI-verified product you must prepay a 10% deposit of {amount}. If the deal is cancelled after on-site verification, the deposit will be refunded.",
+      "confirm": "Pay & Reserve",
+      "button": "Reserve with AI Assurance",
+      "success": "Reservation completed. Please arrange a meeting with the seller."
+    },
+    "status": {
+      "reserved": "Reserved",
+      "sold": "Sold"
+    },
+    "takeover": {
+      "button": "On-site pickup & verification",
+      "title": "AI On-site Verification",
+      "guide": {
+        "title": "AI on-site similarity verification",
+        "subtitle": "Confirm that the original AI report matches the actual item. Take 3 or more photos that clearly show the item's key features."
+      },
+      "photoTitle": "Take on-site photos",
+      "buttonVerify": "Start AI similarity verification",
+      "errors": {
+        "noPhoto": "At least 1 on-site photo is required for verification."
+      },
+      "dialog": {
+        "matchTitle": "AI verification success",
+        "noMatchTitle": "AI verification failed",
+        "finalize": "Confirm final takeover",
+        "cancelDeal": "Cancel deal (request refund)"
+      },
+      "success": {
+        "finalized": "Deal completed successfully.",
+        "cancelled": "Deal cancelled. Deposit will be refunded."
+      }
+    },
+    "aiBadge": "AI verified",
     "setLocationPrompt": "Set your neighborhood first to see preloved items!"
   },
   "ai_flow": {
@@ -1258,6 +1293,7 @@
         "etc": "Other"
       },
       "listingType": "Transaction type",
+      "listingTypeHint": "Select transaction type",
       "listingTypes": {
         "rent": "Rent",
         "sale": "Sale"

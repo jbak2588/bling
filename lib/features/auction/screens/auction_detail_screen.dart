@@ -23,6 +23,7 @@ import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 
 class AuctionDetailScreen extends StatefulWidget {
   final AuctionModel auction;
@@ -161,25 +162,37 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
 
         return Scaffold(
           appBar: AppBar(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: AppBarIcon(
+                icon: Icons.arrow_back,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
             title: Text(auction.title),
             // V V V --- [추가] 경매 주인에게만 보이는 수정/삭제 버튼 --- V V V
             actions: [
               if (isOwner)
-                IconButton(
-                  icon: const Icon(Icons.edit_note_outlined),
-                  tooltip: 'auctions.edit.tooltip'.tr(),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) => EditAuctionScreen(auction: auction)),
-                    );
-                  },
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: AppBarIcon(
+                    icon: Icons.edit_note_outlined,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                EditAuctionScreen(auction: auction)),
+                      );
+                    },
+                  ),
                 ),
               if (isOwner)
-                IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: 'auctions.delete.tooltip'.tr(),
-                  onPressed: _deleteAuction,
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: AppBarIcon(
+                    icon: Icons.delete_outline,
+                    onPressed: _deleteAuction,
+                  ),
                 ),
             ],
             // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^

@@ -33,12 +33,17 @@ import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:bling_app/features/marketplace/screens/product_edit_screen.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart'; // AI 뱃지
+import 'package:bling_app/features/marketplace/data/product_repository.dart'; // [AI 인수] 리포지토리 임포트
+import 'package:bling_app/features/marketplace/screens/ai_takeover_screen.dart'; // [AI 인수 2단계] 현장 검증 화면
+
+import '../widgets/ai_report_viewer.dart'; // [AI 리팩토링] 공용 위젯 임포트
 
 // ✅ 공용 위젯 4개를 import 합니다.
 import '../../shared/widgets/author_profile_tile.dart';
 import '../../shared/widgets/clickable_tag_list.dart';
 import '../../shared/widgets/mini_map_view.dart';
 import '../../shared/screens/image_gallery_screen.dart';
+import '../../shared/widgets/app_bar_icon.dart';
 
 // 카테고리 이름 표시를 위한 별도 위젯
 class CategoryNameWidget extends StatelessWidget {
@@ -97,6 +102,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   // --- 상태 변수 및 로직 함수들 (기존과 동일) ---
   bool _isFavorite = false;
   int _currentIndex = 0;
+  bool _isReserving = false; // [AI 인수] 예약 진행 중 상태
   late final PageController _pageController = PageController(initialPage: 0);
   // 기본은 상세 설명을 보여주고, 버튼으로 AI 리포트 표시를 전환합니다.
   bool _showAiReport = false;
@@ -133,6 +139,85 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .doc(widget.product.id)
         .get();
     if (mounted) setState(() => _isFavorite = favDoc.exists);
+  }
+
+  // [AI 인수] 예약금 결제 확인 다이얼로그 (신규)
+  Future<void> _showReservationDialog(ProductModel product) async {
+    final int depositAmount = (product.price * 0.1).ceil(); // 10% 예약금
+
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('marketplace.reservation.title'.tr()),
+        content: Text(
+          'marketplace.reservation.content'.tr(
+            namedArgs: {
+              'amount': NumberFormat.currency(
+                      locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0)
+                  .format(depositAmount),
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: Text('marketplace.dialog.cancel'.tr()),
+            onPressed: () => Navigator.of(ctx).pop(false),
+          ),
+          FilledButton(
+            child: Text('marketplace.reservation.confirm'.tr()),
+            onPressed: () {
+              // TODO: 실제 결제 게이트웨이(PG) 연동 로직
+              // PG 연동이 성공했다고 가정하고 true 반환
+              Navigator.of(ctx).pop(true);
+            },
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      _executeReservation(product);
+    }
+  }
+
+  // [AI 인수] 예약 실행 로직 (신규)
+  Future<void> _executeReservation(ProductModel product) async {
+    if (_isReserving) return;
+    setState(() => _isReserving = true);
+
+    final myUid = FirebaseAuth.instance.currentUser?.uid;
+    if (myUid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('marketplace.errors.loginRequired'.tr())));
+      setState(() => _isReserving = false);
+      return;
+    }
+
+    try {
+      final productRepository = ProductRepository(); // (임시)
+      await productRepository.reserveProduct(
+        productId: product.id,
+        buyerId: myUid,
+      );
+
+      // [임시 구현] 리포지토리 대신 Firestore 직접업데이트
+      await FirebaseFirestore.instance
+          .collection('products')
+          .doc(product.id)
+          .update({'status': 'reserved'});
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('marketplace.reservation.success'.tr())));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) setState(() => _isReserving = false);
+    }
   }
 
   Future<void> _toggleFavorite() async {
@@ -178,6 +263,43 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ],
       ),
     );
+  }
+
+  // [AI 인수] 채팅 시작 로직 분리 (신규)
+  Future<void> _startChat(ProductModel product, String? myUid) async {
+    if (myUid == null) return;
+    if (!context.mounted) return;
+
+    final ChatService chatService = ChatService();
+    try {
+      final chatId = await chatService.createOrGetChatRoom(
+        otherUserId: product.userId,
+        productId: product.id,
+        productTitle: product.title,
+        productImage:
+            product.imageUrls.isNotEmpty ? product.imageUrls.first : '',
+      );
+
+      final otherUser = await chatService.getOtherUserInfo(product.userId);
+
+      if (context.mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ChatRoomScreen(
+              chatId: chatId,
+              otherUserName: otherUser.nickname,
+              otherUserId: otherUser.uid,
+              productTitle: product.title,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Failed to start chat: $e")));
+      }
+    }
   }
 
   Future<void> _deleteProduct() async {
@@ -241,120 +363,175 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         final isMyProduct = myUid == product.userId;
         final imageUrls = product.imageUrls;
         final hasLocation = product.geoPoint != null;
+        // [AI 인수] 상품 상태 확인 (신규)
+        final bool isSelling = product.status == 'selling';
+        final bool isReserved = product.status == 'reserved';
+        // [AI 인수] 내가 예약한 상품인지 확인
+        final bool isReservedByMe =
+            isReserved && product.buyerId != null && product.buyerId == myUid;
+
+        // [FAB Fix] FAB를 표시할 조건 정의
+        final bool showAiFab =
+            product.isAiVerified && isSelling && !isMyProduct;
 
         return Scaffold(
-          // ✅ 채팅/가격 BottomAppBar를 포함한 모든 UI를 항상 표시합니다. (등록자에게도 보이도록)
+          // [FAB Fix] AI 안심 예약 버튼을 FAB로 이동하여 Overflow 해결
+          floatingActionButton: showAiFab
+              ? FloatingActionButton.extended(
+                  onPressed: _isReserving
+                      ? null
+                      : () => _showReservationDialog(product),
+                  backgroundColor:
+                      _isReserving ? Colors.grey : const Color(0xFF007BFF),
+                  icon: _isReserving
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.shield_outlined, color: Colors.white),
+                  label: Text(
+                    "marketplace.reservation.button".tr(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                )
+              : null,
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          // 채팅/가격 BottomAppBar: fixed-height removed and buttons allowed to
+          // flex/shrink via Flexible so it adapts to different font/device sizes.
           bottomNavigationBar: BottomAppBar(
             surfaceTintColor: Colors.white,
             elevation: 10,
-            child: SizedBox(
-              height: 80,
+            child: SafeArea(
+              top: false,
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
                   children: [
-                    Expanded(
-                      child: Row(
+                    // 1. Favorite Icon
+                    IconButton(
+                      padding: const EdgeInsets.only(right: 16),
+                      icon: Icon(
+                        _isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isMyProduct
+                            ? Colors.grey
+                            : (_isFavorite ? Colors.pink : Colors.grey),
+                      ),
+                      onPressed: isMyProduct ? null : _toggleFavorite,
+                    ),
+                    const VerticalDivider(width: 1.0, thickness: 1.0),
+                    const SizedBox(width: 16),
+
+                    // 2. Price + Negotiable — allow flexible shrinking/growing so
+                    // it cooperates better with large fonts or small screens.
+                    Flexible(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          IconButton(
-                            padding: const EdgeInsets.only(right: 16),
-                            icon: Icon(
-                              _isFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: isMyProduct
-                                  ? Colors.grey
-                                  : (_isFavorite ? Colors.pink : Colors.grey),
+                          Text(
+                            NumberFormat.currency(
+                              locale: 'id_ID',
+                              symbol: 'Rp ',
+                              decimalDigits: 0,
+                            ).format(product.price),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              height: 1.15,
+                              color: Colors.black,
                             ),
-                            onPressed: isMyProduct ? null : _toggleFavorite,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                          const VerticalDivider(width: 1.0, thickness: 1.0),
-                          const SizedBox(width: 16),
-                          Flexible(
-                            child: RichText(
-                              text: TextSpan(
-                                style: const TextStyle(color: Colors.black),
-                                children: [
-                                  TextSpan(
-                                    text: NumberFormat.currency(
-                                            locale: 'id_ID',
-                                            symbol: 'Rp ',
-                                            decimalDigits: 0)
-                                        .format(product.price),
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
-                                  ),
-                                  TextSpan(
-                                    text:
-                                        '\n${product.negotiable ? 'marketplace.detail.makeOffer'.tr() : 'marketplace.detail.fixedPrice'.tr()}',
-                                    style: TextStyle(
-                                        color: product.negotiable
-                                            ? Colors.green
-                                            : Colors.grey,
-                                        fontSize: 12,
-                                        height: 1.5),
-                                  ),
-                                ],
-                              ),
+                          Text(
+                            product.negotiable
+                                ? 'marketplace.detail.makeOffer'.tr()
+                                : 'marketplace.detail.fixedPrice'.tr(),
+                            style: TextStyle(
+                              color: product.negotiable
+                                  ? Colors.green
+                                  : Colors.grey,
+                              fontSize: 12,
+                              height: 1.1,
                             ),
-                          )
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         ],
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: isMyProduct
-                          ? null
-                          : () async {
-                              if (myUid == null) return;
-                              if (!context.mounted) return;
 
-                              final ChatService chatService = ChatService();
-                              try {
-                                final chatId =
-                                    await chatService.createOrGetChatRoom(
-                                  otherUserId: product.userId,
-                                  productId: product.id,
-                                  productTitle: product.title,
-                                  productImage: product.imageUrls.isNotEmpty
-                                      ? product.imageUrls.first
-                                      : '',
-                                );
-
-                                final otherUser = await chatService
-                                    .getOtherUserInfo(product.userId);
-
-                                if (context.mounted) {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => ChatRoomScreen(
-                                        chatId: chatId,
-                                        otherUserName: otherUser.nickname,
-                                        otherUserId: otherUser.uid,
-                                        productTitle: product.title,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(
-                                              "Failed to start chat: $e")));
-                                }
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE8803C), // 당근마켓 주황색
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                    const SizedBox(width: 8),
+                    // 3. Chat Button — allow shrinking via Flexible and use a
+                    // FittedBox for the label so it scales down instead of
+                    // overflowing when fonts are large.
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: ElevatedButton(
+                        onPressed: (isMyProduct || !isSelling)
+                            ? null
+                            : () => _startChat(product, myUid),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: (isSelling)
+                              ? const Color(0xFFE8803C)
+                              : Colors.grey,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            (isReserved)
+                                ? 'marketplace.status.reserved'.tr()
+                                : (isSelling
+                                    ? 'marketplace.detail.chat'.tr()
+                                    : 'marketplace.status.sold'.tr()),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       ),
-                      child: Text("marketplace.detail.chat".tr(),
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
+
+                    // Takeover Button (Conditional) — also flexible so it doesn't
+                    // cause overflow on smaller screens / large fonts.
+                    if (isReservedByMe) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) =>
+                                  AiTakeoverScreen(product: product),
+                            ));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              "marketplace.takeover.button".tr(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -365,6 +542,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               SliverAppBar(
                 expandedHeight: 300,
                 pinned: true,
+                // make leading and action icons easier to read on top of the
+                // image by wrapping them in a dark circular background
+                leading: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: AppBarIcon(
+                    icon: Icons.arrow_back,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
                 flexibleSpace: FlexibleSpaceBar(
                   background: GestureDetector(
                     onTap: () {
@@ -430,24 +616,35 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ),
                 actions: [
-                  IconButton(
-                    icon: const Icon(Icons.share),
-                    onPressed: () => SharePlus.instance.share(
-                      ShareParams(
-                          text: 'Check out this product: ${product.title}'),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: AppBarIcon(
+                      icon: Icons.share,
+                      onPressed: () => SharePlus.instance.share(
+                        ShareParams(
+                            text: 'Check out this product: ${product.title}'),
+                      ),
                     ),
                   ),
                   if (isMyProduct)
-                    IconButton(
-                        icon: const Icon(Icons.edit),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: AppBarIcon(
+                        icon: Icons.edit,
                         onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    ProductEditScreen(product: product)))),
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ProductEditScreen(product: product),
+                          ),
+                        ),
+                      ),
+                    ),
                   if (isMyProduct)
-                    IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: _showDeleteDialog),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: AppBarIcon(
+                          icon: Icons.delete, onPressed: _showDeleteDialog),
+                    ),
                 ],
               ),
               SliverList(
@@ -457,15 +654,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // ✅ 1. AuthorProfileTile 공용 위젯으로 교체
                         AuthorProfileTile(userId: product.userId),
                         const Divider(height: 32),
-                        // ... 제목, 카테고리, 설명 등은 원본과 동일 ...
                         Text(product.title,
                             style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
-                        // [추가] 제목 아래 AI 뱃지
                         if (product.isAiVerified)
                           const Padding(
                             padding: EdgeInsets.only(bottom: 16.0),
@@ -483,7 +677,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         if (product.isAiVerified &&
                             product.aiReport != null) ...[
                           if (_showAiReport) ...[
-                            _buildAiReportSection(),
+                            AiReportViewer(product: product),
                             Align(
                               alignment: Alignment.centerRight,
                               child: TextButton(
@@ -508,7 +702,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 onPressed: () =>
                                     setState(() => _showAiReport = true),
                                 child: Text(
-                                    '[${'ai_flow.final_report.title'.tr()}]'),
+                                    '[${"ai_flow.final_report.title".tr()}]'),
                               ),
                             ),
                           ],
@@ -543,143 +737,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           style:
                               const TextStyle(color: Colors.grey, fontSize: 12),
                         ),
+                        // spacer so the floating action button / bottom bar does not
+                        // overlap important content at the bottom of the page.
+                        // Adaptive spacer: clamp height between 56 and 96 for safe, flexible layout
+                        Builder(
+                          builder: (context) {
+                            final double raw = kBottomNavigationBarHeight +
+                                MediaQuery.of(context).padding.bottom +
+                                8;
+                            final double clamped = raw.clamp(56.0, 96.0);
+                            return SizedBox(height: clamped);
+                          },
+                        ),
                       ],
                     ),
                   ),
                 ]),
-              )
+              ),
             ],
           ),
         );
       },
-    );
-  }
-
-  // AI 검수 리포트 섹션 위젯
-  Widget _buildAiReportSection() {
-    if (!widget.product.isAiVerified || widget.product.aiReport == null) {
-      return const SizedBox.shrink();
-    }
-    final report = widget.product.aiReport!;
-    final summary = report['verification_summary'];
-    final specs = report['key_specs'];
-    final condition = report['condition_check'];
-    final items = report['included_items'];
-    final buyerNotes = report['notes_for_buyer'];
-    final skipped = report['skipped_items'];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 구조화된 리포트 표시
-
-        // [V2] 구조화된 리포트 표시
-        if (summary != null)
-          _buildReportItem(context, Icons.task_alt,
-              'ai_flow.final_report.summary'.tr(), summary),
-        if (specs is Map && specs.isNotEmpty)
-          _buildReportMap(context, Icons.list_alt,
-              'ai_flow.final_report.key_specs'.tr(), specs),
-        if (condition != null)
-          _buildReportItem(context, Icons.healing,
-              'ai_flow.final_report.condition'.tr(), condition),
-        if (items is List && items.isNotEmpty)
-          _buildReportList(context, Icons.inbox,
-              'ai_flow.final_report.included_items_label'.tr(), items),
-
-        if (buyerNotes is String && buyerNotes.trim().isNotEmpty) ...[
-          const SizedBox(height: 12),
-          _buildReportItem(context, Icons.info_outline,
-              'ai_flow.final_report.buyer_notes_label'.tr(), buyerNotes),
-        ],
-
-        if (skipped is List && skipped.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          _buildReportList(
-              context,
-              Icons.photo_size_select_actual_outlined,
-              'ai_flow.final_report.skipped_items'.tr(),
-              List<String>.from(skipped)),
-        ],
-
-        const Divider(height: 32),
-      ],
-    );
-  }
-
-  // 리포트 항목을 표시하는 헬퍼 위젯들
-  Widget _buildReportItem(
-      BuildContext context, IconData icon, String title, dynamic content) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: Theme.of(context).primaryColor, size: 20),
-              const SizedBox(width: 8),
-              Text(title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(content.toString(), style: const TextStyle(height: 1.5)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReportMap(BuildContext context, IconData icon, String title,
-      Map<dynamic, dynamic> data) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: Theme.of(context).primaryColor, size: 20),
-            const SizedBox(width: 8),
-            Text(title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ...data.entries.map((e) => Padding(
-              padding: const EdgeInsets.only(left: 28.0, bottom: 4.0),
-              child: Text("- ${e.key}: ${e.value}"),
-            )),
-      ],
-    );
-  }
-
-  Widget _buildReportList(
-      BuildContext context, IconData icon, String title, List<dynamic> data) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: Theme.of(context).primaryColor, size: 20),
-            const SizedBox(width: 8),
-            Text(title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ...data.map((e) => Padding(
-              padding: const EdgeInsets.only(left: 28.0, bottom: 4.0),
-              child: Text("- ${e.toString()}"),
-            )),
-      ],
     );
   }
 

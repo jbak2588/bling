@@ -264,7 +264,10 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
           if (!_isSaving)
             TextButton(
                 onPressed: _updateListing,
-                child: Text('realEstate.edit.save'.tr()))
+                child: Text('realEstate.edit.save'.tr(),
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold)))
         ],
       ),
       body: Stack(
@@ -338,7 +341,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                     style: Theme.of(context).textTheme.titleMedium),
                 _buildDropdown<String?>(
                   value: _selectedListingType,
-                  hint: "Pilih Tipe Transaksi", // TODO: 다국어
+                  hint: 'realEstate.form.listingTypeHint'.tr(),
                   items: const ['rent', 'sale'],
                   itemBuilder: (type) => DropdownMenuItem(
                     value: type,
@@ -592,6 +595,22 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                     keyboardType: TextInputType.number,
                   ),
                 ],
+
+                const SizedBox(height: 24),
+                // Bottom primary action consistent with AppBar
+                ElevatedButton(
+                  onPressed: _isSaving ? null : _updateListing,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        )
+                      : Text('realEstate.edit.save'.tr()),
+                ),
 
                 // 상업용 상세 입력은 _buildDynamicDetailInputs()에서 처리합니다.
               ],

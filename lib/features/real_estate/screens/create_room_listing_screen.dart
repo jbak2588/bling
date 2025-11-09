@@ -226,7 +226,10 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
           if (!_isSaving)
             TextButton(
                 onPressed: _submitListing,
-                child: Text('realEstate.form.submit'.tr())),
+                child: Text('realEstate.form.submit'.tr(),
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold))),
         ],
       ),
       body: Stack(
@@ -289,12 +292,26 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
+                // Bottom primary action consistent with appBar
+                ElevatedButton(
+                  onPressed: _isSaving ? null : _submitListing,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        )
+                      : Text('realEstate.form.submit'.tr()),
+                ),
                 // [수정] '작업 27': 'listingType'을 'roomType' 앞으로 이동
                 Text('realEstate.form.listingType'.tr(),
                     style: Theme.of(context).textTheme.titleMedium),
                 _buildDropdown<String?>(
                   value: _selectedListingType,
-                  hint: "Pilih Tipe Transaksi", // TODO: 다국어
+                  hint: 'realEstate.form.listingTypeHint'.tr(),
                   items: const ['rent', 'sale'],
                   itemBuilder: (type) => DropdownMenuItem(
                     value: type,
@@ -730,7 +747,6 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         if (_type != 'kos') ...[
           TextFormField(
             controller: _landAreaController,
-            // TODO: 다국어 키 추가: realEstate.form.landArea
             decoration: InputDecoration(
               labelText: 'realEstate.form.landArea'.tr(),
               hintText: '0',

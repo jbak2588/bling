@@ -1,7 +1,7 @@
 // lib/features/marketplace/widgets/ai_verification_badge.dart
 
 import 'package:flutter/material.dart';
-// import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class AiVerificationBadge extends StatelessWidget {
   const AiVerificationBadge({super.key});
@@ -25,7 +25,7 @@ class AiVerificationBadge extends StatelessWidget {
               color: Theme.of(context).primaryColor, size: 16),
           const SizedBox(width: 6),
           Text(
-            'AI 검증 완료', // TODO: 다국어 키 추가
+            'marketplace.aiBadge'.tr(),
             style: TextStyle(
               color: Theme.of(context).primaryColor,
               fontWeight: FontWeight.bold,

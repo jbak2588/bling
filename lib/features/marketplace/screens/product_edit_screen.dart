@@ -323,7 +323,13 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text('marketplace.edit.save'.tr()),
+                : Text(
+                    'marketplace.edit.save'.tr(),
+                    style: TextStyle(
+                        color: Theme.of(context)
+                            .primaryColor, // [Fix] Use primaryColor
+                        fontWeight: FontWeight.bold),
+                  ),
           ),
         ],
       ),

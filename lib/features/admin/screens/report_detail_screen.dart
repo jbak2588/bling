@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
 // ✅ Post Detail Screen import (게시글 ID 클릭 시 이동)
 import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
+import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 
 class ReportDetailScreen extends StatefulWidget {
   final String reportId;
@@ -188,6 +189,13 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: AppBarIcon(
+            icon: Icons.arrow_back,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
         // 다국어 키: admin.reportDetail.title
         title: Text('admin.reportDetail.title'.tr()),
       ),

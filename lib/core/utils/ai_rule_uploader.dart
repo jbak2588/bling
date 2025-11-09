@@ -97,6 +97,8 @@ Output a report in JSON format ONLY, in Indonesian.
   // [V2.1 신규] 스마트폰 전용 규칙 생성 함수
   AiVerificationRule _getSmartphoneV2Rule() {
     // 프롬프트는 범용 프롬프트를 그대로 재사용할 수 있습니다.
+    // [Blocker-A Fix] 백엔드가 룰에서 직접 프롬프트를 읽으므로, 범용 룰의 프롬프트를 여기에 복사해야 합니다.
+    final genericRule = _getGenericV2Rule();
     // V2.1의 핵심은 프롬프트가 아닌, 'suggestedShots' 데이터에 있습니다.
 
     return AiVerificationRule(
@@ -121,8 +123,8 @@ Output a report in JSON format ONLY, in Indonesian.
       },
       // initialAnalysisPromptTemplate, reportTemplatePrompt는 범용 규칙과 동일한 것을 사용하거나
       // 필요시 스마트폰에 더 특화된 프롬프트를 여기에 별도로 정의할 수 있습니다.
-      initialAnalysisPromptTemplate: '', // 우선 비워두어 서버에서 범용 프롬프트를 찾도록 유도
-      reportTemplatePrompt: '',
+      initialAnalysisPromptTemplate: genericRule.initialAnalysisPromptTemplate,
+      reportTemplatePrompt: genericRule.reportTemplatePrompt,
     );
   }
 }

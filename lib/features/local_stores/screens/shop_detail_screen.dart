@@ -49,6 +49,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 // [추가] 리뷰 작성을 위한 위젯 (예: flutter_rating_bar)
 // import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 // [추가] 날짜 포매팅을 위한 intl
@@ -252,46 +253,59 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
 
         return Scaffold(
           appBar: AppBar(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: AppBarIcon(
+                icon: Icons.arrow_back,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
             title: Text(shop.name),
             actions: [
               // [추가] 'Jobs' 연동 (알바 구하기 버튼)
               if (isOwner && widget.userModel != null)
-                IconButton(
-                  icon: const Icon(Icons.work_outline),
-                  tooltip: 'jobs.create.title'.tr(), // "알바 구하기"
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => CreateJobScreen(
-                          userModel: widget.userModel!,
-                          // [자동 채우기] 가게 정보 전달
-                          initialCompanyName: shop.name,
-                          initialLocation: shop.locationName,
-                          initialGeoPoint: shop.geoPoint,
-                          initialLocationParts: shop.locationParts,
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: AppBarIcon(
+                    icon: Icons.work_outline,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => CreateJobScreen(
+                            userModel: widget.userModel!,
+                            // [자동 채우기] 가게 정보 전달
+                            initialCompanyName: shop.name,
+                            initialLocation: shop.locationName,
+                            initialGeoPoint: shop.geoPoint,
+                            initialLocationParts: shop.locationParts,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               if (isOwner)
-                IconButton(
-                  icon: const Icon(Icons.edit_note_outlined),
-                  tooltip: 'localStores.edit.tooltip'.tr(),
-                  onPressed: () {
-                    Navigator.of(context)
-                        .push(
-                          MaterialPageRoute(
-                              builder: (_) => EditShopScreen(shop: shop)),
-                        )
-                        .then((_) => setState(() {}));
-                  },
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: AppBarIcon(
+                    icon: Icons.edit_note_outlined,
+                    onPressed: () {
+                      Navigator.of(context)
+                          .push(
+                            MaterialPageRoute(
+                                builder: (_) => EditShopScreen(shop: shop)),
+                          )
+                          .then((_) => setState(() {}));
+                    },
+                  ),
                 ),
               if (isOwner)
-                IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: 'localStores.detail.deleteTooltip'.tr(),
-                  onPressed: _deleteShop,
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: AppBarIcon(
+                    icon: Icons.delete_outline,
+                    onPressed: _deleteShop,
+                  ),
                 ),
             ],
           ),

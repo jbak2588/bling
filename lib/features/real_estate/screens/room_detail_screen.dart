@@ -48,6 +48,7 @@ import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 
 class RoomDetailScreen extends StatefulWidget {
   final RoomListingModel room;
@@ -169,6 +170,13 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
 
         return Scaffold(
           appBar: AppBar(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: AppBarIcon(
+                icon: Icons.arrow_back,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
             title: Text(room.title),
             actions: [
               // [추가] Gap 3: 찜하기 버튼
@@ -178,28 +186,33 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                       _repository.isBookmarkedStream(_currentUserId!, room.id),
                   builder: (context, snapshot) {
                     final isBookmarked = snapshot.data ?? false;
-                    return IconButton(
-                      icon: Icon(
-                        isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: AppBarIcon(
+                        icon: isBookmarked
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                        onPressed: () {
+                          _repository.toggleBookmark(
+                              _currentUserId!, room.id, isBookmarked);
+                        },
                       ),
-                      tooltip: 'common.bookmark'.tr(),
-                      onPressed: () {
-                        _repository.toggleBookmark(
-                            _currentUserId!, room.id, isBookmarked);
-                      },
                     );
                   },
                 ),
               if (isOwner)
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => EditRoomListingScreen(room: room),
-                      ),
-                    );
-                  },
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: AppBarIcon(
+                    icon: Icons.edit,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => EditRoomListingScreen(room: room),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               if (isOwner)
                 IconButton(

@@ -1397,4 +1397,133 @@ exports.startFriendChat = onCall(CALL_OPTS, async (request) => {
   }
 });
 
+/**
+ * ============================================================================
+ * [AI 인수 2단계] 현장 동일성 검증
+ * 구매자가 현장에서 촬영한 사진과 원본 AI 보고서/사진을 비교합니다.
+ * ============================================================================
+ */
+exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
+  logger.info("✅ [AI 인수 2단계] verifyProductOnSite 함수가 호출되었습니다.", {
+    uid: request.auth ? request.auth.uid : "No UID",
+    body: request.data,
+  });
+
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "인증이 필요합니다.");
+  }
+
+  const { productId, newImageUrls, locale } = request.data || {};
+  if (
+    !productId ||
+    !Array.isArray(newImageUrls) ||
+    newImageUrls.length === 0
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "productId 및 newImageUrls (배열)가 필요합니다."
+    );
+  }
+
+  const db = getFirestore();
+  const genAI = getGenAI();
+
+  try {
+    // 1. 원본 상품 데이터 및 AI 보고서 가져오기
+    const productRef = db.collection("products").doc(productId);
+    const productDoc = await productRef.get();
+    if (!productDoc.exists) {
+      throw new HttpsError("not-found", `상품(ID: ${productId})을 찾을 수 없습니다.`);
+    }
+
+    const productData = productDoc.data();
+    const originalReport = productData.aiReport;
+    const originalImageUrls = productData.imageUrls;
+
+    if (!originalReport || !originalImageUrls || originalImageUrls.length === 0) {
+      throw new HttpsError(
+        "failed-precondition",
+        "AI 검증이 완료된 상품이 아닙니다."
+      );
+    }
+
+    // 2. 비교 프롬프트 생성
+    const lc = (typeof locale === "string" && locale) || "id";
+    const langName =
+      lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
+
+    const verificationPrompt = `
+      You are an on-site verification AI for a marketplace. A buyer is meeting a seller to pick up an item.
+      Your task is to compare the 'NEW ON-SITE PHOTOS' (taken by the buyer) with the 'ORIGINAL AI REPORT' (created by the seller).
+
+  **Original AI Report (Seller's Claim):**
+  (Original AI Report JSON)
+  ${JSON.stringify(originalReport)}
+  (End of Original AI Report)
+
+      **Task:**
+      Analyze the 'NEW ON-SITE PHOTOS'.
+      1. Do these new photos show the same item described in the 'Original AI Report'?
+      2. Does the condition (scratches, dents, wear) in the new photos match the "condition_check" described in the original report?
+      3. Provide a clear 'match' (true/false) and a 'reason' for your decision. The 'reason' must be written in ${langName}.
+
+      **Output Format (JSON ONLY):**
+      {
+       "match": true | false,
+       "reason": "string (Your explanation in ${langName}. Example: 'Item matches original report.' or 'New photos show a large crack not mentioned in the original report.')"
+      }
+    `;
+
+    // 3. 현장 사진(newImageUrls) 및 원본 사진(originalImageUrls)을 GenerativePart로 변환
+    // (성능을 위해 원본 이미지는 2장만, 새 이미지는 5장으로 제한)
+    const newParts = await Promise.all(
+      newImageUrls.slice(0, 5).map((url) => urlToGenerativePart(url))
+    );
+    const originalParts = await Promise.all(
+      originalImageUrls.slice(0, 2).map((url) => urlToGenerativePart(url))
+    );
+
+    const contents = [
+      { role: "user", parts: [
+        { text: verificationPrompt },
+        { text: "--- ORIGINAL IMAGES (Reference) ---" },
+        ...originalParts,
+        { text: "--- NEW ON-SITE PHOTOS (To Verify) ---" },
+        ...newParts,
+      ]},
+    ];
+
+    // 4. Gemini API 호출
+    const rawResponseText = await genAiCall(genAI, {
+      contents,
+      safetySettings,
+      responseMimeType: "application/json",
+      tag: "verifyProductOnSite",
+    });
+
+    // 5. 결과 파싱 및 반환
+    const jsonText = extractJsonText(rawResponseText);
+    const verificationResult = tryParseJson(jsonText);
+    logAiDiagnostics("verifyProductOnSite", rawResponseText, verificationResult);
+
+    if (!verificationResult || verificationResult.match === undefined) {
+      throw new HttpsError("data-loss", "AI가 유효한 검증 결과를 반환하지 못했습니다.");
+    }
+
+    logger.info(`✅ [AI 인수 2단계] 검증 완료: ${productId}`, verificationResult);
+    return { success: true, verification: verificationResult };
+
+  } catch (error) {
+    logger.error(
+      "❌ [AI 인수 2단계] verifyProductOnSite 함수 오류:",
+      error
+    );
+    if (error instanceof HttpsError) throw error;
+    throw new HttpsError(
+      "internal",
+      "현장 검증 중 내부 오류가 발생했습니다."
+    );
+  }
+});
+
     

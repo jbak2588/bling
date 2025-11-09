@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
 import 'package:bling_app/features/marketplace/screens/ai_evidence_suggestion_screen.dart';
-import 'package:bling_app/features/marketplace/screens/ai_final_report_screen.dart';
+// import 'package:bling_app/features/marketplace/screens/ai_final_report_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -87,6 +87,8 @@ class AiVerificationService {
     String? productPrice,
   }) async {
     // [V2.1] 먼저 1차 분석을 수행하여 누락된 추천 증거 목록을 확인합니다.
+    // [Blocker-B Fix] 보고서 권고안(7.3)에 따라 V1 레거시 경로(ai_evidence_collection)로의
+    // fallback을 제거하고 V2.1(ai_evidence_suggestion) 흐름으로 일원화합니다.
     try {
       // Ensure URL list
       final user = FirebaseAuth.instance.currentUser;
@@ -112,122 +114,51 @@ class AiVerificationService {
           (data['missing_evidence_list'] as List<dynamic>?) ?? const [];
       final missingKeys = missingRaw.whereType<String>().toList();
 
-      if (missingKeys.isNotEmpty) {
-        // 카테고리 ko 이름 조회
-        String? subName;
-        String? parentName;
-        try {
-          final lang = context.locale.languageCode;
-          final nameField =
-              lang == 'ko' ? 'name_ko' : (lang == 'en' ? 'name_en' : 'name_id');
-          final subDoc = await _firestore
-              .collection('categories_v2')
-              .doc(categoryId)
-              .get();
-          subName = subDoc.data()?[nameField] ?? subDoc.data()?['name_ko'];
-          final pid = subDoc.data()?['parentId'];
-          if (pid is String && pid.isNotEmpty) {
-            final pDoc =
-                await _firestore.collection('categories_v2').doc(pid).get();
-            parentName = pDoc.data()?[nameField] ?? pDoc.data()?['name_ko'];
-          }
-        } catch (_) {}
+      // V2.1 흐름: 1차 분석 성공 시, '부족 증거가 있든 없든' (missingKeys.isNotEmpty or not)
+      // AiEvidenceSuggestionScreen으로 데이터를 넘깁니다.
+      // 이 화면은 missingKeys가 비어있으면 '다음' 버튼만 표시하여
+      // '최종 리포트 직행 경로(2.4)' 역할을 겸합니다.
 
-        if (context.mounted) {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => AiEvidenceSuggestionScreen(
-              productId: productId,
-              categoryId: categoryId,
-              ruleId: rule.id,
-              rule: rule,
-              initialImageUrls: initialUrls,
-              confirmedProductName: confirmedName,
-              userPrice: productPrice,
-              userDescription: productDescription,
-              categoryName: parentName,
-              subCategoryName: subName,
-              missingEvidenceKeys: missingKeys,
-            ),
-          ));
-          return;
+      // 카테고리 ko 이름 조회
+      String? subName;
+      String? parentName;
+      try {
+        final lang = context.locale.languageCode;
+        final nameField =
+            lang == 'ko' ? 'name_ko' : (lang == 'en' ? 'name_en' : 'name_id');
+        final subDoc =
+            await _firestore.collection('categories_v2').doc(categoryId).get();
+        subName = subDoc.data()?[nameField] ?? subDoc.data()?['name_ko'];
+        final pid = subDoc.data()?['parentId'];
+        if (pid is String && pid.isNotEmpty) {
+          final pDoc =
+              await _firestore.collection('categories_v2').doc(pid).get();
+          parentName = pDoc.data()?[nameField] ?? pDoc.data()?['name_ko'];
         }
+      } catch (_) {}
+
+      if (context.mounted) {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => AiEvidenceSuggestionScreen(
+            productId: productId,
+            categoryId: categoryId,
+            ruleId: rule.id,
+            rule: rule,
+            initialImageUrls: initialUrls,
+            confirmedProductName: confirmedName,
+            userPrice: productPrice,
+            userDescription: productDescription,
+            categoryName: parentName,
+            subCategoryName: subName,
+            missingEvidenceKeys: missingKeys,
+          ),
+        ));
       }
     } catch (e) {
-      debugPrint('initialproductanalysis failed: $e');
-      // fall through to final report
-    }
-
-    // 추천 증거 보강 없이 바로 최종 리포트 생성으로 진행
-    {
-      try {
-        final user = FirebaseAuth.instance.currentUser;
-        if (user == null) throw Exception("User not authenticated.");
-
-        // 이미지 업로드
-        final List<String> imageUrls = [];
-        for (final image in initialImages) {
-          if (image is String) {
-            imageUrls.add(image);
-          } else if (image is XFile) {
-            final url = await _uploadImage(image, user.uid);
-            imageUrls.add(url);
-          }
-        }
-
-        // [핵심 수정] categoryId를 사용하여 parentId를 조회하고 이름들을 가져옵니다.
-        final subCategoryDoc =
-            await _firestore.collection('categories_v2').doc(categoryId).get();
-        if (!subCategoryDoc.exists) {
-          throw Exception("Category with ID $categoryId not found.");
-        }
-        final parentId = subCategoryDoc.data()?['parentId'] as String?;
-        if (parentId == null || parentId.isEmpty) {
-          throw Exception(
-              "Parent category ID not found for category $categoryId.");
-        }
-        final categoryNames = await getCategoryNames(
-          categoryId,
-          parentId,
-          langCode: context.locale.languageCode,
-        );
-
-        // 최종 리포트 생성 함수 호출
-        final callable = _functions.httpsCallable('generatefinalreport');
-        final result = await callable.call(<String, dynamic>{
-          'imageUrls': {'initial': imageUrls, 'guided': {}},
-          'ruleId': rule.id,
-          'confirmedProductName': productName,
-          'categoryName': categoryNames['parentCategoryName'],
-          'subCategoryName': categoryNames['subCategoryName'],
-          'userPrice': productPrice,
-          'userDescription': productDescription,
-          'locale': context.locale.languageCode,
-        });
-
-        final reportData = result.data['report'] as Map<String, dynamic>?;
-        if (reportData == null) {
-          throw Exception("AI가 유효한 리포트를 생성하지 못했습니다.");
-        }
-
-        if (context.mounted) {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => AiFinalReportScreen(
-              productId: productId,
-              categoryId: categoryId,
-              finalReport: reportData,
-              rule: rule,
-              initialImages: initialImages,
-              takenShots: const {},
-              confirmedProductName: productName,
-              userPrice: productPrice,
-            ),
-          ));
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('오류: ${e.toString()}')));
-        }
+      debugPrint('1차 분석 실패 또는 V2.1 흐름 진입 오류: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('오류: ${e.toString()}')));
       }
     }
   }

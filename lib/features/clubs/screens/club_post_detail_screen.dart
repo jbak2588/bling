@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class ClubPostDetailScreen extends StatefulWidget {
@@ -138,6 +139,13 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: AppBarIcon(
+            icon: Icons.arrow_back,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
         title: Text('clubs.postDetail.appBarTitle'
             .tr(namedArgs: {'title': widget.club.title})),
       ),
@@ -168,7 +176,7 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
                               )),
                         const Divider(height: 32),
                         _buildActionRow(),
-                         const Divider(height: 32),
+                        const Divider(height: 32),
                       ],
                     ),
                   ),
@@ -250,7 +258,7 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
     );
   }
 
-   Widget _buildActionRow() {
+  Widget _buildActionRow() {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     if (currentUserId == null) return const SizedBox.shrink();
 
@@ -258,22 +266,30 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
       stream: _repository.getClubPostStream(widget.club.id, widget.post.id),
       builder: (context, postSnapshot) {
         if (!postSnapshot.hasData) return const SizedBox(height: 36);
-        
-        final livePost = ClubPostModel.fromFirestore(postSnapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
-        
+
+        final livePost = ClubPostModel.fromFirestore(
+            postSnapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
+
         return StreamBuilder<DocumentSnapshot>(
-          stream: FirebaseFirestore.instance.collection('users').doc(currentUserId).snapshots(),
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(currentUserId)
+              .snapshots(),
           builder: (context, currentUserSnapshot) {
             if (!currentUserSnapshot.hasData) return const SizedBox(height: 36);
 
-            final currentUser = UserModel.fromFirestore(currentUserSnapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
-            final bool isLiked = currentUser.bookmarkedClubPostIds?.contains(widget.post.id) ?? false;
+            final currentUser = UserModel.fromFirestore(currentUserSnapshot
+                .data! as DocumentSnapshot<Map<String, dynamic>>);
+            final bool isLiked =
+                currentUser.bookmarkedClubPostIds?.contains(widget.post.id) ??
+                    false;
 
             return Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 TextButton.icon(
-                  onPressed: () => _repository.toggleClubPostLike(widget.club.id, widget.post.id, isLiked),
+                  onPressed: () => _repository.toggleClubPostLike(
+                      widget.club.id, widget.post.id, isLiked),
                   icon: Icon(
                     isLiked ? Icons.favorite : Icons.favorite_border,
                     color: isLiked ? Colors.red : Colors.grey,
@@ -283,7 +299,8 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
                 const SizedBox(width: 16),
                 TextButton.icon(
                   onPressed: null,
-                  icon: const Icon(Icons.chat_bubble_outline, color: Colors.grey),
+                  icon:
+                      const Icon(Icons.chat_bubble_outline, color: Colors.grey),
                   label: Text(livePost.commentsCount.toString()),
                 ),
               ],

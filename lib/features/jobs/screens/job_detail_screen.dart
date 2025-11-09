@@ -31,6 +31,7 @@ import 'package:bling_app/features/chat/screens/chat_room_screen.dart'; // [ì¶”ê
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 
 class JobDetailScreen extends StatelessWidget {
   final JobModel job;
@@ -84,6 +85,13 @@ class JobDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: AppBarIcon(
+            icon: Icons.arrow_back,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
         title: Text(job.title),
       ),
       body: ListView(

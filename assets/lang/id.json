@@ -140,7 +140,7 @@
     "empty": "Belum ada produk yang terdaftar.\nTekan tombol + untuk menambahkan produk pertama!",
     "registration": {
       "title": "Postingan Baru",
-      "done": "Selesai",
+  "done": "Simpan",
       "titleHint": "Judul",
       "priceHint": "Harga (Rp)",
       "negotiable": "Izinkan Penawaran",
@@ -206,9 +206,50 @@
       "new": "Baru",
       "used": "Bekas"
     },
+    "reservation": {
+      "title": "Pembayaran deposit 10%",
+      "content": "Untuk memesan produk yang telah diverifikasi AI, Anda harus membayar deposit 10% sebesar {amount} terlebih dahulu. Jika transaksi dibatalkan setelah verifikasi di lokasi, deposit akan dikembalikan.",
+      "confirm": "Bayar dan Pesan",
+      "button": "Reservasi Aman AI",
+      "success": "Reservasi berhasil. Silakan atur janji dengan penjual."
+    },
+    "status": {
+      "reserved": "Dipesan",
+      "sold": "Terjual"
+    },
+    "takeover": {
+      "button": "Ambil & Verifikasi di Lokasi",
+      "title": "Verifikasi AI di Lokasi",
+      "guide": {
+        "title": "Verifikasi kesamaan AI di lokasi",
+        "subtitle": "Periksa apakah laporan AI asli cocok dengan barang nyata. Ambil minimal 3 foto yang menampilkan fitur utama barang."
+      },
+      "photoTitle": "Ambil foto di lokasi",
+      "buttonVerify": "Mulai verifikasi kesamaan AI",
+      "errors": {
+        "noPhoto": "Butuh minimal 1 foto lokasi untuk verifikasi."
+      },
+      "dialog": {
+        "matchTitle": "Verifikasi AI Berhasil",
+        "noMatchTitle": "Verifikasi AI Gagal",
+        "finalize": "Konfirmasi pengambilan akhir",
+        "cancelDeal": "Batalkan transaksi (minta pengembalian)"
+      },
+      "success": {
+        "finalized": "Transaksi berhasil diselesaikan.",
+        "cancelled": "Transaksi dibatalkan. Deposit akan dikembalikan."
+      }
+    },
+    "aiBadge": "AI Terverifikasi",
     "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!"
   },
   "ai_flow": {
+    "cta": {
+      "title": "🤖 Tingkatkan kepercayaan dengan verifikasi AI (opsional)",
+      "subtitle": "Dapatkan lencana verifikasi AI untuk meningkatkan kepercayaan pembeli dan mempercepat penjualan. Isi semua informasi produk sebelum memulai.",
+      "start_button": "Mulai verifikasi AI",
+      "missing_required_fields": "Silakan masukkan nama produk, kategori, dan minimal satu gambar."
+    },
     "category_selection": {
       "title": "Pilih Kategori Verifikasi AI",
       "error": "Gagal memuat kategori.",
@@ -1219,6 +1260,7 @@
         "etc": "Lainnya"
       },
       "listingType": "Tipe transaksi",
+      "listingTypeHint": "Pilih Tipe Transaksi",
       "listingTypes": {
         "rent": "Sewa",
         "sale": "Jual"

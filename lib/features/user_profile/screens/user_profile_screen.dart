@@ -6,6 +6,7 @@ import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../shared/widgets/app_bar_icon.dart';
 
 class UserProfileScreen extends StatelessWidget {
   final String userId;
@@ -20,6 +21,13 @@ class UserProfileScreen extends StatelessWidget {
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               SliverAppBar(
+                leading: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: AppBarIcon(
+                    icon: Icons.arrow_back,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
                 title: Text('profileView.title'.tr()),
                 floating: true,
                 pinned: true,

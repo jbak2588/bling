@@ -142,7 +142,11 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   }
 
   Future<void> _pickImages() async {
-    final pickedImages = await ImagePicker().pickMultiImage(limit: 10);
+    final pickedImages = await ImagePicker().pickMultiImage(
+      limit: 10,
+      imageQuality: 80, // [Fix] Warning #4: 품질 80%
+      maxWidth: 1024, // [Fix] Warning #4: 최대 너비 1024px
+    );
     if (pickedImages.isNotEmpty) {
       setState(() {
         _images = pickedImages;
@@ -314,11 +318,12 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
           TextButton(
             onPressed: _isLoading ? null : _submitProduct,
             child: _isLoading
-                ? const CircularProgressIndicator(color: Colors.white)
+                ? const CircularProgressIndicator() // Use default (theme) color
                 : Text(
                     'marketplace.registration.done'.tr(),
                     style: TextStyle(
-                      color: theme.colorScheme.onPrimary,
+                      color: theme
+                          .primaryColor, // [Fix] Use primaryColor for visibility
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -333,6 +338,21 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // [Fix] 하단에 '일반 등록' 버튼 추가 (UX 일관성)
+              ElevatedButton(
+                onPressed: _isLoading ? null : _submitProduct,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 3),
+                      )
+                    : Text('marketplace.registration.done'.tr()),
+              ),
+              const SizedBox(height: 16),
               InkWell(
                 onTap: _pickImages,
                 child: Container(
@@ -463,6 +483,22 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                 },
               ),
               const SizedBox(height: 24),
+
+              // [Fix] 하단에 '일반 등록' 버튼 추가 (UX 일관성)
+              ElevatedButton(
+                onPressed: _isLoading ? null : _submitProduct,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 3),
+                      )
+                    : Text('marketplace.registration.done'.tr()),
+              ),
+              const SizedBox(height: 16),
 
               // [V2 핵심 추가] AI 검수 옵션 섹션
               const Divider(height: 32),

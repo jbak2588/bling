@@ -184,7 +184,12 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         title: Text('localStores.create.title'.tr()),
         actions: [
           if (!_isSaving)
-            TextButton(onPressed: _submitShop, child: Text('common.done'.tr())),
+            TextButton(
+                onPressed: _submitShop,
+                child: Text('common.done'.tr(),
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold))),
         ],
       ),
       body: Stack(
@@ -259,6 +264,21 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                   validator: (value) => (value == null || value.trim().isEmpty)
                       ? 'localStores.form.nameError'.tr()
                       : null,
+                ),
+                const SizedBox(height: 24),
+                // Bottom primary action for better discoverability
+                ElevatedButton(
+                  onPressed: _isSaving ? null : _submitShop,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        )
+                      : Text('localStores.create.submit'.tr()),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

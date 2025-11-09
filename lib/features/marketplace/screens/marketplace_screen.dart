@@ -18,25 +18,6 @@
 /// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
 /// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
 /// ============================================================================
-///
-/// [기획/실제 코드 분석 및 개선 제안]
-/// 1. 기획 문서 요약
-///   - CRUD(등록/수정/조회/삭제) 기본 뼈대, 채팅/댓글/찜/좋아요/신고/알림 등 상호작용 기능
-///   - TrustLevel/인증, 프로필/Privacy, Opt-in/Opt-out, 다국어(i18n), AI 검수, 통계/카운트, 활동 히스토리 등 품질·운영 기능
-///
-/// 2. 실제 코드 분석
-///   - 위치 기반 필터로 상품 목록 표시, Firestore products 컬렉션, locationParts 기반 정렬/필터
-///   - AI 검수(isAiVerified), 신뢰등급, 광고/프로모션, KPI/Analytics, 다국어(i18n) 등 정책 반영
-///   - Edge case(위치 미설정, 인증/신뢰 등) 처리
-///
-/// 3. 기획과 실제 기능의 차이점
-///   - 기획보다 좋아진 점: 데이터 모델 세분화, 위치·신뢰등급·AI 검수 등 품질·운영 기능 강화, KPI/Analytics, 광고/프로모션, 다국어(i18n) 등 실제 서비스 운영에 필요한 기능 반영
-///   - 기획에 못 미친 점: 채팅, 댓글, 찜, Opt-in/Opt-out 등 일부 상호작용 기능 미구현, AI 검수·활동 히스토리·광고 슬롯 등 추가 구현 필요
-///
-/// 4. 개선 제안
-///   - UI/UX: 위치 기반 추천, 카테고리별 필터/정렬, 광고/프로모션 배너, 신뢰등급 시각화 강화
-///   - 수익화: 지역 광고, 프로모션, 추천 상품/판매자 노출, 프리미엄 기능 연계, KPI/Analytics 이벤트 로깅
-///   - 코드: Firestore 쿼리 최적화, 비동기 처리/에러 핸들링 강화, 데이터 모델/위젯 분리, 상태 관리 개선
 library;
 
 /// 아래부터 실제 코드
@@ -104,6 +85,27 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
         .toList();
   }
 
+  /// [Fix #2] 'sold' 상태 10일 경과 아이템 숨김 처리를 위한 클라이언트 필터
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyStatusRules(
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
+    final now = DateTime.now();
+    // 10일 전 cutoff 타임스탬프
+    final cutoffDate = now.subtract(const Duration(days: 10));
+
+    return docs.where((doc) {
+      final data = doc.data();
+      final status = data['status'] as String?;
+      final updatedAt = data['updatedAt'] as Timestamp?;
+
+      if (status == 'sold') {
+        if (updatedAt == null) return false; // updatedAt 없으면 숨김
+        return updatedAt.toDate().isAfter(cutoffDate); // 10일 이내면 true
+      }
+      // 'selling' 또는 'reserved'는 항상 true
+      return true;
+    }).toList();
+  }
+
   // ✅ [수정] initState 추가
   @override
   void initState() {
@@ -154,27 +156,14 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
       }
 
       query = query
-          // [수정] 'selling' 상태인 상품만 노출하도록 쿼리를 단순화합니다.
-          .where('status', isEqualTo: 'selling');
+          // [Fix #2] 'selling', 'reserved', 'sold' 상태 모두 조회
+          .where('status', whereIn: ['selling', 'reserved', 'sold']);
 
       // AI 검증 상품을 최상단에, 그 후 최신순으로 정렬
       query = query.orderBy('isAiVerified', descending: true);
       query = query.orderBy('createdAt', descending: true);
 
       return query;
-    }
-
-    if (widget.userModel?.locationParts?['prov'] == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Text(
-            'marketplace.setLocationPrompt'.tr(),
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ),
-      );
     }
 
     return Scaffold(
@@ -210,12 +199,16 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                 }
 
                 final allDocs = snapshot.data!.docs;
-                // 위치 필터
-                var productsDocs = _applyLocationFilter(allDocs);
+                // [Fix #2] 1. 위치 필터
+                var filteredDocs = _applyLocationFilter(allDocs);
+
+                // [Fix #2] 2. 'sold' + 10일 경과 상품 숨김 필터
+                filteredDocs = _applyStatusRules(filteredDocs);
+
                 // 키워드 필터 (제목/설명/태그)
                 final kw = _searchKeywordNotifier.value;
                 if (kw.isNotEmpty) {
-                  productsDocs = productsDocs.where((d) {
+                  filteredDocs = filteredDocs.where((d) {
                     final p = ProductModel.fromFirestore(d);
                     final hay =
                         ('${p.title} ${p.description} ${p.tags.join(' ')}')
@@ -225,7 +218,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                 }
 
                 return ListView.separated(
-                  itemCount: productsDocs.length,
+                  itemCount: filteredDocs.length,
                   separatorBuilder: (context, index) => const Divider(
                     height: 1,
                     thickness: 1,
@@ -234,7 +227,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                   ),
                   itemBuilder: (context, index) {
                     final product =
-                        ProductModel.fromFirestore(productsDocs[index]);
+                        ProductModel.fromFirestore(filteredDocs[index]);
 
                     // 이제 ProductCard가 AI 뱃지 표시를 스스로 책임지므로,
                     // 여기서는 ProductCard만 호출하면 됩니다.

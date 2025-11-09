@@ -197,7 +197,10 @@ class _EditShopScreenState extends State<EditShopScreen> {
           if (!_isSaving)
             TextButton(
                 onPressed: _updateShop,
-                child: Text('localStores.edit.save'.tr())),
+                child: Text('localStores.edit.save'.tr(),
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold))),
         ],
       ),
       body: Stack(
@@ -330,6 +333,20 @@ class _EditShopScreenState extends State<EditShopScreen> {
                       labelText: 'localStores.form.productsLabel'.tr(),
                       hintText: 'localStores.form.productsHint'.tr(),
                       border: const OutlineInputBorder()),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _isSaving ? null : _updateShop,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        )
+                      : Text('localStores.edit.save'.tr()),
                 ),
               ],
             ),

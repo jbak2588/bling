@@ -138,7 +138,7 @@
     "empty": "등록된 상품이 없습니다.\n아래 + 버튼을 눌러 첫 상품을 등록해보세요!",
     "registration": {
       "title": "새 게시물",
-      "done": "완료",
+  "done": "등록",
       "titleHint": "상품명",
       "priceHint": "가격 (Rp)",
       "negotiable": "가격 제안 가능",
@@ -204,6 +204,41 @@
       "new": "새것",
       "used": "중고"
     },
+    "reservation": {
+      "title": "10% 예약금 결제",
+      "content": "AI 검증 상품을 예약하려면 10%의 예약금 {amount}를 선결제해야 합니다. 현장 검증 후 거래를 취소하면 예약금은 환불됩니다.",
+      "confirm": "결제 및 예약",
+      "button": "AI 안심 예약하기",
+      "success": "예약이 완료되었습니다. 판매자와 약속을 잡아주세요."
+    },
+    "status": {
+      "reserved": "예약중",
+      "sold": "판매완료"
+    },
+    "takeover": {
+      "button": "현장 인수 및 검증",
+      "title": "AI 현장 검증",
+      "guide": {
+        "title": "AI 현장 동일성 검증",
+        "subtitle": "구매할 상품의 원본 AI 리포트와 실제 상품이 일치하는지 확인합니다. 상품의 주요 특징이 잘 보이도록 3장 이상의 사진을 촬영하세요."
+      },
+      "photoTitle": "현장 사진 촬영",
+      "buttonVerify": "AI 동일성 검증 시작",
+      "errors": {
+        "noPhoto": "검증을 위해 1장 이상의 현장 사진이 필요합니다."
+      },
+      "dialog": {
+        "matchTitle": "AI 검증 성공",
+        "noMatchTitle": "AI 검증 실패",
+        "finalize": "최종 인수 확정",
+        "cancelDeal": "거래 취소 (환불 요청)"
+      },
+      "success": {
+        "finalized": "거래가 성공적으로 완료되었습니다.",
+        "cancelled": "거래가 취소되었습니다. 예약금이 환불됩니다."
+      }
+    },
+    "aiBadge": "AI 검증 완료",
     "setLocationPrompt": "중고거래 상품을 보려면 먼저 내 동네를 설정해주세요!"
   },
   "ai_flow": {
@@ -1244,6 +1279,7 @@
         "etc": "기타"
       },
       "listingType": "거래 유형",
+      "listingTypeHint": "거래 유형 선택",
       "listingTypes": {
         "rent": "임대 (월세/전세)",
         "sale": "매매"

@@ -7,7 +7,6 @@
 library;
 
 import 'dart:async'; // ✅ StreamSubscription 사용 위해 추가
-import 'dart:io';
 
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +19,8 @@ import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 // ✅ app_links 및 링크 처리 관련 import 추가 (uni_links 대체)
 import 'package:app_links/app_links.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+// import 'package:device_info_plus/device_info_plus.dart'; // [Fix] 더 이상 필요하지 않음
+// import 'dart:io'; // [Fix] 더 이상 필요하지 않음
 import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,121 +34,44 @@ Future<void> _ensureGoogleMapRenderer() async {
 }
 
 // -----------------------------------------------------------------------------
-// DEVELOPMENT NOTE (App Check debug toggle)
+// DEVELOPMENT NOTE (App Check Build-Time Toggle)
 //
-// This application includes a safe, opt-in toggle to force App Check into
-// debug mode during development. Use the build-time flag below to enable
-// the debug provider on debug builds only. Do NOT enable this flag for
-// release builds and make sure CI/build scripts do not set
-// --dart-define=APPCHECK_DEBUG=true for production releases.
+// 이 프로젝트는 빌드 시점의 플래그(--dart-define)를 사용하여 Firebase App Check
+// 공급자를 관리합니다. 이 방식은 3가지 시나리오를 완벽하게 지원합니다:
+// 1. 로컬 개발 (Vscode F5)
+// 2. App Distribution (테스터용 빌드)
+// 3. Production (정식 출시 빌드)
 //
-// To enable while running locally:
-//   flutter run -d <device> --dart-define=APPCHECK_DEBUG=true
+// [시나리오 1: 로컬 개발 (Vscode F5)]
+// - Vscode에서 F5 키로 앱을 실행할 때 (kDebugMode = true)
+// - 별도 설정 없이 자동으로 `AndroidDebugProvider`가 활성화됩니다.
+// - Vscode의 'Debug Console'에서 "AppCheck debug token" 로그를 찾아
+//   Firebase 콘솔의 App Check -> 앱 -> '디버그 토큰 관리'에 등록하십시오.
 //
-// The flag is intentionally guarded with `kDebugMode` to reduce accidental
-// activation, and the code logs debug-only information to help debugging.
+// [시나리오 2: App Distribution (테스터용 빌드)]
+// - 테스터에게 배포할 릴리즈(release) 빌드를 생성할 때 사용합니다.
+// - 이 빌드는 `kDebugMode`가 false이지만, 강제로 Debug Provider를 사용해야 합니다.
+// - 아래 명령어로 빌드하십시오:
+//   flutter build apk --release --dart-define=APPCHECK_DEBUG=true
+//   (또는 appbundle)
+// - `APPCHECK_DEBUG=true` 플래그가 `forceAppCheckDebug`를 true로 설정하여,
+//   릴리즈 빌드임에도 `AndroidDebugProvider`를 강제로 사용하게 합니다.
+// - 테스터는 기기의 Logcat(Android) / Console(iOS)에서 자신의 디버그 토큰을
+//   찾아 보스에게 전달해야 하며, 보스는 이 토큰을 Firebase에 등록해야 합니다.
+//
+// [시나리오 3: Production (Google Play / App Store)]
+// - 정식 출시용 빌드입니다.
+// - **어떤 플래그도 사용하지 않고** 표준 빌드 명령을 사용합니다:
+//   flutter build appbundle
+// - `forceAppCheckDebug`와 `kDebugMode`가 모두 false가 되어,
+//   자동으로 `AndroidPlayIntegrityProvider` (Play 스토어) 또는
+//   `AppleAppAttestWithDeviceCheckFallbackProvider` (App 스토어)가 활성화됩니다.
 // -----------------------------------------------------------------------------
 const bool forceAppCheckDebug =
     bool.fromEnvironment('APPCHECK_DEBUG', defaultValue: false);
 
-/// Decide whether to apply the App Check debug token on this runtime.
-///
-/// This uses lightweight heuristics so you can scope debug tokens to a
-/// particular emulator or simulator (for example `emulator-5556`). It first
-/// checks environment variables commonly set by host tooling, then falls back
-/// to other approaches (commented examples using `device_info_plus`).
-Future<bool> _shouldUseDebugToken() async {
-  // Only consider enabling debug tokens in debug builds.
-  if (!kDebugMode) return false;
-  // Helpful debug output while developing: print mode and environment info.
-  try {
-    debugPrint('DEBUG _shouldUseDebugToken: kDebugMode=$kDebugMode');
-    // Print a subset of environment keys we care about to avoid huge logs
-    final env = Platform.environment;
-    debugPrint(
-        'DEBUG Platform.environment.ANDROID_SERIAL=${env['ANDROID_SERIAL'] ?? 'null'}, ANDROID_DEVICE=${env['ANDROID_DEVICE'] ?? 'null'}');
-  } catch (_) {}
-
-  try {
-    final env = Platform.environment;
-
-    // Android emulator/device serial reported by adb / flutter tool
-    final String? androidSerial =
-        env['ANDROID_SERIAL'] ?? env['ANDROID_DEVICE'];
-    if (androidSerial != null) {
-      // Add any test device adb serials here (e.g. 'emulator-5554').
-      const allowedAndroid = ['emulator-5554', 'RR8N109B4JM', 'R52T10CZN1X'];
-      if (allowedAndroid.contains(androidSerial)) {
-        debugPrint(
-            'AppCheck debug-token: matched environment Android serial: $androidSerial');
-        return true;
-      }
-    }
-
-    // iOS simulator environment (set by some host tooling)
-    final String? simName =
-        env['SIMULATOR_DEVICE_NAME'] ?? env['SIMULATOR_UDID'];
-    if (simName != null) {
-      const allowedIosSimulators = ['iPhone 14', 'iPhone 14 Pro'];
-      if (allowedIosSimulators.contains(simName)) {
-        debugPrint(
-            'AppCheck debug-token: matched environment iOS simulator: $simName');
-        return true;
-      }
-    }
-  } catch (_) {
-    // ignore
-  }
-
-  // For a more reliable approach across platforms, use device_info_plus to
-  // identify devices by model or vendor id. The code below uses
-  // DeviceInfoPlugin to inspect platform identifiers and compare them to
-  // whitelists. Replace the placeholder IDs in `allowedAndroidIds` and
-  // `allowedIosIds` with the IDs for your test devices.
-  try {
-    final deviceInfo = DeviceInfoPlugin();
-    if (Platform.isAndroid) {
-      final info = await deviceInfo.androidInfo;
-      // Debug: print multiple device_info fields to confirm which id to whitelist
-      try {
-        debugPrint(
-            'DEBUG device_info: id=${info.id}, product=${info.product}, model=${info.model}, brand=${info.brand}, manufacturer=${info.manufacturer}');
-      } catch (_) {}
-      // `info.id` is a stable id on many devices; some platforms provide
-      // `androidId` as well in other versions of the plugin. Replace the
-      // placeholder below with the actual androidId from `adb shell settings`.
-      final String androidId = info.id;
-      // Whitelist device ids for debug-token activation. Add your test
-      // device IDs here (e.g. 'R52T10CZN1X').
-      const allowedAndroidIds = <String>[
-        'RR8N109B4JM',
-        '8aae416b0618741d',
-        'R52T10CZN1X'
-      ];
-      if (allowedAndroidIds.contains(androidId)) {
-        debugPrint(
-            'AppCheck debug-token: matched device_info Android id: $androidId');
-        return true;
-      }
-    }
-
-    if (Platform.isIOS) {
-      final info = await deviceInfo.iosInfo;
-      final String? iosId = info.identifierForVendor;
-      const allowedIosIds = <String>['00008101-000c60380A88001E'];
-      if (iosId != null && allowedIosIds.contains(iosId)) {
-        debugPrint('AppCheck debug-token: matched device_info iOS id: $iosId');
-        return true;
-      }
-    }
-  } catch (_) {
-    debugPrint(
-        'AppCheck debug-token: device_info_plus check failed or unavailable');
-  }
-  debugPrint(
-      'AppCheck debug-token: no matching heuristic found; debug token disabled');
-  return false;
-}
+// [Fix] 복잡한 _shouldUseDebugToken() 함수는 제거하고,
+// `forceAppCheckDebug` 플래그로 관리 방식을 일원화합니다.
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -160,26 +83,39 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // App Check activation: allow forcing debug provider via build-time flag
-  // (forceAppCheckDebug) while still requiring debug builds. This lets
-  // developers enable debug App Check only when needed via
-  // `--dart-define=APPCHECK_DEBUG=true`.
-  // NOTE: Never enable this flag for release builds.
-  final bool useDebugToken =
-      (forceAppCheckDebug && kDebugMode) || await _shouldUseDebugToken();
+  // [Fix] App Distribution 시나리오를 지원하는 새 App Check 로직
+  AndroidAppCheckProvider androidProvider;
+  AppleAppCheckProvider appleProvider;
+
+  if (forceAppCheckDebug) {
+    // 시나리오 2: App Distribution (테스터 빌드)
+    // --dart-define=APPCHECK_DEBUG=true 플래그가 전달됨.
+    // 릴리즈 빌드라도 강제로 Debug Provider를 사용.
+    debugPrint(
+        "AppCheck: Forcing DEBUG provider via --dart-define=APPCHECK_DEBUG=true (For App Distribution)");
+    androidProvider = const AndroidDebugProvider();
+    appleProvider = const AppleDebugProvider();
+  } else if (kDebugMode) {
+    // 시나리오 1: 로컬 개발 (Vscode F5)
+    debugPrint("AppCheck: Using DEBUG provider (kDebugMode=true)");
+    androidProvider = const AndroidDebugProvider();
+    appleProvider = const AppleDebugProvider();
+  } else {
+    // 시나리오 3: Production (정식 출시)
+    // 플래그도 없고, kDebugMode도 false.
+    debugPrint(
+        "AppCheck: Using PRODUCTION provider (Play Integrity / App Attest)");
+    androidProvider = const AndroidPlayIntegrityProvider();
+    appleProvider = const AppleAppAttestWithDeviceCheckFallbackProvider();
+  }
 
   await FirebaseAppCheck.instance.activate(
-    providerAndroid: useDebugToken
-        ? const AndroidDebugProvider(
-            debugToken: 'd7fc630c-5342-4f2e-85f5-fdb1ea2b1ded')
-        : const AndroidPlayIntegrityProvider(),
-    providerApple: useDebugToken
-        ? const AppleDebugProvider(
-            debugToken: 'd7fc630c-5342-4f2e-85f5-fdb1ea2b1ded')
-        : const AppleAppAttestWithDeviceCheckFallbackProvider(),
+    providerAndroid: androidProvider,
+    providerApple: appleProvider,
   );
 
   try {
+    // 앱 시작 시 토큰 강제 갱신 및 로그 출력
     final token = await FirebaseAppCheck.instance.getToken(true);
     debugPrint('AppCheck token (forceRefresh=true): $token');
   } catch (e) {

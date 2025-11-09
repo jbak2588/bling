@@ -297,6 +297,22 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                   // --- 기존 이미지 첨부 ---
                   _buildImagePicker(),
 
+                  // Bottom primary action for create local news
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _isSaving ? null : _savePost,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: _isSaving
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 3),
+                          )
+                        : Text('localNewsCreate.buttons.submit'.tr()),
+                  ),
+
                   // --- ✅ [태그 시스템] 가이드형 필드 UI (조건부 표시) ---
                   if (_showGuidedFields) _buildGuidedFields(),
                 ],

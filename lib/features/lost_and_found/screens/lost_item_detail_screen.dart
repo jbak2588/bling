@@ -44,6 +44,7 @@ import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 // ✅ [작업 42] 공용 댓글 위젯 import
 import 'package:bling_app/features/local_news/widgets/comment_input_field.dart';
 import 'package:bling_app/features/local_news/widgets/comment_list_view.dart';
+import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class LostItemDetailScreen extends StatefulWidget {
@@ -204,28 +205,39 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: AppBarIcon(
+            icon: Icons.arrow_back,
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
         title: Text('lostAndFound.detail.title'.tr()),
         // V V V --- [추가] 작성자에게만 보이는 수정/삭제 버튼 --- V V V
         actions: [
           if (isOwner)
-            IconButton(
-              icon: const Icon(Icons.edit_note_outlined),
-              tooltip: 'lostAndFound.detail.editTooltip'.tr(),
-              onPressed: () {
-                Navigator.of(context)
-                    .push(
-                      MaterialPageRoute(
-                          builder: (_) =>
-                              EditLostItemScreen(item: widget.item)),
-                    )
-                    .then((_) => setState(() {})); // 수정 후 돌아왔을 때 화면 갱신
-              },
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: AppBarIcon(
+                icon: Icons.edit_note_outlined,
+                onPressed: () {
+                  Navigator.of(context)
+                      .push(
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                EditLostItemScreen(item: widget.item)),
+                      )
+                      .then((_) => setState(() {})); // 수정 후 돌아왔을 때 화면 갱신
+                },
+              ),
             ),
           if (isOwner)
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: 'lostAndFound.detail.deleteTooltip'.tr(),
-              onPressed: _deleteItem,
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: AppBarIcon(
+                icon: Icons.delete_outline,
+                onPressed: _deleteItem,
+              ),
             ),
         ],
         // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^

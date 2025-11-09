@@ -51,7 +51,11 @@ class _AiEvidenceSuggestionScreenState
   final Set<String> _skipped = {};
 
   Future<void> _pick(String key) async {
-    final XFile? img = await _picker.pickImage(source: ImageSource.camera);
+    final XFile? img = await _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 80, // [Fix] Warning #4: 품질 80%
+      maxWidth: 1024, // [Fix] Warning #4: 최대 너비 1024px
+    );
     if (img != null) {
       setState(() {
         _addedPhotos[key] = img;
@@ -106,7 +110,11 @@ class _AiEvidenceSuggestionScreenState
         'locale': context.locale.languageCode,
       });
 
-      final report = (result.data ?? {})['report'] as Map<String, dynamic>?;
+      // [Fix] Cast-Safety: result.data['report'] is Map<dynamic, dynamic>
+      final reportRaw = (result.data as Map<dynamic, dynamic>?)?['report'];
+      final report = (reportRaw != null && reportRaw is Map)
+          ? Map<String, dynamic>.from(reportRaw)
+          : null;
       if (report == null) {
         throw Exception('AI가 유효한 리포트를 생성하지 못했습니다.');
       }

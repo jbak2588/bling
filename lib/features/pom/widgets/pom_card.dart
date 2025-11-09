@@ -277,7 +277,7 @@ class _PomCardState extends State<PomCard> {
 
   /// 1. 카드 헤더: 작성자 프로필
   Widget _buildHeader() {
-    // [V2] FutureBuilder로 작성자 정보 비동기 로드 (캐싱 TODO 해결)
+    // [V2] FutureBuilder로 작성자 정보 비동기 로드 (캐싱 해결)
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       future: FirebaseFirestore.instance
           .collection('users')

@@ -60,6 +60,7 @@ class ProductModel {
   // ✅ [통합] 구버전 모델의 상태 관리 필드를 가져옵니다.
   final String status; // 'selling', 'reserved', 'sold'
   final String condition; // 'new' or 'used'
+  final String? buyerId; // [AI 인수] 'reserved', 'sold' 상태일 때 구매자 ID
   // ✅ [추가] 거래 희망 장소 필드를 추가합니다.
   final String? transactionPlace;
 
@@ -95,6 +96,7 @@ class ProductModel {
     this.geoPoint,
     this.status = 'selling',
     this.condition = 'used',
+    this.buyerId,
     this.transactionPlace,
     this.likesCount = 0,
     this.chatsCount = 0,
@@ -130,6 +132,7 @@ class ProductModel {
           : null,
       geoPoint: data['geoPoint'],
       status: data['status'] ?? 'selling',
+      buyerId: data['buyerId'], // [AI 인수] buyerId 로드
       condition: data['condition'] ?? 'used',
       transactionPlace: data['transactionPlace'],
       likesCount: data['likesCount'] ?? 0,
@@ -169,6 +172,7 @@ class ProductModel {
       'geoPoint': geoPoint,
       'status': status,
       'condition': condition,
+      'buyerId': buyerId, // [AI 인수] buyerId 저장
       'transactionPlace': transactionPlace,
       'likesCount': likesCount,
       'chatsCount': chatsCount,
@@ -200,6 +204,7 @@ class ProductModel {
     GeoPoint? geoPoint,
     String? status,
     String? condition,
+    String? buyerId,
     String? transactionPlace,
     int? likesCount,
     int? chatsCount,
@@ -228,6 +233,7 @@ class ProductModel {
       geoPoint: geoPoint ?? this.geoPoint,
       status: status ?? this.status,
       condition: condition ?? this.condition,
+      buyerId: buyerId ?? this.buyerId,
       transactionPlace: transactionPlace ?? this.transactionPlace,
       likesCount: likesCount ?? this.likesCount,
       chatsCount: chatsCount ?? this.chatsCount,
