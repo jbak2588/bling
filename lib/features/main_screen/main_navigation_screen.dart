@@ -74,7 +74,8 @@ import 'package:bling_app/features/boards/screens/kelurahan_board_screen.dart';
 // ❌ [삭제] import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
 
 import 'package:bling_app/features/admin/screens/admin_screen.dart'; // ✅ 관리자 화면 import
-import 'package:bling_app/core/utils/ai_rule_uploader.dart';
+// [Fix]
+import 'package:bling_app/features/marketplace/ai/ai_rule_uploader_from_json.dart'; // Admin only
 
 /// 현재 보고 있는 섹션을 타입 세이프하게 관리하기 위한 enum
 enum AppSection {
@@ -1165,16 +1166,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     onTap: () async {
                       Navigator.pop(context); // Drawer를 먼저 닫습니다.
 
-                      // Uploader 실행
+                      // Uploader 실행 (JSON 기반 업로드기로 교체)
                       final uploader =
-                          AiRuleUploader(FirebaseFirestore.instance);
+                          AiRuleUploaderFromJson(FirebaseFirestore.instance);
                       await uploader.uploadAll();
 
                       // 작업 완료 후 사용자에게 피드백 표시
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text('AI 검수 규칙 초기 데이터 업로드를 시도했습니다.')),
+                              content: Text(
+                                  'V2 AI Rules (from JSON) successfully uploaded!')),
                         );
                       }
                     },

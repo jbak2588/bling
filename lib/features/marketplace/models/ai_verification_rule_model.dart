@@ -42,6 +42,7 @@ class AiVerificationRule {
   final String id; // Firestore 문서 ID
   final String nameKo;
   final String nameId;
+  final String nameEn;
   final bool isAiVerificationSupported;
   final int minGalleryPhotos;
   final Map<String, RequiredShot>
@@ -53,6 +54,7 @@ class AiVerificationRule {
     required this.id,
     required this.nameKo,
     required this.nameId,
+    required this.nameEn,
     required this.isAiVerificationSupported,
     required this.minGalleryPhotos,
     required this.suggestedShots,
@@ -64,22 +66,39 @@ class AiVerificationRule {
   factory AiVerificationRule.fromSnapshot(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
-    // [V2.1] Firestore에서도 suggested_shots 필드를 읽도록 변경
-    final shotsMap = data['suggested_shots'] as Map<String, dynamic>? ?? {};
-    final requiredShots = shotsMap.map((key, value) {
+    // [Fix] camelCase/snake_case 호환을 위한 헬퍼 (작업 37 제안)
+    String pickStr(List<String> keys, [String defaultValue = '']) {
+      for (final k in keys) {
+        final v = data[k];
+        if (v is String && v.trim().isNotEmpty) return v.trim();
+      }
+      return defaultValue;
+    }
+
+    // [Fix] data['suggested_shots'] (snake_case)와 data['suggestedShots'] (camelCase) 모두 확인
+    final dynamic rawShots = data['suggested_shots'] ?? data['suggestedShots'];
+    final shotsMap = (rawShots is Map)
+        ? Map<String, dynamic>.from(rawShots)
+        : <String, dynamic>{};
+
+    final suggestedShots = shotsMap.map((key, value) {
       return MapEntry(key, RequiredShot.fromMap(value as Map<String, dynamic>));
     });
 
     return AiVerificationRule(
       id: doc.id,
-      nameKo: data['name_ko'] ?? '',
-      nameId: data['name_id'] ?? '',
+      nameKo: pickStr(['name_ko', 'nameKo']),
+      nameEn: pickStr(['name_en', 'nameEn']),
+      nameId: pickStr(['name_id', 'nameId']),
       isAiVerificationSupported: data['is_ai_verification_supported'] ?? false,
       minGalleryPhotos: data['min_gallery_photos'] ?? 0,
-      suggestedShots: requiredShots,
-      reportTemplatePrompt: data['report_template_prompt'] ?? '',
-      initialAnalysisPromptTemplate:
-          data['initial_analysis_prompt_template'] ?? '',
+      suggestedShots: suggestedShots,
+      reportTemplatePrompt:
+          pickStr(['report_template_prompt', 'reportTemplatePrompt']),
+      initialAnalysisPromptTemplate: pickStr([
+        'initial_analysis_prompt_template',
+        'initialAnalysisPromptTemplate'
+      ]),
     );
   }
 
@@ -92,11 +111,12 @@ class AiVerificationRule {
 
     return {
       'name_ko': nameKo,
+      'name_en': nameEn,
       'name_id': nameId,
       'is_ai_verification_supported': isAiVerificationSupported,
       'min_gallery_photos': minGalleryPhotos,
-      'suggested_shots':
-          shotsToMap, // [V2.1] Firestore에도 suggested_shots 필드로 저장
+      // [Fix] Firestore에 snake_case로 저장
+      'suggested_shots': shotsToMap,
       'report_template_prompt': reportTemplatePrompt,
       'initial_analysis_prompt_template': initialAnalysisPromptTemplate,
     };

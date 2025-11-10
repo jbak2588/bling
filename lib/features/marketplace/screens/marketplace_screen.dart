@@ -159,9 +159,13 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
           // [Fix #2] 'selling', 'reserved', 'sold' 상태 모두 조회
           .where('status', whereIn: ['selling', 'reserved', 'sold']);
 
-      // AI 검증 상품을 최상단에, 그 후 최신순으로 정렬
-      query = query.orderBy('isAiVerified', descending: true);
-      query = query.orderBy('createdAt', descending: true);
+      // [Fix] 감리 보고서(A) 적용: AI 검수 상품 우선, 그 후 최신순 정렬
+      query = query
+          .orderBy('isAiVerified', descending: true)
+          .orderBy('updatedAt', descending: true); // createdAt -> updatedAt
+
+      // (참고: Firestore에서 'locationParts.prov' 필터와 'isAiVerified' 정렬을
+      // 함께 사용하려면 복합 인덱스가 필요할 수 있습니다.)
 
       return query;
     }

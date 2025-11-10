@@ -155,6 +155,7 @@ Return **one** JSON schema ONLY:
     return AiVerificationRule(
       id: 'generic_v2', // 서버와 프론트엔드가 찾는 바로 그 ID
       nameKo: "범용 중고물품 검증 규칙 V2",
+      nameEn: "Generic Used Item Verification Rule V2",
       nameId: "Aturan Verifikasi Barang Bekas Umum V2",
       isAiVerificationSupported: true,
       minGalleryPhotos: 1,
@@ -174,6 +175,7 @@ Return **one** JSON schema ONLY:
     return AiVerificationRule(
       id: 'smartphone-tablet', // 실제 카테고리 ID와 일치
       nameKo: "스마트폰/태블릿 전용 검증 규칙",
+      nameEn: "Smartphone/Tablet Verification Rule",
       nameId: "Aturan Verifikasi Khusus Smartphone/Tablet",
       isAiVerificationSupported: true,
       minGalleryPhotos: 1,

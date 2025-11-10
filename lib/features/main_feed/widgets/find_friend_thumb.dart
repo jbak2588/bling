@@ -100,7 +100,10 @@ class FindFriendThumb extends StatelessWidget {
     final location =
         user.locationParts?['kab'] ?? user.locationParts?['kota'] ?? '';
 
-    return Expanded(
+    // Meta area has a fixed height to avoid RenderFlex overflow inside the
+    // parent SizedBox(240). Image uses 140, so reserve the remaining 100px.
+    return SizedBox(
+      height: 100,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
         child: Column(
@@ -134,7 +137,9 @@ class FindFriendThumb extends StatelessWidget {
                 ),
               ),
 
-            const Spacer(), // 하단으로 밀기
+            // Use a small gap instead of Spacer to avoid forcing expansion inside
+            // the fixed-height meta area which can cause RenderFlex overflow.
+            const SizedBox(height: 4),
             // 지역
             Row(
               children: [

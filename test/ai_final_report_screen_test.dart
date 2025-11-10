@@ -10,10 +10,11 @@ void main() {
     final rule = AiVerificationRule(
       id: 'r1',
       nameKo: '',
+      nameEn: '',
       nameId: '',
       isAiVerificationSupported: false,
       minGalleryPhotos: 0,
-      suggestedShots: {},
+      suggestedShots: <String, RequiredShot>{},
       reportTemplatePrompt: '',
       initialAnalysisPromptTemplate: '',
     );
