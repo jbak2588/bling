@@ -75,6 +75,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   bool _isAiVerified = false;
   AiVerificationRule? _aiRule; // [추가] AI 규칙을 저장할 변수
   // [핵심 추가] AI 검수 진행 상태를 추적하는 변수
+  bool _isCancellingAi = false;
   bool _isAiLoading = false;
 
   @override
@@ -92,7 +93,16 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     _transactionPlaceController.text = widget.product.transactionPlace ?? '';
     _isNegotiable = widget.product.negotiable;
     _existingImageUrls = List<String>.from(widget.product.imageUrls);
-    _condition = widget.product.condition;
+
+    // [Fix] Dropdown 크래시 방어 코드 (Copilot 제안)
+    final dbCondition = widget.product.condition;
+    if (dbCondition == 'new' || dbCondition == 'used') {
+      _condition = dbCondition;
+    } else {
+      debugPrint(
+          "Warning: Invalid condition value '$dbCondition' for ${widget.product.id}. Defaulting to 'used'.");
+      _condition = 'used'; // 오염된 값이면 'used'로 강제
+    }
 
     // ✅ 기존 상품의 태그를 초기값으로 설정
     _tags = List<String>.from(widget.product.tags);
@@ -306,6 +316,106 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
           _isAiLoading = false;
         });
       }
+    }
+  }
+
+  /// [개편안 1] AI 검수 취소 로직
+  Future<void> _cancelAiVerification() async {
+    // 1회만 취소 가능
+    if (widget.product.aiCancelCount > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('marketplace.ai.cancel_limit'.tr())),
+      );
+      return;
+    }
+
+    setState(() => _isCancellingAi = true);
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('products')
+          .doc(widget.product.id)
+          .update({
+        'isAiVerified': false,
+        'aiVerificationStatus': 'none',
+        'aiCancelCount': FieldValue.increment(1),
+        // aiReport, aiReportSource... 등은 재사용을 위해 삭제하지 않음
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('marketplace.ai.cancel_success'.tr())),
+        );
+        // 화면 갱신을 위해 pop (또는 product 모델 리로드)
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text('marketplace.ai.cancel_error'.tr(args: [e.toString()]))),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isCancellingAi = false);
+      }
+    }
+  }
+
+  /// Show confirmation dialog before cancelling AI verification.
+  Future<void> _confirmCancelAi() async {
+    // Button should be disabled when aiCancelCount > 0, but guard anyway
+    if (widget.product.aiCancelCount > 0) return;
+    // Use a two-step confirmation: explanatory text + checkbox acknowledgement
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        bool ackChecked = false;
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: Text('marketplace.ai.cancel_confirm'.tr()),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('marketplace.ai.cancel_limit'.tr()),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Checkbox(
+                      value: ackChecked,
+                      onChanged: (v) => setState(() => ackChecked = v ?? false),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text('marketplace.ai.cancel_ack_charge'.tr()),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text('common.cancel'.tr()),
+              ),
+              TextButton(
+                onPressed:
+                    ackChecked ? () => Navigator.of(context).pop(true) : null,
+                child: Text('common.confirm'.tr()),
+              ),
+            ],
+          );
+        });
+      },
+    );
+
+    if (confirmed == true) {
+      await _cancelAiVerification();
     }
   }
 
@@ -592,6 +702,25 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 ] else ...[
                   const Divider(height: 32),
                   const AiVerificationBadge(),
+                  const SizedBox(height: 8),
+                  // [개편안 1] AI 검수 취소 버튼
+                  if (_isCancellingAi)
+                    const Center(child: CircularProgressIndicator())
+                  else
+                    TextButton(
+                      onPressed: (widget.product.aiCancelCount > 0)
+                          ? null
+                          : _confirmCancelAi,
+                      child: Text(
+                        'marketplace.ai.cancel_confirm'.tr(),
+                        style: TextStyle(
+                          color: (widget.product.aiCancelCount > 0)
+                              ? Colors.grey
+                              : Colors.red,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
                 ],
 
                 const SizedBox(height: 24),

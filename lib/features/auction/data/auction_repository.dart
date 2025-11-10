@@ -6,7 +6,10 @@ import '../models/bid_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class AuctionRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  // Use a getter so constructing AuctionRepository in tests doesn't require
+  // Firebase to be initialized. Accessing `_firestore` will still call
+  // FirebaseFirestore.instance when methods that use it run.
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _auctionsCollection =>
       _firestore.collection('auctions');

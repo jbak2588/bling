@@ -130,6 +130,7 @@ class _AiEvidenceSuggestionScreenState
           takenShots: takenShots,
           confirmedProductName: widget.confirmedProductName,
           userPrice: widget.userPrice,
+          userDescription: widget.userDescription, // [Fix #3] 원본 설명 전달 누락 수정
         ),
       ));
     } catch (e) {

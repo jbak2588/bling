@@ -6,10 +6,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class RequiredShot {
   final String nameKo;
   final String descKo;
+  final String nameId;
+  final String descId;
 
   RequiredShot({
     required this.nameKo,
     required this.descKo,
+    this.nameId = '',
+    this.descId = '',
   });
 
   // Firestore Map -> RequiredShot 객체 변환
@@ -17,6 +21,8 @@ class RequiredShot {
     return RequiredShot(
       nameKo: map['name_ko'] ?? '',
       descKo: map['desc_ko'] ?? '',
+      nameId: map['name_id'] ?? '',
+      descId: map['desc_id'] ?? '',
     );
   }
 
@@ -25,6 +31,8 @@ class RequiredShot {
     return {
       'name_ko': nameKo,
       'desc_ko': descKo,
+      'name_id': nameId,
+      'desc_id': descId,
     };
   }
 }

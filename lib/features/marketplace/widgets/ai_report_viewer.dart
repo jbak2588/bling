@@ -21,6 +21,10 @@ class AiReportViewer extends StatelessWidget {
     final condition = report['condition_check'];
     final items = report['included_items'];
     final buyerNotes = report['notes_for_buyer'];
+    // [Fix #4] AI 제안 가격 추출 (여러 키 호환)
+    final dynamic aiPrice = report['price_suggestion'] ??
+        report['suggested_price'] ??
+        report['ai_recommended_price'];
     final skipped = report['skipped_items'];
 
     return Column(
@@ -35,6 +39,15 @@ class AiReportViewer extends StatelessWidget {
         if (condition != null)
           _buildReportItem(context, Icons.healing,
               'ai_flow.final_report.condition'.tr(), condition),
+
+        // [Fix #4] AI 제안 가격 표시
+        if (aiPrice != null && aiPrice.toString().isNotEmpty)
+          _buildReportItem(
+            context,
+            Icons.auto_awesome,
+            tr('ai_flow.final_report.suggested_price', args: ['Rp']),
+            aiPrice.toString(),
+          ),
         if (items is List && items.isNotEmpty)
           _buildReportList(context, Icons.inbox,
               'ai_flow.final_report.included_items_label'.tr(), items),

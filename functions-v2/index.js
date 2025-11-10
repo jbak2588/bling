@@ -441,7 +441,8 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
   }
 
   try {
-    const { imageUrls, ruleId, locale } = request.data || {};
+  // [Fix #2] 1차 분석 시 categoryName 힌트를 받도록 파라미터 추가
+  const { imageUrls, ruleId, locale, categoryName, subCategoryName } = request.data || {};
     if (!Array.isArray(imageUrls) || imageUrls.length === 0 || !ruleId) {
       logger.error("❌ 오류: 이미지 URL 또는 ruleId가 누락되었습니다.");
       throw new HttpsError(
@@ -472,15 +473,36 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
       );
     }
 
+    // [Fix #1 - 2A] 카테고리 그룹 추론 (구조적 보강안)
+    const DEFAULT_SUGGESTED_SHOTS = {
+      universal: ["front_full","back_full","brand_model_tag","serial_or_size_label","defect_closeups","included_items_flatlay","power_on_or_fit","measurement_reference","receipt_or_warranty"],
+      apparel:   ["front_full","back_full","brand_model_tag","serial_or_size_label","defect_closeups","included_items_flatlay","measurement_reference"],
+      footwear:  ["front_full","back_full","brand_model_tag","serial_or_size_label","defect_closeups","included_items_flatlay","measurement_reference"],
+      electronics:["front_full","back_full","brand_model_tag","serial_or_size_label","defect_closeups","included_items_flatlay","power_on_or_fit","receipt_or_warranty"],
+    };
+    function inferGroup(categoryName, subCategoryName) {
+      const t = `${categoryName} ${subCategoryName}`.toLowerCase();
+      if (t.includes('shoe') || t.includes('sepatu') || t.includes('foot')) return 'footwear';
+      if (t.includes('dress') || t.includes('fashion') || t.includes('pakaian') || t.includes('apparel')) return 'apparel';
+      if (t.includes('elect') || t.includes('device') || t.includes('gadget')) return 'electronics';
+      return 'universal';
+    }
+
     // [V2.1 핵심 추가] 규칙에 정의된 '추천 증거(suggested_shots)' 목록을 가져와
     // 제공된 이미지에서 확인할 수 없는 항목 키를 AI가 판별하도록 지시합니다.
     const suggestedShotsMap = ruleData.suggested_shots || {};
-    const suggestedShotKeys = Object.keys(suggestedShotsMap || {});
-    const evidenceInstruction = suggestedShotKeys.length
-      ? `\nAdditionally, analyze the provided images and determine which of the following suggested evidence keys CANNOT be confidently verified from the images: [${suggestedShotKeys.join(
+    let suggestedShotKeys = Object.keys(suggestedShotsMap || {});
+
+    // [Fix #1 - 2A] 만약 규칙에 추천샷이 비어있으면(generic_v2 등), 카테고리 추론으로 폴백
+    if (suggestedShotKeys.length === 0) {
+      // [Fix #2] 1차 분석 시 전달받은 categoryName 힌트를 사용하여 그룹 추론
+      const group = inferGroup(categoryName || "", subCategoryName || "");
+      suggestedShotKeys = DEFAULT_SUGGESTED_SHOTS[group];
+    }
+
+    const evidenceInstruction = `\nAdditionally, analyze the provided images and determine which of the following suggested evidence keys CANNOT be confidently verified from the images: [${suggestedShotKeys.join(
           ", "
-        )}].\nReturn JSON ONLY with the following schema:\n{\n  "predicted_item_name": "string",\n  "missing_evidence_list": ["key", ...]  // keys from the list above that cannot be verified\n}`
-      : `\nReturn JSON ONLY with the following schema:\n{\n  "predicted_item_name": "string",\n  "missing_evidence_list": []\n}`;
+        )}].\nReturn JSON ONLY with the following schema:\n{\n  "predicted_item_name": "string",\n  "missing_evidence_list": ["key1_if_missing", "key2_if_missing"]  // keys from the list above that cannot be verified\n}`;
 
     const ac = new AbortController();
     const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
@@ -771,12 +793,27 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
       delete report.suggested_price;
     }
 
+    // [Fix #34 - Copilot (A)] AI 응답 검증: notes_for_buyer 필드 정제
+    // AI가 프롬프트(스키마)를 무시하고 필드를 누락하거나 null로 보낼 경우에 대비
+    if (typeof report.notes_for_buyer !== 'string') {
+      logger.warn("AI Warning: 'notes_for_buyer' field missing or not a string. Defaulting to empty string.", {
+          keys: Object.keys(report)
+      });
+      report.notes_for_buyer = ""; // 안전장치: 빈 문자열로 강제
+    }
+
     // [V2.1 보강] 사용자가 건너뛴 증거가 있는 경우, notes_for_buyer가 비어 있으면 기본 안내 문구를 생성합니다.
     if (skippedKeys.length) {
       const hasNotes =
         report.notes_for_buyer && typeof report.notes_for_buyer === "string" && report.notes_for_buyer.trim().length > 0;
       if (!hasNotes) {
-        report.notes_for_buyer = `The seller did not provide the following evidence: ${skippedKeys.join(", ")}. Please consider verifying these points in person or request additional proof in chat before purchasing.`;
+        // 지역화된 기본 안내문 생성
+        const defaultNotes = {
+          id: `Penjual tidak menyediakan bukti berikut: ${skippedKeys.join(", ")}. Mohon pertimbangkan untuk memeriksa poin-poin ini secara langsung atau minta bukti tambahan lewat chat sebelum membeli.`,
+          ko: `판매자가 다음의 증거를 제공하지 않았습니다: ${skippedKeys.join(", ")}. 구매 전 직접 확인하거나 채팅으로 추가 증빙을 요청하시기 바랍니다.`,
+          en: `The seller did not provide the following evidence: ${skippedKeys.join(", ")}. Please consider verifying these points in person or request additional proof via chat before purchasing.`,
+        };
+        report.notes_for_buyer = defaultNotes[lc] || defaultNotes['id'];
       }
       // 참고용으로 최종 보고서에 skipped_items를 포함하여 클라이언트가 표시/저장을 선택할 수 있게 합니다.
       if (!Array.isArray(report.skipped_items)) {

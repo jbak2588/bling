@@ -64,6 +64,12 @@ class ProductModel {
   // ✅ [추가] 거래 희망 장소 필드를 추가합니다.
   final String? transactionPlace;
 
+  // [개편안 1] AI 검수 취소/재사용을 위한 신규 필드
+  final int aiCancelCount; // AI 검수 취소 횟수
+  final bool isAiFreeTierUsed; // 첫 무료 AI 검수 기회 사용 여부
+  final String? aiReportSourceDescription; // AI 보고서 생성 당시의 설명
+  final List<String>? aiReportSourceImages; // AI 보고서 생성 당시의 이미지 URL 목록
+
   final bool isAiVerified;
   final String
       aiVerificationStatus; // 'pending', 'approved', 'rejected', 'none'
@@ -97,6 +103,10 @@ class ProductModel {
     this.status = 'selling',
     this.condition = 'used',
     this.buyerId,
+    this.aiCancelCount = 0,
+    this.isAiFreeTierUsed = false,
+    this.aiReportSourceDescription,
+    this.aiReportSourceImages,
     this.transactionPlace,
     this.likesCount = 0,
     this.chatsCount = 0,
@@ -135,6 +145,14 @@ class ProductModel {
       buyerId: data['buyerId'], // [AI 인수] buyerId 로드
       condition: data['condition'] ?? 'used',
       transactionPlace: data['transactionPlace'],
+
+      // [개편안 1] 신규 필드 로드
+      aiCancelCount: data['aiCancelCount'] ?? 0,
+      isAiFreeTierUsed: data['isAiFreeTierUsed'] ?? false,
+      aiReportSourceDescription: data['aiReportSourceDescription'],
+      aiReportSourceImages: data['aiReportSourceImages'] != null
+          ? List<String>.from(data['aiReportSourceImages'])
+          : null,
       likesCount: data['likesCount'] ?? 0,
       chatsCount: data['chatsCount'] ?? 0,
       viewsCount: data['viewsCount'] ?? 0,
@@ -173,6 +191,11 @@ class ProductModel {
       'status': status,
       'condition': condition,
       'buyerId': buyerId, // [AI 인수] buyerId 저장
+      'aiCancelCount': aiCancelCount,
+      'isAiFreeTierUsed': isAiFreeTierUsed,
+      'aiReportSourceDescription': aiReportSourceDescription,
+      'aiReportSourceImages': aiReportSourceImages,
+
       'transactionPlace': transactionPlace,
       'likesCount': likesCount,
       'chatsCount': chatsCount,
@@ -205,6 +228,10 @@ class ProductModel {
     String? status,
     String? condition,
     String? buyerId,
+    int? aiCancelCount,
+    bool? isAiFreeTierUsed,
+    String? aiReportSourceDescription,
+    List<String>? aiReportSourceImages,
     String? transactionPlace,
     int? likesCount,
     int? chatsCount,
@@ -234,6 +261,11 @@ class ProductModel {
       status: status ?? this.status,
       condition: condition ?? this.condition,
       buyerId: buyerId ?? this.buyerId,
+      aiCancelCount: aiCancelCount ?? this.aiCancelCount,
+      isAiFreeTierUsed: isAiFreeTierUsed ?? this.isAiFreeTierUsed,
+      aiReportSourceDescription:
+          aiReportSourceDescription ?? this.aiReportSourceDescription,
+      aiReportSourceImages: aiReportSourceImages ?? this.aiReportSourceImages,
       transactionPlace: transactionPlace ?? this.transactionPlace,
       likesCount: likesCount ?? this.likesCount,
       chatsCount: chatsCount ?? this.chatsCount,

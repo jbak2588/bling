@@ -1166,8 +1166,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       Navigator.pop(context); // Drawer를 먼저 닫습니다.
 
                       // Uploader 실행
-                      final uploader = AiRuleUploader();
-                      await uploader.uploadInitialRules();
+                      final uploader =
+                          AiRuleUploader(FirebaseFirestore.instance);
+                      await uploader.uploadAll();
 
                       // 작업 완료 후 사용자에게 피드백 표시
                       if (context.mounted) {

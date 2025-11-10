@@ -104,8 +104,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _currentIndex = 0;
   bool _isReserving = false; // [AI 인수] 예약 진행 중 상태
   late final PageController _pageController = PageController(initialPage: 0);
-  // 기본은 상세 설명을 보여주고, 버튼으로 AI 리포트 표시를 전환합니다.
-  bool _showAiReport = false;
 
   // 가격 포맷 및 숫자 변환 유틸은 현 섹션에서 사용하지 않으므로 제거되었습니다.
 
@@ -673,48 +671,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ]),
                         const SizedBox(height: 16),
 
-                        // 상세 설명을 우선 표시하고, AI 리포트는 버튼으로 토글합니다.
-                        if (product.isAiVerified &&
-                            product.aiReport != null) ...[
-                          if (_showAiReport) ...[
-                            AiReportViewer(product: product),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () =>
-                                    setState(() => _showAiReport = false),
-                                child:
-                                    Text('marketplace.detail.description'.tr()),
-                              ),
-                            ),
-                          ] else ...[
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: Text(
-                                product.description,
-                                style:
-                                    const TextStyle(fontSize: 16, height: 1.6),
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () =>
-                                    setState(() => _showAiReport = true),
-                                child: Text(
-                                    '[${"ai_flow.final_report.title".tr()}]'),
-                              ),
-                            ),
-                          ],
-                        ] else ...[
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: Text(
-                              product.description,
-                              style: const TextStyle(fontSize: 16, height: 1.6),
-                            ),
+                        // [개편안 2] 1. 사용자가 작성한 설명 (항상 표시)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: Text(
+                            product.description,
+                            style: const TextStyle(fontSize: 16, height: 1.6),
                           ),
-                        ],
+                        ),
+
+                        // [개편안 2] 2. AI 검증 리포트 (검증된 경우에만 표시)
+                        if (product.isAiVerified)
+                          AiReportViewer(product: product),
 
                         // ✅ 3. 공용 위젯 추가
                         ClickableTagList(tags: product.tags),
@@ -725,8 +693,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   fontSize: 16, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 12),
                           MiniMapView(
-                              location: product.geoPoint!,
-                              markerId: product.id),
+                            location: product.geoPoint!,
+                            markerId: product.id,
+                            // [Fix #1] 80초 멈춤(Jank) 현상 해결을 위해 myLocation 비활성화
+                            myLocationEnabled: false,
+                          ),
                           const SizedBox(height: 16),
                         ],
 
@@ -737,18 +708,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           style:
                               const TextStyle(color: Colors.grey, fontSize: 12),
                         ),
-                        // spacer so the floating action button / bottom bar does not
-                        // overlap important content at the bottom of the page.
-                        // Adaptive spacer: clamp height between 56 and 96 for safe, flexible layout
-                        Builder(
-                          builder: (context) {
-                            final double raw = kBottomNavigationBarHeight +
-                                MediaQuery.of(context).padding.bottom +
-                                8;
-                            final double clamped = raw.clamp(56.0, 96.0);
-                            return SizedBox(height: clamped);
-                          },
-                        ),
+                        // [Fix #2] 1px 오버플로우 방지를 위해 정적 높이 사용
+                        const SizedBox(height: 80.0),
                       ],
                     ),
                   ),

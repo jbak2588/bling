@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
-import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -27,6 +26,8 @@ class AiFinalReportScreen extends StatefulWidget {
   final String? userPrice; // [추가] 사용자가 입력한 가격(선택)
   // TODO: 이전 화면들로부터 가격, 설명 등 다른 필드들도 전달받아야 함
 
+  final String? userDescription; // [개편안 1] 원본 설명
+  final bool skipUserFetch; // test-friendly flag to skip Firebase user fetch
   const AiFinalReportScreen({
     super.key,
     required this.productId,
@@ -37,6 +38,8 @@ class AiFinalReportScreen extends StatefulWidget {
     required this.takenShots,
     required this.confirmedProductName,
     this.userPrice, // [추가]
+    this.userDescription, // [개편안 1] 원본 설명
+    this.skipUserFetch = false,
   });
 
   @override
@@ -66,21 +69,31 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
   // ✅ [신뢰-경매] 2. 경매/판매 토글 및 기간 상태 변수
   RegistrationType _registrationType = RegistrationType.sale;
   int _durationInDays = 3; // 경매 기간
-  final AuctionRepository _auctionRepository = AuctionRepository();
+  late final AuctionRepository _auctionRepository;
 
   @override
   void initState() {
     super.initState();
+    _auctionRepository = AuctionRepository();
     _initializeControllers();
     _allImages = [...widget.initialImages, ...widget.takenShots.values];
-    // 사용자 위치/신뢰 정보 미리 로드
-    _fetchUserModel();
+    // [Fix] 원본 설명을 컨트롤러에 설정
+    _descriptionController.text = widget.userDescription ?? '';
+    // 사용자 위치/신뢰 정보 미리 로드 (테스트 환경에서는 건너뜁니다)
+    if (!widget.skipUserFetch) {
+      try {
+        _fetchUserModel();
+      } catch (e) {
+        debugPrint('Skipping _fetchUserModel (no Firebase in test): $e');
+      }
+    }
   }
 
   void _initializeControllers() {
     _titleController.text = widget.confirmedProductName;
     _summaryController.text = widget.finalReport['verification_summary'] ?? '';
-    _buyerNotesController.text = widget.finalReport['notes_for_buyer'] ?? '';
+    _buyerNotesController.text =
+        (widget.finalReport['notes_for_buyer'] as String? ?? '').trim();
     _conditionController.text = widget.finalReport['condition_check'] ?? '';
     _itemsController.text =
         (widget.finalReport['included_items'] as List<dynamic>? ?? [])
@@ -102,9 +115,8 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     specs.forEach((key, value) {
       _specsControllers[key] = TextEditingController(text: value.toString());
     });
-
-    // [핵심 로직 복원] 컨트롤러 초기화 후, 상세 설명 필드를 자동으로 채웁니다.
-    _applyAllSuggestionsToDescription(isInitial: true);
+    // [Fix] description 컨트롤러를 AI 요약으로 덮어쓰는 로직 제거
+    // _applyAllSuggestionsToDescription(isInitial: true);
   }
 
   // ✅ [신뢰-경매] 4. 현재 사용자 정보(위치 등)를 가져오는 함수
@@ -121,34 +133,6 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
       }
     } catch (e) {
       debugPrint("User model fetch error: $e");
-    }
-  }
-
-  // [핵심 로직 복원] 모든 AI 분석 결과를 조합하여 상세 설명 필드를 채우는 함수
-  void _applyAllSuggestionsToDescription({bool isInitial = false}) {
-    String specsText = _specsControllers.entries
-        .map((e) => "- ${e.key}: ${e.value.text}")
-        .join('\n');
-
-    setState(() {
-      _descriptionController.text = '''[AI 검증 요약]
-${_summaryController.text}
-
-[주요 사양]
-$specsText
-
-[상태 점검]
-${_conditionController.text}
-
-[구성품]
-${_itemsController.text.split(',').map((e) => "- ${e.trim()}").join('\n')}
-''';
-    });
-
-    if (!isInitial) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('AI 제안이 상세 설명에 적용되었습니다.')),
-      );
     }
   }
 
@@ -296,37 +280,45 @@ ${_itemsController.text.split(',').map((e) => "- ${e.trim()}").join('\n')}
           _specsControllers.map((key, value) => MapEntry(key, value.text)),
     };
 
-    final product = ProductModel(
-      id: widget.productId,
-      userId: user.uid,
-      title: _titleController.text,
-      description: _descriptionController.text,
-      imageUrls: allImageUrls,
-      categoryId: widget.categoryId,
-      // 판매가는 사용자가 입력한 값이 있으면 우선 사용, 없으면 AI 추천가 사용
-      price: (userSelectedPrice > 0) ? userSelectedPrice : aiSuggestedPrice,
-      negotiable: false,
-      tags: const [],
-      locationName: _currentUserModel?.locationName,
-      locationParts: _currentUserModel?.locationParts,
-      geoPoint: _currentUserModel?.geoPoint,
-      status: 'selling',
-      condition: _conditionController.text.isNotEmpty
-          ? _conditionController.text.toLowerCase()
-          : 'used',
-      transactionPlace: null,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      isAiVerified: true,
-      aiVerificationStatus: 'approved',
-      aiVerificationData: finalAiReport,
-      aiReport: widget.finalReport,
-    );
+    // [Fix] .set()은 createdAt을 덮어쓰므로 .update() 또는 .set(merge:true)와 Map을 사용
+    final Map<String, dynamic> productData = {
+      'id': widget.productId,
+      'userId': user.uid,
+      'title': _titleController.text,
+      // [Fix #A] AI 요약본이 아닌, 사용자가 입력한 원본 설명을 저장합니다.
+      'description': widget.userDescription ?? _descriptionController.text,
+      'imageUrls': allImageUrls,
+      'categoryId': widget.categoryId,
+      'price': (userSelectedPrice > 0) ? userSelectedPrice : aiSuggestedPrice,
+      'negotiable': false,
+      'tags': const [], // TODO: Add tag input
+      'locationName': _currentUserModel?.locationName,
+      'locationParts': _currentUserModel?.locationParts,
+      'geoPoint': _currentUserModel?.geoPoint,
+      'status': 'selling',
+      // [Fix #B] AI 상세 리포트가 아닌, 'used' 또는 'new'를 저장합니다.
+      'condition': 'used', // TODO: 'new'/'used' 선택 UI 추가 필요
+      'transactionPlace': null,
+      'updatedAt': Timestamp.now(),
+      'isAiVerified': true,
+      'aiVerificationStatus': 'approved',
 
+      // [Fix #C] aiReport(레거시)와 aiVerificationData(신규)에 동일 데이터 저장 (모델 호환성 유지)
+      'aiReport': finalAiReport,
+      'aiVerificationData': finalAiReport,
+
+      // [개편안 1] 스냅샷 데이터 저장 (Job 25)
+      'isAiFreeTierUsed': true, // 무료 티어 사용 완료
+      'aiReportSourceDescription':
+          widget.userDescription ?? _descriptionController.text, // 현재 설명을 스냅샷
+      'aiReportSourceImages': allImageUrls, // 현재 이미지 목록을 스냅샷
+    };
+
+    // .set(merge:true)는 createdAt을 덮어쓰지 않도록 product.toJson() 대신 Map을 사용
     await FirebaseFirestore.instance
         .collection('products')
         .doc(widget.productId)
-        .set(product.toJson(), SetOptions(merge: true));
+        .set(productData, SetOptions(merge: true));
 
     await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
       'productIds': FieldValue.arrayUnion([widget.productId])
@@ -501,6 +493,7 @@ ${_itemsController.text.split(',').map((e) => "- ${e.trim()}").join('\n')}
               const SizedBox(height: 16),
               // [V2.1] 구매자 안내 노트 표시 및 편집 가능
               TextFormField(
+                key: const Key('buyerNotesField'),
                 controller: _buyerNotesController,
                 decoration: InputDecoration(
                     labelText: 'ai_flow.final_report.buyer_notes'.tr(),
@@ -535,24 +528,7 @@ ${_itemsController.text.split(',').map((e) => "- ${e.trim()}").join('\n')}
                     border: const OutlineInputBorder()),
                 maxLines: 12,
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _transactionPlaceController,
-                decoration: InputDecoration(
-                    labelText:
-                        'marketplace.registration.addressDetailHint'.tr(),
-                    border: const OutlineInputBorder()),
-                validator: (value) => (value == null || value.trim().isEmpty)
-                    ? 'marketplace.errors.requiredField'.tr()
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              // [수정] isInitial 플래그를 사용하여 버튼 클릭 시에만 스낵바가 표시되도록 합니다.
-              ElevatedButton.icon(
-                onPressed: () => _applyAllSuggestionsToDescription(),
-                icon: const Icon(Icons.auto_fix_high),
-                label: Text('ai_flow.final_report.apply_suggestions'.tr()),
-              ),
+              // [Fix] "AI 제안 적용" 버튼 제거 (데이터 오염 방지)
             ],
           ),
         ),

@@ -5,6 +5,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class MiniMapView extends StatelessWidget {
   final GeoPoint location;
   final String markerId;
+  // [Fix] 작업 28의 myLocationEnabled 파라미터를 받도록 추가
+  final bool myLocationEnabled;
   final double height;
 
   const MiniMapView({
@@ -12,6 +14,7 @@ class MiniMapView extends StatelessWidget {
     required this.location,
     required this.markerId,
     this.height = 180.0,
+    this.myLocationEnabled = false, // 기본값은 false
   });
 
   @override
@@ -25,7 +28,7 @@ class MiniMapView extends StatelessWidget {
         child: GoogleMap(
           initialCameraPosition: CameraPosition(
             target: target,
-            zoom: 15,
+            zoom: 16.0,
           ),
           markers: {
             Marker(
@@ -33,11 +36,10 @@ class MiniMapView extends StatelessWidget {
               position: target,
             ),
           },
-          myLocationEnabled: false,
-          myLocationButtonEnabled: false,
-          zoomControlsEnabled: true,
-          scrollGesturesEnabled: true,
-          zoomGesturesEnabled: true,
+          myLocationEnabled: myLocationEnabled, // [Fix] 전달받은 값 적용
+          myLocationButtonEnabled: false, // 사용 안 함
+          scrollGesturesEnabled: false,
+          zoomGesturesEnabled: false,
           tiltGesturesEnabled: false,
           rotateGesturesEnabled: false,
         ),
