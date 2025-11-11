@@ -75,6 +75,7 @@ import 'package:bling_app/features/boards/screens/kelurahan_board_screen.dart';
 
 import 'package:bling_app/features/admin/screens/admin_screen.dart'; // ✅ 관리자 화면 import
 // [Fix]
+import 'package:bling_app/features/categories/screens/category_admin_screen.dart'; // [Fix #52] 관리자 카테고리 화면
 import 'package:bling_app/features/marketplace/ai/ai_rule_uploader_from_json.dart'; // Admin only
 
 /// 현재 보고 있는 섹션을 타입 세이프하게 관리하기 위한 enum
@@ -1233,6 +1234,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       Navigator.of(context).pop(); // Drawer를 닫고
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (_) => const AdminScreen())); // 관리자 페이지로 이동
+                    },
+                  ),
+
+                  // [Fix #52] 신규 카테고리 관리자 화면 연결
+                  ListTile(
+                    leading: const Icon(Icons.category_outlined),
+                    title: const Text('ADMIN: Category Manager (V2)'),
+                    onTap: () {
+                      Navigator.of(context).pop(); // Drawer를 닫고
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const CategoryAdminScreen(),
+                      ));
                     },
                   ),
 

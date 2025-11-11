@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Bling 카테고리 설계 (JS 모듈) - 필요 시 경로 조정
-const design = require('../scripts/categories_v2_design.js');
+// [Fix] const design = require('../scripts/categories_v2_design.js'); // CLI 실행 시에만 필요
 
 // -------------------- 1) 추천샷(shot presets) 카탈로그 --------------------
 const SHOT_CATALOG = {
@@ -336,7 +336,7 @@ function buildRule(id, nameKo, nameId, nameEn, parentNameEn, subKey, subNameEn) 
 }
 
 // -------------------- 5) 전체 카테고리 순회 → 규칙 배열 생성 --------------------
-function generateAllRules() {
+function generateAllRules(design) { // [Fix] 'design' 객체를 파라미터로 받음
   const rules = [];
 
   for (const [parentId, parent] of Object.entries(design)) {
@@ -357,8 +357,8 @@ function generateAllRules() {
 }
 
 // -------------------- 6) JSON 파일로 저장 --------------------
-function main() {
-  const rules = generateAllRules();
+function main(design) { // [Fix] 'design' 객체를 파라미터로 받음
+  const rules = generateAllRules(design);
   const outDir = path.join(__dirname, '../assets/ai');
   const outPath = path.join(outDir, 'ai_rules_v2.json');
   fs.mkdirSync(outDir, { recursive: true });
@@ -367,9 +367,12 @@ function main() {
 }
 
 if (require.main === module) {
-  main();
+  // [Fix] CLI로 직접 실행 시, design 파일을 로드하여 main 실행
+  const design = require('../scripts/categories_v2_design.js');
+  main(design);
 }
 
+// [Fix] 다른 스크립트(export_categories_v2_design.js)가 호출할 수 있도록 함수를 export
 module.exports = {
   generateAllRules,
   buildRule,

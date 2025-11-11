@@ -27,8 +27,9 @@ class ParentCategoryScreen extends StatelessWidget {
       appBar: AppBar(title: Text('selectCategory'.tr())),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
-            .collection('categories')
-            .where('parentId', isEqualTo: "")
+            // [Fix] 'categories_v2' 컬렉션 사용
+            .collection('categories_v2')
+            .orderBy('order')
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -36,8 +37,8 @@ class ParentCategoryScreen extends StatelessWidget {
           }
           if (snapshot.hasError) {
             return Center(
-              child: Text(
-                  'marketplace.error'.tr(namedArgs: {'error': snapshot.error.toString()})),
+              child: Text('marketplace.error'
+                  .tr(namedArgs: {'error': snapshot.error.toString()})),
             );
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {

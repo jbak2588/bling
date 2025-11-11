@@ -127,6 +127,10 @@ const {
 
 initializeApp();
 
+// functions-v2/index.js (추가)
+Object.assign(exports, require('./categories_sync'));
+    
+
 // 🔐 Secrets 선언: 배포/런타임에서 안전하게 주입
 const GEMINI_KEY = defineSecret("GEMINI_KEY");
 
@@ -1589,5 +1593,3 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
     );
   }
 });
-
-    

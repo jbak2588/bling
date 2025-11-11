@@ -32,8 +32,10 @@ class SubCategoryScreen extends StatelessWidget {
       appBar: AppBar(title: Text(parentName)),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
-            .collection('categories')
-            .where('parentId', isEqualTo: parentId)
+            // [Fix] 'categories_v2'의 서브컬렉션 'subCategories'를 쿼리
+            .collection('categories_v2')
+            .doc(parentId)
+            .collection('subCategories')
             .orderBy('order')
             .snapshots(),
         builder: (context, snapshot) {
@@ -42,8 +44,8 @@ class SubCategoryScreen extends StatelessWidget {
           }
           if (snapshot.hasError) {
             return Center(
-              child: Text(
-                  'marketplace.error'.tr(namedArgs: {'error': snapshot.error.toString()})),
+              child: Text('marketplace.error'
+                  .tr(namedArgs: {'error': snapshot.error.toString()})),
             );
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
