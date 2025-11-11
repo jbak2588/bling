@@ -2,6 +2,7 @@
 // Bling App v0.4
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -79,7 +80,7 @@ class _DataUploaderScreenState extends State<DataUploaderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('샘플 데이터 업로더')),
+      appBar: AppBar(title: Text('admin.dataUploader.title'.tr())),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -88,13 +89,14 @@ class _DataUploaderScreenState extends State<DataUploaderScreen> {
             ElevatedButton.icon(
               onPressed: _isLoading ? null : _uploadData,
               icon: const Icon(Icons.upload_file),
-              label: const Text('게시물 샘플 데이터 업로드 시작'),
+              label: Text('admin.dataUploader.startLabel'.tr()),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
             const SizedBox(height: 20),
-            const Text('작업 로그:', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('admin.dataUploader.logsLabel'.tr(),
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const Divider(),
             Expanded(
               child: Container(

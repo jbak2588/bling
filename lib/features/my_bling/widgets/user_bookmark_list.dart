@@ -17,6 +17,7 @@ library;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../local_news/models/post_model.dart';
 import '../../marketplace/models/product_model.dart';
@@ -74,7 +75,9 @@ class UserBookmarkList extends StatelessWidget {
   Widget build(BuildContext context) {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
 
-    if (myUid == null) return const Center(child: Text("로그인이 필요합니다."));
+    if (myUid == null) {
+      return Center(child: Text('main.errors.loginRequired'.tr()));
+    }
 
     // 1. 사용자 정보를 먼저 가져옴
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -82,7 +85,7 @@ class UserBookmarkList extends StatelessWidget {
           FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
       builder: (context, userSnapshot) {
         if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-          return const Center(child: Text("사용자 정보를 찾을 수 없습니다."));
+          return Center(child: Text('main.errors.userNotFound'.tr()));
         }
 
         final user = UserModel.fromFirestore(userSnapshot.data!);
@@ -90,7 +93,7 @@ class UserBookmarkList extends StatelessWidget {
         final productIds = user.bookmarkedProductIds ?? [];
 
         if (postIds.isEmpty && productIds.isEmpty) {
-          return const Center(child: Text("찜한 항목이 없습니다."));
+          return Center(child: Text('myBling.bookmarks.empty'.tr()));
         }
 
         // 2. 찜한 ID 목록을 기반으로 실제 데이터들을 가져옴
@@ -103,7 +106,7 @@ class UserBookmarkList extends StatelessWidget {
             if (itemsSnapshot.hasError ||
                 !itemsSnapshot.hasData ||
                 itemsSnapshot.data!.isEmpty) {
-              return const Center(child: Text("관심 목록을 불러올 수 없습니다."));
+              return Center(child: Text('myBling.bookmarks.loadError'.tr()));
             }
 
             final items = itemsSnapshot.data!;

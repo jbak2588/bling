@@ -170,8 +170,9 @@ class AiVerificationService {
           'aiVerificationStatus': 'verified', // 재활성화
         });
         if (context.mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('AI 검수를 다시 활성화했습니다.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('marketplace.ai.reactivated'.tr())),
+          );
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
       } else {
@@ -268,8 +269,11 @@ class AiVerificationService {
     } catch (e) {
       debugPrint('1차 분석 실패 또는 V2.1 흐름 진입 오류: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('오류: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'marketplace.error'.tr(namedArgs: {'error': e.toString()}))),
+        );
       }
     }
   }

@@ -147,6 +147,59 @@ class _AiEvidenceCollectionScreenState
     return ref.getDownloadURL();
   }
 
+  // Locale-aware helpers for per-shot name/description
+  String _shotName(RequiredShot shot, String fallbackKey) {
+    final lang = context.locale.languageCode;
+    if (lang == 'en') {
+      if (shot.nameEn.isNotEmpty) return shot.nameEn;
+      if (shot.nameKo.isNotEmpty) return shot.nameKo;
+      if (shot.nameId.isNotEmpty) return shot.nameId;
+      return fallbackKey;
+    }
+    if (lang == 'ko') {
+      if (shot.nameKo.isNotEmpty) return shot.nameKo;
+      if (shot.nameEn.isNotEmpty) return shot.nameEn;
+      if (shot.nameId.isNotEmpty) return shot.nameId;
+      return fallbackKey;
+    }
+    if (lang == 'id') {
+      if (shot.nameId.isNotEmpty) return shot.nameId;
+      if (shot.nameEn.isNotEmpty) return shot.nameEn;
+      if (shot.nameKo.isNotEmpty) return shot.nameKo;
+      return fallbackKey;
+    }
+    if (shot.nameEn.isNotEmpty) return shot.nameEn;
+    if (shot.nameKo.isNotEmpty) return shot.nameKo;
+    if (shot.nameId.isNotEmpty) return shot.nameId;
+    return fallbackKey;
+  }
+
+  String _shotDesc(RequiredShot shot) {
+    final lang = context.locale.languageCode;
+    if (lang == 'en') {
+      if (shot.descEn.isNotEmpty) return shot.descEn;
+      if (shot.descKo.isNotEmpty) return shot.descKo;
+      if (shot.descId.isNotEmpty) return shot.descId;
+      return 'ai_flow.guided_camera.guide'.tr();
+    }
+    if (lang == 'ko') {
+      if (shot.descKo.isNotEmpty) return shot.descKo;
+      if (shot.descEn.isNotEmpty) return shot.descEn;
+      if (shot.descId.isNotEmpty) return shot.descId;
+      return 'ai_flow.guided_camera.guide'.tr();
+    }
+    if (lang == 'id') {
+      if (shot.descId.isNotEmpty) return shot.descId;
+      if (shot.descEn.isNotEmpty) return shot.descEn;
+      if (shot.descKo.isNotEmpty) return shot.descKo;
+      return 'ai_flow.guided_camera.guide'.tr();
+    }
+    if (shot.descEn.isNotEmpty) return shot.descEn;
+    if (shot.descKo.isNotEmpty) return shot.descKo;
+    if (shot.descId.isNotEmpty) return shot.descId;
+    return 'ai_flow.guided_camera.guide'.tr();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,8 +221,8 @@ class _AiEvidenceCollectionScreenState
                 color: isCompleted ? Colors.green : Colors.grey,
                 size: 40,
               ),
-              title: Text(shotRule.nameKo.tr()),
-              subtitle: Text(shotRule.descKo.tr()),
+              title: Text(_shotName(shotRule, shotKey)),
+              subtitle: Text(_shotDesc(shotRule)),
               trailing: takenImage != null
                   ? Image.file(File(takenImage.path),
                       width: 50, height: 50, fit: BoxFit.cover)

@@ -7,7 +7,7 @@
       "nameEn": "Electronics",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -89,8 +89,8 @@
           "descEn": "Take a photo of the screen while the device is on"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "smartphone-tablet",
@@ -99,7 +99,7 @@
       "nameEn": "Smartphone/Tablet",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -205,8 +205,8 @@
           "descEn": "Photo of device info screen (model/capacity)"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "Anda adalah ahli transaksi HP bekas di Indonesia. Tulis JSON berbahasa Indonesia.\n\nInput Pengguna:\n- Harga yang diinginkan: {{userPrice}} IDR\n- Deskripsi singkat: {{userDescription}}\n\nWajib isi: judul, deskripsi, spesifikasi (merek, model, kapasitas, warna), cek kondisi (layar, bodi, baterai), kelengkapan, harga pasar (angka IDR saja). Jika bukti kunci (IMEI/baterai/info perangkat) tidak ada, tambahkan \"notes_for_buyer\"."
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "Anda adalah ahli transaksi HP bekas di Indonesia. Tulis JSON berbahasa Indonesia.\n\nInput Pengguna:\n- Harga yang diinginkan: {{userPrice}} IDR\n- Deskripsi singkat: {{userDescription}}\n\nWajib isi: judul, deskripsi, spesifikasi (merek, model, kapasitas, warna), cek kondisi (layar, bodi, baterai), kelengkapan, harga pasar (angka IDR saja). Jika bukti kunci (IMEI/baterai/info perangkat) tidak ada, tambahkan \"notes_for_buyer\"."
     },
     {
       "id": "computer-laptop",
@@ -215,7 +215,7 @@
       "nameEn": "Computer/Laptop",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -297,8 +297,8 @@
           "descEn": "Take a photo of the screen while the device is on"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "camera-drone",
@@ -307,7 +307,7 @@
       "nameEn": "Camera/Drone",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -405,8 +405,8 @@
           "descEn": "Photo of shutter count/flight log screen (if possible)"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "other-digital-devices",
@@ -415,7 +415,7 @@
       "nameEn": "Other Digital Devices",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -497,8 +497,8 @@
           "descEn": "Take a photo of the screen while the device is on"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "kitchenware",
@@ -507,7 +507,7 @@
       "nameEn": "Kitchenware",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -581,8 +581,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "furniture",
@@ -591,7 +591,7 @@
       "nameEn": "Furniture",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -673,8 +673,8 @@
           "descEn": "Close-up photo of furniture joints/hinges"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "lighting-electrical",
@@ -683,7 +683,7 @@
       "nameEn": "Lighting & Electrical",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -765,8 +765,8 @@
           "descEn": "Take a photo of the screen while the device is on"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "other-home-essentials",
@@ -775,7 +775,7 @@
       "nameEn": "Others Home Essentials",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -849,8 +849,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "women-s-clothing",
@@ -859,7 +859,7 @@
       "nameEn": "Women's Clothing",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -933,8 +933,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "men-s-clothing",
@@ -943,7 +943,7 @@
       "nameEn": "Men's Clothing",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1017,8 +1017,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "shoes",
@@ -1027,7 +1027,7 @@
       "nameEn": "Shoes",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1133,8 +1133,8 @@
           "descEn": "Close-up photo of the toe box condition"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "bags-accessories",
@@ -1143,7 +1143,7 @@
       "nameEn": "Tas & Aksesori",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1241,8 +1241,8 @@
           "descEn": "Close-up photo of wear on bottom corners"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "other-fashion",
@@ -1251,7 +1251,7 @@
       "nameEn": "Other Fashion Itmes",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1325,8 +1325,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "skincare",
@@ -1335,7 +1335,7 @@
       "nameEn": "Skincare",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1409,8 +1409,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "makeup",
@@ -1419,7 +1419,7 @@
       "nameEn": "Makeup",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1493,8 +1493,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "hair-body",
@@ -1503,7 +1503,7 @@
       "nameEn": "Hair/Body",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1577,8 +1577,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "other-beauty-care",
@@ -1587,7 +1587,7 @@
       "nameEn": "Other Beauty & Care",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1661,8 +1661,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "limited-edition",
@@ -1671,7 +1671,7 @@
       "nameEn": "Limited Edition",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1745,8 +1745,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "luxury-goods",
@@ -1755,7 +1755,7 @@
       "nameEn": "Luxury Goods",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1829,8 +1829,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "hunter-s-pick",
@@ -1839,7 +1839,7 @@
       "nameEn": "Hunter's Pick",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1913,8 +1913,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "other-limited-luxury",
@@ -1923,7 +1923,7 @@
       "nameEn": "Other Limited & Luxury Items",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -1997,8 +1997,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "sports-leisure",
@@ -2007,7 +2007,7 @@
       "nameEn": "Sports & Leisure",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -2081,8 +2081,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "games-consoles",
@@ -2091,7 +2091,7 @@
       "nameEn": "Games & Consoles",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -2165,8 +2165,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "instruments",
@@ -2175,7 +2175,7 @@
       "nameEn": "Instruments",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -2249,8 +2249,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "books-stationery",
@@ -2259,7 +2259,7 @@
       "nameEn": "Books & Stationery",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -2333,8 +2333,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "other-hobby-leisure",
@@ -2343,7 +2343,7 @@
       "nameEn": "Other Hobby & Leisure",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -2417,8 +2417,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "baby-clothing",
@@ -2427,7 +2427,7 @@
       "nameEn": "Baby Clothing",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -2501,8 +2501,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "toys",
@@ -2511,7 +2511,7 @@
       "nameEn": "Toys",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -2585,8 +2585,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "baby-essentials",
@@ -2595,7 +2595,7 @@
       "nameEn": "Baby Essentials",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -2669,8 +2669,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "other-baby-kids",
@@ -2679,7 +2679,7 @@
       "nameEn": "Other Baby & Kids Items",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -2753,8 +2753,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "motorcycle",
@@ -2763,7 +2763,7 @@
       "nameEn": "Motorcycle",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -2837,8 +2837,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "motor-parts",
@@ -2847,7 +2847,7 @@
       "nameEn": "Motor Parts",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -2921,8 +2921,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "motor-accessories",
@@ -2931,7 +2931,7 @@
       "nameEn": "Motor Accessories",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -3029,8 +3029,8 @@
           "descEn": "Close-up photo of wear on bottom corners"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "other-motorcycle",
@@ -3039,7 +3039,7 @@
       "nameEn": "Other Motorcycles Items",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -3113,8 +3113,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "handcrafts",
@@ -3123,7 +3123,7 @@
       "nameEn": "Handcrafts",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -3197,8 +3197,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     },
     {
       "id": "other-used-items",
@@ -3207,7 +3207,7 @@
       "nameEn": "Other Used Items",
       "isAiVerificationSupported": true,
       "minGalleryPhotos": 1,
-      "suggestedShots": {
+      "suggested_shots": {
         "front_full": {
           "nameKo": "전면 전체샷",
           "descKo": "제품 전체가 보이도록 전면에서 촬영",
@@ -3281,8 +3281,8 @@
           "descEn": "If available, photo of the purchase receipt or warranty card"
         }
       },
-      "initialAnalysisPromptTemplate": "Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {\"predicted_item_name\": \"PREDICTED_NAME\"}",
-      "reportTemplatePrompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
+      "initial_analysis_prompt_template": "You are an expert product inspector for a second-hand marketplace.\nAnalyze ONLY the provided images to help determine evidence completeness for the item.\nRespond in JSON ONLY. Do not include any text outside JSON.\nDo not invent details that are not visible in the images.\nYou will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.",
+      "report_template_prompt": "You are an expert product inspector for a marketplace. Output JSON in Indonesian only.\n\n**User's Input**\n- Product Name Claim: \"{{confirmedProductName}}\"\n- Category: \"{{categoryName}}\"\n- Sub-Category: \"{{subCategoryName}}\"\n- User Price: \"{{userPrice}}\"\n\n**Instructions**\n1) Respect the user's claim. Support it with evidence.\n2) Pick 2-3 key specs relevant to the sub-category.\n3) Describe condition objectively (wear, scratch, dent).\n4) List included items detected.\n5) Suggest reasonable market price in IDR (numbers only).\nIf some evidence keys were missing, add:\n\"notes_for_buyer\": \"Saran untuk pembeli mengenai bukti yang tidak disediakan penjual.\"\n\nReturn one JSON:\n{\n  \"verification_summary\": \"string\",\n  \"key_specs\": { \"Spec 1\": \"Value 1\", \"Spec 2\": \"Value 2\" },\n  \"condition_check\": \"string\",\n  \"included_items\": [\"...\"],\n  \"suggested_price\": 0,\n  \"notes_for_buyer\": \"optional\"\n}"
     }
   ]
 }

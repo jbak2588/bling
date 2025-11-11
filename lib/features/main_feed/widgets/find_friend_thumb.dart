@@ -53,9 +53,14 @@ class FindFriendThumb extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. 상단 이미지 (1:1 비율)
-              _buildImageContent(context),
+              // Wrap image in Flexible(fit: FlexFit.loose) so it can shrink
+              // if the meta content needs more vertical space (accessibility
+              // text scaling, chips, etc.). This prevents Column overflow.
+              Flexible(fit: FlexFit.loose, child: _buildImageContent(context)),
               // 2. 하단 메타 (닉네임, 나이, 지역)
-              _buildMeta(context),
+              // Use Expanded so the meta area flexes to the remaining space and
+              // avoids RenderFlex overflow when textScaleFactor is large.
+              Expanded(child: _buildMeta(context)),
             ],
           ),
         ),
@@ -93,74 +98,71 @@ class FindFriendThumb extends StatelessWidget {
   // --- 하단 메타 (닉네임 + 나이 + 지역) ---
   Widget _buildMeta(BuildContext context) {
     // [v2.1] 'age' 및 'ageRange' 필드 삭제됨.
-    // final interests = user.interests ?? []; // 'interests'로 대체
     final interests = user.interests?.take(2).toList() ?? []; // 최대 2개만 표시
 
     // 지역명 추출 (Kelurahan 우선, 없으면 Kecamatan)
     final location =
         user.locationParts?['kab'] ?? user.locationParts?['kota'] ?? '';
 
-    // Meta area has a fixed height to avoid RenderFlex overflow inside the
-    // parent SizedBox(240). Image uses 140, so reserve the remaining 100px.
-    return SizedBox(
-      height: 100,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 닉네임
-            Text(
-              user.nickname, //
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-              maxLines: 1, // MD: 오버플로우 방지
-              overflow: TextOverflow.ellipsis,
+    // Return a flexible meta area (no fixed height). The parent Column
+    // wraps this widget in Expanded so it will take remaining space and
+    // avoid RenderFlex overflow even when textScaleFactor increases.
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 닉네임
+          Text(
+            user.nickname, //
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+            maxLines: 1, // MD: 오버플로우 방지
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          // [v2.1] 'age' 대신 'interests' 표시 (최대 2개)
+          if (interests.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Wrap(
+                spacing: 4.0,
+                runSpacing: 4.0,
+                children: interests
+                    .map((interest) => Chip(
+                          label: Text(interest,
+                              style: Theme.of(context).textTheme.labelSmall),
+                          padding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
+                        ))
+                    .toList(),
+              ),
             ),
-            const SizedBox(height: 4),
-            // [v2.1] 'age' 대신 'interests' 표시 (최대 2개)
-            if (interests.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Wrap(
-                  spacing: 4.0,
-                  runSpacing: 4.0,
-                  children: interests
-                      .map((interest) => Chip(
-                            label: Text(interest,
-                                style: Theme.of(context).textTheme.labelSmall),
-                            padding: EdgeInsets.zero,
-                            visualDensity: VisualDensity.compact,
-                          ))
-                      .toList(),
+
+          // Small gap instead of Spacer to avoid forcing expansion inside the
+          // meta area - but the parent uses Expanded so this Column can grow.
+          const SizedBox(height: 4),
+          // 지역
+          Row(
+            children: [
+              Icon(Icons.location_on_outlined,
+                  size: 14, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Expanded(
+                // 지역명이 길 경우 대비
+                child: Text(
+                  location,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                  maxLines: 1, // MD: 오버플로우 방지
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-
-            // Use a small gap instead of Spacer to avoid forcing expansion inside
-            // the fixed-height meta area which can cause RenderFlex overflow.
-            const SizedBox(height: 4),
-            // 지역
-            Row(
-              children: [
-                Icon(Icons.location_on_outlined,
-                    size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Expanded(
-                  // 지역명이 길 경우 대비
-                  child: Text(
-                    location,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                    maxLines: 1, // MD: 오버플로우 방지
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }

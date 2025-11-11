@@ -136,11 +136,72 @@ class _AiEvidenceSuggestionScreenState
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('오류: ${e.toString()}')),
+        SnackBar(
+            content: Text(
+                'marketplace.error'.tr(namedArgs: {'error': e.toString()}))),
       );
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
+  }
+
+  /// [Fix] 다국어 지원을 위해 규칙에서 올바른 문자열을 선택합니다.
+  String _getShotName(RequiredShot? shot, String fallbackKey) {
+    if (shot == null) return fallbackKey;
+    final lang = context.locale.languageCode;
+    // Prefer the locale-specific field if present, otherwise fall back
+    // through a reasonable order: en -> ko -> id -> fallbackKey for English
+    // and similar for other languages.
+    if (lang == 'en') {
+      if (shot.nameEn.isNotEmpty) return shot.nameEn;
+      if (shot.nameKo.isNotEmpty) return shot.nameKo;
+      if (shot.nameId.isNotEmpty) return shot.nameId;
+      return fallbackKey;
+    }
+    if (lang == 'ko') {
+      if (shot.nameKo.isNotEmpty) return shot.nameKo;
+      if (shot.nameEn.isNotEmpty) return shot.nameEn;
+      if (shot.nameId.isNotEmpty) return shot.nameId;
+      return fallbackKey;
+    }
+    if (lang == 'id') {
+      if (shot.nameId.isNotEmpty) return shot.nameId;
+      if (shot.nameEn.isNotEmpty) return shot.nameEn;
+      if (shot.nameKo.isNotEmpty) return shot.nameKo;
+      return fallbackKey;
+    }
+    // Other locales: prefer English if available, then Korean, then ID.
+    if (shot.nameEn.isNotEmpty) return shot.nameEn;
+    if (shot.nameKo.isNotEmpty) return shot.nameKo;
+    if (shot.nameId.isNotEmpty) return shot.nameId;
+    return fallbackKey;
+  }
+
+  String _getShotDesc(RequiredShot? shot) {
+    if (shot == null) return 'ai_flow.guided_camera.guide'.tr();
+    final lang = context.locale.languageCode;
+    if (lang == 'en') {
+      if (shot.descEn.isNotEmpty) return shot.descEn;
+      if (shot.descKo.isNotEmpty) return shot.descKo;
+      if (shot.descId.isNotEmpty) return shot.descId;
+      return 'ai_flow.guided_camera.guide'.tr();
+    }
+    if (lang == 'ko') {
+      if (shot.descKo.isNotEmpty) return shot.descKo;
+      if (shot.descEn.isNotEmpty) return shot.descEn;
+      if (shot.descId.isNotEmpty) return shot.descId;
+      return 'ai_flow.guided_camera.guide'.tr();
+    }
+    if (lang == 'id') {
+      if (shot.descId.isNotEmpty) return shot.descId;
+      if (shot.descEn.isNotEmpty) return shot.descEn;
+      if (shot.descKo.isNotEmpty) return shot.descKo;
+      return 'ai_flow.guided_camera.guide'.tr();
+    }
+    if (shot.descEn.isNotEmpty) return shot.descEn;
+    if (shot.descKo.isNotEmpty) return shot.descKo;
+    if (shot.descId.isNotEmpty) return shot.descId;
+    return 'ai_flow.guided_camera.guide'.tr(); // 기본값
   }
 
   @override
@@ -169,6 +230,8 @@ class _AiEvidenceSuggestionScreenState
                 final picked = _addedPhotos[k];
                 final skipped = _skipped.contains(k);
                 // Visual hint: try to show a small thumbnail or an icon per key
+                // [Fix] 규칙에서 번역된 이름과 설명을 가져옵니다.
+                final shotInfo = widget.rule.suggestedShots[k];
                 Widget leading;
                 // 1) If user already took a photo for this key, show its thumbnail
                 if (picked != null) {
@@ -180,9 +243,8 @@ class _AiEvidenceSuggestionScreenState
                   );
                 } else {
                   // 2) If rule has suggestedShots metadata, pick an icon by key
-                  final shot = widget.rule.suggestedShots[k];
                   IconData icon = Icons.photo_camera_outlined;
-                  if (shot != null) {
+                  if (shotInfo != null) {
                     final keyLower = k.toLowerCase();
                     if (keyLower.contains('imei')) {
                       icon = Icons.qr_code_2;
@@ -201,13 +263,14 @@ class _AiEvidenceSuggestionScreenState
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   child: ListTile(
                     leading: leading,
-                    title: Text(k),
+                    // [Fix] Raw key(k) 대신 번역된 이름 표시
+                    title: Text(_getShotName(shotInfo, k)),
                     subtitle: picked != null
                         ? Text(tr('ai_flow.common.added_photo',
                             args: [picked.name]))
                         : skipped
                             ? Text('ai_flow.common.skipped'.tr())
-                            : Text('ai_flow.guided_camera.guide'.tr()),
+                            : Text(_getShotDesc(shotInfo)),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

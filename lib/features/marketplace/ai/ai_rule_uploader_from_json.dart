@@ -30,43 +30,19 @@ class AiRuleUploaderFromJson {
 
       final docRef = col.doc(docId);
 
-      // [Fix] JSON(camelCase) -> Firestore(snake_case) 변환
-      // Transform suggestedShots inner keys (camelCase) -> snake_case expected by the model
-      final rawShots = (r['suggestedShots'] as Map<String, dynamic>?) ?? {};
-      final Map<String, dynamic> transformedShots = {};
-      rawShots.forEach((shotKey, shotValue) {
-        if (shotValue is Map<String, dynamic>) {
-          transformedShots[shotKey] = {
-            'name_ko': shotValue['nameKo'] ?? shotValue['name_ko'] ?? '',
-            'name_en': shotValue['nameEn'] ??
-                shotValue['name_en'] ??
-                '', // [Fix] nameEn 읽기
-            'desc_ko': shotValue['descKo'] ?? shotValue['desc_ko'] ?? '',
-            'name_id': shotValue['nameId'] ??
-                shotValue['name_id'] ??
-                shotValue['nameKo'] ??
-                '',
-            'desc_id': shotValue['descId'] ?? shotValue['desc_id'] ?? '',
-            'desc_en': shotValue['descEn'] ??
-                shotValue['desc_en'] ??
-                '', // [Fix] descEn 읽기
-          };
-        }
-      });
-
+      // [Fix] 생성기(JS)가 이미 snake_case로 생성하므로, 변환 로직 제거
       final jsonMap = {
         'id': r['id'], // 'id'는 Firestore 문서 ID이므로 snake_case 불필요
-        'name_ko': r['nameKo'],
-        'name_en':
-            r['nameEn'] ?? r['name_en'] ?? r['nameKo'] ?? '', // [Fix] nameEn 읽기
-        'name_id': r['nameId'],
+        'name_ko': r['nameKo'] ?? '',
+        'name_en': r['nameEn'] ?? '',
+        'name_id': r['nameId'] ?? '',
         'is_ai_verification_supported': r['isAiVerificationSupported'],
         'min_gallery_photos': r['minGalleryPhotos'],
-        'suggested_shots': transformedShots, // 'suggested_shots' (snake_case)
-        'initial_analysis_prompt_template': r[
-            'initialAnalysisPromptTemplate'], // 'initial_analysis_prompt_template' (snake_case)
-        'report_template_prompt':
-            r['reportTemplatePrompt'], // 'report_template_prompt' (snake_case)
+        // 생성기에서 이미 snake_case로 제공된 값을 그대로 사용
+        'suggested_shots': r['suggested_shots'] ?? {},
+        'initial_analysis_prompt_template':
+            r['initial_analysis_prompt_template'] ?? '',
+        'report_template_prompt': r['report_template_prompt'] ?? '',
       };
 
       batch.set(docRef, jsonMap);

@@ -199,7 +199,8 @@
       "noPhoto": "Please add at least one photo.",
       "noCategory": "Please select a category.",
       "loginRequired": "Login is required.",
-      "userNotFound": "User information could not be found."
+      "userNotFound": "User information could not be found.",
+      "aiReserved": "This product is locked by an AI Safe Reservation. The buyer must complete or cancel the takeover before the status can be changed."
     },
     "condition": {
       "label": "Condition",
@@ -214,10 +215,13 @@
       "success": "Reservation completed. Please arrange a meeting with the seller."
     },
     "status": {
+      "label": "Product Status",
+      "selling": "Selling",
       "reserved": "Reserved",
       "sold": "Sold"
     },
     "ai": {
+      "reactivated": "AI verification reactivated.",
       "cancel_confirm": "Cancel AI verification",
       "cancel_limit": "AI verification can only be canceled once per product. Re-requesting AI verification may incur charges.",
       "cancel_ack_charge": "I understand I may be charged.",
@@ -292,8 +296,8 @@
       "back_button": "Back"
     },
     "guided_camera": {
-      "title": "AI guidance: missing evidence",
-      "guide": "To improve trust, please add suggested photos for the items below.",
+      "title": "Capture for product detail info",
+      "guide": "To improve product detail information, please add suggested photos for the items below.",
       "location_mismatch_error": "The photo’s location doesn’t match your current location. Please shoot at the same place.",
       "location_permission_error": "Location permission denied. Please enable it in settings.",
       "no_location_data_error": "No location data found in the photo. Please enable location tags in your camera settings.",
@@ -320,9 +324,9 @@
       "fail": "fail"
     },
     "evidence": {
-      "all_shots_required": "all shots required",
-      "title": "title",
-      "submit_button": "submit button"
+      "all_shots_required": "All shots are required for product detail information.",
+      "title": "Collect for product detail info",
+      "submit_button": "Submit for verification"
     },
     "error": {
       "report_generation": "report generation"
@@ -356,7 +360,22 @@
       "friends": "Friends"
     },
     "friendRequests": "Received Friend Requests",
-    "sentFriendRequests": "Sent Requests"
+    "sentFriendRequests": "Sent Requests",
+    "products": {
+      "empty": "No products listed.",
+      "detailsTitle": "Product details",
+      "editButton": "Edit product",
+      "deleteConfirm": "Are you sure you want to delete this product? This action cannot be undone.",
+      "deleteSuccess": "Product deleted.",
+      "deleteFail": "Failed to delete product: {error}"
+    },
+    "postList": {
+      "empty": "No posts yet.",
+      "writeButton": "Write"
+    },
+    "friendList": {
+      "noFriends": "You have no friends yet. Try adding some."
+    }
   },
   "profileView": {
     "title": "Profile",
@@ -1689,6 +1708,15 @@
       "originalPostNotFound": "Original post not found.",
       "couldNotOpenOriginalPost": "Could not open original post."
     }
+    ,
+    "reset": {
+      "confirmTitle": "Reset AI cancel counts",
+      "confirmContent": "Force-reset all products' AI cancel counts (aiCancelCount) to 0. (Restores free tier once)\n\nThis action cannot be undone. Continue?",
+      "execute": "Execute reset",
+      "noTargets": "Success: No products to reset.",
+      "success": "Success: {count} products were reset to 0.",
+      "fail": "Failed: {error}"
+    }
   },
   "tags": {
     "local_news": {
@@ -1793,6 +1821,11 @@
     "chatRoomTitle": "chatRoomTitle",
     "emptyFeed": "emptyFeed",
     "chatRoomCreated": "chatRoomCreated"
+  },
+  "language": {
+    "id": "Bahasa Indonesia",
+    "ko": "Korean",
+    "en": "English"
   },
   "location_setting_error": "location setting error",
   "signup_fail_required": "signup fail required",

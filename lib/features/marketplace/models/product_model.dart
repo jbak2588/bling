@@ -85,6 +85,7 @@ class ProductModel {
 
   final Timestamp createdAt;
   final Timestamp updatedAt;
+  final Timestamp? userUpdatedAt; // [Fix] '끌어올리기' 정렬 기준
   final bool isNew; // <-- 신품 여부 구분을 위한 필드 추가
 
   ProductModel({
@@ -113,6 +114,7 @@ class ProductModel {
     this.viewsCount = 0,
     required this.createdAt,
     required this.updatedAt,
+    this.userUpdatedAt, // [Fix]
     this.isAiVerified = false,
     this.aiVerificationStatus = 'none',
     this.aiReport,
@@ -158,6 +160,9 @@ class ProductModel {
       viewsCount: data['viewsCount'] ?? 0,
       createdAt: data['createdAt'] ?? Timestamp.now(),
       updatedAt: data['updatedAt'] ?? Timestamp.now(),
+      // [Fix] userUpdatedAt이 없으면 createdAt으로 대체 (오래된 데이터 호환)
+      userUpdatedAt:
+          data['userUpdatedAt'] ?? data['createdAt'] ?? Timestamp.now(),
       // ✅ [핵심 수정] AI 관련 필드들을 안전하게 불러옵니다.
       isAiVerified: data['isAiVerified'] ?? false,
       aiVerificationStatus: data['aiVerificationStatus'] ?? 'none',
@@ -202,6 +207,7 @@ class ProductModel {
       'viewsCount': viewsCount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'userUpdatedAt': userUpdatedAt, // [Fix]
       'isAiVerified': isAiVerified,
       'aiVerificationStatus': aiVerificationStatus,
       'aiReport': aiReport,
@@ -238,6 +244,7 @@ class ProductModel {
     int? viewsCount,
     Timestamp? createdAt,
     Timestamp? updatedAt,
+    Timestamp? userUpdatedAt,
     bool? isAiVerified,
     String? aiVerificationStatus,
     Map<String, dynamic>? aiReport,
@@ -272,6 +279,7 @@ class ProductModel {
       viewsCount: viewsCount ?? this.viewsCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      userUpdatedAt: userUpdatedAt ?? this.userUpdatedAt, // [Fix]
       isAiVerified: isAiVerified ?? this.isAiVerified,
       aiVerificationStatus: aiVerificationStatus ?? this.aiVerificationStatus,
       aiReport: aiReport ?? this.aiReport,

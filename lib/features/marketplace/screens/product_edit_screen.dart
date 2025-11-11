@@ -65,6 +65,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   List<String> _existingImageUrls = [];
   final List<XFile> _images = [];
   bool _isLoading = false;
+  String _status = 'selling'; // [Fix] Add status state variable
   Category? _selectedCategory;
   String _condition = 'used';
 
@@ -94,7 +95,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     _isNegotiable = widget.product.negotiable;
     _existingImageUrls = List<String>.from(widget.product.imageUrls);
 
-    // [Fix] Dropdown 크래시 방어 코드 (Copilot 제안)
+    // [Fix] Dropdown 크래시 방어 코드 (작업 32 적용)
     final dbCondition = widget.product.condition;
     if (dbCondition == 'new' || dbCondition == 'used') {
       _condition = dbCondition;
@@ -103,6 +104,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
           "Warning: Invalid condition value '$dbCondition' for ${widget.product.id}. Defaulting to 'used'.");
       _condition = 'used'; // 오염된 값이면 'used'로 강제
     }
+    _status = widget.product.status; // [Fix] Initialize status
 
     // ✅ 기존 상품의 태그를 초기값으로 설정
     _tags = List<String>.from(widget.product.tags);
@@ -252,9 +254,11 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         'imageUrls': allImageUrls,
         'categoryId': _selectedCategory?.id ?? widget.product.categoryId,
         'condition': _condition,
+        'status': _status, // [Fix] Save the updated status
 
         'tags': _tags, // ✅ 수정된 태그를 업데이트 데이터에 포함 : 2025년 8월 30일
         'updatedAt': Timestamp.now(),
+        'userUpdatedAt': Timestamp.now(), // [Fix #40] 사용자가 직접 저장했으므로 '끌어올리기'
 
         // ✅ 구버전 address 대신, 사용자의 최신 위치 정보로 덮어씁니다.
         'locationName': userModel.locationName,
@@ -307,8 +311,11 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('오류: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('ai_flow.common.error'
+                  .tr(namedArgs: {'error': e.toString()}))),
+        );
       }
     } finally {
       if (mounted) {
@@ -659,6 +666,39 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                       setState(() => _condition = value ?? 'used'),
                 ),
                 const SizedBox(height: 16),
+                // [Fix] Re-add the Status selection dropdown
+                DropdownButtonFormField<String>(
+                  initialValue: _status,
+                  decoration: InputDecoration(
+                    labelText: 'marketplace.status.label'.tr(),
+                    // [Fix] AI 안심 예약으로 예약된 경우, 비활성화하고 안내 문구 표시
+                    helperText:
+                        (widget.product.isAiVerified && _status == 'reserved')
+                            ? 'marketplace.errors.aiReserved'.tr()
+                            : null,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'selling',
+                      child: Text('marketplace.status.selling'.tr()),
+                    ),
+                    DropdownMenuItem(
+                      value: 'reserved',
+                      child: Text('marketplace.status.reserved'.tr()),
+                    ),
+                    DropdownMenuItem(
+                      value: 'sold',
+                      child: Text('marketplace.status.sold'.tr()),
+                    ),
+                  ],
+                  // [Fix] AI 안심 예약으로 예약된 상품은 판매자가 상태 변경 불가
+                  onChanged: (widget.product.isAiVerified &&
+                          _status == 'reserved')
+                      ? null // AI에 의해 예약된 경우 비활성화
+                      : (value) => setState(() => _status = value ?? 'selling'),
+                ),
+
+                const SizedBox(height: 16),
                 CustomTagInputField(
                   initialTags: _tags,
                   hintText: 'marketplace.registration.tagsHint'.tr(),
@@ -673,12 +713,12 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 if (!_isAiVerified) ...[
                   const Divider(height: 32),
                   Text(
-                    '🤖 AI 검수로 신뢰도 높이기',
+                    'ai_flow.cta.title'.tr(),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'AI 검증 뱃지를 받아 구매자의 신뢰를 얻고 더 빨리 판매하세요.',
+                    'ai_flow.cta.subtitle'.tr(),
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
@@ -697,7 +737,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                             width: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('AI 검수 시작하기'),
+                        : Text('ai_flow.cta.start_button'.tr()),
                   ),
                 ] else ...[
                   const Divider(height: 32),

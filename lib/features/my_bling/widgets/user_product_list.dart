@@ -17,6 +17,7 @@ library;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../marketplace/models/product_model.dart';
 import '../../../core/models/user_model.dart';
@@ -31,7 +32,7 @@ class UserProductList extends StatelessWidget {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
 
     if (myUid == null) {
-      return const Center(child: Text("로그인이 필요합니다."));
+      return Center(child: Text('main.errors.loginRequired'.tr()));
     }
 
     // 1. 현재 사용자의 문서를 실시간으로 관찰합니다.
@@ -40,14 +41,14 @@ class UserProductList extends StatelessWidget {
           FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
       builder: (context, userSnapshot) {
         if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-          return const Center(child: Text("사용자 정보를 찾을 수 없습니다."));
+          return Center(child: Text('main.errors.userNotFound'.tr()));
         }
 
         final user = UserModel.fromFirestore(userSnapshot.data!);
         final productIds = user.productIds;
 
         if (productIds == null || productIds.isEmpty) {
-          return const Center(child: Text("판매중인 상품이 없습니다."));
+          return Center(child: Text('myBling.products.empty'.tr()));
         }
 
         // 2. 가져온 productIds 목록을 사용하여 'products' 컬렉션에서 여러 문서를 한번에 쿼리합니다.
@@ -62,12 +63,12 @@ class UserProductList extends StatelessWidget {
             }
             if (productsSnapshot.hasError) {
               return Center(
-                  child:
-                      Text("상품을 불러오는 중 오류가 발생했습니다: ${productsSnapshot.error}"));
+                  child: Text('myBling.products.loadErrorWithMsg'.tr(
+                      namedArgs: {'msg': productsSnapshot.error.toString()})));
             }
             if (!productsSnapshot.hasData ||
                 productsSnapshot.data!.docs.isEmpty) {
-              return const Center(child: Text("등록된 상품 정보를 찾을 수 없습니다."));
+              return Center(child: Text('myBling.products.noInfo'.tr()));
             }
 
             final products = productsSnapshot.data!.docs

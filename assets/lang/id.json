@@ -202,7 +202,8 @@
       "noPhoto": "Silakan tambahkan minimal 1 foto.",
       "noCategory": "Silakan pilih kategori.",
       "loginRequired": "Anda harus masuk.",
-      "userNotFound": "Informasi pengguna tidak ditemukan."
+      "userNotFound": "Informasi pengguna tidak ditemukan.",
+      "aiReserved": "Produk ini dikunci oleh Reservasi Aman AI. Pembeli harus menyelesaikan atau membatalkan pengambilan sebelum status dapat diubah."
     },
     "condition": {
       "label": "Kondisi",
@@ -217,6 +218,8 @@
       "success": "Reservasi berhasil. Silakan atur janji dengan penjual."
     },
     "status": {
+      "label": "Status Produk",
+      "selling": "Dijual",
       "reserved": "Dipesan",
       "sold": "Terjual"
     },
@@ -287,10 +290,10 @@
       "back_button": "Kembali"
     },
     "guided_camera": {
-      "title": "Foto Terpandu AI (3/3)",
+      "title": "Ambil untuk detail produk",
       "location_error": "Lokasi foto tidak cocok dengan lokasi Anda saat ini. Harap ambil foto di lokasi barang.",
       "next_button": "Minta Analisis Akhir",
-      "guide": "To improve trust, please add suggested photos for the items below."
+      "guide": "Untuk memperkaya informasi detail produk, silakan tambahkan foto yang disarankan untuk item di bawah."
     },
     "final_report": {
       "title": "Tinjauan Iklan oleh AI",
@@ -312,9 +315,9 @@
       "skipped_items": "Skipped evidence items"
     },
     "evidence": {
-      "all_shots_required": "all shots required",
-      "title": "title",
-      "submit_button": "submit button"
+      "all_shots_required": "Semua bidikan diperlukan untuk informasi detail produk.",
+      "title": "Kumpulkan untuk detail produk",
+      "submit_button": "Kirim untuk verifikasi"
     },
     "error": {
       "report_generation": "report generation"
@@ -346,6 +349,7 @@
       "followers": "Pengikut",
       "neighbors": "Tetangga",
       "ai": {
+        "reactivated": "Verifikasi AI telah diaktifkan kembali.",
         "cancel_confirm": "Batalkan verifikasi AI",
         "cancel_limit": "Verifikasi AI hanya dapat dibatalkan satu kali per produk. Meminta verifikasi AI ulang dapat dikenakan biaya.",
         "cancel_ack_charge": "Saya mengerti saya mungkin akan dikenai biaya.",
@@ -361,7 +365,22 @@
       "friends": "Teman"
     },
     "friendRequests": "Permintaan Pertemanan",
-    "sentFriendRequests": "Permintaan Terkirim"
+    "sentFriendRequests": "Permintaan Terkirim",
+    "products": {
+      "empty": "Belum ada produk yang terdaftar.",
+      "detailsTitle": "Rincian produk",
+      "editButton": "Sunting produk",
+      "deleteConfirm": "Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.",
+      "deleteSuccess": "Produk telah dihapus.",
+      "deleteFail": "Gagal menghapus produk: {error}"
+    },
+    "postList": {
+      "empty": "Belum ada postingan.",
+      "writeButton": "Tulis"
+    },
+    "friendList": {
+      "noFriends": "Anda belum memiliki teman. Coba tambahkan beberapa."
+    }
   },
   "profileView": {
     "title": "Profil",
@@ -1694,6 +1713,15 @@
       "originalPostNotFound": "Postingan asli tidak ditemukan.",
       "couldNotOpenOriginalPost": "Tidak dapat membuka postingan asli."
     }
+    ,
+    "reset": {
+      "confirmTitle": "Reset jumlah pembatalan AI",
+      "confirmContent": "Mengatur ulang semua produk sehingga AI cancel count (aiCancelCount) menjadi 0. (Mengembalikan free tier 1 kali)\n\nTindakan ini tidak dapat dibatalkan. Lanjutkan?",
+      "execute": "Jalankan reset",
+      "noTargets": "Berhasil: Tidak ada produk untuk di-reset.",
+      "success": "Berhasil: {count} produk telah di-reset menjadi 0.",
+      "fail": "Gagal: {error}"
+    }
   },
   "tags": {
     "local_news": {
@@ -1827,6 +1855,11 @@
       "comingSoon": "Segera hadir"
     },
     "results": "results"
+  },
+  "language": {
+    "id": "Bahasa Indonesia",
+    "ko": "Korean",
+    "en": "English"
   },
   "location_setting_error": "location setting error",
   "signup_fail_required": "signup fail required",

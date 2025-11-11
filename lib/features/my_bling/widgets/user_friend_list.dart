@@ -14,12 +14,12 @@
 /// 4. 활동 내역, KPI 기반 추천/분석 기능 추가 권장.
 library;
 
-
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 
 class UserFriendList extends StatelessWidget {
@@ -28,7 +28,9 @@ class UserFriendList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
-    if (myUid == null) return const Center(child: Text("Please log in."));
+    if (myUid == null) {
+      return Center(child: Text('main.errors.loginRequired'.tr()));
+    }
 
     return StreamBuilder<DocumentSnapshot>(
       // 1. 내 유저 정보를 실시간으로 감시
@@ -36,7 +38,7 @@ class UserFriendList extends StatelessWidget {
           FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return const Center(child: Text("친구 목록을 불러올 수 없습니다."));
+          return Center(child: Text('myBling.friends.loadError'.tr()));
         }
         final user = UserModel.fromFirestore(
             snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
@@ -51,7 +53,7 @@ class UserFriendList extends StatelessWidget {
         debugPrint('--------------------------');
 
         if (friendUids.isEmpty) {
-          return const Center(child: Text("아직 친구가 없습니다."));
+          return Center(child: Text('myBling.friends.empty'.tr()));
         }
 
         // 2. 친구 UID 목록을 사용하여 각 친구의 상세 정보를 가져옴
@@ -66,7 +68,9 @@ class UserFriendList extends StatelessWidget {
                   .get(),
               builder: (context, friendSnapshot) {
                 if (!friendSnapshot.hasData || !friendSnapshot.data!.exists) {
-                  return ListTile(title: Text("$friendUid 사용자를 찾을 수 없음"));
+                  return ListTile(
+                      title: Text('myBling.friends.userNotFound'
+                          .tr(namedArgs: {'uid': friendUid})));
                 }
                 final friend = UserModel.fromFirestore(friendSnapshot.data!
                     as DocumentSnapshot<Map<String, dynamic>>);
@@ -90,7 +94,7 @@ class UserFriendList extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(friend.bio ?? '',
                         maxLines: 1, overflow: TextOverflow.ellipsis),
-                        // V V V --- [수정] ListTile의 onTap 이벤트를 추가합니다 --- V V V
+                    // V V V --- [수정] ListTile의 onTap 이벤트를 추가합니다 --- V V V
                     onTap: () {
                       // 탭하면 친구의 상세 프로필 화면으로 이동합니다.
                       Navigator.of(context).push(

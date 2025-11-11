@@ -6,23 +6,37 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class RequiredShot {
   final String nameKo;
   final String descKo;
+  final String nameEn; // [Fix] Add English fields
+  final String descEn; // [Fix] Add English fields
   final String nameId;
   final String descId;
 
   RequiredShot({
     required this.nameKo,
     required this.descKo,
+    this.nameEn = '',
+    this.descEn = '',
     this.nameId = '',
     this.descId = '',
   });
 
   // Firestore Map -> RequiredShot 객체 변환
   factory RequiredShot.fromMap(Map<String, dynamic> map) {
+    String pick(List<String> keys) {
+      for (final k in keys) {
+        final v = map[k];
+        if (v is String && v.trim().isNotEmpty) return v.trim();
+      }
+      return '';
+    }
+
     return RequiredShot(
-      nameKo: map['name_ko'] ?? '',
-      descKo: map['desc_ko'] ?? '',
-      nameId: map['name_id'] ?? '',
-      descId: map['desc_id'] ?? '',
+      nameKo: pick(['name_ko', 'nameKo']),
+      descKo: pick(['desc_ko', 'descKo']),
+      nameEn: pick(['name_en', 'nameEn']),
+      descEn: pick(['desc_en', 'descEn']),
+      nameId: pick(['name_id', 'nameId']),
+      descId: pick(['desc_id', 'descId']),
     );
   }
 
@@ -31,6 +45,8 @@ class RequiredShot {
     return {
       'name_ko': nameKo,
       'desc_ko': descKo,
+      'name_en': nameEn,
+      'desc_en': descEn,
       'name_id': nameId,
       'desc_id': descId,
     };

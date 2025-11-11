@@ -112,6 +112,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _totalUnreadCount = 0;
   // ✅ [게시판] 동네 게시판 활성화 상태
   bool _isKelurahanBoardActive = false;
+  // 관리자 작업 로딩 상태
+  bool _isAdminLoading = false;
+  // AI 규칙 업로드 로딩 상태
+  bool _isRulesLoading = false;
 
   // ✅ [신규] 시나리오 2 (피드 내 검색 활성화)를 위한 Notifier
   final ValueNotifier<AppSection?> _searchActivationNotifier =
@@ -486,7 +490,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     if (user == null) {
       // 만약 이 순간에 로그인이 풀려있다면, 사용자에게 알리고 즉시 종료합니다.
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로그인이 필요합니다. 다시 시도해주세요.')),
+        SnackBar(content: Text('main.errors.loginRequiredRetry'.tr())),
       );
       return;
     }
@@ -557,7 +561,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _showGlobalCreateSheet() {
     if (_userModel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로그인이 필요합니다. 다시 시도해주세요.')),
+        SnackBar(content: Text('main.errors.loginRequiredRetry'.tr())),
       );
       return;
     }
@@ -847,6 +851,79 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     }
     // 3. 'kab' 값도 없으면, 기존의 전체 주소(_currentAddress)를 축약해서 표시
     return AddressFormatter.toSingkatan(_currentAddress);
+  }
+
+  /// [Fix] AI 검수 횟수 초기화 확인 다이얼로그 (누락된 함수 호출)
+  void _confirmResetAiCounts() async {
+    Navigator.of(context).pop(); // Drawer 닫기
+
+    final bool? confirmed = await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('admin.reset.confirmTitle'.tr()),
+        content: Text('admin.reset.confirmContent'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('common.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('admin.reset.execute'.tr(),
+                style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      _resetAiCancelCounts();
+    }
+  }
+
+  /// [Fix] AI 검수 횟수 초기화 함수 호출
+  Future<void> _resetAiCancelCounts() async {
+    // [Fix] 20여개 문서이므로 Cloud Function 대신 Client-side Batch Write 실행
+    setState(() => _isAdminLoading = true);
+    try {
+      final db = FirebaseFirestore.instance;
+      final productsRef = db.collection('products');
+
+      // 1. 대상 문서 조회
+      final snapshot =
+          await productsRef.where('aiCancelCount', isGreaterThan: 0).get();
+
+      if (snapshot.docs.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('admin.reset.noTargets'.tr())),
+        );
+        if (mounted) setState(() => _isAdminLoading = false);
+        return;
+      }
+
+      // 2. 배치(Batch) 작업 생성
+      final batch = db.batch();
+      for (final doc in snapshot.docs) {
+        batch.update(doc.reference, {'aiCancelCount': 0});
+      }
+
+      // 3. 배치 커밋
+      await batch.commit();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('admin.reset.success'
+                .tr(namedArgs: {'count': snapshot.docs.length.toString()}))),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                'admin.reset.fail'.tr(namedArgs: {'error': e.toString()}))),
+      );
+    } finally {
+      if (mounted) setState(() => _isAdminLoading = false);
+    }
   }
 
   void _navigateToPage(Widget page, String titleKey) {
@@ -1159,28 +1236,69 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     },
                   ),
 
-                  // ▼▼▼▼▼ 여기에 아래 코드를 추가하세요 ▼▼▼▼▼
-                  ListTile(
-                    leading: const Icon(Icons.cloud_upload_outlined),
-                    title: const Text('AI 검수 규칙 업로드 (초기화)'),
-                    onTap: () async {
-                      Navigator.pop(context); // Drawer를 먼저 닫습니다.
+                  // [Fix] 'Upload AI Rules' 버튼이 _isRulesLoading을 사용하도록 수정
+                  if (_isRulesLoading)
+                    const ListTile(
+                      leading: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      title: Text('Uploading AI Rules...'),
+                    )
+                  else
+                    ListTile(
+                      leading: const Icon(Icons.cloud_upload_outlined),
+                      title: const Text('Upload AI Rules (V2)'),
+                      enabled: !_isAdminLoading, // 다른 관리자 작업 중 비활성화
+                      onTap: () async {
+                        if (_isRulesLoading) return;
+                        Navigator.pop(context); // Drawer를 먼저 닫습니다.
+                        setState(() => _isRulesLoading = true);
+                        try {
+                          final uploader = AiRuleUploaderFromJson(
+                              FirebaseFirestore.instance);
+                          await uploader.uploadAll();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      'V2 AI Rules (from JSON) successfully uploaded!')),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    'AI Rules Upload Error: ${e.toString()}')),
+                          );
+                        } finally {
+                          if (mounted) setState(() => _isRulesLoading = false);
+                        }
+                      },
+                    ),
 
-                      // Uploader 실행 (JSON 기반 업로드기로 교체)
-                      final uploader =
-                          AiRuleUploaderFromJson(FirebaseFirestore.instance);
-                      await uploader.uploadAll();
-
-                      // 작업 완료 후 사용자에게 피드백 표시
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text(
-                                  'V2 AI Rules (from JSON) successfully uploaded!')),
-                        );
-                      }
-                    },
-                  ),
+                  // [Fix] 누락된 'AI Cancel Count 초기화' 메뉴 추가
+                  if (_isAdminLoading)
+                    const ListTile(
+                      leading: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      title: Text('Initializing AI Counts...'),
+                    )
+                  else
+                    ListTile(
+                      leading: Icon(
+                        Icons.history_toggle_off,
+                        color: _isRulesLoading ? Colors.grey : Colors.orange,
+                      ),
+                      title: const Text('ADMIN: Reset AI Cancel Counts'),
+                      enabled: !_isRulesLoading, // 다른 관리자 작업 중 비활성화
+                      onTap:
+                          _confirmResetAiCounts, // [Fix] _resetAiCancelCounts -> _confirmResetAiCounts
+                    ),
                 ],
                 const Divider(),
                 ListTile(
@@ -1228,18 +1346,18 @@ class _LanguageMenu extends StatelessWidget {
           if (el != null) el.setLocale(loc);
         });
       },
-      itemBuilder: (context) => const [
+      itemBuilder: (context) => [
         PopupMenuItem(
           value: Locale('id'),
-          child: Text('Bahasa Indonesia'),
+          child: Text('language.id'.tr()),
         ),
         PopupMenuItem(
           value: Locale('ko'),
-          child: Text('한국어'),
+          child: Text('language.ko'.tr()),
         ),
         PopupMenuItem(
           value: Locale('en'),
-          child: Text('English'),
+          child: Text('language.en'.tr()),
         ),
       ],
       // 아이콘 + 현재 코드(ID/KO/EN)

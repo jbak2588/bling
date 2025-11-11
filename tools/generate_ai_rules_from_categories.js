@@ -257,7 +257,11 @@ function mapToGroup(parentNameEn, subKey, subNameEn) {
 
 // -------------------- 3) 프롬프트 템플릿 --------------------
 const INITIAL_PROMPT = `
-Analyze the provided images and return only a JSON object with the predicted item name. Do not include any other text. The JSON format must be: {"predicted_item_name": "PREDICTED_NAME"}`.trim();
+You are an expert product inspector for a second-hand marketplace.
+Analyze ONLY the provided images to help determine evidence completeness for the item.
+Respond in JSON ONLY. Do not include any text outside JSON.
+Do not invent details that are not visible in the images.
+You will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.`.trim();
 
 const REPORT_PROMPT_GENERIC_ID = `
 You are an expert product inspector for a marketplace. Output JSON in Indonesian only.
@@ -324,9 +328,10 @@ function buildRule(id, nameKo, nameId, nameEn, parentNameEn, subKey, subNameEn) 
     nameEn, // [Fix] nameEn 필드 추가
     isAiVerificationSupported: true,
     minGalleryPhotos: 1,
-    suggestedShots,
-    initialAnalysisPromptTemplate: INITIAL_PROMPT,
-    reportTemplatePrompt: reportPrompt,
+    // [Fix] Firestore/백엔드 호환을 위해 snake_case로 저장
+    suggested_shots: suggestedShots,
+    initial_analysis_prompt_template: INITIAL_PROMPT,
+    report_template_prompt: reportPrompt,
   };
 }
 

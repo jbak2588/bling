@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../core/models/user_model.dart';
 
@@ -151,7 +152,7 @@ class _DataFixScreenState extends State<DataFixScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('데이터 보정 스크립트'),
+        title: Text('admin.dataFix.title'.tr()),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -166,11 +167,11 @@ class _DataFixScreenState extends State<DataFixScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 16)),
               child: _isProcessing
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('데이터 보정 시작 (주의: 되돌릴 수 없음)'),
+                  : Text('admin.dataFix.startWarning'.tr()),
             ),
             const SizedBox(height: 24),
-            const Text(
-              '실행 로그:',
+            Text(
+              'admin.dataFix.logsLabel'.tr(),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const Divider(),

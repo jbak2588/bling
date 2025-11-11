@@ -461,10 +461,12 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
       throw new HttpsError("not-found", `Rule with ID ${ruleId} not found.`);
     }
     // [수정] 데이터베이스 필드 불일치에 대응하기 위한 방어 코드
-    // initial_analysis_prompt_template 필드를 우선 사용하고, 없으면 report_template_prompt를 사용합니다. (하위 호환성)
+    // initial_analysis_prompt_template 필드를 우선 사용합니다.
+    // 2. 만약 이 값이 없거나(null) 비어있으면(""), 그때서야 report_template_prompt로 폴백(Fallback)합니다.
     const ruleData = ruleDoc.data();
     const promptTemplate =
-      ruleData.initial_analysis_prompt_template ||
+      // [Fix] (ruleData.initial_analysis_prompt_template || "").trim() 추가 (제안 2)
+      (ruleData.initial_analysis_prompt_template || "").trim() ||
       ruleData.report_template_prompt;
     if (!promptTemplate) {
       throw new HttpsError(

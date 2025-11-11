@@ -216,6 +216,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         isAiVerified: false,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
+        userUpdatedAt: Timestamp.now(), // [Fix #40] 끌어올리기용 타임스탬프 설정
         isNew: true, // <-- 이 부분을 추가하여 '신품'임을 명시합니다.
       );
 

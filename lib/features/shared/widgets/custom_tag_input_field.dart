@@ -162,7 +162,9 @@ class _CustomTagInputFieldState extends State<CustomTagInputField> {
     }
     if (_tags.length >= widget.maxTags) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('최대 ${widget.maxTags}개까지 선택할 수 있어요.')),
+        SnackBar(
+            content: Text('shared.tagInput.maxSelection'
+                .tr(namedArgs: {'max': widget.maxTags.toString()}))),
       );
       _textController.clear();
       return;
