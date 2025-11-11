@@ -85,6 +85,31 @@
  * 트랜잭션으로 'metrics.last30dPosts' 업데이트.
  * - [룰 완화] 'ACTIVATION_THRESHOLD = 10'을 적용, 10건 도달 시 'features.hasGroupChat'을 true로 설정.
  * ============================================================================
+ * [V2.1/V2.2 주요 변경 사항 (Job 1-46)] 11월 09일 - 11월 11일
+ * 1. initialproductanalysis (1차 분석):
+ * - V1의 '이름 예측' 프롬프트와 'V2.1 증거 제안' 지시를 결합하여 호출합니다.
+ * - (Fix) V1 프롬프트(initial_analysis_prompt_template)가 충돌을 일으키지 않도록
+ * '스켈레톤 프롬프트'로 교체되었습니다. (Job 44)
+ * - (Fix) 카테고리 힌트(categoryName)를 받아 '신발' 등에 맞는 전용 추천샷을
+ * 제공하도록 수정되었습니다. (Job 34)
+ *
+ * 2. generatefinalreport (2차 분석):
+ * - (Fix) AI가 'notes_for_buyer' 필드를 누락하지 않도록 프롬프트 스키마에
+ * 필수 항목으로 포함시켰습니다. (Job 34)
+ * - (Fix) AI 응답 파싱 시 'notes_for_buyer'가 null이거나 누락되어도
+ * 안전하게 빈 문자열("")을 반환하도록 정제 로직을 추가했습니다. (Job 35)
+ *
+ * 3. verifyProductOnSite (신규, V2.2):
+ * - AI 인수를 위한 2단계 '현장 동일성 검증' 함수입니다.
+ * - 원본 AI 리포트/이미지와 구매자가 현장에서 촬영한 새 이미지를 비교하여
+ * 'match: true/false' 결과를 반환합니다. (Job 5)
+ *
+ * 4. admin_initializeAiCancelCounts (신규, 관리자):
+ * - 필드 테스트 지원을 위해, 모든 상품의 'aiCancelCount'를 0으로
+ * 초기화하는 관리자 전용 함수입니다.
+ * - (Fix) 문서 20개 내외이므로 Cloud Function 대신 클라이언트(앱)에서
+ * 직접 Batch Write 하도록 로직이 이전되었습니다. (Job 39)
+ * ============================================================================
  */
 // (파일 내용...)
 const { onCall, HttpsError } = require("firebase-functions/v2/https");

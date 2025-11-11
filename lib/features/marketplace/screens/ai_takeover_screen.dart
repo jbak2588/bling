@@ -1,4 +1,23 @@
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Marketplace (AI 인수 V2.2)
+/// File          : lib/features/marketplace/screens/ai_takeover_screen.dart
+/// Purpose       : AI 인수 2단계: '현장 동일성 검증' UI
+///
+/// [기능 요약 (Job 5, 6)]
+/// 1. 이 화면은 'AI 안심 예약'을 완료한 구매자만 진입할 수 있습니다.
+/// 2. `AiReportViewer`를 통해 판매자가 등록한 '원본 AI 보고서'를 표시합니다.
+/// 3. 구매자는 현장에서 실제 상품의 사진을 촬영합니다 (`_pickPhotos`).
+/// 4. 'AI 동일성 검증 시작' 버튼을 누르면:
+///    - 현장 사진을 업로드하고 (`_startOnSiteVerification`)
+///    - 백엔드 `verifyProductOnSite` 함수를 호출합니다.
+/// 5. AI의 `match: true/false` 결과에 따라 다이얼로그를 표시합니다.
+///    - [Match] -> `_finalizeTakeover` (product_repository.completeTakeover 호출)
+///    - [No Match] -> `_cancelReservation` (product_repository.cancelReservation 호출)
+/// ============================================================================
 // lib/features/marketplace/screens/ai_takeover_screen.dart
+library;
+
 import 'dart:io';
 import 'package:bling_app/core/utils/upload_helpers.dart';
 import 'package:bling_app/features/marketplace/data/product_repository.dart';

@@ -18,6 +18,26 @@
 /// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
 /// Source Docs   : docs/index/011 Marketplace 모듈.md; docs/index/7 Marketplace.md
 /// ============================================================================
+/// [V2.2 주요 변경 사항 (Job 8, 12, 13, 27, 29, 40)]
+/// 1. [개편안 2] 사용자/AI 설명 동시 노출 (Job 27, 33):
+///    - `_showAiReport` 토글 버튼과 로직을 제거했습니다.
+///    - 이제 사용자가 작성한 `product.description`이 항상 표시되고,
+///    - `isAiVerified`가 true이면 `AiReportViewer`가 그 하단에 함께 노출됩니다.
+///
+/// 2. AI 인수 (V2.2):
+///    - 하단 앱바(BottomAppBar)의 버튼 로직을 재구성했습니다.
+///    - (Fix) 'AI 안심 예약' 버튼은 `floatingActionButton` (FAB)으로 이동하여
+///      하단 바 오버플로우를 해결했습니다. (Job 12)
+///    - (Fix) 'AI 안심 예약' 상태(`isReservedByMe`)일 때, '현장 인수' 버튼이
+///      표시되도록 수정했습니다. (Job 13)
+///
+/// 3. UI 버그 수정:
+///    - (Fix) `MiniMapView` 호출 시 `myLocationEnabled: false`를 명시하여
+///      80초간 앱이 멈추는(Jank) 현상을 해결했습니다. (Job 28, 29)
+///    - (Fix) 어두운 이미지 위에서 AppBar 아이콘이 보이도록
+///      `AppBarIcon` (공용 위젯)을 적용했습니다. (Job 13)
+/// ============================================================================
+///
 library;
 // 아래부터 실제 코드
 

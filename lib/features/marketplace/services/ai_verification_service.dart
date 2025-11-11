@@ -1,3 +1,27 @@
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Marketplace (AI 검수 V2.1)
+/// File          : lib/features/marketplace/services/ai_verification_service.dart
+/// Purpose       : AI 검수 시작, 1차 분석, 화면 분기를 담당하는 핵심 서비스
+///
+/// [V2.1/V2.2 주요 변경 사항 (Job 25, 33, 34, 44)]
+/// 1. startVerificationFlow (메인 함수):
+///    - [개편안 1] 무료/유료/재사용 로직을 수행합니다. (Job 25)
+///      - `isAiFreeTierUsed` (무료 티어) 확인.
+///      - 데이터(설명/이미지) 변경 여부를 `aiReportSourceDescription`과 비교.
+///      - 데이터가 동일하면 '보고서 재활성화', 다르면 '유료 재생성'을 안내 (TODO: PG연동).
+///    - 1차 분석(`initialproductanalysis`) 호출 시, '카테고리명' 힌트를 전달하여
+///      AI가 더 정확한 추천샷을 제안하도록 개선되었습니다. (Job 34)
+///    - [Fix #3] AI의 이름 예측(prediction)을 무시하고, 사용자의 원본 `productName`을
+///      신뢰하여 다음 화면으로 전달합니다. (데이터 오염 방지)
+///
+/// 2. 화면 분기 로직:
+///    - 1차 분석 결과 `missingKeys`가 비어있으면(예: 신발), `AiEvidenceSuggestionScreen`으로
+///      이동합니다. (작업 33에서 '빈 화면 스킵' 로직은 작업 34/35의 새 규칙 도입으로 대체됨)
+/// ============================================================================
+/// lib/features/marketplace/services/ai_verification_service.dart
+library;
+
 import 'dart:io';
 import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
 import 'package:bling_app/features/marketplace/screens/ai_evidence_suggestion_screen.dart';

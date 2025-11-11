@@ -1,3 +1,30 @@
+/// ============================================================================
+/// Bling DocHeader
+/// Module        : Marketplace
+/// File          : lib/features/marketplace/screens/ai_final_report_screen.dart
+/// Purpose       : AI가 생성한 최종 보고서를 폼에 채워넣고, 사용자가 검토 후
+///                 최종 상품(또는 경매)을 등록하는 화면입니다.
+///
+/// [V2.1/V2.2 주요 변경 사항 (Job 30, 32, 33)]
+/// 1. [CRITICAL FIX] 데이터 오염 방지:
+///    - 이 화면은 `_submitProductSale` 실행 시, 사용자의 원본 `description`과
+///      `condition` ('used'/'new') 필드가 AI의 분석 내용으로 덮어쓰기되는
+///      치명적인 버그가 있었습니다.
+///    - [Fix] `description` 필드에 `widget.userDescription` (원본 설명)을
+///      저장하도록 수정했습니다.
+///    - [Fix] `condition` 필드에 AI의 긴 텍스트 대신 'used' (고정값)를
+///      저장하도록 수정했습니다. (작업 31 크래시 해결)
+///    - [Fix] AI 요약본을 description에 강제 적용하던 `_applyAllSuggestions...`
+///      버튼 및 `initState` 호출을 제거했습니다.
+///
+/// 2. [개편안 1] 보고서 스냅샷 저장:
+///    - 상품 저장 시, `isAiFreeTierUsed: true`를 설정하고,
+///    - `aiReportSourceDescription` 및 `aiReportSourceImages` 필드에
+///      현재의 설명과 이미지 목록을 '스냅샷'으로 저장하여 '보고서 재사용' 로직을 지원합니다.
+/// ============================================================================
+///
+library;
+
 import 'dart:io';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
