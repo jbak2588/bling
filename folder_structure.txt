@@ -1,26 +1,3 @@
-functions-v2
-├── index.js
-├── node_modules
-│   ├── @eslint
-|...node_modules 하위 폴더 생략....
-├── package-lock.json
-└── package.json
-
-scripts
-├── audit_pom_shorts_urls.js
-├── categories_v2_design.js
-├── check_i18n.js
-├── clean_conditions.js
-├── list_added_i18n.js
-├── migrate_categories.js
-├── migrate_shorts_to_pom.js
-├── node_modules
-... node_modules 하위 폴더 생략....
-└── serviceAccountKey.json
-
-tools
-└── generate_ai_rules_from_categories.js
-
 assets
 ├── ai
 │   └── ai_rules_v2.json
@@ -37,13 +14,21 @@ assets
 │   ├── ico_pom.svg
 │   ├── ico_real_estate.svg
 │   ├── ico_secondhand.svg
-│   └── ico_store.svg
+│   ├── ico_store.svg
+│   └── ms
 ├── lang
 │   ├── en.json
 │   ├── id.json
 │   └── ko.json
 └── sounds
     └── send_sound.mp3
+
+
+functions-v2
+├── categories_sync.js
+├── index.js
+├── node_modules
+└── util_ai_rules.js
 
 lib
 ├── api_keys.dart
@@ -101,11 +86,20 @@ lib
 │   │   └── screens
 │   │       └── kelurahan_board_screen.dart
 │   ├── categories
+│   │   ├── constants
+│   │   │   └── category_icons.dart
+│   │   ├── data
+│   │   │   ├── category_admin_repository.dart
+│   │   │   ├── category_repository.dart
+│   │   │   └── firestore_category_repository.dart
 │   │   ├── domain
 │   │   │   └── category.dart
-│   │   └── screens
-│   │       ├── parent_category_screen.dart
-│   │       └── sub_category_screen.dart
+│   │   ├── screens
+│   │   │   ├── category_admin_screen.dart
+│   │   │   ├── parent_category_screen.dart
+│   │   │   └── sub_category_screen.dart
+│   │   └── services
+│   │       └── category_sync_service.dart
 │   ├── chat
 │   │   ├── data
 │   │   │   └── chat_service.dart
@@ -338,3 +332,26 @@ lib
 │           └── user_profile_screen.dart
 ├── firebase_options.dart
 └── main.dart
+
+scripts
+├── audit_pom_shorts_urls.js
+├── backfill_category_icons.js
+├── categories_v2_design.js
+├── check_design_icons.js
+├── check_i18n.js
+├── clean_conditions.js
+├── export_categories_v2_design.js
+├── fetch_ms_icons.js
+├── list_added_i18n.js
+├── migrate_categories.js
+├── migrate_shorts_to_pom.js
+├── migrate_v2_design_to_firestore.js
+├── node_modules
+├── package-lock.json
+├── package.json
+├── print_categories_structure.js
+├── rebuild_categories.js
+├── seed_category_icons.js
+└── serviceAccountKey.json
+tools
+└── generate_ai_rules_from_categories.js

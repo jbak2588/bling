@@ -41,6 +41,7 @@ class ParentCategoryScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
             .collection('categories_v2')
+            .where('isParent', isEqualTo: true)
             .orderBy('order')
             .snapshots(),
         builder: (context, snapshot) {
@@ -131,8 +132,9 @@ class SubCategoryScreen extends StatelessWidget {
       appBar: AppBar(title: Text(parentName)),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
-            .collection('categories')
-            .where('parentId', isEqualTo: parentId)
+            .collection('categories_v2')
+            .doc(parentId)
+            .collection('subCategories')
             .orderBy('order')
             .snapshots(),
         builder: (context, snapshot) {

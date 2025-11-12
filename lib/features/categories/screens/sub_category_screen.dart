@@ -11,11 +11,11 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../constants/category_icons.dart';
-import '../data/category_repository.dart';
-import '../data/firestore_category_repository.dart';
+// repository imports removed: using direct Firestore queries against categories_v2
 import '../domain/category.dart';
 
 class SubCategoryScreen extends StatelessWidget {
@@ -36,30 +36,37 @@ class SubCategoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CategoryRepository repo = FirestoreCategoryRepository();
     final parentTitle = _displayName(context, parent);
 
     return Scaffold(
       appBar: AppBar(title: Text(parentTitle)),
-      body: StreamBuilder<List<Category>>(
-        // parentId 기준으로 active == true, order 정렬
-        stream: repo.watchSubs(parent.id, activeOnly: true),
-        builder: (context, snap) {
-          if (snap.connectionState == ConnectionState.waiting) {
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('categories_v2')
+            .doc(parent.id)
+            .collection('subCategories')
+            .orderBy('order')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snap.hasError) {
+          if (snapshot.hasError) {
             return Center(
               child: Text(
                 'marketplace.error'
-                    .tr(namedArgs: {'error': snap.error.toString()}),
+                    .tr(namedArgs: {'error': snapshot.error.toString()}),
               ),
             );
           }
-          final items = snap.data ?? const <Category>[];
-          if (items.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(child: Text('category_empty'.tr()));
           }
+
+          final items = snapshot.data!.docs
+              .map((doc) => Category.fromFirestore(doc))
+              .toList()
+            ..sort((a, b) => a.order.compareTo(b.order));
 
           return ListView.separated(
             itemCount: items.length,

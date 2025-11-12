@@ -8,26 +8,27 @@ class FirestoreCategoryRepository implements CategoryRepository {
 
   CollectionReference<Map<String, dynamic>> get _parents =>
       _db.collection('categories_v2');
-  CollectionReference<Map<String, dynamic>> get _subs =>
-      _db.collection('categories');
+  // v2: subCategories는 각 부모 도큐먼트 하위 서브컬렉션으로 존재
+  CollectionReference<Map<String, dynamic>> _subsOf(String parentId) =>
+      _db.collection('categories_v2').doc(parentId).collection('subCategories');
 
   @override
   Stream<List<Category>> watchParents({bool activeOnly = true}) {
-    Query<Map<String, dynamic>> q = _parents.orderBy('order');
+    Query<Map<String, dynamic>> q = _parents.where('isParent', isEqualTo: true);
     if (activeOnly) q = q.where('active', isEqualTo: true);
-    return q
-        .snapshots()
-        .map((s) => s.docs.map(Category.fromFirestore).toList());
+    q = q.orderBy('order');
+    return q.snapshots().map(
+          (s) => s.docs.map((d) => Category.fromFirestore(d)).toList(),
+        );
   }
 
   @override
   Stream<List<Category>> watchSubs(String parentId, {bool activeOnly = true}) {
-    Query<Map<String, dynamic>> q =
-        _subs.where('parentId', isEqualTo: parentId).orderBy('order');
-    if (activeOnly) q = q.where('active', isEqualTo: true);
-    return q
-        .snapshots()
-        .map((s) => s.docs.map(Category.fromFirestore).toList());
+    final col = _subsOf(parentId);
+    final q = activeOnly ? col.where('active', isEqualTo: true) : col;
+    return q.orderBy('order').snapshots().map(
+          (s) => s.docs.map((d) => Category.fromFirestore(d)).toList(),
+        );
   }
 
   @override
@@ -42,7 +43,10 @@ class FirestoreCategoryRepository implements CategoryRepository {
 
   @override
   Future<void> upsertSub(String parentId, Category model) async {
-    await _subs.doc(model.id).set(model.toMap(), SetOptions(merge: true));
+    await _subsOf(parentId).doc(model.id).set(
+          model.toSubMap(),
+          SetOptions(merge: true),
+        );
   }
 
   @override
@@ -51,20 +55,24 @@ class FirestoreCategoryRepository implements CategoryRepository {
 
   @override
   Future<void> updateSubFields(
-          String parentId, String id, Map<String, dynamic> fields) =>
-      _subs.doc(id).update(fields);
+      String parentId, String id, Map<String, dynamic> data) async {
+    await _subsOf(parentId).doc(id).update(data);
+  }
 
   @override
-  Future<void> deleteSub(String parentId, String id) => _subs.doc(id).delete();
+  Future<void> deleteSub(String parentId, String id) async {
+    await _subsOf(parentId).doc(id).delete();
+  }
 
   @override
-  Future<void> deleteParentWithSubs(String id) async {
+  Future<void> deleteParentWithSubs(String parentId) async {
+    final parentRef = _parents.doc(parentId);
+    final subsSnap = await _subsOf(parentId).get();
     final batch = _db.batch();
-    batch.delete(_parents.doc(id));
-    final subs = await _subs.where('parentId', isEqualTo: id).get();
-    for (final d in subs.docs) {
+    for (final d in subsSnap.docs) {
       batch.delete(d.reference);
     }
+    batch.delete(parentRef);
     await batch.commit();
   }
 }

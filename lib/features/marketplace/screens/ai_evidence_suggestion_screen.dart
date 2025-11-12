@@ -4,6 +4,7 @@ import 'package:bling_app/features/marketplace/screens/ai_final_report_screen.da
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:bling_app/core/utils/upload_helpers.dart';
@@ -51,16 +52,50 @@ class _AiEvidenceSuggestionScreenState
   final Set<String> _skipped = {};
 
   Future<void> _pick(String key) async {
-    final XFile? img = await _picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 80, // [Fix] Warning #4: 품질 80%
-      maxWidth: 1024, // [Fix] Warning #4: 최대 너비 1024px
-    );
-    if (img != null) {
-      setState(() {
-        _addedPhotos[key] = img;
-        _skipped.remove(key);
-      });
+    try {
+      // Use camera-first flow. If permission is denied or user cancels,
+      // we handle PlatformException and offer a graceful fallback.
+      final XFile? img = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80, // [Fix] Warning #4: 품질 80%
+        maxWidth: 1024, // [Fix] Warning #4: 최대 너비 1024px
+      );
+      if (img != null) {
+        setState(() {
+          _addedPhotos[key] = img;
+          _skipped.remove(key);
+        });
+      }
+    } on PlatformException catch (e) {
+      // Permission denied or other platform-specific error. Offer gallery fallback.
+      debugPrint('Camera pick failed: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('ai_flow.guided_camera.camera_unavailable'.tr()),
+        action: SnackBarAction(
+          label: 'ai_flow.common.open_gallery'.tr(),
+          onPressed: () async {
+            try {
+              final XFile? img = await _picker.pickImage(
+                source: ImageSource.gallery,
+                imageQuality: 80,
+                maxWidth: 1024,
+              );
+              if (img != null && mounted) {
+                setState(() {
+                  _addedPhotos[key] = img;
+                  _skipped.remove(key);
+                });
+              }
+            } catch (e2) {
+              debugPrint('Gallery pick also failed: $e2');
+            }
+          },
+        ),
+      ));
+    } catch (e) {
+      // Generic catch: user canceled or other runtime error — treat as cancel.
+      debugPrint('Image pick cancelled/failed: $e');
     }
   }
 

@@ -577,11 +577,12 @@ class _CategoryAdminScreenState extends State<CategoryAdminScreen> {
 
           divider,
 
-          // --------- Subcategories ---------
+          // --------- Subcategories (v2) ---------
           Expanded(
             child: _selectedParentId == null
                 ? const Center(child: Text('왼쪽에서 부모 카테고리를 선택하세요.'))
                 : StreamBuilder<List<Category>>(
+                    // FINAL: categories_v2/{parentId}/subCategories
                     stream:
                         _repo.watchSubs(_selectedParentId!, activeOnly: false),
                     builder: (context, snap) {

@@ -149,14 +149,82 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   }
 
   Future<void> _loadInitialCategory() async {
-    final doc = await FirebaseFirestore.instance
-        .collection('categories')
-        .doc(widget.product.categoryId)
-        .get();
-    if (doc.exists) {
-      setState(() {
-        _selectedCategory = Category.fromFirestore(doc);
-      });
+    // Defensive: normalize and validate the stored category id before querying.
+    final dynamic raw = widget.product.categoryId;
+    if (raw == null) return; // nothing to do
+
+    String? id;
+    if (raw is String) {
+      id = raw.trim();
+      if (id.isEmpty) id = null;
+      // If a full path was stored (e.g. "categories/parentId"), extract last segment
+      if (id != null && id.contains('/')) {
+        id = id.split('/').last;
+      }
+    } else {
+      // In rare cases older documents might contain a DocumentReference-like value.
+      try {
+        final maybeId = (raw as dynamic).id;
+        if (maybeId is String && maybeId.isNotEmpty) {
+          id = maybeId;
+        } else {
+          id = raw.toString().split('/').last;
+        }
+      } catch (_) {
+        id = raw.toString().split('/').last;
+      }
+    }
+
+    if (id == null) return;
+
+    // 1) Try loading as a parent category stored in categories_v2
+    try {
+      final parentDoc = await FirebaseFirestore.instance
+          .collection('categories_v2')
+          .doc(id)
+          .get();
+      if (parentDoc.exists) {
+        setState(() => _selectedCategory = Category.fromFirestore(parentDoc));
+        return;
+      }
+    } catch (e) {
+      // Log and continue to fallback
+      debugPrint('Failed loading parent category doc for id=$id: $e');
+    }
+
+    // 2) Fallback: search across all subCategories subcollections for a matching doc id.
+    // Wrap in try/catch because some platform/serialization issues can throw at the
+    // native layer when a query argument is unexpected.
+    try {
+      final q = await FirebaseFirestore.instance
+          .collectionGroup('subCategories')
+          .where(FieldPath.documentId, isEqualTo: id)
+          .limit(1)
+          .get();
+      if (q.docs.isNotEmpty) {
+        setState(
+            () => _selectedCategory = Category.fromFirestore(q.docs.first));
+        return;
+      }
+    } catch (e) {
+      debugPrint(
+          'collectionGroup by docId failed for id=$id: $e — trying DocumentReference fallback');
+      try {
+        final docRef = FirebaseFirestore.instance.doc('categories_v2/$id');
+        final q2 = await FirebaseFirestore.instance
+            .collectionGroup('subCategories')
+            .where(FieldPath.documentId, isEqualTo: docRef)
+            .limit(1)
+            .get();
+        if (q2.docs.isNotEmpty) {
+          setState(
+              () => _selectedCategory = Category.fromFirestore(q2.docs.first));
+          return;
+        }
+      } catch (e2) {
+        debugPrint(
+            'collectionGroup by DocumentReference also failed for id=$id: $e2');
+      }
     }
   }
 
@@ -478,6 +546,42 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                                   width: 120,
                                   height: 120,
                                   fit: BoxFit.cover,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      width: 120,
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[200],
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Center(
+                                        child: SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: 120,
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[200],
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.broken_image,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                               Positioned(

@@ -89,7 +89,7 @@ class CategoryNameWidget extends StatelessWidget {
     }
     return FutureBuilder<DocumentSnapshot>(
       future: FirebaseFirestore.instance
-          .collection('categories')
+          .collection('categories_v2')
           .doc(categoryId)
           .get(),
       builder: (context, snapshot) {
