@@ -40,7 +40,7 @@ import 'package:easy_localization/easy_localization.dart';
 class AiVerificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseFunctions _functions =
-      FirebaseFunctions.instanceFor(region: 'us-central1');
+      FirebaseFunctions.instanceFor(region: 'asia-southeast2');
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   /// AI 규칙을 Firestore에서 불러옵니다. 전용 규칙이 없으면 범용 규칙('generic_v2')을 찾습니다.

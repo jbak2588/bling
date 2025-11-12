@@ -7,13 +7,13 @@ const logger = require('firebase-functions/logger');
 const admin = require('firebase-admin');
 const { buildAiRulesFromDesign } = require('./util_ai_rules'); // 아래 util 파일
 
-admin.initializeApp();
+// admin.initializeApp(); // [Fix] index.js에서 이미 초기화됨
 const db = admin.firestore();
 const bucket = admin.storage().bucket();
 
-// [Region統一] 프로젝트 기본 리전을 us-central1로 고정
-// 개별 함수에 region 옵션을 주지 않으면 이 전역 옵션을 따릅니다.
-setGlobalOptions({ region: 'us-central1' });
+// [Fix] 리전 정책 변경 (us-central1 -> asia-southeast2)
+// (index.js의 setGlobalOptions가 이미 모든 함수를 asia-southeast2로 설정함)
+// (개별 리전 설정이 필요하다면 여기에 setGlobalOptions({ region: "asia-southeast2" }) 추가)
 
 async function buildDesignFromFirestore() {
   const parentsSnap = await db.collection('categories_v2').orderBy('order').get();

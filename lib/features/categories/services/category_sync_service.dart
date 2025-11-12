@@ -5,8 +5,8 @@ import 'package:cloud_functions/cloud_functions.dart';
 class CategorySyncService {
   final FirebaseFunctions _functions;
   CategorySyncService({FirebaseFunctions? functions})
-      : _functions =
-            functions ?? FirebaseFunctions.instanceFor(region: 'us-central1');
+      : _functions = functions ??
+            FirebaseFunctions.instanceFor(region: 'asia-southeast2');
 
   Future<void> publishDesignAndRules() async {
     final callable = _functions.httpsCallable('exportCategoriesDesign');

@@ -114,6 +114,10 @@
 // (파일 내용...)
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentUpdated, onDocumentCreated } = require("firebase-functions/v2/firestore");
+// [Fix] 모든 함수의 기본 리전을 'asia-southeast2'에서 'asia-southeast2'(자카르타)로 변경
+// (사용자 지연 시간 최소화 및 Firestore 데이터 전송 비용(Egress) 제거 목적)
+const { setGlobalOptions } = require("firebase-functions/v2");
+setGlobalOptions({ region: "asia-southeast2" });
 const { initializeApp } = require("firebase-admin/app");
 const { getMessaging } = require("firebase-admin/messaging"); // ✅ [푸시 스키마] 추가
 const { defineSecret } = require("firebase-functions/params");
@@ -208,7 +212,7 @@ const getGenAI = () => {
 
 // 공통 onCall 옵션
 const CALL_OPTS = {
-  region: "us-central1",
+  region: "asia-southeast2",
   enforceAppCheck: true,
   memory: "1GiB",
   // 장시간 이미지 다운로드 + 모델 혼잡 대비
@@ -385,7 +389,7 @@ async function genAiCall(
 exports.calculateTrustScore = onDocumentUpdated(
   {
     document: "users/{userId}",
-    region: "us-central1",
+    region: "asia-southeast2",
   },
   async (event) => {
     const userData = event.data.after.data();
@@ -1164,7 +1168,7 @@ function buildTopicsFromPrefs(prefs) {
  * users/{uid} 문서의 pushPrefs 변경 시 FCM 토픽 구독을 동기화합니다.
  */
 exports.onUserPushPrefsWrite = onDocumentUpdated(
-  { document: "users/{uid}", region: "us-central1" },
+  { document: "users/{uid}", region: "asia-southeast2" },
   async (event) => {
     const change = event.data;
     if (!change) {
@@ -1301,7 +1305,7 @@ function getKelKey(adminParts) {
  * 기획안: "onPostCreate ... /boards/{kel_key} upsert. metrics.last30dPosts++"
  */
 exports.onLocalNewsPostCreate = onDocumentCreated(
-  { document: "posts/{postId}", region: "us-central1" },
+  { document: "posts/{postId}", region: "asia-southeast2" },
   async (event) => {
     const db = getFirestore();
 

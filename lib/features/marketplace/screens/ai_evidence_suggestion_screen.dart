@@ -92,7 +92,7 @@ class _AiEvidenceSuggestionScreenState
         }
       }
 
-      final callable = FirebaseFunctions.instanceFor(region: 'us-central1')
+      final callable = FirebaseFunctions.instanceFor(region: 'asia-southeast2')
           .httpsCallable('generatefinalreport');
 
       final result = await callable.call(<String, dynamic>{

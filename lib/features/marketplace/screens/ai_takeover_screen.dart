@@ -79,7 +79,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
           await uploadAllProductImages(_newPhotos, user.uid);
 
       // 2. 백엔드 'verifyProductOnSite' 함수 호출
-      final callable = FirebaseFunctions.instanceFor(region: 'us-central1')
+      final callable = FirebaseFunctions.instanceFor(region: 'asia-southeast2')
           .httpsCallable('verifyProductOnSite');
       final result = await callable.call(<String, dynamic>{
         'productId': widget.product.id,

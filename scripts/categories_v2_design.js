@@ -15,7 +15,7 @@ const design = {
         "name_id": "Elektronik",
         "order": 1,
         "active": true,
-        "icon": "ms:electronics"
+        "icon": "ms:devices"
       },
       "smartphone-tablet": {
         "name_ko": "스마트폰/태블릿",
@@ -47,7 +47,7 @@ const design = {
         "name_id": "Perangkat Digital Lainnya",
         "order": 99,
         "active": true,
-        "icon": "ms:electronics"
+        "icon": "ms:devices"
       }
     }
   },
