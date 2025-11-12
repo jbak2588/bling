@@ -70,6 +70,7 @@ dependencies:
   percent_indicator: ^4.2.5
   timeago: ^3.7.1
   async: ^2.13.0
+  material_symbols_icons: ^4.2874.0
 
 
   

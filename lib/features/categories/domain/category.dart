@@ -1,48 +1,182 @@
 // lib/features/categories/domain/category.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../constants/category_icons.dart';
 
 class Category {
-  final String id;
+  final String id; // Firestore 문서 ID
+  final String? parentId; // 부모 문서 ID (부모는 null)
+  final String slug; // 사람이 읽는 slug (kebab)
   final String nameKo;
-  final String nameEn;
   final String nameId;
-  final String? parentId;
+  final String nameEn;
   final int order;
+  final bool active;
+  final bool isParent; // 부모 문서만 true
+  final String? icon; // 파일명 또는 풀패스 (권장: 파일명)
 
-  Category({
+  const Category({
     required this.id,
+    required this.parentId,
+    required this.slug,
     required this.nameKo,
-    required this.nameEn,
     required this.nameId,
-    this.parentId,
+    required this.nameEn,
     required this.order,
+    required this.active,
+    required this.isParent,
+    required this.icon,
   });
 
-  factory Category.fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> snapshot,
-  ) {
-    final data = snapshot.data()!;
-    // [Fix] categories_v2 스키마(names 맵)에서 데이터 추출
-    final names = data['names'] as Map<String, dynamic>? ?? {};
-
-    // ▼▼▼▼▼ 여기가 핵심 수정 포인트입니다 ▼▼▼▼▼
-    // order 필드의 타입을 확인하고, 문자열이면 숫자로 변환을 시도합니다.
-    dynamic orderData = data['order'];
-    int finalOrder = 99; // 기본값
-    if (orderData is int) {
-      finalOrder = orderData;
-    } else if (orderData is String) {
-      finalOrder = int.tryParse(orderData) ?? 99;
-    }
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
+  /// 부모 문서에서 생성
+  factory Category.fromParentDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final d = doc.data() ?? {};
     return Category(
-      id: snapshot.id,
-      nameKo: names['ko'] ?? data['nameKo'] ?? '', // 'names' 맵 우선, 구형 필드 호환
-      nameEn: names['en'] ?? data['nameEn'] ?? '',
-      nameId: names['id'] ?? data['nameId'] ?? '',
-      parentId: data['parentId'], // 'categories_v2'는 parentId가 없음 (서브컬렉션 방식)
-      order: finalOrder,
+      id: doc.id,
+      parentId: null,
+      slug: (d['slug'] ?? d['id'] ?? doc.id).toString(),
+      nameKo: (d['nameKo'] ?? d['name_ko'] ?? '').toString(),
+      nameId: (d['nameId'] ?? d['name_id'] ?? '').toString(),
+      nameEn: (d['nameEn'] ?? d['name_en'] ?? '').toString(),
+      order: d['order'] is int
+          ? d['order'] as int
+          : int.tryParse('${d['order'] ?? 1}') ?? 1,
+      active: d['active'] == true,
+      isParent: d['isParent'] == true,
+      icon: (d['icon'] ?? d['iconAsset'])?.toString(),
+    );
+  }
+
+  /// 서브 문서에서 생성
+  factory Category.fromSubDoc(
+      String parentId, DocumentSnapshot<Map<String, dynamic>> doc) {
+    final d = doc.data() ?? {};
+    return Category(
+      id: doc.id,
+      parentId: parentId,
+      slug: (d['slug'] ?? d['id'] ?? doc.id).toString(),
+      nameKo: (d['nameKo'] ?? d['name_ko'] ?? '').toString(),
+      nameId: (d['nameId'] ?? d['name_id'] ?? '').toString(),
+      nameEn: (d['nameEn'] ?? d['name_en'] ?? '').toString(),
+      order: d['order'] is int
+          ? d['order'] as int
+          : int.tryParse('${d['order'] ?? 1}') ?? 1,
+      active: d['active'] == true,
+      isParent: false,
+      icon: (d['icon'] ?? d['iconAsset'])?.toString(),
+    );
+  }
+
+  /// Backward-compat: 기존 코드의 `Category.fromFirestore(doc)` 호출을 지원합니다.
+  factory Category.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final collectionId = doc.reference.parent.id;
+    if (collectionId == 'subCategories') {
+      final parentRef = doc.reference.parent.parent;
+      final parentId = parentRef?.id ?? '';
+      return Category.fromSubDoc(parentId, doc);
+    }
+    return Category.fromParentDoc(doc);
+  }
+
+  /// 모델 -> Firestore(Map)
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'parentId': parentId,
+      'slug': slug,
+      'nameKo': nameKo,
+      'nameId': nameId,
+      'nameEn': nameEn,
+      'order': order,
+      'active': active,
+      'isParent': isParent,
+      'icon': icon,
+    };
+  }
+
+  Map<String, dynamic> toParentMap() => {
+        'slug': slug,
+        'nameKo': nameKo,
+        'nameId': nameId,
+        'nameEn': nameEn,
+        'order': order,
+        'active': active,
+        'isParent': true,
+        if (icon != null && icon!.isNotEmpty)
+          'icon':
+              icon!.startsWith('ms:') ? icon : CategoryIcons.basename(icon!),
+      };
+
+  Map<String, dynamic> toSubMap() => {
+        'slug': slug,
+        'nameKo': nameKo,
+        'nameId': nameId,
+        'nameEn': nameEn,
+        'order': order,
+        'active': active,
+        if (icon != null && icon!.isNotEmpty)
+          'icon':
+              icon!.startsWith('ms:') ? icon : CategoryIcons.basename(icon!),
+      };
+
+  String displayName(String lang) {
+    switch (lang) {
+      case 'ko':
+        return nameKo.isNotEmpty
+            ? nameKo
+            : (nameId.isNotEmpty
+                ? nameId
+                : (nameEn.isNotEmpty ? nameEn : slug));
+      case 'id':
+        return nameId.isNotEmpty
+            ? nameId
+            : (nameKo.isNotEmpty
+                ? nameKo
+                : (nameEn.isNotEmpty ? nameEn : slug));
+      default:
+        return nameEn.isNotEmpty
+            ? nameEn
+            : (nameId.isNotEmpty
+                ? nameId
+                : (nameKo.isNotEmpty ? nameKo : slug));
+    }
+  }
+
+  /// UI에서 바로 쓸 에셋 경로
+  String get iconAssetPath =>
+      CategoryIcons.resolve(icon: icon, slug: slug, isParent: isParent);
+
+  /// 실제 사용할 아이콘 코드('ms:*').
+  /// 비어있으면 nameEn/slug 기반 추천값을 돌려줌.
+  String effectiveIcon({required bool forParent}) =>
+      (icon != null && icon!.isNotEmpty)
+          ? icon!
+          : (forParent
+              ? CategoryIcons.suggestForParent(nameEn: nameEn, slug: slug)
+              : CategoryIcons.suggestForSub(nameEn: nameEn, slug: slug));
+
+  Category copyWith({
+    String? id,
+    String? parentId,
+    String? slug,
+    String? nameKo,
+    String? nameId,
+    String? nameEn,
+    int? order,
+    bool? active,
+    bool? isParent,
+    String? icon,
+  }) {
+    return Category(
+      id: id ?? this.id,
+      parentId: parentId ?? this.parentId,
+      slug: slug ?? this.slug,
+      nameKo: nameKo ?? this.nameKo,
+      nameId: nameId ?? this.nameId,
+      nameEn: nameEn ?? this.nameEn,
+      order: order ?? this.order,
+      active: active ?? this.active,
+      isParent: isParent ?? this.isParent,
+      icon: icon ?? this.icon,
     );
   }
 }

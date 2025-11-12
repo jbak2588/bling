@@ -7,7 +7,7 @@ const design = {
     "name_id": "Perangkat Digital",
     "order": 1,
     "active": true,
-    "icon": null,
+    "icon": "ms:devices",
     "subCategories": {
       "electronics": {
         "name_ko": "전자기기",
@@ -15,7 +15,7 @@ const design = {
         "name_id": "Elektronik",
         "order": 1,
         "active": true,
-        "icon": null
+        "icon": "ms:electronics"
       },
       "smartphone-tablet": {
         "name_ko": "스마트폰/태블릿",
@@ -23,7 +23,7 @@ const design = {
         "name_id": "Handphone & Tablet",
         "order": 2,
         "active": true,
-        "icon": null
+        "icon": "ms:smartphone"
       },
       "computer-laptop": {
         "name_ko": "컴퓨터/노트북",
@@ -31,7 +31,7 @@ const design = {
         "name_id": "Komputer & Laptop",
         "order": 3,
         "active": true,
-        "icon": null
+        "icon": "ms:laptop"
       },
       "camera-drone": {
         "name_ko": "카메라/드론",
@@ -39,7 +39,7 @@ const design = {
         "name_id": "Kamera & Drone",
         "order": 4,
         "active": true,
-        "icon": null
+        "icon": "ms:camera"
       },
       "other-digital-devices": {
         "name_ko": "기타 디지털기기",
@@ -47,16 +47,9 @@ const design = {
         "name_id": "Perangkat Digital Lainnya",
         "order": 99,
         "active": true,
-        "icon": null
+        "icon": "ms:electronics"
       }
     }
-  },
-  "undefined": {
-    "isParent": true,
-    "order": 99,
-    "active": false,
-    "icon": null,
-    "subCategories": {}
   },
   "4hx6hyOYodriXgPiR5bl": {
     "isParent": true,
@@ -65,7 +58,7 @@ const design = {
     "name_id": "Perlengkapan Rumah",
     "order": 2,
     "active": true,
-    "icon": null,
+    "icon": "ms:home",
     "subCategories": {
       "kitchenware": {
         "name_ko": "주방용품",
@@ -73,7 +66,7 @@ const design = {
         "name_id": "Peralatan Dapur",
         "order": 1,
         "active": true,
-        "icon": null
+        "icon": "ms:home"
       },
       "furniture": {
         "name_ko": "가구",
@@ -81,7 +74,7 @@ const design = {
         "name_id": "Perabot",
         "order": 2,
         "active": true,
-        "icon": null
+        "icon": "ms:furniture"
       },
       "lighting-electrical": {
         "name_ko": "조명/전기",
@@ -89,7 +82,7 @@ const design = {
         "name_id": "Lampu & Listrik",
         "order": 3,
         "active": true,
-        "icon": null
+        "icon": "ms:light"
       },
       "other-home-essentials": {
         "name_ko": "기타 생활용품",
@@ -97,7 +90,7 @@ const design = {
         "name_id": "Perlengkapan Rumah Lainnya",
         "order": 99,
         "active": true,
-        "icon": null
+        "icon": "ms:home"
       }
     }
   },
@@ -108,7 +101,7 @@ const design = {
     "name_id": "Fashion",
     "order": 3,
     "active": true,
-    "icon": null,
+    "icon": "ms:checkroom",
     "subCategories": {
       "women-s-clothing": {
         "name_ko": "여성의류",
@@ -116,7 +109,7 @@ const design = {
         "name_id": "Pakaian Wanita",
         "order": 1,
         "active": true,
-        "icon": null
+        "icon": "ms:fashion"
       },
       "men-s-clothing": {
         "name_ko": "남성의류",
@@ -124,7 +117,7 @@ const design = {
         "name_id": "Pakaian Pria",
         "order": 2,
         "active": true,
-        "icon": null
+        "icon": "ms:fashion"
       },
       "shoes": {
         "name_ko": "신발",
@@ -132,7 +125,7 @@ const design = {
         "name_id": "Sepatu",
         "order": 3,
         "active": true,
-        "icon": null
+        "icon": "ms:shoes"
       },
       "bags-accessories": {
         "name_ko": "가방/잡화",
@@ -140,7 +133,7 @@ const design = {
         "name_id": "Tas & Aksesoris",
         "order": 4,
         "active": true,
-        "icon": null
+        "icon": "ms:bag"
       },
       "other-fashion": {
         "name_ko": "기타 패션 ",
@@ -148,7 +141,7 @@ const design = {
         "name_id": "Fashion  Lainnya",
         "order": 99,
         "active": true,
-        "icon": null
+        "icon": "ms:fashion"
       }
     }
   },
@@ -159,7 +152,7 @@ const design = {
     "name_id": "Kecantikan & Perawatan",
     "order": 4,
     "active": true,
-    "icon": null,
+    "icon": "ms:spa",
     "subCategories": {
       "skincare": {
         "name_ko": "스킨케어",
@@ -167,7 +160,7 @@ const design = {
         "name_id": "Perawatan Kulit",
         "order": 1,
         "active": true,
-        "icon": null
+        "icon": "ms:skincare"
       },
       "makeup": {
         "name_ko": "메이크업",
@@ -175,7 +168,7 @@ const design = {
         "name_id": "Rias Wajah",
         "order": 2,
         "active": true,
-        "icon": null
+        "icon": "ms:makeup"
       },
       "hair-body": {
         "name_ko": "헤어/바디",
@@ -183,7 +176,7 @@ const design = {
         "name_id": "Perawatan Rambut & Tubuh",
         "order": 3,
         "active": true,
-        "icon": null
+        "icon": "ms:beauty"
       },
       "other-beauty-care": {
         "name_ko": "기타 뷰티/미용",
@@ -191,7 +184,7 @@ const design = {
         "name_id": "Kecantikan & Perawatan Lainnya",
         "order": 99,
         "active": true,
-        "icon": null
+        "icon": "ms:beauty"
       }
     }
   },
@@ -202,7 +195,7 @@ const design = {
     "name_id": "Edisi Terbatas & Mewah",
     "order": 5,
     "active": true,
-    "icon": null,
+    "icon": "ms:diamond",
     "subCategories": {
       "limited-edition": {
         "name_ko": "한정판",
@@ -210,7 +203,7 @@ const design = {
         "name_id": "Edisi Terbatas",
         "order": 1,
         "active": true,
-        "icon": null
+        "icon": "ms:star"
       },
       "luxury-goods": {
         "name_ko": "명품",
@@ -218,7 +211,7 @@ const design = {
         "name_id": "Barang Mewah",
         "order": 2,
         "active": true,
-        "icon": null
+        "icon": "ms:diamond"
       },
       "hunter-s-pick": {
         "name_ko": "헌터 아이템",
@@ -226,7 +219,7 @@ const design = {
         "name_id": "Pilihan Hunter",
         "order": 3,
         "active": true,
-        "icon": null
+        "icon": "ms:target"
       },
       "other-limited-luxury": {
         "name_ko": "기타 한정판/명품/급매품",
@@ -234,7 +227,7 @@ const design = {
         "name_id": "Edisi Terbatas & Mewah Lainnya",
         "order": 99,
         "active": true,
-        "icon": null
+        "icon": "ms:diamond"
       }
     }
   },
@@ -245,7 +238,7 @@ const design = {
     "name_id": "Hobi & Rekreasi",
     "order": 6,
     "active": true,
-    "icon": null,
+    "icon": "ms:sports_esports",
     "subCategories": {
       "sports-leisure": {
         "name_ko": "스포츠/레저",
@@ -253,7 +246,7 @@ const design = {
         "name_id": "Olahraga & Rekreasi",
         "order": 1,
         "active": true,
-        "icon": null
+        "icon": "ms:sports"
       },
       "games-consoles": {
         "name_ko": "게임/콘솔",
@@ -261,7 +254,7 @@ const design = {
         "name_id": "Game & Konsol",
         "order": 2,
         "active": true,
-        "icon": null
+        "icon": "ms:gamepad"
       },
       "instruments": {
         "name_ko": "악기",
@@ -269,7 +262,7 @@ const design = {
         "name_id": "Alat Musik",
         "order": 3,
         "active": true,
-        "icon": null
+        "icon": "ms:music"
       },
       "books-stationery": {
         "name_ko": "도서/문구",
@@ -277,7 +270,7 @@ const design = {
         "name_id": "Buku & Alat Tulis",
         "order": 4,
         "active": true,
-        "icon": null
+        "icon": "ms:book"
       },
       "other-hobby-leisure": {
         "name_ko": "기타 취미/여가",
@@ -285,7 +278,7 @@ const design = {
         "name_id": "Hobi & Rekreasi Lainnya",
         "order": 99,
         "active": true,
-        "icon": null
+        "icon": "ms:sports"
       }
     }
   },
@@ -296,7 +289,7 @@ const design = {
     "name_id": "Bayi & Anak",
     "order": 7,
     "active": true,
-    "icon": null,
+    "icon": "ms:child_friendly",
     "subCategories": {
       "baby-clothing": {
         "name_ko": "유아 의류",
@@ -304,7 +297,7 @@ const design = {
         "name_id": "Pakaian Bayi",
         "order": 1,
         "active": true,
-        "icon": null
+        "icon": "ms:baby"
       },
       "toys": {
         "name_ko": "완구/장난감",
@@ -312,7 +305,7 @@ const design = {
         "name_id": "Mainan Anak",
         "order": 2,
         "active": true,
-        "icon": null
+        "icon": "ms:toy"
       },
       "baby-essentials": {
         "name_ko": "육아 용품",
@@ -320,7 +313,7 @@ const design = {
         "name_id": "Perlengkapan Bayi",
         "order": 3,
         "active": true,
-        "icon": null
+        "icon": "ms:child_friendly"
       },
       "other-baby-kids": {
         "name_ko": "기타 유아/아동",
@@ -328,7 +321,7 @@ const design = {
         "name_id": "Bayi & Anak Lainnya",
         "order": 99,
         "active": true,
-        "icon": null
+        "icon": "ms:baby"
       }
     }
   },
@@ -339,7 +332,7 @@ const design = {
     "name_id": "Motor",
     "order": 8,
     "active": true,
-    "icon": null,
+    "icon": "ms:two_wheeler",
     "subCategories": {
       "motorcycle": {
         "name_ko": "오토바이",
@@ -347,7 +340,7 @@ const design = {
         "name_id": "motor",
         "order": 1,
         "active": true,
-        "icon": null
+        "icon": "ms:motorcycle"
       },
       "motor-parts": {
         "name_ko": "부품",
@@ -355,7 +348,7 @@ const design = {
         "name_id": "Suku Cadang Motor",
         "order": 2,
         "active": true,
-        "icon": null
+        "icon": "ms:two_wheeler"
       },
       "motor-accessories": {
         "name_ko": "액세서리",
@@ -363,7 +356,7 @@ const design = {
         "name_id": "Aksesoris Motor",
         "order": 3,
         "active": true,
-        "icon": null
+        "icon": "ms:work"
       },
       "other-motorcycle": {
         "name_ko": "기타 오토바이",
@@ -371,7 +364,7 @@ const design = {
         "name_id": "Motor Lainnya",
         "order": 99,
         "active": true,
-        "icon": null
+        "icon": "ms:motorcycle"
       }
     }
   },
@@ -382,7 +375,7 @@ const design = {
     "name_id": "Barang Lainnya",
     "order": 99,
     "active": true,
-    "icon": null,
+    "icon": "ms:category",
     "subCategories": {
       "handcrafts": {
         "name_ko": "수공예/핸드메이드",
@@ -390,7 +383,7 @@ const design = {
         "name_id": "Kerajinan Tangan",
         "order": 1,
         "active": true,
-        "icon": null
+        "icon": "ms:handcraft"
       },
       "other-used-items": {
         "name_ko": "기타 중고물품",
@@ -398,7 +391,7 @@ const design = {
         "name_id": "Barang Preloved Lainnya",
         "order": 2,
         "active": true,
-        "icon": null
+        "icon": "ms:box"
       }
     }
   }

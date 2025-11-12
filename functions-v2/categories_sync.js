@@ -52,8 +52,18 @@ async function exportToStorage() {
 exports.exportCategoriesDesign = functions.https.onCall(async (req) => {
   const auth = req.auth;
   if (!auth) { throw new functions.https.HttpsError('unauthenticated', '로그인이 필요합니다.'); }
-  // 역할 검사(예: customClaims.role === 'admin')
-  if (auth.token.role !== 'admin') { throw new functions.https.HttpsError('permission-denied', '관리자만 가능합니다.'); }
+  // [Fix] auth.token.role (Custom Claim) 대신 Firestore 'users' 문서의 'role' 또는 'isAdmin'을 확인
+  // (앱 UI의 userModel.isAdmin == true 로직과 일치시킴)
+  const userDoc = await db.collection('users').doc(auth.uid).get();
+  if (!userDoc.exists) {
+    throw new functions.https.HttpsError('not-found', '사용자 문서를 찾을 수 없습니다.');
+  }
+  
+  const userData = userDoc.data() || {};
+  if (userData.role !== 'admin' && userData.isAdmin !== true) {
+    throw new functions.https.HttpsError('permission-denied', '관리자만 가능합니다.');
+  }
+
   const res = await exportToStorage();
   logger.info('categories design/rules exported by', auth.uid);
   return res;
