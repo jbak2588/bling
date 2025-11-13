@@ -2,7 +2,7 @@
 // 카테고리 변경 시 Cloud Storage에 categories_v2_design.json + ai_rules_v2.json 재생성
 const functions = require('firebase-functions/v2');
 const { onDocumentWritten } = require('firebase-functions/v2/firestore');
-const { setGlobalOptions } = require('firebase-functions/v2');
+const { onCall } = require('firebase-functions/v2/https'); // [추가]
 const logger = require('firebase-functions/logger');
 const admin = require('firebase-admin');
 const { buildAiRulesFromDesign } = require('./util_ai_rules'); // 아래 util 파일
@@ -49,7 +49,7 @@ async function exportToStorage() {
 }
 
 // 수동 호출용(관리자 Publish 버튼)
-exports.exportCategoriesDesign = functions.https.onCall(async (req) => {
+exports.exportCategoriesDesign = onCall(async (req) => { // [수정]
   const auth = req.auth;
   if (!auth) { throw new functions.https.HttpsError('unauthenticated', '로그인이 필요합니다.'); }
   // [Fix] auth.token.role (Custom Claim) 대신 Firestore 'users' 문서의 'role' 또는 'isAdmin'을 확인

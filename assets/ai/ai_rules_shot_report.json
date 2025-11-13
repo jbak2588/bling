@@ -1,0 +1,451 @@
+{
+  "generatedAt": "2025-11-13T01:28:00.493Z",
+  "baseline": {
+    "id": "electronics",
+    "nameEn": "Electronics",
+    "shotCount": 10,
+    "keys": [
+      "front_full",
+      "back_full",
+      "brand_model_tag",
+      "serial_or_size_label",
+      "defect_closeups",
+      "included_items_flatlay",
+      "power_on_or_fit",
+      "measurement_reference",
+      "power_on_screen",
+      "ports_closeup"
+    ]
+  },
+  "perRule": [
+    {
+      "id": "electronics",
+      "nameEn": "Electronics",
+      "totalShots": 10,
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "smartphone-tablet",
+      "nameEn": "Smartphone/Tablet",
+      "totalShots": 5,
+      "removed": [
+        "front_full",
+        "back_full",
+        "brand_model_tag",
+        "serial_or_size_label",
+        "defect_closeups",
+        "included_items_flatlay",
+        "power_on_or_fit",
+        "measurement_reference"
+      ],
+      "added": [
+        "imei_shot",
+        "battery_shot",
+        "info_shot"
+      ]
+    },
+    {
+      "id": "computer-laptop",
+      "nameEn": "Computer/Laptop",
+      "totalShots": 10,
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "camera-drone",
+      "nameEn": "Camera/Drone",
+      "totalShots": 13,
+      "removed": [],
+      "added": [
+        "lens_closeup",
+        "shutter_info",
+        "sensor_dust"
+      ]
+    },
+    {
+      "id": "other-digital-devices",
+      "nameEn": "Other Digital Devices",
+      "totalShots": 10,
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "kitchenware",
+      "nameEn": "Kitchenware",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "furniture",
+      "nameEn": "Furniture",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "lighting-electrical",
+      "nameEn": "Lighting & Electrical",
+      "totalShots": 10,
+      "removed": [],
+      "added": []
+    },
+    {
+      "id": "other-home-essentials",
+      "nameEn": "Others Home Essentials",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "women-s-clothing",
+      "nameEn": "Women's Clothing",
+      "totalShots": 5,
+      "removed": [
+        "front_full",
+        "back_full",
+        "brand_model_tag",
+        "serial_or_size_label",
+        "defect_closeups",
+        "power_on_or_fit",
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": [
+        "neckline_stitch",
+        "care_label",
+        "fabric_closeup"
+      ]
+    },
+    {
+      "id": "men-s-clothing",
+      "nameEn": "Men's Clothing",
+      "totalShots": 5,
+      "removed": [
+        "front_full",
+        "back_full",
+        "brand_model_tag",
+        "serial_or_size_label",
+        "defect_closeups",
+        "power_on_or_fit",
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": [
+        "neckline_stitch",
+        "care_label",
+        "fabric_closeup"
+      ]
+    },
+    {
+      "id": "shoes",
+      "nameEn": "Shoes",
+      "totalShots": 11,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": [
+        "neckline_stitch",
+        "care_label",
+        "fabric_closeup"
+      ]
+    },
+    {
+      "id": "bags-accessories",
+      "nameEn": "Tas & Aksesori",
+      "totalShots": 11,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": [
+        "neckline_stitch",
+        "care_label",
+        "fabric_closeup"
+      ]
+    },
+    {
+      "id": "other-fashion",
+      "nameEn": "Other Fashion Itmes",
+      "totalShots": 11,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": [
+        "neckline_stitch",
+        "care_label",
+        "fabric_closeup"
+      ]
+    },
+    {
+      "id": "skincare",
+      "nameEn": "Skincare",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "makeup",
+      "nameEn": "Makeup",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "hair-body",
+      "nameEn": "Hair/Body",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "other-beauty-care",
+      "nameEn": "Other Beauty & Care",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "limited-edition",
+      "nameEn": "Limited Edition",
+      "totalShots": 13,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": [
+        "logo",
+        "interior",
+        "corners",
+        "date_code",
+        "hardware_stamp"
+      ]
+    },
+    {
+      "id": "luxury-goods",
+      "nameEn": "Luxury Goods",
+      "totalShots": 13,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": [
+        "logo",
+        "interior",
+        "corners",
+        "date_code",
+        "hardware_stamp"
+      ]
+    },
+    {
+      "id": "hunter-s-pick",
+      "nameEn": "Hunter's Pick",
+      "totalShots": 13,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": [
+        "logo",
+        "interior",
+        "corners",
+        "date_code",
+        "hardware_stamp"
+      ]
+    },
+    {
+      "id": "other-limited-luxury",
+      "nameEn": "Other Limited & Luxury Items",
+      "totalShots": 13,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": [
+        "logo",
+        "interior",
+        "corners",
+        "date_code",
+        "hardware_stamp"
+      ]
+    },
+    {
+      "id": "sports-leisure",
+      "nameEn": "Sports & Leisure",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "games-consoles",
+      "nameEn": "Games & Consoles",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "instruments",
+      "nameEn": "Instruments",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "books-stationery",
+      "nameEn": "Books & Stationery",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "other-hobby-leisure",
+      "nameEn": "Other Hobby & Leisure",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "baby-clothing",
+      "nameEn": "Baby Clothing",
+      "totalShots": 11,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": [
+        "neckline_stitch",
+        "care_label",
+        "fabric_closeup"
+      ]
+    },
+    {
+      "id": "toys",
+      "nameEn": "Toys",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "baby-essentials",
+      "nameEn": "Baby Essentials",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "other-baby-kids",
+      "nameEn": "Other Baby & Kids Items",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "motorcycle",
+      "nameEn": "Motorcycle",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "motor-parts",
+      "nameEn": "Motor Parts",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "motor-accessories",
+      "nameEn": "Motor Accessories",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "other-motorcycle",
+      "nameEn": "Other Motorcycles Items",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "handcrafts",
+      "nameEn": "Handcrafts",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    },
+    {
+      "id": "other-used-items",
+      "nameEn": "Other Used Items",
+      "totalShots": 8,
+      "removed": [
+        "power_on_screen",
+        "ports_closeup"
+      ],
+      "added": []
+    }
+  ]
+}
