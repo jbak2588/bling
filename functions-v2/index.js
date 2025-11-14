@@ -895,12 +895,17 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     const guidedKeys = Object.keys((imageUrls && imageUrls.guided) || {});
     if (validSkippedKeys.length) {
       promptTemplate += `\n\n[Context: Skipped Evidence]\n` +
-        `The user skipped providing the following suggested evidence keys: [${validSkippedKeys.join(", ")}].\n` +
-        `Please still complete the final report objectively. In addition, include a field named \'notes_for_buyer\' (string) that politely informs the buyer which evidence was not provided and suggests verifying them in person or via chat. Do not fabricate data for skipped items.`;
+        `The user SKIPPED providing the following evidence keys: [${validSkippedKeys.join(", ")}].\n` +
+        `You MUST mention these missing items in the 'notes_for_buyer' field.`;
+    } else {
+      // [작업 30 수정] 사용자가 아무것도 건너뛰지 않았음을 AI에게 명시적으로 알립니다.
+      // 'report_template_prompt'의 기본 경고문을 무시하도록 지시합니다.
+      promptTemplate += `\n\n[Context: Skipped Evidence]\n` +
+        `The user did NOT skip any suggested evidence. Do NOT add any warnings about missing evidence to 'notes_for_buyer' unless absolutely necessary.`;
     }
     if (guidedKeys.length) {
       promptTemplate += `\n\n[Context: Guided Evidence]\n` +
-        `The user provided additional guided evidence images for keys: [${guidedKeys.join(", ")}]. Use them to improve report quality.`;
+        `The user provided additional guided evidence images for keys: [${guidedKeys.join(", ")}]. You MUST analyze these guided images to improve report quality.`;
     }
 
 

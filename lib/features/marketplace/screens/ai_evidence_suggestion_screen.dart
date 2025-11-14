@@ -238,7 +238,12 @@ class _AiEvidenceSuggestionScreenState
         }
       }
 
-      final skippedKeys = _skippedShots.toList();
+      // [작업 27 수정] 'Skipped' 목록 재계산
+      // Recompute skipped keys defensively: use the original missingEvidenceKeys
+      // and remove any keys for which we actually uploaded a guided/taken shot.
+      final List<String> finalSkippedKeys = widget.missingEvidenceKeys
+          .where((key) => !takenShots.containsKey(key))
+          .toList();
       // Call the Cloud Function in the same region as the deployed functions
       // (server uses 'asia-southeast2' via setGlobalOptions). Use the
       // regioned instance to avoid firebase_functions/not-found errors.
@@ -257,7 +262,8 @@ class _AiEvidenceSuggestionScreenState
         'subCategoryName': widget.subCategoryName,
         'userPrice': widget.userPrice,
         'userDescription': widget.userDescription,
-        'skippedKeys': skippedKeys,
+        // Use the recalculated list to avoid bugs where _skippedShots was out-of-sync.
+        'skippedKeys': finalSkippedKeys,
         'locale': context.locale.languageCode,
       });
 
