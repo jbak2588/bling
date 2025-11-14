@@ -60,6 +60,8 @@ class ProductModel {
   final String description;
   final List<String> imageUrls;
   final String categoryId;
+  // 새 필드: 부모 카테고리 문서 ID (nullable)
+  final String? categoryParentId;
   final int price;
   final bool negotiable;
   // ✅ [추가] 태그 필드를 추가합니다.
@@ -112,6 +114,7 @@ class ProductModel {
     this.locationName,
     this.locationParts,
     this.geoPoint,
+    this.categoryParentId,
     this.status = 'selling',
     this.condition = 'used',
     this.buyerId,
@@ -146,6 +149,7 @@ class ProductModel {
       imageUrls:
           data['imageUrls'] != null ? List<String>.from(data['imageUrls']) : [],
       categoryId: data['categoryId'] ?? '',
+      categoryParentId: data['categoryParentId'],
       price: data['price'] ?? 0,
       negotiable: data['negotiable'] ?? false,
       tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
@@ -198,6 +202,7 @@ class ProductModel {
       'description': description,
       'imageUrls': imageUrls,
       'categoryId': categoryId,
+      'categoryParentId': categoryParentId,
       'price': price,
       'negotiable': negotiable,
       'tags': tags,
@@ -236,6 +241,7 @@ class ProductModel {
     String? description,
     List<String>? imageUrls,
     String? categoryId,
+    String? categoryParentId,
     int? price,
     bool? negotiable,
     List<String>? tags,
@@ -270,6 +276,7 @@ class ProductModel {
       description: description ?? this.description,
       imageUrls: imageUrls ?? this.imageUrls,
       categoryId: categoryId ?? this.categoryId,
+      categoryParentId: categoryParentId ?? this.categoryParentId,
       price: price ?? this.price,
       negotiable: negotiable ?? this.negotiable,
       tags: tags ?? this.tags,

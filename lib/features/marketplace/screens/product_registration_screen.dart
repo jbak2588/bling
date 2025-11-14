@@ -77,7 +77,8 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   String _condition = 'used';
 
   // [추가] AI 검수 관련 상태
-  bool _isSaving = false;
+  // [작업 68] bool _isSaving -> String? _loadingStatus로 변경
+  String? _loadingStatus;
   AiVerificationRule? _selectedAiRule;
 
   // 1. [추가] 대/소분류 이름을 저장할 상태 변수
@@ -126,8 +127,10 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       setState(() {
         _selectedCategory = result;
       });
+      // For AI rules, prefer parent category id when available
+      final ruleCategoryId = result.parentId ?? result.id;
+      final rule = await _aiVerificationService.loadAiRule(ruleCategoryId);
       if (result.parentId != null && result.parentId!.isNotEmpty) {
-        final rule = await _aiVerificationService.loadAiRule(result.id);
         final names = await _aiVerificationService.getCategoryNames(
             result.id, result.parentId!);
         if (!mounted) return;
@@ -136,7 +139,11 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
           _selectedParentCategoryName = names['parentCategoryName'];
         });
       } else {
-        debugPrint("선택된 카테고리에 parentId가 없습니다.");
+        if (!mounted) return;
+        setState(() {
+          _selectedAiRule = rule;
+          _selectedParentCategoryName = null;
+        });
       }
     }
   }
@@ -204,6 +211,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         description: _descriptionController.text,
         imageUrls: imageUrls,
         categoryId: _selectedCategory!.id,
+        categoryParentId: _selectedCategory!.parentId,
         price: int.tryParse(_priceController.text) ?? 0,
         negotiable: _isNegotiable,
         tags: _tags, // ✅ _tags 상태를 모델에 전달  // 2025년 8월 30일
@@ -284,22 +292,30 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       return;
     }
 
-    setState(() => _isSaving = true);
+    // [작업 68] 로딩 상태 텍스트 설정
+    setState(
+        () => _loadingStatus = tr('ai_flow.status.saving')); // "상품 정보 저장 중..."
     try {
       final productId =
           FirebaseFirestore.instance.collection('products').doc().id;
+      // ... (기존 _saveProduct 로직) ...
+      // 1. 이미지 업로드
+      // ...existing code...
+      // [작업 68] 로딩 상태 텍스트 변경
+      setState(() => _loadingStatus =
+          tr('ai_flow.status.analyzing')); // "AI가 1차 분석 중... (최대 1분)"
       await _aiVerificationService.startVerificationFlow(
         context: context,
         rule: _selectedAiRule!,
         productId: productId,
-        categoryId: _selectedCategoryId!,
+        categoryId: _selectedCategory?.parentId ?? _selectedCategoryId!,
         initialImages: _images, // XFile 리스트 그대로 전달하면 서비스가 업로드 처리
         productName: _titleController.text,
         productDescription: _descriptionController.text,
         productPrice: _priceController.text,
       );
     } finally {
-      if (mounted) setState(() => _isSaving = false);
+      if (mounted) setState(() => _loadingStatus = null); // [작업 68]
     }
   }
 
@@ -519,14 +535,22 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                       _selectedAiRule != null &&
                       _selectedParentCategoryName != null; // 이름까지 로드되었는지 확인
                   return OutlinedButton.icon(
-                    onPressed:
-                        (isReady && !_isSaving) ? _startAiVerification : null,
+                    onPressed: (isReady && _loadingStatus == null)
+                        ? _startAiVerification
+                        : null,
                     icon: const Icon(Icons.shield_outlined),
-                    label: _isSaving
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                    label: _loadingStatus != null
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2)),
+                              const SizedBox(width: 12),
+                              Text(_loadingStatus!), // [작업 68] "AI가 1차 분석 중..."
+                            ],
                           )
                         : Text('ai_flow.cta.start_button'.tr()),
                     style: OutlinedButton.styleFrom(

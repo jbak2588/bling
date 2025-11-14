@@ -64,9 +64,11 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   bool _isNegotiable = false;
   List<String> _existingImageUrls = [];
   final List<XFile> _images = [];
-  bool _isLoading = false;
+  // bool _isLoading = false; // [작업 68] _loadingStatus로 대체
+  String? _loadingStatus; // 저장 또는 AI 시작 시
   String _status = 'selling'; // [Fix] Add status state variable
   Category? _selectedCategory;
+  Category? _selectedParentCategory; // [작업 72] 부모 카테고리 저장용
   String _condition = 'used';
 
   // ✅ 태그 목록을 관리할 상태 변수 추가 : 2025년 8월 30일
@@ -77,13 +79,17 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   AiVerificationRule? _aiRule; // [추가] AI 규칙을 저장할 변수
   // [핵심 추가] AI 검수 진행 상태를 추적하는 변수
   bool _isCancellingAi = false;
-  bool _isAiLoading = false;
+  // [작업 71] 선택된(또는 저장된) 카테고리 관련 상태
+  String? _selectedCategoryId;
+  // bool _isAiLoading = false; // [작업 68] _loadingStatus로 대체
 
   @override
   void initState() {
     super.initState();
-    // [핵심 추가] 화면이 시작될 때 현재 상품의 카테고리 ID로 AI 규칙을 미리 불러옵니다.
-    _aiVerificationService.loadAiRule(widget.product.categoryId).then((rule) {
+    // [핵심 추가] 화면이 시작될 때 현재 상품의 카테고리(우선 child/subcategory)로 AI 규칙을 미리 불러옵니다.
+    // Prefer the product's subcategory id so we fetch ai_verification_rules/{subCategory}.
+    final String ruleCategoryId = widget.product.categoryId;
+    _aiVerificationService.loadAiRule(ruleCategoryId).then((rule) {
       if (mounted) setState(() => _aiRule = rule);
     });
 
@@ -104,26 +110,14 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
           "Warning: Invalid condition value '$dbCondition' for ${widget.product.id}. Defaulting to 'used'.");
       _condition = 'used'; // 오염된 값이면 'used'로 강제
     }
-    _status = widget.product.status; // [Fix] Initialize status
 
-    // ✅ 기존 상품의 태그를 초기값으로 설정
-    _tags = List<String>.from(widget.product.tags);
-
-    // [추가] AI 검증 상태 초기화
+    // 초기 카테고리 ID 설정 후 비동기로 카테고리/규칙을 로드합니다.
+    // Prefer subcategory id (product.categoryId) first for lookups and rule loading
+    _selectedCategoryId = widget.product.categoryId;
+    // 초기 AI 검증 상태를 로드합니다.
     _isAiVerified = widget.product.isAiVerified;
-
     _loadInitialCategory();
-    // 규칙은 위에서 카테고리 ID로 로드합니다.
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _priceController.dispose();
-    _descriptionController.dispose();
-    _addressController.dispose();
-    _transactionPlaceController.dispose();
-    super.dispose();
+    _loadCategoryDetails();
   }
 
   Future<void> _pickImages() async {
@@ -133,6 +127,29 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       setState(() {
         _images.addAll(picked);
       });
+    }
+  }
+
+  // [작업 72] 선택된 카테고리 ID 기반으로 AI 규칙 및 관련 세부 정보를 비동기로 로드합니다.
+  Future<void> _loadCategoryDetails() async {
+    if (_selectedCategoryId == null) {
+      return; // 카테고리 정보가 없으면 선택 대기
+    }
+
+    if (mounted) {
+      setState(() => _loadingStatus = tr('ai_flow.status.loading_category'));
+    }
+
+    try {
+      // AI 규칙 로드
+      _aiRule = await _aiVerificationService.loadAiRule(_selectedCategoryId!);
+    } catch (e) {
+      debugPrint("Error loading category details: $e");
+      // 오류 발생 시, 사용자가 수동으로 재선택하도록 강제
+      _selectedCategoryId = null;
+    }
+    if (mounted) {
+      setState(() => _loadingStatus = null); // 로딩 완료
     }
   }
 
@@ -177,54 +194,113 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
 
     if (id == null) return;
 
-    // 1) Try loading as a parent category stored in categories_v2
-    try {
-      final parentDoc = await FirebaseFirestore.instance
-          .collection('categories_v2')
-          .doc(id)
-          .get();
-      if (parentDoc.exists) {
-        setState(() => _selectedCategory = Category.fromFirestore(parentDoc));
-        return;
+    // Resolve category using the stored `categoryId` on the product.
+    // ProductModel may include `categoryParentId`; `categoryId` may be a
+    // parent or a subcategory id. Strategy:
+    // 1) Try to load a parent document at categories_v2/{categoryId}.
+    // 2) If not found, search collectionGroup('subCategories') for a matching
+    //    doc id and then load its parent using the child's parentId.
+    final String catId = widget.product.categoryId;
+
+    // If product explicitly stores parent id, use it first (preferred)
+    final String? prodParentId = widget.product.categoryParentId;
+    if (prodParentId != null && prodParentId.isNotEmpty) {
+      try {
+        final parentDoc = await FirebaseFirestore.instance
+            .collection('categories_v2')
+            .doc(prodParentId)
+            .get();
+        if (parentDoc.exists) {
+          // try to load sub doc under the parent
+          final subDoc = await FirebaseFirestore.instance
+              .collection('categories_v2')
+              .doc(prodParentId)
+              .collection('subCategories')
+              .doc(catId)
+              .get();
+
+          if (subDoc.exists) {
+            setState(() {
+              _selectedParentCategory = Category.fromFirestore(parentDoc);
+              _selectedCategory = Category.fromFirestore(subDoc);
+              _selectedCategoryId = catId;
+            });
+            return;
+          }
+
+          // If subDoc doesn't exist, but parent exists and catId equals parentId,
+          // treat product category as the parent
+          if (prodParentId == catId) {
+            setState(() {
+              _selectedParentCategory = Category.fromFirestore(parentDoc);
+              _selectedCategory = _selectedParentCategory;
+              _selectedCategoryId = catId;
+            });
+            return;
+          }
+        }
+      } catch (e) {
+        debugPrint('Error loading category via product.categoryParentId: $e');
       }
-    } catch (e) {
-      // Log and continue to fallback
-      debugPrint('Failed loading parent category doc for id=$id: $e');
     }
 
-    // 2) Fallback: search across all subCategories subcollections for a matching doc id.
-    // Wrap in try/catch because some platform/serialization issues can throw at the
-    // native layer when a query argument is unexpected.
     try {
-      final q = await FirebaseFirestore.instance
-          .collectionGroup('subCategories')
-          .where(FieldPath.documentId, isEqualTo: id)
-          .limit(1)
+      // 1) Parent doc lookup
+      final parentDoc = await FirebaseFirestore.instance
+          .collection('categories_v2')
+          .doc(catId)
           .get();
-      if (q.docs.isNotEmpty) {
-        setState(
-            () => _selectedCategory = Category.fromFirestore(q.docs.first));
+      if (parentDoc.exists) {
+        setState(() {
+          _selectedParentCategory = Category.fromFirestore(parentDoc);
+          _selectedCategory = _selectedParentCategory; // parent selected
+          _selectedCategoryId = catId;
+        });
         return;
       }
-    } catch (e) {
-      debugPrint(
-          'collectionGroup by docId failed for id=$id: $e — trying DocumentReference fallback');
+
+      // 2) Fallback: find subcategory document by id across subCategories
       try {
-        final docRef = FirebaseFirestore.instance.doc('categories_v2/$id');
-        final q2 = await FirebaseFirestore.instance
+        final q = await FirebaseFirestore.instance
             .collectionGroup('subCategories')
-            .where(FieldPath.documentId, isEqualTo: docRef)
+            .where(FieldPath.documentId, isEqualTo: catId)
             .limit(1)
             .get();
-        if (q2.docs.isNotEmpty) {
-          setState(
-              () => _selectedCategory = Category.fromFirestore(q2.docs.first));
+
+        if (q.docs.isNotEmpty) {
+          final subDoc = q.docs.first;
+          final subCategory = Category.fromFirestore(subDoc);
+          final parentId = subCategory.parentId;
+
+          if (parentId != null && parentId.isNotEmpty) {
+            final parentDoc2 = await FirebaseFirestore.instance
+                .collection('categories_v2')
+                .doc(parentId)
+                .get();
+            if (parentDoc2.exists) {
+              setState(() {
+                _selectedParentCategory = Category.fromFirestore(parentDoc2);
+                _selectedCategory = subCategory;
+                _selectedCategoryId = catId;
+              });
+              return;
+            }
+          }
+
+          // parent not found, but set the subcategory so UI shows something
+          setState(() {
+            _selectedCategory = subCategory;
+            _selectedCategoryId = catId;
+          });
           return;
         }
-      } catch (e2) {
-        debugPrint(
-            'collectionGroup by DocumentReference also failed for id=$id: $e2');
+      } catch (e) {
+        debugPrint('collectionGroup by docId failed for id=$catId: $e');
       }
+
+      debugPrint('Warning: Could not resolve category for id=$catId');
+    } catch (e) {
+      debugPrint('Failed _loadInitialCategory: $e');
     }
   }
 
@@ -235,6 +311,10 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     if (result != null && mounted) {
       setState(() {
         _selectedCategory = result;
+        // [작업 74] 부모/자식 카테고리를 선택 스크린에서 올바르게 받아왔다고 가정
+        _selectedParentCategory = (result.isParent) ? result : null;
+        _selectedCategoryId = result.id;
+        _loadCategoryDetails(); // AI 규칙 다시 로드
       });
     }
   }
@@ -263,6 +343,11 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   String _getCategoryName(BuildContext context, Category? category) {
     if (category == null) return 'selectCategory'.tr();
     final langCode = context.locale.languageCode;
+    // [작업 74] 부모 이름 + 자식 이름 (예: 디지털기기 > 스마트폰)
+    if (_selectedParentCategory != null && !category.isParent) {
+      return "${_selectedParentCategory!.displayName(langCode)} > ${category.displayName(langCode)}";
+    }
+    // 부모를 찾지 못했거나, 부모 카테고리 자체인 경우
     switch (langCode) {
       case 'ko':
         return category.nameKo;
@@ -274,7 +359,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   }
 
   Future<void> _saveProduct() async {
-    if (_isLoading) return;
+    if (_loadingStatus != null) return;
     if (_existingImageUrls.isEmpty && _images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('marketplace.errors.noPhoto'.tr())),
@@ -286,7 +371,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     }
 
     setState(() {
-      _isLoading = true;
+      _loadingStatus = tr('marketplace.edit.saving');
     });
 
     try {
@@ -321,6 +406,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         'negotiable': _isNegotiable,
         'imageUrls': allImageUrls,
         'categoryId': _selectedCategory?.id ?? widget.product.categoryId,
+        'categoryParentId':
+            _selectedCategory?.parentId ?? widget.product.categoryParentId,
         'condition': _condition,
         'status': _status, // [Fix] Save the updated status
 
@@ -354,7 +441,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         );
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _loadingStatus = null);
     }
   }
 
@@ -362,15 +449,15 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   Future<void> _startAiVerification() async {
     if (_aiRule == null) return;
 
-    setState(() {
-      _isAiLoading = true;
-    });
+    setState(() =>
+        _loadingStatus = tr('ai_flow.status.analyzing')); // "AI가 1차 분석 중..."
 
     try {
       await _aiVerificationService.startVerificationFlow(
         context: context,
         rule: _aiRule!,
         productId: widget.product.id,
+        // Prefer the product's subcategory id so AI rules are loaded per-subcategory.
         categoryId: widget.product.categoryId,
         initialImages: widget.product.imageUrls,
         productName: _titleController.text,
@@ -387,9 +474,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isAiLoading = false;
-        });
+        setState(() => _loadingStatus = null);
       }
     }
   }
@@ -501,8 +586,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         title: Text('marketplace.edit.title'.tr()),
         actions: [
           TextButton(
-            onPressed: _isLoading ? null : _saveProduct,
-            child: _isLoading
+            onPressed: _loadingStatus != null ? null : _saveProduct,
+            child: _loadingStatus != null
                 ? const SizedBox(
                     width: 16,
                     height: 16,
@@ -681,17 +766,27 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                       : null,
                 ),
                 const SizedBox(height: 16),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                  onTap: _selectCategory,
-                  title: Text(_getCategoryName(context, _selectedCategory)),
-                  leading: const Icon(Icons.category_outlined),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.grey.shade400),
-                    borderRadius: BorderRadius.circular(4),
+                // [작업 71] 1. 카테고리 로딩 중이 아닐 때만 선택기 표시
+                if (_loadingStatus == tr('ai_flow.status.loading_category'))
+                  ListTile(
+                    title: const Text("카테고리 정보 로딩 중..."),
+                    leading: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2)),
+                  )
+                else
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    onTap: _selectCategory,
+                    title: Text(_getCategoryName(context, _selectedCategory)),
+                    leading: const Icon(Icons.category_outlined),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
-                ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _priceController,
@@ -827,19 +922,21 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                   ),
                   const SizedBox(height: 16),
                   OutlinedButton.icon(
-                    // [핵심 수정] 로딩 중일 때 버튼 비활성화
-                    onPressed: (_aiRule != null &&
-                            _aiRule!.isAiVerificationSupported &&
-                            !_isAiLoading)
-                        ? _startAiVerification
-                        : null,
+                    onPressed:
+                        _loadingStatus != null ? null : _startAiVerification,
                     icon: const Icon(Icons.shield_outlined),
-                    // [핵심 수정] 로딩 중일 때 스피너 표시
-                    label: _isAiLoading
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                    label: _loadingStatus != null
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2)),
+                              const SizedBox(width: 12),
+                              Text(_loadingStatus!), // [작업 68] "AI가 1차 분석 중..."
+                            ],
                           )
                         : Text('ai_flow.cta.start_button'.tr()),
                   ),
@@ -869,7 +966,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
 
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _saveProduct,
+                  onPressed: _loadingStatus != null ? null : _saveProduct,
                   child: Text('marketplace.edit.save'.tr()),
                 ),
               ],

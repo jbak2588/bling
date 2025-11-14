@@ -25,7 +25,10 @@ class AiReportViewer extends StatelessWidget {
     final dynamic aiPrice = report['price_suggestion'] ??
         report['suggested_price'] ??
         report['ai_recommended_price'];
-    final skipped = report['skipped_items'];
+    // Prefer the newer `skippedKeys` field (sent by the client), but
+    // fall back to legacy `skipped_items` which the server still includes
+    // for backward compatibility. Normalize to a List if present.
+    final dynamic skipped = report['skippedKeys'] ?? report['skipped_items'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

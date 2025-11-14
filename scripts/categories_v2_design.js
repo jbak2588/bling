@@ -129,7 +129,7 @@ const design = {
       },
       "bags-accessories": {
         "name_ko": "가방/잡화",
-        "name_en": "Tas & Aksesori",
+        "name_en": "Bags & Accessories",
         "name_id": "Tas & Aksesoris",
         "order": 4,
         "active": true,

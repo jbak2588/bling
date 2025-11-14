@@ -253,8 +253,13 @@ class AiVerificationService {
       final data = initRes.data ?? {};
       // [Fix #3] AI가 예측한 이름이 아닌, 사용자가 입력한 원본 제목을 항상 신뢰합니다.
       final String confirmedName = productName;
+      // Support both new and legacy AI response schemas:
+      // - New key: 'missing_evidence_keys' (server patch)
+      // - Legacy key: 'missing_evidence_list'
       final List<dynamic> missingRaw =
-          (data['missing_evidence_list'] as List<dynamic>?) ?? const [];
+          (data['missing_evidence_keys'] as List<dynamic>?) ??
+              (data['missing_evidence_list'] as List<dynamic>?) ??
+              const [];
       final missingKeys = missingRaw.whereType<String>().toList();
 
       // [Fix #2] '신발' 등 범용 카테고리일 때 빈 제안 화면이 뜨는 문제 해결
@@ -287,6 +292,9 @@ class AiVerificationService {
             categoryName: parentName,
             subCategoryName: subName,
             missingEvidenceKeys: missingKeys,
+            foundEvidence: (data['found_evidence'] as Map?) != null
+                ? Map<String, dynamic>.from((data['found_evidence'] as Map))
+                : <String, dynamic>{},
           ),
         ));
       }
@@ -342,7 +350,8 @@ class AiVerificationService {
       'subCategoryName': subName,
       'userPrice': productPrice,
       'userDescription': productDescription,
-      'skipped_items': skippedItems,
+      // Use 'skippedKeys' (client name) to match server expectations.
+      'skippedKeys': skippedItems,
       'locale': context.locale.languageCode,
     });
 
@@ -350,8 +359,14 @@ class AiVerificationService {
     final report = (reportRaw != null && reportRaw is Map)
         ? Map<String, dynamic>.from(reportRaw)
         : null;
-    if (report == null) {
-      throw Exception('AI가 유효한 리포트를 생성하지 못했습니다.');
+
+    // [작업 11 수정] AI 계약 위반 방어 코드
+    // AI가 notes_for_buyer만 반환하고 필수 키를 누락하는 경우를 차단합니다.
+    if (report == null ||
+        report['key_specs'] == null ||
+        report['verification_summary'] == null ||
+        report['condition_check'] == null) {
+      throw Exception('ai_flow.errors.incomplete_report'.tr());
     }
 
     // 3. 최종 화면으로 이동 (AiEvidenceSuggestionScreen의 로직과 동일)

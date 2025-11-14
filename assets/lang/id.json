@@ -257,6 +257,11 @@
     }
   },
   "ai_flow": {
+    "status": {
+      "saving": "Menyimpan informasi produk...",
+      "analyzing": "AI sedang menganalisis... (maks 1 menit)",
+      "loading_category": "Memuat info kategori..."
+    },
     "cta": {
       "title": "🤖 Tingkatkan kepercayaan dengan verifikasi AI (opsional)",
       "subtitle": "Dapatkan lencana verifikasi AI untuk meningkatkan kepercayaan pembeli dan mempercepat penjualan. Isi semua informasi produk sebelum memulai.",
@@ -317,16 +322,28 @@
     "evidence": {
       "all_shots_required": "Semua bidikan diperlukan untuk informasi detail produk.",
       "title": "Kumpulkan untuk detail produk",
+      "initial_images_title": "Daftar gambar yang digunakan AI untuk analisis awal",
+      "suggestion_title": "Item pelengkapan yang disarankan AI",
+      
+      "pick_initial_title": "Pilih foto untuk bukti ini",
       "submit_button": "Kirim untuk verifikasi"
     },
     "error": {
       "report_generation": "report generation"
     },
+    "errors": {
+      "incomplete_report": "Analisis AI Gagal: AI tidak menghasilkan item laporan yang diperlukan (spesifikasi, kondisi, ringkasan). Silakan coba lagi nanti."
+    },
     "common": {
+      "pick_from_initial": "Pilih dari foto yang ada",
+      "take_photo": "Ambil Foto",
+      "pick_gallery": "Pilih dari Galeri",
       "skipped": "Skipped",
       "add_photo": "Add Photo",
       "skip": "Skip",
-      "added_photo": "Photo added: {}"
+      "added_photo": "Photo added: {}",
+      "verified_from_initial": "Terverifikasi dari foto ke-{}",
+      "retake": "Ambil ulang"
     }
   },
   "registration_flow": {
@@ -1712,8 +1729,7 @@
       "statusUpdateFail": "Gagal memperbarui status: {error}",
       "originalPostNotFound": "Postingan asli tidak ditemukan.",
       "couldNotOpenOriginalPost": "Tidak dapat membuka postingan asli."
-    }
-    ,
+    },
     "reset": {
       "confirmTitle": "Reset jumlah pembatalan AI",
       "confirmContent": "Mengatur ulang semua produk sehingga AI cancel count (aiCancelCount) menjadi 0. (Mengembalikan free tier 1 kali)\n\nTindakan ini tidak dapat dibatalkan. Lanjutkan?",

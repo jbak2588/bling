@@ -68,7 +68,9 @@ import '../../shared/widgets/app_bar_icon.dart';
 // 카테고리 이름 표시를 위한 별도 위젯
 class CategoryNameWidget extends StatelessWidget {
   final String categoryId;
-  const CategoryNameWidget({super.key, required this.categoryId});
+  final String? categoryParentId;
+  const CategoryNameWidget(
+      {super.key, required this.categoryId, this.categoryParentId});
 
   String _getCategoryName(BuildContext context, Category category) {
     final langCode = context.locale.languageCode;
@@ -87,6 +89,64 @@ class CategoryNameWidget extends StatelessWidget {
     if (categoryId.isEmpty) {
       return const SizedBox.shrink();
     }
+    // If a parent id is provided, prefer loading the child from parent's subCategories
+    if (categoryParentId != null && categoryParentId!.isNotEmpty) {
+      return FutureBuilder<List<DocumentSnapshot>>(
+        future: Future.wait([
+          FirebaseFirestore.instance
+              .collection('categories_v2')
+              .doc(categoryParentId)
+              .get(),
+          FirebaseFirestore.instance
+              .collection('categories_v2')
+              .doc(categoryParentId)
+              .collection('subCategories')
+              .doc(categoryId)
+              .get(),
+        ]),
+        builder: (context, snap) {
+          if (!snap.hasData) return const SizedBox.shrink();
+          final parentDoc = snap.data![0];
+          final childDoc = snap.data![1];
+          if (parentDoc.exists && childDoc.exists) {
+            try {
+              final parent = Category.fromFirestore(
+                  parentDoc as DocumentSnapshot<Map<String, dynamic>>);
+              final child = Category.fromFirestore(
+                  childDoc as DocumentSnapshot<Map<String, dynamic>>);
+              final text =
+                  "${parent.displayName(context.locale.languageCode)} > ${child.displayName(context.locale.languageCode)}";
+              return Text(text,
+                  style: const TextStyle(fontSize: 13, color: Colors.grey));
+            } catch (e) {
+              return const SizedBox.shrink();
+            }
+          }
+          // Fallback to loading categoryId directly
+          return FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestore.instance
+                .collection('categories_v2')
+                .doc(categoryId)
+                .get(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData || !snapshot.data!.exists) {
+                return const Text('');
+              }
+              try {
+                final category = Category.fromFirestore(
+                  snapshot.data as DocumentSnapshot<Map<String, dynamic>>,
+                );
+                return Text(_getCategoryName(context, category),
+                    style: const TextStyle(fontSize: 13, color: Colors.grey));
+              } catch (e) {
+                return const SizedBox.shrink();
+              }
+            },
+          );
+        },
+      );
+    }
+
     return FutureBuilder<DocumentSnapshot>(
       future: FirebaseFirestore.instance
           .collection('categories_v2')
@@ -684,7 +744,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             child: AiVerificationBadge(),
                           ),
                         Row(children: [
-                          CategoryNameWidget(categoryId: product.categoryId),
+                          CategoryNameWidget(
+                              categoryId: product.categoryId,
+                              categoryParentId: product.categoryParentId),
                           Text(" ∙ ${_formatTimestamp(product.createdAt)}",
                               style: const TextStyle(
                                   fontSize: 13, color: Colors.grey)),

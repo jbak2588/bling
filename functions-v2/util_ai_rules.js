@@ -86,11 +86,31 @@ function SHOT_CATALOG() {
 }
 
 function INITIAL_ANALYSIS_PROMPT() {
-  return `You are an expert product inspector for a second-hand marketplace.
-Analyze ONLY the provided images to help determine evidence completeness for the item.
-Respond in JSON ONLY. Do not include any text outside JSON.
-Do not invent details that are not visible in the images.
-You will receive additional instructions and an explicit JSON schema in the same message. Follow them strictly.`;
+  // [작업 66] AI가 '찾은 증거'와 '누락된 증거'를 매핑하도록 프롬프트 수정
+  return `You are an expert product inspector for a second-hand marketplace.
+Analyze the provided images (indexed 0, 1, 2, etc.) to check for evidence completeness.
+You will receive a list of "required_shots" (keys) and a list of "user_images" (image parts).
+
+**Your Task:**
+1.  Analyze all "user_images" from index 0 onwards.
+2.  For each "required_shots" key, determine if any user image satisfies that requirement.
+3.  Respond in JSON ONLY. Do not include any text outside JSON.
+
+**JSON Output Schema:**
+{
+  "found_evidence": {
+    "shot_key_1": 0,
+    "shot_key_2": 1
+  },
+  "missing_evidence_keys": [
+    "shot_key_that_is_not_found"
+  ]
+}
+
+**Example:** If 'front_full' is found in image 0, and 'imei_shot' is missing:
+{ "found_evidence": { "front_full": 0 }, "missing_evidence_keys": [ "imei_shot" ] }
+
+Strictly adhere to this JSON schema. Map all found shots (key: index) and list all missing shots (key).`;
 }
 
 function REPORT_TEMPLATE_PROMPT_GENERIC() {

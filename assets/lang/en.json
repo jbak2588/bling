@@ -255,12 +255,22 @@
     "setLocationPrompt": "Set your neighborhood first to see preloved items!"
   },
   "ai_flow": {
+    "status": {
+      "saving": "Saving product...",
+      "analyzing": "AI is analyzing... (up to 1 minute)",
+      "loading_category": "Loading category info..."
+    },
     "common": {
       "error": "An error occurred: {error}",
       "add_photo": "Add Photo",
+      "take_photo": "Take Photo",
+      "pick_gallery": "Pick from Gallery",
+      "pick_from_initial": "Select from existing photos",
       "skip": "Skip",
       "added_photo": "Photo added: {}",
-      "skipped": "Skipped"
+      "skipped": "Skipped",
+      "verified_from_initial": "Verified from image # {}",
+      "retake": "Retake"
     },
     "cta": {
       "title": "🤖 Boost trust with AI verification (optional)",
@@ -326,10 +336,17 @@
     "evidence": {
       "all_shots_required": "All shots are required for product detail information.",
       "title": "Collect for product detail info",
+      "initial_images_title": "List of images used in AI's initial analysis",
+      "suggestion_title": "AI suggested supplementary items",
+      
+      "pick_initial_title": "Select a photo for this evidence",
       "submit_button": "Submit for verification"
     },
     "error": {
       "report_generation": "report generation"
+    },
+    "errors": {
+      "incomplete_report": "AI Analysis Failed: The AI did not generate required report items (specs, condition, summary). Please try again later."
     }
   },
   "registration_flow": {

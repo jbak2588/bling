@@ -233,7 +233,8 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                           setState(() => _isStartingChat = true);
                           try {
                             // 1. Cloud Function 호출
-                            final result = await FirebaseFunctions.instance
+                            final result = await FirebaseFunctions.instanceFor(
+                                    region: 'asia-southeast2')
                                 .httpsCallable("startFriendChat")
                                 .call({"otherUserId": user.uid});
 

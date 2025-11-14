@@ -535,9 +535,7 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
       suggestedShotKeys = DEFAULT_SUGGESTED_SHOTS[group];
     }
 
-    const evidenceInstruction = `\nAdditionally, analyze the provided images and determine which of the following suggested evidence keys CANNOT be confidently verified from the images: [${suggestedShotKeys.join(
-          ", "
-        )}].\nReturn JSON ONLY with the following schema:\n{\n  "predicted_item_name": "string",\n  "missing_evidence_list": ["key1_if_missing", "key2_if_missing"]  // keys from the list above that cannot be verified\n}`;
+    // evidenceInstruction will be defined later after locale resolution (langName).
 
     const ac = new AbortController();
     const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
@@ -591,11 +589,20 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
   // Locale-aware directive
   const lc = (typeof locale === "string" && locale) || "id";
   const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
-  const localeDirective = `\n\n[Language]\nAll textual responses must be written in ${langName}. For example, return 'predicted_item_name' in ${langName}.`;
 
-  const augmentedPrompt = `${promptTemplate}${evidenceInstruction}${localeDirective}`;
+  // [작업 74] AI가 '찾은 증거'와 '누락된 증거'를 매핑하도록 프롬프트 수정 (작업 66 내용)
+  const evidenceInstruction = `\nAdditionally, analyze the provided images (indexed 0, 1, 2, etc.) to check for evidence completeness.\nYou will receive a list of "required_shots" (keys) and a list of "user_images" (image parts).\n\n**Your Task:**\n1.  Analyze all "user_images" from index 0 onwards.\n2.  For each "required_shots" key, determine if any user image satisfies that requirement.\n3.  Respond in JSON ONLY. Do not include any text outside JSON.\n\n**JSON Output Schema:**\n{\n  "found_evidence": {\n    "shot_key_1": 0,\n    "shot_key_2": 1\n  },\n  "missing_evidence_keys": [\n    "shot_key_that_is_not_found"\n  ]\n}\n\n[Language] All textual responses must be written in ${langName}.`;
+
+  const augmentedPrompt = `${promptTemplate}${evidenceInstruction}`;
+    // [작업 66] AI 프롬프트가 'required_shots' 목록을 요구하므로, contents에 추가
     const userContents = [
-      { role: "user", parts: [{ text: augmentedPrompt }, ...imageParts] },
+      { role: "user", parts: [
+        { text: augmentedPrompt },
+        { text: "--- REQUIRED SHOTS (Keys) ---" },
+        { text: JSON.stringify(suggestedShotKeys) },
+        { text: "--- USER IMAGES (Indexed) ---" },
+        ...imageParts,
+      ]},
     ];
     const text = await genAiCall(genAI, {
       modelPrimary: "gemini-2.5-flash",
@@ -609,38 +616,93 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
     // 진단 로그용 원문/파싱 결과 기록
     const jsonText = extractJsonText(text);
     const parsed = tryParseJson(jsonText);
+
+    // Robust fallback: if primary parse failed, try to salvage common JSON fragments
+    let parsedRes = parsed;
+    if (!parsedRes) {
+      try {
+        // 1) Try to extract the first {...} object block
+        const objMatch = jsonText.match(/\{[\s\S]*\}/);
+        if (objMatch) {
+          parsedRes = tryParseJson(objMatch[0]);
+        }
+      } catch (e) {
+        parsedRes = null;
+      }
+    }
+    if (!parsedRes) {
+      // 2) Try to extract legacy array field 'missing_evidence_list' if present as JSON fragment
+      try {
+        const arrMatch = jsonText.match(/"missing_evidence_list"\s*:\s*(\[[\s\S]*?\])/);
+        const nameMatch = jsonText.match(/"predicted_item_name"\s*:\s*"([^"]*)"/);
+        const foundMatch = jsonText.match(/"found_evidence"\s*:\s*(\{[\s\S]*?\})/);
+        const rescueObj = {};
+        if (arrMatch) {
+          const a = tryParseJson(arrMatch[1]);
+          if (Array.isArray(a)) rescueObj.missing_evidence_list = a;
+        }
+        if (nameMatch) rescueObj.predicted_item_name = nameMatch[1];
+        if (foundMatch) {
+          const f = tryParseJson(foundMatch[1]);
+          if (f && typeof f === 'object') rescueObj.found_evidence = f;
+        }
+        if (Object.keys(rescueObj).length) parsedRes = rescueObj;
+      } catch (e) {
+        parsedRes = null;
+      }
+    }
+
+    // [작업 74] AI가 새 스키마를 따랐는지 검증 (작업 66 내용)
+    if (!parsedRes || (parsedRes.found_evidence === undefined && parsedRes.missing_evidence_keys === undefined)) {
+      logger.warn(`[AI 분석 검사] AI가 새 스키마(found_evidence/missing_evidence_keys)를 완전히 따르지 않았습니다. 원본: ${jsonText}`);
+
+      // 시나리오: 모델이 아직 레거시 스키마를 반환하는 경우(작업 이전)
+      // 레거시 필드인 `missing_evidence_list` 또는 `predicted_item_name`이 존재하면
+      // 이를 새 스키마로 매핑하여 하위 호환성을 제공합니다.
+      if (parsedRes && (parsedRes.missing_evidence_list !== undefined || parsedRes.predicted_item_name !== undefined)) {
+        logger.info('[AI 분석] 레거시 스키마 감지, 결과를 새 스키마로 매핑합니다.');
+        const predictedName = parsedRes.predicted_item_name ?? null;
+        let legacyMissing = [];
+        if (Array.isArray(parsedRes.missing_evidence_list)) {
+          legacyMissing = parsedRes.missing_evidence_list
+            .filter((v) => typeof v === 'string')
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0);
+        }
+        const foundEvidence = (parsedRes.found_evidence && typeof parsedRes.found_evidence === 'object')
+          ? parsedRes.found_evidence
+          : {};
+
+        logger.info('✅ 레거시 매핑 완료', { predictedName, legacyMissingCount: legacyMissing.length });
+        return { success: true, prediction: predictedName, found_evidence: foundEvidence, missing_evidence_keys: legacyMissing };
+      }
+      // As a last-resort fallback, if we have suggestedShotKeys available, return them as missing.
+      try {
+        if (Array.isArray(suggestedShotKeys) && suggestedShotKeys.length > 0) {
+          logger.warn('[AI 분석] 최종 폴백: suggestedShotKeys를 missing_evidence_keys로 사용합니다.', { suggestedCount: suggestedShotKeys.length });
+          return { success: true, prediction: null, found_evidence: {}, missing_evidence_keys: suggestedShotKeys };
+        }
+      } catch (e) {
+        logger.warn('폴백 사용 중 오류 발생', e?.toString?.() || e);
+      }
+
+      throw new HttpsError("data-loss", "AI가 유효한 분석 결과를 반환하지 못했습니다.");
+    }
+    // Ensure downstream code uses the rescued parse result if needed
+    if (parsedRes && !parsed) parsed = parsedRes;
+
     logAiDiagnostics("initialproductanalysis", text, parsed);
     if (!parsed) {
       throw new HttpsError("data-loss", "AI returned invalid JSON.");
     }
-    const predictedName = parsed?.predicted_item_name ?? null;
-    // [V2.1] 동적 증거 보강: 누락된 증거 키 목록 추출 및 필터링
-    let missingEvidenceList = [];
-    if (Array.isArray(parsed?.missing_evidence_list)) {
-      missingEvidenceList = parsed.missing_evidence_list
-        .filter((v) => typeof v === "string")
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
-      // 서버 신뢰도 보강: 정의되지 않은 키는 제외
-      if (suggestedShotKeys.length) {
-        const allowed = new Set(suggestedShotKeys);
-        missingEvidenceList = missingEvidenceList.filter((k) => allowed.has(k));
-      }
-    }
-    if (
-      !predictedName ||
-      (typeof predictedName === "string" && predictedName.trim() === "")
-    ) {
-      logger.warn("⚠️ AI returned empty 'predicted_item_name'", {
-        ctx: "initialproductanalysis",
-        hasKeys: Object.keys(parsed || {}),
-      });
-    } else {
-      logger.info("✅ Gemini 분석 성공", {
-        predicted_item_name: predictedName,
-      });
-    }
-    return { success: true, prediction: predictedName, missing_evidence_list: missingEvidenceList };
+
+    logger.info("✅ Gemini 1차 분석 성공", {
+      found: Object.keys(parsed.found_evidence).length,
+      missing: parsed.missing_evidence_keys.length,
+    });
+    
+    // [작업 74] AI가 반환한 { found_evidence: ..., missing_evidence_keys: ... } 객체 전체를 반환
+    return { success: true, ...parsed };
   } catch (error) {
     logger.error(
       "❌ initialproductanalysis 함수 내부에서 심각한 오류 발생:",
@@ -676,7 +738,7 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     userDescription,
     categoryName, // <-- V2 데이터
     subCategoryName, // <-- V2 데이터
-    skipped_items, // <-- V2.1: 사용자가 건너뛴 증거 키 목록
+    skippedKeys, // [작업 74] 클라이언트에서 보내는 필드 이름을 `skippedKeys`로 받습니다
     locale,
   } = request.data;
 
@@ -723,16 +785,13 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
   const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
   promptTemplate += `\n\n[Language]\nWrite all textual fields in ${langName}.`;
 
-  // [V2.1 추가] 사용자가 건너뛴 증거 키(skipped_items)를 프롬프트에 반영하여
-    // 구매자에게 안내할 notes_for_buyer를 생성하도록 모델에 지시합니다.
-    let skippedKeys = [];
-    if (Array.isArray(skipped_items)) {
-      skippedKeys = skipped_items.filter((v) => typeof v === "string").map((s) => s.trim()).filter((s) => s.length > 0);
-    }
+    // [작업 74] 'skippedKeys'가 유효한 배열인지 확인
+    const validSkippedKeys = (Array.isArray(skippedKeys) ? skippedKeys : [])
+      .filter((v) => typeof v === "string").map((s) => s.trim()).filter((s) => s.length > 0);
     const guidedKeys = Object.keys((imageUrls && imageUrls.guided) || {});
-    if (skippedKeys.length) {
+    if (validSkippedKeys.length) {
       promptTemplate += `\n\n[Context: Skipped Evidence]\n` +
-        `The user skipped providing the following suggested evidence keys: [${skippedKeys.join(", ")}].\n` +
+        `The user skipped providing the following suggested evidence keys: [${validSkippedKeys.join(", ")}].\n` +
         `Please still complete the final report objectively. In addition, include a field named \'notes_for_buyer\' (string) that politely informs the buyer which evidence was not provided and suggests verifying them in person or via chat. Do not fabricate data for skipped items.`;
     }
     if (guidedKeys.length) {
@@ -838,21 +897,26 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     }
 
     // [V2.1 보강] 사용자가 건너뛴 증거가 있는 경우, notes_for_buyer가 비어 있으면 기본 안내 문구를 생성합니다.
-    if (skippedKeys.length) {
+    if (validSkippedKeys.length) {
       const hasNotes =
         report.notes_for_buyer && typeof report.notes_for_buyer === "string" && report.notes_for_buyer.trim().length > 0;
       if (!hasNotes) {
         // 지역화된 기본 안내문 생성
         const defaultNotes = {
-          id: `Penjual tidak menyediakan bukti berikut: ${skippedKeys.join(", ")}. Mohon pertimbangkan untuk memeriksa poin-poin ini secara langsung atau minta bukti tambahan lewat chat sebelum membeli.`,
-          ko: `판매자가 다음의 증거를 제공하지 않았습니다: ${skippedKeys.join(", ")}. 구매 전 직접 확인하거나 채팅으로 추가 증빙을 요청하시기 바랍니다.`,
-          en: `The seller did not provide the following evidence: ${skippedKeys.join(", ")}. Please consider verifying these points in person or request additional proof via chat before purchasing.`,
+          id: `Penjual tidak menyediakan bukti berikut: ${validSkippedKeys.join(", ")}. Mohon pertimbangkan untuk memeriksa poin-poin ini secara langsung atau minta bukti tambahan lewat chat sebelum membeli.`,
+          ko: `판매자가 다음의 증거를 제공하지 않았습니다: ${validSkippedKeys.join(", ")}. 구매 전 직접 확인하거나 채팅으로 추가 증빙을 요청하시기 바랍니다.`,
+          en: `The seller did not provide the following evidence: ${validSkippedKeys.join(", ")}. Please consider verifying these points in person or request additional proof via chat before purchasing.`,
         };
         report.notes_for_buyer = defaultNotes[lc] || defaultNotes['id'];
       }
       // 참고용으로 최종 보고서에 skipped_items를 포함하여 클라이언트가 표시/저장을 선택할 수 있게 합니다.
       if (!Array.isArray(report.skipped_items)) {
-        report.skipped_items = skippedKeys;
+        report.skipped_items = validSkippedKeys; // [작업 74] "skipped_items" 키 이름으로 저장
+      }
+      // Also include the newer `skippedKeys` field so clients that expect
+      // the updated key name can read it directly. Keep both for safety.
+      if (!Array.isArray(report.skippedKeys)) {
+        report.skippedKeys = validSkippedKeys;
       }
     }
 
@@ -1508,16 +1572,16 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
       throw new HttpsError("not-found", `상품(ID: ${productId})을 찾을 수 없습니다.`);
     }
 
-    const productData = productDoc.data();
-    const originalReport = productData.aiReport;
-    const originalImageUrls = productData.imageUrls;
+      const productData = productDoc.data();
+      const originalReport = productData.aiReport;
+      const originalImageUrls = productData.imageUrls;
 
-    if (!originalReport || !originalImageUrls || originalImageUrls.length === 0) {
-      throw new HttpsError(
-        "failed-precondition",
-        "AI 검증이 완료된 상품이 아닙니다."
-      );
-    }
+      if (!originalReport) {
+        throw new HttpsError(
+          "failed-precondition",
+          "AI 검증이 완료된 상품이 아닙니다."
+        );
+      }
 
     // 2. 비교 프롬프트 생성
     const lc = (typeof locale === "string" && locale) || "id";
