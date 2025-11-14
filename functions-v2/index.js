@@ -724,6 +724,106 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
   }
 });
 
+
+function normalizeFinalReportShape(raw) {
+  const r = raw && typeof raw === "object" ? { ...raw } : {};
+
+  // ── 공통 헬퍼: 다국어/대체 키 후보 목록에서 첫 값을 고르는 함수들 ──
+  const pickString = (keys) => {
+    for (const k of keys) {
+      const v = r[k];
+      if (typeof v === "string" && v.trim()) return v.trim();
+    }
+    return "";
+  };
+
+  const pickObject = (keys) => {
+    for (const k of keys) {
+      const v = r[k];
+      if (v && typeof v === "object" && !Array.isArray(v)) return v;
+    }
+    return {};
+  };
+
+  const pickArray = (keys) => {
+    for (const k of keys) {
+      const v = r[k];
+      if (Array.isArray(v)) return v;
+      if (typeof v === "string" && v.trim()) {
+        return v
+          .split(/[;,]/)
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
+      }
+    }
+    return [];
+  };
+
+  const pickNumber = (keys) => {
+    for (const k of keys) {
+      const v = r[k];
+      if (typeof v === "number" && Number.isFinite(v)) return v;
+      if (typeof v === "string" && v.trim()) {
+        const n = Number(v.replace(/[^\d.-]/g, ""));
+        if (Number.isFinite(n)) return n;
+      }
+    }
+    return null;
+  };
+
+  // ── 1) 요약: 영어/인도네시아어(등)를 모두 canonical 필드로 정규화 ──
+  //    - AI가 ringkasan, resumen 등을 써도 verification_summary로 모읍니다.
+  r.verification_summary = pickString([
+    "verification_summary",
+    "summary",
+    "ringkasan",       // id
+    "ringkasan_singkat",
+  ]);
+
+  // ── 2) 핵심 스펙: key_specs / specs / spesifikasi 등 ──
+  r.key_specs = pickObject([
+    "key_specs",
+    "specs",
+    "spesifikasi",     // id
+  ]);
+
+  // ── 3) 상태 점검: condition_check / condition / kondisi 등 ──
+  r.condition_check = pickString([
+    "condition_check",
+    "condition",
+    "kondisi",         // id
+  ]);
+
+  // ── 4) 구성품: included_items / items / kelengkapan 등 ──
+  r.included_items = pickArray([
+    "included_items",
+    "items",
+    "kelengkapan",     // id
+  ]);
+
+  // ── 5) 구매자 안내: notes_for_buyer / notes / catatan_* 등 ──
+  r.notes_for_buyer = pickString([
+    "notes_for_buyer",
+    "notes",
+    "catatan_pembeli",        // id
+    "catatan_untuk_pembeli",  // id
+  ]);
+
+  // ── 6) 가격: suggested_price / harga_disarankan / harga_rekomendasi / price_suggestion ──
+  const price = pickNumber([
+    "suggested_price",
+    "harga_disarankan",   // id
+    "harga_rekomendasi",  // id
+    "price_suggestion",
+  ]);
+  if (price !== null) {
+    r.suggested_price = price;
+    r.price_suggestion = price;
+  }
+
+  return r;
+}
+
 /**
  * [V2 최종 수정] 모든 이미지와 정보를 종합하여 최종 판매 보고서를 생성합니다.
  */
@@ -780,10 +880,14 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
       .replace(/{{categoryName}}/g, String(categoryName ?? ""))           // <-- V2 로직
       .replace(/{{subCategoryName}}/g, String(subCategoryName ?? ""));   // <-- V2 로직
 
-  // [Locale] Ensure model writes in the requested language
+  // [작업 21 수정] 프롬프트 언어 주입 로직
+  // "이전에 영어로 강제하던 기능"이 이 부분입니다.
+  // AI가 혼동하지 않도록, "값의 언어"와 "키의 언어"를 명확히 분리하여 지시합니다.
   const lc = (typeof locale === "string" && locale) || "id";
   const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
-  promptTemplate += `\n\n[Language]\nWrite all textual fields in ${langName}.`;
+  promptTemplate += `\n\n[MANDATORY INSTRUCTIONS]:\n` +
+    `1.  **JSON Keys MUST be in English:** The JSON *keys* (e.g., "verification_summary", "key_specs") MUST be in English, exactly as defined in the schema.\n` +
+    `2.  **Text Values MUST be in ${langName}:** All human-readable *values* (the descriptions, specs, notes) MUST be written in ${langName}.`;
 
     // [작업 74] 'skippedKeys'가 유효한 배열인지 확인
     const validSkippedKeys = (Array.isArray(skippedKeys) ? skippedKeys : [])
@@ -870,7 +974,7 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     ).trim();
 
     const jsonBlock = extractJsonText(jsonStr);
-    const report = tryParseJson(jsonBlock);
+    let report = tryParseJson(jsonBlock);
     logAiDiagnostics("generatefinalreport", jsonStr, report);
     if (!report) {
       throw new HttpsError(
@@ -878,6 +982,8 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
         "AI returned invalid JSON for the final report."
       );
     }
+
+    report = normalizeFinalReportShape(report);
 
     // [최종 수정] 클라이언트(Flutter) 코드와 데이터 키 이름을 일치시킵니다.
     // AI는 'suggested_price'를 반환하지만, Flutter 코드는 'price_suggestion'을 기대하고 있습니다.

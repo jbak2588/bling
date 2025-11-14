@@ -114,28 +114,77 @@ Strictly adhere to this JSON schema. Map all found shots (key: index) and list a
 }
 
 function REPORT_TEMPLATE_PROMPT_GENERIC() {
-  return `You are an expert product inspector for a marketplace. Output JSON in Indonesian only.
+  return `You are an expert inspector for second-hand items in an online marketplace.
 
-**User's Input**
+You MUST respond with ONE JSON object only. Do NOT add any commentary before or after the JSON.
+The JSON MUST use exactly the following keys and structure:
+
+{
+  "verification_summary": "string",
+  "key_specs": {
+    "Spec label 1": "Value 1",
+    "Spec label 2": "Value 2"
+  },
+  "condition_check": "string",
+  "included_items": [
+    "Item 1",
+    "Item 2"
+  ],
+  "notes_for_buyer": "string",
+  "suggested_price": 1234567
+}
+
+Field definitions:
+- "verification_summary": 2–3 short sentences that summarize the item, its model and overall impression.
+- "key_specs": 2–5 most important specs or attributes for this category (brand, model, capacity, size, etc.).
+- "condition_check": honest description of wear, scratches, dents, repairs or defects.
+- "included_items": list of each accessory or item included in the sale.
+- "notes_for_buyer": warnings or advice to the buyer, especially if some important evidence photos are missing.
+- "suggested_price": reasonable price suggestion in Indonesian rupiah as a NUMBER only (no currency symbol).
+
+User input to respect:
 - Product Name Claim: "{{confirmedProductName}}"
 - Category: "{{categoryName}}"
 - Sub-Category: "{{subCategoryName}}"
 - User Price: "{{userPrice}}"
 
-**Instructions**
-1) Respect the user's claim. Support it with evidence.
-2) Pick 2-3 key specs relevant to the sub-category.
-3) Describe condition objectively (wear, scratch, dent).
-4) List included items detected.
-5) Suggest reasonable market price in IDR (numbers only).
-If some evidence keys were missing, add:
-"notes_for_buyer": "Saran untuk pembeli mengenai bukti yang tidak disediakan penjual."`;
+If some evidence keys were missing, clearly mention them inside "notes_for_buyer".`;
 }
 
 function REPORT_TEMPLATE_PROMPT_SMARTPHONE() {
-  return `Anda adalah ahli transaksi HP bekas di Indonesia. Tulis JSON berbahasa Indonesia.
-Input Pengguna: Harga: {{userPrice}} IDR, Deskripsi singkat: {{userDescription}}
-Wajib: judul, deskripsi, spesifikasi (merek/model/kapasitas/warna), kondisi (layar/bodi/baterai), kelengkapan, harga pasar (angka IDR). Jika IMEI/ baterai/ info perangkat tidak ada, tambahkan "notes_for_buyer".`;
+  return `You are an expert appraiser for used mobile phones in a marketplace.
+
+You MUST return ONLY ONE JSON object, with no other text outside the JSON.
+The structure and key names MUST be exactly as follows:
+
+{
+  "verification_summary": "string",
+  "key_specs": {
+    "Brand/Model": "Example Model",
+    "Storage": "256GB"
+  },
+  "condition_check": "string",
+  "included_items": [
+    "Item 1",
+    "Item 2"
+  ],
+  "notes_for_buyer": "string",
+  "suggested_price": 1234567
+}
+
+Field rules:
+- "verification_summary": A 2-3 sentence summary about the phone type, usage duration, and overall impression.
+- "key_specs": 2-5 important specifications (brand, model, storage, color, network, etc.).
+- "condition_check": Physical & functional condition (cracks, scratches, screen/battery replacements, etc.).
+- "included_items": List of included accessories (box, charger, cable, headset, etc.).
+- "notes_for_buyer": Suggestions/warnings, especially if important photos are missing (e.g., IMEI, screen on, or battery info).
+- "suggested_price": Price recommendation in Rupiah as a NUMBER only (no currency symbol).
+
+Also use the following user input:
+- Asking price: {{userPrice}} (IDR, can be empty)
+- Seller's short description: {{userDescription}}
+
+If any important evidence is missing (e.g., no photo of IMEI, screen on, or battery info), please explain it politely in "notes_for_buyer".`;
 }
 
 // ---- 그룹 매핑(간단 키워드) ----
