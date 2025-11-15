@@ -1,6 +1,8 @@
 import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
 import 'package:bling_app/features/marketplace/screens/ai_final_report_screen.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:bling_app/core/utils/popups/snackbars.dart'; // BArtSnackBar 가 정의된 곳
+import 'package:bling_app/core/utils/logging/logger.dart'; // Logger 가 정의된 곳
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -46,6 +48,7 @@ class _AiEvidenceSuggestionScreenState
     extends State<AiEvidenceSuggestionScreen> {
   final ImagePicker _picker = ImagePicker();
   bool _submitting = false;
+  bool _isReportLoading = false; // loading state for final report generation
   final Map<String, XFile> _pickedImages = {};
   final Set<String> _skippedShots = {};
   late Map<String, dynamic> _foundEvidence;
@@ -251,10 +254,13 @@ class _AiEvidenceSuggestionScreenState
           FirebaseFunctions.instanceFor(region: 'asia-southeast2')
               .httpsCallable('generatefinalreport');
 
-      final result = await callable.call(<String, dynamic>{
+      // Prepare payload
+      final payload = <String, dynamic>{
         'imageUrls': {
           'initial': widget.initialImageUrls,
           'guided': guided,
+          // [V3] merge initial found evidence with local updates
+          'found_evidence': _foundEvidence,
         },
         'ruleId': widget.ruleId,
         'confirmedProductName': widget.confirmedProductName,
@@ -262,33 +268,71 @@ class _AiEvidenceSuggestionScreenState
         'subCategoryName': widget.subCategoryName,
         'userPrice': widget.userPrice,
         'userDescription': widget.userDescription,
-        // Use the recalculated list to avoid bugs where _skippedShots was out-of-sync.
         'skippedKeys': finalSkippedKeys,
         'locale': context.locale.languageCode,
-      });
-
-      final reportRaw = (result.data as Map<dynamic, dynamic>?)?['report'];
-      final report = (reportRaw != null && reportRaw is Map)
-          ? Map<String, dynamic>.from(reportRaw)
-          : null;
-      if (report == null) throw Exception('AI did not return a valid report.');
+      };
 
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (_) => AiFinalReportScreen(
-          productId: widget.productId,
-          categoryId: widget.categoryId,
-          finalReport: report,
-          rule: widget.rule,
-          initialImages: widget.initialImageUrls,
-          takenShots: takenShots,
-          confirmedProductName: widget.confirmedProductName,
-          userPrice: widget.userPrice,
-          userDescription: widget.userDescription,
-        ),
-      ));
-    } catch (e) {
+      setState(() => _isReportLoading = true);
+
+      try {
+        final result = await callable.call(payload);
+
+        final reportRaw = (result.data as Map<dynamic, dynamic>?)?['report'];
+        final report = (reportRaw != null && reportRaw is Map)
+            ? Map<String, dynamic>.from(reportRaw)
+            : null;
+
+        // Validate V3 schema
+        if (report == null || report['key_specs'] is! List) {
+          throw Exception('AI가 유효한 V3 리포트를 생성하지 못했습니다.');
+        }
+
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (_) => AiFinalReportScreen(
+            productId: widget.productId,
+            categoryId: widget.categoryId,
+            finalReport: report,
+            rule: widget.rule,
+            initialImages: widget.initialImageUrls,
+            takenShots: takenShots,
+            confirmedProductName: widget.confirmedProductName,
+            userPrice: widget.userPrice,
+            userDescription: widget.userDescription,
+          ),
+        ));
+      } on FirebaseFunctionsException catch (e) {
+        // Handle known Cloud Functions errors
+        if (e.code == 'deadline-exceeded') {
+          BArtSnackBar.showErrorSnackBar(
+              title: '요청 시간 초과',
+              message: 'AI 분석 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.');
+        } else {
+          BArtSnackBar.showErrorSnackBar(
+              title: 'AI 리포트 생성 실패',
+              message: e.message ?? '알 수 없는 오류가 발생했습니다.');
+        }
+        Logger.error('AI Final Report Error (_continue)',
+            error: e, stackTrace: e.stackTrace);
+      } catch (e, stackTrace) {
+        BArtSnackBar.showErrorSnackBar(
+            title: '오류 발생', message: '리포트 생성 중 예기치 않은 오류가 발생했습니다.');
+        Logger.error('AI Final Report Error (_continue)',
+            error: e, stackTrace: stackTrace);
+      } finally {
+        if (mounted) setState(() => _isReportLoading = false);
+      }
+    } catch (e, stackTrace) {
       if (!mounted) return;
+
+      // [작업 41] 에러를 디버그 콘솔에 상세히 출력합니다.
+      debugPrint("======================================================");
+      debugPrint("❌ AI Final Report Error (_continue):");
+      debugPrint("Error: ${e.toString()}");
+      debugPrint("StackTrace: ${stackTrace.toString()}");
+      debugPrint("======================================================");
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
               'marketplace.error'.tr(namedArgs: {'error': e.toString()}))));
@@ -479,8 +523,8 @@ class _AiEvidenceSuggestionScreenState
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
-          onPressed: _submitting ? null : _continue,
-          child: _submitting
+          onPressed: (_submitting || _isReportLoading) ? null : _continue,
+          child: (_submitting || _isReportLoading)
               ? const SizedBox(
                   height: 20,
                   width: 20,

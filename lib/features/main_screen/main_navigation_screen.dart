@@ -76,7 +76,6 @@ import 'package:bling_app/features/boards/screens/kelurahan_board_screen.dart';
 import 'package:bling_app/features/admin/screens/admin_screen.dart'; // ✅ 관리자 화면 import
 // [Fix]
 import 'package:bling_app/features/categories/screens/category_admin_screen.dart'; // [Fix #52] 관리자 카테고리 화면
-import 'package:bling_app/features/marketplace/ai/ai_rule_uploader_from_json.dart'; // Admin only
 
 /// 현재 보고 있는 섹션을 타입 세이프하게 관리하기 위한 enum
 enum AppSection {
@@ -115,8 +114,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   bool _isKelurahanBoardActive = false;
   // 관리자 작업 로딩 상태
   bool _isAdminLoading = false;
-  // AI 규칙 업로드 로딩 상태
-  bool _isRulesLoading = false;
 
   // ✅ [신규] 시나리오 2 (피드 내 검색 활성화)를 위한 Notifier
   final ValueNotifier<AppSection?> _searchActivationNotifier =
@@ -1249,47 +1246,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     },
                   ),
 
-                  // [Fix] 'Upload AI Rules' 버튼이 _isRulesLoading을 사용하도록 수정
-                  if (_isRulesLoading)
-                    const ListTile(
-                      leading: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      title: Text('Uploading AI Rules...'),
-                    )
-                  else
-                    ListTile(
-                      leading: const Icon(Icons.cloud_upload_outlined),
-                      title: const Text('Upload AI Rules (V2)'),
-                      enabled: !_isAdminLoading, // 다른 관리자 작업 중 비활성화
-                      onTap: () async {
-                        if (_isRulesLoading) return;
-                        Navigator.pop(context); // Drawer를 먼저 닫습니다.
-                        setState(() => _isRulesLoading = true);
-                        try {
-                          final uploader = AiRuleUploaderFromJson(
-                              FirebaseFirestore.instance);
-                          await uploader.uploadAll();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'V2 AI Rules (from JSON) successfully uploaded!')),
-                            );
-                          }
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text(
-                                    'AI Rules Upload Error: ${e.toString()}')),
-                          );
-                        } finally {
-                          if (mounted) setState(() => _isRulesLoading = false);
-                        }
-                      },
-                    ),
+                  // 'Upload AI Rules' (V2) removed: uploader is deprecated in favor of Firestore atomic deploy
 
                   // [Fix] 누락된 'AI Cancel Count 초기화' 메뉴 추가
                   if (_isAdminLoading)
@@ -1305,10 +1262,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     ListTile(
                       leading: Icon(
                         Icons.history_toggle_off,
-                        color: _isRulesLoading ? Colors.grey : Colors.orange,
+                        color: _isAdminLoading ? Colors.grey : Colors.orange,
                       ),
                       title: const Text('ADMIN: Reset AI Cancel Counts'),
-                      enabled: !_isRulesLoading, // 다른 관리자 작업 중 비활성화
+                      enabled: !_isAdminLoading, // 다른 관리자 작업 중 비활성화
                       onTap:
                           _confirmResetAiCounts, // [Fix] _resetAiCancelCounts -> _confirmResetAiCounts
                     ),

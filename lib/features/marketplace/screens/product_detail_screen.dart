@@ -764,7 +764,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                         // [개편안 2] 2. AI 검증 리포트 (검증된 경우에만 표시)
                         if (product.isAiVerified)
-                          AiReportViewer(product: product),
+                          AiReportViewer(
+                            aiReport: Map<String, dynamic>.from(
+                                product.aiReport ??
+                                    product.aiVerificationData ??
+                                    {}),
+                          ),
 
                         // ✅ 3. 공용 위젯 추가
                         ClickableTagList(tags: product.tags),

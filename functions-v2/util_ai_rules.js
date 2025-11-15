@@ -150,41 +150,124 @@ User input to respect:
 
 If some evidence keys were missing, clearly mention them inside "notes_for_buyer".`;
 }
+/**
+ * ============================================================================
+ * [V3 아키텍처 개편] (작업 35, 36)
+ * V2의 "통 프롬프트"(`REPORT_TEMPLATE_PROMPT_...`)를 폐기합니다.
+ * 대신, 카테고리별로 "무엇을 추출할지" 정의하는 "추출 대상 템플릿"을 정의합니다.
+ * 이 템플릿은 index.js에서 "증거 지도"와 결합되어 동적 프롬프트로 생성됩니다.
+ * ============================================================================
+ */
+function EXTRACTION_TARGETS() {
+  // 1. 범용(Generic) 추출 템플릿
+  const generic_targets = {
+    // V3 스키마 (ChatGPT 감수안 채택)
+    // key_specs, condition_check, included_items는 List<Map> 형태가 됩니다.
+    "key_specs": [
+      {
+        "spec_key": "brand", // 내부 고정 키
+        "label_ko": "브랜드",
+        "label_id": "Merek",
+        "label_en": "Brand",
+        // AI에게 내릴 "추출 지시"
+        "prompt": "Extract the brand name (e.g., 'Samsung', 'Nike', 'Gucci') from the 'brand_model_tag' image. If unreadable, set value to null.",
+        // 이 지시를 수행할 때 참조할 증거 키
+        "evidence_key": "brand_model_tag"
+      }
+    ],
+    "condition_check": [
+      {
+        "condition_key": "visible_defects",
+        "label_ko": "주요 하자",
+        "label_id": "Cacat Terlihat",
+        "label_en": "Visible Defects",
+        "prompt": "List any visible scratches, dents, or stains shown in 'defect_closeups'. If none are visible, state 'No visible defects found'.",
+        "evidence_key": "defect_closeups"
+      }
+    ],
+    "included_items": [
+      {
+        "item_key": "original_box",
+        "label_ko": "정품 박스",
+        "label_id": "Kotak Asli",
+        "label_en": "Original Box",
+        "prompt": "Is the original box visible in the 'included_items_flatlay' image? Respond true or false. If unsure, set value to null.",
+        "evidence_key": "included_items_flatlay"
+      }
+    ]
+  };
 
-function REPORT_TEMPLATE_PROMPT_SMARTPHONE() {
-  return `You are an expert appraiser for used mobile phones in a marketplace.
+  // 2. 스마트폰(Smartphone) 전용 추출 템플릿
+  const smartphone_targets = {
+    "key_specs": [
+      {
+        "spec_key": "model_name",
+        "label_ko": "모델명",
+        "label_id": "Model",
+        "label_en": "Model",
+        "prompt": "Extract the exact model name (e.g., 'iPhone 15 Pro', 'Galaxy S24 Ultra') from the 'info_shot' image. If unreadable, set value to null.",
+        "evidence_key": "info_shot"
+      },
+      {
+        "spec_key": "storage_capacity",
+        "label_ko": "저장용량",
+        "label_id": "Kapasitas",
+        "label_en": "Storage",
+        "prompt": "Extract the storage capacity (e.g., '128GB', '256GB') from the 'info_shot' image. If unreadable, set value to null.",
+        "evidence_key": "info_shot"
+      },
+      {
+        "spec_key": "battery_health",
+        "label_ko": "배터리 성능",
+        "label_id": "Kesehatan Baterai",
+        "label_en": "Battery Health",
+        "prompt": "Extract the battery health percentage (e.g., '95%') from the 'battery_shot' image. If not a number or unreadable, set value to null.",
+        "evidence_key": "battery_shot"
+      },
+      {
+        "spec_key": "imei",
+        "label_ko": "IMEI",
+        "label_id": "IMEI",
+        "label_en": "IMEI",
+        "prompt": "Extract the IMEI number from the 'imei_shot' image. If unreadable, set value to null.",
+        "evidence_key": "imei_shot"
+      }
+    ],
+    "condition_check": [
+       {
+        "condition_key": "screen_condition",
+        "label_ko": "화면 상태",
+        "label_id": "Kondisi Layar",
+        "label_en": "Screen Condition",
+        "prompt": "Analyze the 'power_on_screen' and 'defect_closeups' images for any scratches, cracks, or dead pixels on the screen. If none, state 'No visible screen defects'.",
+        "evidence_key": "power_on_screen" // index.js가 'defect_closeups'도 함께 참조하도록 동적 구성
+      }
+    ],
+    "included_items": [
+      {
+        "item_key": "original_box",
+        "label_ko": "정품 박스",
+        "label_id": "Kotak Asli",
+        "label_en": "Original Box",
+        "prompt": "Is the original box visible in the 'included_items_flatlay' image? Respond true or false. If unsure, set value to null.",
+        "evidence_key": "included_items_flatlay"
+      },
+      {
+        "item_key": "charger",
+        "label_ko": "충전기",
+        "label_id": "Pengisi Daya",
+        "label_en": "Charger",
+        "prompt": "Is the charger visible in the 'included_items_flatlay' image? Respond true or false. If unsure, set value to null.",
+        "evidence_key": "included_items_flatlay"
+      }
+    ]
+  };
 
-You MUST return ONLY ONE JSON object, with no other text outside the JSON.
-The structure and key names MUST be exactly as follows:
-
-{
-  "verification_summary": "string",
-  "key_specs": {
-    "Brand/Model": "Example Model",
-    "Storage": "256GB"
-  },
-  "condition_check": "string",
-  "included_items": [
-    "Item 1",
-    "Item 2"
-  ],
-  "notes_for_buyer": "string",
-  "suggested_price": 1234567
-}
-
-Field rules:
-- "verification_summary": A 2-3 sentence summary about the phone type, usage duration, and overall impression.
-- "key_specs": 2-5 important specifications (brand, model, storage, color, network, etc.).
-- "condition_check": Physical & functional condition (cracks, scratches, screen/battery replacements, etc.).
-- "included_items": List of included accessories (box, charger, cable, headset, etc.).
-- "notes_for_buyer": Suggestions/warnings, especially if important photos are missing (e.g., IMEI, screen on, or battery info).
-- "suggested_price": Price recommendation in Rupiah as a NUMBER only (no currency symbol).
-
-Also use the following user input:
-- Asking price: {{userPrice}} (IDR, can be empty)
-- Seller's short description: {{userDescription}}
-
-If any important evidence is missing (e.g., no photo of IMEI, screen on, or battery info), please explain it politely in "notes_for_buyer".`;
+  return {
+    "generic": generic_targets,
+    "smartphone": smartphone_targets,
+    // TODO: apparel, bag, camera 등에 대한 전용 템플릿을 여기에 추가
+  };
 }
 
 // ---- 그룹 매핑(간단 키워드) ----
@@ -391,9 +474,16 @@ function applyOverrides(suggestedShots, ov) {
   return shots;
 }
 
-function pickReportPrompt(groups) {
-  return (groups.includes('smartphone')) ? REPORT_TEMPLATE_PROMPT_SMARTPHONE()
-                                         : REPORT_TEMPLATE_PROMPT_GENERIC();
+/**
+ * [V3] V2의 pickReportPrompt를 대체합니다.
+ * 카테고리 그룹에 맞는 "추출 대상 템플릿" (JSON 객체)을 반환합니다.
+ */
+function pickExtractionTargets(groups) {
+  const targets = EXTRACTION_TARGETS();
+  if (groups.includes('smartphone')) {
+    return targets.smartphone;
+  }
+  return targets.generic; // 기본값
 }
 
 function buildAiRulesFromDesign(design) {
@@ -422,8 +512,10 @@ function buildAiRulesFromDesign(design) {
         isAiVerificationSupported: true,
         minGalleryPhotos: ov?.minGalleryPhotos ?? 4,
         suggested_shots: suggested,
+        // [V3] 1차 분석 프롬프트는 V2와 동일하게 유지 (증거 매핑용)
         initial_analysis_prompt_template: INITIAL_ANALYSIS_PROMPT(),
-        report_template_prompt: pickReportPrompt(baseGroups),
+        // [V3] 2차 분석용 '추출 대상 템플릿' (JSON 객체)을 저장
+        extraction_targets: pickExtractionTargets(baseGroups),
       });
     }
   }

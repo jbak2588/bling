@@ -5,11 +5,12 @@ const { onDocumentWritten } = require('firebase-functions/v2/firestore');
 const { onCall } = require('firebase-functions/v2/https'); // [추가]
 const logger = require('firebase-functions/logger');
 const admin = require('firebase-admin');
-const { buildAiRulesFromDesign } = require('./util_ai_rules'); // 아래 util 파일
+const { buildAiRulesFromDesign } = require('./util_ai_rules'); // V3 빌더
 
-// admin.initializeApp(); // [Fix] index.js에서 이미 초기화됨
+// admin.initializeApp(); // index.js에서 이미 초기화됨
 const db = admin.firestore();
-const bucket = admin.storage().bucket();
+
+// note: Storage-based export removed in favor of Firestore atomic deploy
 
 // [Fix] 리전 정책 변경 (us-central1 -> asia-southeast2)
 // (index.js의 setGlobalOptions가 이미 모든 함수를 asia-southeast2로 설정함)
@@ -38,45 +39,81 @@ async function buildDesignFromFirestore() {
   return design;
 }
 
-async function exportToStorage() {
+/**
+ * [V3 원자적 배포] (작업 47)
+ * Firestore에서 디자인을 읽고, V3 규칙을 생성하여
+ * 'ai_verification_rules' 컬렉션에 원자적으로 덮어씁니다.
+ */
+async function deployV3RulesToFirestore() {
+  // 1) Firestore에서 디자인 로드
   const design = await buildDesignFromFirestore();
-  // 1) 디자인 JSON
-  await bucket.file('configs/categories_v2_design.json').save(JSON.stringify({ design }, null, 2), { contentType: 'application/json' });
-  // 2) AI 룰 JSON
-  const rules = buildAiRulesFromDesign(design);
-  await bucket.file('configs/ai_rules_v2.json').save(JSON.stringify(rules, null, 2), { contentType: 'application/json' });
-  return { ok: true };
+  if (!design || Object.keys(design).length === 0) {
+    logger.error('[V3 Atomic Deploy] 0 categories found in Firestore. Aborting.');
+    throw new functions.https.HttpsError('failed-precondition', 'No categories found in Firestore. Publish aborted.');
+  }
+
+  // 2) V3 규칙 생성
+  const rulesData = buildAiRulesFromDesign(design);
+  const rules = rulesData.rules || [];
+
+  // 3) 안전 장치: 0 rules 방지
+  if (rules.length === 0) {
+    logger.error('[V3 Atomic Deploy] 0 rules generated from design. Aborting deploy.');
+    throw new functions.https.HttpsError('failed-precondition', 'Generated 0 rules. Aborting deploy. Check design or Firestore data.');
+  }
+
+  // 4) 원자적 배포: 기존 규칙 삭제 후 새 규칙 배치로 쓰기
+  const batch = db.batch();
+  const colRef = db.collection('ai_verification_rules');
+
+  // 4a) 기존 규칙 삭제
+  const oldRulesSnap = await colRef.get();
+  oldRulesSnap.docs.forEach((doc) => batch.delete(doc.ref));
+  logger.info(`[V3 Atomic Deploy] Deleting ${oldRulesSnap.size} old rules...`);
+
+  // 4b) 새 규칙 추가 (Firestore에 저장하기 전에 필드명 조정)
+  for (const r of rules) {
+    if (!r || !r.id) continue;
+    const docId = r.id.trim();
+    if (!docId) continue;
+
+    const docRef = colRef.doc(docId);
+    const ruleMap = {
+      id: docId,
+      name_ko: r.nameKo || '',
+      name_en: r.nameEn || '',
+      name_id: r.nameId || '',
+      is_ai_verification_supported: r.isAiVerificationSupported || false,
+      min_gallery_photos: r.minGalleryPhotos || 4,
+      suggested_shots: r.suggested_shots || {},
+      initial_analysis_prompt_template: r.initial_analysis_prompt_template || '',
+      extraction_targets: r.extraction_targets || {},
+    };
+
+    batch.set(docRef, ruleMap);
+  }
+
+  // 5) 커밋
+  await batch.commit();
+  logger.info(`[V3 Atomic Deploy] Successfully deployed ${rules.length} V3 rules to Firestore.`);
+  return { ok: true, deployedRules: rules.length };
 }
 
 // 수동 호출용(관리자 Publish 버튼)
-exports.exportCategoriesDesign = onCall(async (req) => { // [수정]
-  const auth = req.auth;
-  if (!auth) { throw new functions.https.HttpsError('unauthenticated', '로그인이 필요합니다.'); }
-  // [Fix] auth.token.role (Custom Claim) 대신 Firestore 'users' 문서의 'role' 또는 'isAdmin'을 확인
-  // (앱 UI의 userModel.isAdmin == true 로직과 일치시킴)
-  const userDoc = await db.collection('users').doc(auth.uid).get();
-  if (!userDoc.exists) {
-    throw new functions.https.HttpsError('not-found', '사용자 문서를 찾을 수 없습니다.');
-  }
-  
-  const userData = userDoc.data() || {};
-  if (userData.role !== 'admin' && userData.isAdmin !== true) {
+exports.exportCategoriesDesign = onCall({
+  region: 'asia-southeast2',
+  secrets: [],
+}, async (req) => {
+  const auth = req.auth || {};
+  if (!auth.token || !auth.token.admin) {
     throw new functions.https.HttpsError('permission-denied', '관리자만 가능합니다.');
   }
 
-  const res = await exportToStorage();
-  logger.info('categories design/rules exported by', auth.uid);
+  // [V3] Firestore에 원자적 배포 실행
+  const res = await deployV3RulesToFirestore();
+  logger.info(`[V3 Atomic Deploy] ${res.deployedRules} rules deployed by admin:`, auth.uid);
   return res;
 });
 
-// 변경 트리거(부모/자식)
-exports.onCategoriesChanged = onDocumentWritten(
-  {
-    document: 'categories_v2/{parentId}/{anySub=**}',
-    retries: 3,
-  },
-  async () => {
-    await exportToStorage();
-    logger.info('categories change detected -> exported.');
-  }
-);
+// 자동 트리거 제거: 배포는 이제 수동(onCall)으로만 수행됩니다.
+// (자동 배포는 실수로 대량 삭제/덮어쓰기를 발생시킬 수 있으므로 의도적으로 제거)

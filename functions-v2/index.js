@@ -825,6 +825,145 @@ function normalizeFinalReportShape(raw) {
 }
 
 /**
+ * [V3 아키텍처] (작업 37)
+ * V3 "증거 패키지"와 "추출 템플릿"을 기반으로 동적 프롬프트를 생성합니다.
+ * @param {object} data - 클라이언트 요청 데이터
+ * @param {object} ruleData - Firestore의 V3 규칙 문서
+ * @return {string} - AI에게 보낼 V3 동적 프롬프트
+ */
+function buildV3ExtractionPrompt(data, ruleData) {
+  const {
+    imageUrls,
+    confirmedProductName,
+    userPrice,
+    userDescription,
+    categoryName,
+    subCategoryName,
+    skippedKeys,
+    locale,
+  } = data;
+
+  // 1. 언어 설정
+  const lc = (typeof locale === "string" && locale) || "id";
+  const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
+  const labelLang = `label_${lc}`; // 예: label_ko
+
+  // 2. V3 추출 대상 템플릿 로드
+  const targets = ruleData.extraction_targets;
+  if (!targets || !targets.key_specs) {
+    throw new HttpsError("failed-precondition", `Rule '${data.ruleId}' is missing V3 'extraction_targets'.`);
+  }
+
+  // 3. [EVIDENCE MAP] 생성
+  const initialUrls = imageUrls.initial || [];
+  const foundEvidence = data.found_evidence || {}; // 1차 분석 결과 { 'key': index }
+  const guidedUrls = imageUrls.guided || {}; // 보강 사진 { 'key': 'url' }
+  const validSkippedKeys = (Array.isArray(skippedKeys) ? skippedKeys : [])
+      .filter((v) => typeof v === "string").map((s) => s.trim()).filter((s) => s.length > 0);
+
+  let evidenceMapText = "[EVIDENCE MAP]\n";
+  evidenceMapText += "You MUST use this map to find the correct image for each task.\n";
+  
+  const allEvidenceKeys = new Set([
+    ...Object.keys(foundEvidence),
+    ...Object.keys(guidedUrls),
+  ]);
+
+  for (const key of allEvidenceKeys) {
+    if (guidedUrls[key]) {
+      evidenceMapText += `- Evidence '${key}' is in 'guided_image_urls.${key}'.\n`;
+    } else if (foundEvidence[key] !== undefined) {
+      evidenceMapText += `- Evidence '${key}' is in 'initial_image_urls[${foundEvidence[key]}]'.\n`;
+    }
+  }
+  if (allEvidenceKeys.size === 0) {
+    evidenceMapText += "- No specific evidence map provided. Analyze all images.\n";
+  }
+
+  // 4. [TASKS] 생성 (동적)
+  let tasksText = "[TASKS]\n";
+  tasksText += "You MUST perform these tasks based on the [EVIDENCE MAP].\n";
+  
+  // 4.1. Key Specs 추출 작업
+  tasksText += "\n1. Extract Key Specifications:\n";
+  for (const target of targets.key_specs || []) {
+    tasksText += `   - For spec_key '${target.spec_key}':\n`;
+    tasksText += `     - Label: "${target[labelLang] || target.label_en}"\n`;
+    tasksText += `     - Task: ${target.prompt}\n`;
+    tasksText += `     - Evidence: Use evidence_key '${target.evidence_key}' from the map.\n`;
+  }
+
+  // 4.2. Condition 추출 작업 (TODO: 템플릿 확장)
+  tasksText += "\n2. Extract Condition:\n";
+  tasksText += "   - Analyze all images, especially 'defect_closeups', to describe the item's condition.\n";
+
+  // 4.3. Included Items 추출 작업 (TODO: 템플릿 확장)
+  tasksText += "\n3. Extract Included Items:\n";
+  tasksText += "   - Analyze 'included_items_flatlay' to determine what is included.\n";
+
+  // 4.4. Skipped Keys 처리 (버그 수정)
+  tasksText += "\n4. Generate Buyer Notes:\n";
+  if (validSkippedKeys.length) {
+    tasksText += `   - The user SKIPPED providing: [${validSkippedKeys.join(", ")}].\n`;
+    tasksText += `   - You MUST write a note in 'notes_for_buyer.value' (in ${langName}) warning about these missing items.\n`;
+  } else {
+    tasksText += `   - The user did NOT skip any evidence.\n`;
+    tasksText += `   - You MUST NOT write any warnings about missing evidence in 'notes_for_buyer.value'. Set it to null or a neutral summary.\n`;
+  }
+
+  // 5. [OUTPUT SCHEMA] 및 [SAFETY RULES] (ChatGPT 감수안 채택)
+  const schemaText = `
+[OUTPUT SCHEMA (V3)]
+You MUST return ONLY ONE JSON object with this exact structure.
+JSON keys MUST be in English. Text values MUST be in ${langName}.
+
+{
+  "key_specs": [
+    {
+      "spec_key": "string (e.g., 'model_name')",
+      "label": "string (The ${langName} label provided in TASKS)",
+      "value": "string | number | null",
+      "evidence_key": "string (The 'evidence_key' used)",
+      "confidence_score": "number (0.0 to 1.0) | null",
+      "reason_if_null": "string (Explain in ${langName} if value is null) | null"
+    }
+  ],
+  "condition_check": [ ... ],
+  "included_items": [ ... ],
+  "notes_for_buyer": { "value": "string | null" }
+}
+
+[SAFETY RULES]
+- If the evidence image is blurry, unreadable, or does not contain the information:
+  - You MUST NOT guess.
+  - Set 'value' to null.
+  - Set 'reason_if_null' to a short explanation in ${langName} (e.g., "Teks tidak terbaca", "Foto tidak menunjukkan bagian relevan").
+- If you are not at least 80% confident, set 'value' to null.
+- Never invent data (model, OS, capacity, battery) that is not visible.
+  `;
+
+  // 6. 최종 프롬프트 조립
+  const finalPrompt = `
+[ROLE]
+You are an extraction engine, NOT a writer.
+Your task is to extract facts from the provided evidence images based on a map and specific tasks.
+
+[USER INPUT]
+- Product Name Claim: "${confirmedProductName || ""}"
+- Category: "${categoryName || ""}" / "${subCategoryName || ""}"
+- User Price: "${userPrice || ""}"
+- User Description: "${userDescription || ""}"
+
+${evidenceMapText}
+${tasksText}
+${schemaText}
+`;
+
+  return finalPrompt;
+}
+
+
+/**
  * [V2 최종 수정] 모든 이미지와 정보를 종합하여 최종 판매 보고서를 생성합니다.
  */
 exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
@@ -839,6 +978,8 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     categoryName, // <-- V2 데이터
     subCategoryName, // <-- V2 데이터
     skippedKeys, // [작업 74] 클라이언트에서 보내는 필드 이름을 `skippedKeys`로 받습니다
+    // [V3] 1차 분석 결과를 클라이언트가 다시 보냅니다.
+    found_evidence, // { 'key': index }
     locale,
   } = request.data;
 
@@ -857,62 +998,22 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     }
     const ruleData = ruleDoc.data();
 
-    // V1과의 호환성을 위해 v2ReportPrompt 필드가 있으면 그것을 사용하고, 없으면 report_template_prompt를 사용
-    let promptTemplate =
-      ruleData.v2ReportPrompt || ruleData.report_template_prompt;
-
-    // [추적 코드 1] 프롬프트 템플릿 누락 방지
-    if (!promptTemplate) {
-      logger.error(
-        `❌ Rule '${ruleId}' is missing the 'report_template_prompt' field.`
-      );
-      throw new HttpsError(
+    
+    // [V3] 'extraction_targets'가 있는지 확인합니다.
+    if (!ruleData.extraction_targets) {
+       throw new HttpsError(
         "failed-precondition",
-        `Rule '${ruleId}' is not configured for final report.`
+        `Rule '${ruleId}' is not configured for V3 'extraction_targets'.`
       );
     }
 
-    // 2. [V2 수정] 새로운 카테고리 변수를 포함하여 모든 변수를 치환합니다.
-    promptTemplate = (promptTemplate || "")
-      .replace(/{{userPrice}}/g, String(userPrice ?? ""))
-      .replace(/{{userDescription}}/g, String(userDescription ?? ""))
-      .replace(/{{confirmedProductName}}/g, String(confirmedProductName ?? ""))
-      .replace(/{{categoryName}}/g, String(categoryName ?? ""))           // <-- V2 로직
-      .replace(/{{subCategoryName}}/g, String(subCategoryName ?? ""));   // <-- V2 로직
+    // [V3] 동적 V3 프롬프트 생성
+    const v3Prompt = buildV3ExtractionPrompt(request.data, ruleData);
 
-  // [작업 21 수정] 프롬프트 언어 주입 로직
-  // "이전에 영어로 강제하던 기능"이 이 부분입니다.
-  // AI가 혼동하지 않도록, "값의 언어"와 "키의 언어"를 명확히 분리하여 지시합니다.
-  const lc = (typeof locale === "string" && locale) || "id";
-  const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
-  promptTemplate += `\n\n[MANDATORY INSTRUCTIONS]:\n` +
-    `1.  **JSON Keys MUST be in English:** The JSON *keys* (e.g., "verification_summary", "key_specs") MUST be in English, exactly as defined in the schema.\n` +
-    `2.  **Text Values MUST be in ${langName}:** All human-readable *values* (the descriptions, specs, notes) MUST be written in ${langName}.`;
-
-    // [작업 74] 'skippedKeys'가 유효한 배열인지 확인
-    const validSkippedKeys = (Array.isArray(skippedKeys) ? skippedKeys : [])
-      .filter((v) => typeof v === "string").map((s) => s.trim()).filter((s) => s.length > 0);
-    const guidedKeys = Object.keys((imageUrls && imageUrls.guided) || {});
-    if (validSkippedKeys.length) {
-      promptTemplate += `\n\n[Context: Skipped Evidence]\n` +
-        `The user SKIPPED providing the following evidence keys: [${validSkippedKeys.join(", ")}].\n` +
-        `You MUST mention these missing items in the 'notes_for_buyer' field.`;
-    } else {
-      // [작업 30 수정] 사용자가 아무것도 건너뛰지 않았음을 AI에게 명시적으로 알립니다.
-      // 'report_template_prompt'의 기본 경고문을 무시하도록 지시합니다.
-      promptTemplate += `\n\n[Context: Skipped Evidence]\n` +
-        `The user did NOT skip any suggested evidence. Do NOT add any warnings about missing evidence to 'notes_for_buyer' unless absolutely necessary.`;
-    }
-    if (guidedKeys.length) {
-      promptTemplate += `\n\n[Context: Guided Evidence]\n` +
-        `The user provided additional guided evidence images for keys: [${guidedKeys.join(", ")}]. You MUST analyze these guided images to improve report quality.`;
-    }
-
-
-    // ... (이미지 처리 로직은 동일)
+    // [V3] 1차(initial) + 2차(guided) 이미지 URL을 모두 추출합니다.
     const allImageUrls = [
-      ...imageUrls.initial,
-      ...Object.values(imageUrls.guided),
+      ...(imageUrls.initial || []),
+      ...Object.values(imageUrls.guided || {}),
     ];
 
     const ac = new AbortController();
@@ -970,7 +1071,7 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
         modelPrimary: "gemini-2.5-flash",
         modelFallback: "gemini-2.5-pro",
         contents: [
-          { role: "user", parts: [{ text: promptTemplate }, ...imageParts] },
+          { role: "user", parts: [{ text: v3Prompt }, ...imageParts] },
         ],
         safetySettings,
         responseMimeType: "application/json",
@@ -988,48 +1089,31 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
       );
     }
 
-    report = normalizeFinalReportShape(report);
-
-    // [최종 수정] 클라이언트(Flutter) 코드와 데이터 키 이름을 일치시킵니다.
-    // AI는 'suggested_price'를 반환하지만, Flutter 코드는 'price_suggestion'을 기대하고 있습니다.
-    // 서버에서 키 이름을 변경하여 클라이언트로 보내기 전에 데이터 구조를 맞춰줍니다.
-    if (report.suggested_price !== undefined) {
-      report.price_suggestion = report.suggested_price;
-      delete report.suggested_price;
-    }
-
-    // [Fix #34 - Copilot (A)] AI 응답 검증: notes_for_buyer 필드 정제
-    // AI가 프롬프트(스키마)를 무시하고 필드를 누락하거나 null로 보낼 경우에 대비
-    if (typeof report.notes_for_buyer !== 'string') {
-      logger.warn("AI Warning: 'notes_for_buyer' field missing or not a string. Defaulting to empty string.", {
-          keys: Object.keys(report)
+    // [V3] V2 정규화 함수(`normalizeFinalReportShape`)를 호출하지 않습니다.
+    // [V3] AI가 V3 스키마를 따랐는지 최소한으로 검증합니다.
+    if (!report.key_specs || !Array.isArray(report.key_specs)) {
+      logger.error("❌ CRITICAL: AI V3 response is missing 'key_specs' array.", {
+        keys: Object.keys(report),
       });
-      report.notes_for_buyer = ""; // 안전장치: 빈 문자열로 강제
+      throw new HttpsError("data-loss", "AI returned invalid V3 report structure.");
     }
 
-    // [V2.1 보강] 사용자가 건너뛴 증거가 있는 경우, notes_for_buyer가 비어 있으면 기본 안내 문구를 생성합니다.
-    if (validSkippedKeys.length) {
-      const hasNotes =
-        report.notes_for_buyer && typeof report.notes_for_buyer === "string" && report.notes_for_buyer.trim().length > 0;
-      if (!hasNotes) {
-        // 지역화된 기본 안내문 생성
-        const defaultNotes = {
-          id: `Penjual tidak menyediakan bukti berikut: ${validSkippedKeys.join(", ")}. Mohon pertimbangkan untuk memeriksa poin-poin ini secara langsung atau minta bukti tambahan lewat chat sebelum membeli.`,
-          ko: `판매자가 다음의 증거를 제공하지 않았습니다: ${validSkippedKeys.join(", ")}. 구매 전 직접 확인하거나 채팅으로 추가 증빙을 요청하시기 바랍니다.`,
-          en: `The seller did not provide the following evidence: ${validSkippedKeys.join(", ")}. Please consider verifying these points in person or request additional proof via chat before purchasing.`,
-        };
-        report.notes_for_buyer = defaultNotes[lc] || defaultNotes['id'];
+    // [V3] (중요) AI가 반환한 'evidence_key'를 기반으로 실제 'source_image_url'을 채워줍니다.
+    const initialUrls = imageUrls.initial || [];
+    const guidedUrls = imageUrls.guided || {};
+
+    report.key_specs.forEach((spec) => {
+      const eKey = spec.evidence_key;
+      if (guidedUrls[eKey]) {
+        spec.source_image_url = guidedUrls[eKey];
+      } else if (found_evidence && found_evidence[eKey] !== undefined) {
+        const index = found_evidence[eKey];
+        if (index >= 0 && index < initialUrls.length) {
+          spec.source_image_url = initialUrls[index];
+        }
       }
-      // 참고용으로 최종 보고서에 skipped_items를 포함하여 클라이언트가 표시/저장을 선택할 수 있게 합니다.
-      if (!Array.isArray(report.skipped_items)) {
-        report.skipped_items = validSkippedKeys; // [작업 74] "skipped_items" 키 이름으로 저장
-      }
-      // Also include the newer `skippedKeys` field so clients that expect
-      // the updated key name can read it directly. Keep both for safety.
-      if (!Array.isArray(report.skippedKeys)) {
-        report.skippedKeys = validSkippedKeys;
-      }
-    }
+    });
+    // (TODO: condition_check, included_items에 대해서도 동일한 URL 주입 로직 추가)
 
     // [추적 코드 2] 성공 직전 최종 로그
     logger.info(

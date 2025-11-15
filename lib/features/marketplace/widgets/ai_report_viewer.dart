@@ -1,153 +1,240 @@
 // lib/features/marketplace/widgets/ai_report_viewer.dart
-import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 /// AI 검수 리포트의 내용을 구조화하여 표시하는 공용 위젯
+/// [V3 개편] V3 "증거 연계" 스키마를 파싱하도록 전면 수정
 class AiReportViewer extends StatelessWidget {
-  final ProductModel product;
+  // V3는 ProductModel이 아닌, Map 자체를 받습니다.
+  final Map<String, dynamic> aiReport;
 
-  const AiReportViewer({super.key, required this.product});
+  const AiReportViewer({super.key, required this.aiReport});
 
   @override
   Widget build(BuildContext context) {
-    if (!product.isAiVerified || product.aiReport == null) {
+    // V3 스키마의 유효성을 검사합니다.
+    if (aiReport['key_specs'] == null || aiReport['key_specs'] is! List) {
       return const SizedBox.shrink();
     }
 
-    final report = product.aiReport!;
-    final summary = report['verification_summary'];
-    final specs = report['key_specs'];
-    final condition = report['condition_check'];
-    final items = report['included_items'];
-    final buyerNotes = report['notes_for_buyer'];
-    // [Fix #4] AI 제안 가격 추출 (여러 키 호환)
-    final dynamic aiPrice = report['price_suggestion'] ??
-        report['suggested_price'] ??
-        report['ai_recommended_price'];
-    // Prefer the newer `skippedKeys` field (sent by the client), but
-    // fall back to legacy `skipped_items` which the server still includes
-    // for backward compatibility. Normalize to a List if present.
-    final dynamic skipped = report['skippedKeys'] ?? report['skipped_items'];
+    // [FIX] V3 스키마 파싱 - 런타임 타입 에러 방지를 위한 안전한 캐스팅
 
+    // 1. Key Specs (List<Map>)
+    final List<dynamic> keySpecsRaw = aiReport['key_specs'] ?? [];
+    final List<Map<String, dynamic>> keySpecs = keySpecsRaw
+        .map((item) => Map<String, dynamic>.from(item as Map))
+        .toList();
+
+    // 2. Condition Check (List<Map>)
+    final List<dynamic> conditionCheckRaw = aiReport['condition_check'] ?? [];
+    final List<Map<String, dynamic>> conditionCheck = conditionCheckRaw
+        .map((item) => Map<String, dynamic>.from(item as Map))
+        .toList();
+
+    // 3. Included Items (List<Map>)
+    final List<dynamic> includedItemsRaw = aiReport['included_items'] ?? [];
+    final List<Map<String, dynamic>> includedItems = includedItemsRaw
+        .map((item) => Map<String, dynamic>.from(item as Map))
+        .toList();
+
+    // 4. Notes for Buyer (Map)
+    final dynamic notesRaw = aiReport['notes_for_buyer'];
+    final Map<String, dynamic> notesForBuyer =
+        (notesRaw is Map) ? Map<String, dynamic>.from(notesRaw) : {};
+    final String? buyerNoteValue = notesForBuyer['value'] as String?;
+
+    final List<Widget> sections = [];
+
+    // --- V2 섹션 (제거) ---
+
+    // [V3] 1. Key Specs 섹션
+    if (keySpecs.isNotEmpty) {
+      sections.add(_buildV3Section(
+        context,
+        Icons.memory_outlined,
+        'ai_flow.final_report.specs'.tr(),
+        keySpecs,
+      ));
+    }
+
+    // [V3] 2. Condition 섹션
+    if (conditionCheck.isNotEmpty) {
+      sections.add(_buildV3Section(
+        context,
+        Icons.healing_outlined,
+        'ai_flow.final_report.condition'.tr(),
+        conditionCheck,
+      ));
+    }
+
+    // [V3] 3. Included Items 섹션
+    if (includedItems.isNotEmpty) {
+      sections.add(_buildV3Section(
+        context,
+        Icons.inventory_2_outlined,
+        'ai_flow.final_report.items'.tr(),
+        includedItems,
+      ));
+    }
+
+    // [V3] 4. Notes for Buyer 섹션
+    if (buyerNoteValue != null && buyerNoteValue.isNotEmpty) {
+      sections.add(_buildReportText(
+        context,
+        Icons.warning_amber_rounded,
+        'ai_flow.final_report.notes'.tr(),
+        buyerNoteValue,
+      ));
+    }
+
+    if (sections.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      elevation: 1,
+      color: Theme.of(context).colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        child: Column(
+          children:
+              sections.expand((e) => [e, const SizedBox(height: 16)]).toList()
+                ..removeLast(),
+        ),
+      ),
+    );
+  }
+
+  /// [V3] '증거 연계' 스키마 (List<Map>)를 렌더링하는 위젯
+  Widget _buildV3Section(
+    BuildContext context,
+    IconData icon,
+    String title,
+    List<Map<String, dynamic>> items,
+  ) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (summary != null)
-          _buildReportItem(context, Icons.task_alt,
-              'ai_flow.final_report.summary'.tr(), summary),
-        if (specs is Map && specs.isNotEmpty)
-          _buildReportMap(context, Icons.list_alt,
-              'ai_flow.final_report.key_specs'.tr(), specs),
-        if (condition != null)
-          _buildReportItem(context, Icons.healing,
-              'ai_flow.final_report.condition'.tr(), condition),
+        Row(
+          children: [
+            Icon(icon, color: theme.primaryColor, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 28.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: items.map((item) {
+              final label = item['label'] as String? ?? 'N/A';
+              final value = item['value'];
+              final reasonIfNull = item['reason_if_null'] as String?;
+              final sourceImageUrl = item['source_image_url'] as String?;
 
-        // [Fix #4] AI 제안 가격 표시
-        if (aiPrice != null && aiPrice.toString().isNotEmpty)
-          _buildReportItem(
-            context,
-            Icons.auto_awesome,
-            tr('ai_flow.final_report.suggested_price', args: ['Rp']),
-            aiPrice.toString(),
+              Widget valueWidget;
+              if (value == null) {
+                valueWidget = Text(
+                  reasonIfNull ?? 'N/A',
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: theme.colorScheme.error),
+                );
+              } else {
+                valueWidget = Text(
+                  value.toString(),
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                );
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 증거 썸네일
+                    if (sourceImageUrl != null)
+                      Container(
+                        width: 40,
+                        height: 40,
+                        margin: const EdgeInsets.only(right: 12.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          image: DecorationImage(
+                            image: NetworkImage(sourceImageUrl),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        width: 40,
+                        height: 40,
+                        margin: const EdgeInsets.only(right: 12.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          color: theme.colorScheme.surfaceContainerHighest,
+                        ),
+                        child: Icon(Icons.image_not_supported_outlined,
+                            size: 20, color: theme.colorScheme.outline),
+                      ),
+
+                    // 라벨 및 값
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(label, style: theme.textTheme.labelMedium),
+                          const SizedBox(height: 2),
+                          valueWidget,
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
           ),
-        if (items is List && items.isNotEmpty)
-          _buildReportList(context, Icons.inbox,
-              'ai_flow.final_report.included_items_label'.tr(), items),
-        if (buyerNotes is String && buyerNotes.trim().isNotEmpty) ...[
-          const SizedBox(height: 12),
-          _buildReportItem(context, Icons.info_outline,
-              'ai_flow.final_report.buyer_notes_label'.tr(), buyerNotes,
-              isWarning: true),
-        ],
-        if (skipped is List && skipped.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          _buildReportList(
-              context,
-              Icons.photo_size_select_actual_outlined,
-              'ai_flow.final_report.skipped_items'.tr(),
-              List<String>.from(skipped)),
-        ],
-        const Divider(height: 32),
+        ),
       ],
     );
   }
 
-  // 리포트 항목을 표시하는 헬퍼 위젯들
-  Widget _buildReportItem(
-      BuildContext context, IconData icon, String title, dynamic content,
-      {bool isWarning = false}) {
-    final theme = Theme.of(context);
-    final color = isWarning ? Colors.orange.shade700 : theme.primaryColor;
-
+  /// 단순 텍스트 섹션 (Summary, Notes for Buyer 등)
+  Widget _buildReportText(
+      BuildContext context, IconData icon, String title, String data) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.only(bottom: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 20),
+              Icon(icon, color: Theme.of(context).primaryColor, size: 20),
               const SizedBox(width: 8),
               Text(title,
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold, color: color)),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold)),
             ],
           ),
           const SizedBox(height: 8),
-          Text(content.toString(), style: const TextStyle(height: 1.5)),
+          Text(data.toString(), style: const TextStyle(height: 1.5)),
         ],
       ),
-    );
-  }
-
-  Widget _buildReportMap(BuildContext context, IconData icon, String title,
-      Map<dynamic, dynamic> data) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: Theme.of(context).primaryColor, size: 20),
-            const SizedBox(width: 8),
-            Text(title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ...data.entries.map((e) => Padding(
-              padding: const EdgeInsets.only(left: 28.0, bottom: 4.0),
-              child: Text("- ${e.key}: ${e.value}"),
-            )),
-      ],
-    );
-  }
-
-  Widget _buildReportList(
-      BuildContext context, IconData icon, String title, List<dynamic> data) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: Theme.of(context).primaryColor, size: 20),
-            const SizedBox(width: 8),
-            Text(title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ...data.map((e) => Padding(
-              padding: const EdgeInsets.only(left: 28.0, bottom: 4.0),
-              child: Text("- ${e.toString()}"),
-            )),
-      ],
     );
   }
 }

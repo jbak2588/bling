@@ -217,7 +217,11 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
             Text('marketplace.takeover.guide.subtitle'.tr()),
             const SizedBox(height: 16),
             // [AI 리팩토링] 공용 위젯을 사용하여 원본 리포트 표시
-            AiReportViewer(product: widget.product),
+            AiReportViewer(
+              aiReport: Map<String, dynamic>.from(widget.product.aiReport ??
+                  widget.product.aiVerificationData ??
+                  {}),
+            ),
 
             const Divider(height: 32),
             // 사진 촬영 섹션

@@ -28,6 +28,8 @@ library;
 import 'dart:io';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
+import 'package:bling_app/features/marketplace/models/product_model.dart';
+import 'package:bling_app/features/marketplace/widgets/ai_report_viewer.dart'; // [V3] 리포트 뷰어 임포트
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -118,10 +120,49 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
 
   void _initializeControllers() {
     _titleController.text = widget.confirmedProductName;
-    _summaryController.text = widget.finalReport['verification_summary'] ?? '';
-    _buyerNotesController.text =
-        (widget.finalReport['notes_for_buyer'] as String? ?? '').trim();
-    _conditionController.text = widget.finalReport['condition_check'] ?? '';
+    // [FIX] Safely handle 'verification_summary' which might not be a String
+    final dynamic summaryValue = widget.finalReport['verification_summary'];
+    if (summaryValue is String && summaryValue.isNotEmpty) {
+      _summaryController.text = summaryValue;
+    } else {
+      // [NEW] Show placeholder if empty
+      _summaryController.text = ''; // 또는 "AI 요약 없음" 등
+    }
+
+    // [FIX] Safely handle 'notes_for_buyer' which might not be a String
+    final dynamic notesValue = widget.finalReport['notes_for_buyer'];
+    if (notesValue is String && notesValue.isNotEmpty) {
+      _buyerNotesController.text = notesValue.trim();
+    } else {
+      // [NEW] User suggestion: Show placeholder if empty
+      _buyerNotesController.text =
+          'ai_flow.final_report.notes_placeholder'.tr();
+    }
+
+    // [FIX] Safely handle 'condition_check' which is often a List
+    final dynamic conditionValue = widget.finalReport['condition_check'];
+    if (conditionValue is String) {
+      _conditionController.text = conditionValue;
+    } else if (conditionValue is List) {
+      // [RE-FIX] Join List<Map> into human-readable string, not Map.toString()
+      List<String> conditions = [];
+      for (var item in conditionValue) {
+        if (item is Map) {
+          // Use 'label' and 'value' from the map (based on AiReportViewer logic)
+          String label = item['label']?.toString() ?? '';
+          String value = item['value']?.toString() ?? 'N/A';
+          if (label.isNotEmpty) {
+            conditions.add('$label: $value');
+          }
+        } else {
+          // Fallback for non-map items
+          conditions.add(item.toString());
+        }
+      }
+      _conditionController.text = conditions.join('\n'); // Join with newlines
+    } else {
+      _conditionController.text = ''; // Handle null or other types
+    }
     _itemsController.text =
         (widget.finalReport['included_items'] as List<dynamic>? ?? [])
             .join(', ');
@@ -291,21 +332,19 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
   Future<void> _submitProductSale(User user, List<String> allImageUrls) async {
     // V2 UI 컨트롤러들로부터 최종 AI 리포트 객체 구성(간단 버전)
     final int userSelectedPrice = int.tryParse(_priceController.text) ?? 0;
-    final int aiSuggestedPrice =
-        int.tryParse(_priceSuggestionController.text) ?? 0;
-    final finalAiReport = {
-      'verification_summary': _summaryController.text,
-      'condition_check': _conditionController.text,
-      'included_items':
-          _itemsController.text.split(',').map((e) => e.trim()).toList(),
-      'notes_for_buyer': _buyerNotesController.text,
-      'suggested_price': aiSuggestedPrice,
-      'price_suggestion': aiSuggestedPrice,
-      'ai_recommended_price': aiSuggestedPrice,
-      'user_selected_price': userSelectedPrice,
-      'key_specs':
-          _specsControllers.map((key, value) => MapEntry(key, value.text)),
-    };
+    final int aiSuggestedPrice = int.tryParse(
+            widget.finalReport['suggested_price']?.toString() ??
+                widget.finalReport['price_suggestion']?.toString() ??
+                '0') ??
+        0;
+
+    // Use the V3 report directly and augment with runtime fields
+    final Map<String, dynamic> finalAiReport =
+        Map<String, dynamic>.from(widget.finalReport);
+    finalAiReport['user_selected_price'] = userSelectedPrice;
+    finalAiReport['suggested_price'] = aiSuggestedPrice;
+    finalAiReport['price_suggestion'] = aiSuggestedPrice;
+    finalAiReport['ai_recommended_price'] = aiSuggestedPrice;
 
     // [Fix] .set()은 createdAt을 덮어쓰므로 .update() 또는 .set(merge:true)와 Map을 사용
     final Map<String, dynamic> productData = {
@@ -417,6 +456,25 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Create a lightweight ProductModel wrapper so `AiReportViewer` can
+    // consume the V3 report via the existing API without larger refactors.
+    final ProductModel viewerProduct = ProductModel(
+      id: widget.productId,
+      userId: '',
+      title: _titleController.text.isNotEmpty
+          ? _titleController.text
+          : widget.confirmedProductName,
+      description: widget.userDescription ?? _descriptionController.text,
+      imageUrls: widget.initialImages.map((e) => e.toString()).toList(),
+      categoryId: widget.categoryId,
+      price: int.tryParse(_priceController.text) ?? 0,
+      negotiable: false,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+      isAiVerified: true,
+      aiReport: Map<String, dynamic>.from(widget.finalReport),
+      aiVerificationData: Map<String, dynamic>.from(widget.finalReport),
+    );
     // ... UI 코드는 작업 101과 거의 동일하게 유지 ...
     // 단, TextFormField 들이 _titleController, _priceController, _descriptionController를 사용하도록 변경
     return Scaffold(
@@ -444,6 +502,12 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
                     );
                   },
                 ),
+              ),
+              const SizedBox(height: 16),
+              // V3: Show structured AI report viewer for finalReview
+              AiReportViewer(
+                aiReport:
+                    Map<String, dynamic>.from(viewerProduct.aiReport ?? {}),
               ),
               const SizedBox(height: 16),
               // [복원] 상품 제목, 가격, 설명 필드

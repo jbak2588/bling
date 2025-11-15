@@ -101,6 +101,14 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     _isNegotiable = widget.product.negotiable;
     _existingImageUrls = List<String>.from(widget.product.imageUrls);
 
+    // ✅ [Fix] Load existing tags from the product into the local state so the
+    // CustomTagInputField shows previously saved tags when editing.
+    try {
+      _tags = List<String>.from(widget.product.tags);
+    } catch (_) {
+      _tags = [];
+    }
+
     // [Fix] Dropdown 크래시 방어 코드 (작업 32 적용)
     final dbCondition = widget.product.condition;
     if (dbCondition == 'new' || dbCondition == 'used') {

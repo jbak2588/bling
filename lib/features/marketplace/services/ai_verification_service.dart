@@ -262,12 +262,18 @@ class AiVerificationService {
               const [];
       final missingKeys = missingRaw.whereType<String>().toList();
 
+      final Map<String, dynamic> foundEvidenceMap =
+          (data['found_evidence'] as Map?) != null
+              ? Map<String, dynamic>.from((data['found_evidence'] as Map))
+              : <String, dynamic>{};
+
       // [Fix #2] '신발' 등 범용 카테고리일 때 빈 제안 화면이 뜨는 문제 해결
       // 부족한 증거가 없으면(missingKeys.isEmpty) 제안 화면을 건너뛰고 바로 리포트 생성
       if (missingKeys.isEmpty && context.mounted) {
         debugPrint("AI 검수: 부족한 증거 없음. 최종 보고서 생성으로 직행.");
         await _generateFinalReportDirectly(
             context,
+            foundEvidenceMap,
             rule,
             productId,
             categoryId,
@@ -313,6 +319,7 @@ class AiVerificationService {
   /// [Fix #2] 제안 화면을 건너뛸 때 호출할 최종 보고서 생성 함수
   Future<void> _generateFinalReportDirectly(
     BuildContext context,
+    Map<String, dynamic> foundEvidence,
     AiVerificationRule rule,
     String productId,
     String categoryId,
@@ -343,7 +350,14 @@ class AiVerificationService {
     // 2. 백엔드 호출
     final callable = _functions.httpsCallable('generatefinalreport');
     final result = await callable.call(<String, dynamic>{
-      'imageUrls': {'initial': initialUrls, 'guided': <String, String>{}},
+      'imageUrls': {
+        'initial': initialUrls,
+        // [V3] 보강된 샷은 없으므로 비워둡니다.
+        'guided': <String, String>{},
+      },
+      // [V3] 1차 분석에서 받은 증거 지도를 서버로 다시 보냅니다.
+      // 이것이 V3 "증거 연계"의 핵심입니다.
+      'found_evidence': foundEvidence,
       'ruleId': rule.id,
       'confirmedProductName': confirmedProductName,
       'categoryName': parentName,
@@ -360,12 +374,11 @@ class AiVerificationService {
         ? Map<String, dynamic>.from(reportRaw)
         : null;
 
-    // [작업 11 수정] AI 계약 위반 방어 코드
-    // AI가 notes_for_buyer만 반환하고 필수 키를 누락하는 경우를 차단합니다.
+    // [V3] V3 스키마에 맞게 응답을 검증합니다.
+    // key_specs는 이제 Map이 아닌 List<Map>입니다.
     if (report == null ||
-        report['key_specs'] == null ||
-        report['verification_summary'] == null ||
-        report['condition_check'] == null) {
+        report['key_specs'] is! List ||
+        report['notes_for_buyer'] == null) {
       throw Exception('ai_flow.errors.incomplete_report'.tr());
     }
 
