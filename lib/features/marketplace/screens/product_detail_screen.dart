@@ -54,7 +54,7 @@ import 'package:bling_app/features/marketplace/screens/product_edit_screen.dart'
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart'; // AI 뱃지
 import 'package:bling_app/features/marketplace/data/product_repository.dart'; // [AI 인수] 리포지토리 임포트
-import 'package:bling_app/features/marketplace/screens/ai_takeover_screen.dart'; // [AI 인수 2단계] 현장 검증 화면
+import 'package:bling_app/features/marketplace/screens/ai_takeover_screen.dart'; // [AI 인수 2단계] 현장 검증 화면 (used by FAB builder)
 
 import '../widgets/ai_report_viewer.dart'; // [AI 리팩토링] 공용 위젯 임포트
 
@@ -171,8 +171,12 @@ class CategoryNameWidget extends StatelessWidget {
 }
 
 class ProductDetailScreen extends StatefulWidget {
-  final ProductModel product;
-  const ProductDetailScreen({super.key, required this.product});
+  // [V3 NOTIFICATION] ID 또는 객체로 화면을 로드할 수 있도록 허용
+  final ProductModel? product;
+  final String? productId;
+  const ProductDetailScreen({super.key, this.product, this.productId})
+      : assert(product != null || productId != null,
+            'product 또는 productId 중 하나는 필수입니다.');
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -185,11 +189,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _isReserving = false; // [AI 인수] 예약 진행 중 상태
   late final PageController _pageController = PageController(initialPage: 0);
 
-  // 가격 포맷 및 숫자 변환 유틸은 현 섹션에서 사용하지 않으므로 제거되었습니다.
+  // [V3 NOTIFICATION] StreamBuilder가 사용할 ID
+  late final String _productId;
 
   @override
   void initState() {
     super.initState();
+    // [V3 NOTIFICATION] 생성자에서 받은 ID를 상태 변수로 설정
+    _productId = widget.product?.id ?? widget.productId!;
     _checkIfFavorite();
     _increaseViewCount();
   }
@@ -203,7 +210,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Future<void> _increaseViewCount() async {
     final docRef = FirebaseFirestore.instance
         .collection('products')
-        .doc(widget.product.id);
+        .doc(_productId); // [V3 NOTIFICATION]
     await docRef.update({'viewsCount': FieldValue.increment(1)});
   }
 
@@ -214,7 +221,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .collection('users')
         .doc(myUid)
         .collection('favorites')
-        .doc(widget.product.id)
+        .doc(_productId) // [V3 NOTIFICATION]
         .get();
     if (mounted) setState(() => _isFavorite = favDoc.exists);
   }
@@ -306,10 +313,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .collection('users')
         .doc(myUid)
         .collection('favorites')
-        .doc(widget.product.id);
+        .doc(_productId); // [V3 NOTIFICATION]
     final prodRef = FirebaseFirestore.instance
         .collection('products')
-        .doc(widget.product.id);
+        .doc(_productId); // [V3 NOTIFICATION]
     if (_isFavorite) {
       await favRef.set({'createdAt': FieldValue.serverTimestamp()});
       await prodRef.update({'likesCount': FieldValue.increment(1)});
@@ -384,7 +391,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     try {
       await FirebaseFirestore.instance
           .collection('products')
-          .doc(widget.product.id)
+          .doc(_productId) // [V3 NOTIFICATION]
           .delete();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -428,7 +435,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('products')
-          .doc(widget.product.id)
+          .doc(_productId) // [V3 NOTIFICATION]
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
@@ -448,35 +455,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         final bool isReservedByMe =
             isReserved && product.buyerId != null && product.buyerId == myUid;
 
-        // [FAB Fix] FAB를 표시할 조건 정의
-        final bool showAiFab =
-            product.isAiVerified && isSelling && !isMyProduct;
-
         return Scaffold(
-          // [FAB Fix] AI 안심 예약 버튼을 FAB로 이동하여 Overflow 해결
-          floatingActionButton: showAiFab
-              ? FloatingActionButton.extended(
-                  onPressed: _isReserving
-                      ? null
-                      : () => _showReservationDialog(product),
-                  backgroundColor:
-                      _isReserving ? Colors.grey : const Color(0xFF007BFF),
-                  icon: _isReserving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.shield_outlined, color: Colors.white),
-                  label: Text(
-                    "marketplace.reservation.button".tr(),
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                )
-              : null,
+          floatingActionButton: _buildFloatingActionButton(
+              product, isMyProduct, isSelling, isReservedByMe),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
           // 채팅/가격 BottomAppBar: fixed-height removed and buttons allowed to
           // flex/shrink via Flexible so it adapts to different font/device sizes.
@@ -578,38 +559,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                     ),
 
-                    // Takeover Button (Conditional) — also flexible so it doesn't
-                    // cause overflow on smaller screens / large fonts.
-                    if (isReservedByMe) ...[
-                      const SizedBox(width: 8),
-                      Flexible(
-                        fit: FlexFit.loose,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) =>
-                                  AiTakeoverScreen(product: product),
-                            ));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              "marketplace.takeover.button".tr(),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 14),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    // [Task 107] '현장 인수' 버튼이 FAB로 이동했으므로 BottomAppBar에서 제거.
                   ],
                 ),
               ),
@@ -810,4 +760,55 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   // 원문 다이얼로그 기능은 요청에 따라 제거되었습니다.
+
+  /// [Task 107] FAB 로직 통합 (예약 / 인수)
+  Widget? _buildFloatingActionButton(
+    ProductModel product,
+    bool isMyProduct,
+    bool isSelling,
+    bool isReservedByMe,
+  ) {
+    if (isMyProduct) return null; // 내 상품에는 FAB 없음
+
+    if (isReservedByMe) {
+      // [Task 107] 1. 현장 인수 버튼 (기존 BottomAppBar에서 이동)
+      return FloatingActionButton.extended(
+        heroTag: 'takeover_fab',
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => AiTakeoverScreen(product: product),
+          ));
+        },
+        backgroundColor: Colors.green,
+        icon: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white),
+        label: Text(
+          "marketplace.takeover.button".tr(),
+          style:
+              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      );
+    }
+
+    if (product.isAiVerified && isSelling) {
+      // [Task 107] 2. AI 안심 예약 버튼 (기존 로직)
+      return FloatingActionButton.extended(
+        heroTag: 'reserve_fab',
+        onPressed: _isReserving ? null : () => _showReservationDialog(product),
+        backgroundColor: _isReserving ? Colors.grey : const Color(0xFF007BFF),
+        icon: _isReserving
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.white))
+            : const Icon(Icons.shield_outlined, color: Colors.white),
+        label: Text(
+          "marketplace.reservation.button".tr(),
+          style: const TextStyle(color: Colors.white),
+        ),
+      );
+    }
+
+    return null; // 그 외 (판매 완료, AI 미검증 등)
+  }
 }

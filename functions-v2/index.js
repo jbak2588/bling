@@ -9,8 +9,7 @@
  *      - App Check/인증 강제(enforceAppCheck, auth 확인)
  *      - 입력 유효성 검증(ruleId 존재, 이미지 URL 배열 형식)
  *      - 이미지 다운로드/크기 제한(HTTPS만 허용, 7.5MB 제한)
- *   2) 규칙/프롬프트 관리:
- *      - Firestore의 ai_verification_rules/{ruleId}에서 프롬프트 템플릿 로드
+ *   2) 규칙/프롬프트 관리:(철회됨)
  *      - ruleId만으로 다양한 카테고리·템플릿을 처리(범용성 유지)
  *   3) 모델 호출/파싱:
  *      - Gemini 호출(2.5 계열), 안전설정 적용
@@ -102,7 +101,10 @@
  * 3. verifyProductOnSite (신규, V2.2):
  * - AI 인수를 위한 2단계 '현장 동일성 검증' 함수입니다.
  * - 원본 AI 리포트/이미지와 구매자가 현장에서 촬영한 새 이미지를 비교하여
- * 'match: true/false' 결과를 반환합니다. (Job 5)
+ *   'match: true/false/null' 결과를 반환합니다. (Job 5, V3 3-Way Logic)
+ *   - true  : 현장 사진이 원본과 충분히 일치
+ *   - false : 현장 사진이 원본과 명백히 불일치
+ *   - null  : AI가 판단하지 못함(네트워크/모델 오류 등, 앱에서 재시도 유도)
  *
  * 4. admin_initializeAiCancelCounts (신규, 관리자):
  * - 필드 테스트 지원을 위해, 모든 상품의 'aiCancelCount'를 0으로
@@ -132,8 +134,8 @@ const {
 initializeApp();
 
 // functions-v2/index.js (추가)
-Object.assign(exports, require('./categories_sync'));
-    
+// [V3 REFACTOR] 'AI 룰 엔진'의 핵심인 categories_sync.js 의존성을 제거합니다.
+// Object.assign(exports, require('./categories_sync'));
 
 // 🔐 Secrets 선언: 배포/런타임에서 안전하게 주입
 const GEMINI_KEY = defineSecret("GEMINI_KEY");
@@ -209,6 +211,274 @@ const getGenAI = () => {
   }
   return new GoogleGenerativeAI(key);
 };
+  /**
+   * ============================================================================
+   * [V3 NEW] AI 검증으로 'pending' 상태가 된 상품 알림 (Task 79)
+   * 'products' 문서의 status가 'pending'으로 변경될 때 트리거됩니다.
+   * 1. 관리자 그룹에게 알림을 보냅니다.
+   * 2. 상품 등록자(판매자)에게 알림을 보냅니다.
+   * ============================================================================
+   */
+  exports.onProductStatusPending = onDocumentUpdated(
+    { document: "products/{productId}", region: "asia-southeast2" },
+    async (event) => {
+      const before = event.data.before.data();
+      const after = event.data.after.data();
+
+      // 'pending' 상태로 '변경'되었을 때만 실행
+      if (before.status === "pending" || after.status !== "pending") {
+        logger.info(`[Notify] Product ${event.params.productId} status unchanged or not pending. Skipping.`);
+        return;
+      }
+
+      // 'aiVerificationStatus'가 'pending_admin'일 때 (AI가 플래그한 경우)
+      if (after.aiVerificationStatus !== "pending_admin") {
+        logger.info(`[Notify] Product ${event.params.productId} is pending, but not by AI. Skipping.`);
+        return;
+      }
+
+      logger.info(`[Notify] AI pending status detected for product ${event.params.productId}. Sending notifications...`);
+
+      const db = getFirestore();
+      const messaging = getMessaging();
+      const batch = db.batch(); // [Task 94] 알림 저장을 위한 Firestore Batch Write 생성
+      const sellerId = after.userId;
+      const productTitle = after.title || "Untitled Product";
+
+      // Separate token sets for admins and seller so we can craft distinct messages
+      const adminTokens = new Set();
+      const sellerTokens = new Set();
+
+      // --- 1. 관리자(들) 토큰 수집 ---
+      try {
+        const adminQuery = await db.collection("users")
+          .where("role", "==", "admin")
+          .get();
+
+        if (!adminQuery.empty) {
+          logger.info(`[Notify] Found ${adminQuery.size} admin(s).`);
+          for (const doc of adminQuery.docs) {
+            const tokens = doc.data()?.fcmTokens; // 'fcmTokens' 필드 가정
+            if (Array.isArray(tokens)) {
+              tokens.forEach((t) => adminTokens.add(t));
+            }
+
+          // [Task 94] Part A: 관리자의 'notifications' 하위 컬렉션에 알림 저장
+          const adminNotifRef = db.collection("users").doc(doc.id).collection("notifications").doc();
+          const adminNotifData = {
+            "type": "ADMIN_PRODUCT_PENDING",
+            "title": "새 AI 검토 요청",
+            "body": `상품 '${productTitle}'이(가) 'pending' 상태입니다.`,
+            "productId": event.params.productId,
+            "createdAt": FieldValue.serverTimestamp(),
+            "isRead": false,
+          };
+          batch.set(adminNotifRef, adminNotifData);
+          }
+        }
+      } catch (e) {
+        logger.error("[Notify] Error fetching admin tokens:", e);
+      }
+
+      // --- 2. 판매자 토큰 수집 ---
+      try {
+        if (sellerId) {
+          const sellerDoc = await db.collection("users").doc(sellerId).get();
+          if (sellerDoc.exists) {
+            const tokens = sellerDoc.data()?.fcmTokens; // 'fcmTokens' 필드 가정
+            if (Array.isArray(tokens)) {
+              tokens.forEach((t) => sellerTokens.add(t));
+            }
+
+          // [Task 94] Part A: 판매자의 'notifications' 하위 컬렉션에 알림 저장
+          const sellerNotifRef = db.collection("users").doc(sellerId).collection("notifications").doc();
+          const sellerNotifData = {
+            "type": "USER_PRODUCT_PENDING",
+            "title": "상품 검토가 진행 중입니다",
+            "body": `등록하신 상품 '${productTitle}'이(가) 관리자 검토를 위해 제출되었습니다.`,
+            "productId": event.params.productId,
+            "createdAt": FieldValue.serverTimestamp(),
+            "isRead": false,
+          };
+          batch.set(sellerNotifRef, sellerNotifData);
+          }
+        }
+      } catch (e) {
+        logger.error(`[Notify] Error fetching seller ${sellerId} tokens:`, e);
+      }
+
+      const promises = [];
+
+      // --- 3. 관리자에게 FCM 발송 (관리자 전용 메시지) ---
+      const adminTokenList = Array.from(adminTokens);
+      if (adminTokenList.length > 0) {
+        const adminMessage = {
+          notification: { title: "새 AI 검토 요청", body: `상품 '${productTitle}'이(가) 'pending' 상태입니다.` },
+          data: { type: "ADMIN_PRODUCT_PENDING", productId: event.params.productId, click_action: "FLUTTER_NOTIFICATION_CLICK" },
+          tokens: adminTokenList,
+        };
+        promises.push(messaging.sendEachForMulticast(adminMessage)
+          .then((res) => logger.info(`[Notify] Sent ${res.successCount} messages to admins.`))
+          .catch((e) => logger.error("[Notify] Error sending to admins:", e))
+        );
+      }
+
+      // --- 4. 판매자에게 FCM 발송 (판매자 전용 메시지) ---
+      const sellerTokenList = Array.from(sellerTokens);
+      if (sellerTokenList.length > 0) {
+        // For seller notifications we send i18n keys + args in the `data` payload.
+        // The client app should localize the message using these keys and args.
+        const sellerMessage = {
+          // We still provide a short title to FCM notification field so some platforms
+          // display something while the app is in background. The client should
+          // prefer `data.title_key`/`data.body_key` when handling the message.
+          notification: { title: productTitle, body: `` },
+          data: {
+            type: "USER_PRODUCT_PENDING",
+            productId: event.params.productId,
+            click_action: "FLUTTER_NOTIFICATION_CLICK",
+            // i18n keys for client-side localization
+            title_key: "ai_flow.notifications.seller_pending_title",
+            body_key: "ai_flow.notifications.seller_pending_body",
+            // Args encoded as JSON string; client can parse and replace placeholders
+            body_args: JSON.stringify({ title: productTitle }),
+          },
+          tokens: sellerTokenList,
+        };
+        promises.push(
+          messaging
+            .sendEachForMulticast(sellerMessage)
+            .then((res) => logger.info(`[Notify] Sent ${res.successCount} messages to seller.`))
+            .catch((e) => logger.error("[Notify] Error sending to seller:", e))
+        );
+      }
+
+      // [Task 94] Part A: FCM 전송과 동시에 Firestore에 알림 문서를 원자적으로 저장
+      promises.push(batch.commit());
+
+      await Promise.all(promises);
+    }
+  );
+
+  /**
+   * ============================================================================
+   * [V3 NEW] 관리자가 'pending' 상품을 승인/거절할 때 알림 (Task 103/106)
+   * 'products' 문서의 status가 'pending'에서 'selling' 또는 'rejected'로
+   * 변경될 때 트리거됩니다.
+   * 1. 판매자(seller)에게 최종 결과를 알림(FCM + Firestore)으로 보냅니다.
+   * ============================================================================
+   */
+  exports.onProductStatusResolved = onDocumentUpdated(
+    { document: "products/{productId}", region: "asia-southeast2" },
+    async (event) => {
+      const before = event.data.before.data();
+      const after = event.data.after.data();
+      const productId = event.params.productId;
+
+      // 1. [핵심 조건] 'pending' -> 'selling' 또는 'pending' -> 'rejected' 변경 시에만 실행
+      if (
+        before.status !== "pending" ||
+        (after.status !== "selling" && after.status !== "rejected")
+      ) {
+        // 'pending'에서 변경된 것이 아니므로 무시
+        return;
+      }
+
+      // 2. 관리자에 의한 변경인지 확인 (Task 104에서 앱이 이 필드를 저장함)
+      if (
+        after.aiVerificationStatus !== "approved_by_admin" &&
+        after.aiVerificationStatus !== "rejected_by_admin"
+      ) {
+        logger.info(`[Notify Res] Product ${productId} status changed, but not by admin. Skipping.`);
+        return;
+      }
+
+      const sellerId = after.userId;
+      const productTitle = after.title || "Untitled Product";
+      logger.info(`[Notify Res] Admin resolution detected for ${productId}. Status: ${after.status}. Notifying seller ${sellerId}.`);
+
+      const db = getFirestore();
+      const messaging = getMessaging();
+      const sellerTokens = new Set();
+
+      // 3. 판매자 토큰 수집
+      let sellerUserDoc;
+      try {
+        if (!sellerId) {
+          logger.warn(`[Notify Res] Product ${productId} has no sellerId.`);
+          return;
+        }
+        sellerUserDoc = await db.collection("users").doc(sellerId).get();
+        if (sellerUserDoc.exists) {
+          const tokens = sellerUserDoc.data()?.fcmTokens;
+          if (Array.isArray(tokens)) {
+            tokens.forEach((t) => sellerTokens.add(t));
+          }
+        }
+      } catch (e) {
+        logger.error(`[Notify Res] Error fetching seller ${sellerId} tokens:`, e);
+        return;
+      }
+
+      // 4. 상태에 따라 알림 내용 준비
+      let notifTitle = "";
+      let notifBody = "";
+      let notifType = "";
+      let bodyArgs = {};
+
+      if (after.status === "selling") {
+        // [승인됨]
+        notifType = "USER_PRODUCT_APPROVED";
+        notifTitle = "상품이 승인되었습니다";
+        notifBody = `축하합니다! 등록하신 상품 '${productTitle}'이(가) 관리자 검토 후 승인되었습니다.`;
+        bodyArgs = { title: productTitle };
+      } else {
+        // [거절됨] Task 104에서 앱이 저장한 거절 사유를 가져옴
+        const reason = after.rejectionReason || "관리자 정책 위반";
+        notifType = "USER_PRODUCT_REJECTED";
+        notifTitle = "상품 등록이 거절되었습니다";
+        notifBody = `등록하신 상품 '${productTitle}'이(가) 거절되었습니다. 사유: ${reason}`;
+        bodyArgs = { title: productTitle, reason: reason };
+      }
+
+      const promises = [];
+
+      // 5. 판매자의 'notifications' 하위 컬렉션에 알림 저장
+      const sellerNotifRef = db.collection("users").doc(sellerId).collection("notifications").doc();
+      const sellerNotifData = {
+        "type": notifType,
+        "title": notifTitle, // DB에는 기본 언어(ko)로 저장
+        "body": notifBody,
+        "productId": productId,
+        "createdAt": FieldValue.serverTimestamp(),
+        "isRead": false,
+      };
+      promises.push(db.batch().set(sellerNotifRef, sellerNotifData).commit());
+
+      // 6. 판매자에게 FCM 발송
+      const sellerTokenList = Array.from(sellerTokens);
+      if (sellerTokenList.length > 0) {
+        const sellerMessage = {
+          notification: { title: notifTitle, body: notifBody },
+          data: {
+            type: notifType,
+            productId: productId,
+            click_action: "FLUTTER_NOTIFICATION_CLICK",
+            body_args: JSON.stringify(bodyArgs), // (앱에서 i18n 처리를 위함)
+          },
+          tokens: sellerTokenList,
+        };
+        promises.push(
+          messaging.sendEachForMulticast(sellerMessage)
+            .then((res) => logger.info(`[Notify Res] Sent ${res.successCount} messages to seller.`))
+            .catch((e) => logger.error("[Notify Res] Error sending to seller:", e))
+        );
+      }
+
+      await Promise.all(promises);
+    }
+  );
+
 
 // 공통 onCall 옵션
 const CALL_OPTS = {
@@ -219,6 +489,55 @@ const CALL_OPTS = {
   timeoutSeconds: 300,
   secrets: [GEMINI_KEY],
 };
+
+/**
+ * [V3 REFACTOR] initialproductanalysis를 위한 새 V3 단순 프롬프트
+ */
+function buildV3InitialPrompt(data) {
+  const { locale, categoryName, subCategoryName, userDescription, confirmedProductName } = data;
+  const lc = (typeof locale === "string" && locale) || "id";
+  const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
+
+  return `
+[ROLE]
+You are an expert AI assistant for a second-hand marketplace.
+Your task is to perform two actions based on the user's initial product registration attempt.
+
+[USER INPUT DATA]
+- Category: "${categoryName || ""}" / "${subCategoryName || ""}"
+- User's Title: "${confirmedProductName || ""}"
+- User's Description: "${userDescription || ""}"
+- Language: You MUST respond in ${langName}.
+
+[TASK 1: Predict Item Name]
+Analyze the user input data and the provided images to predict the most accurate product name.
+If the images and text are unclear, set 'prediction' to null.
+
+[TASK 2: Suggest Additional Shots]
+Analyze the user input and images. Based on the category, suggest 3-5 additional photos that would
+help a buyer verify the item's condition and authenticity.
+These suggestions MUST be simple, actionable text strings in ${langName}.
+
+Examples of good suggestions:
+- "배터리 성능 상태 화면을 보여주세요."
+- "시리얼 번호가 보이는 라벨을 가까이서 찍어주세요."
+- "스크래치나 얼룩이 있다면 그 부분을 확대해서 찍어주세요."
+- "신발 밑창 마모 상태를 보여주세요."
+
+[OUTPUT SCHEMA (JSON ONLY)]
+You MUST return ONLY ONE JSON object with this exact structure.
+
+{
+  "prediction": "string (The predicted product name in ${langName}) | null",
+  "suggestedShots": [
+    "string (Suggestion 1 in ${langName})",
+    "string (Suggestion 2 in ${langName})",
+    "string (Suggestion 3 in ${langName})"
+  ]
+}
+`;
+}
+
 
 // 이미지 다운로드 공통 제한
 const MAX_IMAGE_BYTES = 7_500_000; // 7.5MB 안전선
@@ -474,68 +793,13 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
   }
 
   try {
-  // [Fix #2] 1차 분석 시 categoryName 힌트를 받도록 파라미터 추가
-  const { imageUrls, ruleId, locale, categoryName, subCategoryName } = request.data || {};
-    if (!Array.isArray(imageUrls) || imageUrls.length === 0 || !ruleId) {
-      logger.error("❌ 오류: 이미지 URL 또는 ruleId가 누락되었습니다.");
-      throw new HttpsError(
-        "invalid-argument",
-        "Image URLs (array) and ruleId are required."
-      );
-    }
-
-    const db = getFirestore();
-    const ruleDoc = await db
-      .collection("ai_verification_rules")
-      .doc(ruleId)
-      .get();
-    if (!ruleDoc.exists) {
-      // [수정] onCall 함수에서는 HttpsError를 throw하여 클라이언트에 일관된 오류를 전달하는 것이 표준입니다.
-      throw new HttpsError("not-found", `Rule with ID ${ruleId} not found.`);
-    }
-    // [수정] 데이터베이스 필드 불일치에 대응하기 위한 방어 코드
-    // initial_analysis_prompt_template 필드를 우선 사용합니다.
-    // 2. 만약 이 값이 없거나(null) 비어있으면(""), 그때서야 report_template_prompt로 폴백(Fallback)합니다.
-    const ruleData = ruleDoc.data();
-    const promptTemplate =
-      // [Fix] (ruleData.initial_analysis_prompt_template || "").trim() 추가 (제안 2)
-      (ruleData.initial_analysis_prompt_template || "").trim() ||
-      ruleData.report_template_prompt;
-    if (!promptTemplate) {
-      throw new HttpsError(
-        "failed-precondition",
-        `Rule '${ruleId}' is missing a valid prompt template.`
-      );
-    }
-
-    // [Fix #1 - 2A] 카테고리 그룹 추론 (구조적 보강안)
-    const DEFAULT_SUGGESTED_SHOTS = {
-      universal: ["front_full","back_full","brand_model_tag","serial_or_size_label","defect_closeups","included_items_flatlay","power_on_or_fit","measurement_reference","receipt_or_warranty"],
-      apparel:   ["front_full","back_full","brand_model_tag","serial_or_size_label","defect_closeups","included_items_flatlay","measurement_reference"],
-      footwear:  ["front_full","back_full","brand_model_tag","serial_or_size_label","defect_closeups","included_items_flatlay","measurement_reference"],
-      electronics:["front_full","back_full","brand_model_tag","serial_or_size_label","defect_closeups","included_items_flatlay","power_on_or_fit","receipt_or_warranty"],
-    };
-    function inferGroup(categoryName, subCategoryName) {
-      const t = `${categoryName} ${subCategoryName}`.toLowerCase();
-      if (t.includes('shoe') || t.includes('sepatu') || t.includes('foot')) return 'footwear';
-      if (t.includes('dress') || t.includes('fashion') || t.includes('pakaian') || t.includes('apparel')) return 'apparel';
-      if (t.includes('elect') || t.includes('device') || t.includes('gadget')) return 'electronics';
-      return 'universal';
-    }
-
-    // [V2.1 핵심 추가] 규칙에 정의된 '추천 증거(suggested_shots)' 목록을 가져와
-    // 제공된 이미지에서 확인할 수 없는 항목 키를 AI가 판별하도록 지시합니다.
-    const suggestedShotsMap = ruleData.suggested_shots || {};
-    let suggestedShotKeys = Object.keys(suggestedShotsMap || {});
-
-    // [Fix #1 - 2A] 만약 규칙에 추천샷이 비어있으면(generic_v2 등), 카테고리 추론으로 폴백
-    if (suggestedShotKeys.length === 0) {
-      // [Fix #2] 1차 분석 시 전달받은 categoryName 힌트를 사용하여 그룹 추론
-      const group = inferGroup(categoryName || "", subCategoryName || "");
-      suggestedShotKeys = DEFAULT_SUGGESTED_SHOTS[group];
-    }
-
-    // evidenceInstruction will be defined later after locale resolution (langName).
+  // [V3 REFACTOR] 'ruleId' 및 복잡한 룰 엔진 의존성 제거.
+  // Accept: imageUrls, locale, categoryName, subCategoryName, userDescription, confirmedProductName
+  const { imageUrls, locale, categoryName, subCategoryName, userDescription, confirmedProductName } = request.data || {};
+  if (!Array.isArray(imageUrls) || imageUrls.length === 0) {
+    logger.error("❌ 오류: 이미지 URL이 누락되었습니다.");
+    throw new HttpsError("invalid-argument", "Image URLs (array) are required.");
+  }
 
     const ac = new AbortController();
     const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
@@ -585,124 +849,34 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
     );
     clearTimeout(to);
 
-    // 2.5 계열 고정 호출 + 재시도/타임아웃 래퍼 사용
-  // Locale-aware directive
-  const lc = (typeof locale === "string" && locale) || "id";
-  const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
+  // Build V3 initial prompt and call GenAI
+  const v3InitialPrompt = buildV3InitialPrompt({ locale, categoryName, subCategoryName, userDescription, confirmedProductName });
+  const userContents = [{ role: "user", parts: [{ text: v3InitialPrompt }, ...imageParts] }];
+  const text = await genAiCall(genAI, {
+    modelPrimary: "gemini-2.5-flash",
+    modelFallback: "gemini-2.5-pro",
+    contents: userContents,
+    safetySettings,
+    responseMimeType: "application/json",
+    tag: "initialproductanalysis",
+  });
 
-  // [작업 74] AI가 '찾은 증거'와 '누락된 증거'를 매핑하도록 프롬프트 수정 (작업 66 내용)
-  const evidenceInstruction = `\nAdditionally, analyze the provided images (indexed 0, 1, 2, etc.) to check for evidence completeness.\nYou will receive a list of "required_shots" (keys) and a list of "user_images" (image parts).\n\n**Your Task:**\n1.  Analyze all "user_images" from index 0 onwards.\n2.  For each "required_shots" key, determine if any user image satisfies that requirement.\n3.  Respond in JSON ONLY. Do not include any text outside JSON.\n\n**JSON Output Schema:**\n{\n  "found_evidence": {\n    "shot_key_1": 0,\n    "shot_key_2": 1\n  },\n  "missing_evidence_keys": [\n    "shot_key_that_is_not_found"\n  ]\n}\n\n[Language] All textual responses must be written in ${langName}.`;
-
-  const augmentedPrompt = `${promptTemplate}${evidenceInstruction}`;
-    // [작업 66] AI 프롬프트가 'required_shots' 목록을 요구하므로, contents에 추가
-    const userContents = [
-      { role: "user", parts: [
-        { text: augmentedPrompt },
-        { text: "--- REQUIRED SHOTS (Keys) ---" },
-        { text: JSON.stringify(suggestedShotKeys) },
-        { text: "--- USER IMAGES (Indexed) ---" },
-        ...imageParts,
-      ]},
-    ];
-    const text = await genAiCall(genAI, {
-      modelPrimary: "gemini-2.5-flash",
-      modelFallback: "gemini-2.5-pro",
-      contents: userContents,
-      safetySettings,
-      responseMimeType: "application/json",
-      tag: "initialproductanalysis",
-    });
-
-    // 진단 로그용 원문/파싱 결과 기록
+    // Simple V3 parsing: expect a single JSON object with { prediction, suggestedShots }
     const jsonText = extractJsonText(text);
-    const parsed = tryParseJson(jsonText);
+  const parsedV3 = tryParseJson(jsonText);
+  logAiDiagnostics("initialproductanalysis", text, parsedV3);
+  if (!parsedV3) {
+    throw new HttpsError("data-loss", "AI returned invalid JSON.");
+  }
 
-    // Robust fallback: if primary parse failed, try to salvage common JSON fragments
-    let parsedRes = parsed;
-    if (!parsedRes) {
-      try {
-        // 1) Try to extract the first {...} object block
-        const objMatch = jsonText.match(/\{[\s\S]*\}/);
-        if (objMatch) {
-          parsedRes = tryParseJson(objMatch[0]);
-        }
-      } catch (e) {
-        parsedRes = null;
-      }
-    }
-    if (!parsedRes) {
-      // 2) Try to extract legacy array field 'missing_evidence_list' if present as JSON fragment
-      try {
-        const arrMatch = jsonText.match(/"missing_evidence_list"\s*:\s*(\[[\s\S]*?\])/);
-        const nameMatch = jsonText.match(/"predicted_item_name"\s*:\s*"([^"]*)"/);
-        const foundMatch = jsonText.match(/"found_evidence"\s*:\s*(\{[\s\S]*?\})/);
-        const rescueObj = {};
-        if (arrMatch) {
-          const a = tryParseJson(arrMatch[1]);
-          if (Array.isArray(a)) rescueObj.missing_evidence_list = a;
-        }
-        if (nameMatch) rescueObj.predicted_item_name = nameMatch[1];
-        if (foundMatch) {
-          const f = tryParseJson(foundMatch[1]);
-          if (f && typeof f === 'object') rescueObj.found_evidence = f;
-        }
-        if (Object.keys(rescueObj).length) parsedRes = rescueObj;
-      } catch (e) {
-        parsedRes = null;
-      }
-    }
+  // Minimal schema validation
+  if (!Array.isArray(parsedV3.suggestedShots)) {
+    logger.error("❌ CRITICAL: AI V3 initial response is missing 'suggestedShots' array.", { keys: Object.keys(parsedV3) });
+    throw new HttpsError("data-loss", "AI returned invalid V3 initial structure.");
+  }
 
-    // [작업 74] AI가 새 스키마를 따랐는지 검증 (작업 66 내용)
-    if (!parsedRes || (parsedRes.found_evidence === undefined && parsedRes.missing_evidence_keys === undefined)) {
-      logger.warn(`[AI 분석 검사] AI가 새 스키마(found_evidence/missing_evidence_keys)를 완전히 따르지 않았습니다. 원본: ${jsonText}`);
-
-      // 시나리오: 모델이 아직 레거시 스키마를 반환하는 경우(작업 이전)
-      // 레거시 필드인 `missing_evidence_list` 또는 `predicted_item_name`이 존재하면
-      // 이를 새 스키마로 매핑하여 하위 호환성을 제공합니다.
-      if (parsedRes && (parsedRes.missing_evidence_list !== undefined || parsedRes.predicted_item_name !== undefined)) {
-        logger.info('[AI 분석] 레거시 스키마 감지, 결과를 새 스키마로 매핑합니다.');
-        const predictedName = parsedRes.predicted_item_name ?? null;
-        let legacyMissing = [];
-        if (Array.isArray(parsedRes.missing_evidence_list)) {
-          legacyMissing = parsedRes.missing_evidence_list
-            .filter((v) => typeof v === 'string')
-            .map((s) => s.trim())
-            .filter((s) => s.length > 0);
-        }
-        const foundEvidence = (parsedRes.found_evidence && typeof parsedRes.found_evidence === 'object')
-          ? parsedRes.found_evidence
-          : {};
-
-        logger.info('✅ 레거시 매핑 완료', { predictedName, legacyMissingCount: legacyMissing.length });
-        return { success: true, prediction: predictedName, found_evidence: foundEvidence, missing_evidence_keys: legacyMissing };
-      }
-      // As a last-resort fallback, if we have suggestedShotKeys available, return them as missing.
-      try {
-        if (Array.isArray(suggestedShotKeys) && suggestedShotKeys.length > 0) {
-          logger.warn('[AI 분석] 최종 폴백: suggestedShotKeys를 missing_evidence_keys로 사용합니다.', { suggestedCount: suggestedShotKeys.length });
-          return { success: true, prediction: null, found_evidence: {}, missing_evidence_keys: suggestedShotKeys };
-        }
-      } catch (e) {
-        logger.warn('폴백 사용 중 오류 발생', e?.toString?.() || e);
-      }
-
-      throw new HttpsError("data-loss", "AI가 유효한 분석 결과를 반환하지 못했습니다.");
-    }
-    // Ensure downstream code uses the rescued parse result if needed
-    if (parsedRes && !parsed) parsed = parsedRes;
-
-    logAiDiagnostics("initialproductanalysis", text, parsed);
-    if (!parsed) {
-      throw new HttpsError("data-loss", "AI returned invalid JSON.");
-    }
-
-    logger.info("✅ Gemini 1차 분석 성공", {
-      found: Object.keys(parsed.found_evidence).length,
-      missing: parsed.missing_evidence_keys.length,
-    });
-    
-    // [작업 74] AI가 반환한 { found_evidence: ..., missing_evidence_keys: ... } 객체 전체를 반환
-    return { success: true, ...parsed };
+  logger.info("✅ Gemini 1차 분석 성공", { prediction: parsedV3.prediction, suggestions: parsedV3.suggestedShots.length });
+  return { success: true, ...parsedV3 };
   } catch (error) {
     logger.error(
       "❌ initialproductanalysis 함수 내부에서 심각한 오류 발생:",
@@ -725,103 +899,10 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
 });
 
 
-function normalizeFinalReportShape(raw) {
-  const r = raw && typeof raw === "object" ? { ...raw } : {};
-
-  // ── 공통 헬퍼: 다국어/대체 키 후보 목록에서 첫 값을 고르는 함수들 ──
-  const pickString = (keys) => {
-    for (const k of keys) {
-      const v = r[k];
-      if (typeof v === "string" && v.trim()) return v.trim();
-    }
-    return "";
-  };
-
-  const pickObject = (keys) => {
-    for (const k of keys) {
-      const v = r[k];
-      if (v && typeof v === "object" && !Array.isArray(v)) return v;
-    }
-    return {};
-  };
-
-  const pickArray = (keys) => {
-    for (const k of keys) {
-      const v = r[k];
-      if (Array.isArray(v)) return v;
-      if (typeof v === "string" && v.trim()) {
-        return v
-          .split(/[;,]/)
-          .map((s) => s.trim())
-          .filter((s) => s.length > 0);
-      }
-    }
-    return [];
-  };
-
-  const pickNumber = (keys) => {
-    for (const k of keys) {
-      const v = r[k];
-      if (typeof v === "number" && Number.isFinite(v)) return v;
-      if (typeof v === "string" && v.trim()) {
-        const n = Number(v.replace(/[^\d.-]/g, ""));
-        if (Number.isFinite(n)) return n;
-      }
-    }
-    return null;
-  };
-
-  // ── 1) 요약: 영어/인도네시아어(등)를 모두 canonical 필드로 정규화 ──
-  //    - AI가 ringkasan, resumen 등을 써도 verification_summary로 모읍니다.
-  r.verification_summary = pickString([
-    "verification_summary",
-    "summary",
-    "ringkasan",       // id
-    "ringkasan_singkat",
-  ]);
-
-  // ── 2) 핵심 스펙: key_specs / specs / spesifikasi 등 ──
-  r.key_specs = pickObject([
-    "key_specs",
-    "specs",
-    "spesifikasi",     // id
-  ]);
-
-  // ── 3) 상태 점검: condition_check / condition / kondisi 등 ──
-  r.condition_check = pickString([
-    "condition_check",
-    "condition",
-    "kondisi",         // id
-  ]);
-
-  // ── 4) 구성품: included_items / items / kelengkapan 등 ──
-  r.included_items = pickArray([
-    "included_items",
-    "items",
-    "kelengkapan",     // id
-  ]);
-
-  // ── 5) 구매자 안내: notes_for_buyer / notes / catatan_* 등 ──
-  r.notes_for_buyer = pickString([
-    "notes_for_buyer",
-    "notes",
-    "catatan_pembeli",        // id
-    "catatan_untuk_pembeli",  // id
-  ]);
-
-  // ── 6) 가격: suggested_price / harga_disarankan / harga_rekomendasi / price_suggestion ──
-  const price = pickNumber([
-    "suggested_price",
-    "harga_disarankan",   // id
-    "harga_rekomendasi",  // id
-    "price_suggestion",
-  ]);
-  if (price !== null) {
-    r.suggested_price = price;
-    r.price_suggestion = price;
-  }
-
-  return r;
+// [V3 REFACTOR] 'normalizeFinalReportShape' (V2 정규화 헬퍼) 삭제.
+// V3에서는 AI가 엄격하게 새 스키마를 반환하도록 프롬프트로 강제합니다.
+function normalizeFinalReportShape(/* raw */) {
+  throw new Error("normalizeFinalReportShape is removed in V3 refactor; use strict V3 schema instead.");
 }
 
 /**
@@ -831,122 +912,86 @@ function normalizeFinalReportShape(raw) {
  * @param {object} ruleData - Firestore의 V3 규칙 문서
  * @return {string} - AI에게 보낼 V3 동적 프롬프트
  */
-function buildV3ExtractionPrompt(data, ruleData) {
+function buildV3FinalPrompt(data) {
   const {
-    imageUrls,
     confirmedProductName,
     userPrice,
     userDescription,
     categoryName,
     subCategoryName,
-    skippedKeys,
     locale,
+    useFlash,
   } = data;
 
-  // 1. 언어 설정
   const lc = (typeof locale === "string" && locale) || "id";
   const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
-  const labelLang = `label_${lc}`; // 예: label_ko
 
-  // 2. V3 추출 대상 템플릿 로드
-  const targets = ruleData.extraction_targets;
-  if (!targets || !targets.key_specs) {
-    throw new HttpsError("failed-precondition", `Rule '${data.ruleId}' is missing V3 'extraction_targets'.`);
-  }
-
-  // 3. [EVIDENCE MAP] 생성
-  const initialUrls = imageUrls.initial || [];
-  const foundEvidence = data.found_evidence || {}; // 1차 분석 결과 { 'key': index }
-  const guidedUrls = imageUrls.guided || {}; // 보강 사진 { 'key': 'url' }
-  const validSkippedKeys = (Array.isArray(skippedKeys) ? skippedKeys : [])
-      .filter((v) => typeof v === "string").map((s) => s.trim()).filter((s) => s.length > 0);
-
-  let evidenceMapText = "[EVIDENCE MAP]\n";
-  evidenceMapText += "You MUST use this map to find the correct image for each task.\n";
-  
-  const allEvidenceKeys = new Set([
-    ...Object.keys(foundEvidence),
-    ...Object.keys(guidedUrls),
-  ]);
-
-  for (const key of allEvidenceKeys) {
-    if (guidedUrls[key]) {
-      evidenceMapText += `- Evidence '${key}' is in 'guided_image_urls.${key}'.\n`;
-    } else if (foundEvidence[key] !== undefined) {
-      evidenceMapText += `- Evidence '${key}' is in 'initial_image_urls[${foundEvidence[key]}]'.\n`;
-    }
-  }
-  if (allEvidenceKeys.size === 0) {
-    evidenceMapText += "- No specific evidence map provided. Analyze all images.\n";
-  }
-
-  // 4. [TASKS] 생성 (동적)
-  let tasksText = "[TASKS]\n";
-  tasksText += "You MUST perform these tasks based on the [EVIDENCE MAP].\n";
-  
-  // 4.1. Key Specs 추출 작업
-  tasksText += "\n1. Extract Key Specifications:\n";
-  for (const target of targets.key_specs || []) {
-    tasksText += `   - For spec_key '${target.spec_key}':\n`;
-    tasksText += `     - Label: "${target[labelLang] || target.label_en}"\n`;
-    tasksText += `     - Task: ${target.prompt}\n`;
-    tasksText += `     - Evidence: Use evidence_key '${target.evidence_key}' from the map.\n`;
-  }
-
-  // 4.2. Condition 추출 작업 (TODO: 템플릿 확장)
-  tasksText += "\n2. Extract Condition:\n";
-  tasksText += "   - Analyze all images, especially 'defect_closeups', to describe the item's condition.\n";
-
-  // 4.3. Included Items 추출 작업 (TODO: 템플릿 확장)
-  tasksText += "\n3. Extract Included Items:\n";
-  tasksText += "   - Analyze 'included_items_flatlay' to determine what is included.\n";
-
-  // 4.4. Skipped Keys 처리 (버그 수정)
-  tasksText += "\n4. Generate Buyer Notes:\n";
-  if (validSkippedKeys.length) {
-    tasksText += `   - The user SKIPPED providing: [${validSkippedKeys.join(", ")}].\n`;
-    tasksText += `   - You MUST write a note in 'notes_for_buyer.value' (in ${langName}) warning about these missing items.\n`;
-  } else {
-    tasksText += `   - The user did NOT skip any evidence.\n`;
-    tasksText += `   - You MUST NOT write any warnings about missing evidence in 'notes_for_buyer.value'. Set it to null or a neutral summary.\n`;
-  }
-
-  // 5. [OUTPUT SCHEMA] 및 [SAFETY RULES] (ChatGPT 감수안 채택)
   const schemaText = `
-[OUTPUT SCHEMA (V3)]
+[OUTPUT SCHEMA (V3.0 Simple Engine)]
 You MUST return ONLY ONE JSON object with this exact structure.
 JSON keys MUST be in English. Text values MUST be in ${langName}.
 
 {
-  "key_specs": [
-    {
-      "spec_key": "string (e.g., 'model_name')",
-      "label": "string (The ${langName} label provided in TASKS)",
-      "value": "string | number | null",
-      "evidence_key": "string (The 'evidence_key' used)",
-      "confidence_score": "number (0.0 to 1.0) | null",
-      "reason_if_null": "string (Explain in ${langName} if value is null) | null"
-    }
-  ],
-  "condition_check": [ ... ],
-  "included_items": [ ... ],
-  "notes_for_buyer": { "value": "string | null" }
+  "version": "3.0.0-simple",
+  "modelUsed": "${useFlash ? 'gemini-2.5-flash' : 'gemini-2.5-pro'}",
+  // [V3 ADMIN VERIFICATION] AI must assess the trustworthiness of the listing.
+  "trustVerdict": "string (MUST be one of: 'clear', 'suspicious', 'fraud')",
+
+  "itemSummary": {
+    "predictedName": "string (e.g., 'iPhone 15 Pro Max 256GB') | null",
+    "categoryCheck": "string (e.g., '사용자 선택 카테고리(스마트폰)와 일치함') | null"
+  },
+  "condition": {
+    "grade": "string (e.g., 'A+', 'B', 'C') | null",
+    "gradeReason": "string (Short reason for the grade in ${langName}) | null",
+    "details": [
+      {
+        "label": "string (The ${langName} label, e.g., '화면 상태', '배터리 성능')",
+        "value": "string (The extracted value, e.g., '스크래치 없음', '100%')",
+        "evidenceShot": "string (Name of the photo AI used, e.g., 'power_on_screen.jpg') | null"
+      }
+    ]
+  },
+  "priceAssessment": {
+    "suggestedMin": "number | null",
+    "suggestedMax": "number | null",
+    "currency": "IDR",
+    "comment": "string (Short price commentary in ${langName}) | null"
+  },
+  "notesForBuyer": "string (Key warnings or notes for the buyer in ${langName}) | null",
+  "verificationSummary": "string (Overall summary of the verification in ${langName}) | null",
+
+  "onSiteVerificationChecklist": {
+    "title": "string (Title in ${langName}, e.g., '현장 구매자 안심 체크리스트')",
+    "checks": [
+      {
+        "checkPoint": "string (The check item in ${langName}, e.g., 'IMEI 일치 확인')",
+        "instruction": "string (The instruction in ${langName}, e.g., '설정 > 일반 > 정보에서 IMEI...')"
+      }
+    ]
+  }
 }
 
 [SAFETY RULES]
 - If the evidence image is blurry, unreadable, or does not contain the information:
   - You MUST NOT guess.
-  - Set 'value' to null.
-  - Set 'reason_if_null' to a short explanation in ${langName} (e.g., "Teks tidak terbaca", "Foto tidak menunjukkan bagian relevan").
+  - Explain the reason in 'gradeReason' or 'notesForBuyer'.
 - If you are not at least 80% confident, set 'value' to null.
-- Never invent data (model, OS, capacity, battery) that is not visible.
-  `;
+- Never invent data.
+`;
 
-  // 6. 최종 프롬프트 조립
   const finalPrompt = `
 [ROLE]
-You are an extraction engine, NOT a writer.
-Your task is to extract facts from the provided evidence images based on a map and specific tasks.
+You are an expert product inspector for a high-trust second-hand marketplace.
+Your task is to analyze all provided images and text data to generate a comprehensive, structured JSON report.
+You MUST adhere strictly to the [OUTPUT SCHEMA].
+
+${schemaText}
+
+[CONTEXT]
+- The current date is: ${new Date().toISOString()}
+- Your analysis MUST be based on this current date.
+- Dates in the past relative to this are "past"; dates after this are "future".
 
 [USER INPUT]
 - Product Name Claim: "${confirmedProductName || ""}"
@@ -954,9 +999,20 @@ Your task is to extract facts from the provided evidence images based on a map a
 - User Price: "${userPrice || ""}"
 - User Description: "${userDescription || ""}"
 
-${evidenceMapText}
-${tasksText}
-${schemaText}
+[IMAGES]
+The user has provided multiple images. Analyze ALL of them to find evidence for:
+- Item name, model, specs (e.g., battery health, storage).
+- Physical condition (scratches, dents, screen-on).
+- Included items (box, charger, etc.).
+
+[TASKS]
+1.  **Analyze & Extract:** Fill every field in the [OUTPUT SCHEMA] based on the [USER INPUT] and [IMAGES].
+2.  **Assess Price:** Compare the 'User Price' to the market value (based on your internal knowledge) and set 'priceAssessment'.
+3.  **Generate Checklist (CRITICAL):** Create the 'onSiteVerificationChecklist' with 2-3 essential checks a buyer MUST perform on-site (e.g., "Check IMEI", "Test camera").
+4.  **Trust Verdict (CRITICAL):** Analyze all data for fraud signals.
+  - If the user's claims (model, condition) are supported by images AND all data is plausible (e.g., correct dates, no signs of tampering), set 'trustVerdict' to "clear".
+  - If the model name seems impossible for the year (e.g., "iPhone 20" in 2025), or dates are chronologically impossible (e.g., manufactured *after* first use), or images look faked/manipulated, set 'trustVerdict' to "suspicious" or "fraud".
+
 `;
 
   return finalPrompt;
@@ -968,47 +1024,15 @@ ${schemaText}
  */
 exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
   const genAI = getGenAI();
+  const { imageUrls, locale } = request.data || {};
 
-  const {
-    imageUrls,
-    ruleId,
-    confirmedProductName,
-    userPrice,
-    userDescription,
-    categoryName, // <-- V2 데이터
-    subCategoryName, // <-- V2 데이터
-    skippedKeys, // [작업 74] 클라이언트에서 보내는 필드 이름을 `skippedKeys`로 받습니다
-    // [V3] 1차 분석 결과를 클라이언트가 다시 보냅니다.
-    found_evidence, // { 'key': index }
-    locale,
-  } = request.data;
-
-  if (!imageUrls || !ruleId) {
-    throw new HttpsError("invalid-argument", "Required data is missing.");
+  if (!imageUrls) {
+    throw new HttpsError("invalid-argument", "Required data is missing: imageUrls.");
   }
 
   try {
-    const db = getFirestore();
-    const ruleDoc = await db
-      .collection("ai_verification_rules")
-      .doc(ruleId)
-      .get();
-    if (!ruleDoc.exists) {
-      throw new HttpsError("not-found", "Verification rule not found.");
-    }
-    const ruleData = ruleDoc.data();
-
-    
-    // [V3] 'extraction_targets'가 있는지 확인합니다.
-    if (!ruleData.extraction_targets) {
-       throw new HttpsError(
-        "failed-precondition",
-        `Rule '${ruleId}' is not configured for V3 'extraction_targets'.`
-      );
-    }
-
-    // [V3] 동적 V3 프롬프트 생성
-    const v3Prompt = buildV3ExtractionPrompt(request.data, ruleData);
+    // Build a V3 final report prompt using the simplified generator.
+    const v3Prompt = buildV3FinalPrompt(request.data);
 
     // [V3] 1차(initial) + 2차(guided) 이미지 URL을 모두 추출합니다.
     const allImageUrls = [
@@ -1083,37 +1107,34 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
     let report = tryParseJson(jsonBlock);
     logAiDiagnostics("generatefinalreport", jsonStr, report);
     if (!report) {
-      throw new HttpsError(
-        "data-loss",
-        "AI returned invalid JSON for the final report."
-      );
+      // [V3 HOTFIX] JSON 파싱 자체가 실패한 경우, 안전한 Fallback 객체 생성
+      report = {};
     }
 
-    // [V3] V2 정규화 함수(`normalizeFinalReportShape`)를 호출하지 않습니다.
-    // [V3] AI가 V3 스키마를 따랐는지 최소한으로 검증합니다.
-    if (!report.key_specs || !Array.isArray(report.key_specs)) {
-      logger.error("❌ CRITICAL: AI V3 response is missing 'key_specs' array.", {
+    // [V3 REFACTOR] AI가 새 V3 스키마를 따랐는지 최소한으로 검증합니다.
+    if (!report.itemSummary || !report.condition || !report.onSiteVerificationChecklist) {
+      logger.error("❌ CRITICAL: AI V3 response is missing critical fields (itemSummary, condition, or onSiteVerificationChecklist). Generating fallback.", {
         keys: Object.keys(report),
       });
-      throw new HttpsError("data-loss", "AI returned invalid V3 report structure.");
+      // [V3 HOTFIX] 'data-loss' 예외를 던지는 대신, 앱 크래시를 막기 위해
+      // '안전한 폴백(Fallback) 리포트'를 반환합니다.
+      report = {
+        version: "3.0.0-fallback",
+        modelUsed: "gemini-2.5-pro",
+        itemSummary: report.itemSummary || { predictedName: null, categoryCheck: "AI 분석 실패" },
+        condition: report.condition || { grade: "N/A", gradeReason: "AI가 상태 분석에 실패했습니다.", details: [] },
+        priceAssessment: report.priceAssessment || { suggestedMin: null, suggestedMax: null, currency: "IDR", comment: "AI가 가격 분석에 실패했습니다." },
+        notesForBuyer: report.notesForBuyer || "AI가 세부 보고서를 생성하는 데 실패했습니다. 판매자에게 직접 문의하세요.",
+        verificationSummary: report.verificationSummary || "AI 분석에 실패했습니다. (Invalid V3 Structure)",
+        onSiteVerificationChecklist: report.onSiteVerificationChecklist || { title: "AI 분석 실패", checks: [] },
+      };
     }
 
-    // [V3] (중요) AI가 반환한 'evidence_key'를 기반으로 실제 'source_image_url'을 채워줍니다.
-    const initialUrls = imageUrls.initial || [];
-    const guidedUrls = imageUrls.guided || {};
-
-    report.key_specs.forEach((spec) => {
-      const eKey = spec.evidence_key;
-      if (guidedUrls[eKey]) {
-        spec.source_image_url = guidedUrls[eKey];
-      } else if (found_evidence && found_evidence[eKey] !== undefined) {
-        const index = found_evidence[eKey];
-        if (index >= 0 && index < initialUrls.length) {
-          spec.source_image_url = initialUrls[index];
-        }
-      }
-    });
-    // (TODO: condition_check, included_items에 대해서도 동일한 URL 주입 로직 추가)
+    // NOTE: Previously we injected `source_image_url` server-side using
+    // `found_evidence` and `key_specs`. Under the V3 approach we prefer the
+    // model to reference evidence identifiers directly and the client to map
+    // those identifiers to URLs. If server-side injection is required later,
+    // reintroduce a controlled mapping here.
 
     // [추적 코드 2] 성공 직전 최종 로그
     logger.info(
@@ -1256,69 +1277,29 @@ exports.enhanceProductWithAi = onCall(CALL_OPTS, async (request) => {
       );
     }
 
-    // 2. 상품 데이터 + evidenceImageUrls로 프롬프트 동적 생성
-    // [V2 수정] 특정 카테고리 규칙이 아닌, 범용 V2 규칙('generic_v2')을 사용합니다.
-    const ruleDoc = await db
-      .collection("ai_verification_rules")
-      .doc("generic_v2")
-      .get();
-    if (!ruleDoc.exists) {
-      throw new HttpsError("not-found", `Generic AI rule 'generic_v2' not found.`);
-    }
+    // 2. 상품 데이터 기반으로 V3 프롬프트 생성 (ai_verification_rules 의존성 제거)
+    const confirmedProductName = productData.title || "";
+    const categoryName = productData.categoryName || "";
+    const subCategoryName = productData.subCategoryName || "";
 
-    // V1과의 호환성을 위해 v2ReportPrompt 필드가 있으면 그것을 사용하고, 없으면 report_template_prompt를 사용
-    let promptTemplate =
-      ruleDoc.data().v2ReportPrompt || ruleDoc.data().report_template_prompt;
-    if (!promptTemplate) {
-      throw new HttpsError(
-        "failed-precondition",
-        `AI rule 'generic_v2' is missing a prompt.`
-      );
-    }
-
-    // [V2 핵심 추가] 상품의 categoryId를 이용해 'categories_v2'에서 대/소분류 이름을 직접 조회합니다.
-    const subCategoryDoc = await db
-      .collection("categories_v2")
-      .doc(categoryId)
-      .get();
-    if (!subCategoryDoc.exists) {
-      throw new HttpsError(
-        "not-found",
-        `Sub-category with ID ${categoryId} not found.`
-      );
-    }
-    const subCategoryData = subCategoryDoc.data();
-    const subCategoryName = subCategoryData.name_ko || categoryId;
-    const parentCategoryId = subCategoryData.parentId;
-
-    let categoryName = "";
-    if (parentCategoryId) {
-      const parentCategoryDoc = await db
-        .collection("categories_v2")
-        .doc(parentCategoryId)
-        .get();
-      if (parentCategoryDoc.exists) {
-        categoryName = parentCategoryDoc.data().name_ko || parentCategoryId;
-      }
-    }
-
-    const confirmedProductName = productData.title;
-    // [V2 수정] 상품의 모든 정보를 활용하여 프롬프트를 완성합니다.
-    promptTemplate = promptTemplate
-      .replace(/{{confirmedProductName}}/g, String(confirmedProductName ?? ""))
-      .replace(/{{categoryName}}/g, String(categoryName ?? ""))
-      .replace(/{{subCategoryName}}/g, String(subCategoryName ?? ""))
-      .replace(/{{userPrice}}/g, String(productData.price ?? ""))
-      .replace(/{{userDescription}}/g, String(productData.description ?? ""));
+    // Build a V3 final prompt for the enhancement flow. We prefer using the
+    // V3 structured prompt builder instead of fetching ai_verification_rules.
+    const v3Prompt = buildV3FinalPrompt({
+      confirmedProductName,
+      userPrice: productData.price,
+      userDescription: productData.description,
+      categoryName,
+      subCategoryName,
+      locale: request.data?.locale,
+      useFlash: false,
+    });
 
     // 3. 증거 이미지 준비 및 Gemini API 호출
     const imageParts = await Promise.all(
       evidenceImageUrls.map((url) => urlToGenerativePart(url))
     );
 
-    const contents = [
-      { role: "user", parts: [{ text: promptTemplate }, ...imageParts] },
-    ];
+    const contents = [{ role: "user", parts: [{ text: v3Prompt }, ...imageParts] }];
     const rawResponseText = await genAiCall(genAI, {
       contents,
       safetySettings,
@@ -1771,11 +1752,19 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
       const originalReport = productData.aiReport;
       const originalImageUrls = productData.imageUrls;
 
+      // [Task 115 HOTFIX] Copilot이 발견한 NPE(Null) 오류 수정
+      // 'originalReport'가 null인지 먼저 확인해야 합니다.
       if (!originalReport) {
         throw new HttpsError(
           "failed-precondition",
-          "AI 검증이 완료된 상품이 아닙니다."
+          "AI 검증이 완료된 상품이 아닙니다." // "AI verified product is not."
         );
+      }
+
+      // [V3 TAKEOVER] Extract the V3 checklist to use in the prompt
+      const onSiteChecklist = originalReport.onSiteVerificationChecklist;
+      if (!onSiteChecklist || !onSiteChecklist.checks) {
+        throw new HttpsError("failed-precondition", "AI Report is missing 'onSiteVerificationChecklist'.");
       }
 
     // 2. 비교 프롬프트 생성
@@ -1784,24 +1773,25 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
       lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
 
     const verificationPrompt = `
-      You are an on-site verification AI for a marketplace. A buyer is meeting a seller to pick up an item.
-      Your task is to compare the 'NEW ON-SITE PHOTOS' (taken by the buyer) with the 'ORIGINAL AI REPORT' (created by the seller).
+      [ROLE]
+      You are an expert visual inspector for a high-trust second-hand marketplace.
+      Your task is to compare two sets of images: [PACKET A] (the seller's original photos) and [PACKET B] (the buyer's new on-site photos).
 
-  **Original AI Report (Seller's Claim):**
-  (Original AI Report JSON)
-  ${JSON.stringify(originalReport)}
-  (End of Original AI Report)
+      **[CONTEXT]**
+      The seller's original report included this checklist: ${JSON.stringify(onSiteChecklist)}.
+      The buyer took the [PACKET B] photos to verify this checklist.
 
       **Task:**
-      Analyze the 'NEW ON-SITE PHOTOS'.
-      1. Do these new photos show the same item described in the 'Original AI Report'?
-      2. Does the condition (scratches, dents, wear) in the new photos match the "condition_check" described in the original report?
+      1. **Compare [PACKET A] and [PACKET B]** to determine if they show the exact same item.
+      2. **Check for New Defects:** Look for any new scratches, cracks, dents, or screen issues in [PACKET B] that are NOT visible in [PACKET A].
       3. Provide a clear 'match' (true/false) and a 'reason' for your decision. The 'reason' must be written in ${langName}.
+      4. If the new photos in [PACKET B] are too blurry, dark, or do not show the item clearly enough to make a comparison, set 'match' to null.
 
       **Output Format (JSON ONLY):**
       {
-       "match": true | false,
-       "reason": "string (Your explanation in ${langName}. Example: 'Item matches original report.' or 'New photos show a large crack not mentioned in the original report.')"
+       "match": true | false | null,
+       "reason": "string (Your explanation in ${langName}. Example: 'Item matches original photos.' or 'New photos show a large crack on the screen that was not present in original photos.')",
+       "discrepancies": ["string (List any specific differences found in ${langName})"]
       }
     `;
 
@@ -1817,9 +1807,9 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
     const contents = [
       { role: "user", parts: [
         { text: verificationPrompt },
-        { text: "--- ORIGINAL IMAGES (Reference) ---" },
+        { text: "--- [PACKET A: ORIGINAL ITEM] (Reference) ---" },
         ...originalParts,
-        { text: "--- NEW ON-SITE PHOTOS (To Verify) ---" },
+        { text: "--- [PACKET B: ON-SITE ITEM] (To Verify) ---" },
         ...newParts,
       ]},
     ];
@@ -1837,8 +1827,28 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
     const verificationResult = tryParseJson(jsonText);
     logAiDiagnostics("verifyProductOnSite", rawResponseText, verificationResult);
 
+    // [Task 110] AI가 'match' 키를 반환하지 못했을 때 (AI 실패)
+    // - 'match: false'(불일치)가 아닌 'match: null'(판단 불가)을 반환하여
+    //   앱이 재시도할 기회를 주도록 수정합니다.
+    // - 이때 HTTP 에러를 던지지 않고 { success: true, verification: {...} }를 반환하여
+    //   클라이언트가 "AI 실패 → 재시도" UI를 노출할 수 있게 합니다.
     if (!verificationResult || verificationResult.match === undefined) {
-      throw new HttpsError("data-loss", "AI가 유효한 검증 결과를 반환하지 못했습니다.");
+      logger.error(
+        "❌ CRITICAL: AI verifyProductOnSite response is missing 'match' key. Returning fallback.",
+        { keys: Object.keys(verificationResult || {}) }
+      );
+
+      /** [V3 3-Way Logic]
+       * fallbackResult.match:
+       *  - null : AI가 판단 불가(네트워크 오류, 포맷 불일치 등)
+       *           → 클라이언트에서 "AI 실패, 재시도"로 처리
+       */
+      const fallbackResult = {
+        match: null,
+        reason: `AI 검증에 실패했습니다. 네트워크를 확인하고 다시 시도해 주세요. (${langName})`,
+      };
+
+      return { success: true, verification: fallbackResult };
     }
 
     logger.info(`✅ [AI 인수 2단계] 검증 완료: ${productId}`, verificationResult);

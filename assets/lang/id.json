@@ -108,6 +108,11 @@
       }
     }
   },
+  "notifications": {
+    "title": "Notifikasi",
+    "error": "Gagal memuat notifikasi.",
+    "empty": "Belum ada notifikasi."
+  },
   "drawer": {
     "editProfile": "Ubah Profil",
     "bookmarks": "Markah",
@@ -164,7 +169,8 @@
       "success": "Produk berhasil diedit!",
       "fail": "Gagal memperbarui produk: {error}",
       "resetLocation": "Atur ulang lokasi",
-      "save": "Simpan Perubahan"
+      "save": "Simpan Perubahan",
+      "saving": "Simpan Perubahan"
     },
     "detail": {
       "makeOffer": "Tawarkan harga",
@@ -239,16 +245,23 @@
         "matchTitle": "Verifikasi AI Berhasil",
         "noMatchTitle": "Verifikasi AI Gagal",
         "finalize": "Konfirmasi pengambilan akhir",
-        "cancelDeal": "Batalkan transaksi (minta pengembalian)"
+        "cancelDeal": "Batalkan transaksi (minta pengembalian)",
+        "failTitle": "Gagal verifikasi AI",
+        "retry": "Coba lagi"
       },
       "success": {
         "finalized": "Transaksi berhasil diselesaikan.",
         "cancelled": "Transaksi dibatalkan. Deposit akan dikembalikan."
+      },
+      "checklistTitle": "Daftar Periksa Verifikasi di Lokasi",
+      "ai" : {
+        "reactivated": "Verifikasi AI telah diaktifkan kembali."
       }
     },
     "aiBadge": "AI Terverifikasi",
     "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!",
     "ai": {
+      "reactivated": "Verifikasi AI telah diaktifkan kembali.",
       "cancel_limit": "AI verification can only be canceled once per product. Re-requesting AI verification may incur charges.",
       "cancel_success": "AI verification has been cancelled. The product is now a normal listing.",
       "cancel_error": "Error cancelling AI verification: {0}",
@@ -305,6 +318,9 @@
       "loading": "AI sedang menulis iklan penjualan terakhir...",
       "error": "Gagal membuat laporan. Silakan coba lagi.",
       "success": "Laporan akhir berhasil dibuat.",
+      "success_pending": "Terdaftar. Akan dipublikasikan setelah ditinjau admin.",
+      "pending_title": "Diajukan untuk ditinjau",
+      "pending_message": "Hasil verifikasi AI menunjukkan item ini perlu ditinjau oleh admin sebelum dipublikasikan.",
       "guide": "Ini adalah draf iklan penjualan yang dibuat oleh AI. Periksa dan ubah isinya sebelum dipublikasikan.",
       "submit_button": "Daftarkan",
       "fail": "fail",
@@ -337,10 +353,20 @@
     "errors": {
       "incomplete_report": "Analisis AI Gagal: AI tidak menghasilkan item laporan yang diperlukan (spesifikasi, kondisi, ringkasan). Silakan coba lagi nanti."
     },
+    "notifications": {
+      "title": "Notifikasi",
+      "error": "Gagal memuat notifikasi.",
+      "empty": "Belum ada notifikasi.",
+      "seller_pending_title": "Produk sedang ditinjau",
+      "seller_pending_body": "Daftar Anda '{title}' telah diajukan untuk peninjauan admin."
+    },
     "common": {
       "pick_from_initial": "Pilih dari foto yang ada",
       "take_photo": "Ambil Foto",
       "pick_gallery": "Pilih dari Galeri",
+      "pick_gallery_multi": "Pilih beberapa dari galeri",
+      "added_photos": "{count} foto ditambahkan",
+      "add_more": "Tambah lagi",
       "skipped": "Skipped",
       "add_photo": "Add Photo",
       "skip": "Skip",
@@ -1689,7 +1715,15 @@
     "aiApproval": {
       "empty": "Tidak ada produk yang menunggu verifikasi AI.",
       "error": "Gagal memuat produk yang menunggu.",
-      "requestedAt": "Diminta pada"
+      "requestedAt": "Diminta pada",
+      "detailTitle": "Detail Permintaan Verifikasi",
+      "idInfo": "Informasi ID",
+      "sellerInfo": "Informasi Penjual",
+      "itemInfo": "Detail Produk Asli",
+      "rejectTitle": "Masukkan alasan penolakan",
+      "rejectReasonHint": "Alasan penolakan",
+      "rejectReasonRequired": "Alasan wajib diisi",
+      "aiReport": "Laporan Analisis AI (V3)"
     },
     "reports": {
       "title": "Manajemen Laporan",

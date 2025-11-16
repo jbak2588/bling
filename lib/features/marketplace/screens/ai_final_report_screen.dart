@@ -27,7 +27,6 @@ library;
 
 import 'dart:io';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:bling_app/features/marketplace/widgets/ai_report_viewer.dart'; // [V3] 리포트 뷰어 임포트
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -48,9 +47,11 @@ class AiFinalReportScreen extends StatefulWidget {
   final String productId; // [수정] 새 상품이면 새 ID, 수정이면 기존 ID
   final String categoryId; // [핵심 추가] 상품이 속한 실제 카테고리 ID
   final Map<String, dynamic> finalReport;
-  final AiVerificationRule rule;
-  final List<dynamic> initialImages;
-  final Map<String, XFile> takenShots;
+  // [V3 REFACTOR] '룰 엔진' 종속성(rule, takenShots) 제거
+  // final AiVerificationRule rule;
+  // final Map<String, XFile> takenShots;
+  final List<String> initialImageUrls;
+  final Map<String, String> guidedImageUrls;
   final String confirmedProductName;
   final String? userPrice; // [추가] 사용자가 입력한 가격(선택)
   // TODO: 이전 화면들로부터 가격, 설명 등 다른 필드들도 전달받아야 함
@@ -62,9 +63,9 @@ class AiFinalReportScreen extends StatefulWidget {
     required this.productId,
     required this.categoryId,
     required this.finalReport,
-    required this.rule,
-    required this.initialImages,
-    required this.takenShots,
+    // [V3 REFACTOR]
+    required this.initialImageUrls,
+    required this.guidedImageUrls,
     required this.confirmedProductName,
     this.userPrice, // [추가]
     this.userDescription, // [개편안 1] 원본 설명
@@ -76,10 +77,11 @@ class AiFinalReportScreen extends StatefulWidget {
 }
 
 class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
-  final Map<String, TextEditingController> _specsControllers = {};
+  // [V3 REFACTOR] 'key_specs'와 'included_items'는 'condition'으로 통합됨
+  // final Map<String, TextEditingController> _specsControllers = {};
   final TextEditingController _summaryController = TextEditingController();
   final TextEditingController _conditionController = TextEditingController();
-  final TextEditingController _itemsController = TextEditingController();
+  // final TextEditingController _itemsController = TextEditingController();
   final TextEditingController _priceSuggestionController =
       TextEditingController();
   final TextEditingController _buyerNotesController = TextEditingController();
@@ -105,7 +107,8 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     super.initState();
     _auctionRepository = AuctionRepository();
     _initializeControllers();
-    _allImages = [...widget.initialImages, ...widget.takenShots.values];
+    // [V3 REFACTOR] 'takenShots'(XFile) 대신 'guidedImageUrls'(String) 사용
+    _allImages = [...widget.initialImageUrls, ...widget.guidedImageUrls.values];
     // [Fix] 원본 설명을 컨트롤러에 설정
     _descriptionController.text = widget.userDescription ?? '';
     // 사용자 위치/신뢰 정보 미리 로드 (테스트 환경에서는 건너뜁니다)
@@ -118,73 +121,71 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     }
   }
 
+  /// [V3 REFACTOR] '단순 감정 엔진' V3 JSON 스키마(Task 62)를 파싱하도록 전면 재작성
   void _initializeControllers() {
     _titleController.text = widget.confirmedProductName;
-    // [FIX] Safely handle 'verification_summary' which might not be a String
-    final dynamic summaryValue = widget.finalReport['verification_summary'];
+    // [V3 REFACTOR] price controller initialization
+    _priceController.text = widget.userPrice ?? '';
+
+    // 1. Summary
+    final dynamic summaryValue = widget.finalReport['verificationSummary'];
     if (summaryValue is String && summaryValue.isNotEmpty) {
       _summaryController.text = summaryValue;
     } else {
-      // [NEW] Show placeholder if empty
-      _summaryController.text = ''; // 또는 "AI 요약 없음" 등
+      _summaryController.text = ''; // V3는 플레이스홀더 대신 빈 값
     }
 
-    // [FIX] Safely handle 'notes_for_buyer' which might not be a String
-    final dynamic notesValue = widget.finalReport['notes_for_buyer'];
+    // 2. Notes for Buyer
+    final dynamic notesValue = widget.finalReport['notesForBuyer'];
     if (notesValue is String && notesValue.isNotEmpty) {
       _buyerNotesController.text = notesValue.trim();
     } else {
-      // [NEW] User suggestion: Show placeholder if empty
       _buyerNotesController.text =
           'ai_flow.final_report.notes_placeholder'.tr();
     }
 
-    // [FIX] Safely handle 'condition_check' which is often a List
-    final dynamic conditionValue = widget.finalReport['condition_check'];
-    if (conditionValue is String) {
-      _conditionController.text = conditionValue;
-    } else if (conditionValue is List) {
-      // [RE-FIX] Join List<Map> into human-readable string, not Map.toString()
-      List<String> conditions = [];
-      for (var item in conditionValue) {
-        if (item is Map) {
-          // Use 'label' and 'value' from the map (based on AiReportViewer logic)
-          String label = item['label']?.toString() ?? '';
-          String value = item['value']?.toString() ?? 'N/A';
-          if (label.isNotEmpty) {
-            conditions.add('$label: $value');
+    // 3. Price Assessment
+    final dynamic priceMap = widget.finalReport['priceAssessment'];
+    if (priceMap is Map) {
+      final min = priceMap['suggestedMin']?.toString();
+      final max = priceMap['suggestedMax']?.toString();
+      if (min != null && max != null) {
+        _priceSuggestionController.text = 'Rp $min ~ $max';
+      } else if (min != null) {
+        _priceSuggestionController.text = 'Rp $min';
+      } else {
+        _priceSuggestionController.text = '';
+      }
+    } else {
+      _priceSuggestionController.text = '';
+    }
+
+    // 4. Condition (Grade + Details)
+    final dynamic conditionMap = widget.finalReport['condition'];
+    final List<String> conditionLines = [];
+    if (conditionMap is Map) {
+      final String? grade = conditionMap['grade'] as String?;
+      final String? gradeReason = conditionMap['gradeReason'] as String?;
+      if (grade != null && grade.isNotEmpty) {
+        conditionLines.add('AI 등급: $grade (${gradeReason ?? ''})');
+      }
+
+      final dynamic detailsList = conditionMap['details'];
+      if (detailsList is List) {
+        for (var item in detailsList) {
+          if (item is Map) {
+            String label = item['label']?.toString() ?? '';
+            String value = item['value']?.toString() ?? 'N/A';
+            if (label.isNotEmpty) {
+              conditionLines.add('$label: $value');
+            }
           }
-        } else {
-          // Fallback for non-map items
-          conditions.add(item.toString());
         }
       }
-      _conditionController.text = conditions.join('\n'); // Join with newlines
-    } else {
-      _conditionController.text = ''; // Handle null or other types
     }
-    _itemsController.text =
-        (widget.finalReport['included_items'] as List<dynamic>? ?? [])
-            .join(', ');
+    _conditionController.text = conditionLines.join('\n'); // Join with newlines
 
-    // [수정] 가격 컨트롤러 초기화 로직 변경
-    // 판매 가격은 사용자가 입력한 가격을 기본값으로 설정
-    _priceController.text = widget.userPrice ?? '';
-    // AI 추천 가격은 별도의 컨트롤러로 관리 (suggested_price 우선, 그다음 price_suggestion)
-    _priceSuggestionController.text =
-        widget.finalReport['suggested_price']?.toString() ??
-            widget.finalReport['price_suggestion']?.toString() ??
-            '';
-
-    // [핵심 수정] 중첩된 key_specs 맵을 안전하게 Map<String, dynamic>으로 변환합니다.
-    final dynamic rawSpecs = widget.finalReport['key_specs'];
-    final Map<String, dynamic> specs =
-        (rawSpecs is Map) ? Map<String, dynamic>.from(rawSpecs) : {};
-    specs.forEach((key, value) {
-      _specsControllers[key] = TextEditingController(text: value.toString());
-    });
-    // [Fix] description 컨트롤러를 AI 요약으로 덮어쓰는 로직 제거
-    // _applyAllSuggestionsToDescription(isInitial: true);
+    // [V3 REFACTOR] 'key_specs'와 'included_items' 컨트롤러 초기화 로직 삭제
   }
 
   // ✅ [신뢰-경매] 4. 현재 사용자 정보(위치 등)를 가져오는 함수
@@ -208,16 +209,14 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
   void dispose() {
     _summaryController.dispose();
     _conditionController.dispose();
-    _itemsController.dispose();
     _priceSuggestionController.dispose();
     _buyerNotesController.dispose();
     _titleController.dispose();
     _priceController.dispose();
     _descriptionController.dispose();
     _transactionPlaceController.dispose();
-    for (var controller in _specsControllers.values) {
-      controller.dispose();
-    }
+    // [V3 REFACTOR] disposed controllers for _itemsController and
+    // _specsControllers removed because those controls were removed.
     super.dispose();
   }
 
@@ -282,6 +281,11 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
       return;
     }
 
+    // [V3 ADMIN VERIFICATION] Read the AI's trust verdict
+    final String trustVerdict =
+        widget.finalReport['trustVerdict'] as String? ?? 'clear';
+    final bool isSuspicious = trustVerdict != 'clear';
+
     // 필수 입력: 경매 선택 시 거래 희망 장소가 비어있으면 제출 불가
     if (_registrationType == RegistrationType.auction &&
         _transactionPlaceController.text.trim().isEmpty) {
@@ -307,14 +311,20 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
 
       // 2) 유형 분기
       if (_registrationType == RegistrationType.sale) {
-        await _submitProductSale(user, allImageUrls);
+        await _submitProductSale(user, allImageUrls,
+            isSuspicious: isSuspicious);
       } else {
         await _submitProductAuction(user, allImageUrls);
       }
 
       // 3) 완료 처리
+      // [V3 ADMIN VERIFICATION] Show different message on success
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('ai_flow.final_report.success'.tr())),
+        SnackBar(
+          content: Text(isSuspicious
+              ? 'ai_flow.final_report.success_pending'.tr()
+              : 'ai_flow.final_report.success'.tr()),
+        ),
       );
       navigator.popUntil((route) => route.isFirst);
     } catch (e) {
@@ -329,7 +339,8 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
   }
 
   // ✅ 일반 판매 저장
-  Future<void> _submitProductSale(User user, List<String> allImageUrls) async {
+  Future<void> _submitProductSale(User user, List<String> allImageUrls,
+      {required bool isSuspicious}) async {
     // V2 UI 컨트롤러들로부터 최종 AI 리포트 객체 구성(간단 버전)
     final int userSelectedPrice = int.tryParse(_priceController.text) ?? 0;
     final int aiSuggestedPrice = int.tryParse(
@@ -361,13 +372,15 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
       'locationName': _currentUserModel?.locationName,
       'locationParts': _currentUserModel?.locationParts,
       'geoPoint': _currentUserModel?.geoPoint,
-      'status': 'selling',
+      'status': isSuspicious ? 'pending' : 'selling', // [V3 ADMIN VERIFICATION]
       // [Fix #B] AI 상세 리포트가 아닌, 'used' 또는 'new'를 저장합니다.
       'condition': 'used', // TODO: 'new'/'used' 선택 UI 추가 필요
       'transactionPlace': null,
       'updatedAt': Timestamp.now(),
-      'isAiVerified': true,
-      'aiVerificationStatus': 'approved',
+      'isAiVerified': !isSuspicious, // [V3 ADMIN VERIFICATION]
+      'aiVerificationStatus': isSuspicious
+          ? 'pending_admin'
+          : 'approved', // [V3 ADMIN VERIFICATION]
 
       // [Fix #C] aiReport(레거시)와 aiVerificationData(신규)에 동일 데이터 저장 (모델 호환성 유지)
       'aiReport': finalAiReport,
@@ -465,7 +478,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
           ? _titleController.text
           : widget.confirmedProductName,
       description: widget.userDescription ?? _descriptionController.text,
-      imageUrls: widget.initialImages.map((e) => e.toString()).toList(),
+      imageUrls: widget.initialImageUrls.map((e) => e.toString()).toList(),
       categoryId: widget.categoryId,
       price: int.tryParse(_priceController.text) ?? 0,
       negotiable: false,
@@ -592,25 +605,14 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
-              _buildReportSection(
-                  'ai_flow.final_report.key_specs'.tr(),
-                  _specsControllers.entries
-                      .map((e) => MapEntry(e.key, e.value))
-                      .toList()),
-              const SizedBox(height: 16),
+              // [V3 REFACTOR] 'key_specs' 섹션(_buildReportSection) 제거
               TextFormField(
                 controller: _conditionController,
                 decoration: InputDecoration(
                     labelText: 'ai_flow.final_report.condition'.tr(),
                     border: const OutlineInputBorder()),
-                maxLines: 5,
+                maxLines: 8, // V3에서는 더 많은 정보가 표시되므로 늘림
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                  controller: _itemsController,
-                  decoration: InputDecoration(
-                      labelText: 'ai_flow.final_report.included_items'.tr(),
-                      border: const OutlineInputBorder())),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
@@ -641,35 +643,8 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     );
   }
 
-  Widget _buildReportSection(
-    String title,
-    List<MapEntry<String, TextEditingController>> controllers,
-  ) {
-    // ... 이 위젯은 변경 없음 ...
-    if (controllers.isEmpty) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(title, style: Theme.of(context).textTheme.titleLarge),
-        ),
-        const Divider(),
-        ...controllers.map((entry) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: TextFormField(
-              controller: entry.value,
-              decoration: InputDecoration(
-                labelText: entry.key,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          );
-        }),
-      ],
-    );
-  }
+  // [V3 REFACTOR] 'key_specs' 컨트롤러가 사라졌으므로
+  // 'buildReportSection' 헬퍼 함수도 더 이상 필요 없습니다.
 }
 
 // ✅ 등록 유형 구분을 위한 enum

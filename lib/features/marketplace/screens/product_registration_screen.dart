@@ -36,7 +36,7 @@ import 'package:image_picker/image_picker.dart';
 // Removed direct UUID/path usage for uploads; using shared helper instead
 // ignore: unused_import
 import 'package:uuid/uuid.dart';
-import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart'; // [추가] AI 규칙 모델
+// [V3 REFACTOR] 'AI 룰 엔진' 모델 종속성 완전 삭제
 
 // ✅ [추가] UserModel을 사용하기 위해 import 합니다.
 import '../../../../core/models/user_model.dart';
@@ -71,7 +71,6 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   Category? _selectedCategory;
 
   // 선택된 카테고리의 ID만 필요할 때 사용할 안전한 게터
-  String? get _selectedCategoryId => _selectedCategory?.id;
 
   // 현재 상품 상태 및 추가 입력값
   String _condition = 'used';
@@ -79,7 +78,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   // [추가] AI 검수 관련 상태
   // [작업 68] bool _isSaving -> String? _loadingStatus로 변경
   String? _loadingStatus;
-  AiVerificationRule? _selectedAiRule;
+  // [V3 REFACTOR] 'AI 룰 엔진' 종속성(AiVerificationRule) 제거
 
   // 1. [추가] 대/소분류 이름을 저장할 상태 변수
   String? _selectedParentCategoryName;
@@ -127,21 +126,17 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       setState(() {
         _selectedCategory = result;
       });
-      // For AI rules, prefer parent category id when available
-      final ruleCategoryId = result.parentId ?? result.id;
-      final rule = await _aiVerificationService.loadAiRule(ruleCategoryId);
+      // [V3 REFACTOR] 'loadAiRule' 호출 로직 완전 삭제
       if (result.parentId != null && result.parentId!.isNotEmpty) {
         final names = await _aiVerificationService.getCategoryNames(
             result.id, result.parentId!);
         if (!mounted) return;
         setState(() {
-          _selectedAiRule = rule;
           _selectedParentCategoryName = names['parentCategoryName'];
         });
       } else {
         if (!mounted) return;
         setState(() {
-          _selectedAiRule = rule;
           _selectedParentCategoryName = null;
         });
       }
@@ -283,9 +278,11 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   Future<void> _startAiVerification() async {
     // 유효성 검사 강화
     if (!_formKey.currentState!.validate() ||
-        _selectedCategoryId == null ||
+        _selectedCategory ==
+            null || // [V3 REFACTOR] '_selectedAiRule' 대신 '_selectedCategory'로 검증
         _images.isEmpty ||
-        _selectedAiRule == null) {
+        _selectedParentCategoryName == null) {
+      // [V3 REFACTOR] 이름이 로드되었는지 확인
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('ai_flow.cta.missing_required_fields'.tr())),
       );
@@ -306,9 +303,9 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
           tr('ai_flow.status.analyzing')); // "AI가 1차 분석 중... (최대 1분)"
       await _aiVerificationService.startVerificationFlow(
         context: context,
-        rule: _selectedAiRule!,
+        // [V3 REFACTOR] 'rule' 파라미터 완전 제거
         productId: productId,
-        categoryId: _selectedCategory?.parentId ?? _selectedCategoryId!,
+        categoryId: _selectedCategory!.id, // V3는 서브 카테고리 ID를 직접 사용
         initialImages: _images, // XFile 리스트 그대로 전달하면 서비스가 업로드 처리
         productName: _titleController.text,
         productDescription: _descriptionController.text,
@@ -530,32 +527,30 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                 valueListenable: _titleController,
                 builder: (context, value, _) {
                   final isReady = value.text.isNotEmpty &&
-                      _selectedCategoryId != null &&
+                      _selectedCategory !=
+                          null && // [V3 REFACTOR] use selected category
                       _images.isNotEmpty &&
-                      _selectedAiRule != null &&
                       _selectedParentCategoryName != null; // 이름까지 로드되었는지 확인
                   return OutlinedButton.icon(
                     onPressed: (isReady && _loadingStatus == null)
                         ? _startAiVerification
                         : null,
                     icon: const Icon(Icons.shield_outlined),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 24),
+                    ),
                     label: _loadingStatus != null
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                        ? Column(
+                            // [Task 87] UI 개선: 텍스트 + 진행 바로 변경
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              const SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2)),
-                              const SizedBox(width: 12),
-                              Text(_loadingStatus!), // [작업 68] "AI가 1차 분석 중..."
+                              Text(_loadingStatus!),
+                              const SizedBox(height: 12),
+                              LinearProgressIndicator(),
                             ],
                           )
                         : Text('ai_flow.cta.start_button'.tr()),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
                   );
                 },
               ),

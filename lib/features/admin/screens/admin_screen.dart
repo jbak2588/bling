@@ -64,7 +64,9 @@ class AiApprovalScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('products')
-            .where('aiVerificationStatus', isEqualTo: 'pending')
+            .where('status',
+                isEqualTo:
+                    'pending') // [V3 PENDING FIX] Task 79에서 저장한 'status' 필드 쿼리
             .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {

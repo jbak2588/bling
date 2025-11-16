@@ -23,7 +23,8 @@
 library;
 
 import 'dart:io';
-import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
+// [V3 REFACTOR] 'AI 룰 엔진' 모델 종속성 완전 삭제
+
 import 'package:bling_app/features/marketplace/screens/ai_evidence_suggestion_screen.dart';
 import 'package:bling_app/features/marketplace/screens/ai_final_report_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -43,59 +44,8 @@ class AiVerificationService {
       FirebaseFunctions.instanceFor(region: 'asia-southeast2');
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  /// AI 규칙을 Firestore에서 불러옵니다. 전용 규칙이 없으면 범용 규칙('generic_v2')을 찾습니다.
-  Future<AiVerificationRule?> loadAiRule(String? categoryId) async {
-    if (categoryId == null) {
-      debugPrint('loadAiRule: categoryId == null -> returning null');
-      return null;
-    }
-
-    DocumentSnapshot? snap;
-    try {
-      debugPrint('loadAiRule: fetching ai_verification_rules/$categoryId');
-      snap = await _firestore
-          .collection('ai_verification_rules')
-          .doc(categoryId)
-          .get();
-      debugPrint('loadAiRule: fetched $categoryId, exists=${snap.exists}');
-    } catch (e, st) {
-      debugPrint('loadAiRule: error fetching rule for $categoryId: $e');
-      debugPrint(st.toString());
-      // Don't rethrow; we'll attempt fallback below.
-      snap = null;
-    }
-
-    if (snap == null || !snap.exists) {
-      try {
-        debugPrint(
-            'loadAiRule: trying fallback ai_verification_rules/generic_v2');
-        snap = await _firestore
-            .collection('ai_verification_rules')
-            .doc('generic_v2')
-            .get();
-        debugPrint('loadAiRule: fetched generic_v2, exists=${snap.exists}');
-      } catch (e, st) {
-        debugPrint('loadAiRule: error fetching fallback generic_v2: $e');
-        debugPrint(st.toString());
-        snap = null;
-      }
-    }
-
-    try {
-      if (snap != null && snap.exists) {
-        debugPrint('loadAiRule: returning rule from snapshot (id=${snap.id})');
-        return AiVerificationRule.fromSnapshot(snap);
-      } else {
-        debugPrint(
-            'loadAiRule: no rule found for $categoryId and generic_v2 fallback');
-      }
-    } catch (e, st) {
-      debugPrint('loadAiRule: error parsing rule snapshot: $e');
-      debugPrint(st.toString());
-    }
-
-    return null;
-  }
+  // [V3 REFACTOR] 'AI 룰 엔진'의 핵심인 'loadAiRule' 함수 (약 60줄) 완전 삭제.
+  // V3는 더 이상 룰 객체에 의존하지 않습니다.
 
   /// 카테고리 ID를 이용해 대/소분류 이름을 가져옵니다.
   Future<Map<String, String?>> getCategoryNames(
@@ -134,7 +84,7 @@ class AiVerificationService {
   /// AI 검수 전체 흐름을 시작합니다. 규칙에 따라 화면 흐름을 분기합니다.
   Future<void> startVerificationFlow({
     required BuildContext context,
-    required AiVerificationRule rule,
+    // [V3 REFACTOR] 'rule' 객체 의존성 제거
     required String productId,
     required String categoryId,
     required List<dynamic> initialImages, // String(URL) or XFile
@@ -175,8 +125,8 @@ class AiVerificationService {
     if (!isFreeTierUsed) {
       // [시나리오 1: 무료] 첫 검수이므로 무료 진행
       debugPrint("AI 검수: 무료 티어 사용. 1차 분석 시작.");
-      await _proceedToAnalysis(context, rule, productId, categoryId,
-          initialUrls, productName, productDescription, productPrice);
+      await _proceedToAnalysis(context, productId, categoryId, initialUrls,
+          productName, productDescription, productPrice);
     } else {
       // [시나리오 2 & 3: 유료]
 
@@ -204,8 +154,8 @@ class AiVerificationService {
         // TODO: "유료 신규 보고서" 결제 팝업 표시
         debugPrint("AI 검수: 유료 재생성. (데이터 변경됨)");
         // (결제 성공 시)
-        await _proceedToAnalysis(context, rule, productId, categoryId,
-            initialUrls, productName, productDescription, productPrice);
+        await _proceedToAnalysis(context, productId, categoryId, initialUrls,
+            productName, productDescription, productPrice);
       }
     }
   }
@@ -213,7 +163,6 @@ class AiVerificationService {
   /// [개편안 1] 1차 분석 및 화면 이동 (공통 로직)
   Future<void> _proceedToAnalysis(
     BuildContext context,
-    AiVerificationRule rule,
     String productId,
     String categoryId,
     List<String> initialUrls,
@@ -244,63 +193,46 @@ class AiVerificationService {
 
       final initCallable = _functions.httpsCallable('initialproductanalysis');
       final initRes = await initCallable.call({
+        // [V3 REFACTOR] V3 'initialproductanalysis' 페이로드
         'imageUrls': initialUrls,
-        'ruleId': rule.id,
         'locale': context.locale.languageCode,
         'categoryName': parentName, // [Fix #2] 힌트 전달
         'subCategoryName': subName, // [Fix #2] 힌트 전달
+        'confirmedProductName': productName, // [V3 REFACTOR] 추가
+        'userDescription': productDescription, // [V3 REFACTOR] 추가
       });
       final data = initRes.data ?? {};
       // [Fix #3] AI가 예측한 이름이 아닌, 사용자가 입력한 원본 제목을 항상 신뢰합니다.
       final String confirmedName = productName;
-      // Support both new and legacy AI response schemas:
-      // - New key: 'missing_evidence_keys' (server patch)
-      // - Legacy key: 'missing_evidence_list'
-      final List<dynamic> missingRaw =
-          (data['missing_evidence_keys'] as List<dynamic>?) ??
-              (data['missing_evidence_list'] as List<dynamic>?) ??
-              const [];
-      final missingKeys = missingRaw.whereType<String>().toList();
+      // [V3 REFACTOR] V3 '단순 엔진' 응답 파싱
+      // 'missing_evidence_keys', 'found_evidence' 로직 삭제
+      final List<dynamic> suggestedShotsRaw =
+          (data['suggestedShots'] as List<dynamic>?) ?? const [];
+      final suggestedShots = suggestedShotsRaw.whereType<String>().toList();
 
-      final Map<String, dynamic> foundEvidenceMap =
-          (data['found_evidence'] as Map?) != null
-              ? Map<String, dynamic>.from((data['found_evidence'] as Map))
-              : <String, dynamic>{};
-
-      // [Fix #2] '신발' 등 범용 카테고리일 때 빈 제안 화면이 뜨는 문제 해결
-      // 부족한 증거가 없으면(missingKeys.isEmpty) 제안 화면을 건너뛰고 바로 리포트 생성
-      if (missingKeys.isEmpty && context.mounted) {
-        debugPrint("AI 검수: 부족한 증거 없음. 최종 보고서 생성으로 직행.");
-        await _generateFinalReportDirectly(
-            context,
-            foundEvidenceMap,
-            rule,
-            productId,
-            categoryId,
-            initialUrls,
-            confirmedName,
-            productPrice,
-            productDescription, <String>[]);
+      // [V3 REFACTOR] V3 로직: 제안할 샷이 없으면 바로 최종 보고서 생성
+      if (suggestedShots.isEmpty && context.mounted) {
+        debugPrint("AI 검수: 추가 제안 샷 없음. 최종 보고서 생성으로 직행.");
+        await _generateFinalReportDirectly(context, productId, categoryId,
+            initialUrls, confirmedName, productPrice, productDescription);
         return; // 흐름 종료
       }
 
       if (context.mounted) {
         Navigator.of(context).push(MaterialPageRoute(
           builder: (_) => AiEvidenceSuggestionScreen(
+            // [V3 REFACTOR] 'AiEvidenceSuggestionScreen' V3 생성자 호출
+            // 'ruleId', 'rule', 'missingEvidenceKeys', 'foundEvidence' 삭제
             productId: productId,
             categoryId: categoryId,
-            ruleId: rule.id,
-            rule: rule,
             initialImageUrls: initialUrls,
             confirmedProductName: confirmedName,
             userPrice: productPrice,
             userDescription: productDescription,
             categoryName: parentName,
             subCategoryName: subName,
-            missingEvidenceKeys: missingKeys,
-            foundEvidence: (data['found_evidence'] as Map?) != null
-                ? Map<String, dynamic>.from((data['found_evidence'] as Map))
-                : <String, dynamic>{},
+            // [V3 REFACTOR] 'suggestedShots' 전달
+            suggestedShots: suggestedShots,
           ),
         ));
       }
@@ -317,17 +249,16 @@ class AiVerificationService {
   }
 
   /// [Fix #2] 제안 화면을 건너뛸 때 호출할 최종 보고서 생성 함수
+  /// [Fix #2] 제안 화면을 건너뛸 때 호출할 최종 보고서 생성 함수
+  /// [V3 REFACTOR] 'foundEvidence', 'rule' 제거
   Future<void> _generateFinalReportDirectly(
     BuildContext context,
-    Map<String, dynamic> foundEvidence,
-    AiVerificationRule rule,
     String productId,
     String categoryId,
     List<String> initialUrls,
     String confirmedProductName,
     String? productPrice,
     String? productDescription,
-    List<String> skippedItems,
   ) async {
     // 1. 카테고리 이름 조회 (Suggestion Screen의 로직과 동일)
     String? subName;
@@ -350,22 +281,17 @@ class AiVerificationService {
     // 2. 백엔드 호출
     final callable = _functions.httpsCallable('generatefinalreport');
     final result = await callable.call(<String, dynamic>{
+      // [V3 REFACTOR] V3 'generatefinalreport' 페이로드
       'imageUrls': {
         'initial': initialUrls,
-        // [V3] 보강된 샷은 없으므로 비워둡니다.
         'guided': <String, String>{},
       },
-      // [V3] 1차 분석에서 받은 증거 지도를 서버로 다시 보냅니다.
-      // 이것이 V3 "증거 연계"의 핵심입니다.
-      'found_evidence': foundEvidence,
-      'ruleId': rule.id,
+      // [V3 REFACTOR] 'found_evidence', 'ruleId', 'skippedKeys' 제거
       'confirmedProductName': confirmedProductName,
       'categoryName': parentName,
       'subCategoryName': subName,
       'userPrice': productPrice,
       'userDescription': productDescription,
-      // Use 'skippedKeys' (client name) to match server expectations.
-      'skippedKeys': skippedItems,
       'locale': context.locale.languageCode,
     });
 
@@ -374,11 +300,10 @@ class AiVerificationService {
         ? Map<String, dynamic>.from(reportRaw)
         : null;
 
-    // [V3] V3 스키마에 맞게 응답을 검증합니다.
-    // key_specs는 이제 Map이 아닌 List<Map>입니다.
+    // [V3 REFACTOR] V3 '단순 엔진' 스키마(Task 62) 검증
     if (report == null ||
-        report['key_specs'] is! List ||
-        report['notes_for_buyer'] == null) {
+        report['itemSummary'] == null ||
+        report['condition'] == null) {
       throw Exception('ai_flow.errors.incomplete_report'.tr());
     }
 
@@ -389,9 +314,10 @@ class AiVerificationService {
           productId: productId,
           categoryId: categoryId,
           finalReport: report,
-          rule: rule,
-          initialImages: initialUrls,
-          takenShots: <String, XFile>{},
+          // [V3 REFACTOR] 'AiFinalReportScreen' V3 생성자 호출
+          // 'rule', 'initialImages', 'takenShots' 삭제
+          initialImageUrls: initialUrls,
+          guidedImageUrls: const {}, // 보강 샷 없음
           confirmedProductName: confirmedProductName,
           userPrice: productPrice,
           userDescription: productDescription,

@@ -104,6 +104,11 @@
     },
     "results": "results"
   },
+  "notifications": {
+    "title": "Notifications",
+    "error": "Failed to load notifications.",
+    "empty": "No notifications yet."
+  },
   "drawer": {
     "editProfile": "Edit Profile",
     "bookmarks": "Bookmarks",
@@ -161,7 +166,8 @@
       "success": "Product registered successfully!",
       "fail": "Failed to update product: {error}",
       "resetLocation": "Reset location",
-      "save": "Save changes"
+      "save": "Save changes",
+      "saving": "Saving changes"
     },
     "detail": {
       "makeOffer": "Make an offer",
@@ -244,12 +250,16 @@
         "matchTitle": "AI verification success",
         "noMatchTitle": "AI verification failed",
         "finalize": "Confirm final takeover",
-        "cancelDeal": "Cancel deal (request refund)"
+        "cancelDeal": "Cancel deal (request refund)",
+        "failTitle": "AI verification failed",
+        "retry": "Retry"
       },
       "success": {
         "finalized": "Deal completed successfully.",
         "cancelled": "Deal cancelled. Deposit will be refunded."
       }
+      ,
+      "checklistTitle": "On-site verification checklist"
     },
     "aiBadge": "AI verified",
     "setLocationPrompt": "Set your neighborhood first to see preloved items!"
@@ -265,9 +275,12 @@
       "add_photo": "Add Photo",
       "take_photo": "Take Photo",
       "pick_gallery": "Pick from Gallery",
+      "pick_gallery_multi": "Pick multiple from gallery",
       "pick_from_initial": "Select from existing photos",
       "skip": "Skip",
+      "added_photos": "{count} photos added",
       "added_photo": "Photo added: {}",
+      "add_more": "Add more",
       "skipped": "Skipped",
       "verified_from_initial": "Verified from image # {}",
       "retake": "Retake"
@@ -319,6 +332,9 @@
       "loading": "AI is generating the final report...",
       "error": "Failed to generate the report.",
       "success": "Final report generated successfully.",
+      "success_pending": "Registered. It will be posted after admin review.",
+      "pending_title": "Submitted for review",
+      "pending_message": "AI verification indicates this item needs admin review before it can be posted.",
       "submit_button": "Register for Sale",
       "suggested_price": "AI suggested price ({})",
       "summary": "Verification summary",
@@ -351,6 +367,13 @@
     "errors": {
       "incomplete_report": "AI Analysis Failed: The AI did not generate required report items (specs, condition, summary). Please try again later."
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "error": "Failed to load notifications.",
+    "empty": "You have no notifications.",
+    "seller_pending_title": "Product under review",
+    "seller_pending_body": "Your listing '{title}' has been submitted for admin review."
   },
   "registration_flow": {
     "title": "Choose Item Type to Sell",
@@ -1684,7 +1707,15 @@
     "aiApproval": {
       "empty": "No products pending AI verification.",
       "error": "Error loading pending products.",
-      "requestedAt": "Requested at"
+      "requestedAt": "Requested at",
+      "detailTitle": "Verification Request Details",
+      "idInfo": "ID Information",
+      "sellerInfo": "Seller Information",
+      "itemInfo": "Original Item Details",
+      "rejectTitle": "Enter rejection reason",
+      "rejectReasonHint": "Rejection reason",
+      "rejectReasonRequired": "Reason is required",
+      "aiReport": "AI Analysis Report (V3)"
     },
     "reports": {
       "title": "Report Management",

@@ -76,6 +76,10 @@ import 'package:bling_app/features/boards/screens/kelurahan_board_screen.dart';
 import 'package:bling_app/features/admin/screens/admin_screen.dart'; // ✅ 관리자 화면 import
 // [Fix]
 import 'package:bling_app/features/categories/screens/category_admin_screen.dart'; // [Fix #52] 관리자 카테고리 화면
+// [V3 NOTIFICATION] Task 80/81: 알림 서비스를 임포트합니다.
+import 'package:bling_app/core/services/notification_service.dart';
+// [V3 NOTIFICATION] Task 95/96: 알림 목록 화면을 임포트합니다.
+import 'package:bling_app/features/notifications/screens/notification_list_screen.dart';
 
 /// 현재 보고 있는 섹션을 타입 세이프하게 관리하기 위한 enum
 enum AppSection {
@@ -109,7 +113,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   bool _isLocationLoading = true;
   StreamSubscription? _userSubscription;
   StreamSubscription? _unreadChatsSubscription;
+  StreamSubscription? _unreadNotificationsSubscription; // [Task 96]
   int _totalUnreadCount = 0;
+  int _totalUnreadNotifications = 0; // [Task 96]
   // ✅ [게시판] 동네 게시판 활성화 상태
   bool _isKelurahanBoardActive = false;
   // 관리자 작업 로딩 상태
@@ -144,19 +150,24 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void initState() {
     super.initState();
+    // [V3 NOTIFICATION] Task 80/81: 앱 시작 시 FCM 알림 서비스를 초기화합니다.
+    NotificationService.instance.init();
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user != null) {
         _listenToUserData(user.uid);
         _listenToUnreadChats(user.uid);
+        _listenToUnreadNotifications(user.uid); // [Task 96]
       } else {
         _userSubscription?.cancel();
         _unreadChatsSubscription?.cancel();
+        _unreadNotificationsSubscription?.cancel(); // [Task 96]
         if (mounted) {
           setState(() {
             _userModel = null;
             _currentAddress = 'main.appBar.locationNotSet'.tr();
             _isLocationLoading = false;
             _totalUnreadCount = 0;
+            _totalUnreadNotifications = 0; // [Task 96]
             _isKelurahanBoardActive = false;
           });
         }
@@ -168,6 +179,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void dispose() {
     _userSubscription?.cancel();
     _unreadChatsSubscription?.cancel();
+    _unreadNotificationsSubscription?.cancel(); // [Task 96]
     _homeScrollController.dispose();
     _searchActivationNotifier.dispose(); // ✅ Notifier 해제
     super.dispose();
@@ -266,6 +278,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           count += (doc.data()['unreadCounts']?[myUid] ?? 0) as int;
         }
         setState(() => _totalUnreadCount = count);
+      }
+    });
+  }
+
+  /// [Task 96] 읽지 않은 알림 뱃지 카운트 리스너
+  void _listenToUnreadNotifications(String myUid) {
+    _unreadNotificationsSubscription?.cancel();
+    final stream = FirebaseFirestore.instance
+        .collection('users')
+        .doc(myUid)
+        .collection('notifications')
+        .where('isRead', isEqualTo: false) // 읽지 않은 것만 쿼리
+        .limit(20) // 성능을 위해 최대 20개까지만 카운트
+        .snapshots();
+
+    _unreadNotificationsSubscription = stream.listen((snapshot) {
+      if (mounted) {
+        setState(() {
+          _totalUnreadNotifications = snapshot.docs.length;
+        });
       }
     });
   }
@@ -821,9 +853,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       // ↓↓↓ 기존 actions 그대로
       actions: [
         _LanguageMenu(),
+        // [Task 96] 알림 아이콘 버튼 수정
         IconButton(
-          icon: const Icon(Icons.notifications_none),
-          onPressed: () {},
+          tooltip: 'notifications.title'.tr(),
+          icon: _totalUnreadNotifications > 0
+              ? Badge(
+                  label: Text('$_totalUnreadNotifications'),
+                  child: const Icon(Icons.notifications),
+                )
+              : const Icon(Icons.notifications_none),
+          onPressed: () {
+            // Task 95에서 생성한 알림 목록 화면으로 이동
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const NotificationListScreen()),
+            );
+          },
         ),
       ],
 

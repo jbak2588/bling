@@ -45,18 +45,19 @@ class UserProductList extends StatelessWidget {
         }
 
         final user = UserModel.fromFirestore(userSnapshot.data!);
-        final productIds = user.productIds;
+        final userId = user.uid;
 
-        if (productIds == null || productIds.isEmpty) {
-          return Center(child: Text('myBling.products.empty'.tr()));
-        }
+        // 2. Stream으로 사용자의 상품들을 직접 쿼리합니다.
+        // [V3 PENDING FIX] 'pending' 상태의 상품은 '내 상품' 목록에 표시하지 않습니다.
+        final productsStream = FirebaseFirestore.instance
+            .collection('products')
+            .where('userId', isEqualTo: userId)
+            .where('status', whereIn: ['selling', 'reserved', 'sold'])
+            .orderBy('createdAt', descending: true)
+            .snapshots();
 
-        // 2. 가져온 productIds 목록을 사용하여 'products' 컬렉션에서 여러 문서를 한번에 쿼리합니다.
-        return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          future: FirebaseFirestore.instance
-              .collection('products')
-              .where(FieldPath.documentId, whereIn: productIds)
-              .get(),
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: productsStream,
           builder: (context, productsSnapshot) {
             if (productsSnapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -75,13 +76,9 @@ class UserProductList extends StatelessWidget {
                 .map((doc) => ProductModel.fromFirestore(doc))
                 .toList();
 
-            // 최신순으로 정렬합니다.
-            products.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
             return ListView.builder(
               itemCount: products.length,
               itemBuilder: (context, index) {
-                // ProductCard를 사용하여 각 상품을 표시합니다.
                 return ProductCard(product: products[index]);
               },
             );

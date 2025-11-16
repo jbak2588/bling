@@ -73,6 +73,9 @@ class UserModel {
   // ✅ [푸시 스키마] 2. 기획안 3) 푸시 알림 구독 설정 필드 추가
   final PushPrefsModel? pushPrefs;
 
+  // [V3 NOTIFICATION] Task 79/82: 알림 수신을 위한 FCM 기기 토큰 목록
+  final List<String>? fcmTokens;
+
   final bool isBanned; // 차단 여부 (true 시 계정 제한)
   final List<String>? blockedUsers; // 차단 유저 목록 (uid 리스트)
   final bool profileCompleted; // 기본 프로필 완성 여부
@@ -126,6 +129,7 @@ class UserModel {
     this.thanksReceived = 0,
     this.reportCount = 0,
     this.pushPrefs, // ✅ [푸시 스키마] 3. 생성자에 추가
+    this.fcmTokens, // [V3 NOTIFICATION]
 
     this.isAdmin = false,
     this.isBanned = false,
@@ -197,6 +201,11 @@ class UserModel {
           ? PushPrefsModel.fromMap(Map<String, dynamic>.from(data['pushPrefs']))
           : null,
 
+      // [V3 NOTIFICATION]
+      fcmTokens: data['fcmTokens'] != null
+          ? List<String>.from(data['fcmTokens'])
+          : null,
+
       // ✅ Firestore 문서에서 isAdmin 필드를 읽어옵니다.
       isAdmin: data['isAdmin'] ?? false,
 
@@ -261,6 +270,9 @@ class UserModel {
 
       // ✅ [푸시 스키마] 5. PushPrefsModel 객체를 맵으로 변환하여 저장
       'pushPrefs': pushPrefs?.toMap(),
+
+      // [V3 NOTIFICATION]
+      'fcmTokens': fcmTokens,
 
       // ✅ toJson 맵에 isAdmin 필드를 추가합니다.
       'isAdmin': isAdmin,

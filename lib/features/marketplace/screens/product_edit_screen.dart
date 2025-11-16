@@ -41,7 +41,8 @@ import '../../location/screens/location_setting_screen.dart';
 // ✅ 공용 태그 위젯 import  : 2025년 8월 30일
 import '../../shared/widgets/custom_tag_input_field.dart';
 import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart'; // [추가] AI 뱃지
-import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
+// [V3 REFACTOR] 'AI 룰 엔진' 모델 종속성 완전 삭제
+
 import 'package:bling_app/features/marketplace/services/ai_verification_service.dart';
 
 class ProductEditScreen extends StatefulWidget {
@@ -76,7 +77,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
 
   // [추가] AI 검증 여부
   bool _isAiVerified = false;
-  AiVerificationRule? _aiRule; // [추가] AI 규칙을 저장할 변수
+  // [V3 REFACTOR] 'AI 룰 엔진' 종속성(AiVerificationRule) 제거
   // [핵심 추가] AI 검수 진행 상태를 추적하는 변수
   bool _isCancellingAi = false;
   // [작업 71] 선택된(또는 저장된) 카테고리 관련 상태
@@ -86,12 +87,6 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   @override
   void initState() {
     super.initState();
-    // [핵심 추가] 화면이 시작될 때 현재 상품의 카테고리(우선 child/subcategory)로 AI 규칙을 미리 불러옵니다.
-    // Prefer the product's subcategory id so we fetch ai_verification_rules/{subCategory}.
-    final String ruleCategoryId = widget.product.categoryId;
-    _aiVerificationService.loadAiRule(ruleCategoryId).then((rule) {
-      if (mounted) setState(() => _aiRule = rule);
-    });
 
     _titleController.text = widget.product.title;
     _priceController.text = widget.product.price.toString();
@@ -125,41 +120,10 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     // 초기 AI 검증 상태를 로드합니다.
     _isAiVerified = widget.product.isAiVerified;
     _loadInitialCategory();
-    _loadCategoryDetails();
+    // [V3 REFACTOR] '_loadCategoryDetails' (룰 로딩 함수) 호출 제거
   }
 
-  Future<void> _pickImages() async {
-    final ImagePicker picker = ImagePicker();
-    final List<XFile> picked = await picker.pickMultiImage();
-    if (picked.isNotEmpty) {
-      setState(() {
-        _images.addAll(picked);
-      });
-    }
-  }
-
-  // [작업 72] 선택된 카테고리 ID 기반으로 AI 규칙 및 관련 세부 정보를 비동기로 로드합니다.
-  Future<void> _loadCategoryDetails() async {
-    if (_selectedCategoryId == null) {
-      return; // 카테고리 정보가 없으면 선택 대기
-    }
-
-    if (mounted) {
-      setState(() => _loadingStatus = tr('ai_flow.status.loading_category'));
-    }
-
-    try {
-      // AI 규칙 로드
-      _aiRule = await _aiVerificationService.loadAiRule(_selectedCategoryId!);
-    } catch (e) {
-      debugPrint("Error loading category details: $e");
-      // 오류 발생 시, 사용자가 수동으로 재선택하도록 강제
-      _selectedCategoryId = null;
-    }
-    if (mounted) {
-      setState(() => _loadingStatus = null); // 로딩 완료
-    }
-  }
+  // [V3 REFACTOR] 'loadAiRule'에 의존하던 '_loadCategoryDetails' 함수 (약 20줄) 완전 삭제
 
   void _removeExistingImage(int index) {
     setState(() {
@@ -322,7 +286,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         // [작업 74] 부모/자식 카테고리를 선택 스크린에서 올바르게 받아왔다고 가정
         _selectedParentCategory = (result.isParent) ? result : null;
         _selectedCategoryId = result.id;
-        _loadCategoryDetails(); // AI 규칙 다시 로드
+        // [V3 REFACTOR] 'loadAiRule'을 호출하던 '_loadCategoryDetails' 제거
       });
     }
   }
@@ -455,18 +419,23 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
 
   // [리팩토링] AI 검수 시작 로직을 서비스 클래스로 위임
   Future<void> _startAiVerification() async {
-    if (_aiRule == null) return;
+    // [V3 REFACTOR] '_aiRule' 체크 대신 '_selectedCategoryId' 체크로 변경
+    if (_selectedCategoryId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('marketplace.errors.noCategory'.tr())),
+      );
+      return;
+    }
 
-    setState(() =>
-        _loadingStatus = tr('ai_flow.status.analyzing')); // "AI가 1차 분석 중..."
+    setState(() => _loadingStatus = tr('ai_flow.status.analyzing'));
 
     try {
       await _aiVerificationService.startVerificationFlow(
+        // [V3 REFACTOR] 'rule' 파라미터 완전 제거
         context: context,
-        rule: _aiRule!,
         productId: widget.product.id,
         // Prefer the product's subcategory id so AI rules are loaded per-subcategory.
-        categoryId: widget.product.categoryId,
+        categoryId: _selectedCategoryId!, // V3는 현재 선택된 카테고리 ID를 사용
         initialImages: widget.product.imageUrls,
         productName: _titleController.text,
         productDescription: _descriptionController.text,
@@ -743,7 +712,16 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                       Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: GestureDetector(
-                          onTap: _pickImages,
+                          onTap: () async {
+                            final ImagePicker picker = ImagePicker();
+                            final List<XFile> picked =
+                                await picker.pickMultiImage();
+                            if (picked.isNotEmpty && mounted) {
+                              setState(() {
+                                _images.addAll(picked);
+                              });
+                            }
+                          },
                           child: Container(
                             width: 120,
                             height: 120,
@@ -933,17 +911,18 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                     onPressed:
                         _loadingStatus != null ? null : _startAiVerification,
                     icon: const Icon(Icons.shield_outlined),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 24),
+                    ),
                     label: _loadingStatus != null
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                        ? Column(
+                            // [Task 87] UI 개선: 텍스트 + 진행 바로 변경
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              const SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2)),
-                              const SizedBox(width: 12),
-                              Text(_loadingStatus!), // [작업 68] "AI가 1차 분석 중..."
+                              Text(_loadingStatus!),
+                              const SizedBox(height: 12),
+                              LinearProgressIndicator(),
                             ],
                           )
                         : Text('ai_flow.cta.start_button'.tr()),

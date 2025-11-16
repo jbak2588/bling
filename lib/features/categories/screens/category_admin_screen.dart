@@ -5,14 +5,13 @@
 library;
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 
 import '../constants/category_icons.dart';
 import '../data/category_repository.dart';
 import '../data/firestore_category_repository.dart';
 import '../domain/category.dart';
-import '../services/category_sync_service.dart';
+// [V3 REFACTOR] category sync (AI rule deployment) removed from this screen.
 
 class CategoryAdminScreen extends StatefulWidget {
   const CategoryAdminScreen({super.key});
@@ -23,7 +22,8 @@ class CategoryAdminScreen extends StatefulWidget {
 
 class _CategoryAdminScreenState extends State<CategoryAdminScreen> {
   final CategoryRepository _repo = FirestoreCategoryRepository();
-  final _sync = CategorySyncService();
+  // [V3 REFACTOR] 'AI 룰 엔진' 동기화 서비스 제거
+  // ignore: unused_field
   bool _isAdmin = false;
 
   @override
@@ -386,42 +386,8 @@ class _CategoryAdminScreenState extends State<CategoryAdminScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('[관리자] 카테고리 관리'),
-        actions: [
-          IconButton(
-            tooltip: 'Publish(JSON/AI Rules 재생성)',
-            icon: const Icon(Icons.cloud_upload),
-            onPressed: _isAdmin
-                ? () async {
-                    try {
-                      await _sync.publishDesignAndRules();
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('카테고리 디자인/AI 룰을 재생성했습니다.'),
-                        ),
-                      );
-                    } on NotAdminException catch (e) {
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(e.message)),
-                      );
-                    } on FirebaseFunctionsException catch (e) {
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(e.message ?? '실패했습니다.')),
-                      );
-                    } catch (_) {
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('실패했습니다. 콘솔 로그를 확인하세요.'),
-                        ),
-                      );
-                    }
-                  }
-                : null,
-          ),
-        ],
+        // [V3 REFACTOR] 'AI 룰 엔진' 배포 버튼(actions)을 완전히 제거합니다.
+        // 카테고리 관리는 더 이상 AI와 관련이 없습니다.
       ),
       body: Row(
         children: [

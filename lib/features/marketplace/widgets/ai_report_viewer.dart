@@ -12,78 +12,98 @@ class AiReportViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // V3 스키마의 유효성을 검사합니다.
-    if (aiReport['key_specs'] == null || aiReport['key_specs'] is! List) {
+    // [V3 REFACTOR] V3 '단순 엔진' 스키마(Task 62)의 핵심 필드로 유효성 검사
+    if (aiReport['itemSummary'] == null || aiReport['condition'] == null) {
       return const SizedBox.shrink();
     }
 
-    // [FIX] V3 스키마 파싱 - 런타임 타입 에러 방지를 위한 안전한 캐스팅
-
-    // 1. Key Specs (List<Map>)
-    final List<dynamic> keySpecsRaw = aiReport['key_specs'] ?? [];
-    final List<Map<String, dynamic>> keySpecs = keySpecsRaw
+    // [V3 REFACTOR] '룰 엔진' V2 파싱 로직 (key_specs, condition_check, ...) 완전 삭제
+    // [V3 REFACTOR] V3 '단순 엔진' 스키마(Task 62) 파싱
+    final dynamic condition = aiReport['condition'];
+    final String? grade =
+        (condition is Map) ? condition['grade'] as String? : null;
+    final String? gradeReason =
+        (condition is Map) ? condition['gradeReason'] as String? : null;
+    final List<dynamic> conditionDetailsRaw =
+        (condition is Map) ? condition['details'] as List<dynamic>? ?? [] : [];
+    final List<Map<String, dynamic>> conditionDetails = conditionDetailsRaw
         .map((item) => Map<String, dynamic>.from(item as Map))
         .toList();
 
-    // 2. Condition Check (List<Map>)
-    final List<dynamic> conditionCheckRaw = aiReport['condition_check'] ?? [];
-    final List<Map<String, dynamic>> conditionCheck = conditionCheckRaw
-        .map((item) => Map<String, dynamic>.from(item as Map))
-        .toList();
+    final dynamic price = aiReport['priceAssessment'];
+    final String? priceComment =
+        (price is Map) ? price['comment'] as String? : null;
+    final num? minPrice = (price is Map) ? price['suggestedMin'] as num? : null;
+    final num? maxPrice = (price is Map) ? price['suggestedMax'] as num? : null;
 
-    // 3. Included Items (List<Map>)
-    final List<dynamic> includedItemsRaw = aiReport['included_items'] ?? [];
-    final List<Map<String, dynamic>> includedItems = includedItemsRaw
-        .map((item) => Map<String, dynamic>.from(item as Map))
-        .toList();
-
-    // 4. Notes for Buyer (Map)
-    final dynamic notesRaw = aiReport['notes_for_buyer'];
-    final Map<String, dynamic> notesForBuyer =
-        (notesRaw is Map) ? Map<String, dynamic>.from(notesRaw) : {};
-    final String? buyerNoteValue = notesForBuyer['value'] as String?;
+    final String? notesForBuyer = aiReport['notesForBuyer'] as String?;
+    final String? summary = aiReport['verificationSummary'] as String?;
+    // [V3 REFACTOR] (중요) 구매자 뷰어는 'onSiteVerificationChecklist'를 절대 파싱하거나 표시하지 않습니다.
 
     final List<Widget> sections = [];
 
-    // --- V2 섹션 (제거) ---
-
-    // [V3] 1. Key Specs 섹션
-    if (keySpecs.isNotEmpty) {
-      sections.add(_buildV3Section(
+    // 1. Overall Summary
+    if (summary != null && summary.isNotEmpty) {
+      sections.add(_buildReportText(
         context,
-        Icons.memory_outlined,
-        'ai_flow.final_report.specs'.tr(),
-        keySpecs,
+        Icons.check_circle_outline,
+        'ai_flow.final_report.summary'.tr(),
+        summary,
       ));
     }
 
-    // [V3] 2. Condition 섹션
-    if (conditionCheck.isNotEmpty) {
+    // 2. Price Assessment
+    if (priceComment != null && priceComment.isNotEmpty) {
+      String priceText = priceComment;
+      // 가격 범위를 예쁘게 포맷팅
+      final formatter = NumberFormat.currency(
+          locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+      if (minPrice != null && maxPrice != null) {
+        priceText =
+            "${formatter.format(minPrice)} ~ ${formatter.format(maxPrice)}\n$priceComment";
+      } else if (minPrice != null) {
+        priceText = "${formatter.format(minPrice)}\n$priceComment";
+      }
+      sections.add(_buildReportText(
+        context,
+        Icons.price_check_outlined,
+        'ai_flow.final_report.suggested_price'.tr(args: ['']),
+        priceText,
+      ));
+    }
+
+    // 3. Condition & Details
+    String conditionTitle = 'ai_flow.final_report.condition'.tr();
+    if (grade != null && grade.isNotEmpty) {
+      conditionTitle =
+          "${'ai_flow.final_report.condition'.tr()} (Grade: $grade)";
+    }
+
+    if (conditionDetails.isNotEmpty) {
       sections.add(_buildV3Section(
         context,
         Icons.healing_outlined,
-        'ai_flow.final_report.condition'.tr(),
-        conditionCheck,
+        conditionTitle,
+        conditionDetails,
+        gradeReason,
       ));
-    }
-
-    // [V3] 3. Included Items 섹션
-    if (includedItems.isNotEmpty) {
-      sections.add(_buildV3Section(
+    } else if (gradeReason != null && gradeReason.isNotEmpty) {
+      // 세부 사항(details)은 없지만 등급 사유만 있을 경우
+      sections.add(_buildReportText(
         context,
-        Icons.inventory_2_outlined,
-        'ai_flow.final_report.items'.tr(),
-        includedItems,
+        Icons.healing_outlined,
+        conditionTitle,
+        gradeReason,
       ));
     }
 
-    // [V3] 4. Notes for Buyer 섹션
-    if (buyerNoteValue != null && buyerNoteValue.isNotEmpty) {
+    // 4. Notes for Buyer
+    if (notesForBuyer != null && notesForBuyer.isNotEmpty) {
       sections.add(_buildReportText(
         context,
         Icons.warning_amber_rounded,
         'ai_flow.final_report.notes'.tr(),
-        buyerNoteValue,
+        notesForBuyer,
       ));
     }
 
@@ -112,12 +132,10 @@ class AiReportViewer extends StatelessWidget {
   }
 
   /// [V3] '증거 연계' 스키마 (List<Map>)를 렌더링하는 위젯
-  Widget _buildV3Section(
-    BuildContext context,
-    IconData icon,
-    String title,
-    List<Map<String, dynamic>> items,
-  ) {
+  Widget _buildV3Section(BuildContext context, IconData icon, String title,
+      List<Map<String, dynamic>> items,
+      [String? headerNote] // [V3 REFACTOR] 등급 사유 등을 표시하기 위한 헤더 노트 추가
+      ) {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,74 +156,50 @@ class AiReportViewer extends StatelessWidget {
           padding: const EdgeInsets.only(left: 28.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: items.map((item) {
-              final label = item['label'] as String? ?? 'N/A';
-              final value = item['value'];
-              final reasonIfNull = item['reason_if_null'] as String?;
-              final sourceImageUrl = item['source_image_url'] as String?;
-
-              Widget valueWidget;
-              if (value == null) {
-                valueWidget = Text(
-                  reasonIfNull ?? 'N/A',
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: theme.colorScheme.error),
-                );
-              } else {
-                valueWidget = Text(
-                  value.toString(),
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                );
-              }
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 증거 썸네일
-                    if (sourceImageUrl != null)
-                      Container(
-                        width: 40,
-                        height: 40,
-                        margin: const EdgeInsets.only(right: 12.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          image: DecorationImage(
-                            image: NetworkImage(sourceImageUrl),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      )
-                    else
-                      Container(
-                        width: 40,
-                        height: 40,
-                        margin: const EdgeInsets.only(right: 12.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          color: theme.colorScheme.surfaceContainerHighest,
-                        ),
-                        child: Icon(Icons.image_not_supported_outlined,
-                            size: 20, color: theme.colorScheme.outline),
-                      ),
-
-                    // 라벨 및 값
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(label, style: theme.textTheme.labelMedium),
-                          const SizedBox(height: 2),
-                          valueWidget,
-                        ],
-                      ),
-                    ),
-                  ],
+            children: [
+              // [V3 REFACTOR] 헤더 노트(예: gradeReason) 표시
+              if (headerNote != null && headerNote.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.only(left: 28.0, bottom: 4.0),
+                  child: Text(
+                    headerNote,
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(fontStyle: FontStyle.italic),
+                  ),
                 ),
-              );
-            }).toList(),
+              ],
+              ...items.map((item) {
+                // [V3 REFACTOR] V3 'condition.details' 스키마 파싱
+                final label = item['label'] as String? ?? 'N/A';
+                final value = item['value'];
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // [V3 REFACTOR] 증거 썸네일(source_image_url) 및 reason_if_null 로직 삭제
+                      // 라벨 및 값
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(label, style: theme.textTheme.labelMedium),
+                            const SizedBox(height: 2),
+                            Text(
+                              value?.toString() ?? 'N/A',
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+                // ignore: unnecessary_to_list_in_spreads
+              }).toList(),
+            ],
           ),
         ),
       ],

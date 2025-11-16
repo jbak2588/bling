@@ -1,13 +1,25 @@
 // lib/features/admin/screens/admin_product_detail_screen.dart
 
-import 'package:bling_app/features/marketplace/data/product_repository.dart';
 import 'package:bling_app/features/marketplace/models/product_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // [Task 104] Get Admin UID
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // [Task 102] For copying IDs
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 
+// [Task 91] AI 리포트 뷰어 및 판매자 정보 위젯 임포트
+import 'package:bling_app/features/marketplace/widgets/ai_report_viewer.dart';
+import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
+import 'package:bling_app/core/utils/popups/snackbars.dart'; // [Task 102] For copy snackbar
+
 class AdminProductDetailScreen extends StatefulWidget {
-  final ProductModel product;
-  const AdminProductDetailScreen({super.key, required this.product});
+  // [V3 NOTIFICATION] ID 또는 객체로 화면을 로드할 수 있도록 허용
+  final ProductModel? product;
+  final String? productId;
+  const AdminProductDetailScreen({super.key, this.product, this.productId})
+      : assert(product != null || productId != null,
+            'product 또는 productId 중 하나는 필수입니다.');
 
   @override
   State<AdminProductDetailScreen> createState() =>
@@ -15,28 +27,184 @@ class AdminProductDetailScreen extends StatefulWidget {
 }
 
 class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
-  final ProductRepository _repository = ProductRepository();
-  bool _isLoading = false;
+  // [V3 NOTIFICATION] 상태 변수 추가
+  ProductModel? _product;
+  // [Task 105] ProductRepository is no longer used.
+  bool _isLoading = false; // 버튼 로딩용
+  bool _isLoadingProduct = false; // 화면 로딩용
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.product != null) {
+      _product = widget.product;
+    } else {
+      _isLoadingProduct = true;
+      _loadProduct(widget.productId!);
+    }
+  }
+
+  // [Task 102] ID 복사 기능을 포함한 헬퍼 위젯
+  Widget _buildIdTile(BuildContext context, String title, String value) {
+    return Card(
+      elevation: 0.5,
+      child: ListTile(
+        title: Text(title, style: Theme.of(context).textTheme.labelSmall),
+        subtitle: Text(value, style: Theme.of(context).textTheme.bodyMedium),
+        trailing: IconButton(
+          icon: const Icon(Icons.copy_all_outlined, size: 20),
+          onPressed: () {
+            Clipboard.setData(ClipboardData(text: value));
+            BArtSnackBar.showSuccessSnackBar(
+                title: 'Copied!', message: '$title copied to clipboard.');
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _loadProduct(String id) async {
+    try {
+      final doc =
+          await FirebaseFirestore.instance.collection('products').doc(id).get();
+      if (doc.exists && mounted) {
+        setState(() {
+          // [Task 105] Re-add explicit cast for type safety
+          _product = ProductModel.fromFirestore(doc);
+          _isLoadingProduct = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) Navigator.pop(context);
+    }
+  }
 
   Future<void> _approveProduct() async {
+    // [Task 102 FIX] 'updateProductStatus'는 'status'만 변경.
+    // 'pending' 승인을 위해서는 'isAiVerified'와 'aiVerificationStatus'도 함께 업데이트해야 함.
+    // Repository를 수정하는 대신, 여기서 직접 update를 호출하여 모든 필드를 보장.
     setState(() => _isLoading = true);
-    await _repository.updateProductStatus(
-        productId: widget.product.id, status: 'approved');
-    if (mounted) Navigator.pop(context);
+    // [Task 104] 관리자 작업 로그 추가
+    final adminUid = FirebaseAuth.instance.currentUser?.uid;
+    final adminLog = {
+      'adminId': adminUid,
+      'action': 'approved',
+      'timestamp': FieldValue.serverTimestamp(),
+      'reason': null,
+    };
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('products')
+          .doc(_product!.id)
+          .update({
+        'status': 'selling',
+        'isAiVerified': true,
+        'aiVerificationStatus':
+            'approved_by_admin', // 명확성을 위해 'approved' -> 'approved_by_admin'
+        'updatedAt': FieldValue.serverTimestamp(),
+        'adminActionLog': adminLog, // [Task 104] 로그 저장
+      });
+      if (mounted) {
+        Navigator.pop(context, true); // Pop with 'true' to signal refresh
+      }
+    } catch (e) {
+      if (mounted) {
+        BArtSnackBar.showErrorSnackBar(title: 'Error', message: e.toString());
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _rejectProduct() async {
-    // TODO: 거절 사유를 입력받는 팝업 구현
+    // [Task 104] 1. 거절 사유 팝업 호출
+    final String? reason = await _showRejectionDialog();
+
+    // 2. 사용자가 팝업을 닫거나 사유를 입력하지 않으면 중단
+    if (reason == null || reason.isEmpty) return;
+
     setState(() => _isLoading = true);
-    await _repository.updateProductStatus(
-        productId: widget.product.id,
-        status: 'rejected',
-        rejectionReason: '관리자 거절');
-    if (mounted) Navigator.pop(context);
+
+    // [Task 104] 3. 관리자 로그 생성
+    final adminUid = FirebaseAuth.instance.currentUser?.uid;
+    final adminLog = {
+      'adminId': adminUid,
+      'action': 'rejected',
+      'timestamp': FieldValue.serverTimestamp(),
+      'reason': reason,
+    };
+
+    try {
+      // [Task 104] 4. Firestore 문서 업데이트
+      await FirebaseFirestore.instance
+          .collection('products')
+          .doc(_product!.id)
+          .update({
+        'status': 'rejected', // [Task 103]
+        'isAiVerified': false, // 거절됨
+        'aiVerificationStatus': 'rejected_by_admin',
+        'rejectionReason': reason, // [Task 104] 사유 저장
+        'updatedAt': FieldValue.serverTimestamp(),
+        'adminActionLog': adminLog, // [Task 104] 로그 저장
+      });
+      if (mounted) {
+        Navigator.pop(context, true); // Pop with 'true' to signal refresh
+      }
+    } catch (e) {
+      if (mounted) {
+        BArtSnackBar.showErrorSnackBar(title: 'Error', message: e.toString());
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  // [Task 104] 거절 사유 입력 팝업
+  Future<String?> _showRejectionDialog() async {
+    final TextEditingController reasonController = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text('admin.aiApproval.rejectTitle'.tr()), // '거절 사유 입력'
+          content: TextFormField(
+            controller: reasonController,
+            decoration: InputDecoration(
+              labelText: 'admin.aiApproval.rejectReasonHint'.tr(), // '거절 사유'
+              border: const OutlineInputBorder(),
+            ),
+            maxLines: 3,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(null),
+              child: Text('common.cancel'.tr()),
+            ),
+            FilledButton(
+              onPressed: () {
+                final reason = reasonController.text.trim();
+                if (reason.isNotEmpty) {
+                  Navigator.of(ctx).pop(reason);
+                }
+              },
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              child: Text('common.confirm'.tr()),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // [V3 NOTIFICATION] 상품 로드 전 로딩 화면 표시
+    if (_isLoadingProduct || _product == null) {
+      return Scaffold(
+          appBar: AppBar(),
+          body: const Center(child: CircularProgressIndicator()));
+    }
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
@@ -46,26 +214,46 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        title: const Text('검수 요청 상세'),
+        title: Text('admin.aiApproval.detailTitle'.tr()), // '검수 요청 상세'
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TODO: 여기에 상품 상세 정보 및 AI 리포트 표시 UI 구현
-            Text(widget.product.title,
+            // [Task 102] 1. ID 정보 (개선 요청 사항)
+            Text('admin.aiApproval.idInfo'.tr(),
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 8),
+            _buildIdTile(context, 'User ID', _product!.userId),
+            _buildIdTile(context, 'Product ID', _product!.id),
+            const Divider(height: 30),
+
+            // [Task 91] 2. 판매자 정보
+            Text('admin.aiApproval.sellerInfo'.tr(),
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 8),
+            AuthorProfileTile(userId: _product!.userId),
+            const Divider(height: 30),
+
+            // [Task 91] 2. 상품 원본 정보
+            Text('admin.aiApproval.itemInfo'.tr(),
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 12),
+            Text(_product!.title,
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
-            Text(widget.product.description),
+            Text(_product!.description,
+                style: Theme.of(context).textTheme.bodyLarge),
             const Divider(height: 30),
-            Text('AI 분석 리포트', style: Theme.of(context).textTheme.titleLarge),
+
+            // [Task 91] 3. AI 리포트 뷰어 (사용자와 동일한 UI)
+            Text('admin.aiApproval.aiReport'.tr(),
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(widget.product.aiReport.toString()),
-              ),
+            AiReportViewer(
+              aiReport: Map<String, dynamic>.from(
+                  _product!.aiReport ?? _product!.aiVerificationData ?? {}),
             ),
           ],
         ),

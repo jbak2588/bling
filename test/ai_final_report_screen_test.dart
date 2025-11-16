@@ -1,32 +1,25 @@
-import 'package:bling_app/features/marketplace/models/ai_verification_rule_model.dart';
 import 'package:bling_app/features/marketplace/screens/ai_final_report_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('buyer notes are trimmed on init', (WidgetTester tester) async {
-    final finalReport = {'notes_for_buyer': '   '};
-
-    final rule = AiVerificationRule(
-      id: 'r1',
-      nameKo: '',
-      nameEn: '',
-      nameId: '',
-      isAiVerificationSupported: false,
-      minGalleryPhotos: 0,
-      suggestedShots: <String, RequiredShot>{},
-      reportTemplatePrompt: '',
-      initialAnalysisPromptTemplate: '',
-    );
+    // [V3 REFACTOR] V3 '단순 엔진' 스키마(Task 62)의 키('notesForBuyer')를 사용
+    final finalReport = {
+      'notesForBuyer': '   ', // V3 키
+      // V3 스키마 유효성 검사를 통과하기 위한 최소한의 필수 맵
+      'itemSummary': {},
+      'condition': {},
+    };
 
     await tester.pumpWidget(MaterialApp(
       home: AiFinalReportScreen(
+        // [V3 REFACTOR] 'AiFinalReportScreen' V3 생성자 호출
         productId: 'p1',
         categoryId: 'c1',
         finalReport: finalReport,
-        rule: rule,
-        initialImages: [],
-        takenShots: {},
+        initialImageUrls: const [], // V3 필수 파라미터
+        guidedImageUrls: const {}, // V3 필수 파라미터
         confirmedProductName: 'Test',
         skipUserFetch: true,
       ),

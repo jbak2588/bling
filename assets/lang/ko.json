@@ -112,6 +112,11 @@
       }
     }
   },
+  "notifications": {
+    "title": "알림",
+    "error": "알림을 불러오는 중 오류가 발생했습니다.",
+    "empty": "받은 알림이 없습니다."
+  },
   "drawer": {
     "editProfile": "프로필 수정",
     "bookmarks": "관심목록",
@@ -169,7 +174,8 @@
       "success": "상품이 성공적으로 등록되었습니다!",
       "fail": "상품 수정 실패: {error}",
       "resetLocation": "위치 초기화",
-      "save": "변경사항 저장"
+      "save": "변경사항 저장",
+      "saving": "변경사항 저장"
     },
     "detail": {
       "makeOffer": "가격 제안하기",
@@ -244,11 +250,17 @@
         "matchTitle": "AI 검증 성공",
         "noMatchTitle": "AI 검증 실패",
         "finalize": "최종 인수 확정",
-        "cancelDeal": "거래 취소 (환불 요청)"
+        "cancelDeal": "거래 취소 (환불 요청)",
+        "failTitle": "AI 검증에 실패했습니다",
+        "retry": "다시 시도"
       },
       "success": {
         "finalized": "거래가 성공적으로 완료되었습니다.",
         "cancelled": "거래가 취소되었습니다. 예약금이 환불됩니다."
+      },
+      "checklistTitle": "현장 검증 체크리스트",
+      "ai" : {
+        "reactivated": "AI 검수를 다시 활성화했습니다."
       }
     },
     "aiBadge": "AI 검증 완료",
@@ -273,8 +285,11 @@
       "add_photo": "사진 추가",
       "take_photo": "사진 찍기",
       "pick_gallery": "갤러리에서 선택",
+      "pick_gallery_multi": "갤러리에서 여러 장 선택",
       "pick_from_initial": "기존 사진에서 선택",
       "skip": "건너뛰기",
+      "added_photos": "{count}장의 사진 추가됨",
+      "add_more": "더 추가하기",
       "added_photo": "사진이 추가되었습니다: {}",
       "skipped": "건너뜀",
       "verified_from_initial": "{}번째 사진에서 확인됨",
@@ -327,6 +342,9 @@
       "loading": "AI가 최종 보고서를 생성중입니다...",
       "error": "보고서 생성에 실패했습니다.",
       "success": "최종 보고서가 성공적으로 생성되었습니다.",
+      "success_pending": "등록되었습니다. 관리자 검토 후 게시됩니다.",
+      "pending_title": "검토를 위해 제출되었습니다",
+      "pending_message": "AI 검증 결과, 관리자 검토 후 상품이 게시될 예정입니다.",
       "submit_button": "판매글 등록하기",
       "suggested_price": "AI 추천 가격 ({0})",
       "summary": "검증 요약",
@@ -359,6 +377,13 @@
     "errors": {
       "incomplete_report": "AI 분석 실패: AI가 필수 보고서 항목(스펙, 상태, 요약)을 생성하지 못했습니다. 잠시 후 다시 시도하세요."
     }
+  },
+  "notifications": {
+    "title": "알림",
+    "error": "알림을 불러오지 못했습니다.",
+    "empty": "표시할 알림이 없습니다.",
+    "seller_pending_title": "상품 검토 중입니다",
+    "seller_pending_body": "등록하신 상품 '{title}'이(가) 관리자 검토를 위해 제출되었습니다."
   },
   "registration_flow": {
     "title": "판매 상품 종류 선택",
@@ -1697,7 +1722,15 @@
     "aiApproval": {
       "empty": "AI 검수 대기 중인 상품이 없습니다.",
       "error": "대기 중인 상품을 불러오는 중 오류 발생.",
-      "requestedAt": "요청 시각"
+      "requestedAt": "요청 시각",
+      "detailTitle": "검수 요청 상세",
+      "idInfo": "ID 정보",
+      "sellerInfo": "판매자 정보",
+      "itemInfo": "상품 원본 정보",
+      "rejectTitle": "거절 사유 입력",
+      "rejectReasonHint": "거절 사유",
+      "rejectReasonRequired": "사유는 필수입니다",
+      "aiReport": "AI 분석 리포트 (V3)"
     },
     "reports": {
       "title": "신고 관리",
