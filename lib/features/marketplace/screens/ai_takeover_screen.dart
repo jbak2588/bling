@@ -28,6 +28,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:path/path.dart' as p;
+import 'package:uuid/uuid.dart';
+import 'package:path_provider/path_provider.dart';
 // [Task 107] BArtSnackBar, Logger 임포트
 import 'package:bling_app/core/utils/popups/snackbars.dart';
 import 'package:bling_app/core/utils/logging/logger.dart';
@@ -52,6 +57,7 @@ class AiTakeoverScreen extends StatefulWidget {
 class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
   final ImagePicker _picker = ImagePicker();
   final List<XFile> _newPhotos = [];
+  final List<Uint8List> _newPhotoBytes = [];
   bool _isVerifying = false;
   List<_ChecklistItem> _checklistItems = []; // [Task 99] V3 체크리스트 상태 변수
 
@@ -81,7 +87,11 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
               ));
             }
           }
-          if (mounted) setState(() => _checklistItems = items);
+          if (mounted) {
+            setState(() {
+              _checklistItems = items;
+            });
+          }
         }
       }
     } catch (e) {
@@ -117,12 +127,73 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
     if (source == ImageSource.camera) {
       final XFile? img = await _picker.pickImage(
           source: source!, imageQuality: 80, maxWidth: 1024);
-      if (img != null && mounted) setState(() => _newPhotos.add(img));
+      if (img != null && mounted) {
+        try {
+          final tempDir = await getTemporaryDirectory();
+          final ext = p.extension(img.path);
+          final destPath = p.join(tempDir.path, '${const Uuid().v4()}$ext');
+          final bytes = await img.readAsBytes();
+          await File(destPath).writeAsBytes(bytes);
+          final copiedLen = File(destPath).lengthSync();
+          final fingerprint = base64Encode(bytes.take(20).toList());
+          debugPrint(
+              'camera: original=${img.path}, copied=$destPath, exists=${File(destPath).existsSync()}, size=$copiedLen, fp=$fingerprint');
+          if (mounted) {
+            setState(() {
+              _newPhotos.add(XFile(destPath));
+              _newPhotoBytes.add(bytes);
+            });
+          }
+        } catch (e) {
+          debugPrint('Error copying camera image: $e');
+          if (mounted) {
+            setState(() {
+              _newPhotos.add(img);
+              img.readAsBytes().then((b) {
+                if (mounted) {
+                  setState(() {
+                    _newPhotoBytes.add(b);
+                  });
+                }
+              });
+            });
+          }
+        }
+      }
     } else if (source == ImageSource.gallery) {
       final List<XFile> picked =
           await _picker.pickMultiImage(imageQuality: 80, maxWidth: 1024);
       if (picked.isNotEmpty && mounted) {
-        setState(() => _newPhotos.addAll(picked));
+        final tempDir = await getTemporaryDirectory();
+        final List<XFile> copied = [];
+        final List<Uint8List> copiedBytes = [];
+        for (final x in picked) {
+          final bytes = await x.readAsBytes();
+          debugPrint(
+              'gallery picked original=${x.path}, exists=${File(x.path).existsSync()}, size=${bytes.length}');
+          try {
+            final ext = p.extension(x.path);
+            final destPath = p.join(tempDir.path, '${const Uuid().v4()}$ext');
+            await File(destPath).writeAsBytes(bytes);
+            final copiedLen = File(destPath).lengthSync();
+            final fingerprint = base64Encode(bytes.take(20).toList());
+            debugPrint(
+                'gallery copied to=$destPath, exists=${File(destPath).existsSync()}, size=$copiedLen, fp=$fingerprint');
+            copied.add(XFile(destPath));
+            copiedBytes.add(bytes);
+          } catch (e) {
+            debugPrint('Error copying gallery image ${x.path}: $e');
+            // fallback to original if copy fails
+            copied.add(x);
+            copiedBytes.add(bytes);
+          }
+        }
+        if (mounted) {
+          setState(() {
+            _newPhotos.addAll(copied);
+            _newPhotoBytes.addAll(copiedBytes);
+          });
+        }
       }
     }
   }
@@ -159,12 +230,19 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
         'locale': context.locale.languageCode,
       });
 
-      final verificationData = result.data?['verification'];
+      // [Task 116] Cloud Functions v2 응답은 보통 Map<dynamic, dynamic>으로 역직렬화되므로
+      //            바로 Map<String, dynamic>으로 타입 체크하면 실패할 수 있습니다.
+      //            → 먼저 dynamic으로 받은 뒤, 실제 Map인지 여부만 확인하고
+      //              Map<String, dynamic>.from(...)으로 안전하게 캐스팅합니다.
+      final dynamic data = result.data;
+      final dynamic verificationData =
+          (data is Map) ? data['verification'] : null;
 
-      // [Task 116] ChatGPT/Copilot이 제안한 V3 3-Way 로직 호환 수정
-      if (verificationData is Map<String, dynamic>) {
+      if (verificationData is Map) {
         // V3: match가 true, false, null(AI 실패)인 경우 모두 _showVerificationResult가 처리
-        _showVerificationResult(Map<String, dynamic>.from(verificationData));
+        _showVerificationResult(
+          Map<String, dynamic>.from(verificationData),
+        );
       } else {
         // 'verification' 키 자체가 없거나 Map이 아닌 경우 (예: HttpsError가 아닌 다른 이유로 실패)
         throw Exception('AI가 유효한 검증 결과(JSON)를 반환하지 못했습니다.');
@@ -182,7 +260,11 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
       Logger.error('AI Takeover Error (Generic)',
           error: e, stackTrace: stackTrace);
     } finally {
-      if (mounted) setState(() => _isVerifying = false);
+      if (mounted) {
+        setState(() {
+          _isVerifying = false;
+        });
+      }
     }
   }
 
@@ -280,7 +362,11 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
             .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
-      if (mounted) setState(() => _isVerifying = false);
+      if (mounted) {
+        setState(() {
+          _isVerifying = false;
+        });
+      }
     }
   }
 
@@ -305,7 +391,11 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
             .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
-      if (mounted) setState(() => _isVerifying = false);
+      if (mounted) {
+        setState(() {
+          _isVerifying = false;
+        });
+      }
     }
   }
 
@@ -375,15 +465,20 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ..._newPhotos.map((file) => ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        File(file.path),
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      ),
-                    )),
+                ..._newPhotoBytes.asMap().entries.map((entry) {
+                  final idx = entry.key;
+                  final bytes = entry.value;
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.memory(
+                      bytes,
+                      key: ValueKey(idx),
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                }),
                 GestureDetector(
                   onTap: _pickPhotos,
                   child: Container(

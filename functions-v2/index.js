@@ -1,118 +1,87 @@
 /**
- * =======================[ Server/Client 책임 경계 최종 검수 메모 ]=======================
- * 대상 파일 : functions-v2/index.js (최신본)
- * 목적     : "범용 중고물품 AI 검수" 서버 코드로서의 적합성 점검 및
- *            Flutter(클라이언트)로 위임해야 할 기능 명시. (코드 변경 없음)
- *
- * ■ 서버(이 파일)가 맡는 범위 — 유지 대상
- *   1) 보안/검증:
- *      - App Check/인증 강제(enforceAppCheck, auth 확인)
- *      - 입력 유효성 검증(ruleId 존재, 이미지 URL 배열 형식)
- *      - 이미지 다운로드/크기 제한(HTTPS만 허용, 7.5MB 제한)
- *   2) 규칙/프롬프트 관리:(철회됨)
- *      - ruleId만으로 다양한 카테고리·템플릿을 처리(범용성 유지)
- *   3) 모델 호출/파싱:
- *      - Gemini 호출(2.5 계열), 안전설정 적용
- *      - 응답(JSON)만 엄격 파싱, 핵심 필드만 추출
- *      - 공통 오류 매핑(HttpsError) 및 진단 로그 기록(원문 스니펫/파싱 키)
- *   4) 중립 응답 계약:
- *      - initialproductanalysis → { success, prediction }  (prediction: string|null)
- *      - generatefinalreport   → { success, report }       (report: object)
- *      - UI 문구/카테고리 매핑/브랜드 규칙 등은 포함하지 않음 (범용성 보존)
- *
- * ■ Flutter(클라이언트)가 맡아야 할 범위 — 서버 밖으로 위임
- *   1) 화면/UX:
- *      - 카테고리 선택/촬영 가이드/갤러리 업로드 흐름
- *      - "예상 상품명(없음)" 등 UI 문구 표시, 재시도·수정 입력 UX
- *   2) 데이터 준비/전송:
- *      - 이미지 업로드(Storage) 후 HTTPS URL 전달
- *      - 어떤 ruleId를 쓸지 선택(카테고리와 규칙 매핑)
- *      - userPrice/userDescription/confirmedProductName 등 최종 보고서에 필요한 값 전달
- *   3) 후처리·매핑:
- *      - predicted_category_id → 앱 내부 카테고리 매핑
- *      - prediction이 비었을 때의 대체 경로(수기 입력/재시도) 결정
- *   4) 상태 동기화:
- *      - UI 단계 전환(초기분석 → 사용자확정 → 최종보고서)
- *      - 필요 시 클라이언트측 로컬 로깅/분석 이벤트 전송
- *
- * ■ 요청/응답 데이터 계약(요약)
- *   - initialproductanalysis (onCall)
- *     req: { imageUrls: string[], ruleId: string }
- *     res: { success: boolean, prediction: string|null }
- *
- *   - generatefinalreport (onCall)
- *     req: {
- *       imageUrls: { initial: string[], guided: Record<string,string> },
- *       ruleId: string,
- *       confirmedProductName?: string,
- *       userPrice?: number|string,
- *       userDescription?: string
- *       categoryName?: string,       // [V2 추가]
- *       subCategoryName?: string     // [V2 추가]
- *     }
- *     res: { success: boolean, report: object }
- *
- * ⓘ 결론: 현 index.js는 서버-클라이언트 역할 분리가 준수된 "범용" 구조이며,
- *         제품군 특화 로직/문구는 포함하지 않습니다. Flutter 측에서 UX/매핑을 담당하세요.
- * ===========================================================================================
- */
-/**
  * ============================================================================
- * Bling DocHeader (v3.1 - Gemini Safety Settings)
- * Module        : Auth, Trust, AI Verification
+ * Bling DocHeader (V3 Generic AI Verification, 2025-11-17)
+ * Module        : Auth, Trust, AI Verification, Push, Boards, FindFriends
  * File          : functions-v2/index.js
- * Purpose       : 사용자 신뢰도 계산 및 Gemini 기반의 AI 상품 분석을 처리합니다.
- * Triggers      : Firestore onUpdate `users/{userId}`, HTTPS onCall
+ * Purpose       : Bling Cloud Functions 진입점.
+ *                 - 사용자 신뢰도 계산
+ *                 - 푸시 구독/알림
+ *                 - 동네 게시판/친구찾기 한도
+ *                 - Gemini 기반 범용 중고물품 AI 검수·인수
+ * Region        : asia-southeast2 (Jakarta)
  * ============================================================================
- * * 2025-10-30 (작업 5, 7, 9, 10):
- * 1. [푸시 스키마] 'onUserPushPrefsWrite' 함수 추가.
- * - '하이브리드 기획안' 3)에 따라 'users.pushPrefs' 변경 감지.
- * - 'buildTopicsFromPrefs' 헬퍼를 통해 새 토픽 목록 계산.
- * - FCM 구독/해지(subscribe/unsubscribe)를 자동 동기화.
+ * [AI Verification V3 요약]
+ * 1) initialproductanalysis (1차 분석)
+ *    - 입력: { imageUrls[], locale, categoryName?, subCategoryName?, userDescription?, confirmedProductName? }
+ *    - 출력: { success, prediction, suggestedShots[] }
+ *    - 역할:
+ *      • 등록자가 올린 텍스트+이미지를 보고 “예상 상품명(prediction)”을 추정
+ *      • 동일 상품·카테고리에 관계없이, 구매자 신뢰 확보에 도움이 되는 추가 촬영 샷(suggestedShots)을
+ *        3~5개 제안 (스마트폰/전자기기·패션·가구 등 모든 중고 카테고리 공용)
  *
- * 2. [동네 게시판] 'onLocalNewsPostCreate' 함수 추가.
- * - '하이브리드 기획안' 4)에 따라 'posts' 문서 생성 감지.
- * - 'getKelKey' 헬퍼로 'boards/{kel_key}' 문서를 찾아 트랜잭션으로 'metrics.last30dPosts' 1 증가.
- * - [룰 완화] 'ACTIVATION_THRESHOLD = 10'을 적용, 10건 도달 시 'features.hasGroupChat'을 true로 설정.
- * 2025-10-31 (작업 5, 7, 9, 10):
- * 1. [푸시 스키마] 'onUserPushPrefsWrite' 함수 추가. (기획안 3)
- * - 'users.pushPrefs' 변경 감지, 'buildTopicsFromPrefs' 헬퍼로 토픽 계산.
- * - FCM 구독/해지(subscribe/unsubscribe)를 자동 동기화.
+ * 2) generatefinalreport (최종 AI 검수 리포트)
+ *    - V3 단일 스키마(JSON)로 리포트를 생성:
+ *      {
+ *        version, modelUsed, trustVerdict,
+ *        itemSummary, condition, priceAssessment,
+ *        notesForBuyer, verificationSummary,
+ *        onSiteVerificationChecklist
+ *      }
+ *    - “특정 모델명/버전/날짜가 존재하지 않는다”는 식의 단정을 금지하고,
+ *      확신이 80% 미만인 항목은 해당 필드를 null 로 두고
+ *      notesForBuyer / verificationSummary 로 “추가 확인 필요”만 안내하도록 설계.
  *
- * 2. [동네 게시판] 'onLocalNewsPostCreate' 함수 추가. (기획안 4)
- * - 'posts' 문서 생성 감지, 'getKelKey' 헬퍼로 'boards/{kel_key}' 문서를 찾아
- * 트랜잭션으로 'metrics.last30dPosts' 업데이트.
- * - [룰 완화] 'ACTIVATION_THRESHOLD = 10'을 적용, 10건 도달 시 'features.hasGroupChat'을 true로 설정.
- * ============================================================================
- * [V2.1/V2.2 주요 변경 사항 (Job 1-46)] 11월 09일 - 11월 11일
- * 1. initialproductanalysis (1차 분석):
- * - V1의 '이름 예측' 프롬프트와 'V2.1 증거 제안' 지시를 결합하여 호출합니다.
- * - (Fix) V1 프롬프트(initial_analysis_prompt_template)가 충돌을 일으키지 않도록
- * '스켈레톤 프롬프트'로 교체되었습니다. (Job 44)
- * - (Fix) 카테고리 힌트(categoryName)를 받아 '신발' 등에 맞는 전용 추천샷을
- * 제공하도록 수정되었습니다. (Job 34)
+ * 3) enhanceProductWithAi
+ *    - 기존 상품(productId)에 대해 evidenceImageUrls 를 추가로 받아
+ *      V3 엔진을 다시 돌린 후:
+ *        • aiReport (V3 JSON)
+ *        • isAiVerified: true
+ *        • aiVerificationStatus: "verified"
+ *      를 products 문서에 저장.
  *
- * 2. generatefinalreport (2차 분석):
- * - (Fix) AI가 'notes_for_buyer' 필드를 누락하지 않도록 프롬프트 스키마에
- * 필수 항목으로 포함시켰습니다. (Job 34)
- * - (Fix) AI 응답 파싱 시 'notes_for_buyer'가 null이거나 누락되어도
- * 안전하게 빈 문자열("")을 반환하도록 정제 로직을 추가했습니다. (Job 35)
+ * 4) verifyProductOnSite (AI 인수 2단계: 현장 동일성 검증)
+ *    - 입력: { productId, newImageUrls[], locale? }
+ *    - 원본 상품 이미지/리포트 + 구매자가 현장에서 촬영한 새 이미지를 비교하여
+ *      {
+ *        match: true | false | null,
+ *        reason: string,
+ *        discrepancies?: string[]
+ *      }
+ *      를 반환.
+ *    - 주요 가드레일:
+ *      • 실제 세계의 “공식 모델/버전/날짜 카탈로그”를 갖고 있다는 가정을 금지.
+ *      • A/B 양쪽 사진이 똑같이 “이상한 버전/날짜/코드”를 보여주면
+ *        → 시각적으로 같은 물건으로 보고 match=true 가능
+ *        → 다만 discrepancies/notes 로 “이상한 값이니 현장에서 추가 확인 필요” 정도만 권고.
+ *      • 정말로 다른 물건(전혀 다른 외관·색상·로고·식별자·심각한 신규 파손 등)이 보일 때만 match=false.
+ *      • 사진이 너무 흐리거나, 체크리스트를 충족하지 못하면 match=null 로 처리해
+ *        클라이언트에서 “AI 재시도 / 사진 다시 찍기” UX를 제공.
  *
- * 3. verifyProductOnSite (신규, V2.2):
- * - AI 인수를 위한 2단계 '현장 동일성 검증' 함수입니다.
- * - 원본 AI 리포트/이미지와 구매자가 현장에서 촬영한 새 이미지를 비교하여
- *   'match: true/false/null' 결과를 반환합니다. (Job 5, V3 3-Way Logic)
- *   - true  : 현장 사진이 원본과 충분히 일치
- *   - false : 현장 사진이 원본과 명백히 불일치
- *   - null  : AI가 판단하지 못함(네트워크/모델 오류 등, 앱에서 재시도 유도)
+ * [Gemini 인프라 / 안전 설정]
+ *  - 모델:
+ *      • 기본: gemini-2.5-flash
+ *      • 실패/과부하 시: gemini-2.5-pro 로 자동 폴백
+ *    → genAiCall + withRetry 로 통합, 60초 타임아웃/지수 백오프 재시도 지원.
+ *  - 응답 처리:
+ *      • responseMimeType="application/json" 강제
+ *      • extractJsonText/tryParseJson/logAiDiagnostics 로
+ *        코드블럭/잡담이 섞인 응답도 최대한 복구 후 키 존재 여부를 로깅.
+ *      • 파싱 실패 시엔 data-loss HttpsError 또는 안전한 fallback JSON 으로 처리.
+ *  - safetySettings:
+ *      • DANGEROUS_CONTENT: BLOCK_NONE
+ *      • HARASSMENT / HATE / SEXUALLY_EXPLICIT / CIVIC_INTEGRITY:
+ *          BLOCK_MEDIUM_AND_ABOVE
  *
- * 4. admin_initializeAiCancelCounts (신규, 관리자):
- * - 필드 테스트 지원을 위해, 모든 상품의 'aiCancelCount'를 0으로
- * 초기화하는 관리자 전용 함수입니다.
- * - (Fix) 문서 20개 내외이므로 Cloud Function 대신 클라이언트(앱)에서
- * 직접 Batch Write 하도록 로직이 이전되었습니다. (Job 39)
+ * [비 AI 모듈 (기존 동작 유지)]
+ *  - calculateTrustScore       : users/{userId} onUpdate, trustScore/trustLevel 계산
+ *  - onUserPushPrefsWrite      : users.pushPrefs → FCM topic 구독/해지 동기화
+ *  - onLocalNewsPostCreate     : posts → boards/{kel_key} metrics & hasGroupChat 플래그
+ *  - startFriendChat           : Find Friends 일일 신규 채팅 한도 관리
+ *  - onProductStatusPending    : AI pending 상품 → 관리자 + 판매자 알림(Firebase Messaging + notifications 서브컬렉션)
+ *  - onProductStatusResolved   : pending → selling/rejected 시 판매자에게 최종 결과 알림
  * ============================================================================
  */
+
 // (파일 내용...)
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentUpdated, onDocumentCreated } = require("firebase-functions/v2/firestore");
@@ -912,6 +881,11 @@ function normalizeFinalReportShape(/* raw */) {
  * @param {object} ruleData - Firestore의 V3 규칙 문서
  * @return {string} - AI에게 보낼 V3 동적 프롬프트
  */
+/**
+ * [V3 아키텍처] 단일 감정 엔진용 최종 보고서 프롬프트 빌더
+ * - 카테고리 룰/샷 테이블에 의존하지 않고, 입력 텍스트 + 이미지만으로 감정 보고서를 생성합니다.
+ * - JSON만 반환하도록 강하게 제한하여 파싱 오류를 줄입니다.
+ */
 function buildV3FinalPrompt(data) {
   const {
     confirmedProductName,
@@ -921,77 +895,154 @@ function buildV3FinalPrompt(data) {
     subCategoryName,
     locale,
     useFlash,
-  } = data;
+  } = data || {};
 
   const lc = (typeof locale === "string" && locale) || "id";
-  const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
+  const langName =
+    lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
 
   const schemaText = `
 [OUTPUT SCHEMA (V3.0 Simple Engine)]
-You MUST return ONLY ONE JSON object with this exact structure.
-JSON keys MUST be in English. Text values MUST be in ${langName}.
+You MUST respond with ONE SINGLE valid JSON object.
+- Do NOT include any markdown (no backticks, no \`json).
+- Do NOT include any comments (no // or /* */).
+- Do NOT include trailing commas.
+- JSON keys MUST be in English.
+- All human-readable text MUST be in ${langName}.
+- If you cannot confidently fill a field, set it to null (JSON null, not the string "null").
+
+The JSON structure MUST be:
 
 {
   "version": "3.0.0-simple",
-  "modelUsed": "${useFlash ? 'gemini-2.5-flash' : 'gemini-2.5-pro'}",
-  // [V3 ADMIN VERIFICATION] AI must assess the trustworthiness of the listing.
-  "trustVerdict": "string (MUST be one of: 'clear', 'suspicious', 'fraud')",
+  "modelUsed": "${useFlash ? "gemini-2.5-flash" : "gemini-2.5-pro"}",
+  "trustVerdict": "clear | suspicious | fraud",
 
   "itemSummary": {
-    "predictedName": "string (e.g., 'iPhone 15 Pro Max 256GB') | null",
-    "categoryCheck": "string (e.g., '사용자 선택 카테고리(스마트폰)와 일치함') | null"
+    "predictedName": "string or null",
+    "categoryCheck": "string or null"
   },
+
   "condition": {
-    "grade": "string (e.g., 'A+', 'B', 'C') | null",
-    "gradeReason": "string (Short reason for the grade in ${langName}) | null",
+    "grade": "string or null",
+    "gradeReason": "string or null",
     "details": [
       {
-        "label": "string (The ${langName} label, e.g., '화면 상태', '배터리 성능')",
-        "value": "string (The extracted value, e.g., '스크래치 없음', '100%')",
-        "evidenceShot": "string (Name of the photo AI used, e.g., 'power_on_screen.jpg') | null"
+        "label": "string",
+        "value": "string or null",
+        "evidenceShot": "string or null"
       }
     ]
   },
+
   "priceAssessment": {
-    "suggestedMin": "number | null",
-    "suggestedMax": "number | null",
+    "suggestedMin": "number or null",
+    "suggestedMax": "number or null",
     "currency": "IDR",
-    "comment": "string (Short price commentary in ${langName}) | null"
+    "comment": "string or null"
   },
-  "notesForBuyer": "string (Key warnings or notes for the buyer in ${langName}) | null",
-  "verificationSummary": "string (Overall summary of the verification in ${langName}) | null",
+
+  "notesForBuyer": "string or null",
+  "verificationSummary": "string or null",
 
   "onSiteVerificationChecklist": {
-    "title": "string (Title in ${langName}, e.g., '현장 구매자 안심 체크리스트')",
+    "title": "string",
     "checks": [
       {
-        "checkPoint": "string (The check item in ${langName}, e.g., 'IMEI 일치 확인')",
-        "instruction": "string (The instruction in ${langName}, e.g., '설정 > 일반 > 정보에서 IMEI...')"
+        "checkPoint": "string",
+        "instruction": "string"
       }
     ]
   }
 }
 
+[FIELD RULES]
+- trustVerdict:
+  - "clear": The listing and images look consistent and plausible.
+  - "suspicious": Some details do not fully match or look unusual.
+  - "fraud": The listing looks fake, impossible, or clearly manipulated.
+
+- itemSummary.predictedName:
+  - Use your best guess for the exact product/model name based on images + text.
+  - If you are not at least 80% confident, set it to null.
+
+- itemSummary.categoryCheck:
+  - Briefly state in ${langName} whether the user-selected category seems correct.
+  - Example: "${
+    langName === "Korean"
+      ? "사용자 선택 카테고리와 일치함"
+      : "Category matches the item"
+  }".
+
+- condition.grade:
+  - Use a simple scale like "A+", "A", "B", "C" based on overall condition.
+  - If images are too blurry to judge, set grade to null and explain in gradeReason.
+
+- condition.details:
+  - Use around 2–5 key aspects such as "화면 상태", "배터리 성능", "외관 스크래치", "액세서리 포함 여부".
+  - Each detail.value MUST be based on visible evidence or user description.
+  - If you are not at least 80% confident for a detail, set its value to null and explain in notesForBuyer.
+
+- priceAssessment:
+  - suggestedMin / suggestedMax are numbers in IDR.
+  - Use your internal knowledge to estimate a realistic price range.
+  - If you cannot estimate, set both to null and explain briefly in comment.
+
+- notesForBuyer:
+  - Short 1–3 sentences in ${langName} with practical warnings or advice for the buyer.
+
+- verificationSummary:
+  - 1–3 sentences in ${langName} summarizing your verification decision.
+
+- onSiteVerificationChecklist:
+  - title: a short title in ${langName}, e.g., "현장 구매자 안심 체크리스트".
+  - checks: normally 2–3 items (minimum 1).
+  - Each checkPoint is a specific item to verify on-site.
+  - Each instruction explains briefly HOW to check it in ${langName}.
+
 [SAFETY RULES]
-- If the evidence image is blurry, unreadable, or does not contain the information:
-  - You MUST NOT guess.
-  - Explain the reason in 'gradeReason' or 'notesForBuyer'.
-- If you are not at least 80% confident, set 'value' to null.
-- Never invent data.
+- Never invent data that is not supported by the images or user text.
+- If an image is blurry, unreadable, or does not contain the claimed information:
+  - Do NOT guess. Use null and explain in gradeReason or notesForBuyer.
+- If you are not at least 80% confident about:
+  - itemSummary.predictedName
+  - condition.details[].value
+  - priceAssessment.suggestedMin / suggestedMax
+  then set those specific fields to null.
+  // Attribute / date specific safety (all categories)
+- Listings can cover many different product types (electronics, fashion, furniture, books, etc.).
+- You do NOT have a complete, real-time catalog of all possible product models, version numbers, or official release dates.
+- You MUST NOT claim that a model name, version string, size, or date is "impossible", "non-existent", or "fake"
+  only because it looks unfamiliar to you, uses an unusual naming style, or appears to be in the future
+  relative to your current date.
+- If any technical identifier or date (for example a firmware version, serial/model code, or manufacture/use date)
+  looks unusual or unexpected, treat it as "unverified" data.
+  In that case you may at most use trustVerdict = "suspicious" with clear advice for the buyer to double-check
+  with the seller or official sources, but you MUST NOT label it as "fraud" based solely on such unusual values.
+- Only use trustVerdict = "fraud" when there is strong internal contradiction between the listing text and
+  the images themselves (for example, two clearly different products or identifiers shown for the same claimed item).
 `;
 
   const finalPrompt = `
 [ROLE]
 You are an expert product inspector for a high-trust second-hand marketplace.
-Your task is to analyze all provided images and text data to generate a comprehensive, structured JSON report.
+Your task is to analyze all provided images and text data and generate a comprehensive, structured JSON report.
 You MUST adhere strictly to the [OUTPUT SCHEMA].
 
 ${schemaText}
 
 [CONTEXT]
 - The current date is: ${new Date().toISOString()}
-- Your analysis MUST be based on this current date.
-- Dates in the past relative to this are "past"; dates after this are "future".
+ - The current date is provided only for basic consistency checks inside a single listing.
+ - You may use it to notice obvious contradictions within the same item (for example,
+   a "first use" date that is clearly earlier than a printed manufacture date on the same label,
+   or two different years printed for the same production field).
+ - You MUST NOT treat a date as invalid or evidence of fraud only because it is close
+   to or slightly after the current date, or because you are unsure whether a future
+   model/version/date is officially released.
+ - In such cases, treat the information as "unverified" and advise
+   the buyer to confirm it directly on-site (for example by checking labels, menus,
+   or official documentation with the seller).
 
 [USER INPUT]
 - Product Name Claim: "${confirmedProductName || ""}"
@@ -1001,18 +1052,32 @@ ${schemaText}
 
 [IMAGES]
 The user has provided multiple images. Analyze ALL of them to find evidence for:
-- Item name, model, specs (e.g., battery health, storage).
-- Physical condition (scratches, dents, screen-on).
-- Included items (box, charger, etc.).
+- Item name, model, and specs (e.g., storage, battery health, serial/IMEI).
+- Physical condition (scratches, dents, screen-on state, wear and tear).
+- Included items (box, charger, cable, accessories).
+- Any signals of tampering or fake images.
 
 [TASKS]
-1.  **Analyze & Extract:** Fill every field in the [OUTPUT SCHEMA] based on the [USER INPUT] and [IMAGES].
-2.  **Assess Price:** Compare the 'User Price' to the market value (based on your internal knowledge) and set 'priceAssessment'.
-3.  **Generate Checklist (CRITICAL):** Create the 'onSiteVerificationChecklist' with 2-3 essential checks a buyer MUST perform on-site (e.g., "Check IMEI", "Test camera").
-4.  **Trust Verdict (CRITICAL):** Analyze all data for fraud signals.
-  - If the user's claims (model, condition) are supported by images AND all data is plausible (e.g., correct dates, no signs of tampering), set 'trustVerdict' to "clear".
-  - If the model name seems impossible for the year (e.g., "iPhone 20" in 2025), or dates are chronologically impossible (e.g., manufactured *after* first use), or images look faked/manipulated, set 'trustVerdict' to "suspicious" or "fraud".
+1. Analyze & Extract:
+   - Fill every field in the [OUTPUT SCHEMA] based on [USER INPUT] and [IMAGES].
+   - If a field cannot be reliably filled, use null and explain briefly in notesForBuyer.
 
+2. Assess Price:
+   - Compare the "User Price" with a realistic market range in IDR using your internal knowledge.
+   - Set priceAssessment.suggestedMin / suggestedMax and comment accordingly.
+
+3. Generate On-site Checklist (CRITICAL):
+   - Create "onSiteVerificationChecklist" with normally 2–3 essential checks a buyer should perform on-site (minimum 1).
+   - Example checks: "Check IMEI matches the device", "Test camera and microphone", "Check battery health menu".
+
+4. Trust Verdict (CRITICAL):
+   - Analyze all data (text + images) for fraud or inconsistency signals.
+   - If the user's claims (model, condition) are well-supported and plausible, set trustVerdict = "clear".
+   - If some details are inconsistent, impossible for the claimed model/year, or look manipulated, use "suspicious" or "fraud" and explain in verificationSummary and notesForBuyer.
+
+[OUTPUT]
+Return ONLY the final JSON object.
+Do NOT add any explanation, text, or markdown outside of the JSON.
 `;
 
   return finalPrompt;
@@ -1781,11 +1846,32 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
       The seller's original report included this checklist: ${JSON.stringify(onSiteChecklist)}.
       The buyer took the [PACKET B] photos to verify this checklist.
 
+      **IMPORTANT SCOPE RULES**
+      - Listings can be any type of second-hand item (electronics, clothing, furniture, etc.).
+      - Your ONLY responsibility in this task is to decide whether [PACKET B] appears to show the SAME physical item
+        as [PACKET A], and whether there are new visible defects or damages.
+      - You MUST NOT decide whether version numbers, serial/model codes, sizes, labels, or dates are "real", "official",
+        or "released" in the real world. You do not have a complete or up-to-date catalog of all possible products.
+      - If [PACKET A] and [PACKET B] consistently show the same unusual identifier or date
+        (for example a strange firmware string, batch code, or manufacture date),
+        you should treat this as a visual MATCH between the two packets. In that case:
+          * set "match" to true, and
+          * optionally add a warning about the unusual value in "discrepancies" (for the buyer to double-check),
+            but DO NOT claim that it is definitely fake or impossible.
+      - Use "match": false only when [PACKET B] clearly shows a different item (for example,
+        a different colour or pattern, a different product type, clearly different identifiers such as
+        serial/model codes or logos, or new large damage that was not present in [PACKET A]).
+      - Use "match": null only when the [PACKET B] photos are too blurry, too dark, or incomplete so that you
+        cannot reasonably compare them to [PACKET A].
+      - Do NOT give instructions like "cancel the transaction" or "request a refund". Just describe the factual
+        differences; the app will decide how to handle the transaction.
+
       **Task:**
-      1. **Compare [PACKET A] and [PACKET B]** to determine if they show the exact same item.
+      1. **Compare [PACKET A] and [PACKET B]** to determine if they show the exact same item according to the scope rules above.
       2. **Check for New Defects:** Look for any new scratches, cracks, dents, or screen issues in [PACKET B] that are NOT visible in [PACKET A].
-      3. Provide a clear 'match' (true/false) and a 'reason' for your decision. The 'reason' must be written in ${langName}.
-      4. If the new photos in [PACKET B] are too blurry, dark, or do not show the item clearly enough to make a comparison, set 'match' to null.
+      3. Provide a clear 'match' (true/false/null) and a 'reason' for your decision. The 'reason' must be written in ${langName}.
+      4. If the new photos in [PACKET B] are too blurry, dark, or do not show the item clearly enough to make a comparison,
+         or if they do not cover enough of the checklist items, set 'match' to null.
 
       **Output Format (JSON ONLY):**
       {
