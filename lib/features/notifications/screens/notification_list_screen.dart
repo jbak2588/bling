@@ -92,17 +92,44 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
               final bool isRead = notif['isRead'] ?? true;
               final String type = notif['type'] ?? '';
 
+              // [Step 2] 관리자 결정 상태 파싱
+              final String? status = notif['status']; // 'resolved' etc
+              final String? adminDecision =
+                  notif['adminDecision']; // 'approved' | 'rejected'
+
+              // [Step 2] 상태에 따른 UI 분기
+              IconData iconData = _getIconForType(type);
+              Color? iconColor;
+              String displayTitle = title;
+
+              if (status == 'resolved') {
+                if (adminDecision == 'approved') {
+                  iconData = Icons.check_circle;
+                  iconColor = Colors.green;
+                  displayTitle = '$title (승인됨)';
+                } else if (adminDecision == 'rejected') {
+                  iconData = Icons.cancel;
+                  iconColor = Colors.red;
+                  displayTitle = '$title (거절됨)';
+                }
+              }
+
               return ListTile(
                 // 읽지 않은 알림은 파란색 점 표시
                 leading: isRead
-                    ? Icon(_getIconForType(type))
+                    ? Icon(iconData, color: iconColor)
                     : Badge(
-                        child: Icon(_getIconForType(type)),
+                        child: Icon(iconData, color: iconColor),
                       ),
-                title: Text(title,
+                title: Text(displayTitle,
                     style: TextStyle(
-                        fontWeight:
-                            isRead ? FontWeight.normal : FontWeight.bold)),
+                      fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+                      color: isRead ? Colors.grey[800] : Colors.black,
+                      decoration: (adminDecision == 'rejected')
+                          ? TextDecoration.lineThrough
+                          : null, // 거절된 건은 취소선 효과 (선택 사항)
+                      decorationColor: Colors.red,
+                    )),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

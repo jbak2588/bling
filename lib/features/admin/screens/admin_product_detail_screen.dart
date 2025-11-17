@@ -105,6 +105,9 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
         'adminActionLog': adminLog, // [Task 104] 로그 저장
       });
+
+      // [Step 2] 판매자 알림 상태 동기화 (승인)
+      await _updateSellerNotifications(decision: 'approved');
       if (mounted) {
         Navigator.pop(context, true); // Pop with 'true' to signal refresh
       }
@@ -147,6 +150,9 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
         'adminActionLog': adminLog, // [Task 104] 로그 저장
       });
+
+      // [Step 2] 판매자 알림 상태 동기화 (거절)
+      await _updateSellerNotifications(decision: 'rejected', reason: reason);
       if (mounted) {
         Navigator.pop(context, true); // Pop with 'true' to signal refresh
       }
@@ -155,6 +161,42 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
         BArtSnackBar.showErrorSnackBar(title: 'Error', message: e.toString());
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  /// [Step 2] 판매자의 알림 내역 중, 이 상품과 관련된 알림을 찾아 상태를 업데이트합니다.
+  Future<void> _updateSellerNotifications(
+      {required String decision, String? reason}) async {
+    if (_product == null) return;
+
+    try {
+      final sellerId = _product!.userId; // ProductModel의 판매자 ID
+      final notificationsRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(sellerId)
+          .collection('notifications');
+
+      // 이 상품(productId)과 관련된 모든 알림 쿼리
+      final snapshot = await notificationsRef
+          .where('productId', isEqualTo: _product!.id)
+          .get();
+
+      final batch = FirebaseFirestore.instance.batch();
+
+      for (var doc in snapshot.docs) {
+        batch.update(doc.reference, {
+          'status': 'resolved', // 처리 완료 상태
+          'adminDecision': decision, // approved | rejected
+          'adminComment': reason, // 거절 사유 등
+          'isRead': false, // [Option] 결과를 다시 확인하도록 안 읽음 처리
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      await batch.commit();
+    } catch (e) {
+      // 알림 업데이트 실패가 관리자 작업을 막지 않도록 로그만 출력
+      debugPrint('Failed to update seller notifications: $e');
     }
   }
 
