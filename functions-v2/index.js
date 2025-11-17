@@ -1846,6 +1846,12 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
       const originalReport = productData.aiReport;
       const originalImageUrls = productData.imageUrls;
 
+      // [Debug] 기존 이미지 확인
+      const originalImages = Array.isArray(originalImageUrls) ? originalImageUrls : [];
+      if (originalImages.length === 0) {
+        logger.warn(`⚠️ Product ${productId} has no original images.`);
+      }
+
       // [Task 115 HOTFIX] Copilot이 발견한 NPE(Null) 오류 수정
       // 'originalReport'가 null인지 먼저 확인해야 합니다.
       if (!originalReport) {
@@ -1870,15 +1876,30 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
       [ROLE]
       You are an expert visual inspector for a high-trust second-hand marketplace.
       Your task is to compare two sets of images: [PACKET A] (the seller's original photos) and [PACKET B] (the buyer's new on-site photos).
+      
+      **[CRITICAL INSTRUCTION]**
+      Packet A contains ALL original photos from the listing.
+      Packet B contains new photos specifically taken to verify the [CHECKLIST] below.
+      You must allow for different angles/lighting, but the ITEM itself must be the same.
 
       **[CONTEXT]**
-      The seller's original report included this checklist: ${JSON.stringify(onSiteChecklist)}.
-      The buyer took the [PACKET B] photos to verify this checklist.
+      1. **Full AI Report (Reference):** ${JSON.stringify(originalReport)}
+         - Use this to understand the item's claimed condition, grade, and known defects.
+      2. **On-Site Checklist (Target):** ${JSON.stringify(onSiteChecklist)}
+         - The buyer specifically tried to capture these points in Packet B.
 
       **IMPORTANT SCOPE RULES**
       - Listings can be any type of second-hand item (electronics, clothing, furniture, etc.).
       - Your ONLY responsibility in this task is to decide whether [PACKET B] appears to show the SAME physical item
         as [PACKET A], and whether there are new visible defects or damages.
+      - **Handling Screen/Settings Photos:**
+        * Packet B will likely contain screenshots or photos of digital screens (Settings, IMEI, Battery Health) as requested by the checklist.
+        * These screens will NOT look like the physical body of the device shown in Packet A. This is NORMAL.
+        * If Packet B shows the correct Model/IMEI/OS version claimed in the product report, treat this as a **STRONG MATCH**. Do NOT reject because it doesn't visually match the body/corners of Packet A.
+      - **Condition Verification:**
+         * Check if the condition shown in Packet B matches the 'grade' and 'defects' described in the [Full AI Report].
+         * If Packet B shows the *same* scratches/dents mentioned in the report, that is a MATCH (confirming identity).
+         * Only flag as 'discrepancy' if Packet B shows **NEW, unreported damage** or if the item is in significantly *worse* condition than claimed.
       - You MUST NOT decide whether version numbers, serial/model codes, sizes, labels, or dates are "real", "official",
         or "released" in the real world. You do not have a complete or up-to-date catalog of all possible products.
       - If [PACKET A] and [PACKET B] consistently show the same unusual identifier or date
@@ -1891,7 +1912,7 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
         a different colour or pattern, a different product type, clearly different identifiers such as
         serial/model codes or logos, or new large damage that was not present in [PACKET A]).
       - Use "match": null only when the [PACKET B] photos are too blurry, too dark, or incomplete so that you
-        cannot reasonably compare them to [PACKET A].
+        cannot reasonably compare them to [PACKET A] OR verify the checklist.
       - Do NOT give instructions like "cancel the transaction" or "request a refund". Just describe the factual
         differences; the app will decide how to handle the transaction.
 
@@ -1910,13 +1931,17 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
       }
     `;
 
+    // [Debug] 입력 데이터 로깅
+    logger.info(`🔍 AI Compare Start: Original ${originalImages.length} vs New ${newImageUrls.length}`);
+
     // 3. 현장 사진(newImageUrls) 및 원본 사진(originalImageUrls)을 GenerativePart로 변환
-    // (성능을 위해 원본 이미지는 2장만, 새 이미지는 5장으로 제한)
+    // [V3.1 Full Inspection] 제한 해제: 현장 사진 최대 20장까지 허용
     const newParts = await Promise.all(
-      newImageUrls.slice(0, 5).map((url) => urlToGenerativePart(url))
+      newImageUrls.slice(0, 20).map((url) => urlToGenerativePart(url))
     );
+    // [V3.1 Full Inspection] 원본 사진은 가능한 모든 이미지를 참조하여 비교에 사용
     const originalParts = await Promise.all(
-      originalImageUrls.slice(0, 2).map((url) => urlToGenerativePart(url))
+      (Array.isArray(originalImageUrls) ? originalImageUrls : []).map((url) => urlToGenerativePart(url))
     );
 
     const contents = [
@@ -1974,15 +1999,16 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
     const caseId = caseRef.id;
     const now = FieldValue.serverTimestamp();
 
-    const aiCaseData = {
+      const aiCaseData = {
       caseId: caseId,
       productId: productId,
-      sellerId: productData.sellerId,
+      // [Fix] 데이터 불일치 해결: products의 'userId' 값을 ai_cases의 'sellerId'로 매핑
+      sellerId: productData.userId || productData.sellerId || "unknown",
       buyerId: request.auth.uid, // 인수자 기록
       stage: "takeover",
       status: isMatch ? "pass" : "fail",
       evidenceImageUrls: newImageUrls, // 현장 증거 사진 영구 보존
-      aiResult: verificationResult,
+      aiResult: JSON.parse(JSON.stringify(verificationResult)), // [Fix] undefined 값 제거 (Firestore 저장 에러 방지)
       verdict: isMatch ? "match_confirmed" : "match_failed",
       createdAt: now,
     };
@@ -2003,14 +2029,10 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
     return { success: true, verification: verificationResult, caseId: caseId };
 
   } catch (error) {
-    logger.error(
-      "❌ [AI 인수 2단계] verifyProductOnSite 함수 오류:",
-      error
-    );
+    logger.error("❌ AI Takeover Failed", error);
+    // 전달하는 메시지는 안전하게 추출
+    const errMsg = (error && error.message) || String(error || "unknown error");
     if (error instanceof HttpsError) throw error;
-    throw new HttpsError(
-      "internal",
-      "현장 검증 중 내부 오류가 발생했습니다."
-    );
+    throw new HttpsError("internal", `현장 검증 실패: ${errMsg}`, error);
   }
 });

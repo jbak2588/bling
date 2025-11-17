@@ -124,8 +124,10 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
     );
 
     if (source == ImageSource.camera) {
-      final XFile? img = await _picker.pickImage(
-          source: source!, imageQuality: 80, maxWidth: 1024);
+      // [Fix] 안드로이드 overwrite 버그 방지를 위해 압축 옵션 제거 (원본 사용)
+      // 일부 Android에서 imageQuality/maxWidth가 지정되면 파일명이 겹쳐져
+      // 여러 이미지가 'scaled_0.png'로 덮어써지는 문제가 발생합니다.
+      final XFile? img = await _picker.pickImage(source: source!);
       if (img != null && mounted) {
         try {
           final tempDir = await getTemporaryDirectory();
@@ -160,8 +162,9 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
         }
       }
     } else if (source == ImageSource.gallery) {
-      final List<XFile> picked =
-          await _picker.pickMultiImage(imageQuality: 80, maxWidth: 1024);
+      // [Fix] pickMultiImage 사용 시 imageQuality/maxWidth 옵션이 있으면
+      // 안드로이드에서 모든 파일이 'scaled_0.png'로 덮어쓰여지는 치명적 버그 발생. 제거 필수.
+      final List<XFile> picked = await _picker.pickMultiImage();
       if (picked.isNotEmpty && mounted) {
         final tempDir = await getTemporaryDirectory();
         final List<XFile> copied = [];
