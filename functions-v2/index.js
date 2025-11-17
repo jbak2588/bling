@@ -1383,16 +1383,45 @@ exports.enhanceProductWithAi = onCall(CALL_OPTS, async (request) => {
       );
     }
 
-    await productRef.update({
-      isAiVerified: true,
-      aiVerificationStatus: "verified",
-      aiReport: aiReport,
-      updatedAt: FieldValue.serverTimestamp(),
+    // ---------------------------------------------------------
+    // [V3.1 UPDATE] ai_cases 문서 생성 및 Dual Write
+    // ---------------------------------------------------------
+    const caseRef = db.collection("ai_cases").doc(); // 새 문서 ID 자동 생성
+    const caseId = caseRef.id;
+    const now = FieldValue.serverTimestamp();
+
+    const aiCaseData = {
+      caseId: caseId,
+      productId: productId,
+      sellerId: productData.sellerId || request.auth.uid,
+      buyerId: null, // 등록/검수 단계이므로 null
+      stage: "enhancement",
+      status: "completed",
+      aiResult: aiReport, // 분석 결과 원본 보존
+      evidenceImageUrls: evidenceImageUrls || [], // 사용된 증거 이미지 보존
+      verdict: aiReport.trustVerdict || "pending",
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const batch = db.batch();
+    batch.set(caseRef, aiCaseData);
+
+    // products 문서 업데이트 (요약 정보 + 레거시 호환)
+    batch.update(productRef, {
+      lastAiCaseId: caseId,
+      lastAiVerdict: aiCaseData.verdict,
+      aiVerificationStatus: aiCaseData.verdict === 'safe' ? 'verified' : 'suspicious',
+      aiSummaryShort: aiReport.itemSummary?.title || "AI 검수 완료",
+      aiReport: aiReport, // [Legacy 호환용] 당분간 유지
+      updatedAt: now,
     });
 
-    logger.info(`✅ [V2] Successfully enhanced product ${productId}.`);
+    await batch.commit();
 
-    return { success: true, report: aiReport };
+    logger.info(`✅ [AI Case Created] ${caseId} for Product ${productId}`);
+
+    return { success: true, report: aiReport, caseId: caseId };
   } catch (error) {
     logger.error(
       "❌ [V2] enhanceProductWithAi 함수 내부에서 오류 발생:",
@@ -1937,8 +1966,41 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
       return { success: true, verification: fallbackResult };
     }
 
+    // ---------------------------------------------------------
+    // [V3.1 UPDATE] ai_cases (Takeover) 문서 생성 및 제품 이력 연결
+    // ---------------------------------------------------------
+    const isMatch = verificationResult.match === true;
+    const caseRef = db.collection("ai_cases").doc();
+    const caseId = caseRef.id;
+    const now = FieldValue.serverTimestamp();
+
+    const aiCaseData = {
+      caseId: caseId,
+      productId: productId,
+      sellerId: productData.sellerId,
+      buyerId: request.auth.uid, // 인수자 기록
+      stage: "takeover",
+      status: isMatch ? "pass" : "fail",
+      evidenceImageUrls: newImageUrls, // 현장 증거 사진 영구 보존
+      aiResult: verificationResult,
+      verdict: isMatch ? "match_confirmed" : "match_failed",
+      createdAt: now,
+    };
+
+    const batch = db.batch();
+    batch.set(caseRef, aiCaseData);
+
+    // 제품 상태 업데이트 (검증 이력 연결)
+    batch.update(productRef, {
+      lastAiCaseId: caseId,
+      lastAiVerdict: aiCaseData.verdict,
+      aiVerificationStatus: isMatch ? 'takeover_verified' : 'suspicious',
+    });
+
+    await batch.commit();
+
     logger.info(`✅ [AI 인수 2단계] 검증 완료: ${productId}`, verificationResult);
-    return { success: true, verification: verificationResult };
+    return { success: true, verification: verificationResult, caseId: caseId };
 
   } catch (error) {
     logger.error(

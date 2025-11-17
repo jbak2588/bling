@@ -87,6 +87,13 @@ class ProductModel {
   final String
       aiVerificationStatus; // 'pending', 'approved', 'rejected', 'none'
   final Map<String, dynamic>? aiReport;
+
+  // [V3.1] AI Case Reference Fields
+  final String? lastAiCaseId;
+  final String? lastAiVerdict;
+  final String? aiSummaryShort;
+  final Timestamp? lastAiUpdatedAt;
+
   // [추가] AI 검수 완료 상품을 위한 필드 (새 키 호환)
   final Map<String, dynamic>? aiVerificationData;
   final String? rejectionReason;
@@ -132,6 +139,10 @@ class ProductModel {
     this.isAiVerified = false,
     this.aiVerificationStatus = 'none',
     this.aiReport,
+    this.lastAiCaseId,
+    this.lastAiVerdict,
+    this.aiSummaryShort,
+    this.lastAiUpdatedAt,
     // [추가] 새 필드 추가
     this.aiVerificationData,
     this.rejectionReason,
@@ -184,6 +195,10 @@ class ProductModel {
       aiReport: data['aiReport'] != null
           ? Map<String, dynamic>.from(data['aiReport'])
           : null,
+      lastAiCaseId: data['lastAiCaseId'],
+      lastAiVerdict: data['lastAiVerdict'],
+      aiSummaryShort: data['aiSummaryShort'],
+      lastAiUpdatedAt: data['lastAiUpdatedAt'] as Timestamp?,
       // [추가] 새 키(aiVerificationData)도 함께 로드, 없으면 aiReport로 폴백
       aiVerificationData: data['aiVerificationData'] != null
           ? Map<String, dynamic>.from(data['aiVerificationData'])
@@ -227,6 +242,10 @@ class ProductModel {
       'isAiVerified': isAiVerified,
       'aiVerificationStatus': aiVerificationStatus,
       'aiReport': aiReport,
+      'lastAiCaseId': lastAiCaseId,
+      'lastAiVerdict': lastAiVerdict,
+      'aiSummaryShort': aiSummaryShort,
+      'lastAiUpdatedAt': lastAiUpdatedAt,
       // [추가] 새 필드 저장
       'aiVerificationData': aiVerificationData,
       'rejectionReason': rejectionReason,
@@ -265,6 +284,10 @@ class ProductModel {
     bool? isAiVerified,
     String? aiVerificationStatus,
     Map<String, dynamic>? aiReport,
+    String? lastAiCaseId,
+    String? lastAiVerdict,
+    String? aiSummaryShort,
+    Timestamp? lastAiUpdatedAt,
     // [추가]
     Map<String, dynamic>? aiVerificationData,
     String? rejectionReason,
@@ -301,6 +324,10 @@ class ProductModel {
       isAiVerified: isAiVerified ?? this.isAiVerified,
       aiVerificationStatus: aiVerificationStatus ?? this.aiVerificationStatus,
       aiReport: aiReport ?? this.aiReport,
+      lastAiCaseId: lastAiCaseId ?? this.lastAiCaseId,
+      lastAiVerdict: lastAiVerdict ?? this.lastAiVerdict,
+      aiSummaryShort: aiSummaryShort ?? this.aiSummaryShort,
+      lastAiUpdatedAt: lastAiUpdatedAt ?? this.lastAiUpdatedAt,
       // [추가]
       aiVerificationData: aiVerificationData ?? this.aiVerificationData,
       rejectionReason: rejectionReason ?? this.rejectionReason,

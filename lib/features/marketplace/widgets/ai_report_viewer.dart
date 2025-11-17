@@ -6,20 +6,32 @@ import 'package:easy_localization/easy_localization.dart';
 /// [V3 개편] V3 "증거 연계" 스키마를 파싱하도록 전면 수정
 class AiReportViewer extends StatelessWidget {
   // V3는 ProductModel이 아닌, Map 자체를 받습니다.
-  final Map<String, dynamic> aiReport;
+  final Map<String, dynamic>? aiReport; // Nullable 허용
 
   const AiReportViewer({super.key, required this.aiReport});
 
   @override
   Widget build(BuildContext context) {
+    // [V3.1 Fix] 데이터가 없거나 초기화 중일 때 예외 처리
+    if (aiReport == null || aiReport!.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        alignment: Alignment.center,
+        child: Text(
+          "AI 분석 보고서를 불러오는 중이거나 데이터가 없습니다.",
+          style: TextStyle(color: Colors.grey[600]),
+        ),
+      );
+    }
+
     // [V3 REFACTOR] V3 '단순 엔진' 스키마(Task 62)의 핵심 필드로 유효성 검사
-    if (aiReport['itemSummary'] == null || aiReport['condition'] == null) {
+    if (aiReport!['itemSummary'] == null || aiReport!['condition'] == null) {
       return const SizedBox.shrink();
     }
 
     // [V3 REFACTOR] '룰 엔진' V2 파싱 로직 (key_specs, condition_check, ...) 완전 삭제
     // [V3 REFACTOR] V3 '단순 엔진' 스키마(Task 62) 파싱
-    final dynamic condition = aiReport['condition'];
+    final dynamic condition = aiReport!['condition'];
     final String? grade =
         (condition is Map) ? condition['grade'] as String? : null;
     final String? gradeReason =
@@ -30,14 +42,14 @@ class AiReportViewer extends StatelessWidget {
         .map((item) => Map<String, dynamic>.from(item as Map))
         .toList();
 
-    final dynamic price = aiReport['priceAssessment'];
+    final dynamic price = aiReport!['priceAssessment'];
     final String? priceComment =
         (price is Map) ? price['comment'] as String? : null;
     final num? minPrice = (price is Map) ? price['suggestedMin'] as num? : null;
     final num? maxPrice = (price is Map) ? price['suggestedMax'] as num? : null;
 
-    final String? notesForBuyer = aiReport['notesForBuyer'] as String?;
-    final String? summary = aiReport['verificationSummary'] as String?;
+    final String? notesForBuyer = aiReport!['notesForBuyer'] as String?;
+    final String? summary = aiReport!['verificationSummary'] as String?;
     // [V3 REFACTOR] (중요) 구매자 뷰어는 'onSiteVerificationChecklist'를 절대 파싱하거나 표시하지 않습니다.
 
     final List<Widget> sections = [];

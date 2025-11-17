@@ -1,4 +1,5 @@
 // lib/features/admin/screens/admin_product_detail_screen.dart
+// lib/features/admin/screens/admin_product_detail_screen.dart
 
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -199,6 +200,8 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
       debugPrint('Failed to update seller notifications: $e');
     }
   }
+
+  // duplicate removed
 
   // [Task 104] 거절 사유 입력 팝업
   Future<String?> _showRejectionDialog() async {
