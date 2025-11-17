@@ -20,6 +20,7 @@ library;
 
 import 'dart:io';
 import 'package:bling_app/features/marketplace/data/ai_case_repository.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart'; // [Fix] 압축 패키지 추가
 import 'package:bling_app/features/marketplace/data/product_repository.dart';
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:bling_app/features/marketplace/widgets/ai_report_viewer.dart';
@@ -27,8 +28,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:convert';
-import 'dart:typed_data';
+// removed heavy imports: using file-based image handling instead of raw bytes
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
@@ -56,7 +56,8 @@ class AiTakeoverScreen extends StatefulWidget {
 class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
   final ImagePicker _picker = ImagePicker();
   final List<XFile> _newPhotos = [];
-  final List<Uint8List> _newPhotoBytes = [];
+  // [Fix] OOM 방지: 이미지를 바이트로 메모리에 들고 있지 않고, 파일 경로로만 관리함.
+  // final List<Uint8List> _newPhotoBytes = [];
   bool _isVerifying = false;
   List<_ChecklistItem> _checklistItems = []; // [Task 99] V3 체크리스트 상태 변수
 
@@ -98,6 +99,21 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
     }
   }
 
+  // [Fix] 이미지 안전 압축 헬퍼 함수
+  Future<File?> _compressImage(File file) async {
+    try {
+      final String targetPath = '${file.path}_compressed.jpg';
+      final XFile? result = await FlutterImageCompress.compressAndGetFile(
+        file.absolute.path, targetPath,
+        quality: 80, // 품질 80% (용량 대폭 감소)
+        rotate: 0, // 자동 회전 방지
+      );
+      return result != null ? File(result.path) : file;
+    } catch (e) {
+      return file; // 압축 실패 시 원본 반환
+    }
+  }
+
   /// 현장에서 새 사진 촬영
   Future<void> _pickPhotos() async {
     // [Task 107] 카메라/갤러리 선택 팝업 (Task 65 로직 재사용)
@@ -133,16 +149,12 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
           final tempDir = await getTemporaryDirectory();
           final ext = p.extension(img.path);
           final destPath = p.join(tempDir.path, '${const Uuid().v4()}$ext');
-          final bytes = await img.readAsBytes();
-          await File(destPath).writeAsBytes(bytes);
-          final copiedLen = File(destPath).lengthSync();
-          final fingerprint = base64Encode(bytes.take(20).toList());
-          debugPrint(
-              'camera: original=${img.path}, copied=$destPath, exists=${File(destPath).existsSync()}, size=$copiedLen, fp=$fingerprint');
+          // [Fix] 복사 대신 압축 수행
+          final compressed = await _compressImage(File(img.path));
+          await compressed?.copy(destPath);
           if (mounted) {
             setState(() {
               _newPhotos.add(XFile(destPath));
-              _newPhotoBytes.add(bytes);
             });
           }
         } catch (e) {
@@ -150,13 +162,6 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
           if (mounted) {
             setState(() {
               _newPhotos.add(img);
-              img.readAsBytes().then((b) {
-                if (mounted) {
-                  setState(() {
-                    _newPhotoBytes.add(b);
-                  });
-                }
-              });
             });
           }
         }
@@ -168,32 +173,24 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
       if (picked.isNotEmpty && mounted) {
         final tempDir = await getTemporaryDirectory();
         final List<XFile> copied = [];
-        final List<Uint8List> copiedBytes = [];
         for (final x in picked) {
-          final bytes = await x.readAsBytes();
-          debugPrint(
-              'gallery picked original=${x.path}, exists=${File(x.path).existsSync()}, size=${bytes.length}');
           try {
             final ext = p.extension(x.path);
             final destPath = p.join(tempDir.path, '${const Uuid().v4()}$ext');
-            await File(destPath).writeAsBytes(bytes);
-            final copiedLen = File(destPath).lengthSync();
-            final fingerprint = base64Encode(bytes.take(20).toList());
-            debugPrint(
-                'gallery copied to=$destPath, exists=${File(destPath).existsSync()}, size=$copiedLen, fp=$fingerprint');
+            // [Fix] 갤러리 이미지도 압축 수행
+            final compressed = await _compressImage(File(x.path));
+            await compressed?.copy(destPath);
             copied.add(XFile(destPath));
-            copiedBytes.add(bytes);
           } catch (e) {
             debugPrint('Error copying gallery image ${x.path}: $e');
             // fallback to original if copy fails
             copied.add(x);
-            copiedBytes.add(bytes);
           }
         }
         if (mounted) {
           setState(() {
             _newPhotos.addAll(copied);
-            _newPhotoBytes.addAll(copiedBytes);
+            // Note: not storing raw bytes to avoid OOM
           });
         }
       }
@@ -457,13 +454,13 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ..._newPhotoBytes.asMap().entries.map((entry) {
+                ..._newPhotos.asMap().entries.map((entry) {
                   final idx = entry.key;
-                  final bytes = entry.value;
+                  final file = entry.value;
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.memory(
-                      bytes,
+                    child: Image.file(
+                      File(file.path),
                       key: ValueKey(idx),
                       width: 80,
                       height: 80,

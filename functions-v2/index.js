@@ -83,17 +83,17 @@
  */
 
 // (파일 내용...)
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { onDocumentUpdated, onDocumentCreated } = require("firebase-functions/v2/firestore");
+const {onCall, HttpsError} = require("firebase-functions/v2/https");
+const {onDocumentUpdated, onDocumentCreated} = require("firebase-functions/v2/firestore");
 // [Fix] 모든 함수의 기본 리전을 'asia-southeast2'에서 'asia-southeast2'(자카르타)로 변경
 // (사용자 지연 시간 최소화 및 Firestore 데이터 전송 비용(Egress) 제거 목적)
-const { setGlobalOptions } = require("firebase-functions/v2");
-setGlobalOptions({ region: "asia-southeast2" });
-const { initializeApp } = require("firebase-admin/app");
-const { getMessaging } = require("firebase-admin/messaging"); // ✅ [푸시 스키마] 추가
-const { defineSecret } = require("firebase-functions/params");
-const { getFirestore, FieldValue } = require("firebase-admin/firestore");
-const { logger } = require("firebase-functions");
+const {setGlobalOptions} = require("firebase-functions/v2");
+setGlobalOptions({region: "asia-southeast2"});
+const {initializeApp} = require("firebase-admin/app");
+const {getMessaging} = require("firebase-admin/messaging"); // ✅ [푸시 스키마] 추가
+const {defineSecret} = require("firebase-functions/params");
+const {getFirestore, FieldValue} = require("firebase-admin/firestore");
+const {logger} = require("firebase-functions");
 const {
   GoogleGenerativeAI,
   HarmCategory,
@@ -113,7 +113,7 @@ const GEMINI_KEY = defineSecret("GEMINI_KEY");
 // 요청 타임아웃/재시도 설정 (Gemini 전용)
 // ──────────────────────────────────────────────────────────────────────────────
 // [수정] Gemini 서버의 극심한 지연에 대응하기 위해 개별 요청 타임아웃을 60초로 늘립니다.
-const GENAI_TIMEOUT_MS = 60_000; // 60s: 개별 Gemini 요청 타임아웃
+const GENAI_TIMEOUT_MS = 60000; // 60s: 개별 Gemini 요청 타임아웃
 const GENAI_MAX_RETRIES = 2; // 총 3회(최초 + 2회 재시도)
 const GENAI_BASE_DELAY_MS = 800; // 첫 백오프 지연
 
@@ -133,7 +133,7 @@ function extractJsonText(raw) {
 function tryParseJson(text) {
   try {
     return JSON.parse(text);
-  } catch {
+  } catch (e) {
     return null;
   }
 }
@@ -152,14 +152,14 @@ function logAiDiagnostics(ctx, rawText, parsed) {
         ctx,
         keys: Object.keys(parsed),
         has_predicted_item_name: Object.prototype.hasOwnProperty.call(
-          parsed,
-          "predicted_item_name"
+            parsed,
+            "predicted_item_name",
         ),
         predicted_item_name: parsed?.predicted_item_name ?? null,
         confidence: parsed?.confidence ?? null,
       });
     } else {
-      logger.warn("🧪 AI parse failed (no valid JSON object)", { ctx });
+      logger.warn("🧪 AI parse failed (no valid JSON object)", {ctx});
     }
   } catch (e) {
     logger.warn("🧪 AI diagnostics logging error", {
@@ -174,8 +174,8 @@ const getGenAI = () => {
   const key = GEMINI_KEY.value();
   if (!key) {
     throw new HttpsError(
-      "failed-precondition",
-      "GEMINI_KEY is not configured."
+        "failed-precondition",
+        "GEMINI_KEY is not configured.",
     );
   }
   return new GoogleGenerativeAI(key);
@@ -188,8 +188,8 @@ const getGenAI = () => {
    * 2. 상품 등록자(판매자)에게 알림을 보냅니다.
    * ============================================================================
    */
-  exports.onProductStatusPending = onDocumentUpdated(
-    { document: "products/{productId}", region: "asia-southeast2" },
+exports.onProductStatusPending = onDocumentUpdated(
+    {document: "products/{productId}", region: "asia-southeast2"},
     async (event) => {
       const before = event.data.before.data();
       const after = event.data.after.data();
@@ -221,8 +221,8 @@ const getGenAI = () => {
       // --- 1. 관리자(들) 토큰 수집 ---
       try {
         const adminQuery = await db.collection("users")
-          .where("role", "==", "admin")
-          .get();
+            .where("role", "==", "admin")
+            .get();
 
         if (!adminQuery.empty) {
           logger.info(`[Notify] Found ${adminQuery.size} admin(s).`);
@@ -232,17 +232,17 @@ const getGenAI = () => {
               tokens.forEach((t) => adminTokens.add(t));
             }
 
-          // [Task 94] Part A: 관리자의 'notifications' 하위 컬렉션에 알림 저장
-          const adminNotifRef = db.collection("users").doc(doc.id).collection("notifications").doc();
-          const adminNotifData = {
-            "type": "ADMIN_PRODUCT_PENDING",
-            "title": "새 AI 검토 요청",
-            "body": `상품 '${productTitle}'이(가) 'pending' 상태입니다.`,
-            "productId": event.params.productId,
-            "createdAt": FieldValue.serverTimestamp(),
-            "isRead": false,
-          };
-          batch.set(adminNotifRef, adminNotifData);
+            // [Task 94] Part A: 관리자의 'notifications' 하위 컬렉션에 알림 저장
+            const adminNotifRef = db.collection("users").doc(doc.id).collection("notifications").doc();
+            const adminNotifData = {
+              "type": "ADMIN_PRODUCT_PENDING",
+              "title": "새 AI 검토 요청",
+              "body": `상품 '${productTitle}'이(가) 'pending' 상태입니다.`,
+              "productId": event.params.productId,
+              "createdAt": FieldValue.serverTimestamp(),
+              "isRead": false,
+            };
+            batch.set(adminNotifRef, adminNotifData);
           }
         }
       } catch (e) {
@@ -259,17 +259,17 @@ const getGenAI = () => {
               tokens.forEach((t) => sellerTokens.add(t));
             }
 
-          // [Task 94] Part A: 판매자의 'notifications' 하위 컬렉션에 알림 저장
-          const sellerNotifRef = db.collection("users").doc(sellerId).collection("notifications").doc();
-          const sellerNotifData = {
-            "type": "USER_PRODUCT_PENDING",
-            "title": "상품 검토가 진행 중입니다",
-            "body": `등록하신 상품 '${productTitle}'이(가) 관리자 검토를 위해 제출되었습니다.`,
-            "productId": event.params.productId,
-            "createdAt": FieldValue.serverTimestamp(),
-            "isRead": false,
-          };
-          batch.set(sellerNotifRef, sellerNotifData);
+            // [Task 94] Part A: 판매자의 'notifications' 하위 컬렉션에 알림 저장
+            const sellerNotifRef = db.collection("users").doc(sellerId).collection("notifications").doc();
+            const sellerNotifData = {
+              "type": "USER_PRODUCT_PENDING",
+              "title": "상품 검토가 진행 중입니다",
+              "body": `등록하신 상품 '${productTitle}'이(가) 관리자 검토를 위해 제출되었습니다.`,
+              "productId": event.params.productId,
+              "createdAt": FieldValue.serverTimestamp(),
+              "isRead": false,
+            };
+            batch.set(sellerNotifRef, sellerNotifData);
           }
         }
       } catch (e) {
@@ -282,13 +282,13 @@ const getGenAI = () => {
       const adminTokenList = Array.from(adminTokens);
       if (adminTokenList.length > 0) {
         const adminMessage = {
-          notification: { title: "새 AI 검토 요청", body: `상품 '${productTitle}'이(가) 'pending' 상태입니다.` },
-          data: { type: "ADMIN_PRODUCT_PENDING", productId: event.params.productId, click_action: "FLUTTER_NOTIFICATION_CLICK" },
+          notification: {title: "새 AI 검토 요청", body: `상품 '${productTitle}'이(가) 'pending' 상태입니다.`},
+          data: {type: "ADMIN_PRODUCT_PENDING", productId: event.params.productId, click_action: "FLUTTER_NOTIFICATION_CLICK"},
           tokens: adminTokenList,
         };
         promises.push(messaging.sendEachForMulticast(adminMessage)
-          .then((res) => logger.info(`[Notify] Sent ${res.successCount} messages to admins.`))
-          .catch((e) => logger.error("[Notify] Error sending to admins:", e))
+            .then((res) => logger.info(`[Notify] Sent ${res.successCount} messages to admins.`))
+            .catch((e) => logger.error("[Notify] Error sending to admins:", e)),
         );
       }
 
@@ -301,7 +301,7 @@ const getGenAI = () => {
           // We still provide a short title to FCM notification field so some platforms
           // display something while the app is in background. The client should
           // prefer `data.title_key`/`data.body_key` when handling the message.
-          notification: { title: productTitle, body: `` },
+          notification: {title: productTitle, body: ``},
           data: {
             type: "USER_PRODUCT_PENDING",
             productId: event.params.productId,
@@ -310,15 +310,15 @@ const getGenAI = () => {
             title_key: "ai_flow.notifications.seller_pending_title",
             body_key: "ai_flow.notifications.seller_pending_body",
             // Args encoded as JSON string; client can parse and replace placeholders
-            body_args: JSON.stringify({ title: productTitle }),
+            body_args: JSON.stringify({title: productTitle}),
           },
           tokens: sellerTokenList,
         };
         promises.push(
-          messaging
-            .sendEachForMulticast(sellerMessage)
-            .then((res) => logger.info(`[Notify] Sent ${res.successCount} messages to seller.`))
-            .catch((e) => logger.error("[Notify] Error sending to seller:", e))
+            messaging
+                .sendEachForMulticast(sellerMessage)
+                .then((res) => logger.info(`[Notify] Sent ${res.successCount} messages to seller.`))
+                .catch((e) => logger.error("[Notify] Error sending to seller:", e)),
         );
       }
 
@@ -326,10 +326,10 @@ const getGenAI = () => {
       promises.push(batch.commit());
 
       await Promise.all(promises);
-    }
-  );
+    },
+);
 
-  /**
+/**
    * ============================================================================
    * [V3 NEW] 관리자가 'pending' 상품을 승인/거절할 때 알림 (Task 103/106)
    * 'products' 문서의 status가 'pending'에서 'selling' 또는 'rejected'로
@@ -337,8 +337,8 @@ const getGenAI = () => {
    * 1. 판매자(seller)에게 최종 결과를 알림(FCM + Firestore)으로 보냅니다.
    * ============================================================================
    */
-  exports.onProductStatusResolved = onDocumentUpdated(
-    { document: "products/{productId}", region: "asia-southeast2" },
+exports.onProductStatusResolved = onDocumentUpdated(
+    {document: "products/{productId}", region: "asia-southeast2"},
     async (event) => {
       const before = event.data.before.data();
       const after = event.data.after.data();
@@ -400,14 +400,14 @@ const getGenAI = () => {
         notifType = "USER_PRODUCT_APPROVED";
         notifTitle = "상품이 승인되었습니다";
         notifBody = `축하합니다! 등록하신 상품 '${productTitle}'이(가) 관리자 검토 후 승인되었습니다.`;
-        bodyArgs = { title: productTitle };
+        bodyArgs = {title: productTitle};
       } else {
         // [거절됨] Task 104에서 앱이 저장한 거절 사유를 가져옴
         const reason = after.rejectionReason || "관리자 정책 위반";
         notifType = "USER_PRODUCT_REJECTED";
         notifTitle = "상품 등록이 거절되었습니다";
         notifBody = `등록하신 상품 '${productTitle}'이(가) 거절되었습니다. 사유: ${reason}`;
-        bodyArgs = { title: productTitle, reason: reason };
+        bodyArgs = {title: productTitle, reason: reason};
       }
 
       const promises = [];
@@ -428,7 +428,7 @@ const getGenAI = () => {
       const sellerTokenList = Array.from(sellerTokens);
       if (sellerTokenList.length > 0) {
         const sellerMessage = {
-          notification: { title: notifTitle, body: notifBody },
+          notification: {title: notifTitle, body: notifBody},
           data: {
             type: notifType,
             productId: productId,
@@ -438,15 +438,15 @@ const getGenAI = () => {
           tokens: sellerTokenList,
         };
         promises.push(
-          messaging.sendEachForMulticast(sellerMessage)
-            .then((res) => logger.info(`[Notify Res] Sent ${res.successCount} messages to seller.`))
-            .catch((e) => logger.error("[Notify Res] Error sending to seller:", e))
+            messaging.sendEachForMulticast(sellerMessage)
+                .then((res) => logger.info(`[Notify Res] Sent ${res.successCount} messages to seller.`))
+                .catch((e) => logger.error("[Notify Res] Error sending to seller:", e)),
         );
       }
 
       await Promise.all(promises);
-    }
-  );
+    },
+);
 
 
 // 공통 onCall 옵션
@@ -463,7 +463,7 @@ const CALL_OPTS = {
  * [V3 REFACTOR] initialproductanalysis를 위한 새 V3 단순 프롬프트
  */
 function buildV3InitialPrompt(data) {
-  const { locale, categoryName, subCategoryName, userDescription, confirmedProductName } = data;
+  const {locale, categoryName, subCategoryName, userDescription, confirmedProductName} = data;
   const lc = (typeof locale === "string" && locale) || "id";
   const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
 
@@ -509,7 +509,7 @@ You MUST return ONLY ONE JSON object with this exact structure.
 
 
 // 이미지 다운로드 공통 제한
-const MAX_IMAGE_BYTES = 7_500_000; // 7.5MB 안전선
+const MAX_IMAGE_BYTES = 7500000; // 7.5MB 안전선
 const FETCH_TIMEOUT_MS = 45000; // 45s (네트워크/Storage 지연 대비)
 // [v2.1] '동네 친구' 일일 신규 채팅 한도
 const DAILY_CHAT_LIMIT = 5; // 하루 5명으로 제한
@@ -520,7 +520,7 @@ function isModelNotFoundError(err) {
     const msg =
       (err && (err.message || (err.toString && err.toString()))) || "";
     return /404|Not Found|models\/.+? is not found|is not supported for generateContent/i.test(
-      msg
+        msg,
     );
   } catch {
     return false;
@@ -548,18 +548,18 @@ function isRetryable(err) {
 // 지정 ms 뒤 reject되는 타임아웃 Promise
 function timeoutPromise(ms, tag = "genai") {
   return new Promise((_, rej) =>
-    setTimeout(() => rej(new Error(`[${tag}] request timeout ${ms}ms`)), ms)
+    setTimeout(() => rej(new Error(`[${tag}] request timeout ${ms}ms`)), ms),
   );
 }
 
 // 지수 백오프 재시도 래퍼
 async function withRetry(
-  fn,
-  {
-    maxRetries = GENAI_MAX_RETRIES,
-    baseDelay = GENAI_BASE_DELAY_MS,
-    tag = "genai",
-  } = {}
+    fn,
+    {
+      maxRetries = GENAI_MAX_RETRIES,
+      baseDelay = GENAI_BASE_DELAY_MS,
+      tag = "genai",
+    } = {},
 ) {
   let attempt = 0;
   let delay = baseDelay;
@@ -595,79 +595,79 @@ async function withRetry(
 
 // SDK 버전별 호출을 감싸는 통합 함수
 async function genAiCall(
-  genAI,
-  {
-    modelPrimary = "gemini-2.5-flash",
-    modelFallback = "gemini-2.5-pro",
-    contents,
-    safetySettings,
-    responseMimeType = "application/json",
-    tag,
-  }
+    genAI,
+    {
+      modelPrimary = "gemini-2.5-flash",
+      modelFallback = "gemini-2.5-pro",
+      contents,
+      safetySettings,
+      responseMimeType = "application/json",
+      tag,
+    },
 ) {
   if (hasResponsesApi(genAI)) {
     return withRetry(
-      async () => {
-        try {
-          const resp = await genAI.responses.generate({
-            model: modelPrimary,
-            contents,
-            safetySettings,
-            responseMimeType,
-          });
-          return resp?.output_text || "";
-        } catch (e) {
-          // [수정] 모델을 찾을 수 없거나, 과부하 등 재시도 가능한 에러 발생 시 fallback 모델을 사용하도록 로직 강화
-          const shouldUseFallback = isModelNotFoundError(e) || isRetryable(e);
-          if (shouldUseFallback) {
-            logger.warn(
-              `⚠️ Primary model failed (${e.message}). Falling back to ${modelFallback}...`,
-              { tag }
-            );
-            const fb = await genAI.responses.generate({
-              model: modelFallback,
+        async () => {
+          try {
+            const resp = await genAI.responses.generate({
+              model: modelPrimary,
               contents,
               safetySettings,
               responseMimeType,
             });
-            return fb?.output_text || "";
+            return resp?.output_text || "";
+          } catch (e) {
+          // [수정] 모델을 찾을 수 없거나, 과부하 등 재시도 가능한 에러 발생 시 fallback 모델을 사용하도록 로직 강화
+            const shouldUseFallback = isModelNotFoundError(e) || isRetryable(e);
+            if (shouldUseFallback) {
+              logger.warn(
+                  `⚠️ Primary model failed (${e.message}). Falling back to ${modelFallback}...`,
+                  {tag},
+              );
+              const fb = await genAI.responses.generate({
+                model: modelFallback,
+                contents,
+                safetySettings,
+                responseMimeType,
+              });
+              return fb?.output_text || "";
+            }
+            throw e;
+          }
+        },
+        {tag},
+    );
+  }
+  return withRetry(
+      async () => {
+        try {
+          const m = genAI.getGenerativeModel({
+            model: modelPrimary,
+            safetySettings,
+            generationConfig: {responseMimeType},
+          });
+          const r = await m.generateContent({contents});
+          return String(r?.response?.text?.() ?? "");
+        } catch (e) {
+        // [수정] 동일한 fallback 로직을 다른 SDK 버전 호출에도 적용
+          const shouldUseFallback = isModelNotFoundError(e) || isRetryable(e);
+          if (shouldUseFallback) {
+            logger.warn(
+                `⚠️ Primary model failed (${e.message}). Falling back to ${modelFallback}...`,
+                {tag},
+            );
+            const fm = genAI.getGenerativeModel({
+              model: modelFallback,
+              safetySettings,
+              generationConfig: {responseMimeType},
+            });
+            const r2 = await fm.generateContent({contents});
+            return String(r2?.response?.text?.() ?? "");
           }
           throw e;
         }
       },
-      { tag }
-    );
-  }
-  return withRetry(
-    async () => {
-      try {
-        const m = genAI.getGenerativeModel({
-          model: modelPrimary,
-          safetySettings,
-          generationConfig: { responseMimeType },
-        });
-        const r = await m.generateContent({ contents });
-        return String(r?.response?.text?.() ?? "");
-      } catch (e) {
-        // [수정] 동일한 fallback 로직을 다른 SDK 버전 호출에도 적용
-        const shouldUseFallback = isModelNotFoundError(e) || isRetryable(e);
-        if (shouldUseFallback) {
-          logger.warn(
-            `⚠️ Primary model failed (${e.message}). Falling back to ${modelFallback}...`,
-            { tag }
-          );
-          const fm = genAI.getGenerativeModel({
-            model: modelFallback,
-            safetySettings,
-            generationConfig: { responseMimeType },
-          });
-          const r2 = await fm.generateContent({ contents });
-          return String(r2?.response?.text?.() ?? "");
-        }
-        throw e;
-      }
-    },
-    { tag }
+      {tag},
   );
 }
 
@@ -675,21 +675,21 @@ async function genAiCall(
  * [유지] 사용자 문서가 업데이트될 때 신뢰도 점수와 레벨을 다시 계산합니다.
  */
 exports.calculateTrustScore = onDocumentUpdated(
-  {
-    document: "users/{userId}",
-    region: "asia-southeast2",
-  },
-  async (event) => {
-    const userData = event.data.after.data();
-    const previousUserData = event.data.before.data();
-    const userId = event.params.userId;
+    {
+      document: "users/{userId}",
+      region: "asia-southeast2",
+    },
+    async (event) => {
+      const userData = event.data.after.data();
+      const previousUserData = event.data.before.data();
+      const userId = event.params.userId;
 
-    if (!userData) {
-      logger.info(`User data for ${userId} is missing.`);
-      return null;
-    }
+      if (!userData) {
+        logger.info(`User data for ${userId} is missing.`);
+        return null;
+      }
 
-    const mainFieldsUnchanged =
+      const mainFieldsUnchanged =
       previousUserData &&
       userData.thanksReceived === previousUserData.thanksReceived &&
       userData.reportCount === previousUserData.reportCount &&
@@ -698,45 +698,45 @@ exports.calculateTrustScore = onDocumentUpdated(
       JSON.stringify(userData.locationParts) ===
         JSON.stringify(previousUserData.locationParts);
 
-    if (mainFieldsUnchanged) {
-      logger.info(`No score-related changes for user ${userId}, exiting.`);
-      return null;
-    }
+      if (mainFieldsUnchanged) {
+        logger.info(`No score-related changes for user ${userId}, exiting.`);
+        return null;
+      }
 
-    let score = 0;
-    if (userData.locationParts && userData.locationParts.kel) score += 50;
-    if (userData.locationParts && userData.locationParts.rt) score += 50;
-    if (userData.phoneNumber && userData.phoneNumber.length > 0) score += 100;
-    if (userData.profileCompleted === true) score += 50;
+      let score = 0;
+      if (userData.locationParts && userData.locationParts.kel) score += 50;
+      if (userData.locationParts && userData.locationParts.rt) score += 50;
+      if (userData.phoneNumber && userData.phoneNumber.length > 0) score += 100;
+      if (userData.profileCompleted === true) score += 50;
 
-    const thanksCount = userData.thanksReceived || 0;
-    score += thanksCount * 10;
+      const thanksCount = userData.thanksReceived || 0;
+      score += thanksCount * 10;
 
-    const reportCount = userData.reportCount || 0;
-    score -= reportCount * 50;
+      const reportCount = userData.reportCount || 0;
+      score -= reportCount * 50;
 
-    const finalScore = Math.max(0, score);
+      const finalScore = Math.max(0, score);
 
-    let level = "normal";
-    if (finalScore > 500) {
-      level = "trusted";
-    } else if (finalScore > 100) {
-      level = "verified";
-    }
+      let level = "normal";
+      if (finalScore > 500) {
+        level = "trusted";
+      } else if (finalScore > 100) {
+        level = "verified";
+      }
 
-    if (finalScore !== userData.trustScore || level !== userData.trustLevel) {
-      logger.info(
-        `Updating user ${userId} score to ${finalScore} and level to ${level}`
-      );
-      return event.data.after.ref.update({
-        trustScore: finalScore,
-        trustLevel: level,
-      });
-    } else {
-      logger.info(`Score and level for user ${userId} remain unchanged.`);
-      return null;
-    }
-  }
+      if (finalScore !== userData.trustScore || level !== userData.trustLevel) {
+        logger.info(
+            `Updating user ${userId} score to ${finalScore} and level to ${level}`,
+        );
+        return event.data.after.ref.update({
+          trustScore: finalScore,
+          trustLevel: level,
+        });
+      } else {
+        logger.info(`Score and level for user ${userId} remain unchanged.`);
+        return null;
+      }
+    },
 );
 
 /**
@@ -753,103 +753,104 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
 
   if (!request.auth) {
     logger.error(
-      "❌ 치명적 오류: request.auth 객체가 없습니다. 비로그인 사용자의 호출로 간주됩니다."
+        "❌ 치명적 오류: request.auth 객체가 없습니다. 비로그인 사용자의 호출로 간주됩니다.",
     );
     throw new HttpsError(
-      "unauthenticated",
-      "The function must be called while authenticated."
+        "unauthenticated",
+        "The function must be called while authenticated.",
     );
   }
 
   try {
   // [V3 REFACTOR] 'ruleId' 및 복잡한 룰 엔진 의존성 제거.
   // Accept: imageUrls, locale, categoryName, subCategoryName, userDescription, confirmedProductName
-  const { imageUrls, locale, categoryName, subCategoryName, userDescription, confirmedProductName } = request.data || {};
-  if (!Array.isArray(imageUrls) || imageUrls.length === 0) {
-    logger.error("❌ 오류: 이미지 URL이 누락되었습니다.");
-    throw new HttpsError("invalid-argument", "Image URLs (array) are required.");
-  }
+    const {imageUrls, locale, categoryName, subCategoryName, userDescription, confirmedProductName} = request.data || {};
+    if (!Array.isArray(imageUrls) || imageUrls.length === 0) {
+      logger.error("❌ 오류: 이미지 URL이 누락되었습니다.");
+      throw new HttpsError("invalid-argument", "Image URLs (array) are required.");
+    }
 
     const ac = new AbortController();
     const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
     const imageParts = await Promise.all(
-      imageUrls.map(async (url) => {
-        if (!/^https:\/\//i.test(url)) {
-          throw new HttpsError(
-            "invalid-argument",
-            "Only https image URLs are allowed."
-          );
-        }
-        let response;
-        try {
-          response = await fetch(url, { signal: ac.signal });
-        } catch (e) {
-          if (e && e.name === "AbortError")
-            throw new HttpsError("deadline-exceeded", "Image fetch timed out.");
-          throw e;
-        }
-        if (!response.ok) {
-          throw new HttpsError(
-            "not-found",
-            `Failed to fetch image: ${response.status}`
-          );
-        }
-        const len = Number(response.headers.get("content-length") || 0);
-        if (len && len > MAX_IMAGE_BYTES) {
-          throw new HttpsError(
-            "resource-exhausted",
-            "Image too large (>7.5MB)."
-          );
-        }
-        const buffer = Buffer.from(await response.arrayBuffer());
-        if (!len && buffer.length > MAX_IMAGE_BYTES) {
-          throw new HttpsError(
-            "resource-exhausted",
-            "Image too large (>7.5MB)."
-          );
-        }
-        return {
-          inlineData: {
-            mimeType: response.headers.get("content-type") || "image/jpeg",
-            data: buffer.toString("base64"),
-          },
-        };
-      })
+        imageUrls.map(async (url) => {
+          if (!/^https:\/\//i.test(url)) {
+            throw new HttpsError(
+                "invalid-argument",
+                "Only https image URLs are allowed.",
+            );
+          }
+          let response;
+          try {
+            response = await fetch(url, {signal: ac.signal});
+          } catch (e) {
+            if (e && e.name === "AbortError") {
+              throw new HttpsError("deadline-exceeded", "Image fetch timed out.");
+            }
+            throw e;
+          }
+          if (!response.ok) {
+            throw new HttpsError(
+                "not-found",
+                `Failed to fetch image: ${response.status}`,
+            );
+          }
+          const len = Number(response.headers.get("content-length") || 0);
+          if (len && len > MAX_IMAGE_BYTES) {
+            throw new HttpsError(
+                "resource-exhausted",
+                "Image too large (>7.5MB).",
+            );
+          }
+          const buffer = Buffer.from(await response.arrayBuffer());
+          if (!len && buffer.length > MAX_IMAGE_BYTES) {
+            throw new HttpsError(
+                "resource-exhausted",
+                "Image too large (>7.5MB).",
+            );
+          }
+          return {
+            inlineData: {
+              mimeType: response.headers.get("content-type") || "image/jpeg",
+              data: buffer.toString("base64"),
+            },
+          };
+        }),
     );
     clearTimeout(to);
 
-  // Build V3 initial prompt and call GenAI
-  const v3InitialPrompt = buildV3InitialPrompt({ locale, categoryName, subCategoryName, userDescription, confirmedProductName });
-  const userContents = [{ role: "user", parts: [{ text: v3InitialPrompt }, ...imageParts] }];
-  const text = await genAiCall(genAI, {
-    modelPrimary: "gemini-2.5-flash",
-    modelFallback: "gemini-2.5-pro",
-    contents: userContents,
-    safetySettings,
-    responseMimeType: "application/json",
-    tag: "initialproductanalysis",
-  });
+    // Build V3 initial prompt and call GenAI
+    const v3InitialPrompt = buildV3InitialPrompt({locale, categoryName, subCategoryName, userDescription, confirmedProductName});
+    const userContents = [{role: "user", parts: [{text: v3InitialPrompt}, ...imageParts]}];
+    const text = await genAiCall(genAI, {
+      modelPrimary: "gemini-2.5-flash",
+      modelFallback: "gemini-2.5-pro",
+      contents: userContents,
+      safetySettings,
+      responseMimeType: "application/json",
+      tag: "initialproductanalysis",
+    });
 
     // Simple V3 parsing: expect a single JSON object with { prediction, suggestedShots }
     const jsonText = extractJsonText(text);
-  const parsedV3 = tryParseJson(jsonText);
-  logAiDiagnostics("initialproductanalysis", text, parsedV3);
-  if (!parsedV3) {
-    throw new HttpsError("data-loss", "AI returned invalid JSON.");
-  }
+    const parsedV3 = tryParseJson(jsonText);
+    logAiDiagnostics("initialproductanalysis", text, parsedV3);
+    if (!parsedV3) {
+      throw new HttpsError("data-loss", "AI returned invalid JSON.");
+    }
 
-  // Minimal schema validation
-  if (!Array.isArray(parsedV3.suggestedShots)) {
-    logger.error("❌ CRITICAL: AI V3 initial response is missing 'suggestedShots' array.", { keys: Object.keys(parsedV3) });
-    throw new HttpsError("data-loss", "AI returned invalid V3 initial structure.");
-  }
+    // Minimal schema validation
+    if (!Array.isArray(parsedV3.suggestedShots)) {
+      logger.error("❌ CRITICAL: AI V3 initial response is missing 'suggestedShots' array.", {keys: Object.keys(parsedV3)});
+      throw new HttpsError("data-loss", "AI returned invalid V3 initial structure.");
+    }
 
-  logger.info("✅ Gemini 1차 분석 성공", { prediction: parsedV3.prediction, suggestions: parsedV3.suggestedShots.length });
-  return { success: true, ...parsedV3 };
+    logger.info("✅ Gemini 1차 분석 성공", {prediction: parsedV3.prediction, suggestions: parsedV3.suggestedShots.length});
+    return {success: true, ...parsedV3};
   } catch (error) {
     logger.error(
-      "❌ initialproductanalysis 함수 내부에서 심각한 오류 발생:",
-      error
+        "❌ initialproductanalysis 함수 내부에서 심각한 오류 발생:",
+        error,
     );
     if (error instanceof HttpsError) throw error;
     // Gemini/네트워크 예외 메시지를 그대로 남기되, 상태 코드는 명확히
@@ -859,8 +860,8 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
     // SDK의 rate-limit/availability는 'unavailable'로 매핑
     if (/quota|rate|unavailable|temporarily/i.test(msg)) {
       throw new HttpsError(
-        "unavailable",
-        "AI service temporarily unavailable."
+          "unavailable",
+          "AI service temporarily unavailable.",
       );
     }
     throw new HttpsError("internal", "An internal error occurred.");
@@ -868,11 +869,7 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
 });
 
 
-// [V3 REFACTOR] 'normalizeFinalReportShape' (V2 정규화 헬퍼) 삭제.
-// V3에서는 AI가 엄격하게 새 스키마를 반환하도록 프롬프트로 강제합니다.
-function normalizeFinalReportShape(/* raw */) {
-  throw new Error("normalizeFinalReportShape is removed in V3 refactor; use strict V3 schema instead.");
-}
+// Note: V2 helper 'normalizeFinalReportShape' removed in V3 refactor.
 
 /**
  * [V3 아키텍처] (작업 37)
@@ -969,10 +966,10 @@ The JSON structure MUST be:
 - itemSummary.categoryCheck:
   - Briefly state in ${langName} whether the user-selected category seems correct.
   - Example: "${
-    langName === "Korean"
-      ? "사용자 선택 카테고리와 일치함"
-      : "Category matches the item"
-  }".
+    langName === "Korean" ?
+      "사용자 선택 카테고리와 일치함" :
+      "Category matches the item"
+}".
 
 - condition.grade:
   - Use a simple scale like "A+", "A", "B", "C" based on overall condition.
@@ -1089,7 +1086,7 @@ Do NOT add any explanation, text, or markdown outside of the JSON.
  */
 exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
   const genAI = getGenAI();
-  const { imageUrls, locale } = request.data || {};
+  const {imageUrls} = request.data || {};
 
   if (!imageUrls) {
     throw new HttpsError("invalid-argument", "Required data is missing: imageUrls.");
@@ -1110,48 +1107,49 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
 
     // ... (이미지 처리 로직은 동일)
     const imageParts = await Promise.all(
-      allImageUrls.map(async (url) => {
-        if (!/^https:\/\//i.test(url)) {
-          throw new HttpsError(
-            "invalid-argument",
-            "Only https image URLs are allowed."
-          );
-        }
-        let response;
-        try {
-          response = await fetch(url, { signal: ac.signal });
-        } catch (e) {
-          if (e && e.name === "AbortError")
-            throw new HttpsError("deadline-exceeded", "Image fetch timed out.");
-          throw e;
-        }
-        if (!response.ok) {
-          throw new HttpsError(
-            "not-found",
-            `Failed to fetch image: ${response.status}`
-          );
-        }
-        const len = Number(response.headers.get("content-length") || 0);
-        if (len && len > MAX_IMAGE_BYTES) {
-          throw new HttpsError(
-            "resource-exhausted",
-            "Image too large (>7.5MB)."
-          );
-        }
-        const buffer = Buffer.from(await response.arrayBuffer());
-        if (!len && buffer.length > MAX_IMAGE_BYTES) {
-          throw new HttpsError(
-            "resource-exhausted",
-            "Image too large (>7.5MB)."
-          );
-        }
-        return {
-          inlineData: {
-            mimeType: response.headers.get("content-type") || "image/jpeg",
-            data: buffer.toString("base64"),
-          },
-        };
-      })
+        allImageUrls.map(async (url) => {
+          if (!/^https:\/\//i.test(url)) {
+            throw new HttpsError(
+                "invalid-argument",
+                "Only https image URLs are allowed.",
+            );
+          }
+          let response;
+          try {
+            response = await fetch(url, {signal: ac.signal});
+          } catch (e) {
+            if (e && e.name === "AbortError") {
+              throw new HttpsError("deadline-exceeded", "Image fetch timed out.");
+            }
+            throw e;
+          }
+          if (!response.ok) {
+            throw new HttpsError(
+                "not-found",
+                `Failed to fetch image: ${response.status}`,
+            );
+          }
+          const len = Number(response.headers.get("content-length") || 0);
+          if (len && len > MAX_IMAGE_BYTES) {
+            throw new HttpsError(
+                "resource-exhausted",
+                "Image too large (>7.5MB).",
+            );
+          }
+          const buffer = Buffer.from(await response.arrayBuffer());
+          if (!len && buffer.length > MAX_IMAGE_BYTES) {
+            throw new HttpsError(
+                "resource-exhausted",
+                "Image too large (>7.5MB).",
+            );
+          }
+          return {
+            inlineData: {
+              mimeType: response.headers.get("content-type") || "image/jpeg",
+              data: buffer.toString("base64"),
+            },
+          };
+        }),
     );
     clearTimeout(to);
 
@@ -1160,7 +1158,7 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
         modelPrimary: "gemini-2.5-flash",
         modelFallback: "gemini-2.5-pro",
         contents: [
-          { role: "user", parts: [{ text: v3Prompt }, ...imageParts] },
+          {role: "user", parts: [{text: v3Prompt}, ...imageParts]},
         ],
         safetySettings,
         responseMimeType: "application/json",
@@ -1186,12 +1184,12 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
       report = {
         version: "3.0.0-fallback",
         modelUsed: "gemini-2.5-pro",
-        itemSummary: report.itemSummary || { predictedName: null, categoryCheck: "AI 분석 실패" },
-        condition: report.condition || { grade: "N/A", gradeReason: "AI가 상태 분석에 실패했습니다.", details: [] },
-        priceAssessment: report.priceAssessment || { suggestedMin: null, suggestedMax: null, currency: "IDR", comment: "AI가 가격 분석에 실패했습니다." },
+        itemSummary: report.itemSummary || {predictedName: null, categoryCheck: "AI 분석 실패"},
+        condition: report.condition || {grade: "N/A", gradeReason: "AI가 상태 분석에 실패했습니다.", details: []},
+        priceAssessment: report.priceAssessment || {suggestedMin: null, suggestedMax: null, currency: "IDR", comment: "AI가 가격 분석에 실패했습니다."},
         notesForBuyer: report.notesForBuyer || "AI가 세부 보고서를 생성하는 데 실패했습니다. 판매자에게 직접 문의하세요.",
         verificationSummary: report.verificationSummary || "AI 분석에 실패했습니다. (Invalid V3 Structure)",
-        onSiteVerificationChecklist: report.onSiteVerificationChecklist || { title: "AI 분석 실패", checks: [] },
+        onSiteVerificationChecklist: report.onSiteVerificationChecklist || {title: "AI 분석 실패", checks: []},
       };
     }
 
@@ -1203,15 +1201,15 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
 
     // [추적 코드 2] 성공 직전 최종 로그
     logger.info(
-      "✅ Final report generated successfully. Preparing to return.",
-      { reportObjectKeys: Object.keys(report) }
+        "✅ Final report generated successfully. Preparing to return.",
+        {reportObjectKeys: Object.keys(report)},
     );
 
     // [최종 추적 코드] 객체를 문자열로 변환(직렬화)하는 과정에서 오류가 발생하는지 명시적으로 확인합니다.
     try {
       const reportString = JSON.stringify(report);
       logger.info(
-        `✅ Report object successfully serialized. Length: ${reportString.length}. Returning to client.`
+          `✅ Report object successfully serialized. Length: ${reportString.length}. Returning to client.`,
       );
     } catch (serializationError) {
       // 만약 여기서 에러가 발생하면, Gemini가 보낸 report 객체에 문제가 있는 것입니다.
@@ -1221,17 +1219,17 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
       });
       // 직렬화 실패는 복구 불가능하므로, 명확한 에러를 던집니다.
       throw new HttpsError(
-        "internal",
-        "Failed to process the AI report due to a serialization error."
+          "internal",
+          "Failed to process the AI report due to a serialization error.",
       );
     }
 
     // [최종 복원] 진단용 임시 코드를 삭제하고, 실제 AI 리포트를 반환하는 원래 코드를 활성화합니다.
-    return { success: true, report };
+    return {success: true, report};
   } catch (error) {
     logger.error(
-      "Final report generation failed:",
-      error?.toString?.() || error
+        "Final report generation failed:",
+        error?.toString?.() || error,
     );
     if (error instanceof HttpsError) throw error;
     const msg =
@@ -1239,8 +1237,8 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
       "Unknown";
     if (/quota|rate|unavailable|temporarily/i.test(msg)) {
       throw new HttpsError(
-        "unavailable",
-        "AI final report temporarily unavailable."
+          "unavailable",
+          "AI final report temporarily unavailable.",
       );
     }
     throw new HttpsError("internal", "AI final report generation failed.");
@@ -1251,37 +1249,40 @@ exports.generatefinalreport = onCall(CALL_OPTS, async (request) => {
 async function urlToGenerativePart(url) {
   if (!/^https:\/\//i.test(url)) {
     throw new HttpsError(
-      "invalid-argument",
-      `Invalid URL format: ${url}. Only https is allowed.`
+        "invalid-argument",
+        `Invalid URL format: ${url}. Only https is allowed.`,
     );
   }
   const ac = new AbortController();
   const to = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
   let response;
   try {
-    response = await fetch(url, { signal: ac.signal });
+    response = await fetch(url, {signal: ac.signal});
   } catch (e) {
-    if (e && e.name === "AbortError")
+    if (e && e.name === "AbortError") {
       throw new HttpsError(
-        "deadline-exceeded",
-        `Image fetch timed out for url: ${url}`
+          "deadline-exceeded",
+          `Image fetch timed out for url: ${url}`,
       );
+    }
     throw e;
   } finally {
     clearTimeout(to);
   }
-  if (!response.ok)
+  if (!response.ok) {
     throw new HttpsError(
-      "not-found",
-      `Failed to fetch image from ${url}: ${response.status}`
+        "not-found",
+        `Failed to fetch image from ${url}: ${response.status}`,
     );
+  }
   const contentType = response.headers.get("content-type") || "image/jpeg";
   const buffer = Buffer.from(await response.arrayBuffer());
-  if (buffer.length > MAX_IMAGE_BYTES)
+  if (buffer.length > MAX_IMAGE_BYTES) {
     throw new HttpsError(
-      "resource-exhausted",
-      `Image from ${url} is too large (>7.5MB).`
+        "resource-exhausted",
+        `Image from ${url} is too large (>7.5MB).`,
     );
+  }
   return {
     inlineData: {
       mimeType: contentType,
@@ -1303,21 +1304,21 @@ exports.enhanceProductWithAi = onCall(CALL_OPTS, async (request) => {
 
   if (!request.auth) {
     throw new HttpsError(
-      "unauthenticated",
-      "The function must be called while authenticated."
+        "unauthenticated",
+        "The function must be called while authenticated.",
     );
   }
 
   try {
-    const { productId, evidenceImageUrls } = request.data || {};
+    const {productId, evidenceImageUrls} = request.data || {};
     if (
       !productId ||
       !Array.isArray(evidenceImageUrls) ||
       evidenceImageUrls.length === 0
     ) {
       throw new HttpsError(
-        "invalid-argument",
-        "productId and evidenceImageUrls (array) are required."
+          "invalid-argument",
+          "productId and evidenceImageUrls (array) are required.",
       );
     }
 
@@ -1329,16 +1330,16 @@ exports.enhanceProductWithAi = onCall(CALL_OPTS, async (request) => {
     const productDoc = await productRef.get();
     if (!productDoc.exists) {
       throw new HttpsError(
-        "not-found",
-        `Product with ID ${productId} not found.`
+          "not-found",
+          `Product with ID ${productId} not found.`,
       );
     }
     const productData = productDoc.data();
     const categoryId = productData.categoryId;
     if (!categoryId) {
       throw new HttpsError(
-        "failed-precondition",
-        `Product ${productId} does not have a categoryId.`
+          "failed-precondition",
+          `Product ${productId} does not have a categoryId.`,
       );
     }
 
@@ -1361,10 +1362,10 @@ exports.enhanceProductWithAi = onCall(CALL_OPTS, async (request) => {
 
     // 3. 증거 이미지 준비 및 Gemini API 호출
     const imageParts = await Promise.all(
-      evidenceImageUrls.map((url) => urlToGenerativePart(url))
+        evidenceImageUrls.map((url) => urlToGenerativePart(url)),
     );
 
-    const contents = [{ role: "user", parts: [{ text: v3Prompt }, ...imageParts] }];
+    const contents = [{role: "user", parts: [{text: v3Prompt}, ...imageParts]}];
     const rawResponseText = await genAiCall(genAI, {
       contents,
       safetySettings,
@@ -1378,8 +1379,8 @@ exports.enhanceProductWithAi = onCall(CALL_OPTS, async (request) => {
     logAiDiagnostics("enhanceProductWithAi", rawResponseText, aiReport);
     if (!aiReport) {
       throw new HttpsError(
-        "data-loss",
-        "AI returned invalid JSON for the enhancement report."
+          "data-loss",
+          "AI returned invalid JSON for the enhancement report.",
       );
     }
 
@@ -1411,7 +1412,7 @@ exports.enhanceProductWithAi = onCall(CALL_OPTS, async (request) => {
     batch.update(productRef, {
       lastAiCaseId: caseId,
       lastAiVerdict: aiCaseData.verdict,
-      aiVerificationStatus: aiCaseData.verdict === 'safe' ? 'verified' : 'suspicious',
+      aiVerificationStatus: aiCaseData.verdict === "safe" ? "verified" : "suspicious",
       aiSummaryShort: aiReport.itemSummary?.title || "AI 검수 완료",
       aiReport: aiReport, // [Legacy 호환용] 당분간 유지
       updatedAt: now,
@@ -1421,16 +1422,16 @@ exports.enhanceProductWithAi = onCall(CALL_OPTS, async (request) => {
 
     logger.info(`✅ [AI Case Created] ${caseId} for Product ${productId}`);
 
-    return { success: true, report: aiReport, caseId: caseId };
+    return {success: true, report: aiReport, caseId: caseId};
   } catch (error) {
     logger.error(
-      "❌ [V2] enhanceProductWithAi 함수 내부에서 오류 발생:",
-      error
+        "❌ [V2] enhanceProductWithAi 함수 내부에서 오류 발생:",
+        error,
     );
     if (error instanceof HttpsError) throw error;
     throw new HttpsError(
-      "internal",
-      "An internal error occurred during AI enhancement."
+        "internal",
+        "An internal error occurred during AI enhancement.",
     );
   }
 });
@@ -1471,7 +1472,7 @@ const safetySettings = [
  * @return {Set<string>} - 구독할 토픽 이름의 Set
  */
 function buildTopicsFromPrefs(prefs) {
-  const { scope, tags, regionKeys } = prefs || {};
+  const {scope, tags, regionKeys} = prefs || {};
 
   // scope/regionKeys 가 유효하지 않으면 토픽 생성 불가
   if (!scope || !regionKeys || !regionKeys[scope]) {
@@ -1487,8 +1488,8 @@ function buildTopicsFromPrefs(prefs) {
   const regionKey = String(regionKeys[scope] || "");
   // 2) 토픽 베이스 문자열 생성 (공백/특수문자 정리)
   const baseTopic = `news.${scope}.${regionKey
-    .replace(/[| ]/g, "-")
-    .replace(/[^a-zA-Z0-9-]/g, "")}`;
+      .replace(/[| ]/g, "-")
+      .replace(/[^a-zA-Z0-9-]/g, "")}`;
 
   // 3) 태그별 최종 토픽 만들기
   const topics = new Set();
@@ -1502,109 +1503,109 @@ function buildTopicsFromPrefs(prefs) {
  * users/{uid} 문서의 pushPrefs 변경 시 FCM 토픽 구독을 동기화합니다.
  */
 exports.onUserPushPrefsWrite = onDocumentUpdated(
-  { document: "users/{uid}", region: "asia-southeast2" },
-  async (event) => {
-    const change = event.data;
-    if (!change) {
-      logger.log("No data change found.");
-      return;
-    }
+    {document: "users/{uid}", region: "asia-southeast2"},
+    async (event) => {
+      const change = event.data;
+      if (!change) {
+        logger.log("No data change found.");
+        return;
+      }
 
-    const beforeData = change.before.data() || {};
-    const afterData = change.after.data() || {};
+      const beforeData = change.before.data() || {};
+      const afterData = change.after.data() || {};
 
-    // pushPrefs 미존재 시 종료
-    if (!afterData.pushPrefs) {
-      logger.log("No pushPrefs found in afterData.");
-      return;
-    }
-    // 변경 없음 시 종료
-    if (
-      JSON.stringify(beforeData.pushPrefs || {}) ===
+      // pushPrefs 미존재 시 종료
+      if (!afterData.pushPrefs) {
+        logger.log("No pushPrefs found in afterData.");
+        return;
+      }
+      // 변경 없음 시 종료
+      if (
+        JSON.stringify(beforeData.pushPrefs || {}) ===
       JSON.stringify(afterData.pushPrefs || {})
-    ) {
-      logger.log("pushPrefs did not change.");
-      return;
-    }
-
-    logger.log(`Processing pushPrefs for user ${event.params.uid}`);
-
-    const beforePrefs = beforeData.pushPrefs || {};
-    const afterPrefs = afterData.pushPrefs || {};
-
-    const oldTopics = new Set(beforePrefs.subscribedTopics || []);
-    const newTopics = buildTopicsFromPrefs(afterPrefs);
-
-    const oldTokens = new Set(beforePrefs.deviceTokens || []);
-    const newTokens = new Set(afterPrefs.deviceTokens || []);
-
-    const messaging = getMessaging();
-    const promises = [];
-
-    // 1) 제거된 토큰을 이전 토픽들에서 구독 해제
-    const tokensRemoved = Array.from(oldTokens).filter(
-      (t) => !newTokens.has(t)
-    );
-    if (tokensRemoved.length > 0 && oldTopics.size > 0) {
-      for (const topic of oldTopics) {
-        promises.push(messaging.unsubscribeFromTopic(tokensRemoved, topic));
+      ) {
+        logger.log("pushPrefs did not change.");
+        return;
       }
-    }
 
-    // 2) 현재 토큰들을 제거된 토픽에서 구독 해제
-    const topicsRemoved = Array.from(oldTopics).filter(
-      (t) => !newTopics.has(t)
-    );
-    const currentTokens = Array.from(newTokens);
-    if (currentTokens.length > 0 && topicsRemoved.length > 0) {
-      for (const topic of topicsRemoved) {
-        promises.push(messaging.unsubscribeFromTopic(currentTokens, topic));
+      logger.log(`Processing pushPrefs for user ${event.params.uid}`);
+
+      const beforePrefs = beforeData.pushPrefs || {};
+      const afterPrefs = afterData.pushPrefs || {};
+
+      const oldTopics = new Set(beforePrefs.subscribedTopics || []);
+      const newTopics = buildTopicsFromPrefs(afterPrefs);
+
+      const oldTokens = new Set(beforePrefs.deviceTokens || []);
+      const newTokens = new Set(afterPrefs.deviceTokens || []);
+
+      const messaging = getMessaging();
+      const promises = [];
+
+      // 1) 제거된 토큰을 이전 토픽들에서 구독 해제
+      const tokensRemoved = Array.from(oldTokens).filter(
+          (t) => !newTokens.has(t),
+      );
+      if (tokensRemoved.length > 0 && oldTopics.size > 0) {
+        for (const topic of oldTopics) {
+          promises.push(messaging.unsubscribeFromTopic(tokensRemoved, topic));
+        }
       }
-    }
 
-    // 3) 추가된 토큰들을 새 토픽에 구독
-    const tokensAdded = Array.from(newTokens).filter(
-      (t) => !oldTokens.has(t)
-    );
-    if (tokensAdded.length > 0 && newTopics.size > 0) {
-      for (const topic of newTopics) {
-        promises.push(messaging.subscribeToTopic(tokensAdded, topic));
+      // 2) 현재 토큰들을 제거된 토픽에서 구독 해제
+      const topicsRemoved = Array.from(oldTopics).filter(
+          (t) => !newTopics.has(t),
+      );
+      const currentTokens = Array.from(newTokens);
+      if (currentTokens.length > 0 && topicsRemoved.length > 0) {
+        for (const topic of topicsRemoved) {
+          promises.push(messaging.unsubscribeFromTopic(currentTokens, topic));
+        }
       }
-    }
 
-    // 4) 현재 토큰들을 추가된 토픽에 구독
-    const topicsAdded = Array.from(newTopics).filter(
-      (t) => !oldTopics.has(t)
-    );
-    if (currentTokens.length > 0 && topicsAdded.length > 0) {
-      for (const topic of topicsAdded) {
-        promises.push(messaging.subscribeToTopic(currentTokens, topic));
+      // 3) 추가된 토큰들을 새 토픽에 구독
+      const tokensAdded = Array.from(newTokens).filter(
+          (t) => !oldTokens.has(t),
+      );
+      if (tokensAdded.length > 0 && newTopics.size > 0) {
+        for (const topic of newTopics) {
+          promises.push(messaging.subscribeToTopic(tokensAdded, topic));
+        }
       }
-    }
 
-    try {
-      await Promise.all(promises);
-      logger.log("FCM topic subscriptions updated successfully.");
-    } catch (error) {
-      logger.error("Error updating FCM subscriptions:", error);
-    }
+      // 4) 현재 토큰들을 추가된 토픽에 구독
+      const topicsAdded = Array.from(newTopics).filter(
+          (t) => !oldTopics.has(t),
+      );
+      if (currentTokens.length > 0 && topicsAdded.length > 0) {
+        for (const topic of topicsAdded) {
+          promises.push(messaging.subscribeToTopic(currentTokens, topic));
+        }
+      }
 
-    // 5) Firestore에 최종 구독 토픽 목록 반영
-    const newTopicsArray = Array.from(newTopics);
-    if (
-      JSON.stringify(beforePrefs.subscribedTopics || []) !==
-      JSON.stringify(newTopicsArray)
-    ) {
       try {
-        await change.after.ref.update({
-          "pushPrefs.subscribedTopics": newTopicsArray,
-        });
-        logger.log("Updated subscribedTopics in Firestore.");
+        await Promise.all(promises);
+        logger.log("FCM topic subscriptions updated successfully.");
       } catch (error) {
-        logger.error("Error updating subscribedTopics in Firestore:", error);
+        logger.error("Error updating FCM subscriptions:", error);
       }
-    }
-  }
+
+      // 5) Firestore에 최종 구독 토픽 목록 반영
+      const newTopicsArray = Array.from(newTopics);
+      if (
+        JSON.stringify(beforePrefs.subscribedTopics || []) !==
+      JSON.stringify(newTopicsArray)
+      ) {
+        try {
+          await change.after.ref.update({
+            "pushPrefs.subscribedTopics": newTopicsArray,
+          });
+          logger.log("Updated subscribedTopics in Firestore.");
+        } catch (error) {
+          logger.error("Error updating subscribedTopics in Firestore:", error);
+        }
+      }
+    },
 );
 
 // ----------------------------------------------------------------------
@@ -1639,77 +1640,77 @@ function getKelKey(adminParts) {
  * 기획안: "onPostCreate ... /boards/{kel_key} upsert. metrics.last30dPosts++"
  */
 exports.onLocalNewsPostCreate = onDocumentCreated(
-  { document: "posts/{postId}", region: "asia-southeast2" },
-  async (event) => {
-    const db = getFirestore();
+    {document: "posts/{postId}", region: "asia-southeast2"},
+    async (event) => {
+      const db = getFirestore();
 
-    const postData = event.data.data();
+      const postData = event.data.data();
 
-    // 1. local_news 게시글인지 확인 (tags 필드가 있는지로 간단히 확인)
-    if (!postData?.tags || !Array.isArray(postData.tags) || postData.tags.length === 0) {
-      logger.log("Post has no tags, skipping board metric update.");
-      return;
-    }
+      // 1. local_news 게시글인지 확인 (tags 필드가 있는지로 간단히 확인)
+      if (!postData?.tags || !Array.isArray(postData.tags) || postData.tags.length === 0) {
+        logger.log("Post has no tags, skipping board metric update.");
+        return;
+      }
 
-    // 2. Kelurahan 키 추출
-    const kelKey = getKelKey(postData.adminParts);
-    if (!kelKey) {
-      logger.warn(`Post ${event.params.postId} has invalid adminParts.`);
-      return;
-    }
+      // 2. Kelurahan 키 추출
+      const kelKey = getKelKey(postData.adminParts);
+      if (!kelKey) {
+        logger.warn(`Post ${event.params.postId} has invalid adminParts.`);
+        return;
+      }
 
-    const boardRef = db.collection("boards").doc(kelKey);
+      const boardRef = db.collection("boards").doc(kelKey);
 
-    // ✅ 트랜잭션으로 안전하게 카운트 증가 및 임계값 판단
-    try {
-      await db.runTransaction(async (transaction) => {
-        const boardDoc = await transaction.get(boardRef);
+      // ✅ 트랜잭션으로 안전하게 카운트 증가 및 임계값 판단
+      try {
+        await db.runTransaction(async (transaction) => {
+          const boardDoc = await transaction.get(boardRef);
 
-        // ✅ 런칭 초기 임계값 10으로 설정
-        const ACTIVATION_THRESHOLD = 10;
+          // ✅ 런칭 초기 임계값 10으로 설정
+          const ACTIVATION_THRESHOLD = 10;
 
-        let newPostCount = 1;
-        let currentFeatures = { hasGroupChat: false };
+          let newPostCount = 1;
+          let currentFeatures = {hasGroupChat: false};
 
-        if (boardDoc.exists) {
-          const data = boardDoc.data() || {};
-          const metrics = data.metrics || {};
-          const features = data.features || {};
-          // NOTE: 테스트 단계에서는 30일 기준 없이 단순 누적 카운트만 사용합니다. (추후 롤링 카운트가 필요하면 스케줄러로 전환)
-          newPostCount = (metrics.last30dPosts || 0) + 1;
-          currentFeatures = features;
-        }
+          if (boardDoc.exists) {
+            const data = boardDoc.data() || {};
+            const metrics = data.metrics || {};
+            const features = data.features || {};
+            // NOTE: 테스트 단계에서는 30일 기준 없이 단순 누적 카운트만 사용합니다. (추후 롤링 카운트가 필요하면 스케줄러로 전환)
+            newPostCount = (metrics.last30dPosts || 0) + 1;
+            currentFeatures = features;
+          }
 
-        const shouldActivate = newPostCount >= ACTIVATION_THRESHOLD;
+          const shouldActivate = newPostCount >= ACTIVATION_THRESHOLD;
 
-        transaction.set(
-          boardRef,
-          {
-            key: kelKey,
-            metrics: {
-              last30dPosts: newPostCount,
-            },
-            features: {
-              ...currentFeatures,
-              hasGroupChat: shouldActivate, // ✅ 10건 도달 시 true
-            },
-            label: {
-              en: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
-              id: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
-              ko: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
-            },
-            createdAt: FieldValue.serverTimestamp(), // (Upsert) 생성 시에만 적용
-            updatedAt: FieldValue.serverTimestamp(), // 항상 업데이트
-          },
-          { merge: true }
-        );
-      });
+          transaction.set(
+              boardRef,
+              {
+                key: kelKey,
+                metrics: {
+                  last30dPosts: newPostCount,
+                },
+                features: {
+                  ...currentFeatures,
+                  hasGroupChat: shouldActivate, // ✅ 10건 도달 시 true
+                },
+                label: {
+                  en: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
+                  id: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
+                  ko: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
+                },
+                createdAt: FieldValue.serverTimestamp(), // (Upsert) 생성 시에만 적용
+                updatedAt: FieldValue.serverTimestamp(), // 항상 업데이트
+              },
+              {merge: true},
+          );
+        });
 
-      logger.log(`Updated board metrics for kel_key: ${kelKey}.`);
-    } catch (error) {
-      logger.error(`Failed to update board metrics for ${kelKey}:`, error);
-    }
-  });
+        logger.log(`Updated board metrics for kel_key: ${kelKey}.`);
+      } catch (error) {
+        logger.error(`Failed to update board metrics for ${kelKey}:`, error);
+      }
+    });
 
 // ============================================================================
 // [v2.1] 신규: '동네 친구' 신규 채팅 한도 확인 및 시작
@@ -1819,15 +1820,15 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
     throw new HttpsError("unauthenticated", "인증이 필요합니다.");
   }
 
-  const { productId, newImageUrls, locale } = request.data || {};
+  const {productId, newImageUrls, locale} = request.data || {};
   if (
     !productId ||
     !Array.isArray(newImageUrls) ||
     newImageUrls.length === 0
   ) {
     throw new HttpsError(
-      "invalid-argument",
-      "productId 및 newImageUrls (배열)가 필요합니다."
+        "invalid-argument",
+        "productId 및 newImageUrls (배열)가 필요합니다.",
     );
   }
 
@@ -1842,30 +1843,30 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
       throw new HttpsError("not-found", `상품(ID: ${productId})을 찾을 수 없습니다.`);
     }
 
-      const productData = productDoc.data();
-      const originalReport = productData.aiReport;
-      const originalImageUrls = productData.imageUrls;
+    const productData = productDoc.data();
+    const originalReport = productData.aiReport;
+    const originalImageUrls = productData.imageUrls;
 
-      // [Debug] 기존 이미지 확인
-      const originalImages = Array.isArray(originalImageUrls) ? originalImageUrls : [];
-      if (originalImages.length === 0) {
-        logger.warn(`⚠️ Product ${productId} has no original images.`);
-      }
+    // [Debug] 기존 이미지 확인
+    const originalImages = Array.isArray(originalImageUrls) ? originalImageUrls : [];
+    if (originalImages.length === 0) {
+      logger.warn(`⚠️ Product ${productId} has no original images.`);
+    }
 
-      // [Task 115 HOTFIX] Copilot이 발견한 NPE(Null) 오류 수정
-      // 'originalReport'가 null인지 먼저 확인해야 합니다.
-      if (!originalReport) {
-        throw new HttpsError(
+    // [Task 115 HOTFIX] Copilot이 발견한 NPE(Null) 오류 수정
+    // 'originalReport'가 null인지 먼저 확인해야 합니다.
+    if (!originalReport) {
+      throw new HttpsError(
           "failed-precondition",
-          "AI 검증이 완료된 상품이 아닙니다." // "AI verified product is not."
-        );
-      }
+          "AI 검증이 완료된 상품이 아닙니다.", // "AI verified product is not."
+      );
+    }
 
-      // [V3 TAKEOVER] Extract the V3 checklist to use in the prompt
-      const onSiteChecklist = originalReport.onSiteVerificationChecklist;
-      if (!onSiteChecklist || !onSiteChecklist.checks) {
-        throw new HttpsError("failed-precondition", "AI Report is missing 'onSiteVerificationChecklist'.");
-      }
+    // [V3 TAKEOVER] Extract the V3 checklist to use in the prompt
+    const onSiteChecklist = originalReport.onSiteVerificationChecklist;
+    if (!onSiteChecklist || !onSiteChecklist.checks) {
+      throw new HttpsError("failed-precondition", "AI Report is missing 'onSiteVerificationChecklist'.");
+    }
 
     // 2. 비교 프롬프트 생성
     const lc = (typeof locale === "string" && locale) || "id";
@@ -1937,19 +1938,19 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
     // 3. 현장 사진(newImageUrls) 및 원본 사진(originalImageUrls)을 GenerativePart로 변환
     // [V3.1 Full Inspection] 제한 해제: 현장 사진 최대 20장까지 허용
     const newParts = await Promise.all(
-      newImageUrls.slice(0, 20).map((url) => urlToGenerativePart(url))
+        newImageUrls.slice(0, 20).map((url) => urlToGenerativePart(url)),
     );
     // [V3.1 Full Inspection] 원본 사진은 가능한 모든 이미지를 참조하여 비교에 사용
     const originalParts = await Promise.all(
-      (Array.isArray(originalImageUrls) ? originalImageUrls : []).map((url) => urlToGenerativePart(url))
+        (Array.isArray(originalImageUrls) ? originalImageUrls : []).map((url) => urlToGenerativePart(url)),
     );
 
     const contents = [
-      { role: "user", parts: [
-        { text: verificationPrompt },
-        { text: "--- [PACKET A: ORIGINAL ITEM] (Reference) ---" },
+      {role: "user", parts: [
+        {text: verificationPrompt},
+        {text: "--- [PACKET A: ORIGINAL ITEM] (Reference) ---"},
         ...originalParts,
-        { text: "--- [PACKET B: ON-SITE ITEM] (To Verify) ---" },
+        {text: "--- [PACKET B: ON-SITE ITEM] (To Verify) ---"},
         ...newParts,
       ]},
     ];
@@ -1974,8 +1975,8 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
     //   클라이언트가 "AI 실패 → 재시도" UI를 노출할 수 있게 합니다.
     if (!verificationResult || verificationResult.match === undefined) {
       logger.error(
-        "❌ CRITICAL: AI verifyProductOnSite response is missing 'match' key. Returning fallback.",
-        { keys: Object.keys(verificationResult || {}) }
+          "❌ CRITICAL: AI verifyProductOnSite response is missing 'match' key. Returning fallback.",
+          {keys: Object.keys(verificationResult || {})},
       );
 
       /** [V3 3-Way Logic]
@@ -1988,7 +1989,7 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
         reason: `AI 검증에 실패했습니다. 네트워크를 확인하고 다시 시도해 주세요. (${langName})`,
       };
 
-      return { success: true, verification: fallbackResult };
+      return {success: true, verification: fallbackResult};
     }
 
     // ---------------------------------------------------------
@@ -1999,7 +2000,7 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
     const caseId = caseRef.id;
     const now = FieldValue.serverTimestamp();
 
-      const aiCaseData = {
+    const aiCaseData = {
       caseId: caseId,
       productId: productId,
       // [Fix] 데이터 불일치 해결: products의 'userId' 값을 ai_cases의 'sellerId'로 매핑
@@ -2020,14 +2021,13 @@ exports.verifyProductOnSite = onCall(CALL_OPTS, async (request) => {
     batch.update(productRef, {
       lastAiCaseId: caseId,
       lastAiVerdict: aiCaseData.verdict,
-      aiVerificationStatus: isMatch ? 'takeover_verified' : 'suspicious',
+      aiVerificationStatus: isMatch ? "takeover_verified" : "suspicious",
     });
 
     await batch.commit();
 
     logger.info(`✅ [AI 인수 2단계] 검증 완료: ${productId}`, verificationResult);
-    return { success: true, verification: verificationResult, caseId: caseId };
-
+    return {success: true, verification: verificationResult, caseId: caseId};
   } catch (error) {
     logger.error("❌ AI Takeover Failed", error);
     // 전달하는 메시지는 안전하게 추출

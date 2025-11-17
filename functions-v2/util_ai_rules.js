@@ -6,88 +6,88 @@ function SHOT_CATALOG() {
   return {
     // -------- 공통(폴백) --------
     universal: {
-      front_full: { nameKo:'전면 전체샷', descKo:'제품 전체가 보이도록 전면에서 촬영', nameId:'Foto tampak depan', descId:'Ambil foto seluruh barang dari depan', nameEn:'Full Front Shot', descEn:'Front view of the entire item' },
-      back_full:  { nameKo:'후면 전체샷', descKo:'제품 전체가 보이도록 후면에서 촬영', nameId:'Foto tampak belakang', descId:'Ambil foto seluruh barang dari belakang', nameEn:'Full Back Shot', descEn:'Back view of the entire item' },
-      brand_model_tag: { nameKo:'브랜드/모델 태그', descKo:'라벨/각인/스티커 등 식별 태그 근접', nameId:'Tag merek/model', descId:'Label/ukiran/stiker identitas', nameEn:'Brand/Model Tag', descEn:'Close-up of label/engraving/sticker' },
-      serial_or_size_label: { nameKo:'시리얼/사이즈 라벨', descKo:'전자: 시리얼/모델 | 의류·신발: 사이즈 라벨', nameId:'Label serial/ukuran', descId:'Elektronik: serial/model | Pakaian/Sepatu: label ukuran', nameEn:'Serial/Size Label', descEn:'Serial/Model or size label' },
-      defect_closeups: { nameKo:'하자 부위 근접샷', descKo:'스크래치·찍힘·얼룩 등 하자 근접', nameId:'Foto dekat cacat', descId:'Goresan/penyok/noda', nameEn:'Defect Close-ups', descEn:'Close-up of scratches/dents/stains' },
-      included_items_flatlay: { nameKo:'구성품 일괄샷', descKo:'박스·설명서·충전기 등 구성품 한 장 촬영', nameId:'Semua kelengkapan', descId:'Semua kelengkapan (box/manual/charger)', nameEn:'Included Items Flatlay', descEn:'All included items in one photo' },
-      power_on_or_fit: { nameKo:'동작/착용샷', descKo:'전자: 전원 ON 화면 | 의류·신발: 착용/핏', nameId:'Bukti menyala/fit', descId:'Elektronik: layar menyala | Pakaian/Sepatu: fit', nameEn:'Power-On / Fit', descEn:'Screen on / Wearing/fit' },
-      measurement_reference: { nameKo:'치수 기준샷', descKo:'자/줄자/A4 등 기준물과 함께', nameId:'Referensi ukuran', descId:'Dengan penggaris/kertas A4', nameEn:'Measurement Reference', descEn:'With ruler or A4 paper' },
+      front_full: {nameKo: "전면 전체샷", descKo: "제품 전체가 보이도록 전면에서 촬영", nameId: "Foto tampak depan", descId: "Ambil foto seluruh barang dari depan", nameEn: "Full Front Shot", descEn: "Front view of the entire item"},
+      back_full: {nameKo: "후면 전체샷", descKo: "제품 전체가 보이도록 후면에서 촬영", nameId: "Foto tampak belakang", descId: "Ambil foto seluruh barang dari belakang", nameEn: "Full Back Shot", descEn: "Back view of the entire item"},
+      brand_model_tag: {nameKo: "브랜드/모델 태그", descKo: "라벨/각인/스티커 등 식별 태그 근접", nameId: "Tag merek/model", descId: "Label/ukiran/stiker identitas", nameEn: "Brand/Model Tag", descEn: "Close-up of label/engraving/sticker"},
+      serial_or_size_label: {nameKo: "시리얼/사이즈 라벨", descKo: "전자: 시리얼/모델 | 의류·신발: 사이즈 라벨", nameId: "Label serial/ukuran", descId: "Elektronik: serial/model | Pakaian/Sepatu: label ukuran", nameEn: "Serial/Size Label", descEn: "Serial/Model or size label"},
+      defect_closeups: {nameKo: "하자 부위 근접샷", descKo: "스크래치·찍힘·얼룩 등 하자 근접", nameId: "Foto dekat cacat", descId: "Goresan/penyok/noda", nameEn: "Defect Close-ups", descEn: "Close-up of scratches/dents/stains"},
+      included_items_flatlay: {nameKo: "구성품 일괄샷", descKo: "박스·설명서·충전기 등 구성품 한 장 촬영", nameId: "Semua kelengkapan", descId: "Semua kelengkapan (box/manual/charger)", nameEn: "Included Items Flatlay", descEn: "All included items in one photo"},
+      power_on_or_fit: {nameKo: "동작/착용샷", descKo: "전자: 전원 ON 화면 | 의류·신발: 착용/핏", nameId: "Bukti menyala/fit", descId: "Elektronik: layar menyala | Pakaian/Sepatu: fit", nameEn: "Power-On / Fit", descEn: "Screen on / Wearing/fit"},
+      measurement_reference: {nameKo: "치수 기준샷", descKo: "자/줄자/A4 등 기준물과 함께", nameId: "Referensi ukuran", descId: "Dengan penggaris/kertas A4", nameEn: "Measurement Reference", descEn: "With ruler or A4 paper"},
     },
 
     // -------- 전자 공통 --------
     electronics: {
-      power_on_screen: { nameKo:'전원 ON 화면', descKo:'전원이 켜진 상태의 화면', nameId:'Layar menyala', descId:'Perangkat saat menyala', nameEn:'Power-On Screen', descEn:'Device powered on' },
-      ports_closeup:   { nameKo:'포트/단자 근접', descKo:'충전/입출력 단자 마모·이물', nameId:'Port & konektor', descId:'Kondisi port/connector', nameEn:'Ports Close-up', descEn:'I/O ports wear/foreign objects' },
+      power_on_screen: {nameKo: "전원 ON 화면", descKo: "전원이 켜진 상태의 화면", nameId: "Layar menyala", descId: "Perangkat saat menyala", nameEn: "Power-On Screen", descEn: "Device powered on"},
+      ports_closeup: {nameKo: "포트/단자 근접", descKo: "충전/입출력 단자 마모·이물", nameId: "Port & konektor", descId: "Kondisi port/connector", nameEn: "Ports Close-up", descEn: "I/O ports wear/foreign objects"},
     },
 
     // -------- 스마트폰/태블릿 --------
     smartphone: {
-      imei_shot:  { nameKo:'IMEI 화면', descKo:'*#06# 또는 설정의 IMEI', nameId:'IMEI', descId:'Tangkapan layar IMEI', nameEn:'IMEI Screen', descEn:'Dialer *#06# or settings' },
-      battery_shot:{ nameKo:'배터리 성능', descKo:'배터리 건강도 화면', nameId:'Kesehatan baterai', descId:'Layar kesehatan baterai', nameEn:'Battery Health', descEn:'Battery health screen' },
-      info_shot:   { nameKo:'기기 정보', descKo:'모델/용량 보이는 화면', nameId:'Info perangkat', descId:'Model/kapasitas', nameEn:'Device Info', descEn:'Model/capacity screen' },
+      imei_shot: {nameKo: "IMEI 화면", descKo: "*#06# 또는 설정의 IMEI", nameId: "IMEI", descId: "Tangkapan layar IMEI", nameEn: "IMEI Screen", descEn: "Dialer *#06# or settings"},
+      battery_shot: {nameKo: "배터리 성능", descKo: "배터리 건강도 화면", nameId: "Kesehatan baterai", descId: "Layar kesehatan baterai", nameEn: "Battery Health", descEn: "Battery health screen"},
+      info_shot: {nameKo: "기기 정보", descKo: "모델/용량 보이는 화면", nameId: "Info perangkat", descId: "Model/kapasitas", nameEn: "Device Info", descEn: "Model/capacity screen"},
     },
 
     // -------- 의류 --------
     apparel: {
-      neckline_stitch: { nameKo:'넥라인/스티치', descKo:'넥/스티치 풀림·변형', nameId:'Leher & jahitan', descId:'Leher & jahitan', nameEn:'Neckline/Stitch', descEn:'Neckline & stitching' },
-      care_label:      { nameKo:'케어라벨', descKo:'세탁/소재 라벨 근접', nameId:'Label perawatan', descId:'Label perawatan/bahan', nameEn:'Care Label', descEn:'Care/material label' },
-      fabric_closeup:  { nameKo:'원단 접사', descKo:'필링/올트임 등', nameId:'Kain (dekat)', descId:'Bulu/pull out', nameEn:'Fabric Close-up', descEn:'Fabric/pilling' },
+      neckline_stitch: {nameKo: "넥라인/스티치", descKo: "넥/스티치 풀림·변형", nameId: "Leher & jahitan", descId: "Leher & jahitan", nameEn: "Neckline/Stitch", descEn: "Neckline & stitching"},
+      care_label: {nameKo: "케어라벨", descKo: "세탁/소재 라벨 근접", nameId: "Label perawatan", descId: "Label perawatan/bahan", nameEn: "Care Label", descEn: "Care/material label"},
+      fabric_closeup: {nameKo: "원단 접사", descKo: "필링/올트임 등", nameId: "Kain (dekat)", descId: "Bulu/pull out", nameEn: "Fabric Close-up", descEn: "Fabric/pilling"},
     },
 
     // -------- 신발 --------
     footwear: {
-      side: { nameKo:'측면 전체샷', descKo:'신발 옆모습', nameId:'Tampak samping', descId:'Sisi sepatu', nameEn:'Full Side', descEn:'Side view' },
-      sole: { nameKo:'밑창 샷', descKo:'밑창 마모', nameId:'Sol', descId:'Keausan sol', nameEn:'Sole', descEn:'Sole wear' },
-      tag:  { nameKo:'내부 탭/사이즈', descKo:'사이즈/생산태그', nameId:'Tag ukuran', descId:'Tag ukuran/produksi', nameEn:'Inner Tag/Size', descEn:'Size/production tag' },
+      side: {nameKo: "측면 전체샷", descKo: "신발 옆모습", nameId: "Tampak samping", descId: "Sisi sepatu", nameEn: "Full Side", descEn: "Side view"},
+      sole: {nameKo: "밑창 샷", descKo: "밑창 마모", nameId: "Sol", descId: "Keausan sol", nameEn: "Sole", descEn: "Sole wear"},
+      tag: {nameKo: "내부 탭/사이즈", descKo: "사이즈/생산태그", nameId: "Tag ukuran", descId: "Tag ukuran/produksi", nameEn: "Inner Tag/Size", descEn: "Size/production tag"},
     },
 
     // -------- 가방/럭셔리 --------
     bag: {
-      logo:{ nameKo:'브랜드 로고', descKo:'로고 근접', nameId:'Logo merek', descId:'Logo merek', nameEn:'Brand Logo', descEn:'Brand logo' },
-      interior:{ nameKo:'가방 내부', descKo:'내부 오염/파손', nameId:'Bagian dalam', descId:'Bagian dalam', nameEn:'Interior', descEn:'Interior condition' },
-      corners:{ nameKo:'모서리 마모', descKo:'하단 모서리 마모', nameId:'Sudut aus', descId:'Sudut bawah aus', nameEn:'Corner Wear', descEn:'Bottom corner wear' },
-      date_code:{ nameKo:'시리얼/데이트코드', descKo:'시리얼/히든태그', nameId:'Kode tanggal/serial', descId:'Kode/hidden tag', nameEn:'Serial/Date Code', descEn:'Serial/date code' },
-      hardware_stamp:{ nameKo:'하드웨어 각인', descKo:'지퍼/버클 각인', nameId:'Stempel hardware', descId:'Ukiran hardware', nameEn:'Hardware Stamp', descEn:'Hardware engravings' },
+      logo: {nameKo: "브랜드 로고", descKo: "로고 근접", nameId: "Logo merek", descId: "Logo merek", nameEn: "Brand Logo", descEn: "Brand logo"},
+      interior: {nameKo: "가방 내부", descKo: "내부 오염/파손", nameId: "Bagian dalam", descId: "Bagian dalam", nameEn: "Interior", descEn: "Interior condition"},
+      corners: {nameKo: "모서리 마모", descKo: "하단 모서리 마모", nameId: "Sudut aus", descId: "Sudut bawah aus", nameEn: "Corner Wear", descEn: "Bottom corner wear"},
+      date_code: {nameKo: "시리얼/데이트코드", descKo: "시리얼/히든태그", nameId: "Kode tanggal/serial", descId: "Kode/hidden tag", nameEn: "Serial/Date Code", descEn: "Serial/date code"},
+      hardware_stamp: {nameKo: "하드웨어 각인", descKo: "지퍼/버클 각인", nameId: "Stempel hardware", descId: "Ukiran hardware", nameEn: "Hardware Stamp", descEn: "Hardware engravings"},
     },
 
     // -------- 카메라/드론 --------
     camera: {
-      lens_closeup: { nameKo:'렌즈 근접', descKo:'스크래치/곰팡이', nameId:'Lensa (dekat)', descId:'Gores/jamur', nameEn:'Lens Close-up', descEn:'Lens scratches/fungus' },
-      shutter_info: { nameKo:'셔터/로그', descKo:'셔터카운트/비행로그', nameId:'Info shutter/log', descId:'Shutter/log', nameEn:'Shutter/Log', descEn:'Shutter count/flight log' },
-      sensor_dust:  { nameKo:'센서/먼지', descKo:'센서 먼지/스팟', nameId:'Debu sensor', descId:'Debu/spot', nameEn:'Sensor Dust', descEn:'Sensor dust/spot' },
+      lens_closeup: {nameKo: "렌즈 근접", descKo: "스크래치/곰팡이", nameId: "Lensa (dekat)", descId: "Gores/jamur", nameEn: "Lens Close-up", descEn: "Lens scratches/fungus"},
+      shutter_info: {nameKo: "셔터/로그", descKo: "셔터카운트/비행로그", nameId: "Info shutter/log", descId: "Shutter/log", nameEn: "Shutter/Log", descEn: "Shutter count/flight log"},
+      sensor_dust: {nameKo: "센서/먼지", descKo: "센서 먼지/스팟", nameId: "Debu sensor", descId: "Debu/spot", nameEn: "Sensor Dust", descEn: "Sensor dust/spot"},
     },
 
     // -------- 자전거 --------
     bicycle: {
-      frame_damage:   { nameKo:'프레임 손상', descKo:'크랙/찍힘 근접', nameId:'Kerusakan rangka', descId:'Retak/penyok', nameEn:'Frame Damage', descEn:'Frame cracks/dents' },
-      drivetrain_wear:{ nameKo:'구동계 마모', descKo:'체인/스프라켓 마모', nameId:'Keausan drivetrain', descId:'Rantai/sproket', nameEn:'Drivetrain Wear', descEn:'Chain/sprocket wear' },
-      bb_serial:      { nameKo:'시리얼(BB)', descKo:'BB 하단 시리얼', nameId:'Serial BB', descId:'Serial di bawah BB', nameEn:'BB Serial', descEn:'Bottom bracket serial' },
+      frame_damage: {nameKo: "프레임 손상", descKo: "크랙/찍힘 근접", nameId: "Kerusakan rangka", descId: "Retak/penyok", nameEn: "Frame Damage", descEn: "Frame cracks/dents"},
+      drivetrain_wear: {nameKo: "구동계 마모", descKo: "체인/스프라켓 마모", nameId: "Keausan drivetrain", descId: "Rantai/sproket", nameEn: "Drivetrain Wear", descEn: "Chain/sprocket wear"},
+      bb_serial: {nameKo: "시리얼(BB)", descKo: "BB 하단 시리얼", nameId: "Serial BB", descId: "Serial di bawah BB", nameEn: "BB Serial", descEn: "Bottom bracket serial"},
     },
 
     // -------- 악기 --------
     instrument: {
-      headstock_serial:{ nameKo:'헤드/시리얼', descKo:'헤드 시리얼/로고', nameId:'Serial headstock', descId:'Serial/logo headstock', nameEn:'Headstock Serial', descEn:'Headstock serial/logo' },
-      fretboard_wear:  { nameKo:'프렛/지판 마모', descKo:'프렛/지판 마모', nameId:'Keausan fret', descId:'Keausan fret', nameEn:'Fretboard Wear', descEn:'Fret/fingerboard wear' },
-      body_crack:      { nameKo:'바디 균열', descKo:'바디 균열/충격', nameId:'Retak bodi', descId:'Retak/impact', nameEn:'Body Crack', descEn:'Body cracks/impacts' },
+      headstock_serial: {nameKo: "헤드/시리얼", descKo: "헤드 시리얼/로고", nameId: "Serial headstock", descId: "Serial/logo headstock", nameEn: "Headstock Serial", descEn: "Headstock serial/logo"},
+      fretboard_wear: {nameKo: "프렛/지판 마모", descKo: "프렛/지판 마모", nameId: "Keausan fret", descId: "Keausan fret", nameEn: "Fretboard Wear", descEn: "Fret/fingerboard wear"},
+      body_crack: {nameKo: "바디 균열", descKo: "바디 균열/충격", nameId: "Retak bodi", descId: "Retak/impact", nameEn: "Body Crack", descEn: "Body cracks/impacts"},
     },
 
     // -------- 시계/주얼리 --------
     watch: {
-      caseback_serial: { nameKo:'케이스백/시리얼', descKo:'케이스백 각인·시리얼', nameId:'Serial caseback', descId:'Serial/ukiran belakang', nameEn:'Caseback Serial', descEn:'Caseback serial/engraving' },
-      movement_photo:  { nameKo:'무브먼트', descKo:'가능 시 무브먼트', nameId:'Movement', descId:'Movement (jika bisa)', nameEn:'Movement', descEn:'Movement (if possible)' },
+      caseback_serial: {nameKo: "케이스백/시리얼", descKo: "케이스백 각인·시리얼", nameId: "Serial caseback", descId: "Serial/ukiran belakang", nameEn: "Caseback Serial", descEn: "Caseback serial/engraving"},
+      movement_photo: {nameKo: "무브먼트", descKo: "가능 시 무브먼트", nameId: "Movement", descId: "Movement (jika bisa)", nameEn: "Movement", descEn: "Movement (if possible)"},
     },
     jewelry: {
-      hallmark_stamp:  { nameKo:'함량/각인', descKo:'750/925 각인', nameId:'Stempel kadar', descId:'Kadar emas/perak', nameEn:'Hallmark', descEn:'Gold/silver hallmark' },
-      certificate_card:{ nameKo:'감정서/보증', descKo:'감정서/보증서', nameId:'Sertifikat', descId:'Sertifikat/garansi', nameEn:'Certificate', descEn:'Appraisal/warranty certificate' },
+      hallmark_stamp: {nameKo: "함량/각인", descKo: "750/925 각인", nameId: "Stempel kadar", descId: "Kadar emas/perak", nameEn: "Hallmark", descEn: "Gold/silver hallmark"},
+      certificate_card: {nameKo: "감정서/보증", descKo: "감정서/보증서", nameId: "Sertifikat", descId: "Sertifikat/garansi", nameEn: "Certificate", descEn: "Appraisal/warranty certificate"},
     },
   };
 }
 
 function INITIAL_ANALYSIS_PROMPT() {
-  // [작업 66] AI가 '찾은 증거'와 '누락된 증거'를 매핑하도록 프롬프트 수정
-  return `You are an expert product inspector for a second-hand marketplace.
+  // [작업 66] AI가 '찾은 증거'와 '누락된 증거'를 매핑하도록 프롬프트 수정
+  return `You are an expert product inspector for a second-hand marketplace.
 Analyze the provided images (indexed 0, 1, 2, etc.) to check for evidence completeness.
 You will receive a list of "required_shots" (keys) and a list of "user_images" (image parts).
 
@@ -113,43 +113,8 @@ You will receive a list of "required_shots" (keys) and a list of "user_images" (
 Strictly adhere to this JSON schema. Map all found shots (key: index) and list all missing shots (key).`;
 }
 
-function REPORT_TEMPLATE_PROMPT_GENERIC() {
-  return `You are an expert inspector for second-hand items in an online marketplace.
-
-You MUST respond with ONE JSON object only. Do NOT add any commentary before or after the JSON.
-The JSON MUST use exactly the following keys and structure:
-
-{
-  "verification_summary": "string",
-  "key_specs": {
-    "Spec label 1": "Value 1",
-    "Spec label 2": "Value 2"
-  },
-  "condition_check": "string",
-  "included_items": [
-    "Item 1",
-    "Item 2"
-  ],
-  "notes_for_buyer": "string",
-  "suggested_price": 1234567
-}
-
-Field definitions:
-- "verification_summary": 2–3 short sentences that summarize the item, its model and overall impression.
-- "key_specs": 2–5 most important specs or attributes for this category (brand, model, capacity, size, etc.).
-- "condition_check": honest description of wear, scratches, dents, repairs or defects.
-- "included_items": list of each accessory or item included in the sale.
-- "notes_for_buyer": warnings or advice to the buyer, especially if some important evidence photos are missing.
-- "suggested_price": reasonable price suggestion in Indonesian rupiah as a NUMBER only (no currency symbol).
-
-User input to respect:
-- Product Name Claim: "{{confirmedProductName}}"
-- Category: "{{categoryName}}"
-- Sub-Category: "{{subCategoryName}}"
-- User Price: "{{userPrice}}"
-
-If some evidence keys were missing, clearly mention them inside "notes_for_buyer".`;
-}
+/* exported REPORT_TEMPLATE_PROMPT_GENERIC */
+// REPORT_TEMPLATE_PROMPT_GENERIC removed: unused V2 prompt helper (kept in repo history if needed)
 /**
  * ============================================================================
  * [V3 아키텍처 개편] (작업 35, 36)
@@ -172,8 +137,8 @@ function EXTRACTION_TARGETS() {
         // AI에게 내릴 "추출 지시"
         "prompt": "Extract the brand name (e.g., 'Samsung', 'Nike', 'Gucci') from the 'brand_model_tag' image. If unreadable, set value to null.",
         // 이 지시를 수행할 때 참조할 증거 키
-        "evidence_key": "brand_model_tag"
-      }
+        "evidence_key": "brand_model_tag",
+      },
     ],
     "condition_check": [
       {
@@ -182,8 +147,8 @@ function EXTRACTION_TARGETS() {
         "label_id": "Cacat Terlihat",
         "label_en": "Visible Defects",
         "prompt": "List any visible scratches, dents, or stains shown in 'defect_closeups'. If none are visible, state 'No visible defects found'.",
-        "evidence_key": "defect_closeups"
-      }
+        "evidence_key": "defect_closeups",
+      },
     ],
     "included_items": [
       {
@@ -192,9 +157,9 @@ function EXTRACTION_TARGETS() {
         "label_id": "Kotak Asli",
         "label_en": "Original Box",
         "prompt": "Is the original box visible in the 'included_items_flatlay' image? Respond true or false. If unsure, set value to null.",
-        "evidence_key": "included_items_flatlay"
-      }
-    ]
+        "evidence_key": "included_items_flatlay",
+      },
+    ],
   };
 
   // 2. 스마트폰(Smartphone) 전용 추출 템플릿
@@ -206,7 +171,7 @@ function EXTRACTION_TARGETS() {
         "label_id": "Model",
         "label_en": "Model",
         "prompt": "Extract the exact model name (e.g., 'iPhone 15 Pro', 'Galaxy S24 Ultra') from the 'info_shot' image. If unreadable, set value to null.",
-        "evidence_key": "info_shot"
+        "evidence_key": "info_shot",
       },
       {
         "spec_key": "storage_capacity",
@@ -214,7 +179,7 @@ function EXTRACTION_TARGETS() {
         "label_id": "Kapasitas",
         "label_en": "Storage",
         "prompt": "Extract the storage capacity (e.g., '128GB', '256GB') from the 'info_shot' image. If unreadable, set value to null.",
-        "evidence_key": "info_shot"
+        "evidence_key": "info_shot",
       },
       {
         "spec_key": "battery_health",
@@ -222,7 +187,7 @@ function EXTRACTION_TARGETS() {
         "label_id": "Kesehatan Baterai",
         "label_en": "Battery Health",
         "prompt": "Extract the battery health percentage (e.g., '95%') from the 'battery_shot' image. If not a number or unreadable, set value to null.",
-        "evidence_key": "battery_shot"
+        "evidence_key": "battery_shot",
       },
       {
         "spec_key": "imei",
@@ -230,18 +195,18 @@ function EXTRACTION_TARGETS() {
         "label_id": "IMEI",
         "label_en": "IMEI",
         "prompt": "Extract the IMEI number from the 'imei_shot' image. If unreadable, set value to null.",
-        "evidence_key": "imei_shot"
-      }
+        "evidence_key": "imei_shot",
+      },
     ],
     "condition_check": [
-       {
+      {
         "condition_key": "screen_condition",
         "label_ko": "화면 상태",
         "label_id": "Kondisi Layar",
         "label_en": "Screen Condition",
         "prompt": "Analyze the 'power_on_screen' and 'defect_closeups' images for any scratches, cracks, or dead pixels on the screen. If none, state 'No visible screen defects'.",
-        "evidence_key": "power_on_screen" // index.js가 'defect_closeups'도 함께 참조하도록 동적 구성
-      }
+        "evidence_key": "power_on_screen", // index.js가 'defect_closeups'도 함께 참조하도록 동적 구성
+      },
     ],
     "included_items": [
       {
@@ -250,7 +215,7 @@ function EXTRACTION_TARGETS() {
         "label_id": "Kotak Asli",
         "label_en": "Original Box",
         "prompt": "Is the original box visible in the 'included_items_flatlay' image? Respond true or false. If unsure, set value to null.",
-        "evidence_key": "included_items_flatlay"
+        "evidence_key": "included_items_flatlay",
       },
       {
         "item_key": "charger",
@@ -258,9 +223,9 @@ function EXTRACTION_TARGETS() {
         "label_id": "Pengisi Daya",
         "label_en": "Charger",
         "prompt": "Is the charger visible in the 'included_items_flatlay' image? Respond true or false. If unsure, set value to null.",
-        "evidence_key": "included_items_flatlay"
-      }
-    ]
+        "evidence_key": "included_items_flatlay",
+      },
+    ],
   };
 
   return {
@@ -272,18 +237,18 @@ function EXTRACTION_TARGETS() {
 
 // ---- 그룹 매핑(간단 키워드) ----
 function mapToGroups(parentNameEn, subKey, subNameEn) {
-  const t = `${parentNameEn} ${subKey} ${subNameEn || ''}`.toLowerCase();
-  if (t.includes('smartphone') || t.includes('handphone') || t.includes('tablet')) return ['electronics','smartphone'];
-  if (t.includes('camera') || t.includes('kamera') || t.includes('drone')) return ['electronics','camera'];
-  if (t.includes('bicycle') || t.includes('bike') || t.includes('sepeda')) return ['bicycle'];
-  if (t.includes('guitar') || t.includes('piano') || t.includes('violin') || t.includes('drum') || t.includes('keyboard')) return ['instrument'];
-  if (t.includes('watch') || t.includes('jam tangan')) return ['watch'];
-  if (t.includes('jewel') || t.includes('perhiasan')) return ['jewelry'];
-  if (t.includes('clothing') || t.includes('apparel') || t.includes('pakaian') || t.includes('fashion')) return ['apparel'];
-  if (t.includes('bag') || t.includes('tas') || t.includes('luxury')) return ['bag'];
-  if (t.includes('shoe') || t.includes('sepatu') || t.includes('foot') || t.includes('sneaker')) return ['footwear'];
-  if (t.includes('elect') || t.includes('digital') || t.includes('laptop') || t.includes('computer') || t.includes('komputer')) return ['electronics'];
-  return ['universal']; // 폴백
+  const t = `${parentNameEn} ${subKey} ${subNameEn || ""}`.toLowerCase();
+  if (t.includes("smartphone") || t.includes("handphone") || t.includes("tablet")) return ["electronics", "smartphone"];
+  if (t.includes("camera") || t.includes("kamera") || t.includes("drone")) return ["electronics", "camera"];
+  if (t.includes("bicycle") || t.includes("bike") || t.includes("sepeda")) return ["bicycle"];
+  if (t.includes("guitar") || t.includes("piano") || t.includes("violin") || t.includes("drum") || t.includes("keyboard")) return ["instrument"];
+  if (t.includes("watch") || t.includes("jam tangan")) return ["watch"];
+  if (t.includes("jewel") || t.includes("perhiasan")) return ["jewelry"];
+  if (t.includes("clothing") || t.includes("apparel") || t.includes("pakaian") || t.includes("fashion")) return ["apparel"];
+  if (t.includes("bag") || t.includes("tas") || t.includes("luxury")) return ["bag"];
+  if (t.includes("shoe") || t.includes("sepatu") || t.includes("foot") || t.includes("sneaker")) return ["footwear"];
+  if (t.includes("elect") || t.includes("digital") || t.includes("laptop") || t.includes("computer") || t.includes("komputer")) return ["electronics"];
+  return ["universal"]; // 폴백
 }
 
 function mergeShots(groups) {
@@ -301,149 +266,149 @@ function mergeShots(groups) {
 // * addShots로 필요 샷 보강, removeShots로 세부 제거.
 const SUBCATEGORY_OVERRIDES = {
   // ===== 스마트폰/태블릿(참고: 유지) =====
-  'smartphone-tablet': { overrideGroups: ['electronics','smartphone'], minGalleryPhotos: 6 },
+  "smartphone-tablet": {overrideGroups: ["electronics", "smartphone"], minGalleryPhotos: 6},
 
   // ===== 의류(Apparel) =====
-  'women-s-clothing': {
-    overrideGroups: ['apparel'],
-    addShots: ['included_items_flatlay','measurement_reference'],
+  "women-s-clothing": {
+    overrideGroups: ["apparel"],
+    addShots: ["included_items_flatlay", "measurement_reference"],
     minGalleryPhotos: 5,
   },
-  'men-s-clothing': {
-    overrideGroups: ['apparel'],
-    addShots: ['included_items_flatlay','measurement_reference'],
+  "men-s-clothing": {
+    overrideGroups: ["apparel"],
+    addShots: ["included_items_flatlay", "measurement_reference"],
     minGalleryPhotos: 5,
   },
-  'kids-clothing': {
-    overrideGroups: ['apparel'],
-    addShots: ['included_items_flatlay','measurement_reference'],
+  "kids-clothing": {
+    overrideGroups: ["apparel"],
+    addShots: ["included_items_flatlay", "measurement_reference"],
     minGalleryPhotos: 5,
   },
   // 세부 의류 라인(키워드형 subKey 가정)
-  'dress':   { overrideGroups: ['apparel'], addShots: ['included_items_flatlay','measurement_reference'], minGalleryPhotos: 5 },
-  'shirt':   { overrideGroups: ['apparel'], addShots: ['included_items_flatlay','measurement_reference'], minGalleryPhotos: 5 },
-  'pants':   { overrideGroups: ['apparel'], addShots: ['included_items_flatlay','measurement_reference'], minGalleryPhotos: 5 },
-  'jeans':   { overrideGroups: ['apparel'], addShots: ['included_items_flatlay','measurement_reference'], minGalleryPhotos: 5 },
-  'outerwear':{ overrideGroups: ['apparel'], addShots: ['included_items_flatlay','measurement_reference'], minGalleryPhotos: 5 },
-  'sportswear':{ overrideGroups: ['apparel'], addShots: ['included_items_flatlay','measurement_reference'], minGalleryPhotos: 5 },
+  "dress": {overrideGroups: ["apparel"], addShots: ["included_items_flatlay", "measurement_reference"], minGalleryPhotos: 5},
+  "shirt": {overrideGroups: ["apparel"], addShots: ["included_items_flatlay", "measurement_reference"], minGalleryPhotos: 5},
+  "pants": {overrideGroups: ["apparel"], addShots: ["included_items_flatlay", "measurement_reference"], minGalleryPhotos: 5},
+  "jeans": {overrideGroups: ["apparel"], addShots: ["included_items_flatlay", "measurement_reference"], minGalleryPhotos: 5},
+  "outerwear": {overrideGroups: ["apparel"], addShots: ["included_items_flatlay", "measurement_reference"], minGalleryPhotos: 5},
+  "sportswear": {overrideGroups: ["apparel"], addShots: ["included_items_flatlay", "measurement_reference"], minGalleryPhotos: 5},
 
   // ===== 카메라/드론 =====
-  'camera-dslr': {
-    overrideGroups: ['electronics','camera'],
-    addShots: ['lens_closeup','sensor_dust','shutter_info','ports_closeup','power_on_screen'],
+  "camera-dslr": {
+    overrideGroups: ["electronics", "camera"],
+    addShots: ["lens_closeup", "sensor_dust", "shutter_info", "ports_closeup", "power_on_screen"],
     minGalleryPhotos: 6,
   },
-  'camera-mirrorless': {
-    overrideGroups: ['electronics','camera'],
-    addShots: ['lens_closeup','sensor_dust','shutter_info','ports_closeup','power_on_screen'],
+  "camera-mirrorless": {
+    overrideGroups: ["electronics", "camera"],
+    addShots: ["lens_closeup", "sensor_dust", "shutter_info", "ports_closeup", "power_on_screen"],
     minGalleryPhotos: 6,
   },
-  'camera-compact': {
-    overrideGroups: ['electronics','camera'],
-    addShots: ['lens_closeup','ports_closeup','power_on_screen'],
+  "camera-compact": {
+    overrideGroups: ["electronics", "camera"],
+    addShots: ["lens_closeup", "ports_closeup", "power_on_screen"],
     minGalleryPhotos: 5,
   },
-  'action-camera': {
-    overrideGroups: ['electronics','camera'],
-    addShots: ['ports_closeup','power_on_screen'],
+  "action-camera": {
+    overrideGroups: ["electronics", "camera"],
+    addShots: ["ports_closeup", "power_on_screen"],
     minGalleryPhotos: 5,
   },
-  'drone': {
-    overrideGroups: ['electronics','camera'],
-    addShots: ['shutter_info','power_on_screen'],
+  "drone": {
+    overrideGroups: ["electronics", "camera"],
+    addShots: ["shutter_info", "power_on_screen"],
     minGalleryPhotos: 6,
   },
 
   // ===== 자전거 =====
-  'bicycle': {
-    overrideGroups: ['bicycle'],
-    addShots: ['defect_closeups','measurement_reference'], // 크랙·치수 보강
+  "bicycle": {
+    overrideGroups: ["bicycle"],
+    addShots: ["defect_closeups", "measurement_reference"], // 크랙·치수 보강
     minGalleryPhotos: 6,
   },
-  'road-bike': {
-    overrideGroups: ['bicycle'],
-    addShots: ['defect_closeups','measurement_reference'],
+  "road-bike": {
+    overrideGroups: ["bicycle"],
+    addShots: ["defect_closeups", "measurement_reference"],
     minGalleryPhotos: 6,
   },
-  'mountain-bike': {
-    overrideGroups: ['bicycle'],
-    addShots: ['defect_closeups','measurement_reference'],
+  "mountain-bike": {
+    overrideGroups: ["bicycle"],
+    addShots: ["defect_closeups", "measurement_reference"],
     minGalleryPhotos: 6,
   },
-  'folding-bike': {
-    overrideGroups: ['bicycle'],
-    addShots: ['defect_closeups','measurement_reference'],
+  "folding-bike": {
+    overrideGroups: ["bicycle"],
+    addShots: ["defect_closeups", "measurement_reference"],
     minGalleryPhotos: 6,
   },
-  'bmx': {
-    overrideGroups: ['bicycle'],
-    addShots: ['defect_closeups','measurement_reference'],
+  "bmx": {
+    overrideGroups: ["bicycle"],
+    addShots: ["defect_closeups", "measurement_reference"],
     minGalleryPhotos: 6,
   },
-  'fixie': {
-    overrideGroups: ['bicycle'],
-    addShots: ['defect_closeups','measurement_reference'],
+  "fixie": {
+    overrideGroups: ["bicycle"],
+    addShots: ["defect_closeups", "measurement_reference"],
     minGalleryPhotos: 6,
   },
 
   // ===== 악기 =====
-  'guitar-electric': {
-    overrideGroups: ['instrument'],
-    addShots: ['defect_closeups','included_items_flatlay'],
+  "guitar-electric": {
+    overrideGroups: ["instrument"],
+    addShots: ["defect_closeups", "included_items_flatlay"],
     minGalleryPhotos: 6,
   },
-  'guitar-acoustic': {
-    overrideGroups: ['instrument'],
-    addShots: ['defect_closeups','included_items_flatlay'],
+  "guitar-acoustic": {
+    overrideGroups: ["instrument"],
+    addShots: ["defect_closeups", "included_items_flatlay"],
     minGalleryPhotos: 6,
   },
-  'bass-guitar': {
-    overrideGroups: ['instrument'],
-    addShots: ['defect_closeups','included_items_flatlay'],
+  "bass-guitar": {
+    overrideGroups: ["instrument"],
+    addShots: ["defect_closeups", "included_items_flatlay"],
     minGalleryPhotos: 6,
   },
-  'piano-keyboard': {
-    overrideGroups: ['instrument'],
-    addShots: ['defect_closeups','included_items_flatlay'],
+  "piano-keyboard": {
+    overrideGroups: ["instrument"],
+    addShots: ["defect_closeups", "included_items_flatlay"],
     minGalleryPhotos: 5,
   },
-  'violin': {
-    overrideGroups: ['instrument'],
-    addShots: ['defect_closeups','included_items_flatlay'],
+  "violin": {
+    overrideGroups: ["instrument"],
+    addShots: ["defect_closeups", "included_items_flatlay"],
     minGalleryPhotos: 5,
   },
-  'drum': {
-    overrideGroups: ['instrument'],
-    addShots: ['defect_closeups','included_items_flatlay'],
+  "drum": {
+    overrideGroups: ["instrument"],
+    addShots: ["defect_closeups", "included_items_flatlay"],
     minGalleryPhotos: 6,
   },
 
   // ===== 시계 =====
-  'watch-analog': {
-    overrideGroups: ['watch'],
-    addShots: ['included_items_flatlay','measurement_reference'],
+  "watch-analog": {
+    overrideGroups: ["watch"],
+    addShots: ["included_items_flatlay", "measurement_reference"],
     minGalleryPhotos: 5,
   },
-  'watch-digital': {
-    overrideGroups: ['watch'],
-    addShots: ['included_items_flatlay','measurement_reference'],
+  "watch-digital": {
+    overrideGroups: ["watch"],
+    addShots: ["included_items_flatlay", "measurement_reference"],
     minGalleryPhotos: 5,
   },
-  'smartwatch': {
-    overrideGroups: ['watch','electronics'], // 화면/포트 필요
-    addShots: ['power_on_screen','ports_closeup','included_items_flatlay'],
+  "smartwatch": {
+    overrideGroups: ["watch", "electronics"], // 화면/포트 필요
+    addShots: ["power_on_screen", "ports_closeup", "included_items_flatlay"],
     minGalleryPhotos: 6,
   },
 
   // ===== (참고) 기존 등록됨 =====
-  'sneakers':   { overrideGroups: ['footwear'], addShots: ['side','sole','tag'], minGalleryPhotos: 6 },
-  'luxury-bag': { overrideGroups: ['bag'], addShots: ['date_code','hardware_stamp'], minGalleryPhotos: 8 },
+  "sneakers": {overrideGroups: ["footwear"], addShots: ["side", "sole", "tag"], minGalleryPhotos: 6},
+  "luxury-bag": {overrideGroups: ["bag"], addShots: ["date_code", "hardware_stamp"], minGalleryPhotos: 8},
 };
 
 // ---- 오버라이드 적용기 ----
 function applyOverrides(suggestedShots, ov) {
   const catalog = SHOT_CATALOG();
-  let shots = { ...suggestedShots };
+  let shots = {...suggestedShots};
 
   if (ov.overrideGroups && ov.overrideGroups.length) {
     shots = mergeShots(ov.overrideGroups); // 통째 교체(= universal 완전 배제 가능)
@@ -457,14 +422,16 @@ function applyOverrides(suggestedShots, ov) {
       for (const k of keysToDrop) delete shots[k];
     }
     if (ov.forceGroups && ov.forceGroups.length) {
-      shots = { ...shots, ...mergeShots(ov.forceGroups) };
+      shots = {...shots, ...mergeShots(ov.forceGroups)};
     }
   }
 
   if (ov.addShots && ov.addShots.length) {
     for (const add of ov.addShots) {
       for (const [, c] of Object.entries(catalog)) {
-        if (c[add]) { shots[add] = c[add]; break; }
+        if (c[add]) {
+          shots[add] = c[add]; break;
+        }
       }
     }
   }
@@ -480,7 +447,7 @@ function applyOverrides(suggestedShots, ov) {
  */
 function pickExtractionTargets(groups) {
   const targets = EXTRACTION_TARGETS();
-  if (groups.includes('smartphone')) {
+  if (groups.includes("smartphone")) {
     return targets.smartphone;
   }
   return targets.generic; // 기본값
@@ -490,7 +457,7 @@ function buildAiRulesFromDesign(design) {
   const rules = [];
   for (const parentSlug of Object.keys(design)) {
     const parent = design[parentSlug];
-    const parentNameEn = parent.name_en || parent.nameEn || '';
+    const parentNameEn = parent.name_en || parent.nameEn || "";
     const subs = parent.subCategories || {};
     for (const subSlug of Object.keys(subs)) {
       const s = subs[subSlug] || {};
@@ -500,7 +467,7 @@ function buildAiRulesFromDesign(design) {
 
       // 기본: universal + 매핑 그룹
       const baseGroups = mapToGroups(parentNameEn, subSlug, nameEn);
-      let suggested = mergeShots(['universal', ...baseGroups]);
+      let suggested = mergeShots(["universal", ...baseGroups]);
 
       // 서브카테고리 오버라이드
       const ov = SUBCATEGORY_OVERRIDES[subSlug] || null;
@@ -519,7 +486,7 @@ function buildAiRulesFromDesign(design) {
       });
     }
   }
-  return { rules };
+  return {rules};
 }
 
-module.exports = { buildAiRulesFromDesign };
+module.exports = {buildAiRulesFromDesign};

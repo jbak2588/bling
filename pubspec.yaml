@@ -72,6 +72,7 @@ dependencies:
   async: ^2.13.0
   material_symbols_icons: ^4.2874.0
   firebase_messaging: ^16.0.4
+  flutter_image_compress: ^2.4.0
 
 
   
