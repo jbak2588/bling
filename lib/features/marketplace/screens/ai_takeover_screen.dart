@@ -19,11 +19,10 @@
 library;
 
 import 'dart:io';
-import 'package:bling_app/core/utils/upload_helpers.dart';
+import 'package:bling_app/features/marketplace/data/ai_case_repository.dart';
 import 'package:bling_app/features/marketplace/data/product_repository.dart';
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:bling_app/features/marketplace/widgets/ai_report_viewer.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -217,44 +216,34 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
     }
 
     try {
-      // 1. 현장 사진 업로드
-      final List<String> newImageUrls =
-          await uploadAllProductImages(_newPhotos, user.uid);
+      // [V3.1 Update] AiCaseRepository 사용으로 변경
+      final repository = AiCaseRepository();
 
-      // 2. 백엔드 'verifyProductOnSite' 함수 호출
-      final callable = FirebaseFunctions.instanceFor(region: 'asia-southeast2')
-          .httpsCallable('verifyProductOnSite');
-      final result = await callable.call(<String, dynamic>{
-        'productId': widget.product.id,
-        'newImageUrls': newImageUrls,
-        'locale': context.locale.languageCode,
-      });
+      // 1. 현장 사진 업로드 (여러 장의 사진을 'ai_evidence/takeover' 경로에 안전하게 저장)
+      final List<String> newImageUrls = await repository.uploadEvidenceImages(
+        images: _newPhotos,
+        folderName: 'takeover',
+      );
 
-      // [Task 116] Cloud Functions v2 응답은 보통 Map<dynamic, dynamic>으로 역직렬화되므로
-      //            바로 Map<String, dynamic>으로 타입 체크하면 실패할 수 있습니다.
-      //            → 먼저 dynamic으로 받은 뒤, 실제 Map인지 여부만 확인하고
-      //              Map<String, dynamic>.from(...)으로 안전하게 캐스팅합니다.
-      final dynamic data = result.data;
-      final dynamic verificationData =
-          (data is Map) ? data['verification'] : null;
+      // 2. 백엔드 요청 (ai_cases 문서 생성 및 검증 수행)
+      final result = await repository.requestTakeoverVerification(
+        productId: widget.product.id,
+        newImageUrls: newImageUrls,
+      );
+
+      // [Response Handling] Repo가 반환한 Map에서 'verification' 데이터 추출
+      final dynamic verificationData = result['verification'];
 
       if (verificationData is Map) {
         // V3: match가 true, false, null(AI 실패)인 경우 모두 _showVerificationResult가 처리
-        _showVerificationResult(
-          Map<String, dynamic>.from(verificationData),
-        );
+        _showVerificationResult(Map<String, dynamic>.from(verificationData));
       } else {
         // 'verification' 키 자체가 없거나 Map이 아닌 경우 (예: HttpsError가 아닌 다른 이유로 실패)
         throw Exception('AI가 유효한 검증 결과(JSON)를 반환하지 못했습니다.');
       }
-    } on FirebaseFunctionsException catch (e) {
-      // [Task 107 HOTFIX] 백엔드가 'data-loss', 'internal' 등 HttpsError를 던진 경우
-      BArtSnackBar.showErrorSnackBar(
-          title: 'AI 검증 실패', message: e.message ?? '알 수 없는 서버 오류가 발생했습니다.');
-      Logger.error('AI Takeover Error (Firebase)',
-          error: e, stackTrace: e.stackTrace);
     } catch (e, stackTrace) {
       // [Task 107 HOTFIX] 앱 내부에서 발생한 기타 오류 (e.g., throw Exception)
+      // Repository 내부 예외도 여기서 통합 처리됨
       BArtSnackBar.showErrorSnackBar(
           title: '오류 발생', message: e.toString().replaceAll('Exception: ', ''));
       Logger.error('AI Takeover Error (Generic)',
