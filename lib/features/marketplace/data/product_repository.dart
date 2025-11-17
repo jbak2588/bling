@@ -138,4 +138,18 @@ class ProductRepository {
       rethrow;
     }
   }
+
+  // [Fix] ID로 단일 상품 조회 (Admin/AI Detail 화면용)
+  Future<ProductModel?> fetchProductById(String productId) async {
+    try {
+      final doc = await _firestore.collection('products').doc(productId).get();
+      if (doc.exists) {
+        return ProductModel.fromFirestore(doc);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error fetching product by ID: $e');
+      return null;
+    }
+  }
 }

@@ -1906,4 +1906,58 @@
   "user": {
     "notLoggedIn": "notLoggedIn"
   }
+,
+  "ai_audit": {
+    "title": "AI Audit Log",
+    "tabs": {
+      "all": "All",
+      "takeover": "Takeover",
+      "registration": "Registration"
+    },
+    "list": {
+      "takeover_title": "On-site takeover verification",
+      "registration_title": "Product AI Registration",
+      "verdict": "Verdict",
+      "id": "ID",
+      "no_records": "No AI records found.",
+      "error": "Error loading AI records."
+    }
+  }
+  ,
+  "admin": {
+    "aiApproval": {
+      "detailTitle": "Review Request Details",
+      "idInfo": "ID Information",
+      "sellerInfo": "Seller Information",
+      "itemInfo": "Item Information",
+      "aiReport": "AI Report",
+      "rejectTitle": "Enter rejection reason",
+      "rejectReasonHint": "Rejection reason",
+      "labels": {
+        "userId": "User ID",
+        "productId": "Product ID"
+      },
+      "buttons": {
+        "reject": "Reject",
+        "approve": "Approve"
+      }
+    }
+  },
+  "common": {
+    "copiedTitle": "Copied!",
+    "copiedMessage": "{title} copied to clipboard.",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "error": "Error"
+  }
+  ,
+  "ai_case": {
+    "title": "AI Case Detail",
+    "tabs": {
+      "summary": "Summary",
+      "takeover_photos": "Takeover Photos",
+      "original_photos": "Original Photos",
+      "raw_json": "Raw JSON"
+    }
+  }
 }

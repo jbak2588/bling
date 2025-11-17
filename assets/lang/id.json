@@ -1926,4 +1926,58 @@
   "user": {
     "notLoggedIn": "notLoggedIn"
   }
+,
+  "ai_audit": {
+    "title": "Log Audit AI",
+    "tabs": {
+      "all": "Semua",
+      "takeover": "Pengambilan",
+      "registration": "Pendaftaran"
+    },
+    "list": {
+      "takeover_title": "Verifikasi Pengambilan Di Lokasi",
+      "registration_title": "Pendaftaran AI Produk",
+      "verdict": "Keputusan",
+      "id": "ID",
+      "no_records": "Tidak ada catatan AI.",
+      "error": "Gagal memuat catatan AI."
+    }
+  }
+  ,
+  "admin": {
+    "aiApproval": {
+      "detailTitle": "Detail Permintaan Pemeriksaan",
+      "idInfo": "Informasi ID",
+      "sellerInfo": "Informasi Penjual",
+      "itemInfo": "Informasi Item",
+      "aiReport": "Laporan AI",
+      "rejectTitle": "Masukkan alasan penolakan",
+      "rejectReasonHint": "Alasan penolakan",
+      "labels": {
+        "userId": "User ID",
+        "productId": "Product ID"
+      },
+      "buttons": {
+        "reject": "Tolak",
+        "approve": "Setujui"
+      }
+    }
+  },
+  "common": {
+    "copiedTitle": "Disalin!",
+    "copiedMessage": "{title} disalin ke clipboard.",
+    "confirm": "Konfirmasi",
+    "cancel": "Batal",
+    "error": "Kesalahan"
+  }
+  ,
+  "ai_case": {
+    "title": "Detail Kasus AI",
+    "tabs": {
+      "summary": "Ringkasan",
+      "takeover_photos": "Foto Pengambilan",
+      "original_photos": "Foto Asli",
+      "raw_json": "Raw JSON"
+    }
+  }
 }

@@ -57,7 +57,9 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
           onPressed: () {
             Clipboard.setData(ClipboardData(text: value));
             BArtSnackBar.showSuccessSnackBar(
-                title: 'Copied!', message: '$title copied to clipboard.');
+                title: tr('common.copiedTitle'),
+                message:
+                    tr('common.copiedMessage', namedArgs: {'title': title}));
           },
         ),
       ),
@@ -270,8 +272,10 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
             Text('admin.aiApproval.idInfo'.tr(),
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            _buildIdTile(context, 'User ID', _product!.userId),
-            _buildIdTile(context, 'Product ID', _product!.id),
+            _buildIdTile(context, tr('admin.aiApproval.labels.userId'),
+                _product!.userId),
+            _buildIdTile(
+                context, tr('admin.aiApproval.labels.productId'), _product!.id),
             const Divider(height: 30),
 
             // [Task 91] 2. 판매자 정보
@@ -313,7 +317,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _rejectProduct,
                       icon: const Icon(Icons.close),
-                      label: const Text('거절'),
+                      label: Text('admin.aiApproval.buttons.reject'.tr()),
                       style:
                           ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     ),
@@ -323,7 +327,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _approveProduct,
                       icon: const Icon(Icons.check),
-                      label: const Text('승인'),
+                      label: Text('admin.aiApproval.buttons.approve'.tr()),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green),
                     ),

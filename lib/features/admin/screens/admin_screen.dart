@@ -1,6 +1,7 @@
 // lib/features/admin/screens/admin_screen.dart
 
 import 'package:bling_app/features/admin/screens/admin_product_detail_screen.dart'; // ✅ 상세 화면 import
+import 'package:bling_app/features/admin/screens/ai_audit_screen.dart'; // [New] AI 감사 화면 import
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart'; // 다국어 사용 위해 추가
@@ -43,6 +44,20 @@ class AdminScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                     builder: (context) => const ReportListScreen()),
+              );
+            },
+          ),
+          const Divider(),
+          // [V3.1 New] AI 감사 로그 메뉴 추가
+          ListTile(
+            leading: const Icon(Icons.history_edu_outlined),
+            title: const Text('AI Audit Logs'), // 'admin.menu.aiAudit'.tr() 권장
+            subtitle: const Text('View Takeover & Enhancement history'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AiAuditScreen()),
               );
             },
           ),

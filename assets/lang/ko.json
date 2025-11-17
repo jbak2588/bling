@@ -1934,4 +1934,58 @@
   "user": {
     "notLoggedIn": "notLoggedIn"
   }
+,
+  "ai_audit": {
+    "title": "AI 감사 로그",
+    "tabs": {
+      "all": "전체",
+      "takeover": "현장 인수",
+      "registration": "등록/검수"
+    },
+    "list": {
+      "takeover_title": "현장 인수 검증",
+      "registration_title": "상품 AI 등록",
+      "verdict": "판정",
+      "id": "ID",
+      "no_records": "AI 기록이 없습니다.",
+      "error": "AI 기록을 불러오는 중 오류가 발생했습니다."
+    }
+  }
+  ,
+  "admin": {
+    "aiApproval": {
+      "detailTitle": "검수 요청 상세",
+      "idInfo": "ID 정보",
+      "sellerInfo": "판매자 정보",
+      "itemInfo": "상품 원본 정보",
+      "aiReport": "AI 리포트",
+      "rejectTitle": "거절 사유 입력",
+      "rejectReasonHint": "거절 사유",
+      "labels": {
+        "userId": "사용자 ID",
+        "productId": "상품 ID"
+      },
+      "buttons": {
+        "reject": "거절",
+        "approve": "승인"
+      }
+    }
+  },
+  "common": {
+    "copiedTitle": "복사됨!",
+    "copiedMessage": "{title}이(가) 클립보드에 복사되었습니다.",
+    "confirm": "확인",
+    "cancel": "취소",
+    "error": "오류"
+  }
+  ,
+  "ai_case": {
+    "title": "AI 케이스 상세",
+    "tabs": {
+      "summary": "요약",
+      "takeover_photos": "현장 인수 사진",
+      "original_photos": "원본 사진",
+      "raw_json": "Raw JSON"
+    }
+  }
 }
