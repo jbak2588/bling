@@ -756,6 +756,8 @@
     "submit": "submit",
     "loginRequired": "loginRequired",
     "unknownUser": "unknownUser"
+    ,"copiedTitle": "Copied!",
+    "copiedMessage": "{title} copied to clipboard."
   },
   "commom": {
     "commets": "Comments"
@@ -1703,6 +1705,8 @@
     "menu": {
       "aiApproval": "AI Verification Management",
       "reportManagement": "Report Management"
+      ,"aiAudit": "AI Audit Logs",
+      "aiAuditSubtitle": "View Takeover & Enhancement history"
     },
     "aiApproval": {
       "empty": "No products pending AI verification.",
@@ -1715,7 +1719,15 @@
       "rejectTitle": "Enter rejection reason",
       "rejectReasonHint": "Rejection reason",
       "rejectReasonRequired": "Reason is required",
-      "aiReport": "AI Analysis Report (V3)"
+      "aiReport": "AI Analysis Report (V3)",
+      "labels": {
+        "userId": "User ID",
+        "productId": "Product ID"
+      },
+      "buttons": {
+        "reject": "Reject",
+        "approve": "Approve"
+      }
     },
     "reports": {
       "title": "Report Management",
@@ -1922,33 +1934,6 @@
       "no_records": "No AI records found.",
       "error": "Error loading AI records."
     }
-  }
-  ,
-  "admin": {
-    "aiApproval": {
-      "detailTitle": "Review Request Details",
-      "idInfo": "ID Information",
-      "sellerInfo": "Seller Information",
-      "itemInfo": "Item Information",
-      "aiReport": "AI Report",
-      "rejectTitle": "Enter rejection reason",
-      "rejectReasonHint": "Rejection reason",
-      "labels": {
-        "userId": "User ID",
-        "productId": "Product ID"
-      },
-      "buttons": {
-        "reject": "Reject",
-        "approve": "Approve"
-      }
-    }
-  },
-  "common": {
-    "copiedTitle": "Copied!",
-    "copiedMessage": "{title} copied to clipboard.",
-    "confirm": "Confirm",
-    "cancel": "Cancel",
-    "error": "Error"
   }
   ,
   "ai_case": {

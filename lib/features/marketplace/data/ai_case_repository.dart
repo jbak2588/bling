@@ -138,4 +138,46 @@ class AiCaseRepository {
   Future<DocumentSnapshot<Map<String, dynamic>>> getCaseDetail(String caseId) {
     return _firestore.collection('ai_cases').doc(caseId).get();
   }
+
+  /// [Admin Action] 관리자 직권으로 케이스 및 상품 상태 변경 (Batch Transaction)
+  Future<void> resolveCaseByAdmin({
+    required String caseId,
+    required String productId,
+    required bool isApproved, // true=승인(Override), false=거절
+    String? reason,
+  }) async {
+    final batch = _firestore.batch();
+    final now = FieldValue.serverTimestamp();
+
+    // 1. ai_cases 문서 업데이트
+    final caseRef = _firestore.collection('ai_cases').doc(caseId);
+    batch.update(caseRef, {
+      'status': isApproved ? 'pass' : 'fail',
+      'verdict': isApproved ? 'admin_override_pass' : 'admin_confirmed_fail',
+      'adminComment': reason,
+      'updatedAt': now,
+    });
+
+    // 2. products 문서 업데이트
+    // 승인 시 -> sold (거래 완료) & verified
+    // 거절 시 -> selling (판매중 복귀) & rejected (혹은 suspicious 유지)
+    final productRef = _firestore.collection('products').doc(productId);
+
+    if (isApproved) {
+      batch.update(productRef, {
+        'status': 'sold', // 거래 확정 처리
+        'aiVerificationStatus': 'takeover_verified', // 최종 인증 완료
+        'updatedAt': now,
+      });
+    } else {
+      batch.update(productRef, {
+        'status': 'selling', // 판매 중 상태로 복구 (예약 취소)
+        // 'aiVerificationStatus': 'rejected', // 필요 시 상태 변경
+        'rejectionReason': reason,
+        'updatedAt': now,
+      });
+    }
+
+    await batch.commit();
+  }
 }

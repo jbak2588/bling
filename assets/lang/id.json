@@ -763,7 +763,9 @@
     "edit": "edit",
     "submit": "submit",
     "loginRequired": "loginRequired",
-    "unknownUser": "unknownUser"
+    "unknownUser": "unknownUser",
+    "copiedTitle": "Disalin!",
+    "copiedMessage": "{title} disalin ke clipboard."
   },
   "commom": {
     "commets": "Komentar"
@@ -1710,7 +1712,9 @@
     },
     "menu": {
       "aiApproval": "Manajemen Verifikasi AI",
-      "reportManagement": "Manajemen Laporan"
+      "reportManagement": "Manajemen Laporan",
+      "aiAudit": "Log Audit AI",
+      "aiAuditSubtitle": "Lihat riwayat Pengambilan & Pendaftaran/Verifikasi"
     },
     "aiApproval": {
       "empty": "Tidak ada produk yang menunggu verifikasi AI.",
@@ -1942,33 +1946,6 @@
       "no_records": "Tidak ada catatan AI.",
       "error": "Gagal memuat catatan AI."
     }
-  }
-  ,
-  "admin": {
-    "aiApproval": {
-      "detailTitle": "Detail Permintaan Pemeriksaan",
-      "idInfo": "Informasi ID",
-      "sellerInfo": "Informasi Penjual",
-      "itemInfo": "Informasi Item",
-      "aiReport": "Laporan AI",
-      "rejectTitle": "Masukkan alasan penolakan",
-      "rejectReasonHint": "Alasan penolakan",
-      "labels": {
-        "userId": "User ID",
-        "productId": "Product ID"
-      },
-      "buttons": {
-        "reject": "Tolak",
-        "approve": "Setujui"
-      }
-    }
-  },
-  "common": {
-    "copiedTitle": "Disalin!",
-    "copiedMessage": "{title} disalin ke clipboard.",
-    "confirm": "Konfirmasi",
-    "cancel": "Batal",
-    "error": "Kesalahan"
   }
   ,
   "ai_case": {

@@ -60,13 +60,15 @@ class _AiAuditScreenState extends State<AiAuditScreen>
   }
 
   Widget _buildCaseList(String? stageFilter) {
-    Query query = FirebaseFirestore.instance
-        .collection('ai_cases')
-        .orderBy('createdAt', descending: true);
+    // [Fix] 쿼리 순서 변경: where(필터) -> orderBy(정렬) 순서로 해야 복합 색인이 작동합니다.
+    Query query = FirebaseFirestore.instance.collection('ai_cases');
 
     if (stageFilter != null) {
       query = query.where('stage', isEqualTo: stageFilter);
     }
+
+    // 정렬은 마지막에
+    query = query.orderBy('createdAt', descending: true);
 
     return StreamBuilder<QuerySnapshot>(
       stream: query.snapshots(),

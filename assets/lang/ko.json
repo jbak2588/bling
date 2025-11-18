@@ -771,6 +771,8 @@
     "submit": "submit",
     "loginRequired": "loginRequired",
     "unknownUser": "unknownUser"
+    ,"copiedTitle": "복사됨!",
+    "copiedMessage": "{title}이(가) 클립보드에 복사되었습니다."
   },
   "commom": {
     "commets": "댓글"
@@ -1717,7 +1719,9 @@
     },
     "menu": {
       "aiApproval": "AI 검수 승인 관리",
-      "reportManagement": "신고 관리"
+      "reportManagement": "신고 관리",
+      "aiAudit": "AI 감사 로그",
+      "aiAuditSubtitle": "현장 인수 및 등록/검수 이력 보기"
     },
     "aiApproval": {
       "empty": "AI 검수 대기 중인 상품이 없습니다.",
@@ -1730,7 +1734,15 @@
       "rejectTitle": "거절 사유 입력",
       "rejectReasonHint": "거절 사유",
       "rejectReasonRequired": "사유는 필수입니다",
-      "aiReport": "AI 분석 리포트 (V3)"
+      "aiReport": "AI 분석 리포트 (V3)",
+      "labels": {
+        "userId": "사용자 ID",
+        "productId": "상품 ID"
+      },
+      "buttons": {
+        "reject": "거절",
+        "approve": "승인"
+      }
     },
     "reports": {
       "title": "신고 관리",
@@ -1950,33 +1962,6 @@
       "no_records": "AI 기록이 없습니다.",
       "error": "AI 기록을 불러오는 중 오류가 발생했습니다."
     }
-  }
-  ,
-  "admin": {
-    "aiApproval": {
-      "detailTitle": "검수 요청 상세",
-      "idInfo": "ID 정보",
-      "sellerInfo": "판매자 정보",
-      "itemInfo": "상품 원본 정보",
-      "aiReport": "AI 리포트",
-      "rejectTitle": "거절 사유 입력",
-      "rejectReasonHint": "거절 사유",
-      "labels": {
-        "userId": "사용자 ID",
-        "productId": "상품 ID"
-      },
-      "buttons": {
-        "reject": "거절",
-        "approve": "승인"
-      }
-    }
-  },
-  "common": {
-    "copiedTitle": "복사됨!",
-    "copiedMessage": "{title}이(가) 클립보드에 복사되었습니다.",
-    "confirm": "확인",
-    "cancel": "취소",
-    "error": "오류"
   }
   ,
   "ai_case": {

@@ -51,8 +51,8 @@ class AdminScreen extends StatelessWidget {
           // [V3.1 New] AI 감사 로그 메뉴 추가
           ListTile(
             leading: const Icon(Icons.history_edu_outlined),
-            title: const Text('AI Audit Logs'), // 'admin.menu.aiAudit'.tr() 권장
-            subtitle: const Text('View Takeover & Enhancement history'),
+            title: Text('admin.menu.aiAudit'.tr()),
+            subtitle: Text('admin.menu.aiAuditSubtitle'.tr()),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(

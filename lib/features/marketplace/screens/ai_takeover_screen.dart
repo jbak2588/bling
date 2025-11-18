@@ -55,7 +55,8 @@ class AiTakeoverScreen extends StatefulWidget {
 
 class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
   final ImagePicker _picker = ImagePicker();
-  final List<XFile> _newPhotos = [];
+  // [변경 1] 체크리스트 인덱스 -> 사진 매핑
+  final Map<int, XFile> _checklistPhotos = {};
   // [Fix] OOM 방지: 이미지를 바이트로 메모리에 들고 있지 않고, 파일 경로로만 관리함.
   // final List<Uint8List> _newPhotoBytes = [];
   bool _isVerifying = false;
@@ -115,97 +116,43 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
   }
 
   /// 현장에서 새 사진 촬영
-  Future<void> _pickPhotos() async {
-    // [Task 107] 카메라/갤러리 선택 팝업 (Task 65 로직 재사용)
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.camera_alt),
-            title: Text(
-                StringTranslateExtension('ai_flow.common.take_photo').tr()),
-            onTap: () => Navigator.pop(context, ImageSource.camera),
-          ),
-          ListTile(
-            leading: const Icon(Icons.photo_library),
-            title: Text(
-                StringTranslateExtension('ai_flow.common.pick_gallery_multi')
-                    .tr()), // "갤러리에서 여러 장 선택"
-            onTap: () => Navigator.pop(context, ImageSource.gallery),
-          ),
-        ],
-      ),
-    );
+  // [변경 2] 특정 체크리스트 항목(index)에 사진을 촬영/선택하여 매핑합니다.
+  Future<void> _pickPhotoForIndex(int index, ImageSource source) async {
+    try {
+      final XFile? img = await _picker.pickImage(source: source);
 
-    if (source == ImageSource.camera) {
-      // [Fix] 안드로이드 overwrite 버그 방지를 위해 압축 옵션 제거 (원본 사용)
-      // 일부 Android에서 imageQuality/maxWidth가 지정되면 파일명이 겹쳐져
-      // 여러 이미지가 'scaled_0.png'로 덮어써지는 문제가 발생합니다.
-      final XFile? img = await _picker.pickImage(source: source!);
       if (img != null && mounted) {
-        try {
-          final tempDir = await getTemporaryDirectory();
-          final ext = p.extension(img.path);
-          final destPath = p.join(tempDir.path, '${const Uuid().v4()}$ext');
-          // [Fix] 복사 대신 압축 수행
-          final compressed = await _compressImage(File(img.path));
-          await compressed?.copy(destPath);
-          if (mounted) {
-            setState(() {
-              _newPhotos.add(XFile(destPath));
-            });
-          }
-        } catch (e) {
-          debugPrint('Error copying camera image: $e');
-          if (mounted) {
-            setState(() {
-              _newPhotos.add(img);
-            });
-          }
-        }
-      }
-    } else if (source == ImageSource.gallery) {
-      // [Fix] pickMultiImage 사용 시 imageQuality/maxWidth 옵션이 있으면
-      // 안드로이드에서 모든 파일이 'scaled_0.png'로 덮어쓰여지는 치명적 버그 발생. 제거 필수.
-      final List<XFile> picked = await _picker.pickMultiImage();
-      if (picked.isNotEmpty && mounted) {
+        final compressedFile = await _compressImage(File(img.path));
         final tempDir = await getTemporaryDirectory();
-        final List<XFile> copied = [];
-        for (final x in picked) {
-          try {
-            final ext = p.extension(x.path);
-            final destPath = p.join(tempDir.path, '${const Uuid().v4()}$ext');
-            // [Fix] 갤러리 이미지도 압축 수행
-            final compressed = await _compressImage(File(x.path));
-            await compressed?.copy(destPath);
-            copied.add(XFile(destPath));
-          } catch (e) {
-            debugPrint('Error copying gallery image ${x.path}: $e');
-            // fallback to original if copy fails
-            copied.add(x);
-          }
-        }
+        final ext = p.extension(img.path);
+        final destPath = p.join(tempDir.path, '${const Uuid().v4()}$ext');
+        await compressedFile?.copy(destPath);
+
         if (mounted) {
           setState(() {
-            _newPhotos.addAll(copied);
-            // Note: not storing raw bytes to avoid OOM
+            _checklistPhotos[index] = XFile(destPath);
           });
         }
       }
+    } catch (e) {
+      debugPrint('Error picking photo for index $index: $e');
+      BArtSnackBar.showErrorSnackBar(
+          title: '오류', message: '이미지 선택 중 오류가 발생했습니다.');
     }
   }
 
   /// AI 동일성 검증 시작
   Future<void> _startOnSiteVerification() async {
-    if (_newPhotos.isEmpty) {
+    // [변경 3] 체크리스트 기반 사진 사용: Map -> List 변환
+    if (_checklistPhotos.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
               StringTranslateExtension('marketplace.takeover.errors.noPhoto')
                   .tr())));
       return;
     }
+
+    final List<XFile> photosToSend = _checklistPhotos.values.toList();
 
     setState(() => _isVerifying = true);
 
@@ -216,44 +163,31 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
     }
 
     try {
-      // [V3.1 Update] AiCaseRepository 사용으로 변경
       final repository = AiCaseRepository();
 
-      // 1. 현장 사진 업로드 (여러 장의 사진을 'ai_evidence/takeover' 경로에 안전하게 저장)
       final List<String> newImageUrls = await repository.uploadEvidenceImages(
-        images: _newPhotos,
+        images: photosToSend,
         folderName: 'takeover',
       );
 
-      // 2. 백엔드 요청 (ai_cases 문서 생성 및 검증 수행)
       final result = await repository.requestTakeoverVerification(
         productId: widget.product.id,
         newImageUrls: newImageUrls,
       );
 
-      // [Response Handling] Repo가 반환한 Map에서 'verification' 데이터 추출
       final dynamic verificationData = result['verification'];
-
       if (verificationData is Map) {
-        // V3: match가 true, false, null(AI 실패)인 경우 모두 _showVerificationResult가 처리
         _showVerificationResult(Map<String, dynamic>.from(verificationData));
       } else {
-        // 'verification' 키 자체가 없거나 Map이 아닌 경우 (예: HttpsError가 아닌 다른 이유로 실패)
         throw Exception('AI가 유효한 검증 결과(JSON)를 반환하지 못했습니다.');
       }
     } catch (e, stackTrace) {
-      // [Task 107 HOTFIX] 앱 내부에서 발생한 기타 오류 (e.g., throw Exception)
-      // Repository 내부 예외도 여기서 통합 처리됨
       BArtSnackBar.showErrorSnackBar(
           title: '오류 발생', message: e.toString().replaceAll('Exception: ', ''));
       Logger.error('AI Takeover Error (Generic)',
           error: e, stackTrace: stackTrace);
     } finally {
-      if (mounted) {
-        setState(() {
-          _isVerifying = false;
-        });
-      }
+      if (mounted) setState(() => _isVerifying = false);
     }
   }
 
@@ -415,75 +349,64 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
                   {}),
             ),
 
-            // [Task 99] V3 현장 검증 체크리스트
+            // [변경 4] 체크리스트 항목별 촬영 UI
             if (_checklistItems.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
                 StringTranslateExtension('marketplace.takeover.checklistTitle')
-                    .tr(), // "현장 검증 체크리스트"
+                    .tr(),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
-              // 체크리스트 항목들을 순회하며 표시
-              ..._checklistItems.map((item) => Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                          color: Theme.of(context).colorScheme.outlineVariant),
-                      borderRadius: BorderRadius.circular(12),
+
+              // 체크리스트 항목별 카드(사진 슬롯 포함)
+              ..._checklistItems.asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                final hasPhoto = _checklistPhotos.containsKey(index);
+
+                return Card(
+                  elevation: 2,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.check_circle_outline,
+                                color: Theme.of(context).colorScheme.primary),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                item.checkPoint,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          item.instruction,
+                          style:
+                              TextStyle(color: Colors.grey[700], fontSize: 14),
+                        ),
+                        const SizedBox(height: 16),
+                        hasPhoto
+                            ? _buildPhotoPreview(index)
+                            : _buildCameraButtons(index),
+                      ],
                     ),
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    child: ListTile(
-                      leading: Icon(Icons.fact_check_outlined,
-                          color: Theme.of(context).colorScheme.primary),
-                      title: Text(item.checkPoint,
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(item.instruction),
-                    ),
-                  )),
+                  ),
+                );
+              }),
             ],
 
-            const Divider(height: 32),
-            // 사진 촬영 섹션
-            Text(
-              StringTranslateExtension('marketplace.takeover.photoTitle').tr(),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                ..._newPhotos.asMap().entries.map((entry) {
-                  final idx = entry.key;
-                  final file = entry.value;
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      File(file.path),
-                      key: ValueKey(idx),
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                    ),
-                  );
-                }),
-                GestureDetector(
-                  onTap: _pickPhotos,
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey[400]!),
-                    ),
-                    child: const Icon(Icons.add_a_photo_outlined, size: 32),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _isVerifying ? null : _startOnSiteVerification,
               style: ElevatedButton.styleFrom(
@@ -502,6 +425,71 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  // [신규 위젯] 사진이 없을 때: 카메라/갤러리 버튼
+  Widget _buildCameraButtons(int index) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => _pickPhotoForIndex(index, ImageSource.camera),
+            icon: const Icon(Icons.camera_alt),
+            label: Text('marketplace.takeover.camera'.tr()),
+            style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12)),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => _pickPhotoForIndex(index, ImageSource.gallery),
+            icon: const Icon(Icons.photo_library),
+            label: Text('marketplace.takeover.gallery'.tr()),
+            style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // [신규 위젯] 사진이 있을 때: 미리보기 및 재촬영/삭제 버튼
+  Widget _buildPhotoPreview(int index) {
+    final file = _checklistPhotos[index];
+    if (file == null) return const SizedBox.shrink();
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.file(
+            File(file.path),
+            width: double.infinity,
+            height: 200,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _checklistPhotos.remove(index);
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, color: Colors.white, size: 20),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

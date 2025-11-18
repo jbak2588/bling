@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:bling_app/features/admin/models/ai_case_model.dart';
+import 'package:bling_app/features/marketplace/data/ai_case_repository.dart'; // [New] Repo import
 import 'package:bling_app/features/marketplace/data/product_repository.dart'; // Product 조회용
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:flutter/material.dart';
@@ -81,7 +82,103 @@ class _AiCaseDetailScreenState extends State<AiCaseDetailScreen>
           _buildJsonViewer(),
         ],
       ),
+      // [V3.1 Admin Actions] 하단 액션 바 추가
+      bottomNavigationBar: _buildAdminActions(context),
     );
+  }
+
+  Widget _buildAdminActions(BuildContext context) {
+    // 이미 처리된 건이면 버튼 숨김 (선택 사항)
+    if (widget.aiCase.status == 'pass' || widget.aiCase.status == 'fail') {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -4))
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () => _handleAdminAction(false),
+              icon: const Icon(Icons.close),
+              label: const Text("Reject (반려)"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade50,
+                foregroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () => _handleAdminAction(true),
+              icon: const Icon(Icons.check),
+              label: const Text("Approve (강제 승인)"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleAdminAction(bool isApproved) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(isApproved ? "강제 승인 하시겠습니까?" : "검증을 반려 하시겠습니까?"),
+        content: Text(isApproved
+            ? "상품 상태가 '판매완료'로 변경되며, 거래가 확정됩니다."
+            : "상품 상태가 '판매중'으로 복구되며, 예약이 취소됩니다."),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text("취소")),
+          FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: isApproved ? Colors.green : Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("확인"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      try {
+        final repo = AiCaseRepository();
+        await repo.resolveCaseByAdmin(
+          caseId: widget.aiCase.caseId,
+          productId: widget.aiCase.productId,
+          isApproved: isApproved,
+          reason: "Admin manual action from App",
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(isApproved ? "승인 처리되었습니다." : "반려 처리되었습니다.")));
+          Navigator.pop(context); // 목록으로 복귀
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text("처리 실패: $e")));
+        }
+      }
+    }
   }
 
   // --- Tab 1: Summary ---
