@@ -237,6 +237,8 @@
         "subtitle": "Periksa apakah laporan AI asli cocok dengan barang nyata. Ambil minimal 3 foto yang menampilkan fitur utama barang."
       },
       "photoTitle": "Ambil foto di lokasi",
+      "camera": "Kamera",
+      "gallery": "Galeri",
       "buttonVerify": "Mulai verifikasi kesamaan AI",
       "errors": {
         "noPhoto": "Butuh minimal 1 foto lokasi untuk verifikasi."

@@ -242,6 +242,8 @@
         "subtitle": "Confirm that the original AI report matches the actual item. Take 3 or more photos that clearly show the item's key features."
       },
       "photoTitle": "Take on-site photos",
+      "camera": "Camera",
+      "gallery": "Gallery",
       "buttonVerify": "Start AI similarity verification",
       "errors": {
         "noPhoto": "At least 1 on-site photo is required for verification."

@@ -330,10 +330,23 @@ class _AiEvidenceSuggestionScreenState
         Logger.error('AI Final Report Error (_continue)',
             error: e, stackTrace: e.stackTrace);
       } catch (e, stackTrace) {
-        BArtSnackBar.showErrorSnackBar(
-            title: '오류 발생', message: '리포트 생성 중 예기치 않은 오류가 발생했습니다.');
         Logger.error('AI Final Report Error (_continue)',
             error: e, stackTrace: stackTrace);
+
+        // [Fix] Get.context가 null일 때 스낵바가 안 뜨는 문제 해결
+        // 현재 위젯의 context를 직접 사용하여 확실하게 표시
+        if (mounted) {
+          final errorMessage = e.toString().replaceAll('Exception: ', '');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('오류: $errorMessage'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 4),
+              action: SnackBarAction(
+                  label: '확인', textColor: Colors.white, onPressed: () {}),
+            ),
+          );
+        }
       } finally {
         if (mounted) setState(() => _isReportLoading = false);
       }
