@@ -25,6 +25,9 @@ import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// ✅ New Theme Import
+import 'package:bling_app/core/theme/bling_theme.dart';
+
 // 지도 렌더러를 확인하는 함수
 Future<void> _ensureGoogleMapRenderer() async {
   final mapsImplementation = GoogleMapsFlutterPlatform.instance;
@@ -241,10 +244,8 @@ class BlingApp extends StatelessWidget {
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
+      // ✅ Apply BlingTheme
+      theme: BlingTheme.light(),
       home: isTest ? const Scaffold(body: SizedBox()) : const AuthGate(),
     );
   }

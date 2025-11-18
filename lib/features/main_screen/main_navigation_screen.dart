@@ -52,7 +52,8 @@ import 'package:bling_app/features/lost_and_found/screens/create_lost_item_scree
 import 'package:bling_app/features/auction/screens/create_auction_screen.dart';
 import 'package:bling_app/features/real_estate/screens/create_room_listing_screen.dart';
 
-import 'package:bling_app/features/shared/grab_widgets.dart'; // GrabAppBarShell
+import 'package:bling_app/features/shared/bling_widgets.dart';
+import 'package:bling_app/core/theme/bling_theme.dart';
 
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -749,52 +750,69 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   PreferredSizeWidget _buildAppBar() {
-    // ✅ locale 의존성만 생성(교체X, 리빌드O)
+    // Build leading and trailing widgets first to reuse existing logic
     final _ = context.locale;
     final photoUrl = _userModel?.photoUrl;
-    return GrabAppBarShell(
-      // ↓↓↓ 기존 leading 로직 그대로
-      leading: (_bottomNavIndex == 0 && _currentHomePageContent != null)
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                setState(() {
-                  _currentHomePageContent = null;
-                  _appBarTitleKey = 'main.myTown'; // 키로 저장
-                });
-                // ✅ [스크롤 위치 보존] 다음 프레임에서 스크롤 위치 복원
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  // 컨트롤러가 HomeScreen의 ScrollView에 연결된 후 실행
-                  if (_homeScrollController.hasClients) {
-                    _homeScrollController
-                        .jumpTo(_savedHomeScrollOffset); // 저장된 위치로 즉시 이동
-                  }
-                });
-              },
-            )
-          : Builder(
-              builder: (context) => IconButton(
-                // ✅ [스크롤 위치 보존] Drawer 열 때 스크롤 위치 저장 (선택 사항, 필요시)
-                // onPressed: () {
-                //   _savedHomeScrollOffset = _homeScrollController.hasClients ? _homeScrollController.offset : 0.0;
-                //   Scaffold.of(context).openDrawer();
-                // },
-                icon: CircleAvatar(
-                  backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
-                      ? CachedNetworkImageProvider(photoUrl)
-                      : null,
-                  child: (photoUrl == null || photoUrl.isEmpty)
-                      ? const Icon(Icons.person)
-                      : null,
-                ),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-              ),
-            ),
 
-      // ↓↓↓ 기존 title 로직 (위치 필터 열기/타이틀 텍스트 구성 등)
-      title: InkWell(
-        onTap: () async {
+    Widget leadingWidget = (_bottomNavIndex == 0 &&
+            _currentHomePageContent != null)
+        ? IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              setState(() {
+                _currentHomePageContent = null;
+                _appBarTitleKey = 'main.myTown'; // 키로 저장
+              });
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (_homeScrollController.hasClients) {
+                  _homeScrollController.jumpTo(_savedHomeScrollOffset);
+                }
+              });
+            },
+          )
+        : Builder(
+            builder: (context) => IconButton(
+              icon: CircleAvatar(
+                backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
+                    ? CachedNetworkImageProvider(photoUrl)
+                    : null,
+                child: (photoUrl == null || photoUrl.isEmpty)
+                    ? const Icon(Icons.person)
+                    : null,
+              ),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+            ),
+          );
+
+    Widget trailingWidget = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _LanguageMenu(),
+        IconButton(
+          tooltip: 'notifications.title'.tr(),
+          icon: _totalUnreadNotifications > 0
+              ? Badge(
+                  label: Text('$_totalUnreadNotifications'),
+                  child: const Icon(Icons.notifications),
+                )
+              : const Icon(Icons.notifications_none),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const NotificationListScreen()),
+            );
+          },
+        ),
+      ],
+    );
+
+    final subtitle = _getAppBarSubTitle();
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(110),
+      child: BlingHeader(
+        showTitleRow: true,
+        title: '${_appBarTitleKey.tr()} $subtitle',
+        onChange: () async {
           final result = await Navigator.of(context).push<Map<String, String?>>(
             MaterialPageRoute(
                 builder: (_) => LocationFilterScreen(userModel: _userModel)),
@@ -802,7 +820,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
           if (result != null && mounted) {
             final processedFilter = <String, String?>{};
-            // ✅ 타이틀은 키만 유지하고, 화면에서 .tr()로 번역합니다.
             String newTitleKey = 'main.myTown';
 
             if (result['kel'] != null && result['kel']!.isNotEmpty) {
@@ -825,14 +842,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             setState(() {
               _activeLocationFilter =
                   processedFilter.isNotEmpty ? processedFilter : null;
-              // 홈 루트일 때만 상단 타이틀을 '내 동네' 키로 변경
               if (_currentHomePageContent == null) {
-                _appBarTitleKey = newTitleKey; // 키 저장
+                _appBarTitleKey = newTitleKey;
               }
-              // 섹션 화면에서는 타이틀을 유지(예: main.tabs.auction)
             });
 
-            // ✅ [Option A - refined] 섹션 화면이 열려 있으면 해당 섹션을 재생성하여 필터 반영
             if (_currentHomePageContent != null &&
                 _currentSection != AppSection.home &&
                 _currentSection != AppSection.board) {
@@ -840,58 +854,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             }
           }
         },
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ✅ 항상 build 시점에 번역되도록 .tr() 호출
-            // 👇 [수정] 메인 타이틀도 Flexible로 감싸서 공간을 유연하게 차지하도록 변경
-            Flexible(
-              child: Text(
-                _appBarTitleKey.tr(),
-                style: GoogleFonts.inter(
-                    fontWeight: FontWeight.bold, fontSize: 16),
-                overflow: TextOverflow.ellipsis, // 글자가 길면 ...으로 표시
-                maxLines: 1, // 한 줄만 표시
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                _getAppBarSubTitle(),
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const Icon(Icons.arrow_drop_down, size: 24),
-          ],
-        ),
+        onSearchTap: _onSearchRequested,
+        leading: leadingWidget,
+        trailing: trailingWidget,
       ),
-
-      centerTitle: true, // 기존과 동일하게 가운데 정렬
-      // ↓↓↓ 기존 actions 그대로
-      actions: [
-        _LanguageMenu(),
-        // [Task 96] 알림 아이콘 버튼 수정
-        IconButton(
-          tooltip: 'notifications.title'.tr(),
-          icon: _totalUnreadNotifications > 0
-              ? Badge(
-                  label: Text('$_totalUnreadNotifications'),
-                  child: const Icon(Icons.notifications),
-                )
-              : const Icon(Icons.notifications_none),
-          onPressed: () {
-            // Task 95에서 생성한 알림 목록 화면으로 이동
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const NotificationListScreen()),
-            );
-          },
-        ),
-      ],
-
-      // 선택 옵션: 액션 버튼을 흰색 동글칩으로 감쌀지 여부 (원하면 true 유지)
-      pillActions: true,
     );
   }
 
@@ -1074,6 +1040,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     }
 
     return Scaffold(
+      backgroundColor: BlingColors.surface,
       appBar: _buildAppBar(),
       drawer: _buildAppDrawer(_userModel),
       body: IndexedStack(
@@ -1421,8 +1388,14 @@ class SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: GrabAppBarShell(
-          title: Text(tempSearchQuery ?? 'main.bottomNav.search'.tr())),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(110),
+        child: BlingHeader(
+          showTitleRow: true,
+          title: tempSearchQuery ?? 'main.bottomNav.search'.tr(),
+          onSearchTap: () {},
+        ),
+      ),
       body: Center(
           child: Text(tempSearchQuery != null
               ? "'$tempSearchQuery' ${'search.sheet.comingSoon'.tr()}"
