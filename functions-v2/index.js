@@ -868,6 +868,60 @@ exports.initialproductanalysis = onCall(CALL_OPTS, async (request) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// [V3.1 NEW] 신규 상품 등록 시 AI Case 자동 생성 트리거
+// - 클라이언트가 addProduct()로 직접 등록한 경우에도 ai_cases 기록을 남기기 위함.
+// ---------------------------------------------------------------------------
+exports.createAiCaseOnRegistration = onDocumentCreated(
+    {document: "products/{productId}", region: "asia-southeast2"},
+    async (event) => {
+      const snapshot = event.data;
+      if (!snapshot) return;
+
+      const productId = event.params.productId;
+      const data = snapshot.data();
+
+      // 1. AI 리포트가 포함된 상품인지 확인
+      if (!data || !data.aiReport) return;
+
+      // 2. 이미 케이스가 연결되어 있는지 확인 (중복 방지)
+      if (data.lastAiCaseId) return;
+
+      logger.info(`[Auto-Case] Generating ai_case for new product ${productId}`);
+
+      const db = getFirestore();
+      const caseRef = db.collection("ai_cases").doc();
+      const caseId = caseRef.id;
+      const now = FieldValue.serverTimestamp();
+
+      // 3. ai_cases 문서 생성
+      const aiCaseData = {
+        caseId: caseId,
+        productId: productId,
+        sellerId: data.userId || "unknown",
+        buyerId: null,
+        stage: "enhancement",
+        status: "completed",
+        aiResult: data.aiReport,
+        evidenceImageUrls: data.imageUrls || [],
+        verdict: data.aiVerificationStatus === "suspicious" ? "suspicious" : "safe",
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      // 4. Batch Write (Case 생성 + 상품에 ID 연결)
+      const batch = db.batch();
+      batch.set(caseRef, aiCaseData);
+      batch.update(snapshot.ref, {
+        lastAiCaseId: caseId,
+        lastAiVerdict: aiCaseData.verdict,
+      });
+
+      await batch.commit();
+      logger.info(`✅ [Auto-Case] Created ${caseId} for product ${productId}`);
+    },
+);
+
 
 // Note: V2 helper 'normalizeFinalReportShape' removed in V3 refactor.
 
