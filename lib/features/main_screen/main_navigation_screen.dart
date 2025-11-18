@@ -414,6 +414,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
     late Widget nextScreen;
     late String titleKey;
+    // 동적 타이틀(카테고리 이름 등)을 위한 변수
+    // String? dynamicTitle;
+
     switch (section) {
       case AppSection.localNews:
         titleKey = 'main.tabs.localNews';
@@ -449,9 +452,25 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           locationFilter: activeLocationFilter,
           autoFocusSearch: autoFocus,
           searchNotifier: _searchActivationNotifier,
+          // ✅ [추가] 카테고리 탭 변경 시 앱바 타이틀 업데이트 콜백
+          onTitleChanged: (String newTitle) {
+            setState(() {
+              // _appBarTitleKey가 아닌 별도 변수를 쓰거나,
+              // 단순화를 위해 _appBarTitleKey에 직접 텍스트를 넣고
+              // tr() 호출 시 키가 없으면 텍스트 그대로 나오게 하는 방식을 활용할 수 있음.
+              // 하지만 가장 안전한 방법은 화면 갱신을 유도하는 것입니다.
+              // 여기서는 _getAppBarSubTitle 로직과 충돌하지 않게
+              // 현재 화면 컨텐츠(_currentHomePageContent) 상태에서 타이틀을 관리하는 구조가 필요하나,
+              // 기존 구조상 _appBarTitleKey를 덮어쓰는 것이 가장 빠릅니다.
+              // (참고: .tr()은 키가 없으면 키 자체를 리턴하므로,
+              //  newTitle이 번역된 문자열이라면 그대로 표시됩니다.)
+              _appBarTitleKey = newTitle;
+            });
+          },
         );
         break;
       case AppSection.localStores:
+        // ... (나머지 케이스 유지)
         titleKey = 'main.tabs.localStores';
         nextScreen = LocalStoresScreen(
           userModel: userModel,
