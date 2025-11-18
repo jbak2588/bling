@@ -15,6 +15,23 @@
 ///    - [Match] -> `_finalizeTakeover` (product_repository.completeTakeover 호출)
 ///    - [No Match] -> `_cancelReservation` (product_repository.cancelReservation 호출)
 /// ============================================================================
+/// ============================================================================
+/// Bling DocHeader (V3.1 Takeover UI Stabilization, 2025-11-18)
+/// Module        : Marketplace (AI 인수)
+/// File          : lib/features/marketplace/screens/ai_takeover_screen.dart
+/// Purpose       : 구매자 현장 인수 검증 화면.
+///
+/// [Major Fixes & Improvements]
+/// 1. [Bug Fix] Android Image Picker Duplication:
+///    - image_picker의 내부 압축을 끄고, 'flutter_image_compress' 패키지를 도입하여
+///      파일명 중복(scaled_0.png) 문제와 고용량 전송 오류(resource-exhausted) 동시 해결.
+/// 2. [Performance] OOM(Out of Memory) Prevention:
+///    - 고화질 원본 사진을 메모리(Bytes)에 적재하지 않고 File 경로로 관리하여 앱 튕김 방지.
+/// 3. [UX] Checklist-Based Capture:
+///    - 기존 스크롤 방식에서 '체크리스트 항목별 카드형 촬영 UI'로 개편하여
+///      사용자가 직관적으로 필요한 증거를 매핑할 수 있도록 개선.
+/// 4. [Architecture] Repository Pattern 적용 (AiCaseRepository 사용).
+/// ============================================================================
 // lib/features/marketplace/screens/ai_takeover_screen.dart
 library;
 

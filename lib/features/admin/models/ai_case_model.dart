@@ -1,4 +1,18 @@
 // lib/features/admin/models/ai_case_model.dart
+/// ============================================================================
+/// Bling DocHeader (V3.1 AI Case Model, 2025-11-18)
+/// Module        : Admin / Marketplace
+/// File          : lib/features/admin/models/ai_case_model.dart
+/// Purpose       : Firestore 'ai_cases' 컬렉션의 데이터 모델링.
+///
+/// [Schema Highlights]
+/// - caseId, productId, sellerId, buyerId: 핵심 식별자.
+/// - stage: 'enhancement'(등록) vs 'takeover'(인수).
+/// - status/verdict: 진행 상태 및 AI/관리자의 최종 판정 결과.
+/// - evidenceImageUrls: 현장 인수 시 촬영된 증거 사진 리스트 보존.
+/// - aiResult: Gemini가 반환한 전체 분석 리포트(JSON Map).
+/// ============================================================================
+library;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 

@@ -1,5 +1,20 @@
 // lib/features/admin/screens/ai_audit_screen.dart
 
+/// ============================================================================
+/// Bling DocHeader (V3.1 Admin Dashboard, 2025-11-18)
+/// Module        : Admin / AI Audit
+/// File          : lib/features/admin/screens/ai_audit_screen.dart
+/// Purpose       : AI 검수 및 인수 건수 통합 조회/관리 화면.
+///
+/// [Features]
+/// 1. List View: 'ai_cases' 컬렉션을 실시간 스트림으로 조회.
+/// 2. Filtering: 전체(All) / 현장 인수(Takeover) / 등록 검수(Enhancement) 탭 구분.
+///    - Firestore 복합 색인(stage ASC + createdAt DESC) 최적화 적용.
+/// 3. Status Indicators: AI 판정 결과(Pass/Fail/Suspicious)를 시각적으로 구분.
+/// 4. Navigation: 개별 건 클릭 시 상세 화면(AiCaseDetailScreen)으로 이동.
+/// ============================================================================
+library;
+
 import 'package:bling_app/features/admin/models/ai_case_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';

@@ -1,4 +1,21 @@
 // lib/features/admin/screens/ai_case_detail_screen.dart
+/// ============================================================================
+/// Bling DocHeader (V3.1 Admin Detail & Actions, 2025-11-18)
+/// Module        : Admin / AI Audit
+/// File          : lib/features/admin/screens/ai_case_detail_screen.dart
+/// Purpose       : AI 검수 건 상세 분석 및 관리자 권한 실행.
+///
+/// [Key Functionalities]
+/// 1. Side-by-Side Comparison:
+///    - 'Original Photos'(판매자)와 'Takeover Photos'(구매자) 탭을 오가며
+///      동일성 및 하자 여부를 관리자가 육안으로 교차 검증 가능.
+/// 2. Deep Dive: AI가 생성한 Raw JSON 리포트(reason, discrepancies) 전체 열람.
+/// 3. Admin Actions (Dispute Resolution):
+///    - [Approve]: AI가 거절했더라도 관리자 직권으로 거래 확정(Sold).
+///    - [Reject]: AI가 승인했더라도 관리자 직권으로 거래 취소(Selling 복구).
+/// ============================================================================
+///
+library;
 
 import 'dart:convert';
 import 'package:bling_app/features/admin/models/ai_case_model.dart';

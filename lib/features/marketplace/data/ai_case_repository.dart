@@ -1,4 +1,18 @@
 // lib/features/marketplace/data/ai_case_repository.dart
+/// ============================================================================
+/// Bling DocHeader (V3.1 AI Case Repository, 2025-11-18)
+/// Module        : Marketplace / Admin
+/// File          : lib/features/marketplace/data/ai_case_repository.dart
+/// Purpose       : AI 검수/인수 데이터('ai_cases') 및 증거 자료('ai_evidence') 관리.
+///
+/// [Key Features]
+/// 1. Evidence Upload: 현장 사진을 'ai_evidence/{userId}/{date}/takeover' 경로에
+///    안전하게 저장 (flutter_image_compress 적용).
+/// 2. Backend Calls: 'verifyProductOnSite' 등 Cloud Functions 호출 래핑.
+/// 3. Admin Actions: 관리자 직권 승인/반려 시 'ai_cases'와 'products'의 상태를
+///    동시에 변경하는 트랜잭션(Batch Write) 로직 제공 ('resolveCaseByAdmin').
+/// ============================================================================
+library;
 
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';

@@ -82,6 +82,24 @@
  * ============================================================================
  */
 
+/**
+ * ============================================================================
+ * Bling DocHeader (V3.1 AI Full Inspection & Audit System, 2025-11-18)
+ * Module        : AI Verification (Marketplace)
+ * File          : functions-v2/index.js
+ * Updates       :
+ * 1. [Architecture] 'ai_cases' 컬렉션 도입: 모든 AI 요청을 개별 사건(Case)으로 기록하여
+ * 이력 추적 및 관리자 감사를 가능하게 함. (Dual Write Strategy 적용)
+ * 2. [Logic] 'verifyProductOnSite' (현장 인수) 고도화:
+ * - 이미지 참조 제한 해제 (원본 10장 + 현장 20장 전수 검사).
+ * - 프롬프트 강화: '설정 화면'과 '기기 외관'의 차이를 이해하고,
+ * 원본 리포트(Full Report)와 대조하여 '새로운 파손'만 잡아내도록 지능화.
+ * 3. [Trigger] 'createAiCaseOnRegistration' 추가:
+ * - 상품 등록 시점에도 자동으로 'ai_cases' 로그를 생성하여 관리자 페이지에 즉시 반영.
+ * 4. [Stability] 데이터 무결성 강화 (sellerId undefined 방지, JSON 파싱 안전장치).
+ * ============================================================================
+ */
+
 // (파일 내용...)
 const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const {onDocumentUpdated, onDocumentCreated} = require("firebase-functions/v2/firestore");

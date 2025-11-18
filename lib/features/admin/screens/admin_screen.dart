@@ -1,4 +1,7 @@
 // lib/features/admin/screens/admin_screen.dart
+// (기존 파일 상단에 추가)
+/// [V3.1 Update] AI Audit Log 메뉴 추가 (AI 검수 이력 관리)
+library;
 
 import 'package:bling_app/features/admin/screens/admin_product_detail_screen.dart'; // ✅ 상세 화면 import
 import 'package:bling_app/features/admin/screens/ai_audit_screen.dart'; // [New] AI 감사 화면 import
