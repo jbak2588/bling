@@ -108,11 +108,7 @@
       }
     }
   },
-  "notifications": {
-    "title": "Notifikasi",
-    "error": "Gagal memuat notifikasi.",
-    "empty": "Belum ada notifikasi."
-  },
+  
   "drawer": {
     "editProfile": "Ubah Profil",
     "bookmarks": "Markah",
@@ -441,21 +437,37 @@
   },
   "settings": {
     "title": "Pengaturan",
+    "account": "Akun & Keamanan",
     "accountPrivacy": "Akun & Privasi",
+    "privacy": "Privasi",
+    "blockedUsers": "Pengguna Diblokir",
+    "app": "Pengaturan Aplikasi",
+    "notificationsTitle": "Pengaturan Pemberitahuan",
     "notifications": {
       "loadError": "loadError",
       "saveSuccess": "saveSuccess",
       "saveError": "saveError",
-      "scopeTitle": "scopeTitle",
-      "scopeDescription": "scopeDescription",
+      "scopeTitle": "Ruang Lingkup Notifikasi",
+      "scopeDescription": "Pilih cakupan geografis yang ingin Anda terima notifikasinya.",
       "scope": {
-        "$scope": "$scope"
+        "rt": "RT",
+        "rw": "RW",
+        "kel": "Kelurahan",
+        "kec": "Kecamatan"
       },
-      "scopeLabel": "scopeLabel",
-      "tagsTitle": "tagsTitle",
-      "tagsDescription": "tagsDescription"
+      "scopeLabel": "Pilih cakupan",
+      "tagsTitle": "Langganan Berita Lokal",
+      "tagsDescription": "Hanya terima notifikasi untuk topik berita lokal yang dipilih."
     },
-    "appInfo": "Info Aplikasi"
+    "language": "Bahasa",
+    "languageSelect": "Pilih Bahasa",
+    "info": "Info & Dukungan",
+    "appInfo": "Info Aplikasi",
+    "logout": {
+      "button": "Keluar",
+      "confirmTitle": "Keluar",
+      "confirmBody": "Apakah Anda yakin ingin keluar?"
+    }
   },
   "friendRequests": {
     "title": "Permintaan Pertemanan",

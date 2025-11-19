@@ -178,7 +178,7 @@ class _NotificationSettingsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('settings.notifications'.tr()),
+        title: Text('settings.notificationsTitle'.tr()),
         actions: [
           // 저장 버튼
           if (!_isLoading)

@@ -871,7 +871,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       centerTitle: true, // 기존과 동일하게 가운데 정렬
       // ↓↓↓ 기존 actions 그대로
       actions: [
-        _LanguageMenu(),
         // [Task 96] 알림 아이콘 버튼 수정
         IconButton(
           tooltip: 'notifications.title'.tr(),
@@ -1356,60 +1355,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       title: Text(titleKey.tr(), style: GoogleFonts.inter(fontSize: 15)),
       trailing: Icon(isCompleted ? Icons.check_circle : Icons.cancel,
           color: isCompleted ? Colors.green : Colors.grey, size: 22),
-    );
-  }
-}
-
-class _LanguageMenu extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final code = context.locale.languageCode; // 'id' | 'ko' | 'en'
-    final short = (code == 'id')
-        ? 'ID'
-        : (code == 'ko')
-            ? 'KO'
-            : 'EN';
-
-    return PopupMenuButton<Locale>(
-      tooltip: 'Change Language',
-      onSelected: (loc) {
-        // 팝업 닫힘(라우트 pop) 이후 프레임에 로케일 변경
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final el = EasyLocalization.of(context);
-          if (el != null) el.setLocale(loc);
-        });
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: Locale('id'),
-          child: Text('language.id'.tr()),
-        ),
-        PopupMenuItem(
-          value: Locale('ko'),
-          child: Text('language.ko'.tr()),
-        ),
-        PopupMenuItem(
-          value: Locale('en'),
-          child: Text('language.en'.tr()),
-        ),
-      ],
-      // 아이콘 + 현재 코드(ID/KO/EN)
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.language),
-            const SizedBox(width: 6),
-            Text(
-              short,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-            const SizedBox(width: 4),
-            const Icon(Icons.arrow_drop_down),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -13,25 +13,19 @@
  * - '친구 요청' 및 '보낸 요청' 메뉴 삭제 (기능 폐기)
  */
 
-// import 'package:bling_app/features/my_bling/screens/blocked_users_screen.dart';
 import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart';
-import 'package:bling_app/features/my_bling/screens/settings_screen.dart';
+import 'package:bling_app/features/my_bling/screens/settings_screen.dart'; // ✅ 설정 화면 import 확인
 import 'package:bling_app/features/my_bling/widgets/user_bookmark_list.dart';
 import 'package:bling_app/features/my_bling/widgets/user_friend_list.dart';
 import 'package:bling_app/features/my_bling/widgets/user_post_list.dart';
 import 'package:bling_app/features/my_bling/widgets/user_product_list.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-// [v2.1] 삭제된 파일 임포트 제거
-// import 'friend_requests_screen.dart';
-// import 'sent_friend_requests_screen.dart';
 
 class MyBlingScreen extends StatefulWidget {
   final UserModel userModel;
@@ -72,6 +66,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
       appBar: AppBar(
         title: Text('myBling.title'.tr()),
         actions: [
+          // ✅ [설정 아이콘] SettingsScreen 연결
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {
@@ -206,21 +201,6 @@ class _MyBlingScreenState extends State<MyBlingScreen>
           ],
         ),
       ),
-      // [작업 10] my_bling_screen의 구문 오류 지점이 이 ListView였을 가능성이 높음.
-      // settings_screen.dart로 이동됨.
-      /*
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // V V V --- [수정] 설정 페이지로 이동 --- V V V
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => const SettingsScreen()));
-          // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
-        },
-        child: const Icon(Icons.settings_outlined),
-      ),
-      */
     );
   }
 

@@ -161,13 +161,13 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     });
 
     if (widget.onTitleChanged != null) {
-      final titleKey = category.id == 'all' ? 'main.tabs.marketplace' : null;
-      if (titleKey != null) {
-        widget.onTitleChanged!(titleKey.tr());
-      } else {
-        widget
-            .onTitleChanged!(category.displayName(context.locale.languageCode));
-      }
+      // Always pass a key (not a translated string) so the caller can decide
+      // whether to call .tr() or treat it as raw text. Passing translated
+      // strings previously caused mismatches when the app expected an i18n key.
+      final titleKey = category.id == 'all'
+          ? 'main.tabs.marketplace'
+          : 'category.${category.slug}';
+      widget.onTitleChanged!(titleKey);
     }
   }
 

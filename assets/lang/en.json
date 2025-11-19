@@ -104,11 +104,7 @@
     },
     "results": "results"
   },
-  "notifications": {
-    "title": "Notifications",
-    "error": "Failed to load notifications.",
-    "empty": "No notifications yet."
-  },
+  
   "drawer": {
     "editProfile": "Edit Profile",
     "bookmarks": "Bookmarks",
@@ -433,21 +429,37 @@
   },
   "settings": {
     "title": "Settings",
+    "account": "Account & Security",
     "accountPrivacy": "Account & Privacy",
+    "privacy": "Privacy",
+    "blockedUsers": "Blocked Users",
+    "app": "App Settings",
+    "notificationsTitle": "Notification Settings",
     "notifications": {
       "loadError": "loadError",
       "saveSuccess": "saveSuccess",
       "saveError": "saveError",
-      "scopeTitle": "scopeTitle",
-      "scopeDescription": "scopeDescription",
+      "scopeTitle": "Notification Scope",
+      "scopeDescription": "Select which geographic scope you want to receive notifications for.",
       "scope": {
-        "$scope": "$scope"
+        "rt": "RT",
+        "rw": "RW",
+        "kel": "Kelurahan",
+        "kec": "Kecamatan"
       },
-      "scopeLabel": "scopeLabel",
-      "tagsTitle": "tagsTitle",
-      "tagsDescription": "tagsDescription"
+      "scopeLabel": "Select scope",
+      "tagsTitle": "Local News Subscriptions",
+      "tagsDescription": "Only receive notifications for selected local news topics."
     },
-    "appInfo": "App Info"
+    "language": "Language",
+    "languageSelect": "Select Language",
+    "info": "Info & Support",
+    "appInfo": "App Info",
+    "logout": {
+      "button": "Log Out",
+      "confirmTitle": "Log Out",
+      "confirmBody": "Are you sure you want to log out?"
+    }
   },
   "friendRequests": {
     "title": "Received Friend Requests",
