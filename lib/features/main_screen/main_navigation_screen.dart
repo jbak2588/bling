@@ -302,105 +302,34 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
-  void _onBottomNavItemTapped(int index) {
+  // [UI 개선] 하단 탭 인덱스 처리 로직 변경
+  // 0: 홈, 1: 동네생활, 2: 등록(+), 3: 채팅, 4: 마이
+  void _onBottomNavTapped(int index) {
+    // 1. 등록 버튼 (가운데)
     if (index == 2) {
-      _onFloatingActionButtonTapped();
+      _onFloatingActionButtonTapped(); // 기존 등록 로직 재사용
       return;
     }
-    // ✅ 검색 아이콘(index 3) 탭 시 전역 검색 시트 노출로 일원화
-    if (index == 3) {
-      _onSearchRequested();
-      return;
-    }
-    if (index == 0 && _currentHomePageContent != null) {
-      setState(() {
-        _currentHomePageContent = null;
-        _appBarTitleKey = 'main.myTown'; // 홈으로 돌아올 때 키 초기화
-        _currentSection = AppSection.home; // 섹션도 홈으로 복원
-      });
-    }
+
+    // 2. 탭 이동
     setState(() {
       _bottomNavIndex = index;
+
+      // 홈 탭 선택 시 초기화 로직
+      if (index == 0) {
+        _currentHomePageContent = null;
+        _appBarTitleKey = 'main.myTown';
+        _currentSection = AppSection.home;
+      }
     });
   }
 
-  /// ✅ [신규] 하단 검색 아이콘 탭 시 메인 로직
-  void _onSearchRequested() {
-    if (!mounted) return;
-    if (_currentSection == AppSection.home) {
-      // 시나리오 1: 홈이면 전역 검색 시트
-      _showGlobalSearchSheet(context);
-    } else {
-      // 시나리오 2: 피드 내부면 인라인 검색 활성화 신호
+  // Note: _onSearchRequested removed; search handled via search activation notifier elsewhere.
 
-      // ❗ [버그 수정]
-      // 동일한 값을 다시 할당하면 ValueNotifier가 리스너를 호출하지 않습니다.
-      // _searchActivationNotifier.value = _currentSection; // ❌ 기존 로직
-
-      // ✅ [수정] null로 먼저 초기화하여 값이 '변경'되었음을 보장합니다.
-      _searchActivationNotifier.value = null;
-      // 다음 프레임에서 실제 값으로 설정합니다.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _searchActivationNotifier.value = _currentSection;
-        }
-      });
-    }
-  }
-
-  /// ✅ [신규] 메인(홈 루트)에서 사용되는 전역 검색 시트
-  void _showGlobalSearchSheet(BuildContext ctx) {
-    showModalBottomSheet(
-      context: ctx,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (bctx) {
-        return SafeArea(
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              _searchSheetItem(bctx, Icons.article_rounded,
-                  'main.tabs.localNews', AppSection.localNews),
-              _searchSheetItem(bctx, Icons.work_outline_rounded,
-                  'main.tabs.jobs', AppSection.jobs),
-              _searchSheetItem(bctx, Icons.report_gmailerrorred_rounded,
-                  'main.tabs.lostAndFound', AppSection.lostAndFound),
-              _searchSheetItem(bctx, Icons.store_mall_directory_rounded,
-                  'main.tabs.marketplace', AppSection.marketplace),
-              _searchSheetItem(bctx, Icons.storefront_rounded,
-                  'main.tabs.localStores', AppSection.localStores),
-              _searchSheetItem(bctx, Icons.sentiment_satisfied_alt_rounded,
-                  'main.tabs.findFriends', AppSection.findFriends),
-              _searchSheetItem(bctx, Icons.groups_rounded, 'main.tabs.clubs',
-                  AppSection.clubs),
-              _searchSheetItem(bctx, Icons.house_rounded,
-                  'main.tabs.realEstate', AppSection.realEstate),
-              _searchSheetItem(bctx, Icons.gavel_rounded, 'main.tabs.auction',
-                  AppSection.auction),
-              _searchSheetItem(bctx, Icons.video_camera_back_rounded,
-                  'main.tabs.pom', AppSection.pom),
-              const SizedBox(height: 12),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  // _showGlobalSearchSheet removed; global search UI handled elsewhere.
 
   /// ✅ [신규] 전역 검색 시트 아이템
-  Widget _searchSheetItem(BuildContext sheetContext, IconData icon,
-      String titleKey, AppSection section) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(titleKey.tr()),
-      subtitle: Text('main.search.hint.globalSheet'.tr(args: [titleKey.tr()])),
-      trailing: const Icon(Icons.search_rounded),
-      onTap: () {
-        Navigator.of(sheetContext).pop();
-        _buildFeedScreen(section, autoFocus: true);
-      },
-    );
-  }
+  // _searchSheetItem removed — global search sheet items handled in separate widget.
 
   /// ✅ [신규] AppSection 기반으로 피드 화면을 생성하고 이동
   void _buildFeedScreen(AppSection section, {bool autoFocus = false}) {
@@ -1032,44 +961,53 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // [UI 개선] 하단 탭 구성에 맞춰 페이지 리스트 재정의
     final List<Widget> pages = [
+      // 0. 홈
       _currentHomePageContent ??
           HomeScreen(
-            // ✅ [스크롤 위치 보존] ScrollController 전달
             controller: _homeScrollController,
             userModel: _userModel,
             activeLocationFilter: _activeLocationFilter,
-            searchNotifier: _searchActivationNotifier, // ✅ Notifier 전달
-            // onIconTap 콜백은 이미 스크롤 위치 저장을 처리함 (_navigateToPage 내부)
+            searchNotifier: _searchActivationNotifier,
             onIconTap: _navigateToPage,
           ),
+      // 1. 동네생활 (게시판) - 활성 상태 체크
       if (_isKelurahanBoardActive && _userModel != null)
         KelurahanBoardScreen(userModel: _userModel as UserModel),
-      const SearchScreen(),
+      // 2. (등록 버튼 자리 - 페이지 없음, 더미)
+      const SizedBox.shrink(),
+      // 3. 채팅
       const ChatListScreen(),
-      // Avoid forcing a null value into MyBlingScreen. If _userModel is not
-      // yet available, show a lightweight loading placeholder instead of
-      // using the null-check operator which causes a runtime exception.
+      // 4. 마이
       (_userModel != null)
           ? MyBlingScreen(
               userModel: _userModel as UserModel, onIconTap: _navigateToPage)
           : const Center(child: CircularProgressIndicator()),
     ];
 
-    // ✅ BottomAppBar 인덱스(0, [1], 3, 4, 5)를 실제 pages 인덱스에 매핑
-    // - '동네' 탭 활성: pages = [Home(0), Board(1), Search(2), Chat(3), My(4)]
-    //   => nav index >=3 는 -1, 그 외는 그대로
-    // - '동네' 탭 비활성: pages = [Home(0), Search(1), Chat(2), My(3)]
-    //   => nav index >=3 는 -2, 그 외(0)는 그대로
+    // IndexedStack용 인덱스 보정 (게시판 비활성 시 인덱스 밀림 처리)
     int effectiveIndex;
     final hasBoardTab = _isKelurahanBoardActive && _userModel != null;
+
+    // _bottomNavIndex: 0(홈), 1(동네), 2(등록), 3(채팅), 4(마이)
+    // pages: [Home, Board(opt), Dummy, Chat, My]
     if (hasBoardTab) {
-      effectiveIndex = (_bottomNavIndex >= 3)
-          ? _bottomNavIndex - 1
-          : _bottomNavIndex; // 0 또는 1
+      // Board가 있으면 인덱스 그대로 매핑 (단, 2는 등록버튼이므로 제외)
+      effectiveIndex = _bottomNavIndex;
     } else {
-      effectiveIndex =
-          (_bottomNavIndex >= 3) ? _bottomNavIndex - 2 : _bottomNavIndex; // 0
+      // Board가 없으면:
+      // 0(홈) -> 0
+      // 1(동네 - 비활성) -> (처리 안함/팝업)
+      // 3(채팅) -> pages[2]
+      // 4(마이) -> pages[3]
+      if (_bottomNavIndex == 0) {
+        effectiveIndex = 0;
+      } else if (_bottomNavIndex >= 3) {
+        effectiveIndex = _bottomNavIndex - 1;
+      } else {
+        effectiveIndex = 0;
+      }
     }
 
     return Scaffold(
@@ -1079,83 +1017,90 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         index: effectiveIndex,
         children: pages,
       ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Row(
-          // [수정] mainAxisAlignment 제거
-          children: <Widget>[
-            // ✅ '동네' 탭은 항상 표시. 비활성 상태면 흐리게 처리하고 탭 시 안내 팝업 노출
-            Expanded(child: _buildBottomNavItem(icon: Icons.home, index: 0)),
-            Expanded(
-                child: _buildBottomNavItem(
-                    icon: Icons.holiday_village_outlined, index: 1)),
-            const SizedBox(width: 40),
-            Expanded(child: _buildBottomNavItem(icon: Icons.search, index: 3)),
-            Expanded(
-                child: _buildBottomNavItem(
-                    icon: Icons.chat_bubble_outline,
-                    index: 4,
-                    badgeCount: _totalUnreadCount)),
-            Expanded(
-                child:
-                    _buildBottomNavItem(icon: Icons.person_outline, index: 5)),
+      // [UI 개선] BottomNavigationBar로 교체 (균형 잡힌 배치 + 텍스트 라벨)
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          // 클릭 효과(물결) 색상 조정
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _bottomNavIndex,
+          onTap: (index) {
+            final hasBoardTab = _isKelurahanBoardActive && _userModel != null;
+            if (index == 1 && !hasBoardTab) {
+              _showBoardActivationPopup();
+              return;
+            }
+            _onBottomNavTapped(index);
+          },
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          selectedItemColor: Theme.of(context).primaryColor,
+
+          // ✅ [UI 개선] 비활성 아이콘도 회색 대신 브랜드 컬러(연하게) 적용
+          unselectedItemColor:
+              Theme.of(context).primaryColor.withValues(alpha: 0.6),
+          selectedFontSize: 10,
+          unselectedFontSize: 10,
+          elevation: 8,
+          items: [
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.home_outlined),
+              activeIcon: const Icon(Icons.home),
+              label: 'main.bottomNav.home'.tr(),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.holiday_village_outlined),
+              activeIcon: const Icon(Icons.holiday_village),
+              label: 'main.bottomNav.board'.tr(),
+            ),
+            // [중앙] 등록 버튼 (FAB 대체)
+            BottomNavigationBarItem(
+              icon: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context)
+                          .primaryColor
+                          .withAlpha((0.3 * 255).round()),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(10),
+                child: const Icon(Icons.add, color: Colors.white, size: 28),
+              ),
+              label: '',
+            ),
+            BottomNavigationBarItem(
+              icon: Badge(
+                isLabelVisible: _totalUnreadCount > 0,
+                label: Text('$_totalUnreadCount'),
+                child: const Icon(Icons.chat_bubble_outline),
+              ),
+              activeIcon: Badge(
+                isLabelVisible: _totalUnreadCount > 0,
+                label: Text('$_totalUnreadCount'),
+                child: const Icon(Icons.chat_bubble),
+              ),
+              label: 'main.bottomNav.chat'.tr(),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.person_outline),
+              activeIcon: const Icon(Icons.person),
+              label: 'main.bottomNav.myBling'.tr(),
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'home_main_fab',
-        onPressed: _onFloatingActionButtonTapped,
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
-  Widget _buildBottomNavItem(
-      {required IconData icon, required int index, int badgeCount = 0}) {
-    String tooltipKey = '';
-    if (index == 0) {
-      tooltipKey = 'main.bottomNav.home';
-    } else if (index == 1) {
-      // ✅ 항상 '동네' 탭으로 표시
-      tooltipKey = 'main.bottomNav.board';
-    } else if (index == 3) {
-      tooltipKey = 'main.bottomNav.search';
-    } else if (index == 4) {
-      tooltipKey = 'main.bottomNav.chat';
-    } else if (index == 5) {
-      tooltipKey = 'main.bottomNav.myBling';
-    }
-    final hasBoardTab = _isKelurahanBoardActive && _userModel != null;
-    final bool isBoardDisabled = (index == 1 && !hasBoardTab);
-    final isSelected = _bottomNavIndex == index && !isBoardDisabled;
-    Widget iconWidget = Icon(
-      icon,
-      color: isBoardDisabled
-          ? Colors.grey.shade400
-          : (isSelected ? Theme.of(context).primaryColor : Colors.grey),
-    );
-    iconWidget = badgeCount > 0
-        ? Badge(label: Text('$badgeCount'), child: iconWidget)
-        : iconWidget;
-    return IconButton(
-      tooltip: tooltipKey.isNotEmpty ? tooltipKey.tr() : '',
-      icon: iconWidget,
-      onPressed: () {
-        if (isBoardDisabled) {
-          _showBoardActivationPopup();
-          return;
-        }
-        // 하단 검색 아이콘도 태그 입력으로 통일
-        if (index == 3) {
-          _onSearchRequested();
-          return;
-        }
-        _onBottomNavItemTapped(index);
-      },
-    );
-  }
+  // _buildBottomNavItem removed — navigation now handled by BottomNavigationBar
 
   Widget _buildAppDrawer(UserModel? userModel) {
     return Drawer(

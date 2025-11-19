@@ -30,7 +30,7 @@ library;
 
 /// 아래부터 실제 코드
 
-import 'package:bling_app/features/categories/constants/category_icons.dart';
+// import removed: category_icons is now used via BlingIcon helper
 import 'package:bling_app/features/categories/data/firestore_category_repository.dart';
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
@@ -38,6 +38,7 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:bling_app/features/shared/widgets/bling_icon.dart'; // ✅ BlingIcon import
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 import '../models/product_model.dart';
@@ -421,12 +422,16 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
       Category category, bool isSelected, String langCode, VoidCallback onTap,
       {required bool isSub}) {
     final theme = Theme.of(context);
-    final color = isSelected ? theme.primaryColor : Colors.grey.shade600;
+
+    // ✅ [UI 개선] 비활성 상태여도 회색이 아닌 '브랜드 컬러'를 유지하되, 투명도로 구분
+    final color = isSelected
+        ? theme.primaryColor
+        : theme.primaryColor.withValues(alpha: 0.6);
     final bgColor = isSelected
-        ? theme.primaryColor.withValues(alpha: 0.08)
+        ? theme.primaryColor.withValues(alpha: 0.1)
         : Colors.transparent;
-    // ✅ 텍스트 스타일: 폰트 사이즈 축소, 자간 조정, 볼드 처리
-    final fontWeight = isSelected ? FontWeight.w700 : FontWeight.w500;
+    // ✅ 텍스트 스타일: 선택시 볼드, 비선택시는 보통 폰트
+    final fontWeight = isSelected ? FontWeight.w700 : FontWeight.normal;
 
     return InkWell(
       onTap: onTap,
@@ -473,7 +478,8 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
-                      child: CategoryIcons.widget(
+                      // ✅ [UI 개선] BlingIcon 적용
+                      child: BlingIcon(
                         category.effectiveIcon(forParent: !isSub),
                         size: isSub ? 22 : 26,
                         color: color,
@@ -482,8 +488,9 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                   ),
                 ),
                 SizedBox(height: spacingHeight),
-                SizedBox(
-                  width: constraints.maxWidth,
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                      maxWidth: constraints.maxWidth, maxHeight: labelHeight),
                   child: Text(
                     category.displayName(langCode),
                     style: TextStyle(
