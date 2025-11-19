@@ -24,10 +24,12 @@
 /// User Impact   : 대분류/소분류 탭을 통해 원하는 카테고리의 상품을 쉽게 탐색할 수 있습니다.
 /// Feature Links : MainNavigationScreen (앱바 타이틀 연동)
 /// Data Model    : Firestore `products`, `categories_v2`
+/// Notes         : '전체' 탭은 categoryParentId, 소분류 탭은 categoryId를 기준으로 쿼리합니다.
 /// ============================================================================
 library;
 
 /// 아래부터 실제 코드
+
 import 'package:bling_app/features/categories/constants/category_icons.dart';
 import 'package:bling_app/features/categories/data/firestore_category_repository.dart';
 import 'package:bling_app/features/categories/domain/category.dart';
@@ -46,7 +48,6 @@ class MarketplaceScreen extends StatefulWidget {
   final Map<String, String?>? locationFilter;
   final bool autoFocusSearch;
   final ValueNotifier<AppSection?>? searchNotifier;
-  // ✅ [신규] 앱바 타이틀 변경을 위한 콜백
   final Function(String title)? onTitleChanged;
 
   const MarketplaceScreen({
@@ -62,19 +63,48 @@ class MarketplaceScreen extends StatefulWidget {
   State<MarketplaceScreen> createState() => _MarketplaceScreenState();
 }
 
+// ✅ [UI 개선] SliverPersistentHeader를 위한 Delegate 클래스
+class _SubCategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final double minHeight;
+  final double maxHeight;
+
+  _SubCategoryHeaderDelegate({
+    required this.child,
+    required this.minHeight,
+    required this.maxHeight,
+  });
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox.expand(child: child);
+  }
+
+  @override
+  double get maxExtent => maxHeight;
+
+  @override
+  double get minExtent => minHeight;
+
+  @override
+  bool shouldRebuild(_SubCategoryHeaderDelegate oldDelegate) {
+    return maxHeight != oldDelegate.maxHeight ||
+        minHeight != oldDelegate.minHeight ||
+        child != oldDelegate.child;
+  }
+}
+
 class _MarketplaceScreenState extends State<MarketplaceScreen> {
-  // 리포지토리
   final _categoryRepo = FirestoreCategoryRepository();
 
-  // 검색칩 상태
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
   VoidCallback? _externalSearchListener;
 
-  // ✅ [카테고리] 상태 관리
-  // '전체' 탭을 위한 가상의 Category 객체 (ID: 'all')
+  // '전체' 탭을 위한 가상의 Category 객체
   final Category _allCategory = const Category(
     id: 'all',
     parentId: null,
@@ -85,27 +115,16 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     order: 0,
     active: true,
     isParent: true,
-    icon: 'ms:category',
+    icon: 'ms:grid_view',
   );
 
-  Category _selectedParent = const Category(
-    id: 'all',
-    parentId: null,
-    slug: 'all',
-    nameKo: '전체',
-    nameId: 'Semua',
-    nameEn: 'All',
-    order: 0,
-    active: true,
-    isParent: true,
-    icon: 'ms:category',
-  );
-
-  Category? _selectedSub; // null이면 해당 Parent의 '전체' 보기
+  late Category _selectedParent;
+  Category? _selectedSub;
 
   @override
   void initState() {
     super.initState();
+    _selectedParent = _allCategory;
 
     if (widget.autoFocusSearch) {
       _showSearchBar = true;
@@ -133,21 +152,22 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     if (mounted) setState(() {});
   }
 
-  /// 카테고리 탭 클릭 핸들러
   void _onParentTabSelected(Category category) {
     if (_selectedParent.id == category.id) return;
 
     setState(() {
       _selectedParent = category;
-      _selectedSub = null; // 대분류 변경 시 소분류 초기화
+      _selectedSub = null;
     });
 
-    // 앱바 타이틀 변경 요청
     if (widget.onTitleChanged != null) {
-      final title = category.id == 'all'
-          ? 'main.tabs.marketplace'.tr() // 전체인 경우 기본 타이틀
-          : category.displayName(context.locale.languageCode);
-      widget.onTitleChanged!(title);
+      final titleKey = category.id == 'all' ? 'main.tabs.marketplace' : null;
+      if (titleKey != null) {
+        widget.onTitleChanged!(titleKey.tr());
+      } else {
+        widget
+            .onTitleChanged!(category.displayName(context.locale.languageCode));
+      }
     }
   }
 
@@ -162,28 +182,26 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
   Widget build(BuildContext context) {
     final langCode = context.locale.languageCode;
 
-    // Firestore 쿼리 빌더
     Query<Map<String, dynamic>> buildQuery() {
       final userProv = widget.userModel?.locationParts?['prov'];
       Query<Map<String, dynamic>> query =
           FirebaseFirestore.instance.collection('products');
 
-      // 1. 지역 필터 (대분류 'prov' 기준)
+      // 1. 지역 필터
       if (userProv != null && userProv.isNotEmpty) {
         query = query.where('locationParts.prov', isEqualTo: userProv);
       }
 
-      // 2. 상태 필터 ('selling', 'reserved', 'sold')
+      // 2. 상태 필터
       query = query.where('status', whereIn: ['selling', 'reserved', 'sold']);
 
       // 3. 카테고리 필터
       if (_selectedParent.id != 'all') {
         if (_selectedSub != null && _selectedSub!.id != 'all') {
-          // 특정 소분류 선택
+          // 소분류 선택 시: categoryId 기준
           query = query.where('categoryId', isEqualTo: _selectedSub!.id);
         } else {
-          // 대분류 전체 (소분류 미선택 또는 '전체' 소분류)
-          // ProductModel에 'categoryParentId' 필드가 있어야 함 (ProductRepository 참고)
+          // 대분류 선택(전체) 시: categoryParentId 기준
           query =
               query.where('categoryParentId', isEqualTo: _selectedParent.id);
         }
@@ -198,130 +216,149 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     }
 
     return Scaffold(
-      body: Column(
-        children: [
-          // 1. 상단 대분류 탭 (아이콘 + 텍스트)
-          _buildParentCategoryTabs(langCode),
-
-          // 2. 하단 소분류 탭 (대분류가 선택되었을 때만 표시)
-          if (_selectedParent.id != 'all') _buildSubCategoryTabs(langCode),
-
-          // 3. 검색바 (조건부 표시)
-          if (_showSearchBar)
-            InlineSearchChip(
-              hintText: 'main.search.hint.marketplace'.tr(),
-              openNotifier: _chipOpenNotifier,
-              onSubmitted: (kw) =>
-                  _searchKeywordNotifier.value = kw.trim().toLowerCase(),
-              onClose: () {
-                setState(() => _showSearchBar = false);
-                _searchKeywordNotifier.value = '';
-              },
+      backgroundColor: Colors.white,
+      body: NestedScrollView(
+        floatHeaderSlivers: true, // 스크롤을 살짝 올리면 앱바(탭)가 바로 나타남
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            // 1. 대분류 탭 (SliverAppBar)
+            SliverAppBar(
+              pinned: false, // 스크롤 시 위로 사라짐
+              floating: true, // 스크롤 올리면 바로 나타남
+              snap: true, // 중간에 걸치지 않고 확 나타남
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.white,
+              elevation: 0,
+              // 높이를 내용물(탭)에 맞춤.
+              toolbarHeight: 100,
+              flexibleSpace: FlexibleSpaceBar(
+                background: _buildParentCategoryTabs(langCode),
+              ),
             ),
 
-          // 4. 상품 리스트
-          Expanded(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: buildQuery().snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  // 인덱스 에러 처리 힌트 제공
-                  if (snapshot.error
-                      .toString()
-                      .contains('failed-precondition')) {
-                    return Center(
-                        child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child:
-                          Text("인덱스 생성 필요: 콘솔 링크를 확인하세요.\n${snapshot.error}"),
-                    ));
-                  }
-                  return Center(
-                      child: Text('marketplace.error'.tr(
-                          namedArgs: {'error': snapshot.error.toString()})));
-                }
-
-                // 필터링 로직 (클라이언트 사이드 보정)
-                var allDocs = snapshot.data?.docs ?? [];
-
-                // 위치 상세 필터 (Kab/Kec/Kel)
-                allDocs = _applyLocationFilter(allDocs);
-
-                // 'sold' 상태 + 10일 경과 필터
-                allDocs = _applyStatusRules(allDocs);
-
-                // 검색 키워드 필터
-                final kw = _searchKeywordNotifier.value;
-                if (kw.isNotEmpty) {
-                  allDocs = allDocs.where((d) {
-                    final p = ProductModel.fromFirestore(d);
-                    final hay =
-                        ('${p.title} ${p.description} ${p.tags.join(' ')}')
-                            .toLowerCase();
-                    return hay.contains(kw);
-                  }).toList();
-                }
-
-                if (allDocs.isEmpty) {
-                  return Center(
-                      child: Text('marketplace.empty'.tr(),
-                          textAlign: TextAlign.center));
-                }
-
-                return ListView.separated(
-                  itemCount: allDocs.length,
-                  separatorBuilder: (context, index) => const Divider(
-                    height: 1,
-                    thickness: 1,
-                    indent: 16,
-                    endIndent: 16,
+            // 2. 소분류 탭 (SliverPersistentHeader)
+            // 대분류가 '전체'가 아닐 때만 표시
+            if (_selectedParent.id != 'all')
+              SliverPersistentHeader(
+                pinned: true, // 소분류 탭은 상단에 고정 (선택 사항: false면 같이 사라짐)
+                delegate: _SubCategoryHeaderDelegate(
+                  child: Container(
+                    color: Colors.white, // 배경색 확보
+                    child: _buildSubCategoryTabs(langCode),
                   ),
-                  itemBuilder: (context, index) {
-                    final product = ProductModel.fromFirestore(allDocs[index]);
-                    return ProductCard(
-                      key: ValueKey(product.id),
-                      product: product,
-                    );
+                  maxHeight: 110,
+                  minHeight: 110,
+                ),
+              ),
+
+            // 3. 검색바 (SliverToBoxAdapter)
+            if (_showSearchBar)
+              SliverToBoxAdapter(
+                child: InlineSearchChip(
+                  hintText: 'main.search.hint.marketplace'.tr(),
+                  openNotifier: _chipOpenNotifier,
+                  onSubmitted: (kw) =>
+                      _searchKeywordNotifier.value = kw.trim().toLowerCase(),
+                  onClose: () {
+                    setState(() => _showSearchBar = false);
+                    _searchKeywordNotifier.value = '';
                   },
+                ),
+              ),
+          ];
+        },
+        body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: buildQuery().snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              if (snapshot.error.toString().contains('failed-precondition')) {
+                return Center(
+                    child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text("인덱스 생성 필요: 콘솔 링크를 확인하세요.\n${snapshot.error}"),
+                ));
+              }
+              return Center(
+                  child: Text('marketplace.error'
+                      .tr(namedArgs: {'error': snapshot.error.toString()})));
+            }
+
+            var allDocs = snapshot.data?.docs ?? [];
+
+            allDocs = _applyLocationFilter(allDocs);
+            allDocs = _applyStatusRules(allDocs);
+
+            final kw = _searchKeywordNotifier.value;
+            if (kw.isNotEmpty) {
+              allDocs = allDocs.where((d) {
+                final p = ProductModel.fromFirestore(d);
+                final hay = ('${p.title} ${p.description} ${p.tags.join(' ')}')
+                    .toLowerCase();
+                return hay.contains(kw);
+              }).toList();
+            }
+
+            if (allDocs.isEmpty) {
+              return Center(
+                  child: Text('marketplace.empty'.tr(),
+                      textAlign: TextAlign.center));
+            }
+
+            return ListView.separated(
+              // NestedScrollView 내부 리스트는 padding top 0 권장
+              padding: EdgeInsets.zero,
+              itemCount: allDocs.length,
+              separatorBuilder: (context, index) => const Divider(
+                height: 1,
+                thickness: 1,
+                indent: 16,
+                endIndent: 16,
+                color: Color(0xFFEEEEEE),
+              ),
+              itemBuilder: (context, index) {
+                final product = ProductModel.fromFirestore(allDocs[index]);
+                return ProductCard(
+                  key: ValueKey(product.id),
+                  product: product,
                 );
               },
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  /// 대분류 탭 빌더
   Widget _buildParentCategoryTabs(String langCode) {
     return StreamBuilder<List<Category>>(
       stream: _categoryRepo.watchParents(activeOnly: true),
       builder: (context, snapshot) {
-        // 데이터 로딩 중이거나 없을 때에도 '전체' 탭은 보여줄 수 있음
         final categories = [_allCategory, ...(snapshot.data ?? [])];
 
         return Container(
-          height: 80, // 탭 높이
+          height: 100, // increased to fit icon tile + 2-line label
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border(
               bottom: BorderSide(color: Colors.grey.shade200),
             ),
           ),
-          child: ListView.separated(
+          child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             itemCount: categories.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               final cat = categories[index];
               final isSelected = _selectedParent.id == cat.id;
-              return _buildTabItem(cat, isSelected, langCode, () {
-                _onParentTabSelected(cat);
-              });
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: _buildTabItem(cat, isSelected, langCode, () {
+                  _onParentTabSelected(cat);
+                }, isSub: false),
+              );
             },
           ),
         );
@@ -329,42 +366,50 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     );
   }
 
-  /// 소분류 탭 빌더
   Widget _buildSubCategoryTabs(String langCode) {
     return StreamBuilder<List<Category>>(
       stream: _categoryRepo.watchSubs(_selectedParent.id, activeOnly: true),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const SizedBox.shrink();
+        if (!snapshot.hasData &&
+            snapshot.connectionState == ConnectionState.active) {
+          return const SizedBox.shrink();
+        }
 
-        // 소분류 '전체' 탭 생성
         final allSub = _allCategory.copyWith(
           id: 'all',
-          nameKo: '${_selectedParent.nameKo} 전체',
-          nameEn: 'All ${_selectedParent.nameEn}',
-          nameId: 'Semua ${_selectedParent.nameId}',
-          icon: _selectedParent.icon, // 부모 아이콘 상속
+          nameKo: '전체',
+          nameEn: 'All',
+          nameId: 'Semua',
+          icon: 'ms:apps',
         );
 
-        final subCategories = [allSub, ...snapshot.data!];
+        final subCategories = [allSub, ...(snapshot.data ?? [])];
+
+        if (snapshot.data == null &&
+            snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+              height: 76, child: Center(child: CircularProgressIndicator()));
+        }
 
         return Container(
-          height: 80,
-          color: Colors.grey.shade50, // 소분류는 배경을 약간 다르게
-          child: ListView.separated(
+          height: 110, // give a bit more room for subcategory labels
+          color: const Color(0xFFF9F9F9),
+          child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             itemCount: subCategories.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               final cat = subCategories[index];
-              // 소분류 '전체' 선택 여부: _selectedSub가 null이거나 id가 'all'
               final isSelected = (index == 0 &&
                       (_selectedSub == null || _selectedSub!.id == 'all')) ||
                   (_selectedSub?.id == cat.id);
 
-              return _buildTabItem(cat, isSelected, langCode, () {
-                _onSubTabSelected(index == 0 ? null : cat);
-              }, isSub: true);
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: _buildTabItem(cat, isSelected, langCode, () {
+                  _onSubTabSelected(index == 0 ? null : cat);
+                }, isSub: true),
+              );
             },
           ),
         );
@@ -372,49 +417,95 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     );
   }
 
-  /// 공통 탭 아이템 위젯 (아이콘 + 텍스트)
   Widget _buildTabItem(
       Category category, bool isSelected, String langCode, VoidCallback onTap,
-      {bool isSub = false}) {
-    final color =
-        isSelected ? Theme.of(context).primaryColor : Colors.grey.shade500;
-    final fontWeight = isSelected ? FontWeight.bold : FontWeight.normal;
+      {required bool isSub}) {
+    final theme = Theme.of(context);
+    final color = isSelected ? theme.primaryColor : Colors.grey.shade600;
+    final bgColor = isSelected
+        ? theme.primaryColor.withValues(alpha: 0.08)
+        : Colors.transparent;
+    // ✅ 텍스트 스타일: 폰트 사이즈 축소, 자간 조정, 볼드 처리
+    final fontWeight = isSelected ? FontWeight.w700 : FontWeight.w500;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        constraints: const BoxConstraints(minWidth: 60),
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 아이콘 표시
-            CategoryIcons.widget(
-              category.effectiveIcon(forParent: !isSub),
-              size: 24,
-              color: color,
-            ),
-            const SizedBox(height: 6),
-            // 텍스트 표시
-            Text(
-              category.displayName(langCode),
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight: fontWeight,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+        width: 64, // 좁은 그리드 폭
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: isSub ? 4 : 6),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // approximate label height (2 lines)
+            final labelFontSize = isSub ? 9.0 : 9.5;
+            final labelHeight =
+                labelFontSize * 1.1 * 2; // fontSize * height * lines
+            final spacingHeight = isSub ? 4.0 : 6.0;
+            final maxTile = isSub ? 48.0 : 56.0;
+
+            // available space for the tile considering label and spacing
+            final availableForTile =
+                constraints.maxHeight - labelHeight - spacingHeight;
+            final tileSize = (availableForTile.isFinite && availableForTile > 0)
+                ? availableForTile.clamp(24.0, maxTile)
+                : maxTile.clamp(24.0, maxTile);
+            final effectiveTile = tileSize > constraints.maxWidth
+                ? constraints.maxWidth
+                : tileSize;
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon tile separated from the label
+                SizedBox(
+                  width: effectiveTile,
+                  height: effectiveTile,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? theme.primaryColor.withValues(alpha: 0.08)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: CategoryIcons.widget(
+                        category.effectiveIcon(forParent: !isSub),
+                        size: isSub ? 22 : 26,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: spacingHeight),
+                SizedBox(
+                  width: constraints.maxWidth,
+                  child: Text(
+                    category.displayName(langCode),
+                    style: TextStyle(
+                      color: color,
+                      fontSize: labelFontSize,
+                      fontWeight: fontWeight,
+                      height: 1.1,
+                      letterSpacing: -0.2,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  // 기존 위치 필터 로직 (유지)
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyLocationFilter(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
     final filter = widget.locationFilter;
@@ -444,7 +535,6 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
         .toList();
   }
 
-  // 기존 상태 필터 로직 (유지)
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyStatusRules(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
     final now = DateTime.now();
