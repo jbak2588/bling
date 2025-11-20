@@ -1925,7 +1925,34 @@
       "pomDesc": "Cari berdasarkan judul, tagar",
       "comingSoon": "Segera hadir"
     },
-    "results": "results"
+    "results": "Hasil"
+  },
+  "locationfilter": {
+    "title": "Filter Lokasi",
+    "reset": "Atur Ulang",
+    "apply": "Terapkan",
+    "provinsi": "Provinsi",
+    "kabupaten": "Kabupaten",
+    "kota": "Kota",
+    "kecamatan": "Kecamatan",
+    "kelurahan": "Kelurahan",
+    "tab": {
+      "admin": "Pilih Area",
+      "nearby": "Sekitar Saya",
+      "national": "Nasional"
+    },
+    "nearby": {
+      "radius": "Cari dalam radius {km}km",
+      "desc": "Sesuaikan jangkauan untuk menemukan barang di sekitar Anda."
+    },
+    "national": {
+      "title": "Pencarian Nasional",
+      "desc": "Cari semua barang dan postingan tanpa batasan lokasi."
+    },
+    "hint": {
+      "selectParent": "Silakan pilih wilayah induk terlebih dahulu",
+      "all": "Semua Wilayah"
+    }
   },
   "language": {
     "id": "Bahasa Indonesia",

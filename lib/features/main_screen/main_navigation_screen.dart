@@ -34,9 +34,11 @@ library;
 import 'package:bling_app/features/local_news/screens/local_news_screen.dart';
 import 'package:bling_app/features/jobs/screens/jobs_screen.dart';
 import 'package:bling_app/features/lost_and_found/screens/lost_and_found_screen.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart'; // ✅ Provider Import
 import 'package:bling_app/features/marketplace/screens/marketplace_screen.dart';
 import 'package:bling_app/features/local_stores/screens/local_stores_screen.dart';
 import 'package:bling_app/features/find_friends/screens/find_friends_screen.dart';
+import 'package:bling_app/core/utils/localization_utils.dart';
 import 'package:bling_app/features/clubs/screens/clubs_screen.dart';
 import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart';
 import 'package:bling_app/features/auction/screens/auction_screen.dart';
@@ -62,9 +64,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import 'package:provider/provider.dart'; // ✅ Provider Import
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/core/utils/address_formatter.dart';
+
 import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart';
 import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
@@ -108,9 +111,8 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _bottomNavIndex = 0;
   UserModel? _userModel;
-  Map<String, String?>? _activeLocationFilter;
-  String _currentAddress = "Loading...";
-  bool _isLocationLoading = true;
+  // Map<String, String?>? _activeLocationFilter; // Provider로 대체됨
+
   StreamSubscription? _userSubscription;
   StreamSubscription? _unreadChatsSubscription;
   StreamSubscription? _unreadNotificationsSubscription; // [Task 96]
@@ -136,7 +138,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       try {
         _currentHomePageContent = null; // 해당 변수가 있는 경우만
       } catch (_) {}
-      // ✅ 검색 아이콘은 항상 index 3 (FAB를 중심으로 좌우 아이콘 고정)
+      //
       _bottomNavIndex = 3; // IndexedStack 방식
     });
   }
@@ -164,8 +166,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         if (mounted) {
           setState(() {
             _userModel = null;
-            _currentAddress = 'main.appBar.locationNotSet'.tr();
-            _isLocationLoading = false;
             _totalUnreadCount = 0;
             _totalUnreadNotifications = 0; // [Task 96]
             _isKelurahanBoardActive = false;
@@ -195,11 +195,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       if (mounted && doc.exists) {
         setState(() {
           _userModel = UserModel.fromFirestore(doc);
-          // [수정] _currentAddress를 locationName 대신 locationParts['kab']으로 초기화 시도
-          _currentAddress = _userModel?.locationParts?['kab'] ??
-              _userModel?.locationName ??
-              'main.appBar.locationNotSet'.tr();
-          _isLocationLoading = false;
+          // ✅ Provider에 사용자 정보 업데이트 (초기 위치 설정)
+          context.read<LocationProvider>().setUser(_userModel);
         });
         // ✅ [게시판] 사용자 위치 로드 후 게시판 활성화 여부 확인
         _checkKelurahanBoardStatus();
@@ -334,7 +331,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   /// ✅ [신규] AppSection 기반으로 피드 화면을 생성하고 이동
   void _buildFeedScreen(AppSection section, {bool autoFocus = false}) {
     final userModel = _userModel;
-    final activeLocationFilter = _activeLocationFilter;
+    // final activeLocationFilter = _activeLocationFilter; // 제거
     if (userModel == null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('user.notLoggedIn'.tr())));
@@ -351,7 +348,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         titleKey = 'main.tabs.localNews';
         nextScreen = LocalNewsScreen(
           userModel: userModel,
-          locationFilter: activeLocationFilter,
           autoFocusSearch: autoFocus,
           searchNotifier: _searchActivationNotifier,
         );
@@ -360,7 +356,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         titleKey = 'main.tabs.jobs';
         nextScreen = JobsScreen(
           userModel: userModel,
-          locationFilter: activeLocationFilter,
           autoFocusSearch: autoFocus,
           searchNotifier: _searchActivationNotifier,
         );
@@ -369,7 +364,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         titleKey = 'main.tabs.lostAndFound';
         nextScreen = LostAndFoundScreen(
           userModel: userModel,
-          locationFilter: activeLocationFilter,
           autoFocusSearch: autoFocus,
           searchNotifier: _searchActivationNotifier,
         );
@@ -378,7 +372,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         titleKey = 'main.tabs.marketplace';
         nextScreen = MarketplaceScreen(
           userModel: userModel,
-          locationFilter: activeLocationFilter,
           autoFocusSearch: autoFocus,
           searchNotifier: _searchActivationNotifier,
           // ✅ [추가] 카테고리 탭 변경 시 앱바 타이틀 업데이트 콜백
@@ -403,7 +396,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         titleKey = 'main.tabs.localStores';
         nextScreen = LocalStoresScreen(
           userModel: userModel,
-          locationFilter: activeLocationFilter,
           autoFocusSearch: autoFocus,
           searchNotifier: _searchActivationNotifier,
         );
@@ -420,7 +412,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         titleKey = 'main.tabs.clubs';
         nextScreen = ClubsScreen(
           userModel: userModel,
-          locationFilter: activeLocationFilter,
           autoFocusSearch: autoFocus,
           searchNotifier: _searchActivationNotifier,
         );
@@ -429,7 +420,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         titleKey = 'main.tabs.realEstate';
         nextScreen = RealEstateScreen(
           userModel: userModel,
-          locationFilter: activeLocationFilter,
           autoFocusSearch: autoFocus,
           searchNotifier: _searchActivationNotifier,
         );
@@ -438,7 +428,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         titleKey = 'main.tabs.auction';
         nextScreen = AuctionScreen(
           userModel: userModel,
-          locationFilter: activeLocationFilter,
           autoFocusSearch: autoFocus,
           searchNotifier: _searchActivationNotifier,
         );
@@ -724,49 +713,25 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       // ↓↓↓ 기존 title 로직 (위치 필터 열기/타이틀 텍스트 구성 등)
       title: InkWell(
         onTap: () async {
-          final result = await Navigator.of(context).push<Map<String, String?>>(
+          // ✅ [수정] 반환값 받을 필요 없이 Provider가 상태 관리
+          await Navigator.of(context).push(
             MaterialPageRoute(
                 builder: (_) => LocationFilterScreen(userModel: _userModel)),
           );
-
-          if (result != null && mounted) {
-            final processedFilter = <String, String?>{};
-            // ✅ 타이틀은 키만 유지하고, 화면에서 .tr()로 번역합니다.
-            String newTitleKey = 'main.myTown';
-
-            if (result['kel'] != null && result['kel']!.isNotEmpty) {
-              processedFilter['kel'] = result['kel'];
-              newTitleKey = 'main.myTown';
-            } else if (result['kec'] != null && result['kec']!.isNotEmpty) {
-              processedFilter['kec'] = result['kec'];
-              newTitleKey = 'main.myTown';
-            } else if (result['kota'] != null && result['kota']!.isNotEmpty) {
-              processedFilter['kota'] = result['kota'];
-              newTitleKey = 'main.myTown';
-            } else if (result['kab'] != null && result['kab']!.isNotEmpty) {
-              processedFilter['kab'] = result['kab'];
-              newTitleKey = 'main.myTown';
-            } else if (result['prov'] != null && result['prov']!.isNotEmpty) {
-              processedFilter['prov'] = result['prov'];
-              newTitleKey = 'main.myTown';
-            }
-
+          // 화면 갱신 (Provider 구독은 하위 위젯들이 하므로 여기선 setState만 호출해주면 됨)
+          if (mounted) {
             setState(() {
-              _activeLocationFilter =
-                  processedFilter.isNotEmpty ? processedFilter : null;
               // 홈 루트일 때만 상단 타이틀을 '내 동네' 키로 변경
               if (_currentHomePageContent == null) {
-                _appBarTitleKey = newTitleKey; // 키 저장
+                _appBarTitleKey = 'main.myTown'; // 키 저장
               }
-              // 섹션 화면에서는 타이틀을 유지(예: main.tabs.auction)
+              // 섹션 화면이면 해당 섹션을 재생성하여 필터 반영
+              if (_currentHomePageContent != null &&
+                  _currentSection != AppSection.home &&
+                  _currentSection != AppSection.board) {
+                _buildFeedScreen(_currentSection);
+              }
             });
-
-            // ✅ [Option A - refined] 섹션 화면이 열려 있으면 해당 섹션을 재생성하여 필터 반영
-            if (_currentHomePageContent != null &&
-                _currentSection != AppSection.home &&
-                _currentSection != AppSection.board) {
-              _buildFeedScreen(_currentSection);
-            }
           }
         },
         child: Row(
@@ -785,11 +750,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             ),
             const SizedBox(width: 8),
             Flexible(
-              child: Text(
-                _getAppBarSubTitle(),
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
+              // ✅ [수정] LocationProvider의 displayTitle 사용
+              child: Consumer<LocationProvider>(
+                builder: (context, provider, _) {
+                  return Text(
+                    provider.displayTitle, // "역삼동" or "내 주변 5km"
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  );
+                },
               ),
             ),
             const Icon(Icons.arrow_drop_down, size: 24),
@@ -801,21 +771,29 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       // ↓↓↓ 기존 actions 그대로
       actions: [
         // [Task 96] 알림 아이콘 버튼 수정
-        IconButton(
-          tooltip: 'notifications.title'.tr(),
-          icon: _totalUnreadNotifications > 0
-              ? Badge(
-                  label: Text('$_totalUnreadNotifications'),
-                  child: const Icon(Icons.notifications),
-                )
-              : const Icon(Icons.notifications_none),
-          onPressed: () {
-            // Task 95에서 생성한 알림 목록 화면으로 이동
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const NotificationListScreen()),
-            );
-          },
-        ),
+        // Debug: resolve tooltip text and log to help diagnose missing localization key
+        Builder(builder: (context) {
+          final notifTooltip =
+              safeTr(context, 'notifications.title', fallback: '');
+          debugPrint(
+              'MainNavigationScreen - notifications.title -> $notifTooltip, locale: ${context.locale}');
+          return IconButton(
+            tooltip: notifTooltip,
+            icon: _totalUnreadNotifications > 0
+                ? Badge(
+                    label: Text('$_totalUnreadNotifications'),
+                    child: const Icon(Icons.notifications),
+                  )
+                : const Icon(Icons.notifications_none),
+            onPressed: () {
+              // Task 95에서 생성한 알림 목록 화면으로 이동
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => const NotificationListScreen()),
+              );
+            },
+          );
+        }),
       ],
 
       // 선택 옵션: 액션 버튼을 흰색 동글칩으로 감쌀지 여부 (원하면 true 유지)
@@ -823,24 +801,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  // --- AppBar 부제목 표시 로직 ---
-  String _getAppBarSubTitle() {
-    if (_isLocationLoading) {
-      return 'main.appBar.locationLoading'.tr();
-    }
-    // 1. 사용자가 설정한 필터가 있으면, 그 값을 최우선으로 표시
-    if (_activeLocationFilter != null &&
-        _activeLocationFilter!.values.first != null) {
-      return StringExtension(_activeLocationFilter!.values.first!).capitalize();
-    }
-    // 2. 필터가 없으면, 사용자의 기본 위치 정보에서 'kab' 값을 가져와 표시
-    final userKabupaten = _userModel?.locationParts?['kab'];
-    if (userKabupaten != null && userKabupaten.isNotEmpty) {
-      return StringExtension(userKabupaten).capitalize();
-    }
-    // 3. 'kab' 값도 없으면, 기존의 전체 주소(_currentAddress)를 축약해서 표시
-    return AddressFormatter.toSingkatan(_currentAddress);
-  }
+  // AppBar subtitle is now provided by LocationProvider.displayTitle
 
   /// [Fix] AI 검수 횟수 초기화 확인 다이얼로그 (누락된 함수 호출)
   void _confirmResetAiCounts() async {
@@ -968,7 +929,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           HomeScreen(
             controller: _homeScrollController,
             userModel: _userModel,
-            activeLocationFilter: _activeLocationFilter,
+            activeLocationFilter:
+                Provider.of<LocationProvider>(context).adminFilter,
             searchNotifier: _searchActivationNotifier,
             onIconTap: _navigateToPage,
           ),

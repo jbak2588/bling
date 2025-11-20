@@ -47,6 +47,23 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Debug: log localization context to diagnose missing key warnings
+    try {
+      debugPrint('NotificationListScreen.build - locale: ${context.locale}');
+      debugPrint(
+          'NotificationListScreen.build - supportedLocales: ${context.supportedLocales}');
+      debugPrint(
+          'NotificationListScreen.build - localizationDelegates: ${context.localizationDelegates}');
+      // Calling .tr() intentionally to show what EasyLocalization resolves at runtime
+      final trResult = 'notifications.title'.tr();
+      debugPrint(
+          "NotificationListScreen.build - 'notifications.title'.tr(): $trResult");
+      // Note: avoid calling EasyLocalization.of(context)?.tr(...) as analyzer
+      // may not expose a .tr method on the provider type. Use the String.tr() extension above.
+    } catch (e, st) {
+      debugPrint('NotificationListScreen.build - localization debug error: $e');
+      debugPrint('$st');
+    }
     if (_myUid == null) {
       return Scaffold(
         appBar: AppBar(title: Text('notifications.title'.tr())),

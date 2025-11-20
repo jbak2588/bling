@@ -40,23 +40,26 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:bling_app/features/shared/widgets/bling_icon.dart'; // ✅ BlingIcon import
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart'; // ✅ Provider
+import 'package:provider/provider.dart'; // ✅ Provider
+import 'dart:math' as math; // 거리 계산용
 
 import '../models/product_model.dart';
 import '../widgets/product_card.dart';
 
 class MarketplaceScreen extends StatefulWidget {
   final UserModel? userModel;
-  final Map<String, String?>? locationFilter;
   final bool autoFocusSearch;
   final ValueNotifier<AppSection?>? searchNotifier;
   final Function(String title)? onTitleChanged;
+  // final Map<String, String?>? locationFilter; // 삭제됨 (Provider 사용)
 
   const MarketplaceScreen({
     this.userModel,
-    this.locationFilter,
     this.autoFocusSearch = false,
     this.searchNotifier,
     this.onTitleChanged,
+    Map<String, String?>? locationFilter, // 하위 호환을 위해 남겨두되 사용 안함
     super.key,
   });
 
@@ -182,15 +185,25 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
   @override
   Widget build(BuildContext context) {
     final langCode = context.locale.languageCode;
+    // ✅ LocationProvider 구독
+    final locationProvider = context.watch<LocationProvider>();
 
     Query<Map<String, dynamic>> buildQuery() {
-      final userProv = widget.userModel?.locationParts?['prov'];
       Query<Map<String, dynamic>> query =
           FirebaseFirestore.instance.collection('products');
 
-      // 1. 지역 필터
-      if (userProv != null && userProv.isNotEmpty) {
-        query = query.where('locationParts.prov', isEqualTo: userProv);
+      // 1. 위치 필터 (Provider 기준)
+      if (locationProvider.mode == LocationSearchMode.administrative) {
+        final filterEntry = locationProvider.activeQueryFilter;
+        if (filterEntry != null) {
+          query = query.where(filterEntry.key, isEqualTo: filterEntry.value);
+        }
+      } else if (locationProvider.mode == LocationSearchMode.nearby) {
+        // 거리 검색일 때는 DB 부하를 낮추기 위해 Kab(혹은 prov) 레벨에서 1차 필터
+        final userKab = locationProvider.user?.locationParts?['kab'];
+        if (userKab != null && userKab.isNotEmpty) {
+          query = query.where('locationParts.kab', isEqualTo: userKab);
+        }
       }
 
       // 2. 상태 필터
@@ -289,7 +302,34 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
             var allDocs = snapshot.data?.docs ?? [];
 
-            allDocs = _applyLocationFilter(allDocs);
+            // ✅ [거리순 정렬 로직 추가]
+            if (locationProvider.mode == LocationSearchMode.nearby &&
+                locationProvider.user?.geoPoint != null) {
+              final userGeo = locationProvider.user!.geoPoint!;
+              final radiusKm = locationProvider.radiusKm;
+
+              // 1. 거리 필터링 & 정렬을 위해 리스트 변환
+              // (ProductModel로 변환 비용이 들지만 정확한 거리 계산을 위해 필요)
+              allDocs = allDocs.where((doc) {
+                final pGeo = (doc.data()['geoPoint'] as GeoPoint?);
+                if (pGeo == null) return false;
+                final dist = _calculateDistance(userGeo.latitude,
+                    userGeo.longitude, pGeo.latitude, pGeo.longitude);
+                return dist <= radiusKm;
+              }).toList();
+
+              // 2. 거리순 정렬
+              allDocs.sort((a, b) {
+                final geoA = (a.data()['geoPoint'] as GeoPoint);
+                final geoB = (b.data()['geoPoint'] as GeoPoint);
+                final distA = _calculateDistance(userGeo.latitude,
+                    userGeo.longitude, geoA.latitude, geoA.longitude);
+                final distB = _calculateDistance(userGeo.latitude,
+                    userGeo.longitude, geoB.latitude, geoB.longitude);
+                return distA.compareTo(distB);
+              });
+            }
+
             allDocs = _applyStatusRules(allDocs);
 
             final kw = _searchKeywordNotifier.value;
@@ -303,6 +343,23 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
             }
 
             if (allDocs.isEmpty) {
+              // ✅ [Auto Fallback UI] 결과가 없을 때 전국 검색 제안
+              if (locationProvider.mode != LocationSearchMode.national) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('marketplace.empty'.tr()),
+                      TextButton(
+                        child: const Text("전국에서 검색하기"),
+                        onPressed: () => context
+                            .read<LocationProvider>()
+                            .setMode(LocationSearchMode.national),
+                      )
+                    ],
+                  ),
+                );
+              }
               return Center(
                   child: Text('marketplace.empty'.tr(),
                       textAlign: TextAlign.center));
@@ -513,33 +570,15 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     );
   }
 
-  List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyLocationFilter(
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
-    final filter = widget.locationFilter;
-    if (filter == null) return allDocs;
-
-    String? key;
-    if (filter['kel'] != null) {
-      key = 'kel';
-    } else if (filter['kec'] != null) {
-      key = 'kec';
-    } else if (filter['kab'] != null) {
-      key = 'kab';
-    } else if (filter['kota'] != null) {
-      key = 'kota';
-    } else if (filter['prov'] != null) {
-      key = 'prov';
-    }
-    if (key == null) return allDocs;
-
-    final value = filter[key]!.toLowerCase();
-    return allDocs
-        .where((doc) =>
-            (doc.data()['locationParts']?[key] ?? '')
-                .toString()
-                .toLowerCase() ==
-            value)
-        .toList();
+  // Haversine 공식 (km 단위 반환)
+  double _calculateDistance(
+      double lat1, double lon1, double lat2, double lon2) {
+    var p = 0.017453292519943295;
+    var c = math.cos;
+    var a = 0.5 -
+        c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+    return 12742 * math.asin(math.sqrt(a));
   }
 
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyStatusRules(

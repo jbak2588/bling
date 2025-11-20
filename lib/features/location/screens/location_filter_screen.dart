@@ -1,344 +1,542 @@
 /// ============================================================================
 /// Bling DocHeader
 /// Module        : Location
-/// File          : lib/features/location/screens/location_setting_screen.dart
-/// Purpose       : Google Places와 Firestore를 통해 사용자 위치를 수집하고 검증합니다.
-/// User Impact   : 기능이 올바른 Kelurahan 및 RT/RW에서 동작하도록 보장합니다.
-/// Feature Links : lib/features/location/screens/location_filter_screen.dart; lib/features/location/screens/neighborhood_prompt_screen.dart
-/// Data Model    : `users/{uid}.locationParts{prov,kota/kab,kec,kel,rt,rw}`와 `geoPoint`에 기록하며 `provinces/{prov}/kota/{kota}/kecamatan`을 읽습니다.
-/// Location Scope: Province→Kota/Kabupaten→Kecamatan→Kelurahan이 필요하며 RT/RW는 선택 사항; Google 역지오코딩을 기본값으로 사용합니다.
-/// Trust Policy  : 위치 검증 시 TrustLevel이 상승하며 `privacySettings`로 프라이버시를 보장합니다.
-/// Monetization  : 위치 데이터로 지역 광고 및 프로모션 타깃팅이 가능합니다.
-/// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `set_location`, `location_verified`.
-/// Analytics     : 권한 허용과 위치 업데이트를 기록합니다.
-/// I18N          : 키 `location.set` 및 관련 프롬프트 (assets/lang/*.json)
-/// Dependencies  : cloud_firestore, firebase_auth, flutter_google_maps_webservices, geolocator, permission_handler
-/// Security/Auth : 인증된 사용자와 Google API 키가 필요하며 권한 거부를 처리합니다.
-/// Edge Cases    : 행정 구역 누락, GPS 비활성화, Firestore 불일치.
-/// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
-/// Source Docs   : docs/index/Bling_Location_GeoQuery_Structure.md; docs/index/피드 관련 위치 검색 규칙과 예시.md; docs/team/teamD_GeoQuery_Location_Module_통합_작업문서.md
+/// File          : lib/features/location/screens/location_filter_screen.dart
+/// Purpose       : 검색 범위를 설정하는 화면 (행정구역, 내 주변, 전국)
+/// User Impact   : 사용자가 원하는 방식(동네 이름 or 거리)으로 검색 범위를 자유롭게 조정합니다.
+/// Data Model    : Firestore `provinces` 컬렉션 기반 (하위 호환성 유지)
 /// ============================================================================
-/// [기획의도 요약]
-/// - 위치 필터를 통해 사용자의 지역 정보를 정확히 수집/검증하고, 신뢰등급(TrustLevel) 및 지역 기반 서비스(광고, 프로모션 등)를 활성화한다.
-/// - KPI, Analytics, 보안, I18N 등 다양한 정책을 반영한다.
-/// [실제 구현 기능]
-/// - Firestore와 Google Places 연동, GPS 기반 위치 인증, 지역 선택 UI, 위치 정보 저장 및 검증 로직 구현.
-/// - 위치 인증 실패/권한 거부/행정구역 누락 등 다양한 예외 처리 및 안내 메시지 제공.
-/// [기획의도와 실제 기능의 차이점]
-/// - 기획의도보다 좋아진 점: 위치 인증 및 행정구역 검증 로직이 강화되어 실제 위치와 DB 일치도가 높아짐. 예외 처리 및 안내 메시지 개선.
-/// - 기획의도에 못 미친 점: KPI/Analytics/수익화(광고, 프로모션 연계) 기능은 코드상에서 일부만 구현됨. UI/UX 세부 안내 및 다국어 메시지 다양성은 추가 개선 필요.
-/// [UI/UX 기능개선 제안]
-/// - 위치 인증 과정에서 지도 시각화 및 선택 UI 추가, 인증 실패/성공 시 더 다양한 피드백(애니메이션, 상세 안내 등) 제공
-/// [수익화 제안]
-/// - 인증된 위치 기반으로 지역 광고, 프로모션 추천, 배너 노출 기능 연계
-/// [코드 안정성 및 실행 속도 개선 제안]
-/// - 위치 권한/서비스 체크 로직을 별도 함수로 분리하여 재사용성 및 유지보수성 강화
-/// - Firestore/Google API 호출 시 에러 핸들링 및 로딩 상태 관리 강화
-/// - 인증 성공/실패 이벤트를 별도 로깅하여 KPI/Analytics 연동 강화
 library;
-// 아래부터 실제 코드
 
+import 'package:bling_app/core/models/user_model.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-
-import '../../../core/models/user_model.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LocationFilterScreen extends StatefulWidget {
   final UserModel? userModel;
-  const LocationFilterScreen({this.userModel, super.key});
+  // [추가] 초기 탭 인덱스를 외부에서 지정할 수 있도록 함 (기본값은 null)
+  final int? initialTabIndex;
+
+  const LocationFilterScreen({super.key, this.userModel, this.initialTabIndex});
 
   @override
   State<LocationFilterScreen> createState() => _LocationFilterScreenState();
 }
 
-class _LocationFilterScreenState extends State<LocationFilterScreen> {
-  final List<String> _provinsiList = [];
-  final List<String> _kabupatenList = [];
-  final List<String> _kotaList = [];
-  final List<String> _kecamatanList = [];
-  final List<String> _kelurahanList = [];
+class _LocationFilterScreenState extends State<LocationFilterScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
-  String? _selectedProvinsi;
-  String? _selectedKabupaten;
-  String? _selectedKota;
-  String? _selectedKecamatan;
-  String? _selectedKelurahan;
+  // 행정구역 선택 상태
+  String? _tempProv;
+  String? _tempKab;
+  String? _tempKec;
+  String? _tempKel;
 
-  bool _kabupatenEnabled = false;
-  bool _kotaEnabled = false;
-  bool _kecamatanEnabled = false;
-  bool _kelurahanEnabled = false;
-  bool _loadingProvinces = true;
+  // 거리 선택 상태
+  double _tempRadius = 5.0;
 
-  // [추가] '전체' 옵션을 위한 상수
-  final String _allOption = 'locationFilter.all'.tr();
+  // 컬렉션 이름 상수 (DB 변경 시 여기만 수정)
+  static const String _colProvinces = 'provinces';
+  static const String _colKabupaten = 'kabupaten';
+  static const String _colKota = 'kota';
+  static const String _colKecamatan = 'kecamatan';
+  static const String _colKelurahan = 'kelurahan';
 
   @override
   void initState() {
     super.initState();
-    _loadProvinces();
-  }
+    final provider = context.read<LocationProvider>();
 
-  Future<void> _loadProvinces() async {
-    final snapshot =
-        await FirebaseFirestore.instance.collection('provinces').get();
-    setState(() {
-      _provinsiList.addAll(snapshot.docs.map((d) => d.id));
-      _loadingProvinces = false;
-    });
-  }
-
-  Future<void> _onProvinsiChanged(String? value) async {
-    if (value == null) return;
-    setState(() {
-      _selectedProvinsi = value;
-      _selectedKabupaten = null;
-      _selectedKota = null;
-      _selectedKecamatan = null;
-      _selectedKelurahan = null;
-      _kabupatenEnabled = false;
-      _kotaEnabled = false;
-      _kecamatanEnabled = false;
-      _kelurahanEnabled = false;
-      _kabupatenList.clear();
-      _kotaList.clear();
-      _kecamatanList.clear();
-      _kelurahanList.clear();
-    });
-
-    final provRef =
-        FirebaseFirestore.instance.collection('provinces').doc(value);
-    final kabSnapshot = await provRef.collection('kabupaten').get();
-    final kotaSnapshot = await provRef.collection('kota').get();
-    setState(() {
-      _kabupatenList.addAll(kabSnapshot.docs.map((d) => d.id));
-      _kotaList.addAll(kotaSnapshot.docs.map((d) => d.id));
-      _kabupatenEnabled = true;
-      _kotaEnabled = true;
-    });
-  }
-
-  Future<void> _onKabupatenChanged(String? value) async {
-    // [수정] '전체' 옵션을 선택하면 하위 목록을 비웁니다.
-    if (value == _allOption) {
-      setState(() {
-        _selectedKabupaten = null;
-        _selectedKecamatan = null;
-        _selectedKelurahan = null;
-        _kecamatanEnabled = false;
-        _kelurahanEnabled = false;
-        _kecamatanList.clear();
-        _kelurahanList.clear();
-      });
-      return;
+    // 초기값 로드
+    _tempProv = provider.adminFilter['prov'];
+    _tempKab = provider.adminFilter['kab'];
+    _tempKec = provider.adminFilter['kec'];
+    _tempKel = provider.adminFilter['kel'];
+    if (provider.mode == LocationSearchMode.nearby) {
+      _tempRadius = provider.radiusKm;
     }
-    if (value == null) return;
-    setState(() {
-      _selectedKabupaten = value;
-      _selectedKota = null;
-      _selectedKecamatan = null;
-      _selectedKelurahan = null;
-      _kotaEnabled = false;
-      _kecamatanEnabled = false;
-      _kelurahanEnabled = false;
-      _kotaList.clear();
-      _kecamatanList.clear();
-      _kelurahanList.clear();
-    });
-    final provRef = FirebaseFirestore.instance.collection('provinces').doc(_selectedProvinsi);
-    final kecSnapshot = await provRef.collection('kabupaten').doc(value).collection('kecamatan').get();
-    setState(() {
-      _kecamatanList.addAll(kecSnapshot.docs.map((d) => d.id));
-      _kecamatanEnabled = true;
-    });
-  }
 
-  Future<void> _onKotaChanged(String? value) async {
-    if (value == _allOption) {
-        setState(() {
-        _selectedKota = null;
-        _selectedKecamatan = null;
-        _selectedKelurahan = null;
-        _kecamatanEnabled = false;
-        _kelurahanEnabled = false;
-        _kecamatanList.clear();
-        _kelurahanList.clear();
-      });
-      return;
-    }
-    if (value == null) return;
-    setState(() {
-      _selectedKota = value;
-      _selectedKabupaten = null;
-      _selectedKecamatan = null;
-      _selectedKelurahan = null;
-      _kabupatenEnabled = false;
-      _kecamatanEnabled = false;
-      _kelurahanEnabled = false;
-      _kabupatenList.clear();
-      _kecamatanList.clear();
-      _kelurahanList.clear();
-    });
-    final provRef = FirebaseFirestore.instance.collection('provinces').doc(_selectedProvinsi);
-    final kecSnapshot = await provRef.collection('kota').doc(value).collection('kecamatan').get();
-    setState(() {
-      _kecamatanList.addAll(kecSnapshot.docs.map((d) => d.id));
-      _kecamatanEnabled = true;
-    });
-  }
-
-  Future<void> _onKecamatanChanged(String? value) async {
-    if (value == _allOption) {
-      setState(() {
-        _selectedKecamatan = null;
-        _selectedKelurahan = null;
-        _kelurahanEnabled = false;
-        _kelurahanList.clear();
-      });
-      return;
-    }
-    if (value == null) return;
-    setState(() {
-      _selectedKecamatan = value;
-      _selectedKelurahan = null;
-      _kelurahanEnabled = false;
-      _kelurahanList.clear();
-    });
-    if (_selectedProvinsi == null) return;
-    final provRef = FirebaseFirestore.instance.collection('provinces').doc(_selectedProvinsi);
-    CollectionReference<Map<String, dynamic>> parent;
-    if (_selectedKabupaten != null) {
-      parent = provRef.collection('kabupaten').doc(_selectedKabupaten!).collection('kecamatan');
-    } else if (_selectedKota != null) {
-      parent = provRef.collection('kota').doc(_selectedKota!).collection('kecamatan');
+    // 탭 인덱스 설정
+    int initialIndex = 0;
+    // 1순위: 생성자로 전달된 값이 있다면 최우선 적용
+    if (widget.initialTabIndex != null) {
+      initialIndex = widget.initialTabIndex!;
     } else {
-      return;
+      // 2순위: Provider의 현재 모드에 따라 결정 (기존 로직)
+      switch (provider.mode) {
+        case LocationSearchMode.administrative:
+          initialIndex = 0;
+          break;
+        case LocationSearchMode.nearby:
+          initialIndex = 1;
+          break;
+        case LocationSearchMode.national:
+          initialIndex = 2;
+          break;
+      }
     }
-    final kelSnapshot = await parent.doc(value).collection('kelurahan').get();
-    setState(() {
-      _kelurahanList.addAll(kelSnapshot.docs.map((d) => d.id));
-      _kelurahanEnabled = true;
-    });
+
+    _tabController =
+        TabController(length: 3, vsync: this, initialIndex: initialIndex);
   }
 
-  void _onKelurahanChanged(String? value) {
-     if (value == _allOption) {
-      setState(() => _selectedKelurahan = null);
-      return;
-    }
-    setState(() => _selectedKelurahan = value);
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   void _applyFilter() {
-    final result = {
-      'prov': _selectedProvinsi,
-      'kab': _selectedKabupaten,
-      'kota': _selectedKota,
-      'kec': _selectedKecamatan,
-      'kel': _selectedKelurahan,
-    };
-    Navigator.pop(context, result);
+    final provider = context.read<LocationProvider>();
+
+    switch (_tabController.index) {
+      case 0: // 행정구역
+        provider.setAdminFilter(
+          prov: _tempProv,
+          kab: _tempKab,
+          kec: _tempKec,
+          kel: _tempKel,
+        );
+        break;
+      case 1: // 내 주변
+        provider.setNearbyRadius(_tempRadius);
+        break;
+      case 2: // 전국
+        provider.setMode(LocationSearchMode.national);
+        break;
+    }
+    // ✅ [수정] 선택된 필터 정보를 반환 (NeighborhoodPromptScreen 등에서 사용)
+    // Provider가 이미 업데이트되었으므로 true만 반환하거나, 명시적으로 필터 맵 반환 가능
+    Navigator.pop(context, provider.adminFilter);
   }
 
-  // [추가] 필터를 초기화하는 함수
+  // [기능] 필터 초기화
   void _resetFilter() {
     setState(() {
-      _selectedProvinsi = null;
-      _selectedKabupaten = null;
-      _selectedKota = null;
-      _selectedKecamatan = null;
-      _selectedKelurahan = null;
-      _kabupatenEnabled = false;
-      _kotaEnabled = false;
-      _kecamatanEnabled = false;
-      _kelurahanEnabled = false;
-      _kabupatenList.clear();
-      _kotaList.clear();
-      _kecamatanList.clear();
-      _kelurahanList.clear();
+      _tempProv = null;
+      _tempKab = null;
+      _tempKec = null;
+      _tempKel = null;
+      _tempRadius = 5.0;
     });
-  }
-
-  // [추가] 드롭다운 아이템을 생성하는 헬퍼 함수
-  List<DropdownMenuItem<String>> _buildDropdownItems(List<String> items, {bool addAllOption = false}) {
-    final List<DropdownMenuItem<String>> menuItems = [];
-    if (addAllOption) {
-      menuItems.add(DropdownMenuItem(value: _allOption, child: Text(_allOption)));
-    }
-    menuItems.addAll(items.map((item) => DropdownMenuItem(value: item, child: Text(item))));
-    return menuItems;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('locationFilter.title'.tr()),
-        // [추가] 초기화 버튼
+        title: Text('locationfilter.title'.tr()), // 변경
         actions: [
           TextButton(
             onPressed: _resetFilter,
-            child: Text('locationFilter.reset'.tr()),
+            child: Text('locationfilter.reset'.tr(),
+                style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: _applyFilter,
+            child: Text(
+                'locationfilter.apply'
+                    .tr(), // 변경 (또는 common.confirm 유지 가능하지만 여기선 통일)
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor)),
           )
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'locationfilter.tab.admin'.tr()),
+            Tab(text: 'locationfilter.tab.nearby'.tr()),
+            Tab(text: 'locationfilter.tab.national'.tr()),
+          ],
+        ),
       ),
-      body: _loadingProvinces
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildAdminSelector(),
+          _buildNearbySelector(),
+          _buildNationalSelector(),
+        ],
+      ),
+    );
+  }
+
+  // 1. 행정구역 선택 탭 (Firestore 실데이터 연동)
+  Widget _buildAdminSelector() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Province 선택
+          _buildFirestoreDropdown(
+            label: 'locationfilter.provinsi'.tr(),
+            collectionPath: _colProvinces, // Root collection
+            selectedValue: _tempProv,
+            onChanged: (val) {
+              setState(() {
+                _tempProv = val;
+                _tempKab = null;
+                _tempKec = null;
+                _tempKel = null;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Kab/Kota 선택 (Province 하위)
+          // [주의] 기존 DB 구조상 Province 밑에 'kota'와 'kabupaten' 컬렉션이 분리되어 있을 수 있음.
+          // 여기서는 두 컬렉션을 모두 조회하여 합치는 로직이 필요하나, StreamBuilder로는 복잡함.
+          // 따라서 _buildDualCollectionDropdown 헬퍼를 사용합니다.
+          _buildDualCollectionDropdown(
+            label: 'locationfilter.kabupaten'.tr(),
+            parentPath: _tempProv != null ? '$_colProvinces/$_tempProv' : null,
+            cols: [_colKabupaten, _colKota], // 둘 다 조회
+            selectedValue: _tempKab,
+            onChanged: (val) {
+              setState(() {
+                _tempKab = val;
+                _tempKec = null;
+                _tempKel = null;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Kecamatan 선택 (Kab/Kota 하위)
+          // Kab인지 Kota인지 모르므로, 부모 경로를 동적으로 찾아야 함.
+          // 여기서는 편의상 Kab/Kota 구분 없이 ID만으로 쿼리하거나,
+          // 상위에서 선택된 값이 어느 컬렉션 출신인지 알면 좋겠지만,
+          // 현재 구조상 _tempKab 값만으로는 알 수 없음.
+          // -> 해결책: FutureBuilder를 사용하여 Kab/Kota 양쪽을 다 찔러보고 존재하는 경로를 찾거나,
+          //    애초에 Dropdown Item에 메타데이터를 심어야 함.
+          //    (여기서는 단순화를 위해 Kab/Kota 컬렉션을 순차적으로 탐색하는 FutureBuilder 사용)
+          if (_tempProv != null && _tempKab != null)
+            _buildKecamatanDropdown(
+              label: 'locationfilter.kecamatan'.tr(),
+              provId: _tempProv!,
+              kabId: _tempKab!,
+              selectedValue: _tempKec,
+              onChanged: (val) {
+                setState(() {
+                  _tempKec = val;
+                  _tempKel = null;
+                });
+              },
+            )
+          else
+            _disabledDropdown('locationfilter.kecamatan'.tr()), // 변경
+          const SizedBox(height: 16),
+
+          // Kelurahan 선택
+          // Kecamatan 하위 'kelurahan' 컬렉션 조회
+          // (Kecamatan 경로를 찾기 위해 위 단계에서 경로 정보를 넘겨받아야 함)
+          // -> 복잡성을 피하기 위해, Kecamatan 선택 시 경로를 저장하는 별도 변수 도입 필요.
+          // -> 하지만 UI 상태가 너무 복잡해지므로, 여기서는 _buildKelurahanDropdown 내부에서 해결 시도.
+          if (_tempProv != null && _tempKab != null && _tempKec != null)
+            _buildKelurahanDropdown(
+              // [간소화] 경로 찾기 로직 내장
+              label: 'locationfilter.kelurahan'.tr(),
+              provId: _tempProv!,
+              kabId: _tempKab!,
+              kecId: _tempKec!,
+              selectedValue: _tempKel,
+              onChanged: (val) => setState(() => _tempKel = val),
+            )
+          else
+            _disabledDropdown('locationfilter.kelurahan'.tr()),
+
+          const SizedBox(height: 24),
+          if (_tempProv != null)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
                 children: [
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedProvinsi,
-                    hint: Text('locationFilter.provinsi'.tr()),
-                    isExpanded: true,
-                    items: _buildDropdownItems(_provinsiList),
-                    onChanged: _onProvinsiChanged,
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedKabupaten,
-                    hint: Text('locationFilter.kabupaten'.tr()),
-                    isExpanded: true,
-                    items: _buildDropdownItems(_kabupatenList, addAllOption: true),
-                    onChanged: _kabupatenEnabled ? _onKabupatenChanged : null,
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedKota,
-                    hint: Text('locationFilter.kota'.tr()),
-                    isExpanded: true,
-                    items: _buildDropdownItems(_kotaList, addAllOption: true),
-                    onChanged: _kotaEnabled ? _onKotaChanged : null,
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedKecamatan,
-                    hint: Text('locationFilter.kecamatan'.tr()),
-                    isExpanded: true,
-                    items: _buildDropdownItems(_kecamatanList, addAllOption: true),
-                    onChanged: _kecamatanEnabled ? _onKecamatanChanged : null,
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedKelurahan,
-                    hint: Text('locationFilter.kelurahan'.tr()),
-                    isExpanded: true,
-                    items: _buildDropdownItems(_kelurahanList, addAllOption: true),
-                    onChanged: _kelurahanEnabled ? _onKelurahanChanged : null,
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _applyFilter,
-                      child: Text('locationFilter.apply'.tr()),
-                    ),
-                  ),
+                  const Icon(Icons.info_outline, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  Expanded(
+                      child: Text(_getSummaryText(),
+                          style: const TextStyle(color: Colors.blueAccent))),
                 ],
               ),
+            )
+        ],
+      ),
+    );
+  }
+
+  Widget _disabledDropdown(String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.grey)),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8)),
+          child: Text('locationfilter.hint.selectParent'.tr(),
+              style: const TextStyle(color: Colors.grey)),
+        )
+      ],
+    );
+  }
+
+  // 단일 컬렉션 드롭다운 (Province용)
+  Widget _buildFirestoreDropdown({
+    required String label,
+    required String collectionPath,
+    required String? selectedValue,
+    required Function(String?) onChanged,
+  }) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection(collectionPath).snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return _disabledDropdown(label); // 로딩 중
+        }
+
+        final items = snapshot.data!.docs.map((doc) => doc.id).toList();
+        // 정렬 (가나다순)
+        items.sort();
+
+        return _renderDropdown(label, items, selectedValue, onChanged);
+      },
+    );
+  }
+
+  // 두 컬렉션 합쳐서 보여주는 드롭다운 (Kabupaten + Kota)
+  Widget _buildDualCollectionDropdown({
+    required String label,
+    required String? parentPath,
+    required List<String> cols,
+    required String? selectedValue,
+    required Function(String?) onChanged,
+  }) {
+    if (parentPath == null) return _disabledDropdown(label);
+
+    // 두 스트림 병합을 위해 FutureBuilder 사용 (스냅샷 결합)
+    return FutureBuilder<List<String>>(
+      future: _fetchMergedCollections(parentPath, cols),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return _disabledDropdown(label);
+        return _renderDropdown(label, snapshot.data!, selectedValue, onChanged);
+      },
+    );
+  }
+
+  Future<List<String>> _fetchMergedCollections(
+      String parentPath, List<String> subCols) async {
+    final parentRef = FirebaseFirestore.instance.doc(parentPath);
+    final Set<String> allIds = {}; // ✅ 중복 방지를 위해 Set 사용
+
+    for (var col in subCols) {
+      final snap = await parentRef.collection(col).get();
+      allIds.addAll(snap.docs.map((d) => d.id));
+    }
+    final sortedList = allIds.toList()..sort(); // ✅ 리스트 변환 및 정렬
+    return sortedList;
+  }
+
+  // Kecamatan용 (Kab/Kota 경로 찾기 포함)
+  Widget _buildKecamatanDropdown({
+    required String label,
+    required String provId,
+    required String kabId,
+    required String? selectedValue,
+    required Function(String?) onChanged,
+  }) {
+    // 경로 추적: Prov -> (Kota OR Kab) -> Kec
+    // KabId가 'KOTA ...' 또는 'KABUPATEN ...'을 포함할 수도 있고 아닐 수도 있음.
+    // 가장 확실한 건 두 경로 다 찔러보는 것.
+    return FutureBuilder<List<String>>(
+      future: _fetchKecamatan(provId, kabId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return _disabledDropdown(label);
+        return _renderDropdown(label, snapshot.data!, selectedValue, onChanged);
+      },
+    );
+  }
+
+  Future<List<String>> _fetchKecamatan(String provId, String kabId) async {
+    final provRef =
+        FirebaseFirestore.instance.collection(_colProvinces).doc(provId);
+
+    // 1. Kabupaten에서 검색
+    var snap = await provRef
+        .collection(_colKabupaten)
+        .doc(kabId)
+        .collection(_colKecamatan)
+        .get();
+    if (snap.docs.isNotEmpty) {
+      return snap.docs.map((d) => d.id).toList()..sort();
+    }
+
+    // 2. 없으면 Kota에서 검색
+    snap = await provRef
+        .collection(_colKota)
+        .doc(kabId)
+        .collection(_colKecamatan)
+        .get();
+    return snap.docs.map((d) => d.id).toList()..sort();
+  }
+
+  // Kelurahan용
+  Widget _buildKelurahanDropdown({
+    required String label,
+    required String provId,
+    required String kabId,
+    required String kecId,
+    required String? selectedValue,
+    required Function(String?) onChanged,
+  }) {
+    return FutureBuilder<List<String>>(
+      future: _fetchKelurahan(provId, kabId, kecId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return _disabledDropdown(label);
+        return _renderDropdown(label, snapshot.data!, selectedValue, onChanged);
+      },
+    );
+  }
+
+  Future<List<String>> _fetchKelurahan(
+      String prov, String kab, String kec) async {
+    final provRef =
+        FirebaseFirestore.instance.collection(_colProvinces).doc(prov);
+
+    // 1. Kab -> Kec -> Kel
+    var kecRef = provRef
+        .collection(_colKabupaten)
+        .doc(kab)
+        .collection(_colKecamatan)
+        .doc(kec);
+    var snap = await kecRef.collection(_colKelurahan).get();
+    if (snap.docs.isNotEmpty) {
+      return snap.docs.map((d) => d.id).toList()..sort();
+    }
+
+    // 2. Kota -> Kec -> Kel
+    kecRef = provRef
+        .collection(_colKota)
+        .doc(kab)
+        .collection(_colKecamatan)
+        .doc(kec);
+    snap = await kecRef.collection(_colKelurahan).get();
+    return snap.docs.map((d) => d.id).toList()..sort();
+  }
+
+  // 공통 드롭다운 렌더러
+  Widget _renderDropdown(String label, List<String> items,
+      String? selectedValue, Function(String?) onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.black87)),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              hint: Text('locationfilter.hint.all'.tr()),
+              value: items.contains(selectedValue) ? selectedValue : null,
+              items: [
+                DropdownMenuItem(
+                    value: null, child: Text('locationfilter.hint.all'.tr())),
+                ...items.map((item) => DropdownMenuItem(
+                      value: item,
+                      child: Text(item),
+                    ))
+              ],
+              onChanged: onChanged,
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getSummaryText() {
+    List<String> parts = [];
+    if (_tempProv != null) parts.add(_tempProv!);
+    if (_tempKab != null) parts.add(_tempKab!);
+    if (_tempKec != null) parts.add(_tempKec!);
+    if (_tempKel != null) parts.add(_tempKel!);
+    return parts.join(' > ');
+  }
+
+  // 2. 내 주변 (거리) 선택 탭
+  Widget _buildNearbySelector() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.near_me_rounded, size: 64, color: Colors.orange),
+          const SizedBox(height: 24),
+          Text(
+              "locationfilter.nearby.radius"
+                  .tr(namedArgs: {'km': _tempRadius.toInt().toString()}),
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: 300,
+            child: Slider(
+              value: _tempRadius,
+              min: 1,
+              max: 50,
+              divisions: 49,
+              label: "${_tempRadius.toInt()}km",
+              activeColor: Colors.orange,
+              onChanged: (val) => setState(() => _tempRadius = val),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text("locationfilter.nearby.desc".tr(),
+              textAlign: TextAlign.center, // ✅ 텍스트 중앙 정렬 추가
+              style: TextStyle(color: Colors.grey.shade600)),
+        ],
+      ),
+    );
+  }
+
+  // 3. 전국 선택 탭
+  Widget _buildNationalSelector() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.map_rounded, size: 64, color: Colors.teal),
+          const SizedBox(height: 24),
+          Text("locationfilter.national.title".tr(),
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Text(
+              "locationfilter.national.desc".tr(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

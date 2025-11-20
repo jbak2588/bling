@@ -72,8 +72,7 @@ class SettingsScreen extends StatelessWidget {
           _buildSectionHeader(context, 'settings.app'.tr()), // "앱 설정"
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
-            // JSON 구조에 따라 'settings.notifications'가 객체일 수 있으므로 'settings.notifications.title' 등으로 변경하거나 JSON을 수정해야 함.
-            // 여기서는 안전하게 'notifications.title' (기존에 있는 키라면) 또는 'settings.notificationsTitle'로 변경 제안
+            // JSON 구조에 따라 'settings.notifications'가 객체일 수 있으므로 'settings.notificationsTitle'로 안전하게 사용합니다.
             title: Text(_t('settings.notificationsTitle', '알림 설정')),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {

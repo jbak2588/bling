@@ -102,34 +102,34 @@
       "pomDesc": "Search by title, hashtags",
       "comingSoon": "Coming soon"
     },
-    "results": "Results"
-  },
-  "locationfilter": {
-    "title": "Location Filter",
-    "reset": "Reset",
-    "apply": "Apply",
-    "provinsi": "Province",
-    "kabupaten": "Regency (Kabupaten)",
-    "kota": "City (Kota)",
-    "kecamatan": "District (Kecamatan)",
-    "kelurahan": "Village (Kelurahan)",
-    "tab": {
-      "admin": "Select Area",
-      "nearby": "Nearby",
-      "national": "National"
+    "results": "Results",
+    "locationfilter": {
+      "title": "Location Filter",
+      "reset": "Reset",
+      "apply": "Apply",
+      "provinsi": "Province",
+      "kabupaten": "Regency (Kabupaten)",
+      "kota": "City (Kota)",
+      "kecamatan": "District (Kecamatan)",
+      "kelurahan": "Village (Kelurahan)",
+      "tab": {
+        "admin": "Select Area",
+        "nearby": "Nearby",
+        "national": "National"
+      },
+      "nearby": {
+        "radius": "Search within {km}km radius",
+        "desc": "Adjust the range to find items near you."
+      },
+      "national": {
+        "title": "National Search",
+        "desc": "Search all items and posts without location limits."
+      },
+      "hint": {
+        "selectParent": "Please select a parent region first",
+        "all": "All Areas"
+      }
     },
-    "nearby": {
-      "radius": "Search within {km}km radius",
-      "desc": "Adjust the range to find items near you."
-    },
-    "national": {
-      "title": "National Search",
-      "desc": "Search all items and posts without location limits."
-    },
-    "hint": {
-      "selectParent": "Please select a parent region first",
-      "all": "All Areas"
-    }
   },
   
   "drawer": {

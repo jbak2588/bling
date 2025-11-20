@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // ✅ 인증 정보 가져오기
 import 'package:easy_localization/easy_localization.dart'; // ✅ 다국어
+import '../../../core/utils/localization_utils.dart';
 
 // v0.9 모델 import
 import '../../../core/models/reply_model.dart';
@@ -105,7 +106,8 @@ class _ReplyListViewState extends State<ReplyListView> {
                         PopupMenuButton<String>(
                           icon: const Icon(Icons.more_vert,
                               size: 18), // 아이콘 크기 조정
-                          tooltip: 'common.moreOptions'.tr(),
+                          tooltip: safeTr(context, 'common.moreOptions',
+                              fallback: ''),
                           onSelected: (value) {
                             if (value == 'delete') {
                               _handleDeleteReply(context, reply); // 삭제 함수 호출

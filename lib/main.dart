@@ -9,9 +9,12 @@ library;
 import 'dart:async'; // ✅ StreamSubscription 사용 위해 추가
 
 import 'firebase_options.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart'; // ✅ LocationProvider Import
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:easy_localization/easy_localization.dart';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:bling_app/features/auth/screens/auth_gate.dart';
@@ -19,6 +22,7 @@ import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 // ✅ app_links 및 링크 처리 관련 import 추가 (uni_links 대체)
 import 'package:app_links/app_links.dart';
+import 'package:bling_app/features/shared/controllers/locale_controller.dart'; // ✅ LocaleController import
 // import 'package:device_info_plus/device_info_plus.dart'; // [Fix] 더 이상 필요하지 않음
 // import 'dart:io'; // [Fix] 더 이상 필요하지 않음
 import 'package:bling_app/features/local_news/models/post_model.dart';
@@ -130,7 +134,17 @@ void main() async {
       supportedLocales: const [Locale('id'), Locale('en'), Locale('ko')],
       path: 'assets/lang',
       fallbackLocale: const Locale('id'),
-      child: const BlingApp(),
+      startLocale: const Locale('id'),
+      child: MultiProvider(
+        // ✅ MultiProvider로 감싸기
+        providers: [
+          // LocaleController는 ChangeNotifier가 아니므로 일반 Provider 사용 및 타입 명시
+          Provider<LocaleController>(create: (_) => LocaleController()),
+          ChangeNotifierProvider(
+              create: (_) => LocationProvider()), // ✅ LocationProvider 등록
+        ],
+        child: const BlingApp(),
+      ),
     ),
   );
 }
