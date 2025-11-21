@@ -33,10 +33,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/core/utils/upload_helpers.dart';
 
 import '../models/product_model.dart';
-import '../../../core/models/user_model.dart';
+// import '../../../core/models/user_model.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/screens/parent_category_screen.dart';
-import '../../location/screens/location_setting_screen.dart';
+import '../../location/screens/location_filter_screen.dart';
 
 // ✅ 공용 태그 위젯 import  : 2025년 8월 30일
 import '../../shared/widgets/custom_tag_input_field.dart';
@@ -84,6 +84,10 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   String? _selectedCategoryId;
   // bool _isAiLoading = false; // [작업 68] _loadingStatus로 대체
 
+  // [작업 8] 위치 정보 상태 관리 추가
+  Map<String, dynamic>? _locationParts;
+  GeoPoint? _geoPoint;
+
   @override
   void initState() {
     super.initState();
@@ -92,6 +96,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     _priceController.text = widget.product.price.toString();
     _descriptionController.text = widget.product.description;
     _addressController.text = widget.product.locationName ?? '';
+    _locationParts = widget.product.locationParts; // 초기화
+    _geoPoint = widget.product.geoPoint; // 초기화
     _transactionPlaceController.text = widget.product.transactionPlace ?? '';
     _isNegotiable = widget.product.negotiable;
     _existingImageUrls = List<String>.from(widget.product.imageUrls);
@@ -292,23 +298,29 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   }
 
   Future<void> _resetLocation() async {
-    final result = await Navigator.of(context).push<Map<String, dynamic>?>(
-      MaterialPageRoute(builder: (_) => const LocationSettingScreen()),
+    // 0번 탭(행정구역)을 기본으로 엽니다.
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+          builder: (_) => const LocationFilterScreen(initialTabIndex: 0)),
     );
-    if (result != null) {
-      await FirebaseFirestore.instance
-          .collection('products')
-          .doc(widget.product.id)
-          .update({
-        'locationName': result['locationName'],
-        'locationParts': result['locationParts'],
-        'geoPoint': result['geoPoint'],
+
+    if (result != null && result is Map<String, dynamic>) {
+      setState(() {
+        // 주소 문자열 조합 (예: Kel. A, Kec. B, Kab. C)
+        final kKel = result['kel'] != null ? "Kel. ${result['kel']}" : "";
+        final kKec = result['kec'] != null ? "Kec. ${result['kec']}" : "";
+        final kKab = (result['kab'] ?? "").toString().startsWith("KOTA") ||
+                (result['kab'] ?? "").toString().startsWith("KAB")
+            ? result['kab']
+            : "Kab. ${result['kab'] ?? ''}";
+
+        final newAddress =
+            [kKel, kKec, kKab].where((s) => s.toString().isNotEmpty).join(', ');
+
+        _addressController.text = newAddress;
+        _locationParts = result;
+        _geoPoint = null; // 행정구역 선택은 좌표가 없으므로 null 처리 (필요 시 별도 지오코딩)
       });
-      if (mounted) {
-        setState(() {
-          _addressController.text = result['locationName'] ?? '';
-        });
-      }
     }
   }
 
@@ -358,16 +370,16 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       // 기존 이미지 + 새로 업로드된 이미지 합치기
       final allImageUrls = [..._existingImageUrls, ...uploadedUrls];
 
-      // ✅ [핵심 수정] 사용자의 최신 정보를 가져와서 위치 정보를 업데이트합니다.
-      // user already checked above
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      if (!userDoc.exists) {
-        throw Exception('marketplace.errors.userNotFound'.tr());
-      }
-      final userModel = UserModel.fromFirestore(userDoc);
+      // [작업 8] 사용자 프로필 위치로 덮어쓰는 로직 제거.
+      // 대신 화면에서 편집된(_resetLocation 통해) 정보를 사용합니다.
+      // final userDoc = await FirebaseFirestore.instance
+      //     .collection('users')
+      //     .doc(user.uid)
+      //     .get();
+      // if (!userDoc.exists) {
+      //   throw Exception('marketplace.errors.userNotFound'.tr());
+      // }
+      // final userModel = UserModel.fromFirestore(userDoc);
 
       // ✅ [핵심 수정] copyWith 대신, Map을 직접 만들어 업데이트합니다.
       final updatedData = {
@@ -387,10 +399,10 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         'updatedAt': Timestamp.now(),
         'userUpdatedAt': Timestamp.now(), // [Fix #40] 사용자가 직접 저장했으므로 '끌어올리기'
 
-        // ✅ 구버전 address 대신, 사용자의 최신 위치 정보로 덮어씁니다.
-        'locationName': userModel.locationName,
-        'locationParts': userModel.locationParts,
-        'geoPoint': userModel.geoPoint,
+        // [작업 8] 수정된 위치 정보 반영
+        'locationName': _addressController.text,
+        'locationParts': _locationParts,
+        'geoPoint': _geoPoint,
       };
 
 // ✅ [핵심 수정] toJson() 대신 생성한 Map을 사용하여 update합니다.

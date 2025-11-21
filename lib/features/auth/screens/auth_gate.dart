@@ -6,6 +6,8 @@
 library;
 
 import 'package:bling_app/features/location/screens/neighborhood_prompt_screen.dart';
+import 'package:bling_app/features/user_profile/screens/profile_setup_screen.dart'; // 신규 화면 import
+import 'package:bling_app/features/auth/screens/email_verification_screen.dart'; // [수정] 이메일 인증 화면 import
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -26,15 +28,20 @@ class _AuthGateState extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, authSnapshot) {
-        if (authSnapshot.connectionState == ConnectionState.waiting) {
+      // [수정] authStateChanges -> userChanges로 변경하여 이메일 인증 상태 변화 감지
+      stream: FirebaseAuth.instance.userChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
               body: Center(child: CircularProgressIndicator()));
         }
 
-        if (authSnapshot.hasData) {
-          return AuthenticatedUserChecker(uid: authSnapshot.data!.uid);
+        if (snapshot.hasData) {
+          // [수정] 이메일 인증 여부 확인
+          if (!snapshot.data!.emailVerified) {
+            return const EmailVerificationScreen();
+          }
+          return AuthenticatedUserChecker(uid: snapshot.data!.uid);
         } else {
           return const LoginScreen();
         }
@@ -81,14 +88,20 @@ class _AuthenticatedUserCheckerState extends State<AuthenticatedUserChecker> {
 
         final userData = userSnapshot.data?.data() as Map<String, dynamic>?;
         final bool isVerified = userData?['neighborhoodVerified'] ?? false;
+        final bool isProfileCompleted = userData?['profileCompleted'] ?? false;
 
-        if (isVerified) {
-          // [수정] HomeScreen 대신 '뼈대'인 MainNavigationScreen을 반환합니다.
-          // 이제 child를 전달할 필요가 없습니다.
-          return const MainNavigationScreen();
-        } else {
+        // 1. 동네 인증이 안 된 경우
+        if (!isVerified) {
           return const NeighborhoodPromptScreen();
         }
+
+        // 2. 동네 인증은 했으나, 프로필(필수 정보)이 미완성인 경우
+        if (!isProfileCompleted) {
+          return const ProfileSetupScreen();
+        }
+
+        // 3. 모두 완료된 경우 메인 화면으로 이동
+        return const MainNavigationScreen();
       },
     );
   }

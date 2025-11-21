@@ -93,6 +93,14 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
   void _applyFilter() {
     final provider = context.read<LocationProvider>();
 
+    // [수정] 행정구역 탭에서 '지역(Province)'이 선택되지 않은 경우(All Areas)
+    // '상위 지역 선택' 에러 대신 '전국 모드'로 전환합니다.
+    if (_tabController.index == 0 && _tempProv == null) {
+      provider.setMode(LocationSearchMode.national);
+      Navigator.pop(context, provider.adminFilter);
+      return;
+    }
+
     switch (_tabController.index) {
       case 0: // 행정구역
         provider.setAdminFilter(

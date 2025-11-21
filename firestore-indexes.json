@@ -1,0 +1,2214 @@
+﻿[
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "roomCount",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "bathroomCount",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "furnishedStatus",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "propertyCondition",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgPjChIAJ",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/clubs/indexes/CICAgNj4yIcJ",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "userId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/pom/indexes/CICAgNiryokJ",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "furnishedStatus",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgNj4ho8J",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isElectricityIncluded",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgLjIzo8J",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgJiH7ZQJ",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "active",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "order",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "ASCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/subCategories/indexes/CICAgJjUlJYJ",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "propertyCondition",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgNiZwpcJ",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "categoryParentId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kel",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgLiTsZgJ",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "furnishedStatus",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isElectricityIncluded",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "kosBathroomType",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "propertyCondition",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgNir3pgJ",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "roomCount",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "bathroomCount",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgPjChIAK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kel",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgNj4jYAK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "arrayConfig": "CONTAINS",
+        "fieldPath": "participants"
+      },
+      {
+        "fieldPath": "lastMessageAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/chats/indexes/CICAgNiav4AK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kel",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/clubs/indexes/CICAgLjIw4AK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "categoryId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kel",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgOiPyoAK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "arrayConfig": "CONTAINS",
+        "fieldPath": "participants"
+      },
+      {
+        "fieldPath": "lastTimestamp",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/chats/indexes/CICAgJj7z4EK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "userId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/posts/indexes/CICAgNjpgYIK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "participants",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "lastTimestamp",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/chats/indexes/CICAgJjF9oIK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "arrayConfig": "CONTAINS",
+        "fieldPath": "tags"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/posts/indexes/CICAgOj3mIMK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "categoryParentId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgJjH1IMK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgPig2YMK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "active",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isParent",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "order",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "ASCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/categories_v2/indexes/CICAgNjamYQK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kec",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgLjy1YQK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/club_proposals/indexes/CICAgJjm4YQK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/clubs/indexes/CICAgNirhYUK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/posts/indexes/CICAgOi3voUK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "arrayConfig": "CONTAINS",
+        "fieldPath": "searchIndex"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/pom/indexes/CICAgNiZuIYK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kec",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/club_proposals/indexes/CICAgLix9IYK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgJjUgIcK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/lost_and_found/indexes/CICAgLjIpIcK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isSponsored",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/clubs/indexes/CICAgOj3rYcK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "aiVerificationStatus",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgNj4yIcK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kec",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/clubs/indexes/CICAgLjyuogK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgNja0ogK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "categoryParentId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgLiTpokK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "category",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "endAt",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "ASCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/auctions/indexes/CICAgNiryokK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgLjRh4oK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "updatedAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgJjFvYoK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "aiVerificationStatus",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgJiUzYsK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "furnishedStatus",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgOj35osK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "userId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgJiHu40K",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "endAt",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "ASCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/auctions/indexes/CICAgNir940K",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/jobs/indexes/CICAgNiZ1o4K",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "roomCount",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "bathroomCount",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgNj4ho8K",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isParent",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "order",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "ASCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/categories_v2/indexes/CICAgOiPwI8K",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "kosBathroomType",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgLjIzo8K",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "parentId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "order",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "ASCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/categories/indexes/CICAgOi3kJAK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgJiH2JAK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgLiT_JAK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "kosBathroomType",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isElectricityIncluded",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgLjyrJEK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "parentType",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/posts/indexes/CICAgOj3gpIK",
+    "queryScope": "COLLECTION_GROUP",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "listingType",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgPigw5IK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "category",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/posts/indexes/CICAgNi4-ZIK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/posts/indexes/CICAgNjp5ZMK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "stage",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/ai_cases/indexes/CICAgNirk5QK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kec",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgJiH7ZQK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgLjyi5UK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kec",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kel",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/lost_and_found/indexes/CICAgNja_ZUK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "active",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "parentId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "order",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "ASCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/categories_v2/indexes/CICAgJjUlJYK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgLjIspYK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kel",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/club_proposals/indexes/CICAgOj3u5YK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "furnishedStatus",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isElectricityIncluded",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "kosBathroomType",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "listingType",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "propertyCondition",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgNj43JYK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "propertyCondition",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgNiZwpcK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgLiTsZgK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgNir3pgK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "category",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/posts/indexes/CICAgOi36pgK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "roomCount",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "bathroomCount",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "furnishedStatus",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "propertyCondition",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgNjajpkK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "active",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "order",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "ASCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/categories_v2/indexes/CICAgLjywZkK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "arrayConfig": "CONTAINS",
+        "fieldPath": "searchIndex"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/pom/indexes/CICAgJjm-pkK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "address",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgJiU25oK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "listingType",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgOj38ZoK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "jobType",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/jobs/indexes/CICAgLiI_5oK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/reports/indexes/CICAgNjpr5sK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "categoryParentId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgJjFx5sK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "type",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "listingType",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "price",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgLix4JsK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/club_proposals/indexes/CICAgJjHoJwK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "isAvailable",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/room_listings/indexes/CICAgOi3z5wK",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "userUpdatedAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgNj4kZ4K",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "categoryId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgOiP1J4K",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "locationParts.prov",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isSponsored",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/clubs/indexes/CICAgLjI2Z4K",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  },
+  {
+    "density": "SPARSE_ALL",
+    "fields": [
+      {
+        "fieldPath": "categoryId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "locationParts.kab",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "isAiVerified",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "createdAt",
+        "order": "DESCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "DESCENDING"
+      }
+    ],
+    "name": "projects/blingbling-app/databases/(default)/collectionGroups/products/indexes/CICAgJjU7p4K",
+    "queryScope": "COLLECTION",
+    "state": "READY"
+  }
+]

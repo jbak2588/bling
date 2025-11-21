@@ -8,6 +8,7 @@
 library;
 
 import 'dart:math' as math;
+import 'package:bling_app/core/utils/logging/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -18,37 +19,47 @@ class LocationHelper {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // 1. 위치 서비스 활성화 여부 확인
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      throw Exception("위치 서비스(GPS)가 꺼져 있습니다. 켜주세요.");
-    }
-
-    // 2. 위치 권한 확인 및 요청
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        throw Exception("위치 권한이 거부되었습니다.");
+    try {
+      // 1. 위치 서비스 활성화 여부 확인
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        Logger.error("LocationHelper: GPS Service is disabled");
+        throw Exception("위치 서비스(GPS)가 꺼져 있습니다. 설정에서 켜주세요.");
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      throw Exception("위치 권한이 영구적으로 거부되었습니다. 설정에서 변경해주세요.");
-    }
+      // 2. 위치 권한 확인 및 요청
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          Logger.error("LocationHelper: Permission denied");
+          throw Exception("위치 권한이 거부되었습니다. 앱 설정에서 권한을 허용해주세요.");
+        }
+      }
 
-    // 3. 현재 위치 가져오기 (최신 API 적용)
-    return await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 10), // 10초 타임아웃
-      ),
-    );
+      if (permission == LocationPermission.deniedForever) {
+        Logger.error("LocationHelper: Permission denied forever");
+        throw Exception("위치 권한이 영구적으로 거부되었습니다. 앱 설정에서 변경해주세요.");
+      }
+
+      // 3. 현재 위치 가져오기 (최신 API 적용)
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 20), // [수정] 타임아웃 20초로 연장
+        ),
+      );
+    } catch (e) {
+      Logger.error("LocationHelper: getCurrentLocation error: $e", error: e);
+      rethrow;
+    }
   }
 
   /// 좌표(Position)를 주소 문자열로 변환합니다 (Reverse Geocoding).
   static Future<String?> getAddressFromCoordinates(Position position) async {
     try {
+      Logger.info(
+          "LocationHelper: Start Geocoding for ${position.latitude}, ${position.longitude}");
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
@@ -56,6 +67,7 @@ class LocationHelper {
 
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
+        Logger.info("LocationHelper: Placemark found: $place");
         // 주소 조합 로직
         List<String> parts = [
           place.street ?? '',
@@ -68,6 +80,7 @@ class LocationHelper {
         return parts.where((s) => s.isNotEmpty).join(', ');
       }
     } catch (e) {
+      Logger.error("LocationHelper: Geocoding error: $e", error: e);
       throw Exception("주소 변환 실패: $e");
     }
     return null;

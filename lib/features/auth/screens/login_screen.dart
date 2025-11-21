@@ -7,6 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'dart:io'; // [추가] Platform 확인용
+import 'dart:math'; // [추가] Nonce 생성용
+import 'dart:convert'; // [추가] SHA256 해싱용
+import 'package:crypto/crypto.dart'; // [추가] SHA256
+import 'package:sign_in_with_apple/sign_in_with_apple.dart'; // [추가] Apple Login
 
 // import 'profile_edit_screen.dart'; // 삭제됨
 import 'signup_screen.dart';
@@ -25,6 +30,87 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isLoading = false;
   bool _showPassword = false;
+
+  // [추가] Apple 로그인용 Nonce 생성 헬퍼 함수
+  String _generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
+  }
+
+  // [추가] SHA256 해싱 헬퍼 함수
+  String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  // [추가] Apple 로그인 로직
+  Future<void> _loginWithApple() async {
+    setState(() => _isLoading = true);
+    try {
+      final rawNonce = _generateNonce();
+      final nonce = _sha256ofString(rawNonce);
+
+      // 1. Apple 서버에 인증 요청
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: nonce,
+      );
+
+      // 2. Firebase Credential 생성
+      final OAuthCredential credential = OAuthProvider("apple.com").credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+        rawNonce: rawNonce,
+      );
+
+      // 3. Firebase 로그인
+      final result =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      if (result.user != null) {
+        // 신규 가입자 처리 로직 (기존 구글 로그인과 동일한 패턴)
+        final userDocRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(result.user!.uid);
+        final userDoc = await userDocRef.get();
+
+        if (!userDoc.exists) {
+          // Apple은 최초 로그인 시에만 email, fullName을 줍니다.
+          // 닉네임 우선순위: Apple이 준 이름 > 없으면 'Apple User'
+          String nickname = 'Apple User';
+          if (appleCredential.givenName != null) {
+            nickname =
+                "${appleCredential.givenName} ${appleCredential.familyName ?? ''}"
+                    .trim();
+          }
+
+          final newUser = UserModel(
+            uid: result.user!.uid,
+            nickname: nickname,
+            email: result.user!.email ?? appleCredential.email ?? '', // 이메일 수집
+            photoUrl: null, // Apple은 프로필 사진을 제공하지 않음
+            createdAt: Timestamp.now(),
+          );
+          await userDocRef.set(newUser.toJson());
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('login.alerts.unknownError'.tr())));
+      }
+      debugPrint("Apple Login Error: $e");
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   // GoogleSignIn 7.x: singleton 사용
 
@@ -254,6 +340,33 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 14),
+                    // [추가] Apple 로그인 버튼 (iOS만 표시)
+                    if (Platform.isIOS) ...[
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton.icon(
+                          onPressed: _isLoading ? null : _loginWithApple,
+                          icon: const Icon(Icons.apple,
+                              size: 24, color: Colors.white),
+                          label: Text(
+                            'login.buttons.apple'.tr(),
+                            style: GoogleFonts.montserrat(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black, // Apple 브랜드 컬러
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 18),
                     TextButton(
                       child: Text.rich(

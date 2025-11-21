@@ -15,6 +15,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:bling_app/core/utils/logging/logger.dart';
 
 class NeighborhoodPromptScreen extends StatefulWidget {
   const NeighborhoodPromptScreen({super.key});
@@ -55,28 +56,73 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
 
       // [검증] 최소한 Prov, Kab 정보는 있어야 함
       if (parts['prov'] == null || parts['kab'] == null) {
+        Logger.warn(
+            "NeighborhoodPrompt: Parsing failed. Parts: $parts"); // 디버깅 로그
         // 파싱 실패 시 수동 입력 유도
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("상세 주소를 확인할 수 없습니다. 수동으로 선택해주세요.")),
+            const SnackBar(
+              content: Text("주소 정보를 상세히 가져오지 못했습니다. (행정구역 누락)\n수동 설정을 진행합니다."),
+              duration: Duration(seconds: 3),
+            ),
           );
-          _openManualSelection(); // 수동 선택 화면으로 자동 전환 고려
+          await Future.delayed(const Duration(seconds: 1));
+          if (mounted) _openManualSelection();
         }
         return;
       }
 
       setState(() => _statusMessage = "동네 정보를 저장 중입니다...");
 
+      // [수정] 화면 표시용 약어 주소 생성 (UI 오버플로우 방지)
+      // 예: "Kel. Bencongan, Kec. Kelapa Dua, Kab. Tangerang"
+      String formattedAddress = address; // 기본값은 전체 주소
+      if (parts['kel'] != null &&
+          parts['kec'] != null &&
+          parts['kab'] != null) {
+        // 키워드 제거 및 약어 적용 헬퍼 함수
+        String clean(String? val, String remove) =>
+            val?.replaceAll(RegExp(remove, caseSensitive: false), '').trim() ??
+            '';
+
+        final kel = clean(parts['kel'], 'Kelurahan|Desa');
+        final kec = clean(parts['kec'], 'Kecamatan');
+        final kab = clean(parts['kab'], 'Kabupaten|Kota');
+
+        formattedAddress = "Kel. $kel, Kec. $kec, Kab. $kab";
+      }
+
       // 4) Firestore 저장
       await _saveLocationToUser(
-        locationName: address,
+        locationName: formattedAddress,
         locationParts: parts,
         geoPoint: GeoPoint(position.latitude, position.longitude),
       );
+      Logger.info("NeighborhoodPrompt: Location saved successfully.");
     } catch (e) {
+      String errorMessage = "위치 정보를 가져오는 중 알 수 없는 오류가 발생했습니다.";
+
+      if (e.toString().contains("permission")) {
+        errorMessage = "위치 권한이 필요합니다.";
+      } else if (e.toString().contains("Service")) {
+        errorMessage = "GPS가 꺼져 있습니다.";
+      } else if (e.toString().contains("IOError") ||
+          e.toString().contains("network")) {
+        errorMessage = "네트워크 상태가 좋지 않아 주소를 변환할 수 없습니다.";
+      }
+
+      Logger.error("NeighborhoodPrompt Error: $e", error: e);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("오류: ${e.toString()}")),
+          SnackBar(
+            content: Text(errorMessage),
+            action: SnackBarAction(
+              label: '수동 선택',
+              onPressed: _openManualSelection,
+              textColor: Colors.white,
+            ),
+          ),
         );
       }
     } finally {
@@ -112,17 +158,26 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
         });
 
         try {
-          // 4. 표시용 주소 문자열 생성 (예: "DKI JAKARTA JAKARTA SELATAN ...")
-          final locationNameParts = [prov, kab, result['kec'], result['kel']]
-              .where((element) => element != null)
-              .cast<String>()
-              .toList();
+          // [수정] 수동 선택 시에도 통일된 포맷(약어) 적용
+          String formattedName = "";
 
-          final locationName = locationNameParts.join(' ');
+          // 입력값이 "Kecamatan OO" 형태인지 단순 "OO"인지에 따라 처리가 다르지만,
+          // LocationFilterScreen 데이터가 순수 이름만 온다면 약어만 붙여줌.
+          // 여기서는 안전하게 조합합니다.
+          final kKel = result['kel'] != null ? "Kel. ${result['kel']}" : "";
+          final kKec = result['kec'] != null ? "Kec. ${result['kec']}" : "";
+          final kKab = kab.startsWith("KOTA") || kab.startsWith("KAB")
+              ? kab
+              : "Kab. $kab";
+
+          // 역순 조합 (동 -> 구 -> 시) 또는 순차 조합. 인니는 보통 작은 단위부터 씀.
+          // 기존 예시: Kel. Muja Muju, Kec. Umbulharjo, Kab. Yogyakarta
+          formattedName =
+              [kKel, kKec, kKab].where((s) => s.isNotEmpty).join(', ');
 
           // 5. Firestore 저장 로직 호출
           await _saveLocationToUser(
-            locationName: locationName,
+            locationName: formattedName,
             locationParts: Map<String, dynamic>.from(result),
             geoPoint: null, // 수동 선택은 좌표가 없으므로 null
           );

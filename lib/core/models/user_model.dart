@@ -79,6 +79,10 @@ class UserModel {
   final bool isBanned; // 차단 여부 (true 시 계정 제한)
   final List<String>? blockedUsers; // 차단 유저 목록 (uid 리스트)
   final bool profileCompleted; // 기본 프로필 완성 여부
+  // [v2.2] 약관 동의 필드 추가 (필수/선택)
+  final bool? termsAgreed; // 이용약관 (필수)
+  final bool? privacyAgreed; // 개인정보 처리방침 (필수)
+  final bool? marketingAgreed; // 마케팅 수신 동의 (선택)
   final Timestamp createdAt; // 가입 시각 (Firestore Timestamp)
 
   // [친구찾기/데이팅]
@@ -135,6 +139,9 @@ class UserModel {
     this.isBanned = false,
     this.blockedUsers,
     this.profileCompleted = false,
+    this.termsAgreed,
+    this.privacyAgreed,
+    this.marketingAgreed,
     required this.createdAt,
     this.neighborhoodVerified,
     this.lastActiveAt,
@@ -214,6 +221,9 @@ class UserModel {
           ? List<String>.from(data['blockedUsers'])
           : null,
       profileCompleted: data['profileCompleted'] ?? false,
+      termsAgreed: data['termsAgreed'],
+      privacyAgreed: data['privacyAgreed'],
+      marketingAgreed: data['marketingAgreed'],
       isVisibleInList: data['isVisibleInList'],
       likesGiven: data['likesGiven'] != null
           ? List<String>.from(data['likesGiven'])
@@ -280,6 +290,9 @@ class UserModel {
       'isBanned': isBanned,
       'blockedUsers': blockedUsers,
       'profileCompleted': profileCompleted,
+      'termsAgreed': termsAgreed,
+      'privacyAgreed': privacyAgreed,
+      'marketingAgreed': marketingAgreed,
       'createdAt': createdAt,
       'isDatingProfile': null, // [v2.1] null로 덮어쓰기
       'age': null, // [v2.1] null로 덮어쓰기

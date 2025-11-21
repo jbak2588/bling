@@ -7,7 +7,7 @@
     "buttons": {
       "login": "Log In",
       "google": "Continue with Google",
-      "apple": "Continue with Apple"
+      "apple": "Sign in with Apple"
     },
     "links": {
       "findPassword": "Forgot password?",
@@ -75,6 +75,17 @@
       }
     }
   },
+  "category": {
+    "PnPa5ZjI9FYQiAGP6I7m": "Digital Devices",
+    "4hx6hyOYodriXgPiR5bl": "Home Essentials",
+    "OkjaREVlnybYXdJKZvF7": "Fashion",
+    "lhxeaWRmfmd2gElvHy8y": "Beauty & Care",
+    "wyYkvRznDcngqzuJvOIJ": "Limited & Luxury",
+    "IJ9rF047d2rRnFFkdLyw": "Hobby & Leisure",
+    "6WtvHv9Mm2M49KIVRdZT": "Baby & Kids",
+    "5B68mEyct8tpIr9Eyc8j": "Motorcycle",
+    "BnGbVd3W9P3ztu0HBJix": "Other Items"
+  },
   "search": {
     "resultsTitle": "Results for '{keyword}'",
     "empty": "No results found for '{keyword}'.",
@@ -102,7 +113,34 @@
       "pomDesc": "Search by title, hashtags",
       "comingSoon": "Coming soon"
     },
-    "results": "Results"
+    "results": "Results",
+    "locationfilter": {
+      "title": "Location Filter",
+      "reset": "Reset",
+      "apply": "Apply",
+      "provinsi": "Province",
+      "kabupaten": "Regency (Kabupaten)",
+      "kota": "City (Kota)",
+      "kecamatan": "District (Kecamatan)",
+      "kelurahan": "Village (Kelurahan)",
+      "tab": {
+        "admin": "Select Area",
+        "nearby": "Nearby",
+        "national": "National"
+      },
+      "nearby": {
+        "radius": "Search within {km}km radius",
+        "desc": "Adjust the range to find items near you."
+      },
+      "national": {
+        "title": "National Search",
+        "desc": "Search all items and posts without location limits."
+      },
+      "hint": {
+        "selectParent": "Please select a parent region first",
+        "all": "All Areas"
+      }
+    }
   },
   "locationfilter": {
     "title": "Location Filter",
@@ -131,7 +169,6 @@
       "all": "All Areas"
     }
   },
-  
   "drawer": {
     "editProfile": "Edit Profile",
     "bookmarks": "Bookmarks",
@@ -282,8 +319,7 @@
       "success": {
         "finalized": "Deal completed successfully.",
         "cancelled": "Deal cancelled. Deposit will be refunded."
-      }
-      ,
+      },
       "checklistTitle": "On-site verification checklist"
     },
     "aiBadge": "AI verified",
@@ -382,7 +418,6 @@
       "title": "Collect for product detail info",
       "initial_images_title": "List of images used in AI's initial analysis",
       "suggestion_title": "AI suggested supplementary items",
-      
       "pick_initial_title": "Select a photo for this evidence",
       "submit_button": "Submit for verification"
     },
@@ -796,8 +831,8 @@
     "edit": "edit",
     "submit": "submit",
     "loginRequired": "loginRequired",
-    "unknownUser": "unknownUser"
-    ,"copiedTitle": "Copied!",
+    "unknownUser": "unknownUser",
+    "copiedTitle": "Copied!",
     "copiedMessage": "{title} copied to clipboard."
   },
   "commom": {
@@ -1745,8 +1780,8 @@
     },
     "menu": {
       "aiApproval": "AI Verification Management",
-      "reportManagement": "Report Management"
-      ,"aiAudit": "AI Audit Logs",
+      "reportManagement": "Report Management",
+      "aiAudit": "AI Audit Logs",
       "aiAuditSubtitle": "View Takeover & Enhancement history"
     },
     "aiApproval": {
@@ -1811,8 +1846,7 @@
       "statusUpdateFail": "Failed to update status: {error}",
       "originalPostNotFound": "Original post not found.",
       "couldNotOpenOriginalPost": "Could not open original post."
-    }
-    ,
+    },
     "reset": {
       "confirmTitle": "Reset AI cancel counts",
       "confirmContent": "Force-reset all products' AI cancel counts (aiCancelCount) to 0. (Restores free tier once)\n\nThis action cannot be undone. Continue?",
@@ -1958,8 +1992,7 @@
   "category_empty": "category empty",
   "user": {
     "notLoggedIn": "notLoggedIn"
-  }
-,
+  },
   "ai_audit": {
     "title": "AI Audit Log",
     "tabs": {
@@ -1975,8 +2008,7 @@
       "no_records": "No AI records found.",
       "error": "Error loading AI records."
     }
-  }
-  ,
+  },
   "ai_case": {
     "title": "AI Case Detail",
     "tabs": {
@@ -1984,6 +2016,22 @@
       "takeover_photos": "Takeover Photos",
       "original_photos": "Original Photos",
       "raw_json": "Raw JSON"
+    }
+  },
+  "auth": {
+    "verification": {
+      "title": "Email Verification",
+      "sent_title": "Verification Email Sent",
+      "sent_desc": "We sent a link to {email}.\nPlease click the link to complete verification.",
+      "resend": "Resend Email",
+      "logout": "Log Out",
+      "check": "Check Verification",
+      "success": "Email verification completed.",
+      "fail_send": "Failed to send email: {error}"
+    }
+    ,
+    "signup": {
+      "success_email_sent": "Sign up successful! We've sent a verification link to {email}."
     }
   }
 }

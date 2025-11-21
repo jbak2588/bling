@@ -19,8 +19,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // ✅ 공용 태그 입력 위젯을 import 합니다.
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
-// ✅ 위치 설정을 위해 LocationSettingScreen을 import 합니다.
-import 'package:bling_app/features/location/screens/location_setting_screen.dart';
+// ✅ 위치 설정을 위해 LocationFilterScreen을 import 합니다.
+import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 
 class EditClubScreen extends StatefulWidget {
   final ClubModel club;
@@ -120,14 +120,23 @@ class _EditClubScreenState extends State<EditClubScreen> {
 
   // ✅ 위치를 새로 선택하는 함수를 추가합니다.
   Future<void> _selectLocation() async {
-    final result = await Navigator.of(context).push<Map<String, dynamic>?>(
-      MaterialPageRoute(builder: (_) => const LocationSettingScreen()),
+    // [작업 8] LocationFilterScreen 사용 (0번 탭: 행정구역)
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+          builder: (_) => const LocationFilterScreen(initialTabIndex: 0)),
     );
-    if (result != null && mounted) {
+
+    if (result != null && result is Map<String, dynamic>) {
       setState(() {
-        _locationName = result['locationName'] ?? _locationName;
-        _locationParts = result['locationParts'] ?? _locationParts;
-        _geoPoint = result['geoPoint'] ?? _geoPoint;
+        // 주소 문자열 생성
+        final kKel = result['kel'] != null ? "Kel. ${result['kel']}" : "";
+        final kKec = result['kec'] != null ? "Kec. ${result['kec']}" : "";
+        final kKab = result['kab'] ?? "";
+
+        _locationName =
+            [kKel, kKec, kKab].where((s) => s.toString().isNotEmpty).join(', ');
+        _locationParts = result;
+        _geoPoint = null; // 좌표 정보 없음
       });
     }
   }

@@ -26,7 +26,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../location/screens/location_setting_screen.dart';
+import 'package:bling_app/features/location/screens/neighborhood_prompt_screen.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
@@ -146,9 +146,35 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   Future<void> _openLocationSetting() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const LocationSettingScreen()),
+      MaterialPageRoute(builder: (_) => const NeighborhoodPromptScreen()),
     );
-    await _loadUserData();
+    // 돌아오면 간단히 사용자 위치 데이터만 다시 로드
+    await _refreshUserData();
+  }
+
+  // [작업 9] 동네 설정 화면에서 복귀 시 최신 데이터 로드
+  Future<void> _refreshUserData() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists && mounted) {
+        final updatedUser = UserModel.fromFirestore(userDoc);
+        setState(() {
+          _userModel = updatedUser;
+          // 화면에 표시되는 위치 관련 필드들을 갱신
+          _rtController.text = updatedUser.locationParts?['rt'] ?? '';
+          _rwController.text = updatedUser.locationParts?['rw'] ?? '';
+        });
+      }
+    } catch (e) {
+      debugPrint("Failed to refresh user data: $e");
+    }
   }
 
   Future<void> _saveChanges() async {

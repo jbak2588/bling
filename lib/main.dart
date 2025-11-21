@@ -17,7 +17,8 @@ import 'package:flutter/foundation.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'package:bling_app/features/auth/screens/auth_gate.dart';
+// import 'package:bling_app/features/auth/screens/auth_gate.dart';
+import 'package:bling_app/features/auth/screens/splash_screen.dart';
 import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 // ✅ app_links 및 링크 처리 관련 import 추가 (uni_links 대체)
@@ -259,7 +260,7 @@ class BlingApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: isTest ? const Scaffold(body: SizedBox()) : const AuthGate(),
+      home: isTest ? const Scaffold(body: SizedBox()) : const SplashScreen(),
     );
   }
 }

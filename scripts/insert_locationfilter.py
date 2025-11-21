@@ -42,6 +42,22 @@ loc_obj_ko = {
   "hint": {"selectParent": "상위 지역을 먼저 선택하세요", "all": "전체 (모든 지역)"}
 }
 
+loc_obj_id = {
+  "title": "Filter Lokasi",
+  "reset": "Atur Ulang",
+  "apply": "Terapkan",
+  "provinsi": "Provinsi",
+  "kabupaten": "Kabupaten",
+  "kota": "Kota",
+  "kecamatan": "Kecamatan",
+  "kelurahan": "Kelurahan",
+  "tab": {"admin": "Pilih Area", "nearby": "Di Sekitar", "national": "Nasional"},
+  "nearby": {"radius": "Cari dalam radius {km}km", "desc": "Sesuaikan jangkauan untuk menemukan item di sekitarmu."},
+  "national": {"title": "Pencarian Nasional", "desc": "Cari semua item dan posting tanpa batasan lokasi."},
+  "hint": {"selectParent": "Silakan pilih wilayah induk terlebih dahulu", "all": "Semua Wilayah"}
+}
+
 update('c:/bling/bling_app/assets/lang/en.json', 'Results', loc_obj_en)
 update('c:/bling/bling_app/assets/lang/ko.json', '검색 결과', loc_obj_ko)
+update('c:/bling/bling_app/assets/lang/id.json', 'Hasil', loc_obj_id)
 print('Updated files')

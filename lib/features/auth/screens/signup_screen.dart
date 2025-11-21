@@ -41,92 +41,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  // Future<void> _handleGpsLocation() async {
-  //   try {
-  //     setState(() => _isGettingLocation = true);
-
-  //     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //     if (!serviceEnabled) throw Exception('GPS service is disabled');
-
-  //     LocationPermission permission = await Geolocator.checkPermission();
-  //     if (permission == LocationPermission.denied ||
-  //         permission == LocationPermission.deniedForever) {
-  //       permission = await Geolocator.requestPermission();
-  //       if (permission != LocationPermission.whileInUse &&
-  //           permission != LocationPermission.always) {
-  //         throw Exception('Location permission denied');
-  //       }
-  //     }
-
-  //     final position = await Geolocator.getCurrentPosition();
-  //     final lat = position.latitude;
-  //     final lng = position.longitude;
-
-  //     final response = await _places.searchByText(
-  //       '$lat,$lng',
-  //       location: Location(lat: lat, lng: lng),
-  //       radius: 100,
-  //     );
-  //     if (!response.isOkay || response.results.isEmpty) {
-  //       throw Exception('No reverse geocode result');
-  //     }
-
-  //     final detail =
-  //         await _places.getDetailsByPlaceId(response.results.first.placeId);
-  //     if (!detail.isOkay || detail.result.geometry == null) {
-  //       throw Exception('No geometry');
-  //     }
-
-  //     final location = detail.result.geometry!.location;
-  //     final components = detail.result.addressComponents;
-
-  //     String formatted = detail.result.formattedAddress ?? '';
-  //     final fullAddress =
-  //         formatted.replaceAll(RegExp(r'^[A-Z0-9+]{6,},?\s*'), '');
-
-  //     String district = '';
-  //     for (final type in [
-  //       'neighborhood',
-  //       'sublocality',
-  //       'locality',
-  //       'administrative_area_level_2',
-  //     ]) {
-  //       final match = components.firstWhere(
-  //         (c) => c.types.contains(type),
-  //         orElse: () => AddressComponent(
-  //           longName: '',
-  //           shortName: '',
-  //           types: [],
-  //         ),
-  //       );
-  //       if (match.longName.isNotEmpty) {
-  //         district = match.longName;
-  //         break;
-  //       }
-  //     }
-
-  //     if (!mounted) return;
-  //     setState(() {
-  //       _locationController.text = fullAddress;
-  //       _gpsLocationCache = {
-  //         'location': fullAddress,
-  //         'district': district,
-  //         'latitude': location.lat,
-  //         'longitude': location.lng,
-  //         'neighborhoodVerified': true,
-  //       };
-  //     });
-  //   } catch (e) {
-  //     if (!mounted) return;
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //           content: Text('location_setting_error'.tr(args: [e.toString()]))),
-  //     );
-  //   } finally {
-  //     if (mounted) setState(() => _isGettingLocation = false);
-  //   }
-  // }
-
   Future<void> _signUp() async {
     if (_isLoading) return;
 
@@ -154,7 +68,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
         password: _passwordController.text.trim(),
       );
 
-      if (credential.user != null) {
+      // [수정] 회원가입 성공 시 이메일 인증 메일 발송 (예외 처리 강화)
+      if (credential.user != null && !credential.user!.emailVerified) {
+        try {
+          await credential.user!.sendEmailVerification();
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(tr('auth.verification.fail_send',
+                      namedArgs: {'error': e.toString()}))),
+            );
+          }
+          // 이메일 발송 실패는 가입 실패로 간주하지 않고 진행
+        }
         // ▼▼▼▼▼ UserModel을 사용하여 기본 필드가 포함된 사용자 문서 생성 ▼▼▼▼▼
         final newUser = UserModel(
           uid: credential.user!.uid,
@@ -171,8 +98,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('signup.alerts.signupSuccessLoginNotice'.tr())));
+        // [수정] 성공 메시지에 이메일 확인 안내 추가
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(tr('auth.signup.success_email_sent',
+                  namedArgs: {'email': _emailController.text.trim()}))),
+        );
         Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {

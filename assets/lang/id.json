@@ -108,7 +108,17 @@
       }
     }
   },
-  
+  "category": {
+    "PnPa5ZjI9FYQiAGP6I7m": "Perangkat Digital",
+    "4hx6hyOYodriXgPiR5bl": "Perlengkapan Rumah",
+    "OkjaREVlnybYXdJKZvF7": "Fashion",
+    "lhxeaWRmfmd2gElvHy8y": "Kecantikan & Perawatan",
+    "wyYkvRznDcngqzuJvOIJ": "Edisi Terbatas & Mewah",
+    "IJ9rF047d2rRnFFkdLyw": "Hobi & Rekreasi",
+    "6WtvHv9Mm2M49KIVRdZT": "Bayi & Anak",
+    "5B68mEyct8tpIr9Eyc8j": "Motor",
+    "BnGbVd3W9P3ztu0HBJix": "Barang Lainnya"
+  },
   "drawer": {
     "editProfile": "Ubah Profil",
     "bookmarks": "Markah",
@@ -252,7 +262,7 @@
         "cancelled": "Transaksi dibatalkan. Deposit akan dikembalikan."
       },
       "checklistTitle": "Daftar Periksa Verifikasi di Lokasi",
-      "ai" : {
+      "ai": {
         "reactivated": "Verifikasi AI telah diaktifkan kembali."
       }
     },
@@ -341,7 +351,6 @@
       "title": "Kumpulkan untuk detail produk",
       "initial_images_title": "Daftar gambar yang digunakan AI untuk analisis awal",
       "suggestion_title": "Item pelengkapan yang disarankan AI",
-      
       "pick_initial_title": "Pilih foto untuk bukti ini",
       "submit_button": "Kirim untuk verifikasi"
     },
@@ -1925,7 +1934,34 @@
       "pomDesc": "Cari berdasarkan judul, tagar",
       "comingSoon": "Segera hadir"
     },
-    "results": "Hasil"
+    "results": "Hasil",
+    "locationfilter": {
+      "title": "Filter Lokasi",
+      "reset": "Atur Ulang",
+      "apply": "Terapkan",
+      "provinsi": "Provinsi",
+      "kabupaten": "Kabupaten",
+      "kota": "Kota",
+      "kecamatan": "Kecamatan",
+      "kelurahan": "Kelurahan",
+      "tab": {
+        "admin": "Pilih Area",
+        "nearby": "Di Sekitar",
+        "national": "Nasional"
+      },
+      "nearby": {
+        "radius": "Cari dalam radius {km}km",
+        "desc": "Sesuaikan jangkauan untuk menemukan item di sekitarmu."
+      },
+      "national": {
+        "title": "Pencarian Nasional",
+        "desc": "Cari semua item dan posting tanpa batasan lokasi."
+      },
+      "hint": {
+        "selectParent": "Silakan pilih wilayah induk terlebih dahulu",
+        "all": "Semua Wilayah"
+      }
+    }
   },
   "locationfilter": {
     "title": "Filter Lokasi",
@@ -1970,8 +2006,7 @@
   "category_empty": "category empty",
   "user": {
     "notLoggedIn": "notLoggedIn"
-  }
-,
+  },
   "ai_audit": {
     "title": "Log Audit AI",
     "tabs": {
@@ -1987,8 +2022,7 @@
       "no_records": "Tidak ada catatan AI.",
       "error": "Gagal memuat catatan AI."
     }
-  }
-  ,
+  },
   "ai_case": {
     "title": "Detail Kasus AI",
     "tabs": {
@@ -1996,6 +2030,22 @@
       "takeover_photos": "Foto Pengambilan",
       "original_photos": "Foto Asli",
       "raw_json": "Raw JSON"
+    }
+  },
+  "auth": {
+    "verification": {
+      "title": "Verifikasi Email",
+      "sent_title": "Email Verifikasi Terkirim",
+      "sent_desc": "Kami telah mengirim tautan ke {email}.\nSilakan klik tautan untuk menyelesaikan verifikasi.",
+      "resend": "Kirim Ulang Email",
+      "logout": "Keluar",
+      "check": "Cek Verifikasi",
+      "success": "Verifikasi email selesai.",
+      "fail_send": "Gagal mengirim email: {error}"
+    }
+    ,
+    "signup": {
+      "success_email_sent": "Pendaftaran berhasil! Kami mengirim tautan verifikasi ke {email}."
     }
   }
 }

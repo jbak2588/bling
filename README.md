@@ -157,7 +157,6 @@ lib
 │   ├── location
 │   │   └── screens
 │   │       ├── location_filter_screen.dart
-│   │       ├── location_setting_screen.dart
 │   │       └── neighborhood_prompt_screen.dart
 │   ├── lost_and_found
 │   │   ├── data
@@ -409,9 +408,4 @@ npm run deploy
 
 ---
 
-## 🚀 Ver.0.3 → Ver.1.0 목표
 
-Bling 은 Ver.09에서 구조 통합을 마치고  
-Ver.1.0에서는 실 서비스 론칭을 목표로 합니다.
-
-See [docs/progress_status.md](docs/progress_status.md) for module completion status.

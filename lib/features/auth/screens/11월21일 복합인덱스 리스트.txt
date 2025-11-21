@@ -1,0 +1,480 @@
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+|     NAME     | COLLECTION_GROUP |   QUERY_SCOPE    | STATE | API_SCOPE |      FIELD_PATHS      |   ORDER    | ARRAY_CONFIG | VECTOR_CONFIG |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNirk5QK | ai_cases         | COLLECTION       | READY |           | stage                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNiryokK | auctions         | COLLECTION       | READY |           | category              | ASCENDING  |              |               |
+|              |                  |                  |       |           | endAt                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | __name__              | ASCENDING  |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNir940K | auctions         | COLLECTION       | READY |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | endAt                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | __name__              | ASCENDING  |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOi3kJAK | categories       | COLLECTION       | READY |           | parentId              | ASCENDING  |              |               |
+|              |                  |                  |       |           | order                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | __name__              | ASCENDING  |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNjamYQK | categories_v2    | COLLECTION       | READY |           | active                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isParent              | ASCENDING  |              |               |
+|              |                  |                  |       |           | order                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | __name__              | ASCENDING  |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOiPwI8K | categories_v2    | COLLECTION       | READY |           | isParent              | ASCENDING  |              |               |
+|              |                  |                  |       |           | order                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | __name__              | ASCENDING  |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJjUlJYK | categories_v2    | COLLECTION       | READY |           | active                | ASCENDING  |              |               |
+|              |                  |                  |       |           | parentId              | ASCENDING  |              |               |
+|              |                  |                  |       |           | order                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | __name__              | ASCENDING  |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjywZkK | categories_v2    | COLLECTION       | READY |           | active                | ASCENDING  |              |               |
+|              |                  |                  |       |           | order                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | __name__              | ASCENDING  |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNiav4AK | chats            | COLLECTION       | READY |           | participants          |            
+| CONTAINS     |               |
+|              |                  |                  |       |           | lastMessageAt         | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJj7z4EK | chats            | COLLECTION       | READY |           | participants          |            
+| CONTAINS     |               |
+|              |                  |                  |       |           | lastTimestamp         | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJjF9oIK | chats            | COLLECTION       | READY |           | participants          | ASCENDING  |              |               |
+|              |                  |                  |       |           | lastTimestamp         | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJjm4YQK | club_proposals   | COLLECTION       | READY |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLix9IYK | club_proposals   | COLLECTION       | READY |           | locationParts.kec     | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOj3u5YK | club_proposals   | COLLECTION       | READY |           | locationParts.kel     | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJjHoJwK | club_proposals   | COLLECTION       | READY |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNj4yIcJ | clubs            | COLLECTION       | READY |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjIw4AK | clubs            | COLLECTION       | READY |           | locationParts.kel     | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNirhYUK | clubs            | COLLECTION       | READY |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOj3rYcK | clubs            | COLLECTION       | READY |           | isSponsored           | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjyuogK | clubs            | COLLECTION       | READY |           | locationParts.kec     | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjI2Z4K | clubs            | COLLECTION       | READY |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNiZ1o4K | jobs             | COLLECTION       | READY |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLiI_5oK | jobs             | COLLECTION       | READY |           | jobType               | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjIpIcK | lost_and_found   | COLLECTION       | READY |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNja_ZUK | lost_and_found   | COLLECTION       | READY |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kec     | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kel     | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNiryokJ | pom              | COLLECTION       | READY |           | userId                | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNiZuIYK | pom              | COLLECTION       | READY |           | searchIndex           |            
+| CONTAINS     |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJjm-pkK | pom              | COLLECTION       | READY |           | searchIndex           |            
+| CONTAINS     |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNjpgYIK | posts            | COLLECTION       | READY |           | userId                | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOj3mIMK | posts            | COLLECTION       | READY |           | tags                  |            
+| CONTAINS     |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOi3voUK | posts            | COLLECTION       | READY |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOj3gpIK | posts            | COLLECTION_GROUP | READY |           | parentType            | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNi4-ZIK | posts            | COLLECTION       | READY |           | category              | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNjp5ZMK | posts            | COLLECTION       | READY |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOi36pgK | posts            | COLLECTION       | READY |           | category              | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLiTsZgJ | products         | COLLECTION       | READY |           | categoryParentId      | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kel     | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNj4jYAK | products         | COLLECTION       | READY |           | locationParts.kel     | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOiPyoAK | products         | COLLECTION       | READY |           | categoryId            | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kel     | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJjH1IMK | products         | COLLECTION       | READY |           | categoryParentId      | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgPig2YMK | products         | COLLECTION       | READY |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjy1YQK | products         | COLLECTION       | READY |           | locationParts.kec     | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNj4yIcK | products         | COLLECTION       | READY |           | aiVerificationStatus  | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLiTpokK | products         | COLLECTION       | READY |           | categoryParentId      | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJjFvYoK | products         | COLLECTION       | READY |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | updatedAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJiUzYsK | products         | COLLECTION       | READY |           | aiVerificationStatus  | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJiHu40K | products         | COLLECTION       | READY |           | userId                | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJiH2JAK | products         | COLLECTION       | READY |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLiT_JAK | products         | COLLECTION       | READY |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJiH7ZQK | products         | COLLECTION       | READY |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kec     | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjyi5UK | products         | COLLECTION       | READY |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLiTsZgK | products         | COLLECTION       | READY |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNir3pgK | products         | COLLECTION       | READY |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJiU25oK | products         | COLLECTION       | READY |           | address               | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJjFx5sK | products         | COLLECTION       | READY |           | categoryParentId      | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNj4kZ4K | products         | COLLECTION       | READY |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | userUpdatedAt         | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOiP1J4K | products         | COLLECTION       | READY |           | categoryId            | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.prov    | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJjU7p4K | products         | COLLECTION       | READY |           | categoryId            | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAiVerified          | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNjpr5sK | reports          | COLLECTION       | READY |           | status                | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgPjChIAJ | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | roomCount             | ASCENDING  |              |               |
+|              |                  |                  |       |           | bathroomCount         | ASCENDING  |              |               |
+|              |                  |                  |       |           | furnishedStatus       | ASCENDING  |              |               |
+|              |                  |                  |       |           | propertyCondition     | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNj4ho8J | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | furnishedStatus       | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjIzo8J | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | isElectricityIncluded | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJiH7ZQJ | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNiZwpcJ | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | propertyCondition     | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNir3pgJ | room_listings    | COLLECTION       | READY |           | furnishedStatus       | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isElectricityIncluded | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | kosBathroomType       | ASCENDING  |              |               |
+|              |                  |                  |       |           | propertyCondition     | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgPjChIAK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | roomCount             | ASCENDING  |              |               |
+|              |                  |                  |       |           | bathroomCount         | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJjUgIcK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNja0ogK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjRh4oK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOj35osK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | furnishedStatus       | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNj4ho8K | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | roomCount             | ASCENDING  |              |               |
+|              |                  |                  |       |           | bathroomCount         | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjIzo8K | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | kosBathroomType       | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjyrJEK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | kosBathroomType       | ASCENDING  |              |               |
+|              |                  |                  |       |           | isElectricityIncluded | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgPigw5IK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | listingType           | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | price                 | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLjIspYK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | DESCENDING |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNj43JYK | room_listings    | COLLECTION       | READY |           | furnishedStatus       | ASCENDING  |              |               |
+|              |                  |                  |       |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isElectricityIncluded | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | kosBathroomType       | ASCENDING  |              |               |
+|              |                  |                  |       |           | listingType           | ASCENDING  |              |               |
+|              |                  |                  |       |           | propertyCondition     | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNiZwpcK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | propertyCondition     | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgNjajpkK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | roomCount             | ASCENDING  |              |               |
+|              |                  |                  |       |           | bathroomCount         | ASCENDING  |              |               |
+|              |                  |                  |       |           | furnishedStatus       | ASCENDING  |              |               |
+|              |                  |                  |       |           | propertyCondition     | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOj38ZoK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | listingType           | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgLix4JsK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | isSponsored           | ASCENDING  |              |               |
+|              |                  |                  |       |           | locationParts.kab     | ASCENDING  |              |               |
+|              |                  |                  |       |           | type                  | ASCENDING  |              |               |
+|              |                  |                  |       |           | listingType           | ASCENDING  |              |               |
+|              |                  |                  |       |           | price                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgOi3z5wK | room_listings    | COLLECTION       | READY |           | isAvailable           | ASCENDING  |              |               |
+|              |                  |                  |       |           | createdAt             | DESCENDING |              |               |
+|              |                  |                  |       |           | __name__              | DESCENDING |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
+| CICAgJjUlJYJ | subCategories    | COLLECTION       | READY |           | active                | ASCENDING  |              |               |
+|              |                  |                  |       |           | order                 | ASCENDING  |              |               |
+|              |                  |                  |       |           | __name__              | ASCENDING  |              |               |
++--------------+------------------+------------------+-------+-----------+-----------------------+------------+--------------+---------------+
