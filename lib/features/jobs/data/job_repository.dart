@@ -80,6 +80,39 @@ class JobRepository {
   }
   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
+// V V V --- [추가] 기존 구인글을 수정하는 함수 --- V V V
+  Future<void> updateJob(JobModel job) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.uid != job.userId) {
+      throw Exception(tr('main.errors.permissionDenied'));
+    }
+
+    // 수정 시에는 update()를 사용하여 필요한 필드만 갱신하거나,
+    // 전체 문서를 덮어쓰려면 set()을 사용할 수 있습니다. 여기서는 모델 전체 갱신.
+    // 단, createJob과 달리 user의 jobIds는 건드릴 필요 없음.
+    await _firestore.collection('jobs').doc(job.id).update(job.toJson());
+  }
+
+  // V V V --- [추가] 구인글을 삭제하는 함수 --- V V V
+  Future<void> deleteJob(String jobId, String userId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.uid != userId) {
+      throw Exception(tr('main.errors.permissionDenied'));
+    }
+
+    final jobRef = _firestore.collection('jobs').doc(jobId);
+    final userRef = _firestore.collection('users').doc(userId);
+
+    final batch = _firestore.batch();
+    batch.delete(jobRef);
+    // 사용자의 jobIds 목록에서도 제거
+    batch.update(userRef, {
+      'jobIds': FieldValue.arrayRemove([jobId])
+    });
+
+    await batch.commit();
+  }
+
   // V V V --- [추가] ID로 특정 구인글 하나의 정보를 가져오는 함수 --- V V V
   Future<JobModel?> fetchJob(String jobId) async {
     final doc = await _firestore.collection('jobs').doc(jobId).get();

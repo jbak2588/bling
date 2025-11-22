@@ -56,7 +56,10 @@ class JobModel {
   final String? workHours; // '월-금, 09:00-18:00' 등
   final List<String>? imageUrls;
 
-  // [추가] 검색용 역색인
+  // V V V --- [추가] 태그 리스트 필드 --- V V V
+  final List<String> tags;
+
+  // [기존] 검색용 역색인
   final List<String> searchIndex;
 
   JobModel({
@@ -81,6 +84,8 @@ class JobModel {
     this.workPeriod,
     this.workHours,
     this.imageUrls,
+    // [추가] 생성자 초기화
+    this.tags = const [],
     this.searchIndex = const [],
   });
 
@@ -111,6 +116,8 @@ class JobModel {
       workHours: data['workHours'],
       imageUrls:
           data['imageUrls'] != null ? List<String>.from(data['imageUrls']) : [],
+      // [추가] 태그 리스트 로드 (null 안전 처리)
+      tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
       searchIndex: data['searchIndex'] != null
           ? List<String>.from(data['searchIndex'])
           : [],
@@ -138,6 +145,8 @@ class JobModel {
       'workPeriod': workPeriod,
       'workHours': workHours,
       'imageUrls': imageUrls,
+      // [추가] 태그 필드 저장
+      'tags': tags,
       'searchIndex': searchIndex,
     };
   }

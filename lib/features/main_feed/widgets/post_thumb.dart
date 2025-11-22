@@ -255,12 +255,8 @@ class PostThumb extends StatelessWidget {
           return (emoji != null && emoji.isNotEmpty) ? '$emoji $name' : name;
         }
 
-        // 최후 수단: 기존 카테고리 키 시도 (호환용)
-        final fallbackKey = 'categories.post.$tagId.name';
-        final translated = fallbackKey.tr();
-        if (translated != fallbackKey) return translated;
-
-        return tagId; // 마지막 폴백: tagId 그대로
+        // [수정] 사용자 정의 태그는 번역 시도 없이 그대로 표시 (다국어 키 누락 경고 방지)
+        return tagId;
       }
 
       final labels = <String>[];

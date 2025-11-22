@@ -32,6 +32,7 @@
 /// ============================================================================
 library;
 // (파일 내용...)
+// lib/features/jobs/screens/create_job_screen.dart
 
 import 'dart:io';
 import 'package:bling_app/features/jobs/models/job_model.dart';
@@ -46,25 +47,31 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../constants/job_categories.dart';
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+import 'package:bling_app/core/utils/search_helper.dart';
+
+// ✅ [추가] 공용 태그 위젯 import
+import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
 class CreateJobScreen extends StatefulWidget {
   final UserModel userModel;
   final JobType jobType;
-  // [추가] 상점 상세에서 전달받는 초기값들 (선택)
+  final JobModel? jobToEdit;
+
   final String? initialCompanyName;
   final String? initialLocation;
   final GeoPoint? initialGeoPoint;
   final Map<String, dynamic>? initialLocationParts;
 
-  const CreateJobScreen(
-      {super.key,
-      required this.userModel,
-      this.jobType = JobType.regular,
-      this.initialCompanyName,
-      this.initialLocation,
-      this.initialGeoPoint,
-      this.initialLocationParts});
+  const CreateJobScreen({
+    super.key,
+    required this.userModel,
+    this.jobType = JobType.regular,
+    this.jobToEdit,
+    this.initialCompanyName,
+    this.initialLocation,
+    this.initialGeoPoint,
+    this.initialLocationParts,
+  });
 
   @override
   State<CreateJobScreen> createState() => _CreateJobScreenState();
@@ -72,12 +79,12 @@ class CreateJobScreen extends StatefulWidget {
 
 class _CreateJobScreenState extends State<CreateJobScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _workHoursController = TextEditingController();
-  String? _selectedWorkPeriod;
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _workHoursController;
+  late TextEditingController _salaryAmountController;
 
-  final _salaryAmountController = TextEditingController();
+  String? _selectedWorkPeriod;
   String? _selectedSalaryType;
   bool _isSalaryNegotiable = false;
 
@@ -85,25 +92,89 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
   List<JobCategory> _categories = [];
   JobCategory? _selectedCategory;
 
-  final List<XFile> _images = [];
+  final List<XFile> _newImages = [];
+  List<String> _existingImageUrls = [];
+
+  // ✅ [추가] 태그 목록 상태 변수
+  List<String> _tags = [];
+
   final ImagePicker _picker = ImagePicker();
   final JobRepository _repository = JobRepository();
+
+  bool get _isEditMode => widget.jobToEdit != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _categories = AppJobCategories.getCategoriesByType(widget.jobType);
+
+    if (_isEditMode) {
+      final job = widget.jobToEdit!;
+      _titleController = TextEditingController(text: job.title);
+      _descriptionController = TextEditingController(text: job.description);
+      _workHoursController = TextEditingController(text: job.workHours);
+      _salaryAmountController =
+          TextEditingController(text: job.salaryAmount?.toString() ?? '');
+      _selectedWorkPeriod = job.workPeriod;
+      _selectedSalaryType = job.salaryType;
+      _isSalaryNegotiable = job.isSalaryNegotiable;
+
+      try {
+        _selectedCategory = _categories.firstWhere((c) => c.id == job.category);
+      } catch (_) {
+        _selectedCategory = _categories.isNotEmpty ? _categories.first : null;
+      }
+
+      if (job.imageUrls != null) {
+        _existingImageUrls = List.from(job.imageUrls!);
+      }
+
+      // ✅ [추가] 수정 시 기존 태그 불러오기
+      try {
+        _tags = List<String>.from(job.tags);
+      } catch (_) {
+        _tags = [];
+      }
+    } else {
+      _titleController = TextEditingController(
+          text: (widget.initialCompanyName != null &&
+                  widget.initialCompanyName!.trim().isNotEmpty)
+              ? widget.initialCompanyName!.trim()
+              : '');
+      _descriptionController = TextEditingController();
+      _workHoursController = TextEditingController();
+      _salaryAmountController = TextEditingController();
+      _selectedCategory = _categories.isNotEmpty ? _categories.first : null;
+    }
+  }
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _salaryAmountController.dispose(); // [추가]
+    _workHoursController.dispose();
+    _salaryAmountController.dispose();
     super.dispose();
   }
 
   Future<void> _pickImages() async {
-    if (_images.length >= 5) return; // 최대 5장 제한
-    final pickedFiles = await _picker.pickMultiImage(
-        imageQuality: 70, limit: 5 - _images.length);
+    final currentCount = _existingImageUrls.length + _newImages.length;
+    if (currentCount >= 5) return;
+
+    final pickedFiles =
+        await _picker.pickMultiImage(imageQuality: 70, limit: 5 - currentCount);
+
     if (pickedFiles.isNotEmpty) {
-      setState(() => _images.addAll(pickedFiles));
+      setState(() => _newImages.addAll(pickedFiles));
     }
+  }
+
+  void _removeNewImage(int index) {
+    setState(() => _newImages.removeAt(index));
+  }
+
+  void _removeExistingImage(int index) {
+    setState(() => _existingImageUrls.removeAt(index));
   }
 
   Future<void> _submitJob() async {
@@ -118,49 +189,74 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
     }
 
     try {
-      // [수정] 이미지 업로드 로직 추가
-      List<String> imageUrls = [];
-      for (var imageFile in _images) {
-        final fileName = const Uuid().v4();
-        final ref = FirebaseStorage.instance
-            .ref()
-            .child('job_images/${user.uid}/$fileName');
-        await ref.putFile(File(imageFile.path));
-        imageUrls.add(await ref.getDownloadURL());
+      List<String> finalImageUrls = List.from(_existingImageUrls);
+
+      if (_newImages.isNotEmpty) {
+        for (var imageFile in _newImages) {
+          final fileName = const Uuid().v4();
+          final ref = FirebaseStorage.instance
+              .ref()
+              .child('job_images/${user.uid}/$fileName');
+          await ref.putFile(File(imageFile.path));
+          finalImageUrls.add(await ref.getDownloadURL());
+        }
       }
 
-      // [추가] 검색 키워드 생성
+      // ✅ [추가] 검색 키워드 생성 시 태그 포함
       final searchKeywords = SearchHelper.generateSearchIndex(
         title: _titleController.text,
-        // tags: ... (JobModel에 태그가 있다면 추가)
+        tags: _tags, // 태그 전달
       );
-      final newJob = JobModel(
-        id: '',
+
+      final jobData = JobModel(
+        id: _isEditMode ? widget.jobToEdit!.id : '',
         userId: user.uid,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
-        category: _selectedCategory!.id, // ✅ [작업 31] JobCategory의 id를 전달
-        locationName: widget.initialLocation ?? widget.userModel.locationName,
-        locationParts:
-            widget.initialLocationParts ?? widget.userModel.locationParts,
-        geoPoint: widget.initialGeoPoint ?? widget.userModel.geoPoint,
-        createdAt: Timestamp.now(),
+        category: _selectedCategory!.id,
+        locationName: _isEditMode
+            ? widget.jobToEdit!.locationName
+            : (widget.initialLocation ?? widget.userModel.locationName),
+        locationParts: _isEditMode
+            ? widget.jobToEdit!.locationParts
+            : (widget.initialLocationParts ?? widget.userModel.locationParts),
+        geoPoint: _isEditMode
+            ? widget.jobToEdit!.geoPoint
+            : (widget.initialGeoPoint ?? widget.userModel.geoPoint),
+
+        createdAt: _isEditMode ? widget.jobToEdit!.createdAt : Timestamp.now(),
         salaryType: _selectedSalaryType,
         salaryAmount: int.tryParse(_salaryAmountController.text),
         isSalaryNegotiable: _isSalaryNegotiable,
         workPeriod: _selectedWorkPeriod,
         workHours: _workHoursController.text.trim(),
-        imageUrls: imageUrls, // [수정] 업로드된 이미지 URL 목록 전달
+        imageUrls: finalImageUrls,
         jobType: widget.jobType.name,
-        searchIndex: searchKeywords, // [추가]
+
+        // ✅ [추가] 태그 및 검색 인덱스 저장
+        tags: _tags,
+        searchIndex: searchKeywords,
+
+        viewsCount: _isEditMode ? widget.jobToEdit!.viewsCount : 0,
+        likesCount: _isEditMode ? widget.jobToEdit!.likesCount : 0,
+        trustLevelRequired:
+            _isEditMode ? widget.jobToEdit!.trustLevelRequired : 'normal',
       );
-      await _repository.createJob(newJob);
+
+      if (_isEditMode) {
+        await _repository.updateJob(jobData);
+      } else {
+        await _repository.createJob(jobData);
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('jobs.form.submitSuccess'.tr()),
-              backgroundColor: Colors.green),
+            content: Text(_isEditMode
+                ? 'jobs.form.updateSuccess'.tr()
+                : 'jobs.form.submitSuccess'.tr()),
+            backgroundColor: Colors.green,
+          ),
         );
         Navigator.of(context).pop();
       }
@@ -168,8 +264,9 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('jobs.form.submitFail'.tr(args: [e.toString()])),
-              backgroundColor: Colors.red),
+            content: Text('jobs.form.submitFail'.tr(args: [e.toString()])),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -180,28 +277,19 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    // ✅ [작업 31] 4. 'regular' 타입의 카테고리만 로드
-    _categories = AppJobCategories.getCategoriesByType(widget.jobType);
-    _selectedCategory = _categories.isNotEmpty ? _categories.first : null;
-    // [추가] 상점명 초기값이 있으면 제목에 채워 넣기
-    if (widget.initialCompanyName != null &&
-        widget.initialCompanyName!.trim().isNotEmpty) {
-      _titleController.text = widget.initialCompanyName!.trim();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('jobs.form.titleRegular'.tr()),
+        title: Text(_isEditMode
+            ? 'jobs.form.editTitle'.tr()
+            : 'jobs.form.titleRegular'.tr()),
         actions: [
           if (!_isSaving)
             TextButton(
               onPressed: _submitJob,
-              child: Text('jobs.form.submit'.tr()),
+              child: Text(_isEditMode
+                  ? 'jobs.form.update'.tr()
+                  : 'jobs.form.submit'.tr()),
             ),
         ],
       ),
@@ -212,7 +300,6 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                // --- 직종 선택 ---
                 DropdownButtonFormField<JobCategory>(
                   initialValue: _selectedCategory,
                   items: _categories.map((category) {
@@ -220,9 +307,9 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                       value: category,
                       child: Row(
                         children: [
-                          Text(category.icon), // ✅ [작업 31] 9. 아이콘 표시
+                          Text(category.icon),
                           const SizedBox(width: 8),
-                          Text(category.nameKey.tr()), // ✅ [작업 31] 10. 다국어 키 이름
+                          Text(category.nameKey.tr()),
                         ],
                       ),
                     );
@@ -232,7 +319,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                       setState(() => _selectedCategory = value);
                     }
                   },
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) =>
@@ -240,12 +327,11 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // --- 제목 입력 ---
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
                     labelText: 'jobs.form.titleLabel'.tr(),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -256,11 +342,10 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // V V V --- [수정] 급여 정보 입력 UI --- V V V
                 Text('jobs.form.salaryInfoTitle'.tr(),
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
-                // 급여 종류 선택
+
                 DropdownButtonFormField<String>(
                   initialValue: _selectedSalaryType,
                   hint: Text('jobs.form.salaryTypeHint'.tr()),
@@ -275,17 +360,17 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                       const InputDecoration(border: OutlineInputBorder()),
                 ),
                 const SizedBox(height: 12),
-                // 급여액 입력
+
                 TextFormField(
                   controller: _salaryAmountController,
                   decoration: InputDecoration(
                     labelText: 'jobs.form.salaryAmountLabel'.tr(),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
-                // 급여 협의 가능
+
                 CheckboxListTile(
                   title: Text('jobs.form.salaryNegotiable'.tr()),
                   value: _isSalaryNegotiable,
@@ -296,7 +381,6 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // V V V --- [추가] 근무 조건 입력 UI --- V V V
                 Text('jobs.form.workInfoTitle'.tr(),
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
@@ -323,11 +407,11 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                   decoration: InputDecoration(
                     labelText: 'jobs.form.workHoursLabel'.tr(),
                     hintText: 'jobs.form.workHoursHint'.tr(),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 24),
-                // V V V --- [추가] 이미지 첨부 UI --- V V V
+
                 Text('jobs.form.imageSectionTitle'.tr(),
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
@@ -336,15 +420,70 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: [
-                      ..._images.map((xfile) => Padding(
+                      ..._existingImageUrls.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final url = entry.value;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Image.network(url,
+                                    width: 100, height: 100, fit: BoxFit.cover),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () => _removeExistingImage(index),
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.close,
+                                        color: Colors.white, size: 16),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                      ..._newImages.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final xfile = entry.value;
+                        return Padding(
                             padding: const EdgeInsets.only(right: 8.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: Image.file(File(xfile.path),
-                                  width: 100, height: 100, fit: BoxFit.cover),
-                            ),
-                          )),
-                      if (_images.length < 5)
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.file(File(xfile.path),
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover),
+                                ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: GestureDetector(
+                                    onTap: () => _removeNewImage(index),
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.close,
+                                          color: Colors.white, size: 16),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ));
+                      }),
+                      if ((_existingImageUrls.length + _newImages.length) < 5)
                         GestureDetector(
                           onTap: _pickImages,
                           child: Container(
@@ -364,13 +503,12 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // --- 상세 설명 ---
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
                     labelText: 'jobs.form.descriptionLabel'.tr(),
                     hintText: 'jobs.form.descriptionHint'.tr(),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   maxLines: 8,
                   validator: (value) {
@@ -380,6 +518,22 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                     return null;
                   },
                 ),
+
+                const SizedBox(height: 24),
+
+                // ✅ [추가] 태그 입력 위젯 (ProductRegistrationScreen과 동일한 위치 배치)
+                CustomTagInputField(
+                  initialTags: _tags, // 수정 시 기존 태그 전달
+                  hintText: 'marketplace.registration.tagsHint'.tr(),
+                  onTagsChanged: (tags) {
+                    setState(() {
+                      _tags = tags;
+                    });
+                  },
+                ),
+
+                // 태그 입력 필드 밑 여백 확보
+                const SizedBox(height: 32),
               ],
             ),
           ),

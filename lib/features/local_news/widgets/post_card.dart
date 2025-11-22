@@ -174,7 +174,7 @@ class _PostCardState extends State<PostCard>
               (tagInfo) => tagInfo.tagId == tagId,
               orElse: () => TagInfo(
                   tagId: tagId,
-                  nameKey: tagId,
+                  nameKey: '', // [수정] nameKey를 비워둠
                   descriptionKey: '',
                   emoji: '🏷️'),
             ))
@@ -199,16 +199,15 @@ class _PostCardState extends State<PostCard>
                       },
                       borderRadius: BorderRadius.circular(16),
                       child: Chip(
-                        // 표준화: 레이블에 "이모지 + 이름" 표시
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: Colors.grey.shade100,
+                        padding: EdgeInsets.zero,
+                        // [수정] 시스템 태그(nameKey 있음)는 번역, 사용자 태그는 그대로 표시
                         label: Text(
-                          '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${tagInfo.nameKey.tr()}',
+                          '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${tagInfo.nameKey.isNotEmpty ? tagInfo.nameKey.tr() : tagInfo.tagId}',
                           style: const TextStyle(fontSize: 11),
                         ),
-                        // 폰트 크기 미세 조정
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 0),
-                        visualDensity: VisualDensity.compact,
-                        backgroundColor: Colors.grey[200],
                       ),
                     ))
                 .toList(),
