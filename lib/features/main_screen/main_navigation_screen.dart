@@ -74,7 +74,6 @@ import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
 import 'home_screen.dart';
 import 'package:bling_app/features/boards/screens/kelurahan_board_screen.dart';
-// ❌ [삭제] import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
 
 import 'package:bling_app/features/admin/screens/admin_screen.dart'; // ✅ 관리자 화면 import
 // [Fix]

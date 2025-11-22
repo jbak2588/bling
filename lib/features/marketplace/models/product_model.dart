@@ -108,6 +108,9 @@ class ProductModel {
   final Timestamp? userUpdatedAt; // [Fix] '끌어올리기' 정렬 기준
   final bool isNew; // <-- 신품 여부 구분을 위한 필드 추가
 
+  // [추가] 검색용 역색인
+  final List<String> searchIndex;
+
   ProductModel({
     required this.id,
     required this.userId,
@@ -147,6 +150,7 @@ class ProductModel {
     this.aiVerificationData,
     this.rejectionReason,
     this.isNew = false,
+    this.searchIndex = const [],
   });
 
   factory ProductModel.fromFirestore(
@@ -207,6 +211,9 @@ class ProductModel {
               : null),
       rejectionReason: data['rejectionReason'],
       isNew: data['isNew'] ?? false,
+      searchIndex: data['searchIndex'] != null
+          ? List<String>.from(data['searchIndex'])
+          : [],
     );
   }
 
@@ -250,6 +257,7 @@ class ProductModel {
       'aiVerificationData': aiVerificationData,
       'rejectionReason': rejectionReason,
       'isNew': isNew,
+      'searchIndex': searchIndex,
     };
   }
 

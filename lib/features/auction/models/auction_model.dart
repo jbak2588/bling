@@ -46,6 +46,9 @@ class AuctionModel {
   // ✅ [탐색 기능] 1. category 필드 추가
   final String? category;
 
+  // [추가] 검색용 역색인
+  final List<String> searchIndex;
+
   AuctionModel({
     required this.id,
     required this.title,
@@ -65,6 +68,7 @@ class AuctionModel {
     this.isAiVerified = false,
     this.tags = const [], // ✅ 생성자에 추가
     this.category, // ✅ [탐색 기능] 2. 생성자에 추가
+    this.searchIndex = const [],
   });
 
   factory AuctionModel.fromFirestore(
@@ -96,6 +100,9 @@ class AuctionModel {
       tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
       // ✅ [탐색 기능] 3. Firestore에서 category 읽기
       category: data['category'],
+      searchIndex: data['searchIndex'] != null
+          ? List<String>.from(data['searchIndex'])
+          : [],
     );
   }
 
@@ -118,6 +125,7 @@ class AuctionModel {
       'isAiVerified': isAiVerified,
       'tags': tags, // ✅ JSON 변환 시 tags 필드를 포함합니다.
       'category': category, // ✅ [탐색 기능] 4. JSON에 category 포함
+      'searchIndex': searchIndex,
     };
   }
 }

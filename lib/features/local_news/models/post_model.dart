@@ -48,6 +48,9 @@ class PostModel {
   final Timestamp? eventTime; // 특정 이벤트 시간 (예: 정전 시작 시간)
   final String? eventLocation; // 특정 이벤트 장소 (예: 특정 거리명)
 
+  // [추가] 검색용 역색인
+  final List<String> searchIndex;
+
   PostModel({
     required this.id,
     required this.userId,
@@ -71,6 +74,7 @@ class PostModel {
     // ✅ 가이드형 필드 추가
     this.eventTime,
     this.eventLocation,
+    this.searchIndex = const [],
   });
 
   /// Firestore 문서로부터 PostModel 객체를 생성합니다.
@@ -111,6 +115,9 @@ class PostModel {
       // ✅ 가이드형 필드 로드
       eventTime: data['eventTime'] as Timestamp?,
       eventLocation: data['eventLocation'] as String?,
+      searchIndex: data['searchIndex'] != null
+          ? List<String>.from(data['searchIndex'])
+          : [],
     );
   }
 
@@ -138,6 +145,7 @@ class PostModel {
       // ✅ 가이드형 필드 저장 (null이 아닐 경우)
       if (eventTime != null) 'eventTime': eventTime,
       if (eventLocation != null) 'eventLocation': eventLocation,
+      'searchIndex': searchIndex,
     };
   }
 }

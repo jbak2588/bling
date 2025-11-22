@@ -58,6 +58,9 @@ class ShopModel {
   // V V V --- [수정] 단일 이미지(String)에서 이미지 목록(List<String>)으로 변경 --- V V V
   final List<String> imageUrls; // 상점 대표 이미지
 
+  // [추가] 검색용 역색인
+  final List<String> searchIndex;
+
   ShopModel({
     required this.id,
     required this.name,
@@ -80,6 +83,7 @@ class ShopModel {
     this.adExpiryDate,
     // [수정] 생성자 필드 변경
     required this.imageUrls,
+    this.searchIndex = const [],
   });
 
   factory ShopModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -110,6 +114,9 @@ class ShopModel {
       // [수정] Firestore에서 이미지 목록 불러오기
       imageUrls:
           data['imageUrls'] != null ? List<String>.from(data['imageUrls']) : [],
+      searchIndex: data['searchIndex'] != null
+          ? List<String>.from(data['searchIndex'])
+          : [],
     );
   }
 
@@ -135,6 +142,7 @@ class ShopModel {
       'adExpiryDate': adExpiryDate,
       // [수정] Firestore에 이미지 목록 저장
       'imageUrls': imageUrls,
+      'searchIndex': searchIndex,
     };
   }
 }

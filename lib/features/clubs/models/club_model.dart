@@ -43,6 +43,9 @@ class ClubModel {
   final bool isSponsored; // [추가] 광고 여부
   final Timestamp? adExpiryDate; // [추가] 광고 만료일
 
+  // [추가] 검색용 역색인
+  final List<String> searchIndex;
+
   ClubModel({
     required this.id,
     required this.title,
@@ -62,6 +65,7 @@ class ClubModel {
     this.imageUrl, // [추가] 생성자에 추가
     this.isSponsored = false, // [추가]
     this.adExpiryDate, // [추가]
+    this.searchIndex = const [],
   });
 
   factory ClubModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -93,6 +97,9 @@ class ClubModel {
       imageUrl: data['imageUrl'], // [추가] Firestore에서 이미지 URL 불러오기
       isSponsored: data['isSponsored'] ?? false, // [추가]
       adExpiryDate: data['adExpiryDate'], // [추가]
+      searchIndex: data['searchIndex'] != null
+          ? List<String>.from(data['searchIndex'])
+          : [],
     );
   }
 
@@ -115,6 +122,7 @@ class ClubModel {
       'imageUrl': imageUrl, // [추가] Firestore에 이미지 URL 저장
       'isSponsored': isSponsored,
       'adExpiryDate': adExpiryDate,
+      'searchIndex': searchIndex,
     };
   }
 }

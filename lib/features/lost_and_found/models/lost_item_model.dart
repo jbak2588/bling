@@ -37,6 +37,9 @@ class LostItemModel {
   final int viewsCount;
   final int commentsCount;
 
+  // [추가] 검색용 역색인
+  final List<String> searchIndex;
+
   LostItemModel({
     required this.id,
     required this.userId,
@@ -58,6 +61,7 @@ class LostItemModel {
     // ✅ [작업 42]
     this.viewsCount = 0,
     this.commentsCount = 0,
+    this.searchIndex = const [],
   });
 
   factory LostItemModel.fromFirestore(
@@ -87,6 +91,9 @@ class LostItemModel {
       // ✅ [작업 42]
       viewsCount: data['viewsCount'] ?? 0,
       commentsCount: data['commentsCount'] ?? 0,
+      searchIndex: data['searchIndex'] != null
+          ? List<String>.from(data['searchIndex'])
+          : [],
     );
   }
 
@@ -113,6 +120,7 @@ class LostItemModel {
 
       // [수정] 'isHunted' 필드도 저장되도록 추가합니다.
       'isHunted': isHunted,
+      'searchIndex': searchIndex,
     };
   }
 }

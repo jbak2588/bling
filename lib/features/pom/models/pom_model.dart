@@ -65,6 +65,9 @@ class PomModel {
   final bool isAiVerified;
   final Timestamp createdAt;
 
+  // [추가] 검색용 역색인
+  final List<String> searchIndex;
+
   PomModel({
     required this.id,
     required this.userId,
@@ -87,6 +90,7 @@ class PomModel {
     this.trustLevelVerified = false,
     this.isAiVerified = false,
     required this.createdAt,
+    this.searchIndex = const [],
   });
 
   factory PomModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -134,6 +138,9 @@ class PomModel {
       trustLevelVerified: data['trustLevelVerified'] ?? false,
       isAiVerified: data['isAiVerified'] ?? false,
       createdAt: data['createdAt'] ?? Timestamp.now(),
+      searchIndex: data['searchIndex'] != null
+          ? List<String>.from(data['searchIndex'])
+          : [],
     );
   }
 
@@ -159,6 +166,7 @@ class PomModel {
       'trustLevelVerified': trustLevelVerified,
       'isAiVerified': isAiVerified,
       'createdAt': createdAt,
+      'searchIndex': searchIndex,
     };
   }
 }

@@ -56,6 +56,9 @@ class JobModel {
   final String? workHours; // '월-금, 09:00-18:00' 등
   final List<String>? imageUrls;
 
+  // [추가] 검색용 역색인
+  final List<String> searchIndex;
+
   JobModel({
     required this.id,
     required this.userId,
@@ -78,6 +81,7 @@ class JobModel {
     this.workPeriod,
     this.workHours,
     this.imageUrls,
+    this.searchIndex = const [],
   });
 
   factory JobModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -107,6 +111,9 @@ class JobModel {
       workHours: data['workHours'],
       imageUrls:
           data['imageUrls'] != null ? List<String>.from(data['imageUrls']) : [],
+      searchIndex: data['searchIndex'] != null
+          ? List<String>.from(data['searchIndex'])
+          : [],
     );
   }
 
@@ -131,6 +138,7 @@ class JobModel {
       'workPeriod': workPeriod,
       'workHours': workHours,
       'imageUrls': imageUrls,
+      'searchIndex': searchIndex,
     };
   }
 }

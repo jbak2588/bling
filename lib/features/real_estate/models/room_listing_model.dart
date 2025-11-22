@@ -98,6 +98,9 @@ class RoomListingModel {
   // ✅ tags 필드를 추가합니다.
   final List<String> tags;
 
+  // [추가] 검색용 역색인
+  final List<String> searchIndex;
+
   RoomListingModel({
     required this.id,
     required this.userId,
@@ -140,6 +143,7 @@ class RoomListingModel {
     this.houseFacilities = const [],
     this.commercialFacilities = const [],
     this.tags = const [], // ✅ 생성자에 추가
+    this.searchIndex = const [],
   });
 
   factory RoomListingModel.fromFirestore(
@@ -192,6 +196,9 @@ class RoomListingModel {
           List<String>.from(data['commercialFacilities'] ?? []),
       // ✅ Firestore 데이터로부터 tags 필드를 읽어옵니다.
       tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
+      searchIndex: data['searchIndex'] != null
+          ? List<String>.from(data['searchIndex'])
+          : [],
     );
   }
 
@@ -240,6 +247,7 @@ class RoomListingModel {
       'commercialFacilities': commercialFacilities,
 
       'tags': tags, // ✅ JSON 변환 시 tags 필드를 포함합니다.
+      'searchIndex': searchIndex,
     };
   }
 }

@@ -88,6 +88,8 @@ class UserModel {
   // [친구찾기/데이팅]
   // [관리자/운영]
   final bool isAdmin; // [추가]
+  // [추가] 검색용 역색인 (닉네임 + 관심사)
+  final List<String> searchIndex;
   // [v2.1] 데이팅 관련 필드 삭제
   // final bool isDatingProfile; // 친구찾기 기능 활성화 여부 (ON/OFF)
   // final int? age; // 실제 나이
@@ -153,6 +155,7 @@ class UserModel {
     this.likeCount = 0,
     this.rejectedUsers,
     this.clubs, // [추가]
+    this.searchIndex = const [],
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -246,6 +249,9 @@ class UserModel {
       clubs: data['clubs'] != null
           ? List<String>.from(data['clubs'])
           : null, // [추가]
+      searchIndex: data['searchIndex'] != null
+          ? List<String>.from(data['searchIndex'])
+          : [],
     );
   }
 
@@ -309,6 +315,7 @@ class UserModel {
       'neighborhoodVerified': neighborhoodVerified,
       'lastActiveAt': lastActiveAt,
       'clubs': clubs, // [추가]
+      'searchIndex': searchIndex,
     };
   }
 
