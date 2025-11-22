@@ -36,6 +36,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 // ✅ [작업 31] 1. 중앙 카테고리 및 JobType import
 import '../constants/job_categories.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [검색 인덱스 생성용]
 
 /// '단순/일회성 도움' (quick_gig) 전용 등록 폼
 class CreateQuickGigScreen extends StatefulWidget {
@@ -135,28 +136,30 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
       final newJobRef = FirebaseFirestore.instance.collection('jobs').doc();
       final imageUrls = await _uploadImages(newJobRef.id);
 
+      // [추가] 검색 키워드 생성
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _titleController.text,
+        // tags: ... (JobModel에 태그가 있다면 추가)
+      );
       final newJob = JobModel(
         id: newJobRef.id,
         userId: userModel.uid,
-        // ✅ [작업 31] 1. 'quick_gig' 타입으로 자동 설정
         jobType: JobType.quickGig.name,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         category: _selectedCategory!.id,
-        // ✅ [작업 31] 2. 'total' (총 보수) 타입으로 자동 설정
         salaryType: 'total',
-        // ✅ [작업 35] 8. (num vs int?) 에러 수정: double 값을 int로 변환
         salaryAmount: (double.tryParse(_salaryAmountController.text)?.toInt()),
         isSalaryNegotiable: _isSalaryNegotiable,
-        // ✅ [작업 31] 3. 'one_time' (일회성)으로 자동 설정
         workPeriod: 'one_time',
-        workHours: null, // 단순 일자리는 근무 시간이 필요 없음
+        workHours: null,
         imageUrls: imageUrls,
         locationName: _locationController.text.trim(),
         locationParts: userModel.locationParts,
         geoPoint: userModel.geoPoint,
         createdAt: Timestamp.now(),
         trustLevelRequired: 'normal',
+        searchIndex: searchKeywords, // [추가]
       );
 
       await _jobRepository.createJob(newJob);

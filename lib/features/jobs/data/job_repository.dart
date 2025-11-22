@@ -23,7 +23,9 @@ class JobRepository {
   /// 'jobs' 컬렉션의 모든 구인글 목록을 실시간으로 가져옵니다.
   // V V V --- [수정] 사용자의 Province를 기준으로 1차 필터링하도록 변경 --- V V V
   Stream<List<JobModel>> fetchJobs(
-      {Map<String, String?>? locationFilter, String? jobType}) {
+      {Map<String, String?>? locationFilter,
+      String? jobType,
+      String? searchToken}) {
     Query<Map<String, dynamic>> query = _firestore.collection('jobs');
 
     final String? kab = locationFilter?['kab'];
@@ -34,6 +36,11 @@ class JobRepository {
     // ✅ [작업 31] jobType 필터 추가
     if (jobType != null && jobType.isNotEmpty) {
       query = query.where('jobType', isEqualTo: jobType);
+    }
+
+    // ✅ [검색] searchIndex 기반 필터링 (simple token match)
+    if (searchToken != null && searchToken.isNotEmpty) {
+      query = query.where('searchIndex', arrayContains: searchToken);
     }
 
     query = query.orderBy('createdAt', descending: true);

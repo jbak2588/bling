@@ -368,8 +368,10 @@ class _FeedListViewState extends State<_FeedListView>
     }
     final kw = widget.searchKeywordListenable?.value.trim().toLowerCase() ?? '';
     if (kw.isNotEmpty) {
-      // 간단한 태그 기반 검색
-      query = query.where('tags', arrayContains: kw);
+      final searchToken = kw.split(' ').first;
+      if (searchToken.isNotEmpty) {
+        query = query.where('searchIndex', arrayContains: searchToken);
+      }
     }
     return query.orderBy('createdAt', descending: true);
   }

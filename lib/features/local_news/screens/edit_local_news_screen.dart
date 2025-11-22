@@ -17,6 +17,7 @@ import '../models/post_model.dart';
 // ✅ 태그 사전 + 추천 로직
 import '../../../core/constants/app_tags.dart';
 import '../utils/tag_recommender.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 
 class EditLocalNewsScreen extends StatefulWidget {
   final PostModel post;
@@ -146,8 +147,16 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
       final finalImageUrls = [..._existingImageUrls, ...newImageUrls];
 
       // ✅ 태그 기본값 정책 정합: 비어있으면 'daily_life'로 저장
+
       final List<String> tagsToSave =
           _tags.isEmpty ? ['daily_life'] : List.of(_tags);
+
+      // [추가] 검색 키워드 갱신
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _titleController.text,
+        tags: tagsToSave,
+        description: _contentController.text,
+      );
 
       final updatedData = {
         'title': _titleController.text.trim(),
@@ -156,6 +165,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
         'mediaType': finalImageUrls.isNotEmpty ? 'image' : null,
         'category': _selectedCategory!.categoryId,
         'tags': tagsToSave, // ✅ 비어있으면 daily_life 기본 태그 저장
+        'searchIndex': searchKeywords, // [추가]
         'updatedAt': FieldValue.serverTimestamp(),
       };
 

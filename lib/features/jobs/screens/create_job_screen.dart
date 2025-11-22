@@ -46,6 +46,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../constants/job_categories.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 
 class CreateJobScreen extends StatefulWidget {
   final UserModel userModel;
@@ -128,6 +129,11 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         imageUrls.add(await ref.getDownloadURL());
       }
 
+      // [추가] 검색 키워드 생성
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _titleController.text,
+        // tags: ... (JobModel에 태그가 있다면 추가)
+      );
       final newJob = JobModel(
         id: '',
         userId: user.uid,
@@ -146,6 +152,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         workHours: _workHoursController.text.trim(),
         imageUrls: imageUrls, // [수정] 업로드된 이미지 URL 목록 전달
         jobType: widget.jobType.name,
+        searchIndex: searchKeywords, // [추가]
       );
       await _repository.createJob(newJob);
 

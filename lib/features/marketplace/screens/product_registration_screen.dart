@@ -43,6 +43,7 @@ import '../../../../core/models/user_model.dart';
 // ✅ 공용 태그 위젯 import
 import '../../shared/widgets/custom_tag_input_field.dart'; // 2025년 8월 30일
 import 'package:bling_app/core/utils/upload_helpers.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 
 class ProductRegistrationScreen extends StatefulWidget {
   const ProductRegistrationScreen({super.key});
@@ -191,10 +192,13 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       final userModel = UserModel.fromFirestore(userDoc);
 
       // 이미지 업로드 (공용 helper 사용)
-      List<String> imageUrls = [];
-      for (var image in _images) {
-        imageUrls.add(await uploadProductImage(image, user.uid));
-      }
+      final uploadedUrls = await uploadAllProductImages(_images, user.uid);
+
+      // [추가] 검색 키워드 생성
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _titleController.text,
+        tags: _tags,
+      );
 
       final newProductId =
           FirebaseFirestore.instance.collection('products').doc().id;
@@ -202,14 +206,14 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       final newProduct = ProductModel(
         id: newProductId,
         userId: user.uid,
-        title: _titleController.text,
+        title: _titleController.text.trim(),
         description: _descriptionController.text,
-        imageUrls: imageUrls,
+        imageUrls: uploadedUrls,
         categoryId: _selectedCategory!.id,
         categoryParentId: _selectedCategory!.parentId,
         price: int.tryParse(_priceController.text) ?? 0,
         negotiable: _isNegotiable,
-        tags: _tags, // ✅ _tags 상태를 모델에 전달  // 2025년 8월 30일
+        tags: _tags,
         locationName: userModel.locationName,
         locationParts: userModel.locationParts,
         geoPoint: userModel.geoPoint,
@@ -217,10 +221,11 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         condition: _condition,
         status: 'selling',
         isAiVerified: false,
+        searchIndex: searchKeywords, // [추가] searchIndex 저장
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
-        userUpdatedAt: Timestamp.now(), // [Fix #40] 끌어올리기용 타임스탬프 설정
-        isNew: true, // <-- 이 부분을 추가하여 '신품'임을 명시합니다.
+        userUpdatedAt: Timestamp.now(),
+        isNew: true,
       );
 
       // 1. 상품 문서 저장
@@ -487,6 +492,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                     ? 'marketplace.errors.requiredField'.tr()
                     : null,
               ),
+              const SizedBox(height: 16), // [간격 확대]
               // ✅ 공용 태그 위젯 추가
               CustomTagInputField(
                 hintText: 'marketplace.registration.tagsHint'.tr(),

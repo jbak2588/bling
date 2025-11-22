@@ -19,7 +19,7 @@ class SearchHelper {
           .toLowerCase()
           .replaceAll(RegExp(r'[^\w\s가-힣]'), '') // 특수문자 제거 (선택 사항)
           .split(RegExp(r'\s+')) // 공백으로 분리
-          .where((w) => w.length >= 1) // 1글자 이상만 포함
+          .where((w) => w.isNotEmpty) // 1글자 이상만 포함
           .toList();
     }
 
@@ -27,9 +27,11 @@ class SearchHelper {
     keywords.addAll(tokenize(title));
 
     // 2. 태그 키워드 추가 (원본 + 토큰)
-    for (var tag in tags) {
-      keywords.add(tag.toLowerCase()); // 태그 원본 (띄어쓰기 포함)
-      keywords.addAll(tokenize(tag)); // 태그 내 단어 분리
+    if (tags.isNotEmpty) {
+      for (var tag in tags) {
+        keywords.add(tag.toLowerCase()); // 태그 원본 (띄어쓰기 포함)
+        keywords.addAll(tokenize(tag)); // 태그 내 단어 분리
+      }
     }
 
     // 3. 설명 키워드 추가 (필요 시 주석 해제, 인덱스 용량 고려)

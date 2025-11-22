@@ -41,6 +41,7 @@ import '../../location/screens/location_filter_screen.dart';
 // ✅ 공용 태그 위젯 import  : 2025년 8월 30일
 import '../../shared/widgets/custom_tag_input_field.dart';
 import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart'; // [추가] AI 뱃지
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 // [V3 REFACTOR] 'AI 룰 엔진' 모델 종속성 완전 삭제
 
 import 'package:bling_app/features/marketplace/services/ai_verification_service.dart';
@@ -370,6 +371,12 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       // 기존 이미지 + 새로 업로드된 이미지 합치기
       final allImageUrls = [..._existingImageUrls, ...uploadedUrls];
 
+      // [추가] 수정 시에도 검색 키워드 갱신
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _titleController.text,
+        tags: _tags,
+      );
+
       // [작업 8] 사용자 프로필 위치로 덮어쓰는 로직 제거.
       // 대신 화면에서 편집된(_resetLocation 통해) 정보를 사용합니다.
       // final userDoc = await FirebaseFirestore.instance
@@ -396,6 +403,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         'status': _status, // [Fix] Save the updated status
 
         'tags': _tags, // ✅ 수정된 태그를 업데이트 데이터에 포함 : 2025년 8월 30일
+        'searchIndex': searchKeywords, // [추가] searchIndex 업데이트
         'updatedAt': Timestamp.now(),
         'userUpdatedAt': Timestamp.now(), // [Fix #40] 사용자가 직접 저장했으므로 '끌어올리기'
 

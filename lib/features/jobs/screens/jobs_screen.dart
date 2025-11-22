@@ -208,6 +208,10 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
                 locationFilter: widget.locationFilter,
                 // ✅ [작업 31] 6. 현재 탭의 jobType 필터 전달
                 jobType: _tabFilters[_tabController.index],
+                // ✅ [검색] DB 기반 검색을 위해 키워드의 첫 토큰을 전달
+                searchToken: _searchKeywordNotifier.value.isNotEmpty
+                    ? _searchKeywordNotifier.value.trim().split(' ').first
+                    : null,
               ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -220,15 +224,9 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
                 final allJobs = snapshot.data ?? [];
                 // [수정] 2차 필터링 적용 (위치)
                 var filteredJobs = _applyLocationFilter(allJobs);
-                // 키워드 필터 (제목/설명)
-                final kw = _searchKeywordNotifier.value;
-                if (kw.isNotEmpty) {
-                  filteredJobs = filteredJobs
-                      .where((j) => ('${j.title} ${j.description}')
-                          .toLowerCase()
-                          .contains(kw))
-                      .toList();
-                }
+                // [수정] 클라이언트 키워드 필터링 제거 (DB 쿼리로 대체)
+                // 단, DB 쿼리는 '첫 단어'만 매칭하므로, 필요하다면 여기서 2차 정밀 필터링을 할 수도 있음.
+                // 현재는 성능을 위해 제거하고 DB 결과 그대로 사용.
 
                 if (filteredJobs.isEmpty) {
                   return Center(child: Text('jobs.screen.empty'.tr()));

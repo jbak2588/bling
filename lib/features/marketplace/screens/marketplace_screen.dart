@@ -220,6 +220,15 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
         }
       }
 
+      // [수정] 검색 쿼리 적용 (DB 기반)
+      final kw = _searchKeywordNotifier.value;
+      if (kw.isNotEmpty) {
+        final searchToken = kw.trim().split(' ').first.toLowerCase();
+        if (searchToken.isNotEmpty) {
+          query = query.where('searchIndex', arrayContains: searchToken);
+        }
+      }
+
       // 4. 정렬
       query = query
           .orderBy('isAiVerified', descending: true)
@@ -337,16 +346,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
                   allDocs = _applyStatusRules(allDocs);
 
-                  final kw = _searchKeywordNotifier.value;
-                  if (kw.isNotEmpty) {
-                    allDocs = allDocs.where((d) {
-                      final p = ProductModel.fromFirestore(d);
-                      final hay =
-                          ('${p.title} ${p.description} ${p.tags.join(' ')}')
-                              .toLowerCase();
-                      return hay.contains(kw);
-                    }).toList();
-                  }
+                  // 검색은 DB 기반(정렬/필터링)으로 처리하므로 클라이언트 사이드 키워드 필터는 제거.
 
                   if (allDocs.isEmpty) {
                     // ✅ [Auto Fallback UI] 결과가 없을 때 전국 검색 제안

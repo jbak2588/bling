@@ -23,6 +23,7 @@ import '../utils/tag_recommender.dart';
 // import '../../shared/widgets/custom_tag_input_field.dart';
 
 import '../../../core/models/user_model.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 // import '../models/post_model.dart'; // PostModel은 그대로 사용 (내부 필드 변경됨)
 
 class CreateLocalNewsScreen extends StatefulWidget {
@@ -150,6 +151,14 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
       // 이미지 업로드
       final imageUrls = await _uploadImages(_selectedImages, postId);
 
+      // [추가] 검색 키워드 생성
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _titleController.text,
+        tags: tagsToSave,
+        description:
+            _contentController.text, // 본문 일부도 포함 가능 (SearchHelper 내부 정책 따름)
+      );
+
       // ✅ [태그 시스템] 가이드형 필드 데이터 준비
       final eventLocation =
           _showGuidedFields ? _eventLocationController.text.trim() : null;
@@ -167,6 +176,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
         'tags': tagsToSave,
         'mediaUrl': imageUrls,
         'mediaType': imageUrls.isNotEmpty ? 'image' : null,
+        'searchIndex': searchKeywords, // [추가]
         // 사용자 위치 정보 사용
         'locationName': _currentUserModel!.locationName,
         'locationParts': _currentUserModel!.locationParts,
