@@ -134,8 +134,9 @@ void main() async {
     EasyLocalization(
       supportedLocales: const [Locale('id'), Locale('en'), Locale('ko')],
       path: 'assets/lang',
-      fallbackLocale: const Locale('id'),
-      startLocale: const Locale('id'),
+      fallbackLocale: const Locale('en'),
+      // startLocale을 제거하면 EasyLocalization이 기기 언어를 감지하여
+      // supportedLocales 중 하나와 매칭을 시도합니다.
       child: MultiProvider(
         // ✅ MultiProvider로 감싸기
         providers: [

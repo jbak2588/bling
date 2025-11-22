@@ -28,6 +28,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:geolocator/geolocator.dart';
 // [추가] GeoPoint 타입 사용을 위해 cloud_firestore 임포트
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
 
 class ShopCard extends StatelessWidget {
   final ShopModel shop;
@@ -108,6 +109,32 @@ class ShopCard extends StatelessWidget {
                   ),
                 ),
               // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
+              // ✅ 태그 칩 표시 (PostCard와 동일한 UX)
+              if (shop.tags.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: shop.tags.map((tag) {
+                    return InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => TagSearchResultScreen(tags: [tag]),
+                        ));
+                      },
+                      borderRadius: BorderRadius.circular(16),
+                      child: Chip(
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: Colors.grey.shade100,
+                        padding: EdgeInsets.zero,
+                        label:
+                            Text('#$tag', style: const TextStyle(fontSize: 11)),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
               Row(
                 children: [
                   Expanded(

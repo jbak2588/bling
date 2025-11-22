@@ -17,6 +17,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 // ✅ 1. GeoPoint 클래스 사용을 위해 cloud_firestore를 import 합니다.
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bling_app/core/utils/search_helper.dart';
 // ✅ 공용 태그 입력 위젯을 import 합니다.
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 // ✅ 위치 설정을 위해 LocationFilterScreen을 import 합니다.
@@ -167,6 +168,13 @@ class _EditClubScreenState extends State<EditClubScreen> {
       }
 
       // ClubModel 객체를 업데이트된 정보로 새로 만듭니다.
+      // [추가] 검색 키워드 생성
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _titleController.text,
+        tags: _interestTags,
+        description: _descriptionController.text,
+      );
+
       final updatedClub = ClubModel(
         id: widget.club.id,
         title: _titleController.text.trim(),
@@ -187,6 +195,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
         createdAt: widget.club.createdAt,
         kickedMembers: widget.club.kickedMembers,
         pendingMembers: widget.club.pendingMembers,
+        searchIndex: searchKeywords,
       );
 
       await _repository.updateClub(updatedClub);
@@ -316,7 +325,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 const SizedBox(height: 8),
                 CustomTagInputField(
                   initialTags: _interestTags,
-                  hintText: 'clubs.createClub.tagsHint'.tr(),
+                  hintText: 'tag_input.help'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _interestTags = tags;

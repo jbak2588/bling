@@ -495,7 +495,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               const SizedBox(height: 16), // [간격 확대]
               // ✅ 공용 태그 위젯 추가
               CustomTagInputField(
-                hintText: 'marketplace.registration.tagsHint'.tr(),
+                hintText: 'tag_input.help'.tr(),
                 onTagsChanged: (tags) {
                   setState(() {
                     _tags = tags;

@@ -16,6 +16,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import '../models/pom_model.dart';
 import '../models/pom_comment_model.dart';
 
@@ -148,6 +150,58 @@ class PomRepository {
     final docRef = await _pomCollection.add(pom.toJson());
     return docRef.id;
   }
+
+  // V V V --- [추가] Pom 게시글 수정 --- V V V
+  Future<void> updatePom(String pomId, Map<String, dynamic> data) async {
+    final currentUserId = _auth.currentUser?.uid;
+    if (currentUserId == null) throw Exception('User not logged in');
+
+    // 수정 시간 업데이트
+    data['updatedAt'] = FieldValue.serverTimestamp();
+
+    await _pomCollection.doc(pomId).update(data);
+  }
+
+  // V V V --- [추가] Pom 게시글 삭제 --- V V V
+  Future<void> deletePom(String pomId) async {
+    final currentUserId = _auth.currentUser?.uid;
+    if (currentUserId == null) throw Exception('User not logged in');
+
+    // 먼저 문서에서 mediaUrls(또는 관련 스토리지 참조)를 읽어와
+    // Storage 객체들을 삭제 시도합니다. 실패해도 문서 삭제는 계속합니다.
+    try {
+      final doc = await _pomCollection.doc(pomId).get();
+      final data = doc.data();
+      if (data != null) {
+        final List<dynamic>? mediaUrls = data['mediaUrls'] != null
+            ? List<dynamic>.from(data['mediaUrls'])
+            : null;
+        if (mediaUrls != null && mediaUrls.isNotEmpty) {
+          // Delete each storage object. Use refFromURL to derive reference from download URL.
+          await Future.wait(mediaUrls.map((u) async {
+            try {
+              final url = u?.toString();
+              if (url == null || url.isEmpty) return;
+              final ref = FirebaseStorage.instance.refFromURL(url);
+              await ref.delete();
+            } catch (e) {
+              // Log and continue - don't fail entire operation for one object
+              // (In production consider reporting this to logging/monitoring)
+              debugPrint('Failed to delete storage object for pom $pomId: $e');
+            }
+          }));
+        }
+      }
+    } catch (e) {
+      // If reading doc or deleting storage fails, log and continue to delete doc
+      debugPrint(
+          'Error while attempting to delete storage objects for pom $pomId: $e');
+    }
+
+    // Finally remove Firestore document (regardless of storage deletion success)
+    await _pomCollection.doc(pomId).delete();
+  }
+  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
   // V V V --- [V2 개선] 'Short' -> 'Pom' --- V V V
   Future<void> togglePomLike(String pomId, bool isLiked) async {

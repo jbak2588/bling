@@ -137,7 +137,7 @@ class _PomFeedListState extends State<PomFeedList>
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('search.resultsTitle'.tr(namedArgs: {'keyword': kw})),
-        content: Text('search.empty'.tr(namedArgs: {'keyword': kw})),
+        content: Text('search.empty.message'.tr(namedArgs: {'keyword': kw})),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),

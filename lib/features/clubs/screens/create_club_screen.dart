@@ -23,6 +23,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 // ✅ 공용 태그 입력 위젯을 import 합니다.
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 
 class CreateClubScreen extends StatefulWidget {
   final UserModel userModel;
@@ -168,6 +169,13 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
 
       final parts = widget.userModel.locationParts;
 
+      // [추가] 검색 키워드
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _titleController.text,
+        tags: _interestTags,
+        description: _descriptionController.text,
+      );
+
       // [수정] ClubModel 대신 ClubProposalModel 생성
       final newProposal = ClubProposalModel(
         id: '', // Firestore에서 자동 생성
@@ -189,6 +197,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
         targetMemberCount: _targetMemberCount.toInt(), // 목표 인원
         currentMemberCount: 1,
         memberIds: [widget.userModel.uid],
+        searchIndex: searchKeywords, // [추가] (Model에도 필드 추가되어 있어야 함)
       );
 
       // [수정] createClub -> createClubProposal 호출
@@ -376,7 +385,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                         fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 8),
                 CustomTagInputField(
-                  hintText: 'clubs.proposal.tagsHint'.tr(),
+                  hintText: 'tag_input.help'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _interestTags = tags;

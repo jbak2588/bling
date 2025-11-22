@@ -23,6 +23,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:video_player/video_player.dart'; // [V2]
 import 'package:bling_app/features/pom/screens/pom_pager_screen.dart';
+import 'package:bling_app/features/pom/screens/pom_edit_screen.dart'; // [추가]
 
 /// 기획서(백서) Page 28의 '콘텐츠 카드 구성(피드 UI 기본 단위)'
 /// PomModel을 받아 이미지, 작성자, 내용, 반응(좋아요/댓글)을 표시하는 카드 위젯.
@@ -122,17 +123,45 @@ class _PomCardState extends State<PomCard> {
   // [V2] '신고하기/차단하기' BottomSheet
   void _showMoreOptions(UserModel? author) {
     final authorNickname = author?.nickname ?? 'this user';
+    final isOwner = FirebaseAuth.instance.currentUser?.uid == widget.pom.userId;
+
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return Wrap(
           children: [
+            // 작성자 전용 메뉴
+            if (isOwner) ...[
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: Text('common.edit'.tr()),
+                onTap: () async {
+                  Navigator.pop(context);
+                  // 수정 화면 이동
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => PomEditScreen(pom: widget.pom),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: Text('common.delete'.tr(),
+                    style: const TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showDeleteConfirmDialog();
+                },
+              ),
+              const Divider(),
+            ],
+
             ListTile(
               leading: const Icon(Icons.report_outlined),
               title: Text('pom.report'.tr(args: [authorNickname])),
               onTap: () {
                 Navigator.pop(context);
-                // [V2] 신고 다이얼로그 호출
                 _showReportDialog(context, author);
               },
             ),
@@ -141,7 +170,6 @@ class _PomCardState extends State<PomCard> {
               title: Text('pom.block'.tr(args: [authorNickname])),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: 차단하기 로직 연결
                 ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Block logic pending...')));
               },
@@ -149,6 +177,43 @@ class _PomCardState extends State<PomCard> {
           ],
         );
       },
+    );
+  }
+
+  void _showDeleteConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('pom.delete.title'.tr()),
+        content: Text('pom.delete.content'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('common.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await _repository.deletePom(widget.pom.id);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('pom.delete.success'.tr())),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e')),
+                  );
+                }
+              }
+            },
+            child: Text('common.delete'.tr(),
+                style: const TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 

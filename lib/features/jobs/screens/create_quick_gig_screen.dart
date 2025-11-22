@@ -280,7 +280,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
                 const SizedBox(height: 24),
                 CustomTagInputField(
                   initialTags: _tags,
-                  hintText: 'marketplace.registration.tagsHint'.tr(),
+                  hintText: 'tag_input.help'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;

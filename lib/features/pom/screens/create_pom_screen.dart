@@ -35,6 +35,7 @@ import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart'; // [V2] Re-added
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 
 class CreatePomScreen extends StatefulWidget {
   final UserModel userModel;
@@ -157,30 +158,11 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
         createdAt: Timestamp.now(),
       );
 
-      // 3. Firestore에 저장 (검색 인덱스 포함)
+      // 3. Firestore에 저장
       final data = newShort.toJson();
-      // 간단한 검색 인덱스(searchIndex): 제목/설명 토큰 + 태그, 모두 소문자 정규화
-      List<String> buildSearchIndex(
-          {required String title,
-          required String description,
-          required List<String> tags}) {
-        String norm(String s) => s
-            .toLowerCase()
-            .replaceAll(RegExp(r'[^\p{L}\p{N}\s\-_/]', unicode: true), '')
-            .trim();
-        final t = norm(title).split(RegExp(r"\s+")).where((e) => e.isNotEmpty);
-        final d =
-            norm(description).split(RegExp(r"\s+")).where((e) => e.isNotEmpty);
-        final all = <String>{}
-          ..addAll(t)
-          ..addAll(d)
-          ..addAll(tags.map(norm));
-        // 짧은 토큰만 유지 (길이 2 이상) 및 최대 50개 제한
-        final filtered = all.where((e) => e.length >= 2).take(50).toList();
-        return filtered;
-      }
 
-      data['searchIndex'] = buildSearchIndex(
+      // [수정] 기존 하드코딩 로직을 SearchHelper로 대체
+      data['searchIndex'] = SearchHelper.generateSearchIndex(
         title: newShort.title,
         description: newShort.description,
         tags: newShort.tags ?? const [],

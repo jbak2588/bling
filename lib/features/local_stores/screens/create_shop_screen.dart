@@ -43,6 +43,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
 class CreateShopScreen extends StatefulWidget {
   final UserModel userModel;
@@ -75,6 +77,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
   // [추가] 기획서의 '대표 상품/서비스'  입력을 위한 컨트롤러
   final _productsController = TextEditingController();
+  // 사용자 정의 태그 저장
+  final List<String> _tags = [];
 
   // V V V --- [수정] 단일 이미지(XFile)에서 이미지 목록(List<XFile>)으로 변경 --- V V V
   final List<XFile> _images = [];
@@ -137,6 +141,27 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         imageUrls.add(await ref.getDownloadURL());
       }
 
+      // [추가] 태그/검색 키워드 생성
+      final productsList = _productsController.text.trim().isEmpty
+          ? <String>[]
+          : _productsController.text
+              .trim()
+              .split(',')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .toList();
+
+      final combinedTags = {
+        ...productsList,
+        ..._tags,
+      }.toList();
+
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _nameController.text,
+        description: _descriptionController.text,
+        tags: combinedTags,
+      );
+
       final newShop = ShopModel(
         id: '',
         name: _nameController.text.trim(),
@@ -151,10 +176,12 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
             .split(',')
             .map((e) => e.trim())
             .toList(), // [추가] 쉼표로 구분
+        tags: combinedTags,
         contactNumber: _contactController.text.trim(),
         openHours: _hoursController.text.trim(),
         imageUrls: imageUrls, // [수정]
         createdAt: Timestamp.now(),
+        searchIndex: searchKeywords, // [추가]
       );
 
       await _repository.createShop(newShop);
@@ -335,6 +362,17 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                       labelText: 'localStores.form.productsLabel'.tr(),
                       hintText: 'localStores.form.productsHint'.tr(),
                       border: const OutlineInputBorder()),
+                ),
+                const SizedBox(height: 12),
+                CustomTagInputField(
+                  hintText: 'tag_input.help'.tr(),
+                  initialTags: _tags,
+                  titleController: _nameController,
+                  onTagsChanged: (tags) => setState(() {
+                    _tags
+                      ..clear()
+                      ..addAll(tags);
+                  }),
                 ),
               ],
             ),

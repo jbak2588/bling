@@ -16,11 +16,14 @@
 
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/features/lost_and_found/data/lost_and_found_repository.dart';
+// repository import intentionally removed — using direct Firestore query for search
 import 'package:bling_app/features/lost_and_found/widgets/lost_item_card.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import 'package:provider/provider.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 
 class LostAndFoundScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -101,10 +104,15 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
 
   @override
   Widget build(BuildContext context) {
-    final LostAndFoundRepository repository = LostAndFoundRepository();
-
     if (widget.userModel == null) {
       return const Center(child: CircularProgressIndicator());
+    }
+    // Prepare first-token search token for DB-side filtering
+    final kw = _searchKeywordNotifier.value.trim().toLowerCase();
+    String? searchToken;
+    if (kw.isNotEmpty) {
+      final token = kw.split(' ').first;
+      if (token.isNotEmpty) searchToken = token;
     }
 
     return Scaffold(
@@ -135,11 +143,47 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
             onTap: (index) => setState(() {}),
           ),
           Expanded(
-            child: StreamBuilder<List<LostItemModel>>(
-              stream: repository.fetchItems(
-                locationFilter: _locationFilter,
-                itemType: _tabFilters[_tabController.index],
-              ),
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: (() {
+                Query<Map<String, dynamic>> query =
+                    FirebaseFirestore.instance.collection('lost_and_found');
+
+                // Apply location filter if provided (use most specific key)
+                final filter = _locationFilter;
+                if (filter != null) {
+                  String? key;
+                  if (filter['kel'] != null) {
+                    key = 'kel';
+                  } else if (filter['kec'] != null) {
+                    key = 'kec';
+                  } else if (filter['kab'] != null) {
+                    key = 'kab';
+                  } else if (filter['kota'] != null) {
+                    key = 'kota';
+                  } else if (filter['prov'] != null) {
+                    key = 'prov';
+                  }
+                  if (key != null) {
+                    final v = filter[key]!.toLowerCase();
+                    query = query.where('locationParts.$key', isEqualTo: v);
+                  }
+                }
+
+                // Apply item type filter (lost/found)
+                final itemType = _tabFilters[_tabController.index];
+                if (itemType != null) {
+                  query = query.where('type', isEqualTo: itemType);
+                }
+
+                // DB-side search token filtering
+                if (searchToken != null && searchToken.isNotEmpty) {
+                  query =
+                      query.where('searchIndex', arrayContains: searchToken);
+                }
+
+                query = query.orderBy('createdAt', descending: true);
+                return query.snapshots();
+              })(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -149,29 +193,70 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                       child: Text('lostAndFound.error'.tr(
                           namedArgs: {'error': snapshot.error.toString()})));
                 }
-                final data = snapshot.data ?? [];
+
+                final docs = snapshot.data?.docs ?? [];
+                final data = docs.map(LostItemModel.fromFirestore).toList();
                 if (data.isEmpty) {
-                  return Center(child: Text('lostAndFound.empty'.tr()));
+                  final isNational = context.watch<LocationProvider>().mode ==
+                      LocationSearchMode.national;
+                  if (!isNational) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.search_off,
+                                size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 12),
+                            Text('lostAndFound.empty'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            const SizedBox(height: 8),
+                            Text('search.empty.checkSpelling'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: Colors.grey)),
+                            const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                              icon: const Icon(Icons.map_outlined),
+                              label: Text('search.empty.expandToNational'.tr()),
+                              onPressed: () => context
+                                  .read<LocationProvider>()
+                                  .setMode(LocationSearchMode.national),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 64, color: Colors.grey[300]),
+                          const SizedBox(height: 12),
+                          Text('lostAndFound.empty'.tr(),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
+                  );
                 }
 
-                final kw = _searchKeywordNotifier.value;
-                final items = kw.isEmpty
-                    ? data
-                    : data
-                        .where((e) =>
-                            ('${e.itemDescription} ${e.locationDescription} ${e.tags.join(' ')}')
-                                .toLowerCase()
-                                .contains(kw))
-                        .toList();
-
-                if (items.isEmpty) {
-                  return Center(child: Text('lostAndFound.empty'.tr()));
-                }
+                // Client-side filtering removed; DB query uses `searchIndex`.
 
                 return ListView.builder(
-                  itemCount: items.length,
+                  itemCount: data.length,
                   itemBuilder: (context, index) {
-                    final item = items[index];
+                    final item = data[index];
                     return LostItemCard(item: item);
                   },
                 );

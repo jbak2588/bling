@@ -28,6 +28,8 @@ class ClubProposalModel {
   final int targetMemberCount; // [핵심] 목표 인원
   final int currentMemberCount; // [핵심] 현재 참여 인원
   final List<String> memberIds; // [핵심] 현재 참여자 ID 목록
+  // 검색용 역색인
+  final List<String> searchIndex;
 
   ClubProposalModel({
     required this.id,
@@ -44,6 +46,7 @@ class ClubProposalModel {
     required this.targetMemberCount,
     this.currentMemberCount = 1, // 제안자 1명 포함 시작
     required this.memberIds,
+    this.searchIndex = const [],
   });
 
   factory ClubProposalModel.fromFirestore(
@@ -70,6 +73,9 @@ class ClubProposalModel {
       memberIds: data['memberIds'] != null
           ? List<String>.from(data['memberIds'])
           : [data['ownerId']], // 최소한 제안자는 포함
+      searchIndex: data['searchIndex'] != null
+          ? List<String>.from(data['searchIndex'])
+          : [],
     );
   }
 
@@ -88,6 +94,7 @@ class ClubProposalModel {
       'targetMemberCount': targetMemberCount,
       'currentMemberCount': currentMemberCount,
       'memberIds': memberIds,
+      'searchIndex': searchIndex,
     };
   }
 }

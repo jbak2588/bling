@@ -25,6 +25,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 
 class CreateLostItemScreen extends StatefulWidget {
   final UserModel userModel;
@@ -99,6 +100,13 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
         imageUrls.add(await ref.getDownloadURL());
       }
 
+      // [추가] 검색 키워드 생성
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _itemDescriptionController.text, // 물품명/설명을 제목으로 사용
+        tags: _tags,
+        description: _locationDescriptionController.text,
+      );
+
       final newItem = LostItemModel(
         id: '',
         userId: user.uid,
@@ -112,6 +120,7 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
         tags: _tags, // ✅ 저장 시 태그 목록을 전달
         // ✅ 현상금 정보 저장
         isHunted: _isHunted,
+        searchIndex: searchKeywords, // [추가]
         bountyAmount:
             _isHunted ? num.tryParse(_bountyAmountController.text) : null,
       );
@@ -258,7 +267,7 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
 
                 // ✅ 태그 입력 필드를 추가합니다.
                 CustomTagInputField(
-                  hintText: 'lostAndFound.form.tagsHint'.tr(),
+                  hintText: 'tag_input.help'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;

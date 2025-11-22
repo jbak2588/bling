@@ -160,7 +160,7 @@
       "addressHint": "Lokasi",
       "addressDetailHint": "Detail lokasi pertemuan",
       "descriptionHint": "Deskripsi Lengkap",
-      "tagsHint": "Tambahkan tag (tekan spasi untuk menambahkan)",
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "success": "Produk berhasil didaftarkan!",
       "fail": "Gagal mendaftarkan produk: {error}"
     },
@@ -681,7 +681,7 @@
       "titleLabel": "Judul",
       "contentLabel": "Masukkan konten",
       "tagsLabel": "Tag",
-      "tagsHint": "Tambahkan tag (tekan spasi untuk menambahkan)",
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "recommendedTags": "recommendedTags"
     },
     "labels": {
@@ -1161,7 +1161,7 @@
       "nameError": "Silakan masukkan nama Grup.",
       "descriptionLabel": "Deskripsi Grup",
       "descriptionError": "Silakan masukkan deskripsi Grup.",
-      "tagsHint": "Ketik tag lalu tekan spasi untuk menambahkan",
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "maxInterests": "Anda dapat memilih hingga 3 minat.",
       "privateClub": "Grup Privat",
       "privateDescription": "Hanya bisa bergabung lewat undangan.",
@@ -1184,7 +1184,7 @@
       "imageError": "Silakan pilih gambar sampul.",
       "createSuccess": "Usulan Grup Anda berhasil dibuat.",
       "createFail": "Gagal membuat usulan: {error}",
-      "tagsHint": "Ketik tag lalu tekan spasi untuk menambahkan",
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "targetMembers": "Target anggota",
       "targetMembersCount": "Total {count} orang",
       "empty": "Belum ada usulan Grup.",
@@ -1253,7 +1253,7 @@
         "startPrice": "Harga awal",
         "category": "Kategori",
         "categoryHint": "Pilih kategori",
-        "tagsHint": "Ketik tag lalu tekan spasi untuk menambahkan",
+        "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
         "duration": "Durasi",
         "durationOption": "{days} hari",
         "location": "Lokasi"
@@ -1679,7 +1679,7 @@
       "bountyAmountError": "Masukkan jumlah bounty untuk mengaktifkan bounty.",
       "success": "Berhasil didaftarkan.",
       "fail": "Gagal mendaftarkan barang: {error}",
-      "tagsHint": "tagsHint"
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter."
     },
     "edit": {
       "title": "Ubah Barang Hilang/Temuan",
@@ -1719,7 +1719,7 @@
   },
   "shared": {
     "tagInput": {
-      "defaultHint": "Tambahkan tag (tekan spasi untuk menambahkan)"
+      "defaultHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter."
     }
   },
   "linkPreview": {
@@ -1913,7 +1913,11 @@
   },
   "search": {
     "resultsTitle": "Hasil untuk '{keyword}'",
-    "empty": "Tidak ada hasil ditemukan untuk '{keyword}'.",
+    "empty": {
+      "message": "Tidak ada hasil ditemukan untuk '{keyword}'.",
+      "expandToNational": "Cari Secara Nasional",
+      "checkSpelling": "Periksa ejaan atau coba kata kunci lain."
+    },
     "prompt": "Masukkan kata kunci",
     "sheet": {
       "localNews": "Cari Cerita Lokal",
@@ -2065,5 +2069,8 @@
         "unknown": "Terjadi kesalahan yang tidak diketahui."
       }
     }
+  },
+  "tag_input": {
+    "help": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter."
   }
 }

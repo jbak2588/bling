@@ -21,6 +21,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart'; // 숫자 입력 포맷팅
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
 class EditLostItemScreen extends StatefulWidget {
   final LostItemModel item;
@@ -37,6 +39,7 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
 
   late String _type;
   final List<dynamic> _images = [];
+  List<String> _tags = []; // 태그 상태 변수 추가
   bool _isSaving = false;
 
   // ✅ 현상금(Bounty)
@@ -55,6 +58,9 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         TextEditingController(text: widget.item.locationDescription);
     _type = widget.item.type;
     _images.addAll(widget.item.imageUrls);
+
+    // 기존 태그 로드
+    _tags = widget.item.tags;
 
     // ✅ 기존 현상금 정보 로드
     _isHunted = widget.item.isHunted;
@@ -110,6 +116,13 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         }
       }
 
+      // [추가] 검색 키워드 생성
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _itemDescriptionController.text, // 물품명/설명을 제목으로 사용
+        tags: _tags,
+        description: _locationDescriptionController.text,
+      );
+
       final updatedItem = LostItemModel(
         id: widget.item.id,
         userId: widget.item.userId,
@@ -121,6 +134,8 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         geoPoint: widget.item.geoPoint,
         // ✅ 현상금 정보 저장
         isHunted: _isHunted,
+        tags: _tags,
+        searchIndex: searchKeywords, // [추가]
         bountyAmount:
             _isHunted ? num.tryParse(_bountyAmountController.text) : null,
       );
@@ -260,6 +275,14 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
                   validator: (value) => (value == null || value.trim().isEmpty)
                       ? 'lostAndFound.form.locationError'.tr()
                       : null,
+                ),
+                const SizedBox(height: 16),
+
+                // ✅ 태그 입력 필드
+                CustomTagInputField(
+                  hintText: 'tag_input.help'.tr(),
+                  initialTags: _tags,
+                  onTagsChanged: (tags) => setState(() => _tags = tags),
                 ),
               ],
             ),

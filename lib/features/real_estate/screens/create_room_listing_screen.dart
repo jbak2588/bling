@@ -38,6 +38,7 @@ import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 
 class CreateRoomListingScreen extends StatefulWidget {
   final UserModel userModel;
@@ -150,6 +151,13 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         imageUrls.add(await ref.getDownloadURL());
       }
 
+      // [추가] 검색 키워드
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _titleController.text,
+        tags: _tags,
+        description: _descriptionController.text,
+      );
+
       final newListing = RoomListingModel(
         id: '',
         userId: user.uid,
@@ -171,6 +179,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         commercialFacilities: _commercialFacilities.toList(),
         createdAt: Timestamp.now(),
         tags: _tags, // ✅ 태그 저장
+        searchIndex: searchKeywords, // [추가]
         // [추가] Gap 1, 4 필드 저장
         listingType: _selectedListingType,
         publisherType: _selectedPublisherType,

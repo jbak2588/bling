@@ -24,6 +24,7 @@ import 'package:video_player/video_player.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'pom_comments_sheet.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:bling_app/features/pom/screens/pom_edit_screen.dart'; // [추가]
 
 class PomPlayer extends StatefulWidget {
   final PomModel pom;
@@ -121,6 +122,85 @@ class _PomPlayerState extends State<PomPlayer> {
     _isPlaying.dispose();
     super.dispose();
   }
+
+  // V V V --- [추가] 수정/삭제 바텀 시트 --- V V V
+  void _showOwnerMenu() {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Wrap(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: Text('common.edit'.tr()), // "수정"
+            onTap: () async {
+              Navigator.pop(ctx);
+              _controller?.pause(); // 영상 일시 정지
+
+              final updated = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => PomEditScreen(pom: widget.pom),
+                ),
+              );
+
+              if (updated == true && mounted) {
+                // 수정 후 돌아왔을 때 데이터 갱신이 필요하면 처리 (StreamBuilder 사용 시 자동 갱신됨)
+                // 현재 PomPlayer는 widget.pom을 직접 쓰므로, 상위에서 갱신되지 않으면
+                // UI 반영이 안 될 수 있음. 완전한 반영을 위해선 pop(true)하여 상위 리스트 갱신 유도 필요.
+                Navigator.of(context).pop(true);
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.red),
+            title: Text('common.delete'.tr(),
+                style: const TextStyle(color: Colors.red)),
+            onTap: () {
+              Navigator.pop(ctx);
+              _showDeleteConfirmDialog();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('pom.delete.title'.tr()), // "삭제하시겠습니까?"
+        content: Text('pom.delete.content'.tr()), // "삭제된 게시글은 복구할 수 없습니다."
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('common.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await _repository.deletePom(widget.pom.id);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('pom.delete.success'.tr())));
+                  // 삭제 완료 후 플레이어 닫기
+                  Navigator.of(context).pop(true);
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text('Error: $e')));
+                }
+              }
+            },
+            child: Text('common.delete'.tr(),
+                style: const TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
   void _togglePlayPause() {
     if (_controller == null) return;
@@ -252,6 +332,9 @@ class _PomPlayerState extends State<PomPlayer> {
       return const SizedBox.shrink();
     }
 
+    // [추가] 본인인지 확인
+    final isOwner = _currentUserId == widget.pom.userId;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -314,6 +397,19 @@ class _PomPlayerState extends State<PomPlayer> {
           onTap: _onShare,
           child: _buildActionButton(icon: Icons.share, label: 'pom.share'.tr()),
         ),
+
+        // V V V --- [추가] 작성자일 경우 더보기(...) 버튼 표시 --- V V V
+        if (isOwner) ...[
+          const SizedBox(height: 20),
+          InkWell(
+            onTap: _showOwnerMenu,
+            child: _buildActionButton(
+              icon: Icons.more_horiz,
+              label: 'common.more'.tr(),
+            ),
+          ),
+        ],
+        // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
       ],
     );
   }

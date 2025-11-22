@@ -44,6 +44,7 @@ class ShopModel {
   final GeoPoint? geoPoint;
   final String category; // [추가] 업종 카테고리
   final List<String>? products; // 간단한 대표 상품/서비스 이름 목록
+  final List<String> tags; // 사용자 정의 태그/검색 보조 태그
   final String contactNumber;
   final String openHours;
   final bool trustLevelVerified;
@@ -84,6 +85,7 @@ class ShopModel {
     // [수정] 생성자 필드 변경
     required this.imageUrls,
     this.searchIndex = const [],
+    this.tags = const [],
   });
 
   factory ShopModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -101,6 +103,7 @@ class ShopModel {
       geoPoint: data['geoPoint'],
       products:
           data['products'] != null ? List<String>.from(data['products']) : [],
+      tags: data['tags'] != null ? List<String>.from(data['tags']) : [],
       contactNumber: data['contactNumber'] ?? '',
       openHours: data['openHours'] ?? '',
       trustLevelVerified: data['trustLevelVerified'] ?? false,
@@ -142,6 +145,7 @@ class ShopModel {
       'adExpiryDate': adExpiryDate,
       // [수정] Firestore에 이미지 목록 저장
       'imageUrls': imageUrls,
+      'tags': tags,
       'searchIndex': searchIndex,
     };
   }

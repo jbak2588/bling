@@ -44,6 +44,8 @@ import 'package:bling_app/features/jobs/widgets/job_card.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 // ✅ [작업 31] 1. 일자리 유형 선택 화면 import
 import 'package:bling_app/features/jobs/constants/job_categories.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
@@ -229,7 +231,58 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
                 // 현재는 성능을 위해 제거하고 DB 결과 그대로 사용.
 
                 if (filteredJobs.isEmpty) {
-                  return Center(child: Text('jobs.screen.empty'.tr()));
+                  final isNational = context.watch<LocationProvider>().mode ==
+                      LocationSearchMode.national;
+                  if (!isNational) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.search_off,
+                                size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 12),
+                            Text('jobs.screen.empty'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            const SizedBox(height: 8),
+                            Text('search.empty.checkSpelling'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: Colors.grey)),
+                            const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                              icon: const Icon(Icons.map_outlined),
+                              label: Text('search.empty.expandToNational'.tr()),
+                              onPressed: () => context
+                                  .read<LocationProvider>()
+                                  .setMode(LocationSearchMode.national),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 64, color: Colors.grey[300]),
+                          const SizedBox(height: 12),
+                          Text('jobs.screen.empty'.tr(),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
+                  );
                 }
 
                 return ListView.builder(

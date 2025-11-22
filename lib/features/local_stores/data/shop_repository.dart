@@ -46,12 +46,17 @@ class ShopRepository {
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> fetchShops(
-      {Map<String, String?>? locationFilter}) {
+      {Map<String, String?>? locationFilter, String? searchToken}) {
     Query<Map<String, dynamic>> query = _shopsCollection;
 
     final String? kab = locationFilter?['kab'];
     if (kab != null && kab.isNotEmpty) {
       query = query.where('locationParts.kab', isEqualTo: kab);
+    }
+
+    // Apply DB-side search token filtering when provided
+    if (searchToken != null && searchToken.isNotEmpty) {
+      query = query.where('searchIndex', arrayContains: searchToken);
     }
 
     query = query.orderBy('createdAt', descending: true);

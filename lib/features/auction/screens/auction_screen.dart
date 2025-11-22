@@ -27,6 +27,8 @@ import 'package:bling_app/features/auction/widgets/auction_card.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import 'package:provider/provider.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 // ✅ [지도뷰] 2. 구글맵 및 관련 의존성 import
 // ✅ [탐색 기능] 1. AppCategories import
 import 'package:bling_app/core/constants/app_categories.dart';
@@ -170,7 +172,58 @@ class _AuctionScreenState extends State<AuctionScreen> {
                           namedArgs: {'error': snapshot.error.toString()})));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('auctions.empty'.tr()));
+                  final isNational = context.watch<LocationProvider>().mode ==
+                      LocationSearchMode.national;
+                  if (!isNational) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.search_off,
+                                size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 12),
+                            Text('auctions.empty'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            const SizedBox(height: 8),
+                            Text('search.empty.checkSpelling'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: Colors.grey)),
+                            const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                                icon: const Icon(Icons.map_outlined),
+                                label:
+                                    Text('search.empty.expandToNational'.tr()),
+                                onPressed: () => context
+                                    .read<LocationProvider>()
+                                    .setMode(LocationSearchMode.national)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 64, color: Colors.grey[300]),
+                          const SizedBox(height: 12),
+                          Text('auctions.empty'.tr(),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
+                  );
                 }
 
                 var auctions = snapshot.data!;
@@ -185,7 +238,58 @@ class _AuctionScreenState extends State<AuctionScreen> {
                 }
 
                 if (auctions.isEmpty) {
-                  return Center(child: Text('auctions.empty'.tr()));
+                  final isNational = context.watch<LocationProvider>().mode ==
+                      LocationSearchMode.national;
+                  if (!isNational) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.search_off,
+                                size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 12),
+                            Text('auctions.empty'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            const SizedBox(height: 8),
+                            Text('search.empty.checkSpelling'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: Colors.grey)),
+                            const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                                icon: const Icon(Icons.map_outlined),
+                                label:
+                                    Text('search.empty.expandToNational'.tr()),
+                                onPressed: () => context
+                                    .read<LocationProvider>()
+                                    .setMode(LocationSearchMode.national)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 64, color: Colors.grey[300]),
+                          const SizedBox(height: 12),
+                          Text('auctions.empty'.tr(),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
+                  );
                 }
 
                 // ✅ [지도뷰] 5. _isMapView 상태에 따라 리스트뷰 또는 맵뷰를 표시

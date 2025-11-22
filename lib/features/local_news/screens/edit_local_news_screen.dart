@@ -314,7 +314,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
             // ✅ 교체된 공용 커스텀 태그 위젯을 사용합니다.
             CustomTagInputField(
               initialTags: _tags, // 초기 태그 목록을 전달합니다.
-              hintText: 'localNewsCreate.form.tagsHint'.tr(), // 다국어 힌트 텍스트
+              hintText: 'tag_input.help'.tr(), // 다국어 힌트 텍스트
               onTagsChanged: (tags) {
                 // 태그가 변경될 때마다 화면의 상태(_tags)를 업데이트합니다.
                 setState(() {

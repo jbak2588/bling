@@ -39,6 +39,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/utils/search_helper.dart';
+import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
 class EditShopScreen extends StatefulWidget {
   final ShopModel shop;
@@ -68,6 +70,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
   ];
   late String _selectedCategory;
   late final TextEditingController _productsController;
+  late List<String> _tags;
 
   // [수정] 기존 URL(String)과 새로운 파일(XFile)을 모두 담는 List
   final List<dynamic> _images = [];
@@ -89,6 +92,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
     _productsController =
         TextEditingController(text: (widget.shop.products ?? []).join(', '));
     _images.addAll(widget.shop.imageUrls);
+    _tags = List.from(widget.shop.tags);
   }
 
   @override
@@ -142,6 +146,22 @@ class _EditShopScreenState extends State<EditShopScreen> {
         }
       }
 
+      // [추가] 검색 키워드 생성
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _nameController.text,
+        description: _descriptionController.text,
+        tags: _productsController.text.trim().isEmpty
+            ? _tags
+            : {
+                ..._productsController.text
+                    .trim()
+                    .split(',')
+                    .map((e) => e.trim())
+                    .where((e) => e.isNotEmpty),
+                ..._tags
+              }.toList(),
+      );
+
       final updatedShop = ShopModel(
         id: widget.shop.id,
         name: _nameController.text.trim(),
@@ -163,9 +183,11 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 .map((e) => e.trim())
                 .where((e) => e.isNotEmpty)
                 .toList(), // [추가]
+        tags: _tags,
         trustLevelVerified: widget.shop.trustLevelVerified,
         viewsCount: widget.shop.viewsCount,
         likesCount: widget.shop.likesCount,
+        searchIndex: searchKeywords,
       );
 
       await _repository.updateShop(updatedShop);
@@ -333,6 +355,17 @@ class _EditShopScreenState extends State<EditShopScreen> {
                       labelText: 'localStores.form.productsLabel'.tr(),
                       hintText: 'localStores.form.productsHint'.tr(),
                       border: const OutlineInputBorder()),
+                ),
+                const SizedBox(height: 12),
+                CustomTagInputField(
+                  hintText: 'tag_input.help'.tr(),
+                  initialTags: _tags,
+                  titleController: _nameController,
+                  onTagsChanged: (tags) => setState(() {
+                    _tags
+                      ..clear()
+                      ..addAll(tags);
+                  }),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(

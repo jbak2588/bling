@@ -285,7 +285,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                   ),
                   const SizedBox(height: 8),
                   CustomTagInputField(
-                    hintText: 'localNewsCreate.form.tagsHint'.tr(),
+                    hintText: 'tag_input.help'.tr(),
                     initialTags: _tags,
                     onTagsChanged: (tags) {
                       setState(() {

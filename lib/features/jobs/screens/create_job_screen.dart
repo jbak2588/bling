@@ -524,7 +524,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 // ✅ [추가] 태그 입력 위젯 (ProductRegistrationScreen과 동일한 위치 배치)
                 CustomTagInputField(
                   initialTags: _tags, // 수정 시 기존 태그 전달
-                  hintText: 'marketplace.registration.tagsHint'.tr(),
+                  hintText: 'tag_input.help'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;

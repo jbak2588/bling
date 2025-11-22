@@ -9,6 +9,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/core/constants/app_categories.dart';
+import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 
 class EditAuctionScreen extends StatefulWidget {
   final AuctionModel auction;
@@ -26,6 +28,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
   List<dynamic> _images = []; // 기존 URL(String)과 새로운 파일(XFile)을 모두 담기 위함
   bool _isSaving = false;
   String? _selectedCategory; // ✅ 카테고리 선택 상태
+  List<String> _tags = [];
 
   final AuctionRepository _repository = AuctionRepository();
   final ImagePicker _picker = ImagePicker();
@@ -39,6 +42,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
         TextEditingController(text: widget.auction.description);
     _images = List.from(widget.auction.images);
     _selectedCategory = widget.auction.category; // ✅ 초기 카테고리
+    _tags = List<String>.from(widget.auction.tags);
   }
 
   @override
@@ -89,6 +93,13 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
         }
       }
 
+      // [추가] 검색 키워드
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _titleController.text,
+        tags: _tags,
+        description: _descriptionController.text,
+      );
+
       final updatedAuction = AuctionModel(
         id: widget.auction.id,
         title: _titleController.text.trim(),
@@ -104,7 +115,8 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
         endAt: widget.auction.endAt,
         ownerId: widget.auction.ownerId,
         category: _selectedCategory,
-        tags: widget.auction.tags,
+        tags: _tags,
+        searchIndex: searchKeywords,
       );
 
       await _repository.updateAuction(updatedAuction);
@@ -249,6 +261,15 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
                   validator: (value) => (value == null || value.trim().isEmpty)
                       ? 'auctions.form.descriptionRequired'.tr()
                       : null,
+                ),
+                const SizedBox(height: 16),
+                CustomTagInputField(
+                  hintText: 'tag_input.help'.tr(),
+                  initialTags: _tags,
+                  titleController: _titleController,
+                  onTagsChanged: (tags) {
+                    setState(() => _tags = tags);
+                  },
                 ),
               ],
             ),

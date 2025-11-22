@@ -25,6 +25,8 @@ import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 
 /// [수정] 'rumah123' 모델에 따라 타입별 상세 필터를 제공하는 화면입니다.
 /// 실제 매물 목록을 보여주고 상세 필터링하는 화면입니다.
@@ -353,7 +355,58 @@ class _RoomListScreenState extends State<RoomListScreen> {
                   );
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('realEstate.empty'.tr()));
+                  final isNational = context.watch<LocationProvider>().mode ==
+                      LocationSearchMode.national;
+                  if (!isNational) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.search_off,
+                                size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 12),
+                            Text('realEstate.empty'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            const SizedBox(height: 8),
+                            Text('search.empty.checkSpelling'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: Colors.grey)),
+                            const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                                icon: const Icon(Icons.map_outlined),
+                                label:
+                                    Text('search.empty.expandToNational'.tr()),
+                                onPressed: () => context
+                                    .read<LocationProvider>()
+                                    .setMode(LocationSearchMode.national)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 64, color: Colors.grey[300]),
+                          const SizedBox(height: 12),
+                          Text('realEstate.empty'.tr(),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
+                  );
                 }
 
                 var rooms = snapshot.data!;
@@ -368,7 +421,58 @@ class _RoomListScreenState extends State<RoomListScreen> {
                 }
 
                 if (rooms.isEmpty) {
-                  return Center(child: Text('realEstate.empty'.tr()));
+                  final isNational = context.watch<LocationProvider>().mode ==
+                      LocationSearchMode.national;
+                  if (!isNational) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.search_off,
+                                size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 12),
+                            Text('realEstate.empty'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            const SizedBox(height: 8),
+                            Text('search.empty.checkSpelling'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: Colors.grey)),
+                            const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                                icon: const Icon(Icons.map_outlined),
+                                label:
+                                    Text('search.empty.expandToNational'.tr()),
+                                onPressed: () => context
+                                    .read<LocationProvider>()
+                                    .setMode(LocationSearchMode.national)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 64, color: Colors.grey[300]),
+                          const SizedBox(height: 12),
+                          Text('realEstate.empty'.tr(),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
+                  );
                 }
 
                 return ListView.builder(

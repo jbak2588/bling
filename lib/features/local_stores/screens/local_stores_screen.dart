@@ -44,6 +44,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart'; // [추가]
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'create_shop_screen.dart'; // [추가]
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
@@ -202,6 +204,14 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
       );
     }
 
+    // Prepare DB-side search token (first token of search input)
+    final kwToken = _searchKeywordNotifier.value.trim().toLowerCase();
+    String? searchToken;
+    if (kwToken.isNotEmpty) {
+      final token = kwToken.split(' ').first;
+      if (token.isNotEmpty) searchToken = token;
+    }
+
     return Scaffold(
       body: Column(
         children: [
@@ -270,7 +280,8 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
           Expanded(
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: shopRepository.fetchShops(
-                  locationFilter: widget.locationFilter),
+                  locationFilter: widget.locationFilter,
+                  searchToken: searchToken),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -291,15 +302,9 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                       .toList();
                 }
 
-                final kw = _searchKeywordNotifier.value;
-                if (kw.isNotEmpty) {
-                  shops = shops
-                      .where((s) =>
-                          ('${s.name} ${s.description} ${s.products?.join(' ') ?? ''}')
-                              .toLowerCase()
-                              .contains(kw))
-                      .toList();
-                }
+                // DB-side keyword filtering applied in the repository using
+                // the first token of the search input. Client-side full text
+                // filtering has been removed to rely on Firestore query.
 
                 // [수정] 정렬 로직
                 // [추가] 거리순 정렬
@@ -325,7 +330,58 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                 shops = sponsoredShops + normalShops;
 
                 if (shops.isEmpty) {
-                  return Center(child: Text('localStores.empty'.tr()));
+                  final isNational = context.watch<LocationProvider>().mode ==
+                      LocationSearchMode.national;
+                  if (!isNational) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.search_off,
+                                size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 12),
+                            Text('localStores.empty'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium),
+                            const SizedBox(height: 8),
+                            Text('search.empty.checkSpelling'.tr(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: Colors.grey)),
+                            const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                              icon: const Icon(Icons.map_outlined),
+                              label: Text('search.empty.expandToNational'.tr()),
+                              onPressed: () => context
+                                  .read<LocationProvider>()
+                                  .setMode(LocationSearchMode.national),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 64, color: Colors.grey[300]),
+                          const SizedBox(height: 12),
+                          Text('localStores.empty'.tr(),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
+                  );
                 }
 
                 return ListView.builder(

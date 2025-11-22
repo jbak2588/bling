@@ -23,50 +23,53 @@
 // - KPI/통계/프리미엄 기능 실제 구현 필요(조회수, 지원수, 부스트 등).
 // - 신고/차단/신뢰 등급 UI 노출 및 기능 강화, 알림/지원 UX 개선.
 // =====================================================
+// lib/features/jobs/screens/job_detail_screen.dart
 
 import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
-import 'package:bling_app/features/jobs/data/job_repository.dart'; // [추가]
-import 'package:bling_app/features/jobs/screens/create_job_screen.dart'; // [추가]
-import 'package:bling_app/features/jobs/screens/create_quick_gig_screen.dart'; // [추가]
-import 'package:bling_app/features/jobs/constants/job_categories.dart'; // [추가]
+import 'package:bling_app/features/jobs/data/job_repository.dart';
+import 'package:bling_app/features/jobs/screens/create_job_screen.dart';
+import 'package:bling_app/features/jobs/screens/create_quick_gig_screen.dart';
+import 'package:bling_app/features/jobs/constants/job_categories.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // [추가]
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
+
+// ✅ [공용 위젯 Import]
+import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
+import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 
 class JobDetailScreen extends StatelessWidget {
   final JobModel job;
   const JobDetailScreen({super.key, required this.job});
 
-  // [추가] '지원하기' 버튼을 눌렀을 때 실행될 함수
+  // [기존 로직 유지] 채팅 시작
   void _startChat(BuildContext context) async {
-    // ChatService 인스턴스를 생성합니다.
     final chatService = ChatService();
     try {
-      // 1. 채팅방을 생성하거나, 기존 채팅방 ID를 가져옵니다.
       final chatId = await chatService.createOrGetChatRoom(
         otherUserId: job.userId,
         jobId: job.id,
         jobTitle: job.title,
       );
 
-      // 2. 채팅 상대방(구인자)의 정보를 가져옵니다.
       final otherUser = await chatService.getOtherUserInfo(job.userId);
 
       if (!context.mounted) return;
 
-      // 3. 채팅방으로 이동합니다.
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ChatRoomScreen(
             chatId: chatId,
             otherUserName: otherUser.nickname,
             otherUserId: otherUser.uid,
-            // [수정] 상품 제목 대신 구인글 제목을 전달 (필드명은 재활용)
             productTitle: job.title,
           ),
         ),
@@ -83,14 +86,13 @@ class JobDetailScreen extends StatelessWidget {
     }
   }
 
-  // V V V --- [추가] 구인글 삭제 다이얼로그 --- V V V
+  // [기존 로직 유지] 삭제 다이얼로그
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('jobs.dialog.deleteTitle'.tr()), // '삭제 하시겠습니까?'
-        content:
-            Text('jobs.dialog.deleteContent'.tr()), // '삭제된 게시글은 복구할 수 없습니다.'
+        title: Text('jobs.dialog.deleteTitle'.tr()),
+        content: Text('jobs.dialog.deleteContent'.tr()),
         actions: [
           TextButton(
             child: Text('jobs.dialog.cancel'.tr()),
@@ -100,14 +102,14 @@ class JobDetailScreen extends StatelessWidget {
             child: Text('jobs.dialog.deleteConfirm'.tr(),
                 style: const TextStyle(color: Colors.red)),
             onPressed: () async {
-              Navigator.of(ctx).pop(); // 닫기
+              Navigator.of(ctx).pop();
               try {
                 final repo = JobRepository();
                 await repo.deleteJob(job.id, job.userId);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('jobs.dialog.deleteSuccess'.tr())));
-                  Navigator.of(context).pop(); // 상세 화면 닫기
+                  Navigator.of(context).pop();
                 }
               } catch (e) {
                 if (context.mounted) {
@@ -123,13 +125,11 @@ class JobDetailScreen extends StatelessWidget {
     );
   }
 
-  // V V V --- [추가] 구인글 수정 화면 이동 --- V V V
+  // [기존 로직 유지] 수정 화면 이동
   Future<void> _navigateToEdit(BuildContext context) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
 
-    // UserModel을 가져오기 위한 간단한 fetch (CreateScreen에 필요함)
-    // 실제로는 Provider나 캐시된 유저 정보를 쓰는 것이 좋음.
     final userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(currentUser.uid)
@@ -138,12 +138,11 @@ class JobDetailScreen extends StatelessWidget {
 
     final userModel = UserModel.fromFirestore(userDoc);
 
-    // JobType에 따라 적절한 수정 화면으로 이동
     if (job.jobType == JobType.quickGig.name) {
       Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => CreateQuickGigScreen(
           userModel: userModel,
-          jobToEdit: job, // 기존 job 정보 전달
+          jobToEdit: job,
         ),
       ));
     } else {
@@ -151,7 +150,7 @@ class JobDetailScreen extends StatelessWidget {
         builder: (_) => CreateJobScreen(
           userModel: userModel,
           jobType: JobType.regular,
-          jobToEdit: job, // 기존 job 정보 전달
+          jobToEdit: job,
         ),
       ));
     }
@@ -162,7 +161,6 @@ class JobDetailScreen extends StatelessWidget {
     final NumberFormat currencyFormat =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
-    // [추가] 본인 글인지 확인
     final isMyJob = FirebaseAuth.instance.currentUser?.uid == job.userId;
 
     return Scaffold(
@@ -175,7 +173,6 @@ class JobDetailScreen extends StatelessWidget {
           ),
         ),
         title: Text(job.title),
-// V V V --- [추가] actions에 수정/삭제 버튼 추가 --- V V V
         actions: [
           if (isMyJob) ...[
             Padding(
@@ -198,18 +195,23 @@ class JobDetailScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // --- 1. 대표 이미지 ---
+          // ✅ 1. [공용 위젯 적용] 이미지 캐러셀
           if (job.imageUrls != null && job.imageUrls!.isNotEmpty)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: Image.network(
-                job.imageUrls!.first,
-                height: 250,
-                width: double.infinity,
-                fit: BoxFit.cover,
+            GestureDetector(
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => ImageGalleryScreen(imageUrls: job.imageUrls!),
+              )),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12.0),
+                child: ImageCarouselCard(
+                  imageUrls: job.imageUrls!,
+                  storageId: job.id, // [중요] 상태 유지를 위한 ID
+                  height: 250,
+                ),
               ),
             ),
-          const SizedBox(height: 16),
+          if (job.imageUrls != null && job.imageUrls!.isNotEmpty)
+            const SizedBox(height: 16),
 
           // --- 2. 제목 및 기본 정보 ---
           Text(job.title,
@@ -237,55 +239,47 @@ class JobDetailScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(job.description,
               style: const TextStyle(fontSize: 16, height: 1.5)),
+
+          // ✅ 2. [공용 위젯 적용] 태그 리스트
+          if (job.tags.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            ClickableTagList(tags: job.tags),
+          ],
+
           const Divider(height: 32),
 
-          // --- 4. 작성자 정보 ---
-          _buildSellerInfo(job.userId),
+          // ✅ 3. [공용 위젯 적용] 미니맵
+          if (job.geoPoint != null) ...[
+            Text('jobs.detail.locationTitle'.tr(),
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 12),
+            MiniMapView(
+              location: job.geoPoint!,
+              markerId: job.id,
+              myLocationEnabled: false,
+            ),
+            const Divider(height: 32),
+          ],
+
+          // ✅ 4. [공용 위젯 적용] 작성자 프로필 타일
+          Text('jobs.detail.authorTitle'.tr(),
+              style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          AuthorProfileTile(userId: job.userId),
+
+          const SizedBox(height: 80),
         ],
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
-          // V V V --- [수정] onPressed에 _startChat 함수를 연결합니다 --- V V V
           onPressed: () => _startChat(context),
-          // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
           ),
           child: Text('jobs.detail.apply'.tr()),
         ),
       ),
-    );
-  }
-
-  // 작성자 정보 위젯
-  Widget _buildSellerInfo(String userId) {
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return ListTile(title: Text('jobs.detail.noAuthor'.tr()));
-        }
-        final user = UserModel.fromFirestore(snapshot.data!);
-        return Card(
-          elevation: 0,
-          color: Colors.grey.shade100,
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundImage:
-                  (user.photoUrl != null && user.photoUrl!.isNotEmpty)
-                      ? NetworkImage(user.photoUrl!)
-                      : null,
-            ),
-            title: Text(user.nickname,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(user.locationName ?? ''),
-          ),
-        );
-      },
     );
   }
 }

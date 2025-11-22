@@ -16,6 +16,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 // ✅ [탐색 기능] 1. AppCategories import
 import 'package:bling_app/core/constants/app_categories.dart';
+import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 
 class CreateAuctionScreen extends StatefulWidget {
   final UserModel userModel;
@@ -101,6 +102,13 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
               Duration(days: _durationInDays).inMilliseconds);
       final startPrice = int.tryParse(_startPriceController.text) ?? 0;
 
+      // [추가] 검색 키워드
+      final searchKeywords = SearchHelper.generateSearchIndex(
+        title: _titleController.text,
+        tags: _tags,
+        description: _descriptionController.text,
+      );
+
       final newAuction = AuctionModel(
         id: '',
         title: _titleController.text.trim(),
@@ -120,6 +128,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
         ownerId: user.uid,
         category: _selectedCategory, // ✅ [탐색 기능] 3. 저장 시 category 전달
         tags: _tags, // ✅ 저장 시 태그 목록을 전달
+        searchIndex: searchKeywords, // [추가]
       );
 
       await _repository.createAuction(newAuction);
@@ -272,7 +281,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                 // ✅ 상세 설명 다음, 기간 설정 전에 태그 입력 필드를 추가합니다.
                 const SizedBox(height: 16),
                 CustomTagInputField(
-                  hintText: 'auctions.create.form.tagsHint'.tr(),
+                  hintText: 'tag_input.help'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;

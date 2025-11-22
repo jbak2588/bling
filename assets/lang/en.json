@@ -121,7 +121,11 @@
   },
   "search": {
     "resultsTitle": "Results for '{keyword}'",
-    "empty": "No results found for '{keyword}'.",
+    "empty": {
+      "message": "No results found for '{keyword}'.",
+      "expandToNational": "Search Nationally",
+      "checkSpelling": "Check your spelling or try different keywords."
+    },
     "prompt": "Type a keyword",
     "sheet": {
       "localNews": "Search Local News",
@@ -244,7 +248,7 @@
       "addressDetailHint": "Meeting Place",
       "descriptionHint": "Detailed Description",
       "success": "Product registered successfully!",
-      "tagsHint": "Add tags (press space to confirm)",
+      "tagsHint": "You can register tags using comma (,) or Enter.",
       "fail": "fail"
     },
     "edit": {
@@ -255,7 +259,7 @@
       "priceHint": "Edit Price (Rp)",
       "negotiable": "Edit Negotiable",
       "descriptionHint": "Edit Description",
-      "tagsHint": "Add tags (press space to confirm)",
+      "tagsHint": "You can register tags using comma (,) or Enter.",
       "success": "Product registered successfully!",
       "fail": "Failed to update product: {error}",
       "resetLocation": "Reset location",
@@ -759,7 +763,7 @@
       "titleLabel": "Title",
       "contentLabel": "Enter content",
       "tagsLabel": "Tags",
-      "tagsHint": "Add tags (press space to confirm)",
+      "tagsHint": "You can register tags using comma (,) or Enter.",
       "recommendedTags": "recommendedTags"
     },
     "labels": {
@@ -1239,7 +1243,7 @@
       "nameError": "Please enter a club name.",
       "descriptionLabel": "Club Description",
       "descriptionError": "Please enter a club description.",
-      "tagsHint": "Type a tag and press Space to add",
+      "tagsHint": "You can register tags using comma (,) or Enter.",
       "maxInterests": "You can select up to 3 interests.",
       "privateClub": "Private Club",
       "privateDescription": "Invitation only.",
@@ -1262,7 +1266,7 @@
       "imageError": "Please select a cover image.",
       "createSuccess": "Your club proposal has been created.",
       "createFail": "Failed to create proposal: {error}",
-      "tagsHint": "Type a tag and press Space to add",
+      "tagsHint": "You can register tags using comma (,) or Enter.",
       "targetMembers": "Target members",
       "targetMembersCount": "Total {count} members",
       "empty": "No proposals yet.",
@@ -1331,7 +1335,7 @@
         "startPrice": "Start price",
         "category": "Category",
         "categoryHint": "Select a category",
-        "tagsHint": "Type a tag and press Space to add",
+        "tagsHint": "You can register tags using comma (,) or Enter.",
         "duration": "Duration",
         "durationOption": "{days} days",
         "location": "Location"
@@ -1764,7 +1768,7 @@
       "bountyAmountError": "Enter a bounty amount to enable bounty.",
       "success": "Registered.",
       "fail": "Failed to register: {error}",
-      "tagsHint": "tagsHint"
+      "tagsHint": "You can register tags using comma (,) or Enter."
     },
     "edit": {
       "title": "Edit Lost/Found Item",
@@ -1797,7 +1801,7 @@
   },
   "shared": {
     "tagInput": {
-      "defaultHint": "Add tags (press space to confirm)"
+      "defaultHint": "You can register tags using comma (,) or Enter."
     }
   },
   "linkPreview": {
@@ -2068,5 +2072,8 @@
         }
       }
     }
+  },
+  "tag_input": {
+    "help": "You can register tags using comma (,) or Enter."
   }
 }

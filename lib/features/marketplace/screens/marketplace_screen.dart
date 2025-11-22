@@ -349,26 +349,63 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                   // 검색은 DB 기반(정렬/필터링)으로 처리하므로 클라이언트 사이드 키워드 필터는 제거.
 
                   if (allDocs.isEmpty) {
-                    // ✅ [Auto Fallback UI] 결과가 없을 때 전국 검색 제안
-                    if (locationProvider.mode != LocationSearchMode.national) {
+                    final isNational =
+                        locationProvider.mode == LocationSearchMode.national;
+                    if (!isNational) {
                       return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('marketplace.empty'.tr()),
-                            TextButton(
-                              child: const Text("전국에서 검색하기"),
-                              onPressed: () => context
-                                  .read<LocationProvider>()
-                                  .setMode(LocationSearchMode.national),
-                            )
-                          ],
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.search_off,
+                                  size: 64, color: Colors.grey[300]),
+                              const SizedBox(height: 12),
+                              Text('marketplace.empty'.tr(),
+                                  textAlign: TextAlign.center,
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium),
+                              const SizedBox(height: 8),
+                              Text('search.empty.checkSpelling'.tr(),
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(color: Colors.grey)),
+                              const SizedBox(height: 16),
+                              OutlinedButton.icon(
+                                icon: const Icon(Icons.map_outlined),
+                                label:
+                                    Text('search.empty.expandToNational'.tr()),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12.0, horizontal: 16.0),
+                                ),
+                                onPressed: () => context
+                                    .read<LocationProvider>()
+                                    .setMode(LocationSearchMode.national),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }
+
                     return Center(
-                        child: Text('marketplace.empty'.tr(),
-                            textAlign: TextAlign.center));
+                        child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.search_off,
+                              size: 64, color: Colors.grey[300]),
+                          const SizedBox(height: 12),
+                          Text('marketplace.empty'.tr(),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
+                    ));
                   }
 
                   return ListView.separated(

@@ -906,7 +906,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 const SizedBox(height: 16),
                 CustomTagInputField(
                   initialTags: _tags,
-                  hintText: 'marketplace.registration.tagsHint'.tr(),
+                  hintText: 'tag_input.help'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;

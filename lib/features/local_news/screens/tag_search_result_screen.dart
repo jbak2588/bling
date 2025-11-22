@@ -148,12 +148,12 @@ class _TagSearchResultScreenState extends State<TagSearchResultScreen> {
           }
           if (snap.hasError) {
             return Center(
-              child: Text('search.empty'.tr()),
+              child: Text('search.empty.message'.tr()),
             );
           }
           final list = snap.data ?? const <PostModel>[];
           if (list.isEmpty) {
-            return Center(child: Text('search.empty'.tr()));
+            return Center(child: Text('search.empty.message'.tr()));
           }
           return ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

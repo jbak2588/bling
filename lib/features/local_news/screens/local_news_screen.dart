@@ -48,6 +48,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 
 // ❌ [태그 시스템] 기존 카테고리 import 제거
 // import '../../../core/constants/app_categories.dart';
@@ -424,7 +426,56 @@ class _FeedListViewState extends State<_FeedListView>
         final allDocs = snapshot.data?.docs ?? [];
         final postsDocs = _applyLocationFilter(allDocs);
         if (postsDocs.isEmpty) {
-          return Center(child: Text('localNewsFeed.empty'.tr()));
+          final isNational = context.watch<LocationProvider>().mode ==
+              LocationSearchMode.national;
+          if (!isNational) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
+                    const SizedBox(height: 12),
+                    Text('localNewsFeed.empty'.tr(),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium),
+                    const SizedBox(height: 8),
+                    Text('search.empty.checkSpelling'.tr(),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: Colors.grey)),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.map_outlined),
+                      label: Text('search.empty.expandToNational'.tr()),
+                      onPressed: () => context
+                          .read<LocationProvider>()
+                          .setMode(LocationSearchMode.national),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
+                  const SizedBox(height: 12),
+                  Text('localNewsFeed.empty'.tr(),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium),
+                ],
+              ),
+            ),
+          );
         }
         return ListView.builder(
           padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
