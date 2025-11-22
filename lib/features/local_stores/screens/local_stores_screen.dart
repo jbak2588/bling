@@ -45,14 +45,13 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart'; // [추가]
 import 'package:easy_localization/easy_localization.dart';
 import 'create_shop_screen.dart'; // [추가]
-import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 class LocalStoresScreen extends StatefulWidget {
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
   final bool autoFocusSearch;
-  final ValueNotifier<AppSection?>? searchNotifier;
+  final ValueNotifier<bool>? searchNotifier;
 
   const LocalStoresScreen({
     this.userModel,
@@ -72,7 +71,6 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
-  VoidCallback? _externalSearchListener;
 
   List<ShopModel> _applyLocationFilter(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
@@ -119,17 +117,8 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
       });
     }
 
-    // 피드 내부 하단 검색 아이콘 → 검색칩 열기
     if (widget.searchNotifier != null) {
-      _externalSearchListener = () {
-        if (widget.searchNotifier!.value == AppSection.localStores) {
-          if (mounted) {
-            setState(() => _showSearchBar = true);
-            _chipOpenNotifier.value = true;
-          }
-        }
-      };
-      widget.searchNotifier!.addListener(_externalSearchListener!);
+      widget.searchNotifier!.addListener(_externalSearchListener);
     }
 
     // ✅ [버그 수정] 키워드가 변경될 때마다 setState를 호출하여 화면을 다시 그리도록 리스너 추가
@@ -143,13 +132,24 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
   @override
   void dispose() {
     _chipOpenNotifier.dispose();
-    if (_externalSearchListener != null && widget.searchNotifier != null) {
-      widget.searchNotifier!.removeListener(_externalSearchListener!);
+    if (widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener);
     }
     // ✅ [버그 수정] 리스너 제거를 먼저 수행한 다음 notifier를 폐기합니다.
     _searchKeywordNotifier.removeListener(_onKeywordChanged);
     _searchKeywordNotifier.dispose();
     super.dispose();
+  }
+
+  void _externalSearchListener() {
+    if (widget.searchNotifier?.value == true) {
+      if (!mounted) return;
+      setState(() => _showSearchBar = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+      widget.searchNotifier?.value = false;
+    }
   }
 
   // ✅ [버그 수정] 키워드 변경 시 setState 호출

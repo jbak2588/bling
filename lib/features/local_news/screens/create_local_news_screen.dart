@@ -287,10 +287,11 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                     },
                     titleController: _titleController, // 제목으로부터 제안
                     autoCreateTitleTag: true,
-                    allowEmptyTags: true, // 사용자가 원치 않으면 비워둘 수 있음
-                    suggestedTags: _recommended,
-                    whitelist:
-                        AppTags.localNewsTags.map((t) => t.tagId).toSet(),
+                    // [수정] AppTags.newsTags -> localNewsTags 매핑 + _recommended(추천태그) 결합
+                    suggestedTags: {
+                      ..._recommended,
+                      ...AppTags.localNewsTags.map((e) => e.tagId),
+                    }.toList(),
                     maxTags: 3,
                   ),
 

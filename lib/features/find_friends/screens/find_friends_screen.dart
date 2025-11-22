@@ -35,8 +35,6 @@ library;
 // - (Job 45) [임시 조치] 'Active Clubs'의 Firestore 인덱스 문제로, 'getClubsByLocationStream' 대신 'getClubsStream' (필터 없음)을 호출.
 // 아래부터 실제 코드
 
-import 'package:bling_app/features/main_screen/main_navigation_screen.dart'
-    show AppSection;
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
@@ -62,7 +60,7 @@ class FindFriendsScreen extends StatefulWidget {
   final Map<String, String?>?
       activeLocationFilter; // [v2.1] 이 파라미터는 존재하나, 초기 로드 시 사용하지 않음
   final bool autoFocusSearch;
-  final ValueNotifier<AppSection?>? searchNotifier;
+  final ValueNotifier<bool>? searchNotifier;
 
   const FindFriendsScreen({
     super.key,
@@ -91,7 +89,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
-  VoidCallback? _externalSearchListener;
+  // _externalSearchListener removed: InlineSearchChip handles openNotifier externally
 
   late TabController _tabController; // [v2.1] TabBar 컨트롤러
 
@@ -108,17 +106,14 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
         if (mounted) _chipOpenNotifier.value = true;
       });
     }
+    // If an external search notifier is provided we register a listener
+    // so we can render the chip and then open it. InlineSearchChip listens
+    // to its own openNotifier, but if it's not mounted we must ensure it's
+    // shown first and then trigger the local chip notifier.
     if (widget.searchNotifier != null) {
-      _externalSearchListener = () {
-        if (widget.searchNotifier!.value == AppSection.findFriends) {
-          if (mounted) {
-            setState(() => _showSearchBar = true);
-            _chipOpenNotifier.value = true;
-          }
-        }
-      };
-      widget.searchNotifier!.addListener(_externalSearchListener!);
+      widget.searchNotifier!.addListener(_externalSearchListener);
     }
+
     _searchKeywordNotifier.addListener(_onKeywordChanged);
     // [작업 36] 끝
 
@@ -180,6 +175,30 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
   // [작업 36] 키워드 변경 시 setState 호출 (리스트 필터링)
   void _onKeywordChanged() {
     if (mounted) setState(() {});
+  }
+
+  void _externalSearchListener() {
+    if (widget.searchNotifier?.value == true) {
+      if (!mounted) return;
+      setState(() => _showSearchBar = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+      // reset external notifier to avoid repeated triggers
+      widget.searchNotifier?.value = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener);
+    }
+    _chipOpenNotifier.dispose();
+    _searchKeywordNotifier.removeListener(_onKeywordChanged);
+    _searchKeywordNotifier.dispose();
+    _tabController.dispose();
+    super.dispose();
   }
 
   void _openLocationFilter() async {

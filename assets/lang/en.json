@@ -21,6 +21,39 @@
       "unknownError": "unknownError"
     }
   },
+  "signup": {
+    "title": "Sign Up",
+    "emailHint": "Email Address",
+    "passwordHint": "Password (at least 6 characters)",
+    "passwordConfirmHint": "Confirm Password",
+    "nicknameHint": "Nickname (Required)",
+    "subtitle": "Let's start with Bling! Please enter your information.",
+    "locationHint": "Your location (for local services)",
+    "locationNotice": "Your location is used to show neighborhood posts and is not disclosed to others.",
+    "buttons": {
+      "signup": "Sign Up",
+      "checkDuplicate": "Check"
+    },
+    "links": {
+      "askForLogin": "Already have an account?",
+      "login": "Login"
+    },
+    "alerts": {
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Password must be at least 6 characters long.",
+      "emailInUse": "This email is already in use.",
+      "nicknameInUse": "This nickname is already in use.",
+      "nicknameAvailable": "This nickname is available.",
+      "nicknameNotChecked": "Please check for nickname duplication.",
+      "signupSuccessLoginNotice": "Registration complete! Please log in to continue.",
+      "unknownError": "An unknown error occurred. Please try again."
+    },
+    "policy": {
+      "title": "Registration Policy",
+      "description": "Bling collects minimal information for a safe community. All information is stored securely and will not be disclosed without consent.",
+      "agree": "I agree to the terms and wish to continue."
+    }
+  },
   "main": {
     "appBar": {
       "locationNotSet": "Location not set",
@@ -468,9 +501,13 @@
       "empty": "No products listed.",
       "detailsTitle": "Product details",
       "editButton": "Edit product",
+      "loadErrorWithMsg": "Failed to load products: {error}",
       "deleteConfirm": "Are you sure you want to delete this product? This action cannot be undone.",
       "deleteSuccess": "Product deleted.",
       "deleteFail": "Failed to delete product: {error}"
+    },
+    "bookmarks": {
+      "empty": "No bookmarks yet."
     },
     "postList": {
       "empty": "No posts yet.",
@@ -1968,22 +2005,7 @@
   "location_setting_error": "location setting error",
   "signup_fail_required": "signup fail required",
   "signup_fail_password_mismatch": "signup fail password mismatch",
-  "signup": {
-    "alerts": {
-      "signupSuccessLoginNotice": "signupSuccessLoginNotice"
-    },
-    "title": "title",
-    "subtitle": "subtitle",
-    "nicknameHint": "nicknameHint",
-    "emailHint": "emailHint",
-    "passwordHint": "passwordHint",
-    "passwordConfirmHint": "passwordConfirmHint",
-    "locationHint": "locationHint",
-    "locationNotice": "locationNotice",
-    "buttons": {
-      "signup": "signup"
-    }
-  },
+  
   "signup_fail_default": "signup fail default",
   "signup_fail_weak_password": "signup fail weak password",
   "signup_fail_email_in_use": "signup fail email in use",
@@ -2016,22 +2038,35 @@
       "takeover_photos": "Takeover Photos",
       "original_photos": "Original Photos",
       "raw_json": "Raw JSON"
-    }
-  },
-  "auth": {
-    "verification": {
-      "title": "Email Verification",
-      "sent_title": "Verification Email Sent",
-      "sent_desc": "We sent a link to {email}.\nPlease click the link to complete verification.",
-      "resend": "Resend Email",
-      "logout": "Log Out",
-      "check": "Check Verification",
-      "success": "Email verification completed.",
-      "fail_send": "Failed to send email: {error}"
-    }
-    ,
-    "signup": {
-      "success_email_sent": "Sign up successful! We've sent a verification link to {email}."
+    },
+    "tag_input": {
+      "fromTitleSuffix": "(title)",
+      "addHint": "Add tag...",
+      "help": "Use comma (,) or Enter to add tags."
+    },
+    "auth": {
+      "verification": {
+        "title": "Email Verification",
+        "sent_title": "Verification Email Sent",
+        "sent_desc": "We sent a link to {email}.\nPlease click the link to complete verification.",
+        "resend": "Resend Email",
+        "logout": "Log Out",
+        "check": "Check Verification",
+        "success": "Email verification completed.",
+        "fail_send": "Failed to send email: {error}"
+      },
+      "signup": {
+        "success_email_sent": "Sign up successful! We've sent a verification link to {email}.",
+        "fail": {
+          "required": "Please fill required fields.",
+          "password_mismatch": "Passwords do not match.",
+          "default": "Sign up failed. Please try again.",
+          "weak_password": "The password is too weak.",
+          "email_in_use": "This email is already in use.",
+          "invalid_email": "The email address is invalid.",
+          "unknown": "An unknown error occurred."
+        }
+      }
     }
   }
 }

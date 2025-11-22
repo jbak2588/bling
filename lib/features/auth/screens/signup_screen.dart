@@ -47,13 +47,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (_nicknameController.text.trim().isEmpty ||
         _emailController.text.trim().isEmpty ||
         _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('signup_fail_required'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('auth.signup.fail.required'.tr())));
       return;
     }
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('signup_fail_password_mismatch'.tr())));
+          SnackBar(content: Text('auth.signup.fail.password_mismatch'.tr())));
       return;
     }
 
@@ -107,19 +107,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
         Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {
-      String errorMessage = 'signup_fail_default'.tr();
+      String errorMessage = 'auth.signup.fail.default'.tr();
       if (e.code == 'weak-password') {
-        errorMessage = 'signup_fail_weak_password'.tr();
+        errorMessage = 'auth.signup.fail.weak_password'.tr();
       } else if (e.code == 'email-already-in-use') {
-        errorMessage = 'signup_fail_email_in_use'.tr();
+        errorMessage = 'auth.signup.fail.email_in_use'.tr();
       } else if (e.code == 'invalid-email') {
-        errorMessage = 'signup_fail_invalid_email'.tr();
+        errorMessage = 'auth.signup.fail.invalid_email'.tr();
       }
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(errorMessage)));
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('signup_fail_unknown'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('auth.signup.fail.unknown'.tr())));
     }
 
     if (mounted) {

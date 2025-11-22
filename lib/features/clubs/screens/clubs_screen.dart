@@ -56,14 +56,13 @@ import 'package:bling_app/features/clubs/screens/club_detail_screen.dart';
 // import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 class ClubsScreen extends StatefulWidget {
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
   final bool autoFocusSearch;
-  final ValueNotifier<AppSection?>? searchNotifier;
+  final ValueNotifier<bool>? searchNotifier;
   final TabController? tabController; // 부모로부터 TabController 받을 수 있음(선택)
   final bool showInnerAppBar; // 내부 AppBar 노출 여부 (기본 표시)
 
@@ -82,13 +81,11 @@ class ClubsScreen extends StatefulWidget {
 }
 
 class _ClubsScreenState extends State<ClubsScreen> {
-  // 내부 위치 필터 상태 제거됨: 상위(AppBar)의 위치 필터를 사용합니다.
   // 검색칩 상태
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
-  VoidCallback? _externalSearchListener;
 
   // 저장소 인스턴스 (탭별 StreamBuilder에서 재사용)
   final ClubRepository _repository = ClubRepository();
@@ -105,21 +102,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
     }
 
     if (widget.searchNotifier != null) {
-      _externalSearchListener = () {
-        if (widget.searchNotifier!.value == AppSection.clubs) {
-          // setState during build 방지: 프레임 이후로 지연
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-            if (!_showSearchBar) {
-              setState(() => _showSearchBar = true);
-            }
-            _chipOpenNotifier.value = true;
-          });
-        }
-      };
-      widget.searchNotifier!.addListener(_externalSearchListener!);
+      widget.searchNotifier!.addListener(_externalSearchListener);
     }
-
     _searchKeywordNotifier.addListener(_onKeywordChanged);
   }
 
@@ -127,73 +111,92 @@ class _ClubsScreenState extends State<ClubsScreen> {
     if (mounted) setState(() {});
   }
 
-  // 위치 필터 시트는 현재 탭 UI에서 사용하지 않습니다. (필요 시 복원)
-
   @override
   void dispose() {
     _chipOpenNotifier.dispose();
     _searchKeywordNotifier.removeListener(_onKeywordChanged);
     _searchKeywordNotifier.dispose();
-    if (_externalSearchListener != null && widget.searchNotifier != null) {
-      widget.searchNotifier!.removeListener(_externalSearchListener!);
+    if (widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener);
     }
     super.dispose();
+  }
+
+  void _externalSearchListener() {
+    if (widget.searchNotifier?.value == true) {
+      if (!mounted) return;
+      setState(() => _showSearchBar = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+      widget.searchNotifier?.value = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     // Dual-mode:
-    // - showInnerAppBar == true: self-contained (Scaffold + AppBar with TabBar)
+    // - showInnerAppBar == true: self-contained (Scaffold + TabBar까지 내부 포함)
     // - showInnerAppBar == false: parent manages TabBar; requires external controller
     if (widget.showInnerAppBar) {
       return DefaultTabController(
         length: 2,
-        child: Builder(builder: (ctx) {
-          final controller =
-              widget.tabController ?? DefaultTabController.of(ctx);
-          return Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              toolbarHeight: 0,
-              bottom: TabBar(
-                controller: controller,
-                tabs: [
-                  Tab(text: 'clubs.tabs.proposals'.tr()),
-                  Tab(text: 'clubs.tabs.activeClubs'.tr()),
-                ],
+        child: Builder(
+          builder: (ctx) {
+            final controller =
+                widget.tabController ?? DefaultTabController.of(ctx);
+            return Scaffold(
+              appBar: AppBar(
+                automaticallyImplyLeading: false,
+                // TabBar는 body로 이동하므로 AppBar는 상단 bar 역할만 수행
+                toolbarHeight: 0,
               ),
-            ),
-            body: Column(
-              children: [
-                if (_showSearchBar)
-                  InlineSearchChip(
-                    hintText: 'main.search.hint.clubs'.tr(),
-                    openNotifier: _chipOpenNotifier,
-                    onSubmitted: (kw) =>
-                        _searchKeywordNotifier.value = kw.trim().toLowerCase(),
-                    onClose: () {
-                      setState(() => _showSearchBar = false);
-                      _searchKeywordNotifier.value = '';
-                    },
-                  ),
-                Expanded(
-                  child: TabBarView(
+              body: Column(
+                children: [
+                  // ✅ 검색바가 활성화되면 탭보다 위에서 노출
+                  if (_showSearchBar)
+                    InlineSearchChip(
+                      hintText: 'main.search.hint.clubs'.tr(),
+                      openNotifier: _chipOpenNotifier,
+                      onSubmitted: (kw) => _searchKeywordNotifier.value =
+                          kw.trim().toLowerCase(),
+                      onClose: () {
+                        setState(() => _showSearchBar = false);
+                        _searchKeywordNotifier.value = '';
+                      },
+                    ),
+                  // ✅ 모임 제안 / 활동 중인 모임 탭
+                  TabBar(
                     controller: controller,
-                    children: [
-                      _buildProposalList(),
-                      _buildActiveClubList(),
+                    tabs: [
+                      Tab(text: 'clubs.tabs.proposals'.tr()),
+                      Tab(text: 'clubs.tabs.activeClubs'.tr()),
                     ],
                   ),
-                ),
-              ],
-            ),
-          );
-        }),
+                  // 탭 컨텐츠
+                  Expanded(
+                    child: TabBarView(
+                      controller: controller,
+                      children: [
+                        _buildProposalList(),
+                        _buildActiveClubList(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       );
     } else {
       final controller = widget.tabController;
-      assert(controller != null,
-          'When showInnerAppBar is false, a TabController must be provided.');
+      assert(
+        controller != null,
+        'When showInnerAppBar is false, a TabController must be provided.',
+      );
+      // 이 모드는 상위 위젯에서 TabBar를 관리하므로,
+      // 여기서는 기존대로 탭 내용만 렌더링합니다.
       return Column(
         children: [
           if (_showSearchBar)
@@ -231,8 +234,11 @@ class _ClubsScreenState extends State<ClubsScreen> {
         }
         if (snapshot.hasError) {
           return Center(
-              child: Text('clubs.screen.error'
-                  .tr(namedArgs: {'error': snapshot.error.toString()})));
+            child: Text(
+              'clubs.screen.error'
+                  .tr(namedArgs: {'error': snapshot.error.toString()}),
+            ),
+          );
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(child: Text('clubs.proposal.empty'.tr()));
@@ -242,10 +248,12 @@ class _ClubsScreenState extends State<ClubsScreen> {
         final kw = _searchKeywordNotifier.value;
         if (kw.isNotEmpty) {
           proposals = proposals
-              .where((c) =>
-                  (("${c.title} ${c.description} ${c.mainCategory} ${c.interestTags.join(' ')}")
-                      .toLowerCase()
-                      .contains(kw)))
+              .where(
+                (c) =>
+                    (("${c.title} ${c.description} ${c.mainCategory} ${c.interestTags.join(' ')}")
+                        .toLowerCase()
+                        .contains(kw)),
+              )
               .toList();
         }
 
@@ -258,7 +266,9 @@ class _ClubsScreenState extends State<ClubsScreen> {
           itemBuilder: (context, index) {
             final proposal = proposals[index];
             return ClubProposalCard(
-                key: ValueKey(proposal.id), proposal: proposal);
+              key: ValueKey(proposal.id),
+              proposal: proposal,
+            );
           },
         );
       },
@@ -293,8 +303,11 @@ class _ClubsScreenState extends State<ClubsScreen> {
         }
         if (snapshot.hasError) {
           return Center(
-              child: Text('clubs.screen.error'
-                  .tr(namedArgs: {'error': snapshot.error.toString()})));
+            child: Text(
+              'clubs.screen.error'
+                  .tr(namedArgs: {'error': snapshot.error.toString()}),
+            ),
+          );
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(child: Text('clubs.screen.empty'.tr()));
@@ -304,10 +317,12 @@ class _ClubsScreenState extends State<ClubsScreen> {
         final kw = _searchKeywordNotifier.value;
         if (kw.isNotEmpty) {
           clubs = clubs
-              .where((c) =>
-                  (("${c.title} ${c.description} ${c.mainCategory} ${c.interestTags.join(' ')}")
-                      .toLowerCase()
-                      .contains(kw)))
+              .where(
+                (c) =>
+                    (("${c.title} ${c.description} ${c.mainCategory} ${c.interestTags.join(' ')}")
+                        .toLowerCase()
+                        .contains(kw)),
+              )
               .toList();
         }
 
@@ -354,7 +369,9 @@ class _ClubsScreenState extends State<ClubsScreen> {
                 child: Text(
                   'clubs.tabs.myClubs'.tr(),
                   style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(height: 12),

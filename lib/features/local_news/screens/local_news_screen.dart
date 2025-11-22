@@ -40,7 +40,6 @@ library;
 // 아래부터 실제 코드
 
 import 'dart:async';
-import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
@@ -62,7 +61,7 @@ class LocalNewsScreen extends StatefulWidget {
   final Map<String, String?>? locationFilter;
   // 검색 UX 옵션
   final bool autoFocusSearch;
-  final ValueNotifier<AppSection?>? searchNotifier;
+  final ValueNotifier<bool>? searchNotifier;
 
   const LocalNewsScreen({
     this.userModel,
@@ -85,7 +84,7 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
-  VoidCallback? _externalSearchListener;
+  // external search listener removed; chip will use widget.searchNotifier
   // 검색바 표시 여부 (칩 자체를 완전히 숨기기 위함)
   bool _showSearchBar = false;
 
@@ -157,18 +156,9 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
       });
     }
 
-    // 외부 전역 검색 활성화 신호 구독
+    // widget.searchNotifier will be passed directly to the InlineSearchChip below.
     if (widget.searchNotifier != null) {
-      _externalSearchListener = () {
-        if (widget.searchNotifier!.value == AppSection.localNews) {
-          // 피드 내부에서 하단 검색 아이콘을 눌렀을 때 검색칩을 노출하고 포커스
-          if (mounted) {
-            setState(() => _showSearchBar = true);
-            _chipOpenNotifier.value = true;
-          }
-        }
-      };
-      widget.searchNotifier!.addListener(_externalSearchListener!);
+      widget.searchNotifier!.addListener(_externalSearchListener);
     }
   }
 
@@ -177,10 +167,21 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
     _tabController.dispose();
     _chipOpenNotifier.dispose();
     _searchKeywordNotifier.dispose();
-    if (_externalSearchListener != null && widget.searchNotifier != null) {
-      widget.searchNotifier!.removeListener(_externalSearchListener!);
+    if (widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener);
     }
     super.dispose();
+  }
+
+  void _externalSearchListener() {
+    if (widget.searchNotifier?.value == true) {
+      if (!mounted) return;
+      setState(() => _showSearchBar = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+      widget.searchNotifier?.value = false;
+    }
   }
 
   // 인라인 검색칩 제출 처리

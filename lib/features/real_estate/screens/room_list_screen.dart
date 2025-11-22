@@ -33,11 +33,13 @@ class RoomListScreen extends StatefulWidget {
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
   final String? roomType; // [필수] 'kos', 'apartment' 등
+  final ValueNotifier<bool>? searchNotifier;
 
   const RoomListScreen({
     super.key,
     this.userModel,
     this.locationFilter,
+    this.searchNotifier,
     required this.roomType,
   });
 
@@ -80,6 +82,19 @@ class _RoomListScreenState extends State<RoomListScreen> {
     _filterCount = _calculateFilterCount(_activeFilters);
 
     _searchKeywordNotifier.addListener(_onKeywordChanged);
+    if (widget.searchNotifier != null) {
+      widget.searchNotifier!.addListener(_externalSearchListener);
+    }
+  }
+
+  void _externalSearchListener() {
+    if (widget.searchNotifier?.value == true) {
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+      widget.searchNotifier?.value = false;
+    }
   }
 
   /// [신규] '작업 20': roomType별 기본 최대값 반환
@@ -115,6 +130,9 @@ class _RoomListScreenState extends State<RoomListScreen> {
     _chipOpenNotifier.dispose();
     _searchKeywordNotifier.removeListener(_onKeywordChanged);
     _searchKeywordNotifier.dispose();
+    if (widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener);
+    }
     super.dispose();
   }
 

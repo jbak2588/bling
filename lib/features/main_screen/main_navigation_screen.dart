@@ -30,22 +30,22 @@ library;
 // [추가] 문맥 자동분기용: 인디프렌드/동네가게 생성 화면
 // import 'package:bling_app/features/find_friends/screens/findfriend_form_screen.dart'; // [삭제됨]
 
+import 'package:bling_app/features/location/providers/location_provider.dart'; // ✅ Provider Import
+import 'package:bling_app/core/utils/localization_utils.dart';
 // ✅ [신규] 검색 로직을 위해 모든 피드 스크린 import
 import 'package:bling_app/features/local_news/screens/local_news_screen.dart';
 import 'package:bling_app/features/jobs/screens/jobs_screen.dart';
 import 'package:bling_app/features/lost_and_found/screens/lost_and_found_screen.dart';
-import 'package:bling_app/features/location/providers/location_provider.dart'; // ✅ Provider Import
 import 'package:bling_app/features/marketplace/screens/marketplace_screen.dart';
 import 'package:bling_app/features/local_stores/screens/local_stores_screen.dart';
 import 'package:bling_app/features/find_friends/screens/find_friends_screen.dart';
-import 'package:bling_app/core/utils/localization_utils.dart';
 import 'package:bling_app/features/clubs/screens/clubs_screen.dart';
 import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart';
 import 'package:bling_app/features/auction/screens/auction_screen.dart';
 import 'package:bling_app/features/pom/screens/pom_screen.dart';
+
 import 'package:bling_app/features/jobs/screens/select_job_type_screen.dart';
 import 'package:bling_app/features/local_stores/screens/create_shop_screen.dart';
-
 import 'package:bling_app/features/local_news/screens/create_local_news_screen.dart';
 import 'package:bling_app/features/marketplace/screens/product_registration_screen.dart';
 import 'package:bling_app/features/clubs/screens/create_club_screen.dart';
@@ -126,6 +126,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   // ✅ [신규] 시나리오 2 (피드 내 검색 활성화)를 위한 Notifier
   final ValueNotifier<AppSection?> _searchActivationNotifier =
       ValueNotifier<AppSection?>(null);
+  // [수정] 검색 트리거를 bool 타입으로 통일 (AppSection 제거)
+  // 탭 내부에서 검색바를 열고 닫는 신호로만 사용
+  final ValueNotifier<bool> _searchTrigger = ValueNotifier(false);
 
   // ✅ [스크롤 위치 보존] HomeScreen용 ScrollController 및 위치 저장 변수 추가
   final ScrollController _homeScrollController = ScrollController();
@@ -182,6 +185,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _unreadNotificationsSubscription?.cancel(); // [Task 96]
     _homeScrollController.dispose();
     _searchActivationNotifier.dispose(); // ✅ Notifier 해제
+    _searchTrigger.dispose();
     super.dispose();
   }
 
@@ -346,10 +350,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     switch (section) {
       case AppSection.localNews:
         titleKey = 'main.tabs.localNews';
+        // [수정] 생성자 호출 시 타입 일치 확인
         nextScreen = LocalNewsScreen(
           userModel: userModel,
           autoFocusSearch: autoFocus,
-          searchNotifier: _searchActivationNotifier,
+          searchNotifier: _searchTrigger,
         );
         break;
       case AppSection.jobs:
@@ -357,7 +362,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         nextScreen = JobsScreen(
           userModel: userModel,
           autoFocusSearch: autoFocus,
-          searchNotifier: _searchActivationNotifier,
+          searchNotifier: _searchTrigger,
         );
         break;
       case AppSection.lostAndFound:
@@ -365,7 +370,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         nextScreen = LostAndFoundScreen(
           userModel: userModel,
           autoFocusSearch: autoFocus,
-          searchNotifier: _searchActivationNotifier,
+          searchNotifier: _searchTrigger,
         );
         break;
       case AppSection.marketplace:
@@ -373,7 +378,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         nextScreen = MarketplaceScreen(
           userModel: userModel,
           autoFocusSearch: autoFocus,
-          searchNotifier: _searchActivationNotifier,
+          searchNotifier: _searchTrigger,
           // ✅ [추가] 카테고리 탭 변경 시 앱바 타이틀 업데이트 콜백
           onTitleChanged: (String newTitle) {
             setState(() {
@@ -397,7 +402,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         nextScreen = LocalStoresScreen(
           userModel: userModel,
           autoFocusSearch: autoFocus,
-          searchNotifier: _searchActivationNotifier,
+          searchNotifier: _searchTrigger,
         );
         break;
       case AppSection.findFriends:
@@ -405,7 +410,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         nextScreen = FindFriendsScreen(
           userModel: userModel,
           autoFocusSearch: autoFocus,
-          searchNotifier: _searchActivationNotifier,
+          searchNotifier: _searchTrigger,
         );
         break;
       case AppSection.clubs:
@@ -413,7 +418,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         nextScreen = ClubsScreen(
           userModel: userModel,
           autoFocusSearch: autoFocus,
-          searchNotifier: _searchActivationNotifier,
+          searchNotifier: _searchTrigger,
         );
         break;
       case AppSection.realEstate:
@@ -421,7 +426,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         nextScreen = RealEstateScreen(
           userModel: userModel,
           autoFocusSearch: autoFocus,
-          searchNotifier: _searchActivationNotifier,
+          searchNotifier: _searchTrigger,
         );
         break;
       case AppSection.auction:
@@ -429,7 +434,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         nextScreen = AuctionScreen(
           userModel: userModel,
           autoFocusSearch: autoFocus,
-          searchNotifier: _searchActivationNotifier,
+          searchNotifier: _searchTrigger,
         );
         break;
       case AppSection.pom:
@@ -439,7 +444,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           initialPoms: null,
           initialIndex: 0,
           autoFocusSearch: autoFocus,
-          searchNotifier: _searchActivationNotifier,
+          searchNotifier: _searchTrigger,
         );
         break;
       case AppSection.home:
@@ -666,10 +671,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  // [수정] 매개변수 이름을 명확하게 변경 (selectedIndex -> currentTab)
+  PreferredSizeWidget _buildAppBar(int currentTab) {
     // ✅ locale 의존성만 생성(교체X, 리빌드O)
     final _ = context.locale;
     final photoUrl = _userModel?.photoUrl;
+    // [로직] 검색 아이콘 표시 여부 결정
+    // 숨김: 홈 루트(하위 컨텐츠가 없고 _bottomNavIndex == 0) 또는 채팅 탭(_bottomNavIndex == 3)
+    final bool isHomeRoot =
+        (_bottomNavIndex == 0 && _currentHomePageContent == null);
+    final bool isChatTab = (_bottomNavIndex == 3);
+    final showSearchIcon = !(isHomeRoot || isChatTab);
     return GrabAppBarShell(
       // ↓↓↓ 기존 leading 로직 그대로
       leading: (_bottomNavIndex == 0 && _currentHomePageContent != null)
@@ -770,6 +782,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       centerTitle: true, // 기존과 동일하게 가운데 정렬
       // ↓↓↓ 기존 actions 그대로
       actions: [
+        // [추가] 검색 아이콘 (각 탭의 InlineSearchChip을 열기 위함)
+        if (showSearchIcon)
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.black87, size: 24),
+            tooltip: '검색',
+            onPressed: () {
+              // 검색 트리거 신호 발송 (true/false 토글)
+              _searchTrigger.value = !_searchTrigger.value;
+            },
+          ),
         // [Task 96] 알림 아이콘 버튼 수정
         // Debug: resolve tooltip text and log to help diagnose missing localization key
         Builder(builder: (context) {
@@ -931,7 +953,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             userModel: _userModel,
             activeLocationFilter:
                 Provider.of<LocationProvider>(context).adminFilter,
-            searchNotifier: _searchActivationNotifier,
+            searchNotifier: _searchTrigger,
+            // [수정] 홈 화면 아이콘 클릭 시 이동할 때도 searchTrigger를 전달할 수 있도록 구조 변경 가능하나,
+            // 현재는 홈에서 직접 feature 스크린을 띄우므로, 여기서 searchTrigger를 넘겨줘야 함.
+            // 하지만 HomeScreen 내부 구현상 별도 처리가 필요하므로 아래 HomeScreen 패치 참조.
             onIconTap: _navigateToPage,
           ),
       // 1. 동네생활 (게시판) - 활성 상태 체크
@@ -973,7 +998,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     }
 
     return Scaffold(
-      appBar: _buildAppBar(),
+      // [수정] _selectedIndex(없는 변수) 대신 기존 _bottomNavIndex 전달
+      appBar: _buildAppBar(_bottomNavIndex),
       drawer: _buildAppDrawer(_userModel),
       body: IndexedStack(
         index: effectiveIndex,

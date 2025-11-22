@@ -99,7 +99,6 @@ class _InlineSearchChipState extends State<InlineSearchChip> {
 
   @override
   Widget build(BuildContext context) {
-    // (디자인 로직은 home_screen.dart 백업본과 동일)
     final TextStyle? chipTextStyle =
         Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14);
     final mainContainer = Container(

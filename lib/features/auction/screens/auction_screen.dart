@@ -26,7 +26,6 @@ import 'package:bling_app/features/auction/screens/auction_detail_screen.dart'; 
 import 'package:bling_app/features/auction/widgets/auction_card.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 // ✅ [지도뷰] 2. 구글맵 및 관련 의존성 import
 // ✅ [탐색 기능] 1. AppCategories import
@@ -41,7 +40,7 @@ class AuctionScreen extends StatefulWidget {
   // [추가] HomeScreen에서 locationFilter를 전달받습니다.
   final Map<String, String?>? locationFilter;
   final bool autoFocusSearch;
-  final ValueNotifier<AppSection?>? searchNotifier;
+  final ValueNotifier<bool>? searchNotifier;
 
   const AuctionScreen(
       {this.userModel,
@@ -63,7 +62,6 @@ class _AuctionScreenState extends State<AuctionScreen> {
   bool _showSearchBar = false;
   bool _isMapView = false; // ✅ [지도뷰] 3. 맵/리스트 토글 상태 변수 추가
   String _selectedCategoryId = 'all'; // ✅ [탐색 기능] 2. 카테고리 상태 변수 추가
-  VoidCallback? _externalSearchListener;
 
   @override
   void initState() {
@@ -77,17 +75,10 @@ class _AuctionScreenState extends State<AuctionScreen> {
       });
     }
 
-    // 피드 내부 하단 검색 아이콘 → 검색칩 열기
+    // If an external search notifier is provided, listen and ensure the search
+    // bar is rendered and opened when the notifier toggles.
     if (widget.searchNotifier != null) {
-      _externalSearchListener = () {
-        if (widget.searchNotifier!.value == AppSection.auction) {
-          if (mounted) {
-            setState(() => _showSearchBar = true);
-            _chipOpenNotifier.value = true;
-          }
-        }
-      };
-      widget.searchNotifier!.addListener(_externalSearchListener!);
+      widget.searchNotifier!.addListener(_externalSearchListener);
     }
 
     // ✅ [버그 수정 1] 키워드가 변경될 때마다 setState를 호출하여 화면을 다시 그리도록 리스너 추가
@@ -104,13 +95,24 @@ class _AuctionScreenState extends State<AuctionScreen> {
   // ✅ [버그 수정 2] 메모리 누수 방지를 위해 dispose 메서드 추가
   @override
   void dispose() {
+    if (widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener);
+    }
     _chipOpenNotifier.dispose();
     _searchKeywordNotifier.removeListener(_onKeywordChanged); // 리스너 제거
     _searchKeywordNotifier.dispose();
-    if (_externalSearchListener != null && widget.searchNotifier != null) {
-      widget.searchNotifier!.removeListener(_externalSearchListener!);
-    }
     super.dispose();
+  }
+
+  void _externalSearchListener() {
+    if (widget.searchNotifier?.value == true) {
+      if (!mounted) return;
+      setState(() => _showSearchBar = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+      widget.searchNotifier?.value = false;
+    }
   }
 
   @override

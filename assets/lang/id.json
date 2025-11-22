@@ -423,9 +423,13 @@
       "empty": "Belum ada produk yang terdaftar.",
       "detailsTitle": "Rincian produk",
       "editButton": "Sunting produk",
+      "loadErrorWithMsg": "Gagal memuat produk: {error}",
       "deleteConfirm": "Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.",
       "deleteSuccess": "Produk telah dihapus.",
       "deleteFail": "Gagal menghapus produk: {error}"
+    },
+    "bookmarks": {
+      "empty": "Belum ada markah."
     },
     "postList": {
       "empty": "Belum ada postingan.",
@@ -2032,6 +2036,11 @@
       "raw_json": "Raw JSON"
     }
   },
+  "tag_input": {
+    "fromTitleSuffix": "(judul)",
+    "addHint": "Tambah tag...",
+    "help": "Gunakan koma (,) atau Enter untuk menambahkan tag."
+  },
   "auth": {
     "verification": {
       "title": "Verifikasi Email",
@@ -2045,7 +2054,16 @@
     }
     ,
     "signup": {
-      "success_email_sent": "Pendaftaran berhasil! Kami mengirim tautan verifikasi ke {email}."
+      "success_email_sent": "Pendaftaran berhasil! Kami mengirim tautan verifikasi ke {email}.",
+      "fail": {
+        "required": "Harap isi kolom yang diperlukan.",
+        "password_mismatch": "Kata sandi tidak cocok.",
+        "default": "Pendaftaran gagal. Silakan coba lagi.",
+        "weak_password": "Kata sandi terlalu lemah.",
+        "email_in_use": "Email ini sudah digunakan.",
+        "invalid_email": "Alamat email tidak valid.",
+        "unknown": "Terjadi kesalahan yang tidak diketahui."
+      }
     }
   }
 }

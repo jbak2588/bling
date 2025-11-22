@@ -30,7 +30,6 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/pom/models/pom_model.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import '../widgets/pom_feed_list.dart';
 
@@ -40,7 +39,7 @@ class PomScreen extends StatefulWidget {
   final int initialIndex;
   final Map<String, String?>? locationFilter;
   final bool autoFocusSearch;
-  final ValueNotifier<AppSection?>? searchNotifier;
+  final ValueNotifier<bool>? searchNotifier;
 
   const PomScreen({
     this.userModel,
@@ -58,7 +57,6 @@ class PomScreen extends StatefulWidget {
 
 class _PomScreenState extends State<PomScreen> {
   // [V2] TabBarView로 변경 - 내부 데이터 로드는 PomFeedList가 담당
-  VoidCallback? _externalSearchListener;
   // 검색 칩/키워드 상태 (하단 검색 아이콘으로 토글됨)
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchKeywordNotifier =
@@ -76,17 +74,9 @@ class _PomScreenState extends State<PomScreen> {
       // (V2) 검색바 자동 노출은 현재 미사용
     }
 
-    // 피드 내부 하단 검색 아이콘 → 검색칩 열기
+    // widget.searchNotifier will be passed directly to the InlineSearchChip below.
     if (widget.searchNotifier != null) {
-      _externalSearchListener = () {
-        if (widget.searchNotifier!.value == AppSection.pom) {
-          if (mounted) {
-            setState(() => _showSearchBar = true);
-            _chipOpenNotifier.value = true;
-          }
-        }
-      };
-      widget.searchNotifier!.addListener(_externalSearchListener!);
+      widget.searchNotifier!.addListener(_externalSearchListener);
     }
 
     // 초기 진입이 썸네일에서의 상세 요청인 경우: 선택한 인덱스로 상세 뷰어를 즉시 오픈
@@ -113,11 +103,11 @@ class _PomScreenState extends State<PomScreen> {
   @override
   void dispose() {
     // (V2) 페이지 컨트롤러 및 검색 노티파이어 미사용
-    if (_externalSearchListener != null && widget.searchNotifier != null) {
-      widget.searchNotifier!.removeListener(_externalSearchListener!);
-    }
     _chipOpenNotifier.dispose();
     _searchKeywordNotifier.dispose();
+    if (widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener);
+    }
     super.dispose();
   }
 
@@ -130,6 +120,17 @@ class _PomScreenState extends State<PomScreen> {
     if (!mounted) return;
     setState(() => _showSearchBar = false);
     _searchKeywordNotifier.value = '';
+  }
+
+  void _externalSearchListener() {
+    if (widget.searchNotifier?.value == true) {
+      if (!mounted) return;
+      setState(() => _showSearchBar = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+      widget.searchNotifier?.value = false;
+    }
   }
 
   @override
@@ -158,7 +159,7 @@ class _PomScreenState extends State<PomScreen> {
             if (_showSearchBar)
               InlineSearchChip(
                 hintText: 'pom.search.hint'.tr(),
-                openNotifier: _chipOpenNotifier,
+                openNotifier: widget.searchNotifier,
                 onSubmitted: _onSearchSubmitted,
                 onClose: _onSearchClosed,
               ),

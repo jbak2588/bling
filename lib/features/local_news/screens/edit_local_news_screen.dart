@@ -313,9 +313,11 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
               },
               titleController: _titleController,
               autoCreateTitleTag: true,
-              allowEmptyTags: true, // 편집에서는 비워두기 허용
-              suggestedTags: _recommended,
-              whitelist: AppTags.localNewsTags.map((t) => t.tagId).toSet(),
+              // [수정] AppTags.newsTags -> localNewsTags 매핑 + _recommended 결합
+              suggestedTags: {
+                ..._recommended,
+                ...AppTags.localNewsTags.map((e) => e.tagId),
+              }.toList(),
               maxTags: 3,
             ),
 

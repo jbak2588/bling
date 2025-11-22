@@ -33,7 +33,6 @@ library;
 // import removed: category_icons is now used via BlingIcon helper
 import 'package:bling_app/features/categories/data/firestore_category_repository.dart';
 import 'package:bling_app/features/categories/domain/category.dart';
-import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -50,7 +49,7 @@ import '../widgets/product_card.dart';
 class MarketplaceScreen extends StatefulWidget {
   final UserModel? userModel;
   final bool autoFocusSearch;
-  final ValueNotifier<AppSection?>? searchNotifier;
+  final ValueNotifier<bool>? searchNotifier;
   final Function(String title)? onTitleChanged;
   // final Map<String, String?>? locationFilter; // 삭제됨 (Provider 사용)
 
@@ -139,7 +138,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
     if (widget.searchNotifier != null) {
       _externalSearchListener = () {
-        if (widget.searchNotifier!.value == AppSection.marketplace) {
+        if (widget.searchNotifier!.value == true) {
           if (mounted) {
             setState(() => _showSearchBar = true);
             _chipOpenNotifier.value = true;
@@ -231,162 +230,173 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: NestedScrollView(
-        floatHeaderSlivers: true, // 스크롤을 살짝 올리면 앱바(탭)가 바로 나타남
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            // 1. 대분류 탭 (SliverAppBar)
-            SliverAppBar(
-              pinned: false, // 스크롤 시 위로 사라짐
-              floating: true, // 스크롤 올리면 바로 나타남
-              snap: true, // 중간에 걸치지 않고 확 나타남
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.white,
-              elevation: 0,
-              // 높이를 내용물(탭)에 맞춤.
-              toolbarHeight: 100,
-              flexibleSpace: FlexibleSpaceBar(
-                background: _buildParentCategoryTabs(langCode),
-              ),
+      body: Column(
+        children: [
+          // [수정] 검색바를 NestedScrollView 밖으로 이동 (앱바 바로 아래 고정)
+          if (_showSearchBar)
+            InlineSearchChip(
+              hintText: 'main.search.hint.marketplace'.tr(),
+              openNotifier: _chipOpenNotifier,
+              onSubmitted: (kw) =>
+                  _searchKeywordNotifier.value = kw.trim().toLowerCase(),
+              onClose: () {
+                setState(() => _showSearchBar = false);
+                _searchKeywordNotifier.value = '';
+              },
             ),
 
-            // 2. 소분류 탭 (SliverPersistentHeader)
-            // 대분류가 '전체'가 아닐 때만 표시
-            if (_selectedParent.id != 'all')
-              SliverPersistentHeader(
-                pinned: true, // 소분류 탭은 상단에 고정 (선택 사항: false면 같이 사라짐)
-                delegate: _SubCategoryHeaderDelegate(
-                  child: Container(
-                    color: Colors.white, // 배경색 확보
-                    child: _buildSubCategoryTabs(langCode),
+          Expanded(
+            child: NestedScrollView(
+              floatHeaderSlivers: true, // 스크롤을 살짝 올리면 앱바(탭)가 바로 나타남
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  // 1. 대분류 탭 (SliverAppBar)
+                  SliverAppBar(
+                    pinned: false, // 스크롤 시 위로 사라짐
+                    floating: true, // 스크롤 올리면 바로 나타남
+                    snap: true, // 중간에 걸치지 않고 확 나타남
+                    automaticallyImplyLeading: false,
+                    backgroundColor: Colors.white,
+                    elevation: 0,
+                    // 높이를 내용물(탭)에 맞춤.
+                    toolbarHeight: 100,
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: _buildParentCategoryTabs(langCode),
+                    ),
                   ),
-                  maxHeight: 110,
-                  minHeight: 110,
-                ),
-              ),
 
-            // 3. 검색바 (SliverToBoxAdapter)
-            if (_showSearchBar)
-              SliverToBoxAdapter(
-                child: InlineSearchChip(
-                  hintText: 'main.search.hint.marketplace'.tr(),
-                  openNotifier: _chipOpenNotifier,
-                  onSubmitted: (kw) =>
-                      _searchKeywordNotifier.value = kw.trim().toLowerCase(),
-                  onClose: () {
-                    setState(() => _showSearchBar = false);
-                    _searchKeywordNotifier.value = '';
-                  },
-                ),
-              ),
-          ];
-        },
-        body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: buildQuery().snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              if (snapshot.error.toString().contains('failed-precondition')) {
-                return Center(
-                    child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text("인덱스 생성 필요: 콘솔 링크를 확인하세요.\n${snapshot.error}"),
-                ));
-              }
-              return Center(
-                  child: Text('marketplace.error'
-                      .tr(namedArgs: {'error': snapshot.error.toString()})));
-            }
+                  // 2. 소분류 탭 (SliverPersistentHeader)
+                  // 대분류가 '전체'가 아닐 때만 표시
+                  if (_selectedParent.id != 'all')
+                    SliverPersistentHeader(
+                      pinned: true, // 소분류 탭은 상단에 고정 (선택 사항: false면 같이 사라짐)
+                      delegate: _SubCategoryHeaderDelegate(
+                        child: Container(
+                          color: Colors.white, // 배경색 확보
+                          child: _buildSubCategoryTabs(langCode),
+                        ),
+                        maxHeight: 110,
+                        minHeight: 110,
+                      ),
+                    ),
 
-            var allDocs = snapshot.data?.docs ?? [];
-
-            // ✅ [거리순 정렬 로직 추가]
-            if (locationProvider.mode == LocationSearchMode.nearby &&
-                locationProvider.user?.geoPoint != null) {
-              final userGeo = locationProvider.user!.geoPoint!;
-              final radiusKm = locationProvider.radiusKm;
-
-              // 1. 거리 필터링 & 정렬을 위해 리스트 변환
-              // (ProductModel로 변환 비용이 들지만 정확한 거리 계산을 위해 필요)
-              allDocs = allDocs.where((doc) {
-                final pGeo = (doc.data()['geoPoint'] as GeoPoint?);
-                if (pGeo == null) return false;
-                final dist = _calculateDistance(userGeo.latitude,
-                    userGeo.longitude, pGeo.latitude, pGeo.longitude);
-                return dist <= radiusKm;
-              }).toList();
-
-              // 2. 거리순 정렬
-              allDocs.sort((a, b) {
-                final geoA = (a.data()['geoPoint'] as GeoPoint);
-                final geoB = (b.data()['geoPoint'] as GeoPoint);
-                final distA = _calculateDistance(userGeo.latitude,
-                    userGeo.longitude, geoA.latitude, geoA.longitude);
-                final distB = _calculateDistance(userGeo.latitude,
-                    userGeo.longitude, geoB.latitude, geoB.longitude);
-                return distA.compareTo(distB);
-              });
-            }
-
-            allDocs = _applyStatusRules(allDocs);
-
-            final kw = _searchKeywordNotifier.value;
-            if (kw.isNotEmpty) {
-              allDocs = allDocs.where((d) {
-                final p = ProductModel.fromFirestore(d);
-                final hay = ('${p.title} ${p.description} ${p.tags.join(' ')}')
-                    .toLowerCase();
-                return hay.contains(kw);
-              }).toList();
-            }
-
-            if (allDocs.isEmpty) {
-              // ✅ [Auto Fallback UI] 결과가 없을 때 전국 검색 제안
-              if (locationProvider.mode != LocationSearchMode.national) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('marketplace.empty'.tr()),
-                      TextButton(
-                        child: const Text("전국에서 검색하기"),
-                        onPressed: () => context
-                            .read<LocationProvider>()
-                            .setMode(LocationSearchMode.national),
-                      )
-                    ],
-                  ),
-                );
-              }
-              return Center(
-                  child: Text('marketplace.empty'.tr(),
-                      textAlign: TextAlign.center));
-            }
-
-            return ListView.separated(
-              // NestedScrollView 내부 리스트는 padding top 0 권장
-              padding: EdgeInsets.zero,
-              itemCount: allDocs.length,
-              separatorBuilder: (context, index) => const Divider(
-                height: 1,
-                thickness: 1,
-                indent: 16,
-                endIndent: 16,
-                color: Color(0xFFEEEEEE),
-              ),
-              itemBuilder: (context, index) {
-                final product = ProductModel.fromFirestore(allDocs[index]);
-                return ProductCard(
-                  key: ValueKey(product.id),
-                  product: product,
-                );
+                  // 검색바는 NestedScrollView 밖으로 이동했으므로 제거
+                ];
               },
-            );
-          },
-        ),
-      ),
+              body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: buildQuery().snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    if (snapshot.error
+                        .toString()
+                        .contains('failed-precondition')) {
+                      return Center(
+                          child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child:
+                            Text("인덱스 생성 필요: 콘솔 링크를 확인하세요.\n${snapshot.error}"),
+                      ));
+                    }
+                    return Center(
+                        child: Text('marketplace.error'.tr(
+                            namedArgs: {'error': snapshot.error.toString()})));
+                  }
+
+                  var allDocs = snapshot.data?.docs ?? [];
+
+                  // ✅ [거리순 정렬 로직 추가]
+                  if (locationProvider.mode == LocationSearchMode.nearby &&
+                      locationProvider.user?.geoPoint != null) {
+                    final userGeo = locationProvider.user!.geoPoint!;
+                    final radiusKm = locationProvider.radiusKm;
+
+                    // 1. 거리 필터링 & 정렬을 위해 리스트 변환
+                    // (ProductModel로 변환 비용이 들지만 정확한 거리 계산을 위해 필요)
+                    allDocs = allDocs.where((doc) {
+                      final pGeo = (doc.data()['geoPoint'] as GeoPoint?);
+                      if (pGeo == null) return false;
+                      final dist = _calculateDistance(userGeo.latitude,
+                          userGeo.longitude, pGeo.latitude, pGeo.longitude);
+                      return dist <= radiusKm;
+                    }).toList();
+
+                    // 2. 거리순 정렬
+                    allDocs.sort((a, b) {
+                      final geoA = (a.data()['geoPoint'] as GeoPoint);
+                      final geoB = (b.data()['geoPoint'] as GeoPoint);
+                      final distA = _calculateDistance(userGeo.latitude,
+                          userGeo.longitude, geoA.latitude, geoA.longitude);
+                      final distB = _calculateDistance(userGeo.latitude,
+                          userGeo.longitude, geoB.latitude, geoB.longitude);
+                      return distA.compareTo(distB);
+                    });
+                  }
+
+                  allDocs = _applyStatusRules(allDocs);
+
+                  final kw = _searchKeywordNotifier.value;
+                  if (kw.isNotEmpty) {
+                    allDocs = allDocs.where((d) {
+                      final p = ProductModel.fromFirestore(d);
+                      final hay =
+                          ('${p.title} ${p.description} ${p.tags.join(' ')}')
+                              .toLowerCase();
+                      return hay.contains(kw);
+                    }).toList();
+                  }
+
+                  if (allDocs.isEmpty) {
+                    // ✅ [Auto Fallback UI] 결과가 없을 때 전국 검색 제안
+                    if (locationProvider.mode != LocationSearchMode.national) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('marketplace.empty'.tr()),
+                            TextButton(
+                              child: const Text("전국에서 검색하기"),
+                              onPressed: () => context
+                                  .read<LocationProvider>()
+                                  .setMode(LocationSearchMode.national),
+                            )
+                          ],
+                        ),
+                      );
+                    }
+                    return Center(
+                        child: Text('marketplace.empty'.tr(),
+                            textAlign: TextAlign.center));
+                  }
+
+                  return ListView.separated(
+                    // NestedScrollView 내부 리스트는 padding top 0 권장
+                    padding: EdgeInsets.zero,
+                    itemCount: allDocs.length,
+                    separatorBuilder: (context, index) => const Divider(
+                      height: 1,
+                      thickness: 1,
+                      indent: 16,
+                      endIndent: 16,
+                      color: Color(0xFFEEEEEE),
+                    ),
+                    itemBuilder: (context, index) {
+                      final product =
+                          ProductModel.fromFirestore(allDocs[index]);
+                      return ProductCard(
+                        key: ValueKey(product.id),
+                        product: product,
+                      );
+                    },
+                  );
+                },
+              ), // StreamBuilder
+            ), // NestedScrollView
+          ), // Expanded
+        ],
+      ), // Column
     );
   }
 

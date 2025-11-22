@@ -432,9 +432,13 @@
       "empty": "등록한 상품이 없습니다.",
       "detailsTitle": "상품 상세 정보",
       "editButton": "상품 수정",
+      "loadErrorWithMsg": "상품을 불러오는 중 오류가 발생했습니다: {error}",
       "deleteConfirm": "이 상품을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
       "deleteSuccess": "상품이 삭제되었습니다.",
       "deleteFail": "상품 삭제에 실패했습니다: {error}"
+    },
+    "bookmarks": {
+      "empty": "저장한 즐겨찾기가 없습니다."
     },
     "postList": {
       "empty": "작성한 게시물이 없습니다.",
@@ -2047,7 +2051,12 @@
       "raw_json": "Raw JSON"
     }
   },
-  "auth": {
+    "tag_input": {
+      "fromTitleSuffix": "(제목)",
+      "addHint": "태그 추가...",
+      "help": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다."
+    },
+    "auth": {
     "verification": {
       "title": "이메일 인증",
       "sent_title": "인증 메일 발송 완료",
@@ -2060,7 +2069,16 @@
     }
     ,
     "signup": {
-      "success_email_sent": "가입 성공! {email}로 인증 링크를 보냈습니다."
+      "success_email_sent": "가입 성공! {email}로 인증 링크를 보냈습니다.",
+      "fail": {
+        "required": "필수 항목을 입력해주세요.",
+        "password_mismatch": "비밀번호가 일치하지 않습니다.",
+        "default": "회원가입에 실패했습니다. 다시 시도해주세요.",
+        "weak_password": "비밀번호가 너무 약합니다.",
+        "email_in_use": "이미 사용 중인 이메일입니다.",
+        "invalid_email": "유효하지 않은 이메일 주소입니다.",
+        "unknown": "알 수 없는 오류가 발생했습니다."
+      }
     }
   }
 }

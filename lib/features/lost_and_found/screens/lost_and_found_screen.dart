@@ -20,59 +20,43 @@ import 'package:bling_app/features/lost_and_found/data/lost_and_found_repository
 import 'package:bling_app/features/lost_and_found/widgets/lost_item_card.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
-// [수정] StatelessWidget -> StatefulWidget으로 변경
 class LostAndFoundScreen extends StatefulWidget {
   final UserModel? userModel;
-  // [추가] HomeScreen에서 locationFilter를 전달받습니다.
   final Map<String, String?>? locationFilter;
   final bool autoFocusSearch;
-  final ValueNotifier<AppSection?>? searchNotifier;
+  final ValueNotifier<bool>? searchNotifier;
 
-  const LostAndFoundScreen(
-      {this.userModel,
-      this.locationFilter, // [추가]
-      this.autoFocusSearch = false,
-      this.searchNotifier,
-      super.key});
+  const LostAndFoundScreen({
+    this.userModel,
+    this.locationFilter,
+    this.autoFocusSearch = false,
+    this.searchNotifier,
+    super.key,
+  });
 
   @override
   State<LostAndFoundScreen> createState() => _LostAndFoundScreenState();
 }
 
-// ✅ [작업 39] 1. TabController를 사용하기 위해 TickerProviderStateMixin 추가
 class _LostAndFoundScreenState extends State<LostAndFoundScreen>
     with TickerProviderStateMixin {
-  // [추가] 화면 내부의 필터 상태를 관리합니다.
   late Map<String, String?>? _locationFilter;
-
-  // ✅ [작업 39] 2. TabController 및 필터 값 정의
   late final TabController _tabController;
-  final List<String?> _tabFilters = [
-    null, // 'all' (전체)
-    'lost', // '분실'
-    'found', // '습득'
-  ];
+  final List<String?> _tabFilters = [null, 'lost', 'found'];
 
-  // 검색칩 및 키워드 상태
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
-  VoidCallback? _externalSearchListener;
 
   @override
   void initState() {
     super.initState();
-    // [추가] HomeScreen에서 전달받은 필터 값으로 초기화합니다.
     _locationFilter = widget.locationFilter;
-
-    // ✅ [작업 39] 3. TabController 초기화
     _tabController = TabController(length: _tabFilters.length, vsync: this);
 
-    // 글로벌 전역 검색 진입(autoFocus)
     if (widget.autoFocusSearch) {
       _showSearchBar = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -80,49 +64,48 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
       });
     }
 
-    // 하단 검색 아이콘(피드 내) → 검색칩 열기
+    // If an external search notifier is provided, listen and ensure the search
+    // bar is rendered and opened when the notifier toggles.
     if (widget.searchNotifier != null) {
-      _externalSearchListener = () {
-        if (widget.searchNotifier!.value == AppSection.lostAndFound) {
-          if (mounted) {
-            setState(() => _showSearchBar = true);
-            _chipOpenNotifier.value = true;
-          }
-        }
-      };
-      widget.searchNotifier!.addListener(_externalSearchListener!);
+      widget.searchNotifier!.addListener(_externalSearchListener);
     }
-
-    // ✅ [버그 수정] 키워드가 변경될 때마다 setState를 호출하여 화면을 다시 그리도록 리스너 추가
     _searchKeywordNotifier.addListener(_onKeywordChanged);
   }
 
-  // ✅ [작업 39] 4. TabController 해제
   @override
   void dispose() {
     _tabController.dispose();
     _chipOpenNotifier.dispose();
-    if (_externalSearchListener != null && widget.searchNotifier != null) {
-      widget.searchNotifier!.removeListener(_externalSearchListener!);
+    if (widget.searchNotifier != null) {
+      widget.searchNotifier!.removeListener(_externalSearchListener);
     }
-    // ✅ [버그 수정] 리스너 제거를 먼저 수행한 다음 notifier를 폐기합니다.
     _searchKeywordNotifier.removeListener(_onKeywordChanged);
     _searchKeywordNotifier.dispose();
     super.dispose();
   }
 
-  // ✅ [버그 수정] 키워드 변경 시 setState 호출
+  void _externalSearchListener() {
+    if (widget.searchNotifier?.value == true) {
+      if (!mounted) return;
+      setState(() => _showSearchBar = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chipOpenNotifier.value = true;
+      });
+      widget.searchNotifier?.value = false;
+    }
+  }
+
   void _onKeywordChanged() {
     if (mounted) setState(() {});
   }
 
-  // [추가] 필터 화면을 여는 함수
-
-  // [추가] 필터를 제거하는 함수
-
   @override
   Widget build(BuildContext context) {
     final LostAndFoundRepository repository = LostAndFoundRepository();
+
+    if (widget.userModel == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     return Scaffold(
       body: Column(
@@ -139,43 +122,23 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                 _searchKeywordNotifier.value = '';
               },
             ),
-          // [추가] 필터 관리 UI
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.end,
-          //   children: [
-          //     if (_locationFilter != null)
-          //       IconButton(
-          //         icon: const Icon(Icons.clear),
-          //         tooltip: 'Clear Filter',
-          //         onPressed: _clearFilter,
-          //       ),
-          //     IconButton(
-          //       icon: const Icon(Icons.filter_alt_outlined),
-          //       tooltip: 'Filter',
-          //       onPressed: _openFilter,
-          //     ),
-          //   ],
-          // ),
-          // ✅ [작업 39] 5. '분실'/'습득' 필터링을 위한 TabBar 추가
           TabBar(
             controller: _tabController,
             labelColor: Theme.of(context).primaryColor,
             unselectedLabelColor: Colors.grey[600],
             indicatorColor: Theme.of(context).primaryColor,
             tabs: [
-              Tab(text: 'lostAndFound.tabs.all'.tr()), // '전체'
-              Tab(text: 'lostAndFound.tabs.lost'.tr()), // '분실했어요'
-              Tab(text: 'lostAndFound.tabs.found'.tr()), // '주웠어요'
+              Tab(text: 'lostAndFound.tabs.all'.tr()),
+              Tab(text: 'lostAndFound.tabs.lost'.tr()),
+              Tab(text: 'lostAndFound.tabs.found'.tr()),
             ],
-            // 탭 변경 시 StreamBuilder를 재실행하기 위해 setState 호출
             onTap: (index) => setState(() {}),
           ),
           Expanded(
             child: StreamBuilder<List<LostItemModel>>(
-              // ✅ [작업 39] 6. fetchItems에 locationFilter와 itemType 필터를 함께 전달
               stream: repository.fetchItems(
                 locationFilter: _locationFilter,
-                itemType: _tabFilters[_tabController.index], // 현재 탭의 필터 값
+                itemType: _tabFilters[_tabController.index],
               ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -186,20 +149,24 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                       child: Text('lostAndFound.error'.tr(
                           namedArgs: {'error': snapshot.error.toString()})));
                 }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                final data = snapshot.data ?? [];
+                if (data.isEmpty) {
                   return Center(child: Text('lostAndFound.empty'.tr()));
                 }
 
-                // 키워드가 있으면 간단한 클라이언트 사이드 필터 적용
                 final kw = _searchKeywordNotifier.value;
                 final items = kw.isEmpty
-                    ? snapshot.data!
-                    : snapshot.data!
+                    ? data
+                    : data
                         .where((e) =>
                             ('${e.itemDescription} ${e.locationDescription} ${e.tags.join(' ')}')
                                 .toLowerCase()
                                 .contains(kw))
                         .toList();
+
+                if (items.isEmpty) {
+                  return Center(child: Text('lostAndFound.empty'.tr()));
+                }
 
                 return ListView.builder(
                   itemCount: items.length,
