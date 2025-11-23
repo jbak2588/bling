@@ -563,50 +563,13 @@
     "unblocked": "unblocked"
   },
   "interests": {
-    "title": "관심사",
-    "limit_info": "최대 10개까지 선택할 수 있어요.",
-    "limit_reached": "관심사는 최대 10개까지만 선택할 수 있습니다.",
-    "category_creative": "🎨 취미 & 창작",
-    "category_sports": "🏃 스포츠 & 액티비티",
-    "category_food_drink": "🍸 음식 & 음료",
-    "category_entertainment": "🍿 엔터테인먼트",
-    "category_growth": "📚 자기계발 & 지식",
-    "category_lifestyle": "🌴 라이프스타일",
+    "$categoryKey": "$categoryKey",
     "items": {
-      "drawing": "그림 그리기",
-      "instrument": "악기 연주",
-      "photography": "사진 찍기",
-      "writing": "글쓰기",
-      "crafting": "공예",
-      "gardening": "정원 가꾸기",
-      "soccer": "축구/풋살",
-      "hiking": "등산",
-      "camping": "캠핑",
-      "running": "달리기/조깅",
-      "biking": "자전거",
-      "golf": "골프",
-      "workout": "헬스/피트니스",
-      "foodie": "맛집 탐방",
-      "cooking": "요리하기",
-      "baking": "베이킹",
-      "coffee": "커피",
-      "wine": "와인/술",
-      "tea": "차(Tea)",
-      "movies": "영화/드라마",
-      "music": "음악 감상",
-      "concerts": "콘서트/페스티벌",
-      "gaming": "게임",
-      "reading": "독서",
-      "investing": "재테크",
-      "language": "외국어 공부",
-      "coding": "코딩",
-      "travel": "여행",
-      "pets": "반려동물",
-      "volunteering": "봉사활동",
-      "minimalism": "미니멀리즘",
       "$interestKey": "$interestKey"
     },
-    "$categoryKey": "$categoryKey"
+    "limit_info": "최대 10개까지 선택할 수 있어요.",
+    "limit_reached": "관심사는 최대 10개까지만 선택할 수 있습니다.",
+    "title": "관심사"
   },
   "jobs": {
     "card": {
@@ -631,9 +594,7 @@
     "detail": {
       "apply": "지원하기",
       "chatError": "채팅을 시작할 수 없습니다: {error}",
-      "infoTitle": "상세 정보",
-      "locationTitle": "지역",
-      "authorTitle": "작성자"
+      "infoTitle": "상세 정보"
     },
     "form": {
       "categoryLabel": "카테고리",
@@ -678,10 +639,7 @@
       "hourly": "시급",
       "monthly": "월급",
       "weekly": "주급",
-      "yearly": "연봉",
-      "per_case": "건당",
-      "etc": "기타",
-      "total": "총 보수"
+      "yearly": "연봉"
     },
     "screen": {
       "empty": "해당 지역에 등록된 구인 게시글이 없습니다."
@@ -700,16 +658,6 @@
       "regular": "파트타임/정규직"
     },
     "workPeriods": {
-      "short_term": "단기",
-      "mid_term": "중기",
-      "long_term": "장기",
-      "one_time": "1회성",
-      "1_week": "1주",
-      "1_month": "1개월",
-      "3_months": "3개월",
-      "6_months_plus": "6개월 이상",
-      "negotiable": "협의 가능",
-      "etc": "기타",
       "$period": "$period"
     }
   },
@@ -776,17 +724,8 @@
   },
   "localStores": {
     "categories": {
-      "all": "전체",
-      "food": "음식점",
-      "cafe": "카페",
-      "massage": "마사지",
-      "beauty": "뷰티",
-      "nail": "네일",
-      "auto": "자동차/정비",
-      "kids": "키즈",
-      "hospital": "병원/클리닉",
-      "etc": "기타",
-      "$category": "$category"
+      "$category": "$category",
+      "food": "음식점"
     },
     "create": {
       "fail": "상점 등록에 실패했습니다: {error}",
@@ -1232,72 +1171,10 @@
     "error": "오류가 발생했습니다: {error}",
     "filter": {
       "amenities": {
-        "ac": "에어컨",
-        "bed": "침대",
-        "closet": "옷장",
-        "desk": "책상",
-        "wifi": "와이파이",
-        "kitchen": "주방",
-        "living_room": "거실",
-        "refrigerator": "냉장고",
-        "parking_motorcycle": "오토바이 주차",
-        "parking_car": "자동차 주차",
-        "pool": "수영장",
-        "gym": "헬스장",
-        "security_24h": "24시간 경비",
-        "atm_center": "ATM 센터",
-        "minimarket": "미니마켓",
-        "mall_access": "몰 접근",
-        "playground": "놀이터",
-        "carport": "카포트",
-        "garden": "정원",
-        "pam": "상수도",
-        "telephone": "전화",
-        "water_heater": "온수기",
-        "parking_area": "주차 공간",
-        "electricity": "전기 (전력)",
-        "container_access": "컨테이너 진입 가능",
-        "kos_room": {
-          "ac": "에어컨",
-          "bed": "침대",
-          "closet": "옷장",
-          "desk": "책상",
-          "wifi": "와이파이"
-        },
-        "kos_public": {
-          "kitchen": "주방",
-          "living_room": "거실",
-          "refrigerator": "냉장고",
-          "parking_motorcycle": "오토바이 주차",
-          "parking_car": "자동차 주차"
-        },
-        "apartment": {
-          "pool": "수영장",
-          "gym": "헬스장",
-          "security_24h": "24시간 보안",
-          "atm_center": "ATM",
-          "minimarket": "미니마켓",
-          "mall_access": "쇼핑몰 접근",
-          "playground": "놀이터"
-        },
-        "house": {
-          "carport": "차고",
-          "garden": "정원",
-          "pam": "시수도",
-          "telephone": "전화",
-          "water_heater": "온수기"
-        },
-        "commercial": {
-          "parking_area": "주차 공간",
-          "security_24h": "24시간 보안",
-          "telephone": "전화",
-          "electricity": "전기",
-          "container_access": "컨테이너 접근"
-        },
-        "$key": "$key",
         "$i18nPrefix": {
           "$key": "$key"
-        }
+        },
+        "$key": "$key"
       },
       "apartment": {
         "facilities": "아파트 시설"
@@ -1314,9 +1191,6 @@
       "furnishedHint": "가구 상태 선택",
       "furnishedStatus": "가구 상태",
       "furnishedTypes": {
-        "furnished": "가구 완비",
-        "semi_furnished": "부분 가구",
-        "unfurnished": "무가구",
         "$status": "$status"
       },
       "house": {
@@ -1338,15 +1212,8 @@
       "landAreaRange": "토지 면적 (m²)",
       "priceRange": "가격 범위",
       "propertyCondition": "매물 상태",
-      "propertyConditions": {
-        "new": "새 매물",
-        "used": "중고"
-      },
       "rentPeriod": "임대 기간",
       "rentPeriods": {
-        "daily": "일간",
-        "monthly": "월간",
-        "yearly": "연간",
         "$period": "$period"
       },
       "selectFurnished": "가구 상태 선택",
@@ -1370,8 +1237,6 @@
       "listingType": "거래 유형",
       "listingTypeHint": "거래 유형 선택",
       "listingTypes": {
-        "rent": "임대 (월세/전세)",
-        "sale": "매매",
         "$type": "$type"
       },
       "maintenanceFee": "관리비 (월)",
@@ -1380,14 +1245,10 @@
       "priceLabel": "가격",
       "priceRequired": "가격을 입력하세요",
       "priceUnit": {
-        "monthly": "/월",
-        "yearly": "/년",
         "$value": "$value"
       },
       "publisherType": "게시자",
       "publisherTypes": {
-        "individual": "직거래",
-        "agent": "중개인",
         "$type": "$type"
       },
       "roomTypes": {
@@ -1479,15 +1340,9 @@
       "loadError": "loadError",
       "saveError": "saveError",
       "saveSuccess": "saveSuccess",
-      "scopeTitle": "알림 범위",
-      "scopeLabel": "범위 선택",
       "scopeDescription": "어느 지역 범위까지 알림을 받을지 선택합니다.",
-      "scope": {
-        "rt": "RT",
-        "rw": "RW",
-        "kel": "동 (Kelurahan)",
-        "kec": "구 (Kecamatan)"
-      },
+      "scopeLabel": "범위 선택",
+      "scopeTitle": "알림 범위",
       "tagsDescription": "선택한 주제의 동네 소식이 올라올 때만 알림을 받습니다.",
       "tagsTitle": "동네 소식 구독"
     },
@@ -1612,6 +1467,6 @@
     "now": "방금 전"
   },
   "user": {
-    "notLoggedIn": "로그인되어 있지 않습니다"
+    "notLoggedIn": "notLoggedIn"
   }
 }

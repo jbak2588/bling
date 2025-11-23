@@ -541,50 +541,13 @@
     "unblocked": "unblocked"
   },
   "interests": {
-    "title": "Interests",
-    "limit_info": "You can select up to 10.",
-    "limit_reached": "You can select up to 10 interests.",
-    "category_creative": "🎨 Creative",
-    "category_sports": "🏃 Sports & Activities",
-    "category_food_drink": "🍸 Food & Drinks",
-    "category_entertainment": "🍿 Entertainment",
-    "category_growth": "📚 Self-development",
-    "category_lifestyle": "🌴 Lifestyle",
+    "$categoryKey": "$categoryKey",
     "items": {
-      "drawing": "Drawing",
-      "instrument": "Playing instruments",
-      "photography": "Photography",
-      "writing": "Writing",
-      "crafting": "Crafting",
-      "gardening": "Gardening",
-      "soccer": "Soccer/Futsal",
-      "hiking": "Hiking",
-      "camping": "Camping",
-      "running": "Running/Jogging",
-      "biking": "Cycling",
-      "golf": "Golf",
-      "workout": "Workout/Fitness",
-      "foodie": "Foodie",
-      "cooking": "Cooking",
-      "baking": "Baking",
-      "coffee": "Coffee",
-      "wine": "Wine/Drinks",
-      "tea": "Tea",
-      "movies": "Movies/Drama",
-      "music": "Listening to music",
-      "concerts": "Concerts/Festivals",
-      "gaming": "Gaming",
-      "reading": "Reading",
-      "investing": "Investing",
-      "language": "Language learning",
-      "coding": "Coding",
-      "travel": "Travel",
-      "pets": "Pets",
-      "volunteering": "Volunteering",
-      "minimalism": "Minimalism",
       "$interestKey": "$interestKey"
     },
-    "$categoryKey": "$categoryKey"
+    "limit_info": "You can select up to 10.",
+    "limit_reached": "You can select up to 10 interests.",
+    "title": "Interests"
   },
   "jobs": {
     "card": {
@@ -609,9 +572,7 @@
     "detail": {
       "apply": "Apply",
       "chatError": "Could not start chat: {error}",
-      "infoTitle": "Details",
-      "locationTitle": "Location",
-      "authorTitle": "Author"
+      "infoTitle": "Details"
     },
     "form": {
       "categoryLabel": "Category",
@@ -651,14 +612,11 @@
       "workPeriodTitle": "Work Period"
     },
     "salaryTypes": {
-      "hourly": "Hourly",
-      "daily": "Daily",
-      "weekly": "Weekly",
-      "monthly": "Monthly",
-      "total": "Total Pay",
-      "per_case": "Per case",
-      "etc": "Etc",
       "$value": "$value",
+      "daily": "Daily",
+      "hourly": "Hourly",
+      "monthly": "Monthly",
+      "weekly": "Weekly",
       "yearly": "yearly"
     },
     "screen": {
@@ -678,16 +636,6 @@
       "regular": "Part-time/Full-time"
     },
     "workPeriods": {
-      "short_term": "Short term",
-      "mid_term": "Mid term",
-      "long_term": "Long term",
-      "one_time": "One-time",
-      "1_week": "1 Week",
-      "1_month": "1 Month",
-      "3_months": "3 Months",
-      "6_months_plus": "6 Months+",
-      "negotiable": "Negotiable",
-      "etc": "Etc",
       "$period": "$period"
     }
   },
@@ -754,17 +702,8 @@
   },
   "localStores": {
     "categories": {
-      "all": "All",
-      "food": "Restaurant",
-      "cafe": "Cafe",
-      "massage": "Massage",
-      "beauty": "Beauty",
-      "nail": "Nail",
-      "auto": "Auto Repair",
-      "kids": "Kids",
-      "hospital": "Hospital/Clinic",
-      "etc": "Others",
-      "$category": "$category"
+      "$category": "$category",
+      "food": "Restaurant"
     },
     "create": {
       "fail": "Failed to register store: {error}",
@@ -1210,72 +1149,10 @@
     "error": "An error occurred: {error}",
     "filter": {
       "amenities": {
-        "ac": "AC",
-        "bed": "Bed",
-        "closet": "Wardrobe",
-        "desk": "Desk",
-        "wifi": "Wi‑Fi",
-        "kitchen": "Kitchen",
-        "living_room": "Living room",
-        "refrigerator": "Refrigerator",
-        "parking_motorcycle": "Motorcycle parking",
-        "parking_car": "Car parking",
-        "pool": "Swimming pool",
-        "gym": "Gym",
-        "security_24h": "24h Security",
-        "atm_center": "ATM center",
-        "minimarket": "Minimarket",
-        "mall_access": "Mall access",
-        "playground": "Playground",
-        "carport": "Carport",
-        "garden": "Garden",
-        "pam": "Piped water (PAM)",
-        "telephone": "Telephone",
-        "water_heater": "Water heater",
-        "parking_area": "Parking area",
-        "electricity": "Electricity (power)",
-        "container_access": "Container access",
-        "kos_room": {
-          "ac": "AC",
-          "bed": "Bed",
-          "closet": "Closet",
-          "desk": "Desk",
-          "wifi": "Wifi"
-        },
-        "kos_public": {
-          "kitchen": "Kitchen",
-          "living_room": "Living Room",
-          "refrigerator": "Refrigerator",
-          "parking_motorcycle": "Motorcycle Parking",
-          "parking_car": "Car Parking"
-        },
-        "apartment": {
-          "pool": "Swimming Pool",
-          "gym": "Gym",
-          "security_24h": "24h Security",
-          "atm_center": "ATM Center",
-          "minimarket": "Minimarket",
-          "mall_access": "Mall Access",
-          "playground": "Playground"
-        },
-        "house": {
-          "carport": "Carport",
-          "garden": "Garden",
-          "pam": "PAM (Water)",
-          "telephone": "Telephone",
-          "water_heater": "Water Heater"
-        },
-        "commercial": {
-          "parking_area": "Parking Area",
-          "security_24h": "24h Security",
-          "telephone": "Telephone",
-          "electricity": "Electricity",
-          "container_access": "Container Access"
-        },
-        "$key": "$key",
         "$i18nPrefix": {
           "$key": "$key"
-        }
+        },
+        "$key": "$key"
       },
       "apartment": {
         "facilities": "Apartment facilities"
@@ -1292,9 +1169,6 @@
       "furnishedHint": "Select furnishing",
       "furnishedStatus": "Furnishing",
       "furnishedTypes": {
-        "furnished": "Furnished",
-        "semi_furnished": "Semi-furnished",
-        "unfurnished": "Unfurnished",
         "$status": "$status"
       },
       "house": {
@@ -1316,15 +1190,8 @@
       "landAreaRange": "Land area range (m²)",
       "priceRange": "Price range",
       "propertyCondition": "Property condition",
-      "propertyConditions": {
-        "new": "New",
-        "used": "Used"
-      },
       "rentPeriod": "Rent period",
       "rentPeriods": {
-        "daily": "Daily",
-        "monthly": "Monthly",
-        "yearly": "Yearly",
         "$period": "$period"
       },
       "selectFurnished": "Select furnishing",
@@ -1348,8 +1215,6 @@
       "listingType": "Transaction type",
       "listingTypeHint": "Select transaction type",
       "listingTypes": {
-        "rent": "Rent",
-        "sale": "Sale",
         "$type": "$type"
       },
       "maintenanceFee": "Monthly maintenance fee",
@@ -1358,14 +1223,10 @@
       "priceLabel": "Price",
       "priceRequired": "Enter the price.",
       "priceUnit": {
-        "monthly": "/month",
-        "yearly": "/year",
         "$value": "$value"
       },
       "publisherType": "Publisher",
       "publisherTypes": {
-        "individual": "Individual",
-        "agent": "Agent",
         "$type": "$type"
       },
       "roomTypes": {
@@ -1457,15 +1318,9 @@
       "loadError": "loadError",
       "saveError": "saveError",
       "saveSuccess": "saveSuccess",
-      "scopeTitle": "Notification Scope",
-      "scopeLabel": "Select scope",
       "scopeDescription": "Select which geographic scope you want to receive notifications for.",
-      "scope": {
-        "rt": "RT",
-        "rw": "RW",
-        "kel": "Village (Kelurahan)",
-        "kec": "District (Kecamatan)"
-      },
+      "scopeLabel": "Select scope",
+      "scopeTitle": "Notification Scope",
       "tagsDescription": "Only receive notifications for selected local news topics.",
       "tagsTitle": "Local News Subscriptions"
     },
@@ -1590,6 +1445,6 @@
     "now": "Just now"
   },
   "user": {
-    "notLoggedIn": "Not logged in"
+    "notLoggedIn": "notLoggedIn"
   }
 }

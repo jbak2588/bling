@@ -1,0 +1,232 @@
+{
+  "admin": {
+    "aiApproval": {
+      "aiReport": "AI Analysis Report (V3)",
+      "buttons": {
+        "approve": "Approve",
+        "reject": "Reject"
+      },
+      "detailTitle": "Verification Request Details",
+      "empty": "No products pending AI verification.",
+      "error": "Error loading pending products.",
+      "idInfo": "ID Information",
+      "itemInfo": "Original Item Details",
+      "labels": {
+        "productId": "Product ID",
+        "userId": "User ID"
+      },
+      "rejectReasonHint": "Rejection reason",
+      "rejectTitle": "Enter rejection reason",
+      "requestedAt": "Requested at",
+      "sellerInfo": "Seller Information"
+    },
+    "menu": {
+      "aiApproval": "AI Verification Management",
+      "aiAudit": "AI Audit Logs",
+      "aiAuditSubtitle": "View Takeover & Enhancement history",
+      "reportManagement": "Report Management"
+    },
+    "reportDetail": {
+      "actionDismissed": "Dismiss Report",
+      "actionReviewed": "Mark as Reviewed",
+      "actionTaken": "Mark Action Taken (e.g., Deleted)",
+      "authorIdLabel": "Author ID",
+      "content": {
+        "comment": "Comment: {content}",
+        "post": "Post: {title}\n\n{body}",
+        "reply": "Reply: {content}"
+      },
+      "contentLoadError": "Failed to load reported content.",
+      "contentNotAvailable": "Content information not available or deleted.",
+      "couldNotOpenOriginalPost": "Could not open original post.",
+      "currentStatus": "Status",
+      "idLabel": "ID",
+      "loadError": "Error loading report details.",
+      "loadingContent": "Loading content...",
+      "originalPostNotFound": "Original post not found.",
+      "postIdLabel": "Reported Post ID",
+      "reason": "Reason",
+      "reportedAt": "Reported At",
+      "reportedUser": "Reported User",
+      "reporter": "Reporter",
+      "sectionActions": "Actions",
+      "sectionContent": "Reported Content",
+      "sectionReportInfo": "Report Information",
+      "statusUpdateFail": "Failed to update status: {error}",
+      "statusUpdateSuccess": "Report status updated to '{status}'.",
+      "title": "Report Details",
+      "viewOriginalPost": "View Original Post"
+    },
+    "reportList": {
+      "empty": "No pending reports.",
+      "error": "Error loading reports.",
+      "title": "Report Management"
+    },
+    "reset": {
+      "confirmContent": "Force-reset all products' AI cancel counts (aiCancelCount) to 0. (Restores free tier once)\n\nThis action cannot be undone. Continue?",
+      "confirmTitle": "Reset AI cancel counts",
+      "execute": "Execute reset",
+      "fail": "Failed: {error}",
+      "noTargets": "Success: No products to reset.",
+      "success": "Success: {count} products were reset to 0."
+    },
+    "screen": {
+      "title": "Admin Menu"
+    }
+  },
+  "ai_audit": {
+    "list": {
+      "error": "Error loading AI records.",
+      "id": "ID",
+      "no_records": "No AI records found.",
+      "registration_title": "Product AI Registration",
+      "takeover_title": "On-site takeover verification",
+      "verdict": "Verdict"
+    },
+    "tabs": {
+      "all": "All",
+      "registration": "Registration",
+      "takeover": "Takeover"
+    },
+    "title": "AI Audit Log"
+  },
+  "ai_case": {
+    "tabs": {
+      "original_photos": "Original Photos",
+      "raw_json": "Raw JSON",
+      "summary": "Summary",
+      "takeover_photos": "Takeover Photos"
+    },
+    "title": "AI Case Detail"
+  },
+  "ai_flow": {
+    "common": {
+      "add_more": "Add more",
+      "add_photo": "Add Photo",
+      "added_photos": "{count} photos added",
+      "error": "An error occurred: {error}",
+      "pick_gallery_multi": "Pick multiple from gallery",
+      "skip": "Skip",
+      "skipped": "Skipped",
+      "take_photo": "Take Photo"
+    },
+    "cta": {
+      "missing_required_fields": "Please enter item name, category, and at least one image.",
+      "start_button": "Start AI verification",
+      "subtitle": "Earn an AI verification badge to increase buyer trust and sell faster. Fill in all product info before starting.",
+      "title": "🤖 Boost trust with AI verification (optional)"
+    },
+    "errors": {
+      "incomplete_report": "AI Analysis Failed: The AI did not generate required report items (specs, condition, summary). Please try again later."
+    },
+    "evidence": {
+      "initial_images_title": "List of images used in AI's initial analysis",
+      "suggestion_title": "AI suggested supplementary items",
+      "title": "Collect for product detail info"
+    },
+    "final_report": {
+      "buyer_notes": "Notes for buyer (AI)",
+      "condition": "Condition check",
+      "fail": "fail",
+      "final_description": "Final description",
+      "loading": "AI is generating the final report...",
+      "notes": "Notes for buyer",
+      "notes_placeholder": "All recommended photos were provided. AI did not find any noteworthy issues to inform the buyer about.",
+      "pending_message": "AI verification indicates this item needs admin review before it can be posted.",
+      "pending_title": "Submitted for review",
+      "submit_button": "Register for Sale",
+      "success": "Final report generated successfully.",
+      "success_pending": "Registered. It will be posted after admin review.",
+      "suggested_price": "AI suggested price ({})",
+      "summary": "Verification summary",
+      "title": "AI Verification Report"
+    },
+    "guided_camera": {
+      "next_button": "Generate final report"
+    },
+    "status": {
+      "analyzing": "AI is analyzing... (up to 1 minute)",
+      "loading_category": "Loading category info...",
+      "saving": "Saving product..."
+    }
+  },
+  "auctions": {
+    "card": {
+      "currentBid": "Current bid",
+      "endTime": "Time left",
+      "ended": "Ended",
+      "noBidders": "No bidders yet",
+      "timeLeft": "{hours}:{minutes}:{seconds} left",
+      "timeLeftDays": "{days} days {hours}:{minutes}:{seconds} left",
+      "unknownBidder": "Unknown bidder",
+      "winner": "Winner",
+      "winningBid": "Winning bid"
+    },
+    "errors": {
+      "fetchFailed": "Failed to load auctions: {error}",
+      "notFound": "Auction not found.",
+      "lowerBid": "You must enter a higher bid than the current one.",
+      "alreadyEnded": "This auction has already ended."
+    },
+    "empty": "No auctions.",
+    "filter": {
+      "tooltip": "Filter",
+      "clearTooltip": "Clear filter"
+    },
+    "create": {
+      "tooltip": "Create Auction",
+      "title": "Create Auction",
+      "registrationType": "Registration type",
+      "type": {
+        "sale": "Sale",
+        "auction": "Auction"
+      },
+      "success": "Auction created.",
+      "fail": "Failed to create auction: {error}",
+      "submit_button": "Start Auction",
+      "confirmTitle": "List as an auction?",
+      "confirmContent": "Once listed as an auction, you can't switch back to a normal sale. A 5% fee will be charged upon a successful bid. Continue?",
+      "errors": {
+        "noPhoto": "Please add at least one photo."
+      },
+      "form": {
+        "photoSectionTitle": "Upload photos (max 10)",
+        "title": "Title",
+        "description": "Description",
+        "startPrice": "Start price",
+        "category": "Category",
+        "categoryHint": "Select a category",
+        "tagsHint": "You can register tags using comma (,) or Enter.",
+        "duration": "Duration",
+        "durationOption": "{days} days",
+        "location": "Location"
+      }
+    },
+    "edit": {
+      "tooltip": "Edit auction",
+      "title": "Edit Auction",
+      "save": "Save",
+      "success": "Auction updated.",
+      "fail": "Failed to update auction: {error}"
+    },
+    "form": {
+      "titleRequired": "Please enter a title.",
+      "descriptionRequired": "Please enter a description.",
+      "startPriceRequired": "Please enter a start price.",
+      "categoryRequired": "Please select a category."
+    }
+  },
+  "blockedUsers": {
+    "title": "Blocked Users",
+    "noBlockedUsers": "You haven’t blocked anyone.",
+    "unblock": "Unblock",
+    "unblockDialog": {
+      "title": "Unblock {nickname}?",
+      "content": "After unblocking, this user may appear in your Find Friends list again."
+    },
+    "unblockSuccess": "Unblocked {nickname}.",
+    "unblockFailure": "Failed to unblock: {error}",
+    "unknownUser": "Unknown user",
+    "empty": "empty"
+  }
+}

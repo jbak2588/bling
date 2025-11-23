@@ -554,50 +554,13 @@
     "unblocked": "unblocked"
   },
   "interests": {
-    "title": "Minat",
-    "limit_info": "Anda dapat memilih hingga 10.",
-    "limit_reached": "Anda hanya dapat memilih hingga 10 minat.",
-    "category_creative": "🎨 Kreatif",
-    "category_sports": "🏃 Olahraga & Aktivitas",
-    "category_food_drink": "🍸 Makanan & Minuman",
-    "category_entertainment": "🍿 Hiburan",
-    "category_growth": "📚 Pengembangan Diri",
-    "category_lifestyle": "🌴 Gaya Hidup",
+    "$categoryKey": "$categoryKey",
     "items": {
-      "drawing": "Menggambar",
-      "instrument": "Bermain alat musik",
-      "photography": "Fotografi",
-      "writing": "Menulis",
-      "crafting": "Kerajinan tangan",
-      "gardening": "Berkebun",
-      "soccer": "Sepak Bola/Futsal",
-      "hiking": "Mendaki",
-      "camping": "Berkemah",
-      "running": "Lari/Jogging",
-      "biking": "Bersepeda",
-      "golf": "Golf",
-      "workout": "Olahraga/Kebugaran",
-      "foodie": "Wisata kuliner",
-      "cooking": "Memasak",
-      "baking": "Membuat kue",
-      "coffee": "Kopi",
-      "wine": "Anggur/Minuman",
-      "tea": "Teh",
-      "movies": "Film/Drama",
-      "music": "Mendengarkan musik",
-      "concerts": "Konser/Festival",
-      "gaming": "Bermain game",
-      "reading": "Membaca",
-      "investing": "Investasi",
-      "language": "Belajar bahasa",
-      "coding": "Coding",
-      "travel": "Jalan-jalan",
-      "pets": "Hewan peliharaan",
-      "volunteering": "Kegiatan sosial",
-      "minimalism": "Minimalisme",
       "$interestKey": "$interestKey"
     },
-    "$categoryKey": "$categoryKey"
+    "limit_info": "Anda dapat memilih hingga 10.",
+    "limit_reached": "Anda hanya dapat memilih hingga 10 minat.",
+    "title": "Minat"
   },
   "jobs": {
     "card": {
@@ -622,9 +585,7 @@
     "detail": {
       "apply": "Lamar",
       "chatError": "Tidak dapat memulai chat: {error}",
-      "infoTitle": "Informasi detail",
-      "locationTitle": "Lokasi",
-      "authorTitle": "Penulis"
+      "infoTitle": "Informasi detail"
     },
     "form": {
       "categoryLabel": "Kategori",
@@ -669,9 +630,7 @@
       "hourly": "Per jam",
       "monthly": "Bulanan",
       "weekly": "Mingguan",
-      "yearly": "Tahunan",
-      "per_case": "Per kasus",
-      "etc": "Lainnya"
+      "yearly": "Tahunan"
     },
     "screen": {
       "empty": "Tidak ada lowongan di area ini."
@@ -690,16 +649,6 @@
       "regular": "Paruh Waktu/Penuh Waktu"
     },
     "workPeriods": {
-      "short_term": "Jangka pendek",
-      "mid_term": "Jangka menengah",
-      "long_term": "Jangka panjang",
-      "one_time": "Sekali jalan",
-      "1_week": "1 Minggu",
-      "1_month": "1 Bulan",
-      "3_months": "3 Bulan",
-      "6_months_plus": "6 Bulan+",
-      "negotiable": "Bisa nego",
-      "etc": "Lainnya",
       "$period": "$period"
     }
   },
@@ -766,17 +715,8 @@
   },
   "localStores": {
     "categories": {
-      "all": "Semua",
-      "food": "Restoran",
-      "cafe": "Kafe",
-      "massage": "Pijat",
-      "beauty": "Kecantikan",
-      "nail": "Perawatan Kuku",
-      "auto": "Otomotif/Bengkel",
-      "kids": "Produk & Layanan Anak",
-      "hospital": "Rumah Sakit/Klinik",
-      "etc": "Lainnya",
-      "$category": "$category"
+      "$category": "$category",
+      "food": "Restoran"
     },
     "create": {
       "fail": "Gagal mendaftarkan toko: {error}",
@@ -1218,72 +1158,10 @@
     "error": "Terjadi kesalahan: {error}",
     "filter": {
       "amenities": {
-        "ac": "AC",
-        "bed": "Kasur",
-        "closet": "Lemari",
-        "desk": "Meja",
-        "wifi": "Wi‑Fi",
-        "kitchen": "Dapur",
-        "living_room": "Ruang tamu",
-        "refrigerator": "Kulkas",
-        "parking_motorcycle": "Parkir motor",
-        "parking_car": "Parkir mobil",
-        "pool": "Kolam renang",
-        "gym": "Gym",
-        "security_24h": "Keamanan 24 jam",
-        "atm_center": "Pusat ATM",
-        "minimarket": "Minimarket",
-        "mall_access": "Akses mal",
-        "playground": "Taman bermain",
-        "carport": "Carport",
-        "garden": "Taman",
-        "pam": "Air PAM",
-        "telephone": "Telepon",
-        "water_heater": "Pemanas air",
-        "parking_area": "Area parkir",
-        "electricity": "Listrik",
-        "container_access": "Akses kontainer",
-        "kos_room": {
-          "ac": "AC",
-          "bed": "Tempat Tidur",
-          "closet": "Lemari",
-          "desk": "Meja",
-          "wifi": "Wifi"
-        },
-        "kos_public": {
-          "kitchen": "Dapur",
-          "living_room": "Ruang Tamu",
-          "refrigerator": "Kulkas",
-          "parking_motorcycle": "Parkir Motor",
-          "parking_car": "Parkir Mobil"
-        },
-        "apartment": {
-          "pool": "Kolam Renang",
-          "gym": "Gym",
-          "security_24h": "Keamanan 24 Jam",
-          "atm_center": "Pusat ATM",
-          "minimarket": "Minimarket",
-          "mall_access": "Akses Mall",
-          "playground": "Taman Bermain"
-        },
-        "house": {
-          "carport": "Carport",
-          "garden": "Taman",
-          "pam": "PAM (Air Ledeng)",
-          "telephone": "Telepon",
-          "water_heater": "Pemanas Air"
-        },
-        "commercial": {
-          "parking_area": "Area Parkir",
-          "security_24h": "Keamanan 24 Jam",
-          "telephone": "Telepon",
-          "electricity": "Listrik",
-          "container_access": "Kontainer Akses"
-        },
-        "$key": "$key",
         "$i18nPrefix": {
           "$key": "$key"
-        }
+        },
+        "$key": "$key"
       },
       "apartment": {
         "facilities": "Fasilitas Apartemen"
@@ -1300,9 +1178,6 @@
       "furnishedHint": "Pilih Kondisi Furnitur",
       "furnishedStatus": "Status perabot",
       "furnishedTypes": {
-        "furnished": "Perabot Lengkap",
-        "semi_furnished": "Semi-furnished",
-        "unfurnished": "Tanpa Perabot",
         "$status": "$status"
       },
       "house": {
@@ -1324,15 +1199,8 @@
       "landAreaRange": "Luas Tanah (m²)",
       "priceRange": "Rentang harga",
       "propertyCondition": "Kondisi Properti",
-      "propertyConditions": {
-        "new": "Baru",
-        "used": "Bekas"
-      },
       "rentPeriod": "Periode Sewa",
       "rentPeriods": {
-        "daily": "Harian",
-        "monthly": "Bulanan",
-        "yearly": "Tahunan",
         "$period": "$period"
       },
       "selectFurnished": "Pilih status perabot",
@@ -1356,8 +1224,6 @@
       "listingType": "Tipe transaksi",
       "listingTypeHint": "Pilih Tipe Transaksi",
       "listingTypes": {
-        "rent": "Sewa",
-        "sale": "Jual",
         "$type": "$type"
       },
       "maintenanceFee": "Biaya perawatan bulanan",
@@ -1366,14 +1232,10 @@
       "priceLabel": "Harga",
       "priceRequired": "Masukkan harga.",
       "priceUnit": {
-        "monthly": "/bulan",
-        "yearly": "/tahun",
         "$value": "$value"
       },
       "publisherType": "Tipe pengiklan",
       "publisherTypes": {
-        "individual": "Perorangan",
-        "agent": "Agen",
         "$type": "$type"
       },
       "roomTypes": {
@@ -1465,15 +1327,9 @@
       "loadError": "loadError",
       "saveError": "saveError",
       "saveSuccess": "saveSuccess",
-      "scopeTitle": "Ruang Lingkup Notifikasi",
-      "scopeLabel": "Pilih cakupan",
       "scopeDescription": "Pilih cakupan geografis yang ingin Anda terima notifikasinya.",
-      "scope": {
-        "rt": "RT",
-        "rw": "RW",
-        "kel": "Kelurahan",
-        "kec": "Kecamatan"
-      },
+      "scopeLabel": "Pilih cakupan",
+      "scopeTitle": "Ruang Lingkup Notifikasi",
       "tagsDescription": "Hanya terima notifikasi untuk topik berita lokal yang dipilih.",
       "tagsTitle": "Langganan Berita Lokal"
     },
@@ -1598,6 +1454,6 @@
     "now": "Baru saja"
   },
   "user": {
-    "notLoggedIn": "Belum masuk"
+    "notLoggedIn": "notLoggedIn"
   }
 }
