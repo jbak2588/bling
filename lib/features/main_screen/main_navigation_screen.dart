@@ -794,10 +794,29 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         // [Task 96] 알림 아이콘 버튼 수정
         // Debug: resolve tooltip text and log to help diagnose missing localization key
         Builder(builder: (context) {
-          final notifTooltip =
-              safeTr(context, 'notifications.title', fallback: '');
+          // Attempt to fetch a translated tooltip safely. `safeTr` already
+          // provides a fallback, but context might not be fully ready here
+          // (e.g., during very early builds). Wrap in try/catch and ensure
+          // we always supply a sensible default label.
+          String notifTooltip;
+          try {
+            final t =
+                safeTr(context, 'settings.notificationsTitle', fallback: '');
+            if (t.trim().isEmpty) {
+              notifTooltip = 'Notifications'; // clear English fallback
+            } else {
+              notifTooltip = t;
+            }
+          } catch (e, st) {
+            // Keep the debug log but avoid throwing during widget build.
+            debugPrint(
+                'Failed to resolve settings.notificationsTitle: $e\n$st');
+            notifTooltip = 'Notifications';
+          }
+
           debugPrint(
-              'MainNavigationScreen - notifications.title -> $notifTooltip, locale: ${context.locale}');
+              'MainNavigationScreen - settings.notificationsTitle -> $notifTooltip, locale: ${context.locale}');
+
           return IconButton(
             tooltip: notifTooltip,
             icon: _totalUnreadNotifications > 0
