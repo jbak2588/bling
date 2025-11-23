@@ -1,0 +1,2091 @@
+{
+  "login": {
+    "title": "로그인",
+    "subtitle": "가볍게 사고 팔자, 블링!",
+    "emailHint": "이메일 주소",
+    "passwordHint": "비밀번호",
+    "buttons": {
+      "login": "로그인",
+      "google": "Google 계정으로 로그인",
+      "apple": "Apple로 로그인"
+    },
+    "links": {
+      "findPassword": "비밀번호를 잊으셨나요?",
+      "askForAccount": "계정이 없으신가요?",
+      "signUp": "가입하기"
+    },
+    "invalidEmail": "유효하지 않은 이메일 형식입니다.",
+    "userNotFound": "사용자를 찾을 수 없거나 비밀번호가 틀렸습니다.",
+    "wrongPassword": "비밀번호가 틀렸습니다.",
+    "unknownError": "알 수 없는 오류가 발생했습니다. 다시 시도해주세요.",
+    "alerts": {
+      "userNotFound": "User not found or wrong password.",
+      "wrongPassword": "Wrong password.",
+      "invalidEmail": "Invalid email format.",
+      "unknownError": "unknownError"
+    }
+  },
+  "signup": {
+    "title": "회원가입",
+    "emailHint": "이메일 주소",
+    "passwordHint": "비밀번호 (6자 이상)",
+    "passwordConfirmHint": "비밀번호 확인",
+    "nicknameHint": "닉네임",
+    "subtitle": "블링과 함께 시작해봐요! 정보를 입력해주세요.",
+    "locationHint": "내 동네 (동네 서비스 이용을 위함)",
+    "locationNotice": "입력하신 동네 정보는 동네 게시물을 보는데 사용되며, 다른 사람에게 공개되지 않습니다.",
+    "buttons": {
+      "signup": "가입하기",
+      "checkDuplicate": "중복확인"
+    },
+    "links": {
+      "askForLogin": "이미 계정이 있으신가요?",
+      "login": "로그인"
+    },
+    "alerts": {
+      "passwordMismatch": "비밀번호가 일치하지 않습니다.",
+      "passwordTooShort": "비밀번호는 6자 이상이어야 합니다.",
+      "emailInUse": "이미 사용 중인 이메일입니다.",
+      "nicknameInUse": "이미 사용 중인 닉네임입니다.",
+      "nicknameAvailable": "사용 가능한 닉네임입니다.",
+      "nicknameNotChecked": "닉네임 중복 확인을 해주세요.",
+      "signupSuccessLoginNotice": "회원가입이 완료되었습니다! 로그인 후 계속 이용해 주세요.",
+      "unknownError": "알 수 없는 오류가 발생했습니다. 다시 시도해주세요."
+    },
+    "policy": {
+      "title": "가입 정책 안내",
+      "description": "Bling은 안전한 커뮤니티를 위해 가입 시 최소한의 정보를 받고 있습니다. 모든 정보는 안전하게 보관되며, 동의 없이는 절대 외부에 공개되지 않습니다.",
+      "agree": "위 내용에 동의하며 가입을 계속합니다."
+    }
+  },
+  "main": {
+    "appBar": {
+      "locationNotSet": "위치 미설정",
+      "locationError": "위치 오류",
+      "locationLoading": "불러오는 중..."
+    },
+    "tabs": {
+      "newFeed": "새 소식",
+      "localNews": "동네 소식",
+      "marketplace": "중고거래",
+      "findFriends": "친구찾기",
+      "clubs": "모임",
+      "jobs": "구인구직",
+      "localStores": "동네업체",
+      "auction": "경매",
+      "pom": "POM",
+      "lostAndFound": "분실물 찾기",
+      "realEstate": "부동산"
+    },
+    "bottomNav": {
+      "home": "홈",
+      "board": "동네",
+      "search": "검색",
+      "chat": "채팅",
+      "myBling": "나의 Bling"
+    },
+    "errors": {
+      "loginRequired": "로그인이 필요합니다.",
+      "userNotFound": "사용자를 찾을 수 없습니다.",
+      "unknown": "unknown"
+    },
+    "myTown": "우리 동네",
+    "mapView": {
+      "showMap": "지도 보기",
+      "showList": "showList"
+    },
+    "search": {
+      "placeholder": "검색 화면",
+      "chipPlaceholder": "동네 이웃, 소식, 마켓플레이스, 일자리… 검색",
+      "hint": {
+        "globalSheet": "{}에서 검색하기",
+        "localNews": "동네소식 제목, 내용, 태그 검색",
+        "jobs": "직종, 회사명, 'Help Me' 검색",
+        "lostAndFound": "분실물 또는 습득물 검색",
+        "marketplace": "중고거래 물품 검색",
+        "localStores": "동네 가게, 서비스, 업체명 검색",
+        "findFriends": "프로필 닉네임, 관심사 검색",
+        "clubs": "모임 이름, 관심사, 지역 검색",
+        "realEstate": "부동산 매물, 지역, 가격 검색",
+        "auction": "경매 물품명, 브랜드 검색",
+        "pom": "뽐 자랑, 태그, 사용자 검색"
+      }
+    }
+  },
+  "category": {
+    "PnPa5ZjI9FYQiAGP6I7m": "디지털기기",
+    "4hx6hyOYodriXgPiR5bl": "생활용품",
+    "OkjaREVlnybYXdJKZvF7": "패션",
+    "lhxeaWRmfmd2gElvHy8y": "뷰티/미용",
+    "wyYkvRznDcngqzuJvOIJ": "한정판/명품",
+    "IJ9rF047d2rRnFFkdLyw": "취미/여가",
+    "6WtvHv9Mm2M49KIVRdZT": "유아/아동",
+    "5B68mEyct8tpIr9Eyc8j": "오토바이",
+    "BnGbVd3W9P3ztu0HBJix": "기타"
+  },
+  "drawer": {
+    "editProfile": "프로필 수정",
+    "bookmarks": "관심목록",
+    "uploadSampleData": "샘플 데이터 올리기",
+    "logout": "로그아웃",
+    "trustDashboard": {
+      "title": "나의 신뢰 인증 현황",
+      "kelurahanAuth": "동네 인증 (Kelurahan)",
+      "rtRwAuth": "상세 주소 인증 (RT/RW)",
+      "phoneAuth": "전화번호 인증",
+      "profileComplete": "프로필 완성",
+      "feedThanks": "피드 감사",
+      "reports": "신고",
+      "marketThanks": "마켓 감사",
+      "breakdownButton": "상세보기",
+      "breakdownModalTitle": "신뢰 점수 산정 기준",
+      "breakdownClose": "확인",
+      "breakdown": {
+        "kelurahanAuth": "+50",
+        "rtRwAuth": "+50",
+        "phoneAuth": "+100",
+        "profileComplete": "+50",
+        "feedThanks": "+10 per",
+        "marketThanks": "+20 per",
+        "reports": "-50 per"
+      }
+    },
+    "runDataFix": "데이터 보정 실행"
+  },
+  "marketplace": {
+    "error": "오류가 발생했습니다: {error}",
+    "empty": "등록된 상품이 없습니다.\n아래 + 버튼을 눌러 첫 상품을 등록해보세요!",
+    "registration": {
+      "title": "새 게시물",
+      "done": "등록",
+      "titleHint": "상품명",
+      "priceHint": "가격 (Rp)",
+      "negotiable": "가격 제안 가능",
+      "addressHint": "동네",
+      "addressDetailHint": "거래 장소",
+      "descriptionHint": "상세 설명",
+      "success": "상품이 성공적으로 등록되었습니다!",
+      "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다.",
+      "fail": "fail"
+    },
+    "edit": {
+      "title": "게시물 수정",
+      "done": "수정 완료",
+      "titleHint": "상품명 수정",
+      "addressHint": "위치 수정",
+      "priceHint": "가격 수정 (Rp)",
+      "negotiable": "가격 제안 수정",
+      "descriptionHint": "상세 설명 수정",
+      "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다.",
+      "success": "상품이 성공적으로 등록되었습니다!",
+      "fail": "상품 수정 실패: {error}",
+      "resetLocation": "위치 초기화",
+      "save": "변경사항 저장",
+      "saving": "변경사항 저장"
+    },
+    "detail": {
+      "makeOffer": "가격 제안하기",
+      "fixedPrice": "고정 가격",
+      "description": "제품 설명",
+      "sellerInfo": "판매자 정보",
+      "chat": "채팅",
+      "favorite": "관심",
+      "unfavorite": "관심해제",
+      "share": "공유",
+      "edit": "편집",
+      "delete": "삭제",
+      "category": "카테고리",
+      "categoryError": "카테고리: -",
+      "categoryNone": "카테고리 없음",
+      "views": "조회",
+      "likes": "관심",
+      "chats": "채팅",
+      "noSeller": "판매자 정보 없음",
+      "noLocation": "지역 정보 없음",
+      "seller": "판매자",
+      "dealLocation": "거래 장소"
+    },
+    "dialog": {
+      "deleteTitle": "게시물 삭제",
+      "deleteContent": "이 게시물을 정말 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+      "cancel": "취소",
+      "deleteConfirm": "삭제",
+      "deleteSuccess": "게시물이 성공적으로 삭제되었습니다.",
+      "close": "close"
+    },
+    "errors": {
+      "deleteError": "게시물을 삭제하지 못했습니다: {error}",
+      "requiredField": "필수 입력 항목입니다.",
+      "noPhoto": "사진을 1장 이상 등록해주세요.",
+      "noCategory": "카테고리를 선택해주세요.",
+      "loginRequired": "로그인이 필요합니다.",
+      "userNotFound": "사용자 정보를 찾을 수 없습니다.",
+      "aiReserved": "AI 안심 예약으로 잠긴 상품입니다. 구매자가 인수를 완료/취소해야 상태가 변경됩니다."
+    },
+    "condition": {
+      "label": "상태",
+      "new": "새것",
+      "used": "중고"
+    },
+    "reservation": {
+      "title": "10% 예약금 결제",
+      "content": "AI 검증 상품을 예약하려면 10%의 예약금 {amount}를 선결제해야 합니다. 현장 검증 후 거래를 취소하면 예약금은 환불됩니다.",
+      "confirm": "결제 및 예약",
+      "button": "AI 안심 예약하기",
+      "success": "예약이 완료되었습니다. 판매자와 약속을 잡아주세요."
+    },
+    "status": {
+      "label": "상품 상태",
+      "selling": "판매중",
+      "reserved": "예약중",
+      "sold": "판매완료"
+    },
+    "takeover": {
+      "button": "현장 인수 및 검증",
+      "title": "AI 현장 검증",
+      "guide": {
+        "title": "AI 현장 동일성 검증",
+        "subtitle": "구매할 상품의 원본 AI 리포트와 실제 상품이 일치하는지 확인합니다. 상품의 주요 특징이 잘 보이도록 3장 이상의 사진을 촬영하세요."
+      },
+      "photoTitle": "현장 사진 촬영",
+      "camera": "카메라",
+      "gallery": "갤러리",
+      "buttonVerify": "AI 동일성 검증 시작",
+      "errors": {
+        "noPhoto": "검증을 위해 1장 이상의 현장 사진이 필요합니다."
+      },
+      "dialog": {
+        "matchTitle": "AI 검증 성공",
+        "noMatchTitle": "AI 검증 실패",
+        "finalize": "최종 인수 확정",
+        "cancelDeal": "거래 취소 (환불 요청)",
+        "failTitle": "AI 검증에 실패했습니다",
+        "retry": "다시 시도"
+      },
+      "success": {
+        "finalized": "거래가 성공적으로 완료되었습니다.",
+        "cancelled": "거래가 취소되었습니다. 예약금이 환불됩니다."
+      },
+      "checklistTitle": "현장 검증 체크리스트",
+      "ai": {
+        "reactivated": "AI 검수를 다시 활성화했습니다."
+      }
+    },
+    "aiBadge": "AI 검증 완료",
+    "setLocationPrompt": "중고거래 상품을 보려면 먼저 내 동네를 설정해주세요!",
+    "ai": {
+      "cancel_limit": "AI verification can only be canceled once per product. Re-requesting AI verification may incur charges.",
+      "reactivated": "AI 검수를 다시 활성화했습니다.",
+      "cancel_success": "AI verification has been cancelled. The product is now a normal listing.",
+      "cancel_error": "Error cancelling AI verification: {0}",
+      "cancel_confirm": "Cancel AI verification",
+      "cancel_ack_charge": "I understand I may be charged."
+    }
+  },
+  "ai_flow": {
+    "status": {
+      "saving": "상품 정보 저장 중...",
+      "analyzing": "AI가 1차 분석 중... (최대 1분)",
+      "loading_category": "카테고리 정보 로딩 중..."
+    },
+    "common": {
+      "error": "오류가 발생했습니다: {error}",
+      "add_photo": "사진 추가",
+      "take_photo": "사진 찍기",
+      "pick_gallery": "갤러리에서 선택",
+      "pick_gallery_multi": "갤러리에서 여러 장 선택",
+      "pick_from_initial": "기존 사진에서 선택",
+      "skip": "건너뛰기",
+      "added_photos": "{count}장의 사진 추가됨",
+      "add_more": "더 추가하기",
+      "added_photo": "사진이 추가되었습니다: {}",
+      "skipped": "건너뜀",
+      "verified_from_initial": "{}번째 사진에서 확인됨",
+      "retake": "재촬영"
+    },
+    "cta": {
+      "title": "🤖 AI 검수로 신뢰도 높이기 (선택 사항)",
+      "subtitle": "AI 검증 뱃지로 구매자의 신뢰를 얻고 더 빨리 판매하세요. 시작 전 상품 정보를 모두 입력해주세요.",
+      "start_button": "AI 검수 시작하기",
+      "missing_required_fields": "상품명, 카테고리, 이미지를 모두 입력해주세요."
+    },
+    "category_selection": {
+      "title": "AI 검수: 카테고리 선택",
+      "error": "카테고리를 불러오는 데 실패했습니다.",
+      "no_categories": "검수를 지원하는 카테고리가 없습니다."
+    },
+    "gallery_upload": {
+      "title": "AI 검수: 사진 선택",
+      "guide": "검수를 위해 최소 {count}장의 사진을 올려주세요.",
+      "min_photo_error": "최소 {count}장의 사진을 선택해야 합니다.",
+      "next_button": "AI 분석 요청하기"
+    },
+    "prediction": {
+      "title": "AI 분석 결과",
+      "guide": "AI가 예측한 상품명입니다.",
+      "edit_label": "상품명 직접 수정",
+      "edit_button": "직접 수정할래요",
+      "save_button": "수정 완료",
+      "no_name": "상품명 없음",
+      "error": "상품을 인식하지 못했습니다. 다시 시도해주세요.",
+      "auth_error": "사용자 인증 정보가 없어 분석을 시작할 수 없습니다. 다시 시도해주세요.",
+      "question": "이 상품이 맞나요?",
+      "confirm_button": "네, 맞아요",
+      "reject_button": "아니요, 달라요 (뒤로가기)",
+      "analysis_error": "분석 중 오류가 발생했습니다.",
+      "retry_button": "다시 시도",
+      "back_button": "뒤로가기"
+    },
+    "guided_camera": {
+      "title": "상품 상세 정보용 촬영",
+      "guide": "상품 상세 정보를 보강하기 위해 아래 항목에 대한 사진을 추가하는 것을 권장합니다.",
+      "location_mismatch_error": "촬영된 사진의 위치와 현재 위치가 다릅니다. 같은 장소에서 촬영해주세요.",
+      "location_permission_error": "위치 권한이 거부되었습니다. 설정에서 권한을 허용해주세요.",
+      "no_location_data_error": "사진에서 위치 정보를 찾을 수 없습니다. 카메라 설정에서 위치 태그를 활성화해주세요.",
+      "next_button": "최종 리포트 생성"
+    },
+    "final_report": {
+      "title": "AI 검수 보고서",
+      "guide": "AI가 생성한 판매글 초안입니다. 내용을 수정하고 등록을 완료하세요.",
+      "loading": "AI가 최종 보고서를 생성중입니다...",
+      "error": "보고서 생성에 실패했습니다.",
+      "success": "최종 보고서가 성공적으로 생성되었습니다.",
+      "success_pending": "등록되었습니다. 관리자 검토 후 게시됩니다.",
+      "pending_title": "검토를 위해 제출되었습니다",
+      "pending_message": "AI 검증 결과, 관리자 검토 후 상품이 게시될 예정입니다.",
+      "submit_button": "판매글 등록하기",
+      "suggested_price": "AI 추천 가격 ({0})",
+      "summary": "검증 요약",
+      "buyer_notes": "구매자 안내 사항 (AI)",
+      "key_specs": "주요 사양",
+      "specs": "주요 사양",
+      "condition": "상태 점검",
+      "included_items": "구성품 (쉼표로 구분)",
+      "final_description": "최종 상세 설명",
+      "apply_suggestions": "수정한 내용으로 상세 설명 업데이트",
+      "included_items_label": "구성품",
+      "notes": "구매자 안내",
+      "notes_placeholder": "모든 권장 사진이 제공되었습니다. AI가 특별히 구매자에게 고지할 만한 특이사항을 발견하지 못했습니다.",
+      "buyer_notes_label": "구매자 안내",
+      "skipped_items": "미제공 증거 항목",
+      "fail": "fail"
+    },
+    "evidence": {
+      "all_shots_required": "상품 상세 정보용 촬영은 모든 샷이 필요합니다.",
+      "title": "상품 상세 정보용 수집",
+      "initial_images_title": "AI가 1차 분석에 사용한 이미지 목록",
+      "suggestion_title": "AI 추천 보완 항목",
+      "pick_initial_title": "이 증거로 사용할 사진을 선택하세요",
+      "submit_button": "검증 요청"
+    },
+    "error": {
+      "report_generation": "report generation"
+    },
+    "errors": {
+      "incomplete_report": "AI 분석 실패: AI가 필수 보고서 항목(스펙, 상태, 요약)을 생성하지 못했습니다. 잠시 후 다시 시도하세요."
+    }
+  },
+  "notifications": {
+    "title": "알림",
+    "error": "알림을 불러오지 못했습니다.",
+    "empty": "표시할 알림이 없습니다.",
+    "seller_pending_title": "상품 검토 중입니다",
+    "seller_pending_body": "등록하신 상품 '{title}'이(가) 관리자 검토를 위해 제출되었습니다."
+  },
+  "registration_flow": {
+    "title": "판매 상품 종류 선택",
+    "new_item_title": "신품 및 중고품 일반 판매 등록",
+    "new_item_desc": "구입 후 사용하지 않은 상품과 사용 중고 물품을 간단하게 등록합니다.",
+    "used_item_title": "중고품 판매 (AI 검수)",
+    "used_item_desc": "AI가 상품을 자동 분석하여 신뢰도를 높이고 판매를 도와줍니다."
+  },
+  "myBling": {
+    "title": "나의 Bling",
+    "editProfile": "프로필 수정",
+    "settings": "설정",
+    "posts": "게시물",
+    "followers": "팔로워",
+    "neighbors": "이웃",
+    "friends": "친구",
+    "tabs": {
+      "posts": "내 게시물",
+      "products": "내 상품",
+      "bookmarks": "즐겨찾기",
+      "friends": "친구"
+    },
+    "stats": {
+      "posts": "게시물",
+      "followers": "팔로워",
+      "neighbors": "이웃",
+      "ai": {
+        "cancel_confirm": "AI 검수 취소하기",
+        "cancel_limit": "AI 검수는 상품당 1회만 취소할 수 있습니다. 동일 상품에 대해 재 AI 검증 전환 시 비용이 발생할 수 있습니다.",
+        "cancel_ack_charge": "요금이 발생할 수 있음을 이해합니다.",
+        "cancel_success": "AI 검수가 취소되었습니다. 해당 상품은 일반 상품으로 전환됩니다.",
+        "cancel_error": "AI 검수 취소 중 오류가 발생했습니다: {0}"
+      },
+      "friends": "친구"
+    },
+    "friendRequests": "받은 친구 요청",
+    "sentFriendRequests": "보낸 친구 요청",
+    "products": {
+      "empty": "등록한 상품이 없습니다.",
+      "detailsTitle": "상품 상세 정보",
+      "editButton": "상품 수정",
+      "loadErrorWithMsg": "상품을 불러오는 중 오류가 발생했습니다: {error}",
+      "deleteConfirm": "이 상품을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "deleteSuccess": "상품이 삭제되었습니다.",
+      "deleteFail": "상품 삭제에 실패했습니다: {error}"
+    },
+    "bookmarks": {
+      "empty": "저장한 즐겨찾기가 없습니다."
+    },
+    "postList": {
+      "empty": "작성한 게시물이 없습니다.",
+      "writeButton": "글쓰기"
+    },
+    "friendList": {
+      "noFriends": "친구가 없습니다. 친구를 추가해보세요."
+    }
+  },
+  "profileView": {
+    "title": "프로필",
+    "tabs": {
+      "posts": "작성한 글",
+      "interests": "관심사"
+    },
+    "noPosts": "아직 작성한 게시물이 없습니다.",
+    "noInterests": "설정된 관심사가 없습니다."
+  },
+  "settings": {
+    "title": "설정",
+    "account": "계정 및 보안",
+    "accountPrivacy": "계정 및 개인정보",
+    "privacy": "개인정보 보호",
+    "blockedUsers": "차단된 사용자",
+    "app": "앱 설정",
+    "notificationsTitle": "알림 설정",
+    "notifications": {
+      "loadError": "loadError",
+      "saveSuccess": "saveSuccess",
+      "saveError": "saveError",
+      "scopeTitle": "알림 범위",
+      "scopeDescription": "어느 지역 범위까지 알림을 받을지 선택합니다.",
+      "scope": {
+        "rt": "RT",
+        "rw": "RW",
+        "kel": "Kelurahan",
+        "kec": "Kecamatan"
+      },
+      "scopeLabel": "범위 선택",
+      "tagsTitle": "동네 소식 구독",
+      "tagsDescription": "선택한 주제의 동네 소식이 올라올 때만 알림을 받습니다."
+    },
+    "language": "언어 설정",
+    "languageSelect": "언어 선택",
+    "info": "정보 및 지원",
+    "appInfo": "앱 정보",
+    "logout": {
+      "button": "로그아웃",
+      "confirmTitle": "로그아웃",
+      "confirmBody": "정말 로그아웃 하시겠습니까?"
+    }
+  },
+  "friendRequests": {
+    "title": "받은 친구 요청",
+    "noRequests": "받은 친구 요청이 없습니다.",
+    "acceptSuccess": "친구 요청을 수락했습니다.",
+    "rejectSuccess": "친구 요청을 거절했습니다.",
+    "error": "오류가 발생했습니다: {error}",
+    "tooltip": {
+      "accept": "수락",
+      "reject": "거절"
+    },
+    "defaultChatMessage": "이제 친구가 되었습니다! 대화를 시작해보세요."
+  },
+  "sentFriendRequests": {
+    "title": "보낸 친구 요청",
+    "noRequests": "보낸 친구 요청이 없습니다.",
+    "statusLabel": "요청 상태: {status}",
+    "status": {
+      "pending": "대기중",
+      "accepted": "수락됨",
+      "rejected": "거절됨"
+    }
+  },
+  "blockedUsers": {
+    "title": "차단 사용자 관리",
+    "noBlockedUsers": "차단한 사용자가 없습니다.",
+    "unblock": "차단 해제",
+    "unblockDialog": {
+      "title": "{nickname} 님을 차단 해제할까요?",
+      "content": "차단을 해제하면 상대방이 회원님을 다시 찾을 수 있게 되며, 친구 요청을 보낼 수 있습니다."
+    },
+    "unblockSuccess": "{nickname} 님의 차단을 해제했습니다.",
+    "unblockFailure": "차단 해제에 실패했습니다: {error}",
+    "unknownUser": "알 수 없는 사용자",
+    "empty": "empty"
+  },
+  "rejectedUsers": {
+    "title": "차단된 사용자",
+    "noBlockedUsers": "차단한 사용자가 없습니다.",
+    "unblock": "차단 해제",
+    "unblockDialog": {
+      "title": "{nickname}님을 차단 해제하시겠습니까?",
+      "content": "차단 해제 후, 이 사용자가 다시 동네 친구 리스트에 나타날 수 있습니다."
+    },
+    "unblockSuccess": "{nickname} 님의 차단을 해제했습니다.",
+    "unblockFailure": "차단 해제에 실패했습니다: {error}",
+    "unknownUser": "알 수 없는 사용자"
+  },
+  "prompt": {
+    "title": "블링에 오신 것을 환영합니다!",
+    "subtitle": "주변의 재미있는 소식과 아이템을 보려면, 먼저 당신의 동네를 인증해주세요.",
+    "button": "내 동네 설정하기"
+  },
+  "location": {
+    "title": "동네 설정",
+    "searchHint": "동네 이름으로 검색 (예: 세르퐁)",
+    "gpsButton": "현재 위치로 찾기",
+    "success": "동네가 설정되었습니다.",
+    "error": "동네 설정에 실패했습니다: {error}",
+    "empty": "동네 이름을 입력해주세요.",
+    "permissionDenied": "동네를 찾기 위해 위치 권한이 필요합니다.",
+    "rtLabel": "RT",
+    "rwLabel": "RW",
+    "rtHint": "예: 003",
+    "rwHint": "예: 007",
+    "rtRequired": "RT를 입력해 주세요.",
+    "rwRequired": "RW를 입력해 주세요.",
+    "rtRwInfo": "입력하신 RT/RW 정보는 공개되지 않습니다. 신뢰도 및 동네 맞춤 기능 향상에만 사용됩니다.",
+    "saveThisLocation": "이 위치 저장",
+    "manualSelect": "직접 선택",
+    "refreshFromGps": "GPS로 새로고침"
+  },
+  "profileEdit": {
+    "title": "프로필 설정",
+    "nicknameHint": "닉네임",
+    "phoneHint": "전화번호",
+    "bioHint": "소개 (Bio)",
+    "locationTitle": "지역",
+    "changeLocation": "변경",
+    "locationNotSet": "미설정",
+    "interests": {
+      "title": "관심사",
+      "hint": "쉼표와 Enter로 여러개 동시 추가"
+    },
+    "privacy": {
+      "title": "개인정보 설정",
+      "showLocation": "지도에 내 위치 표시",
+      "allowRequests": "친구 추가 요청 허용"
+    },
+    "saveButton": "변경사항 저장",
+    "successMessage": "프로필이 성공적으로 업데이트되었습니다.",
+    "errors": {
+      "noUser": "로그인된 사용자가 없습니다.",
+      "updateFailed": "프로필 업데이트에 실패했습니다: {error}"
+    }
+  },
+  "mainFeed": {
+    "error": "오류가 발생했습니다: {error}",
+    "empty": "새로운 소식이 없습니다."
+  },
+  "postCard": {
+    "locationNotSet": "지역 미설정",
+    "location": "위치",
+    "authorNotFound": "authorNotFound"
+  },
+  "time": {
+    "now": "방금 전",
+    "minutesAgo": "{minutes}분 전",
+    "hoursAgo": "{hours}시간 전",
+    "daysAgo": "{days}일 전",
+    "dateFormat": "yy.MM.dd",
+    "dateFormatLong": "M월 d일"
+  },
+  "productCard": {
+    "currency": "$"
+  },
+  "localNewsFeed": {
+    "setLocationPrompt": "동네 소식을 보려면 먼저 내 동네를 설정해주세요!",
+    "allCategory": "전체",
+    "empty": "표시할 게시물이 없습니다.",
+    "error": "error"
+  },
+  "categories": {
+    "post": {
+      "jalan-perbaikin": {
+        "name": "도로 보수"
+      },
+      "daily_life": {
+        "name": "일상/궁금",
+        "description": "소소한 일상 이야기나 궁금한 점을 나눠보세요."
+      },
+      "help_share": {
+        "name": "도움/나눔",
+        "description": "도움이 필요하거나 나눌 물건이 있나요?"
+      },
+      "incident_report": {
+        "name": "사건/사고",
+        "description": "동네의 사건, 사고 소식을 공유해주세요."
+      },
+      "local_news": {
+        "name": "동네소식",
+        "description": "우리 동네의 새로운 소식이나 정보를 알려주세요."
+      },
+      "november": {
+        "name": "11월"
+      },
+      "rain": {
+        "name": "비"
+      },
+      "daily_question": {
+        "name": "질문있어요",
+        "description": "이웃에게 무엇이든 물어보세요."
+      },
+      "store_promo": {
+        "name": "가게홍보",
+        "description": "가게의 할인 정보나 이벤트를 홍보해보세요."
+      },
+      "etc": {
+        "name": "기타",
+        "description": "어디에도 속하지 않는 자유로운 이야기를 나눠요."
+      }
+    },
+    "auction": {
+      "all": "전체",
+      "collectibles": {
+        "name": "수집품",
+        "description": "장난감, 카드, 피규어 등."
+      },
+      "digital": {
+        "name": "디지털",
+        "description": "디지털 상품 및 자산."
+      },
+      "fashion": {
+        "name": "패션/잡화",
+        "description": "의류, 액세서리, 뷰티."
+      },
+      "vintage": {
+        "name": "빈티지",
+        "description": "레트로/클래식 아이템."
+      },
+      "art_craft": {
+        "name": "예술/공예",
+        "description": "작품 및 핸드메이드 공예."
+      },
+      "etc": {
+        "name": "기타",
+        "description": "그 외 경매 상품."
+      }
+    }
+  },
+  "localNewsCreate": {
+    "appBarTitle": "새 게시물 작성",
+    "title": "새 게시물 작성",
+    "form": {
+      "categoryLabel": "카테고리",
+      "titleLabel": "제목",
+      "contentLabel": "내용을 입력하세요",
+      "tagsLabel": "태그",
+      "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다.",
+      "recommendedTags": "recommendedTags"
+    },
+    "labels": {
+      "title": "제목",
+      "body": "내용",
+      "tags": "태그",
+      "guidedTitle": "추가 정보 (선택)",
+      "eventLocation": "이벤트/발생 장소"
+    },
+    "hints": {
+      "body": "동네 소식이나 질문을 자유롭게 공유해보세요...",
+      "tagSelection": "(태그 1~3개 선택)",
+      "eventLocation": "예: Jl. Sudirman 123"
+    },
+    "validation": {
+      "bodyRequired": "내용을 입력해주세요.",
+      "tagRequired": "태그를 최소 1개 선택해주세요.",
+      "tagMaxLimit": "태그는 최대 3개까지 선택할 수 있어요.",
+      "imageMaxLimit": "이미지는 최대 5장까지 첨부할 수 있어요.",
+      "titleRequired": "titleRequired"
+    },
+    "buttons": {
+      "addImage": "이미지 추가",
+      "submit": "등록하기"
+    },
+    "alerts": {
+      "contentRequired": "내용을 입력해주세요.",
+      "categoryRequired": "카테고리를 선택해주세요.",
+      "success": "게시글이 등록되었습니다.",
+      "failure": "업로드 실패: {error}",
+      "loginRequired": "게시물을 작성하려면 로그인해야 합니다.",
+      "userNotFound": "사용자 정보를 찾을 수 없습니다."
+    },
+    "success": "게시글이 등록되었습니다.",
+    "fail": "게시글 등록 실패: {error}"
+  },
+  "localNewsDetail": {
+    "appBarTitle": "게시물",
+    "menu": {
+      "edit": "수정하기",
+      "report": "신고하기",
+      "share": "공유하기"
+    },
+    "stats": {
+      "views": "조회",
+      "comments": "댓글",
+      "likes": "좋아요",
+      "thanks": "감사"
+    },
+    "buttons": {
+      "comment": "댓글 달기"
+    },
+    "confirmDelete": "confirmDelete",
+    "deleted": "deleted"
+  },
+  "localNewsEdit": {
+    "appBarTitle": "게시물 수정",
+    "buttons": {
+      "submit": "수정하기"
+    },
+    "alerts": {
+      "success": "게시물이 수정되었습니다.",
+      "failure": "수정 실패: {error}"
+    }
+  },
+  "commentInputField": {
+    "secretCommentLabel": "비밀댓글",
+    "hintText": "댓글을 입력하세요...",
+    "replyHintText": "{nickname}님에게 답글 남기기...",
+    "button": {
+      "send": "전송"
+    }
+  },
+  "commentListView": {
+    "empty": "아직 댓글이 없습니다. 첫 댓글을 남겨보세요!",
+    "reply": "답글",
+    "delete": "삭제",
+    "deleted": "[삭제된 댓글입니다]",
+    "secret": "작성자와 게시물 주인만 볼 수 있는 비밀 댓글입니다."
+  },
+  "common": {
+    "cancel": "취소",
+    "confirm": "확인",
+    "delete": "삭제",
+    "done": "완료",
+    "clear": "지우기",
+    "report": "신고",
+    "moreOptions": "더보기",
+    "viewAll": "모두 보기",
+    "new": "신규",
+    "updated": "업데이트",
+    "comments": "댓글",
+    "sponsored": "스폰서드",
+    "filter": "필터",
+    "reset": "초기화",
+    "apply": "적용",
+    "verified": "인증",
+    "bookmark": "찜하기",
+    "sort": {
+      "default": "기본",
+      "distance": "거리순",
+      "popular": "인기순"
+    },
+    "error": "error",
+    "shareError": "shareError",
+    "edit": "edit",
+    "submit": "submit",
+    "loginRequired": "loginRequired",
+    "unknownUser": "unknownUser",
+    "copiedTitle": "복사됨!",
+    "copiedMessage": "{title}이(가) 클립보드에 복사되었습니다."
+  },
+  "commom": {
+    "commets": "댓글"
+  },
+  "reportDialog": {
+    "title": "게시물 신고",
+    "titleComment": "댓글 신고",
+    "titleReply": "답글 신고",
+    "cannotReportSelfComment": "내가 쓴 댓글은 신고할 수 없습니다.",
+    "cannotReportSelfReply": "내가 쓴 답글은 신고할 수 없습니다.",
+    "success": "신고가 접수되었습니다. 감사합니다.",
+    "fail": "신고 접수에 실패했습니다: {error}",
+    "cannotReportSelf": "내가 작성한 글은 신고할 수 없습니다."
+  },
+  "replyDelete": {
+    "fail": "답글 삭제 실패: {error}"
+  },
+  "reportReasons": {
+    "spam": "스팸/허위 정보",
+    "abuse": "괴롭힘 또는 혐오 발언",
+    "inappropriate": "성적으로 부적절함",
+    "illegal": "불법/위법 내용",
+    "etc": "기타"
+  },
+  "deleteConfirm": {
+    "title": "댓글 삭제",
+    "content": "정말 이 댓글을 삭제하시겠습니까?",
+    "failure": "댓글 삭제 실패: {error}"
+  },
+  "replyInputField": {
+    "hintText": "답글을 입력하세요",
+    "button": {
+      "send": "전송"
+    },
+    "failure": "답글 등록 실패: {error}"
+  },
+  "chat_list": {
+    "appBarTitle": "채팅",
+    "empty": "진행중인 대화가 없습니다."
+  },
+  "chat_room": {
+    "placeholder": "메시지를 입력하세요..."
+  },
+  "chatRoom": {
+    "startConversation": "대화를 시작해 보세요!",
+    "icebreaker1": "안녕하세요! 👋",
+    "icebreaker2": "주말에 보통 뭐 하세요?",
+    "icebreaker3": "근처에 자주 가시는 곳 있나요?",
+    "linkHidden": "링크 숨김 (안전 모드)",
+    "contactHidden": "연락처 숨김 (안전 모드)",
+    "mediaBlocked": "안전을 위해 24시간 동안 미디어 전송이 제한됩니다.",
+    "imageMessage": "사진"
+  },
+  "jobs": {
+    "setLocationPrompt": "구인글을 보려면 먼저 내 동네를 설정해주세요!",
+    "screen": {
+      "empty": "해당 지역에 등록된 구인 게시글이 없습니다.",
+      "createTooltip": "새 구인글 등록"
+    },
+    "tabs": {
+      "all": "전체",
+      "quickGig": "단기 심부름",
+      "regular": "파트타임/정규직"
+    },
+    "selectType": {
+      "title": "일자리 유형 선택",
+      "regularTitle": "파트타임 / 정규직",
+      "regularDesc": "카페·식당·사무 등 일반 근무",
+      "quickGigTitle": "퀵긱 / 단기 심부름",
+      "quickGigDesc": "오토바이 심부름, 이사, 청소 등"
+    },
+    "form": {
+      "title": "구인글 등록",
+      "titleHint": "공고 제목",
+      "descriptionPositionHint": "업무 내용을 입력",
+      "categoryHint": "직종 카테고리",
+      "categorySelectHint": "직종을 선택하세요",
+      "categoryValidator": "직종을 선택해주세요.",
+      "locationHint": "근무 위치",
+      "submit": "구인 등록",
+      "titleLabel": "제목",
+      "titleValidator": "제목을 입력해주세요.",
+      "titleRegular": "파트타임/정규직 구인 등록",
+      "titleQuickGig": "퀵긱 구인 등록",
+      "validationError": "필수 항목을 모두 입력해주세요.",
+      "saveSuccess": "구인글이 저장되었습니다.",
+      "saveError": "구인글 저장에 실패했습니다: {error}",
+      "categoryLabel": "카테고리",
+      "titleHintQuickGig": "예: 오토바이 서류 배달 (긴급)",
+      "salaryLabel": "급여 (IDR)",
+      "salaryHint": "급여 금액을 입력하세요",
+      "salaryValidator": "유효한 급여를 입력해주세요.",
+      "totalPayLabel": "총 보수 (IDR)",
+      "totalPayHint": "제공할 총 금액을 입력",
+      "totalPayValidator": "유효한 금액을 입력해주세요.",
+      "negotiable": "협의 가능",
+      "workPeriodLabel": "근무 기간",
+      "workPeriodHint": "근무 기간 선택",
+      "locationLabel": "근무지/장소",
+      "locationValidator": "근무지를 입력해주세요.",
+      "imageLabel": "이미지 (선택, 최대 10장)",
+      "descriptionHintQuickGig": "출발지/도착지, 요청사항 등 상세 정보를 입력해주세요.",
+      "salaryInfoTitle": "급여 정보",
+      "salaryTypeHint": "종류",
+      "salaryAmountLabel": "금액 (IDR)",
+      "salaryNegotiable": "급여 협의 가능",
+      "workInfoTitle": "근무 조건",
+      "workPeriodTitle": "근무 기간",
+      "workHoursLabel": "근무 요일/시간",
+      "workHoursHint": "예: 월-금, 09:00-18:00",
+      "imageSectionTitle": "사진 첨부 (선택, 최대 5장)",
+      "descriptionLabel": "상세 설명",
+      "descriptionHint": "예) 주 3회, 오후 5시-10시 파트타임 구합니다. 시급은 협의 가능합니다.",
+      "descriptionValidator": "상세 설명을 입력해주세요.",
+      "submitSuccess": "구인글이 등록되었습니다.",
+      "submitFail": "구인글 등록에 실패했습니다: {error}"
+    },
+    "categories": {
+      "restaurant": "식당",
+      "cafe": "카페",
+      "retail": "소매",
+      "delivery": "배달",
+      "etc": "기타",
+      "service": "서비스",
+      "sales_marketing": "영업/마케팅",
+      "delivery_logistics": "배달/물류",
+      "it": "IT/기술",
+      "design": "디자인",
+      "education": "교육",
+      "quick_gig_delivery": "오토바이 심부름/배달",
+      "quick_gig_transport": "오토바이 이동(오젝)",
+      "quick_gig_moving": "이사/짐 나르기",
+      "quick_gig_cleaning": "청소/집안일",
+      "quick_gig_queuing": "줄서기",
+      "quick_gig_etc": "기타 심부름"
+    },
+    "salaryTypes": {
+      "hourly": "시급",
+      "daily": "일급",
+      "weekly": "주급",
+      "monthly": "월급",
+      "yearly": "연봉",
+      "per_case": "건당",
+      "etc": "기타",
+      "total": "총 보수",
+      "$value": "$value"
+    },
+    "workPeriods": {
+      "short_term": "단기",
+      "mid_term": "중기",
+      "long_term": "장기",
+      "one_time": "1회성",
+      "1_week": "1주",
+      "1_month": "1개월",
+      "3_months": "3개월",
+      "6_months_plus": "6개월 이상",
+      "negotiable": "협의 가능",
+      "etc": "기타",
+      "$period": "$period"
+    },
+    "detail": {
+      "infoTitle": "상세 정보",
+      "apply": "지원하기",
+      "noAuthor": "작성자 정보 없음",
+      "chatError": "채팅을 시작할 수 없습니다: {error}"
+    },
+    "card": {
+      "noLocation": "위치 정보 없음",
+      "minutesAgo": "몇 분 전"
+    }
+  },
+  "findFriend": {
+    "title": "친구 찾기",
+    "tabs": {
+      "friends": "친구",
+      "groups": "모임",
+      "clubs": "모임"
+    },
+    "editTitle": "친구 찾기 프로필 수정",
+    "editProfileTitle": "프로필 수정",
+    "save": "저장",
+    "profileImagesLabel": "프로필 이미지 (최대 6장)",
+    "bioLabel": "자기소개",
+    "bioHint": "자신을 다른 사람에게 소개해보세요.",
+    "bioValidator": "자기소개를 입력해주세요.",
+    "ageLabel": "나이",
+    "ageHint": "만 나이를 숫자로만 입력해주세요.",
+    "genderLabel": "성별",
+    "genderMale": "남성",
+    "genderFemale": "여성",
+    "genderHint": "성별을 선택하세요",
+    "interestsLabel": "관심사",
+    "preferredAgeLabel": "찾고 싶은 친구 연령대",
+    "preferredAgeUnit": "세",
+    "preferredGenderLabel": "찾고 싶은 친구 성별",
+    "preferredGenderAll": "상관없음",
+    "showProfileLabel": "친구 찾기 리스트에 내 프로필 노출",
+    "showProfileSubtitle": "끄면 다른 사람이 나를 찾을 수 없습니다.",
+    "saveSuccess": "프로필이 성공적으로 저장되었습니다!",
+    "saveFailed": "프로필 저장에 실패했습니다:",
+    "loginRequired": "로그인이 필요합니다.",
+    "noFriendsFound": "주변에 등록된 친구가 없습니다.",
+    "prompt_title": "새로운 친구들을 만나려면\n먼저 프로필을 만들어주세요!",
+    "prompt_button": "내 프로필 만들기",
+    "chatLimitReached": "오늘의 새 대화 한도({limit}회)에 도달했습니다.",
+    "chatChecking": "확인 중...",
+    "empty": "empty"
+  },
+  "interests": {
+    "title": "관심사",
+    "limit_info": "최대 10개까지 선택할 수 있어요.",
+    "limit_reached": "관심사는 최대 10개까지만 선택할 수 있습니다.",
+    "category_creative": "🎨 취미 & 창작",
+    "category_sports": "🏃 스포츠 & 액티비티",
+    "category_food_drink": "🍸 음식 & 음료",
+    "category_entertainment": "🍿 엔터테인먼트",
+    "category_growth": "📚 자기계발 & 지식",
+    "category_lifestyle": "🌴 라이프스타일",
+    "items": {
+      "drawing": "그림 그리기",
+      "instrument": "악기 연주",
+      "photography": "사진 찍기",
+      "writing": "글쓰기",
+      "crafting": "공예",
+      "gardening": "정원 가꾸기",
+      "soccer": "축구/풋살",
+      "hiking": "등산",
+      "camping": "캠핑",
+      "running": "달리기/조깅",
+      "biking": "자전거",
+      "golf": "골프",
+      "workout": "헬스/피트니스",
+      "foodie": "맛집 탐방",
+      "cooking": "요리하기",
+      "baking": "베이킹",
+      "coffee": "커피",
+      "wine": "와인/술",
+      "tea": "차(Tea)",
+      "movies": "영화/드라마",
+      "music": "음악 감상",
+      "concerts": "콘서트/페스티벌",
+      "gaming": "게임",
+      "reading": "독서",
+      "investing": "재테크",
+      "language": "외국어 공부",
+      "coding": "코딩",
+      "travel": "여행",
+      "pets": "반려동물",
+      "volunteering": "봉사활동",
+      "minimalism": "미니멀리즘",
+      "$interestKey": "$interestKey"
+    },
+    "$categoryKey": "$categoryKey"
+  },
+  "friendDetail": {
+    "request": "친구 요청",
+    "requestSent": "요청 보냄",
+    "alreadyFriends": "이미 친구입니다",
+    "requestFailed": "요청에 실패했습니다:",
+    "chatError": "대화 시작 중 오류가 발생했습니다.",
+    "startChat": "채팅 시작",
+    "block": "차단",
+    "report": "신고",
+    "loginRequired": "로그인이 필요합니다.",
+    "unblocked": "unblocked",
+    "blocked": "blocked",
+    "unblock": "unblock"
+  },
+  "locationFilter": {
+    "title": "지역 필터",
+    "provinsi": "Provinsi",
+    "kabupaten": "Kabupaten",
+    "kota": "Kota",
+    "kecamatan": "Kecamatan",
+    "kelurahan": "Kelurahan",
+    "apply": "필터 적용",
+    "all": "전체",
+    "reset": "초기화"
+  },
+  "clubs": {
+    "tabs": {
+      "proposals": "모임 제안",
+      "activeClubs": "활동 중인 모임",
+      "myClubs": "내가 가입한 모임",
+      "exploreClubs": "모든 모임 탐색"
+    },
+    "sections": {
+      "active": "정식 모임",
+      "proposals": "모임 제안"
+    },
+    "screen": {
+      "error": "오류: {error}",
+      "empty": "아직 동호회가 없습니다."
+    },
+    "postList": {
+      "empty": "아직 게시글이 없습니다. 첫 글을 작성해보세요!",
+      "writeTooltip": "글쓰기"
+    },
+    "memberCard": {
+      "kickConfirmTitle": "{memberName} 님을 강퇴하시겠습니까?",
+      "kickConfirmContent": "강퇴된 멤버는 동호회 관련 활동에 더 이상 참여할 수 없습니다.",
+      "kick": "강퇴하기",
+      "kickedSuccess": "{memberName} 님을 강퇴했습니다.",
+      "kickFail": "멤버 강퇴에 실패했습니다: {error}"
+    },
+    "postCard": {
+      "deleteTitle": "게시글 삭제",
+      "deleteContent": "이 게시글을 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "deleteSuccess": "게시글이 삭제되었습니다.",
+      "deleteFail": "삭제에 실패했습니다: {error}",
+      "withdrawnMember": "탈퇴한 멤버",
+      "deleteTooltip": "게시글 삭제",
+      "loadingUser": "사용자 정보 로딩중..."
+    },
+    "card": {
+      "membersCount": "{count}명"
+    },
+    "postDetail": {
+      "commentFail": "댓글 등록에 실패했습니다: {error}",
+      "appBarTitle": "{title} 게시판",
+      "commentsTitle": "댓글",
+      "noComments": "아직 댓글이 없습니다.",
+      "commentHint": "댓글을 입력하세요...",
+      "unknownUser": "알 수 없는 사용자"
+    },
+    "detail": {
+      "joined": "'{title}' 동호회에 가입했습니다!",
+      "pendingApproval": "방장의 승인을 기다리고 있습니다. 승인 후 활동할 수 있습니다.",
+      "joinFail": "가입 신청에 실패했습니다: {error}",
+      "tabs": {
+        "info": "정보",
+        "board": "게시판",
+        "members": "멤버"
+      },
+      "joinChat": "채팅 참여하기",
+      "joinClub": "동호회 가입하기",
+      "owner": "개설자",
+      "info": {
+        "members": "멤버",
+        "location": "지역"
+      },
+      "location": "위치",
+      "leaveConfirmTitle": "모임 탈퇴",
+      "leaveConfirmContent": "정말로 '{title}' 모임을 탈퇴하시겠습니까?",
+      "leave": "탈퇴",
+      "leaveSuccess": "'{title}' 모임을 탈퇴했습니다",
+      "leaveFail": "탈퇴 실패: {error}"
+    },
+    "memberList": {
+      "pendingMembers": "가입 대기중인 멤버",
+      "allMembers": "전체 멤버"
+    },
+    "createPost": {
+      "title": "새 게시글 작성",
+      "submit": "등록",
+      "success": "게시글이 등록되었습니다.",
+      "fail": "게시글 등록에 실패했습니다: {error}",
+      "bodyHint": "내용을 입력하세요..."
+    },
+    "createClub": {
+      "selectAtLeastOneInterest": "관심사를 1개 이상 선택해주세요.",
+      "success": "동호회가 성공적으로 만들어졌습니다!",
+      "fail": "동호회 생성에 실패했습니다: {error}",
+      "title": "새 동호회 만들기",
+      "nameLabel": "동호회 이름",
+      "nameError": "동호회 이름을 입력해주세요.",
+      "descriptionLabel": "동호회 소개",
+      "descriptionError": "동호회 소개를 입력해주세요.",
+      "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다.",
+      "maxInterests": "관심사는 최대 3개까지 선택할 수 있습니다.",
+      "privateClub": "비공개 동호회",
+      "privateDescription": "초대를 통해서만 가입할 수 있습니다.",
+      "locationLabel": "locationLabel"
+    },
+    "editClub": {
+      "title": "동호회 정보 수정",
+      "save": "저장",
+      "success": "동호회 정보가 수정되었습니다.",
+      "fail": "수정에 실패했습니다: {error}"
+    },
+    "create": {
+      "title": "새 동호회 만들기"
+    },
+    "repository": {
+      "chatCreated": "동호회 채팅방이 개설되었습니다."
+    },
+    "proposal": {
+      "createTitle": "모임 제안하기",
+      "imageError": "대표 이미지를 선택해주세요.",
+      "createSuccess": "모임 제안이 생성되었습니다.",
+      "createFail": "모임 제안 생성에 실패했습니다: {error}",
+      "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다.",
+      "targetMembers": "목표 인원",
+      "targetMembersCount": "총 {count}명",
+      "empty": "아직 모임 제안이 없습니다.",
+      "memberStatus": "{current}명 / {target}명",
+      "join": "참여하기",
+      "leave": "탈퇴",
+      "members": "참여자",
+      "noMembers": "아직 참여자가 없습니다.",
+      "detail": {
+        "joined": "모임 제안에 참여했습니다!",
+        "left": "모임 제안에서 탈퇴했습니다.",
+        "loginRequired": "참여하려면 로그인이 필요합니다.",
+        "error": "오류가 발생했습니다: {error}"
+      }
+    },
+    "empty": "empty"
+  },
+  "findfriend": {
+    "form": {
+      "title": "친구찾기 프로필 만들기"
+    }
+  },
+  "auctions": {
+    "card": {
+      "currentBid": "현재 입찰가",
+      "endTime": "남은 시간",
+      "ended": "종료됨",
+      "winningBid": "낙찰가",
+      "winner": "낙찰자",
+      "noBidders": "입찰자가 없습니다",
+      "unknownBidder": "알 수 없는 입찰자",
+      "timeLeft": "{hours}:{minutes}:{seconds} 남음",
+      "timeLeftDays": "{days}일 {hours}:{minutes}:{seconds} 남음"
+    },
+    "errors": {
+      "fetchFailed": "경매 목록을 불러오지 못했습니다: {error}",
+      "notFound": "경매를 찾을 수 없습니다.",
+      "lowerBid": "현재 입찰가보다 높은 금액을 입력해야 합니다.",
+      "alreadyEnded": "이미 마감된 경매입니다."
+    },
+    "empty": "진행 중인 경매가 없습니다.",
+    "filter": {
+      "tooltip": "필터",
+      "clearTooltip": "필터 지우기"
+    },
+    "create": {
+      "tooltip": "경매 등록",
+      "title": "경매 등록",
+      "registrationType": "판매 유형",
+      "type": {
+        "sale": "일반 판매",
+        "auction": "경매 등록"
+      },
+      "success": "경매가 등록되었습니다.",
+      "fail": "경매 등록에 실패했습니다: {error}",
+      "submit_button": "경매 시작하기",
+      "confirmTitle": "경매로 등록하시겠습니까?",
+      "confirmContent": "경매로 등록하면 일반 판매로 되돌릴 수 없으며, 낙찰 시 수수료(5%)가 부과됩니다. 계속하시겠습니까?",
+      "errors": {
+        "noPhoto": "사진을 최소 한 장 이상 추가해주세요."
+      },
+      "form": {
+        "photoSectionTitle": "사진 등록 (최대 10장)",
+        "title": "제목",
+        "description": "상세 설명",
+        "startPrice": "시작가",
+        "category": "카테고리",
+        "categoryHint": "카테고리를 선택하세요",
+        "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다.",
+        "duration": "경매 기간",
+        "durationOption": "{days}일",
+        "location": "위치"
+      }
+    },
+    "edit": {
+      "tooltip": "경매 수정",
+      "title": "경매 정보 수정",
+      "save": "저장",
+      "success": "경매 정보가 수정되었습니다.",
+      "fail": "수정에 실패했습니다: {error}"
+    },
+    "form": {
+      "titleRequired": "제목을 입력해주세요.",
+      "descriptionRequired": "설명을 입력해주세요.",
+      "startPriceRequired": "시작가를 입력해주세요.",
+      "categoryRequired": "카테고리를 선택해주세요."
+    },
+    "delete": {
+      "tooltip": "경매 삭제",
+      "confirmTitle": "경매 삭제",
+      "confirmContent": "정말 이 경매를 삭제하시겠습니까?",
+      "success": "경매가 삭제되었습니다.",
+      "fail": "삭제에 실패했습니다: {error}"
+    },
+    "detail": {
+      "currentBid": "현재 입찰가: {amount}",
+      "location": "위치",
+      "seller": "판매자",
+      "qnaTitle": "Q&A",
+      "qnaHint": "판매자에게 질문하기...",
+      "endTime": "마감 시간: {time}",
+      "bidsTitle": "입찰 현황",
+      "noBids": "아직 입찰자가 없습니다.",
+      "unknownBidder": "알 수 없는 입찰자",
+      "bidAmountLabel": "입찰가 입력 (Rp)",
+      "placeBid": "입찰하기",
+      "bidSuccess": "입찰에 성공했습니다!",
+      "bidFail": "입찰 실패: {error}",
+      "errors": {
+        "loginRequired": "로그인이 필요합니다.",
+        "invalidAmount": "올바른 입찰 금액을 입력해주세요."
+      }
+    }
+  },
+  "localStores": {
+    "setLocationPrompt": "위치를 설정하면 동네 상점을 볼 수 있어요.",
+    "empty": "등록된 상점이 없습니다.",
+    "error": "오류가 발생했습니다: {error}",
+    "create": {
+      "tooltip": "내 상점 등록하기",
+      "title": "새 상점 등록",
+      "submit": "등록",
+      "success": "상점이 등록되었습니다.",
+      "fail": "상점 등록에 실패했습니다: {error}"
+    },
+    "edit": {
+      "title": "상점 정보 수정",
+      "save": "저장",
+      "success": "상점 정보가 수정되었습니다.",
+      "fail": "수정에 실패했습니다: {error}",
+      "tooltip": "상점 정보 수정"
+    },
+    "form": {
+      "nameLabel": "상점 이름",
+      "nameError": "상점 이름을 입력해주세요.",
+      "descriptionLabel": "상점 소개",
+      "descriptionError": "상점 소개를 입력해주세요.",
+      "contactLabel": "연락처",
+      "hoursLabel": "영업 시간",
+      "hoursHint": "예) 09:00 - 18:00",
+      "photoLabel": "사진 (최대 {count}장)",
+      "categoryLabel": "카테고리",
+      "categoryError": "카테고리를 선택해주세요.",
+      "productsLabel": "대표 상품/서비스",
+      "productsHint": "쉼표로 구분, 예: 커트, 염색, 펌",
+      "imageError": "imageError"
+    },
+    "categories": {
+      "all": "전체",
+      "food": "음식점",
+      "cafe": "카페",
+      "massage": "마사지",
+      "beauty": "뷰티",
+      "nail": "네일",
+      "auto": "자동차/정비",
+      "kids": "키즈",
+      "hospital": "병원/클리닉",
+      "etc": "기타",
+      "$category": "$category"
+    },
+    "detail": {
+      "description": "상점 소개",
+      "products": "대표 상품/서비스",
+      "deleteTitle": "상점 삭제",
+      "deleteContent": "정말로 이 상점을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "deleteTooltip": "상점 삭제",
+      "delete": "삭제",
+      "cancel": "취소",
+      "deleteSuccess": "상점이 삭제되었습니다.",
+      "deleteFail": "상점 삭제에 실패했습니다: {error}",
+      "inquire": "문의하기",
+      "noOwnerInfo": "주인 정보 없음",
+      "startChatFail": "채팅을 시작할 수 없습니다: {error}",
+      "reviews": "reviews",
+      "writeReview": "writeReview",
+      "noReviews": "noReviews",
+      "reviewDialogContent": "reviewDialogContent"
+    },
+    "noLocation": "위치 정보 없음"
+  },
+  "pom": {
+    "title": "POM",
+    "search": {
+      "hint": "뽐 자랑, 태그, 사용자 검색"
+    },
+    "tabs": {
+      "local": "우리 동네",
+      "all": "전체",
+      "popular": "인기",
+      "myPoms": "내 POM"
+    },
+    "more": "더보기",
+    "less": "접기",
+    "likesCount": "좋아요 {}개",
+    "report": "{} 신고하기",
+    "block": "{} 차단하기",
+    "emptyPopular": "인기 POM이 아직 없습니다.",
+    "emptyMine": "내가 올린 POM이 없습니다.",
+    "emptyHintPopular": "전체 탭에서 최신 POM을 확인해보세요.",
+    "emptyCtaMine": "+ 버튼을 눌러 첫 번째 POM을 올려보세요.",
+    "share": "공유",
+    "empty": "등록된 POM이 없습니다.",
+    "errors": {
+      "fetchFailed": "오류가 발생했습니다: {error}",
+      "videoSource": "동영상을 재생할 수 없습니다. 소스가 차단되었거나 사용할 수 없습니다."
+    },
+    "comments": {
+      "title": "댓글",
+      "viewAll": "댓글 {}개 모두 보기",
+      "empty": "아직 댓글이 없습니다.",
+      "placeholder": "댓글을 입력하세요...",
+      "fail": "댓글 등록에 실패했습니다: {error}"
+    },
+    "create": {
+      "title": "새 POM 등록",
+      "photo": "사진",
+      "video": "동영상",
+      "titleImage": "사진 올리기",
+      "submit": "등록",
+      "success": "POM이 등록되었습니다.",
+      "fail": "POM 등록에 실패했습니다: {error}",
+      "form": {
+        "titleLabel": "제목",
+        "descriptionLabel": "설명"
+      }
+    }
+  },
+  "realEstate": {
+    "empty": "등록된 매물이 없습니다.",
+    "error": "오류가 발생했습니다: {error}",
+    "create": "매물 등록",
+    "locationUnknown": "위치 정보 없음",
+    "priceUnits": {
+      "monthly": "월",
+      "yearly": "년"
+    },
+    "priceUnit": {
+      "monthly": "/월"
+    },
+    "form": {
+      "title": "새 매물 등록",
+      "submit": "등록",
+      "imageRequired": "사진을 1장 이상 첨부해주세요.",
+      "success": "매물이 등록되었습니다.",
+      "fail": "등록에 실패했습니다: {error}",
+      "type": {
+        "kos": "하숙",
+        "kontrakan": "월세",
+        "sewa": "임대"
+      },
+      "priceLabel": "가격",
+      "priceRequired": "가격을 입력하세요",
+      "priceUnit": {
+        "monthly": "/월",
+        "yearly": "/년",
+        "$value": "$value"
+      },
+      "titleLabel": "제목",
+      "titleRequired": "제목을 입력하세요",
+      "descriptionLabel": "상세 설명",
+      "typeLabel": "방 유형",
+      "roomTypes": {
+        "kos": "Kos (하숙)",
+        "kontrakan": "Kontrakan (월/연세)",
+        "sewa": "Sewa (임대)",
+        "apartment": "아파트",
+        "house": "주택",
+        "ruko": "루코(상가주택)",
+        "gudang": "창고",
+        "kantor": "사무실",
+        "etc": "기타",
+        "$type": "$type"
+      },
+      "listingType": "거래 유형",
+      "listingTypeHint": "거래 유형 선택",
+      "listingTypes": {
+        "rent": "임대 (월세/전세)",
+        "sale": "매매",
+        "$type": "$type"
+      },
+      "publisherType": "게시자",
+      "publisherTypes": {
+        "individual": "직거래",
+        "agent": "중개인",
+        "$type": "$type"
+      },
+      "area": "면적 (m²)",
+      "areaHint": "예: 33",
+      "landArea": "토지 면적",
+      "rooms": "방 개수",
+      "bathrooms": "욕실 수",
+      "bedAbbr": "침실",
+      "bathAbbr": "욕실",
+      "moveInDate": "입주 가능일",
+      "selectDate": "날짜 선택",
+      "clearDate": "날짜 지우기",
+      "amenities": "편의시설",
+      "amenity": {
+        "wifi": "와이파이",
+        "ac": "에어컨",
+        "parking": "주차장",
+        "kitchen": "주방"
+      },
+      "details": "상세 정보",
+      "maintenanceFee": "관리비 (월)",
+      "maintenanceFeeHint": "월 관리비 (Rp)",
+      "deposit": "보증금",
+      "depositHint": "보증금 (Rp)",
+      "floorInfo": "층수 정보",
+      "floorInfoHint": "예: 5층, 중간층"
+    },
+    "filter": {
+      "amenities": {
+        "ac": "에어컨",
+        "bed": "침대",
+        "closet": "옷장",
+        "desk": "책상",
+        "wifi": "와이파이",
+        "kitchen": "주방",
+        "living_room": "거실",
+        "refrigerator": "냉장고",
+        "parking_motorcycle": "오토바이 주차",
+        "parking_car": "자동차 주차",
+        "pool": "수영장",
+        "gym": "헬스장",
+        "security_24h": "24시간 경비",
+        "atm_center": "ATM 센터",
+        "minimarket": "미니마켓",
+        "mall_access": "몰 접근",
+        "playground": "놀이터",
+        "carport": "카포트",
+        "garden": "정원",
+        "pam": "상수도",
+        "telephone": "전화",
+        "water_heater": "온수기",
+        "parking_area": "주차 공간",
+        "electricity": "전기 (전력)",
+        "container_access": "컨테이너 진입 가능",
+        "kos_room": {
+          "ac": "에어컨",
+          "bed": "침대",
+          "closet": "옷장",
+          "desk": "책상",
+          "wifi": "와이파이"
+        },
+        "kos_public": {
+          "kitchen": "주방",
+          "living_room": "거실",
+          "refrigerator": "냉장고",
+          "parking_motorcycle": "오토바이 주차",
+          "parking_car": "자동차 주차"
+        },
+        "apartment": {
+          "pool": "수영장",
+          "gym": "헬스장",
+          "security_24h": "24시간 보안",
+          "atm_center": "ATM",
+          "minimarket": "미니마켓",
+          "mall_access": "쇼핑몰 접근",
+          "playground": "놀이터"
+        },
+        "house": {
+          "carport": "차고",
+          "garden": "정원",
+          "pam": "시수도",
+          "telephone": "전화",
+          "water_heater": "온수기"
+        },
+        "commercial": {
+          "parking_area": "주차 공간",
+          "security_24h": "24시간 보안",
+          "telephone": "전화",
+          "electricity": "전기",
+          "container_access": "컨테이너 접근"
+        },
+        "$key": "$key",
+        "$i18nPrefix": {
+          "$key": "$key"
+        }
+      },
+      "title": "상세 필터",
+      "priceRange": "가격 범위",
+      "areaRange": "면적 범위 (m²)",
+      "landAreaRange": "토지 면적 (m²)",
+      "depositRange": "보증금 범위",
+      "floorInfo": "층수 정보",
+      "depositMin": "최소 보증금",
+      "depositMax": "최대 보증금",
+      "clearFloorInfo": "지우기",
+      "furnishedStatus": "가구 상태",
+      "rentPeriod": "임대 기간",
+      "selectFurnished": "가구 상태 선택",
+      "furnishedHint": "가구 상태 선택",
+      "selectRentPeriod": "임대 기간 선택",
+      "rentPeriods": {
+        "daily": "일간",
+        "monthly": "월간",
+        "yearly": "연간",
+        "$period": "$period"
+      },
+      "kos": {
+        "bathroomType": "욕실 타입",
+        "bathroomTypes": {
+          "in_room": "방 내부 욕실",
+          "out_room": "공용 욕실"
+        },
+        "maxOccupants": "최대 거주 인원",
+        "hintBathroomType": "욕실 타입 선택",
+        "hintMaxOccupants": "거주 인원 선택",
+        "electricityIncluded": "전기세 포함",
+        "roomFacilities": "방 시설",
+        "publicFacilities": "공용 시설",
+        "occupant": "명"
+      },
+      "apartment": {
+        "facilities": "아파트 시설"
+      },
+      "house": {
+        "facilities": "주택 시설"
+      },
+      "commercial": {
+        "facilities": "상업용 시설"
+      },
+      "propertyCondition": "매물 상태",
+      "propertyConditions": {
+        "new": "신규",
+        "used": "중고"
+      },
+      "furnishedTypes": {
+        "furnished": "가구 포함",
+        "semi_furnished": "부분 가구 포함",
+        "unfurnished": "가구 없음",
+        "$status": "$status"
+      }
+    },
+    "info": {
+      "bed": "방",
+      "bath": "욕실",
+      "anytime": "즉시 입주",
+      "verifiedPublisher": "인증된 게시자"
+    },
+    "detail": {
+      "deleteTitle": "매물 삭제",
+      "deleteContent": "정말로 이 매물을 삭제하시겠습니까?",
+      "cancel": "취소",
+      "deleteConfirm": "삭제",
+      "deleteSuccess": "매물이 삭제되었습니다.",
+      "deleteFail": "삭제에 실패했습니다: {error}",
+      "chatError": "채팅을 시작할 수 없습니다: {error}",
+      "location": "위치",
+      "publisherInfo": "게시자 정보",
+      "contact": "문의하기"
+    },
+    "edit": {
+      "title": "매물 정보 수정",
+      "save": "저장",
+      "success": "매물 정보가 수정되었습니다.",
+      "fail": "수정에 실패했습니다: {error}"
+    },
+    "disclaimer": "블링은 온라인 광고/게시판 플랫폼으로, 거래 당사자가 아닙니다. 게시된 매물의 진위, 권리관계, 가격 및 조건에 대한 책임은 게시자에게 있으며, 사용자는 거래 전 관련 사실을 게시자 및 관계기관을 통해 직접 확인해야 합니다."
+  },
+  "lostAndFound": {
+    "empty": "아직 등록된 분실/습득물이 없습니다.",
+    "error": "오류가 발생했습니다: {error}",
+    "create": "새 분실/습득물 등록",
+    "lost": "분실",
+    "found": "습득",
+    "tabs": {
+      "all": "전체",
+      "lost": "분실했어요",
+      "found": "주웠어요"
+    },
+    "card": {
+      "location": "장소: {location}"
+    },
+    "form": {
+      "title": "분실/습득물 등록",
+      "submit": "등록",
+      "type": {
+        "lost": "분실했어요",
+        "found": "주웠어요"
+      },
+      "photoSectionTitle": "사진 등록 (최대 5장)",
+      "imageRequired": "사진을 1장 이상 첨부해주세요.",
+      "itemLabel": "어떤 물건인가요?",
+      "itemError": "물건 설명을 입력해주세요.",
+      "locationLabel": "어디서 잃어버렸거나 주우셨나요?",
+      "locationError": "장소 설명을 입력해주세요.",
+      "bountyTitle": "현상금 설정 (선택)",
+      "bountyDesc": "설정하면 게시물에 현상금 태그가 표시됩니다.",
+      "bountyAmount": "현상금액 (IDR)",
+      "bountyAmountError": "현상금을 설정하려면 금액을 입력하세요.",
+      "success": "등록되었습니다.",
+      "fail": "등록에 실패했습니다: {error}",
+      "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다."
+    },
+    "edit": {
+      "title": "분실/습득물 수정",
+      "save": "저장",
+      "success": "수정되었습니다.",
+      "fail": "수정에 실패했습니다: {error}"
+    },
+    "resolve": {
+      "confirmTitle": "해결 완료로 표시할까요?",
+      "confirmBody": "이 게시물을 해결 완료로 표시합니다.",
+      "success": "해결 완료로 표시했습니다.",
+      "badgeLost": "찾았어요!",
+      "badgeFound": "돌려줬어요!"
+    },
+    "detail": {
+      "title": "분실/습득물",
+      "location": "장소",
+      "bounty": "현상금",
+      "registrant": "등록자",
+      "contact": "연락하기",
+      "resolved": "해결 완료",
+      "markAsResolved": "해결 완료로 표시",
+      "deleteTitle": "게시글 삭제",
+      "deleteContent": "정말로 이 게시글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "delete": "삭제",
+      "cancel": "취소",
+      "deleteSuccess": "게시글이 삭제되었습니다.",
+      "deleteFail": "삭제에 실패했습니다: {error}",
+      "editTooltip": "수정하기",
+      "deleteTooltip": "삭제하기",
+      "noUser": "사용자 정보 없음",
+      "chatError": "채팅을 시작할 수 없습니다: {error}"
+    }
+  },
+  "community": {
+    "title": "커뮤니티 화면"
+  },
+  "shared": {
+    "tagInput": {
+      "defaultHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다."
+    }
+  },
+  "linkPreview": {
+    "errorTitle": "미리보기를 불러올 수 없습니다",
+    "errorBody": "링크를 확인하거나 나중에 다시 시도하세요."
+  },
+  "selectCategory": "카테고리 선택",
+  "address_neighborhood": "동네",
+  "address_detail_hint": "상세 주소",
+  "localNewsTagResult": {
+    "error": "검색 중 오류가 발생했습니다: {error}",
+    "empty": "'#{tag}' 태그가 포함된 게시물이 없습니다."
+  },
+  "admin": {
+    "screen": {
+      "title": "관리자 메뉴"
+    },
+    "menu": {
+      "aiApproval": "AI 검수 승인 관리",
+      "reportManagement": "신고 관리",
+      "aiAudit": "AI 감사 로그",
+      "aiAuditSubtitle": "현장 인수 및 등록/검수 이력 보기"
+    },
+    "aiApproval": {
+      "empty": "AI 검수 대기 중인 상품이 없습니다.",
+      "error": "대기 중인 상품을 불러오는 중 오류 발생.",
+      "requestedAt": "요청 시각",
+      "detailTitle": "검수 요청 상세",
+      "idInfo": "ID 정보",
+      "sellerInfo": "판매자 정보",
+      "itemInfo": "상품 원본 정보",
+      "rejectTitle": "거절 사유 입력",
+      "rejectReasonHint": "거절 사유",
+      "rejectReasonRequired": "사유는 필수입니다",
+      "aiReport": "AI 분석 리포트 (V3)",
+      "labels": {
+        "userId": "사용자 ID",
+        "productId": "상품 ID"
+      },
+      "buttons": {
+        "reject": "거절",
+        "approve": "승인"
+      }
+    },
+    "reports": {
+      "title": "신고 관리",
+      "empty": "처리 대기 중인 신고가 없습니다.",
+      "error": "신고 목록을 불러오는 중 오류 발생.",
+      "createdAt": "접수 시각"
+    },
+    "reportList": {
+      "title": "신고 관리",
+      "empty": "처리 대기 중인 신고가 없습니다.",
+      "error": "신고 목록을 불러오는 중 오류 발생."
+    },
+    "reportDetail": {
+      "title": "신고 상세 정보",
+      "loadError": "신고 정보를 불러오는데 실패했습니다.",
+      "sectionReportInfo": "신고 정보",
+      "idLabel": "ID",
+      "postIdLabel": "신고된 게시글 ID",
+      "reporter": "신고자",
+      "reportedUser": "피신고자",
+      "reason": "신고 사유",
+      "reportedAt": "신고 시각",
+      "currentStatus": "현재 상태",
+      "sectionContent": "신고된 콘텐츠",
+      "loadingContent": "콘텐츠 로딩 중...",
+      "contentLoadError": "신고된 콘텐츠를 불러오는데 실패했습니다.",
+      "contentNotAvailable": "콘텐츠 정보가 없거나 삭제되었습니다.",
+      "authorIdLabel": "작성자 ID",
+      "content": {
+        "post": "게시글: {title}\n\n{body}",
+        "comment": "댓글: {content}",
+        "reply": "답글: {content}"
+      },
+      "viewOriginalPost": "원본 게시글 보기",
+      "sectionActions": "처리",
+      "actionReviewed": "검토 완료로 표시",
+      "actionTaken": "조치 완료로 표시 (예: 삭제)",
+      "actionDismissed": "신고 기각",
+      "statusUpdateSuccess": "신고 상태를 '{status}'(으)로 업데이트했습니다.",
+      "statusUpdateFail": "상태 업데이트 실패: {error}",
+      "originalPostNotFound": "원본 게시글을 찾을 수 없습니다.",
+      "couldNotOpenOriginalPost": "원본 게시글을 열 수 없습니다."
+    },
+    "reset": {
+      "confirmTitle": "AI 검수 횟수 초기화",
+      "confirmContent": "모든 상품의 \"AI 검수 취소 횟수(aiCancelCount)\"를 0으로 강제 초기화합니다. (무료 티어 1회 복구)\n\n이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?",
+      "execute": "초기화 실행",
+      "noTargets": "성공: 초기화할 상품이 없습니다.",
+      "success": "성공: {count} 개의 상품이 0으로 초기화되었습니다.",
+      "fail": "실패: {error}"
+    }
+  },
+  "tags": {
+    "local_news": {
+      "kelurahan_notice": {
+        "name": "동/리 공지",
+        "desc": "주민센터(동/리) 공지사항."
+      },
+      "kecamatan_notice": {
+        "name": "구/면 공지",
+        "desc": "구청/면사무소 공지사항."
+      },
+      "public_campaign": {
+        "name": "공공 캠페인",
+        "desc": "공공 안내 및 정부 프로그램."
+      },
+      "siskamling": {
+        "name": "자율방범",
+        "desc": "동네 방범 활동/순찰 소식."
+      },
+      "power_outage": {
+        "name": "정전",
+        "desc": "우리 동네 전기 끊김/정전 안내."
+      },
+      "water_outage": {
+        "name": "단수",
+        "desc": "수도 공급 중단/장애 안내."
+      },
+      "waste_collection": {
+        "name": "쓰레기 수거",
+        "desc": "쓰레기 수거 일정 및 안내."
+      },
+      "road_works": {
+        "name": "도로 공사",
+        "desc": "도로 공사/보수 작업 안내."
+      },
+      "public_facility": {
+        "name": "공공 시설",
+        "desc": "공원/광장 등 공공시설 안내."
+      },
+      "weather_warning": {
+        "name": "기상 특보",
+        "desc": "우리 동네 기상 특보/주의보."
+      },
+      "flood_alert": {
+        "name": "홍수 알림",
+        "desc": "홍수 경보 및 침수 지역 안내."
+      },
+      "air_quality": {
+        "name": "대기 질",
+        "desc": "대기오염 정보 및 AQI."
+      },
+      "disease_alert": {
+        "name": "질병 알림",
+        "desc": "전염병/보건 관련 알림."
+      },
+      "school_notice": {
+        "name": "학교 공지",
+        "desc": "인근 학교의 공지사항."
+      },
+      "posyandu": {
+        "name": "포샨두",
+        "desc": "지역 보건소(포샨두) 활동 안내."
+      },
+      "health_campaign": {
+        "name": "건강 캠페인",
+        "desc": "보건 캠페인 및 안내."
+      },
+      "traffic_control": {
+        "name": "교통 통제",
+        "desc": "도로 통제/우회/차량 통제 안내."
+      },
+      "public_transport": {
+        "name": "대중교통",
+        "desc": "버스/전철 등 대중교통 안내."
+      },
+      "parking_policy": {
+        "name": "주차 정보/정책",
+        "desc": "주차 정보 및 정책 변경 안내."
+      },
+      "community_event": {
+        "name": "동네 행사",
+        "desc": "축제/모임/행사 안내."
+      },
+      "worship_event": {
+        "name": "종교 행사",
+        "desc": "사원/교회/사찰 등 종교 행사."
+      },
+      "incident_report": {
+        "name": "사건/사고 제보",
+        "desc": "동네의 사건·사고 신고/알림."
+      }
+    }
+  },
+  "boards": {
+    "popup": {
+      "inactiveTitle": "동네 게시판이 아직 활성화되지 않았어요",
+      "inactiveBody": "동네 게시판을 활성화하려면 먼저 동네 소식을 한 번 작성해보세요. 이웃들의 참여가 생기면 게시판이 자동으로 열립니다.",
+      "writePost": "동네 소식 쓰기"
+    },
+    "defaultTitle": "defaultTitle",
+    "chatRoomComingSoon": "chatRoomComingSoon",
+    "chatRoomTitle": "chatRoomTitle",
+    "emptyFeed": "emptyFeed",
+    "chatRoomCreated": "chatRoomCreated"
+  },
+  "search": {
+    "resultsTitle": "'{keyword}' 검색 결과",
+    "empty": {
+      "message": "'{keyword}'에 대한 검색 결과가 없습니다.",
+      "expandToNational": "전국에서 검색하기",
+      "checkSpelling": "검색어의 철자를 확인하거나 다른 단어로 시도해보세요."
+    },
+    "prompt": "검색어를 입력하세요.",
+    "sheet": {
+      "localNews": "동네소식 검색",
+      "localNewsDesc": "제목, 내용, 태그로 찾기",
+      "jobs": "일자리 검색",
+      "jobsDesc": "직무, 회사, 태그로 찾기",
+      "lostAndFound": "분실물 검색",
+      "lostAndFoundDesc": "물건 이름, 장소로 찾기",
+      "marketplace": "중고거래 검색",
+      "marketplaceDesc": "상품명, 카테고리, 태그로 찾기",
+      "localStores": "동네업체 검색",
+      "localStoresDesc": "상호, 업종, 키워드로 찾기",
+      "clubs": "모임 검색",
+      "clubsDesc": "모임명, 관심사로 찾기",
+      "findFriends": "친구찾기 검색",
+      "findFriendsDesc": "닉네임, 관심사로 찾기",
+      "realEstate": "부동산 검색",
+      "realEstateDesc": "매물명, 지역, 태그로 찾기",
+      "auction": "경매 검색",
+      "auctionDesc": "상품명, 태그로 찾기",
+      "pom": "숏폼 검색",
+      "pomDesc": "제목, 해시태그로 찾기",
+      "comingSoon": "곧 제공됩니다"
+    },
+    "results": "검색 결과",
+    "locationfilter": {
+      "title": "지역 설정",
+      "reset": "초기화",
+      "apply": "적용",
+      "provinsi": "시/도 (Provinsi)",
+      "kabupaten": "시/군 (Kabupaten)",
+      "kota": "시 (Kota)",
+      "kecamatan": "구 (Kecamatan)",
+      "kelurahan": "동 (Kelurahan)",
+      "tab": {
+        "admin": "동네 선택",
+        "nearby": "내 주변",
+        "national": "전국"
+      },
+      "nearby": {
+        "radius": "내 위치 반경 {km}km 검색",
+        "desc": "범위를 조정하여 주변 상품을 찾아보세요."
+      },
+      "national": {
+        "title": "인도네시아 전국 검색",
+        "desc": "위치 제한 없이 등록된 모든 상품과 게시물을 검색합니다."
+      },
+      "hint": {
+        "selectParent": "상위 지역을 먼저 선택하세요",
+        "all": "전체 (모든 지역)"
+      }
+    }
+  },
+  "locationfilter": {
+    "title": "지역 설정",
+    "reset": "초기화",
+    "apply": "적용",
+    "provinsi": "시/도 (Provinsi)",
+    "kabupaten": "시/군 (Kabupaten)",
+    "kota": "시 (Kota)",
+    "kecamatan": "구 (Kecamatan)",
+    "kelurahan": "동 (Kelurahan)",
+    "tab": {
+      "admin": "동네 선택",
+      "nearby": "내 주변",
+      "national": "전국"
+    },
+    "nearby": {
+      "radius": "내 위치 반경 {km}km 검색",
+      "desc": "범위를 조정하여 주변 상품을 찾아보세요."
+    },
+    "national": {
+      "title": "인도네시아 전국 검색",
+      "desc": "위치 제한 없이 등록된 모든 상품과 게시물을 검색합니다."
+    },
+    "hint": {
+      "selectParent": "상위 지역을 먼저 선택하세요",
+      "all": "전체 (모든 지역)"
+    }
+  },
+  "language": {
+    "id": "Bahasa Indonesia",
+    "ko": "한국어",
+    "en": "English"
+  },
+  "location_setting_error": "location setting error",
+  "signup_fail_required": "signup fail required",
+  "signup_fail_password_mismatch": "signup fail password mismatch",
+  "signup_fail_default": "signup fail default",
+  "signup_fail_weak_password": "signup fail weak password",
+  "signup_fail_email_in_use": "signup fail email in use",
+  "signup_fail_invalid_email": "signup fail invalid email",
+  "signup_fail_unknown": "signup fail unknown",
+  "category_empty": "category empty",
+  "user": {
+    "notLoggedIn": "notLoggedIn"
+  },
+  "ai_audit": {
+    "title": "AI 감사 로그",
+    "tabs": {
+      "all": "전체",
+      "takeover": "현장 인수",
+      "registration": "등록/검수"
+    },
+    "list": {
+      "takeover_title": "현장 인수 검증",
+      "registration_title": "상품 AI 등록",
+      "verdict": "판정",
+      "id": "ID",
+      "no_records": "AI 기록이 없습니다.",
+      "error": "AI 기록을 불러오는 중 오류가 발생했습니다."
+    }
+  },
+  "ai_case": {
+    "title": "AI 케이스 상세",
+    "tabs": {
+      "summary": "요약",
+      "takeover_photos": "현장 인수 사진",
+      "original_photos": "원본 사진",
+      "raw_json": "Raw JSON"
+    }
+  },
+    "tag_input": {
+      "fromTitleSuffix": "(제목)",
+      "addHint": "태그 추가...",
+      "help": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다."
+    },
+    "auth": {
+    "verification": {
+      "title": "이메일 인증",
+      "sent_title": "인증 메일 발송 완료",
+      "sent_desc": "{email}\n위 주소로 발송된 링크를 클릭하면\n자동으로 인증이 완료됩니다.",
+      "resend": "인증 메일 재전송",
+      "logout": "로그아웃",
+      "check": "인증 확인",
+      "success": "이메일 인증이 완료되었습니다.",
+      "fail_send": "메일 발송 실패: {error}"
+    }
+    ,
+    "signup": {
+      "success_email_sent": "가입 성공! {email}로 인증 링크를 보냈습니다.",
+      "fail": {
+        "required": "필수 항목을 입력해주세요.",
+        "password_mismatch": "비밀번호가 일치하지 않습니다.",
+        "default": "회원가입에 실패했습니다. 다시 시도해주세요.",
+        "weak_password": "비밀번호가 너무 약합니다.",
+        "email_in_use": "이미 사용 중인 이메일입니다.",
+        "invalid_email": "유효하지 않은 이메일 주소입니다.",
+        "unknown": "알 수 없는 오류가 발생했습니다."
+      }
+    }
+  },
+  "tag_input": {
+    "help": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다."
+  }
+}

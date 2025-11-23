@@ -1,0 +1,167 @@
+diff --git a/tools/i18n_audit.py b/tools/i18n_audit.py
+new file mode 100755
+index 0000000000000000000000000000000000000000..5f2d1c75a41d88543a02613de2d4ec8cede8f694
+--- /dev/null
++++ b/tools/i18n_audit.py
+@@ -0,0 +1,161 @@
++#!/usr/bin/env python3
++"""
++Audit i18n usage and definitions for the Flutter project.
++
++Scans lib/ for translation key usage and compares against locales in assets/lang.
++Outputs a JSON report to tools/i18n_audit_report.json by default.
++"""
++from __future__ import annotations
++
++import json
++import os
++import re
++from collections import defaultdict
++from pathlib import Path
++from typing import Dict, Iterable, List, Set, Tuple
++
++ROOT_DIR = Path(__file__).resolve().parent.parent
++LIB_DIR = ROOT_DIR / "lib"
++LANG_DIR = ROOT_DIR / "assets" / "lang"
++REPORT_PATH = ROOT_DIR / "tools" / "i18n_audit_report.json"
++
++# Regex patterns to capture translation key usages
++PATTERNS = [
++    re.compile(r"tr\(\s*'([^']+)'"),
++    re.compile(r'tr\(\s*"([^"]+)"'),
++    re.compile(r"'([^']+)'\s*\\?\.tr\("),
++    re.compile(r"safeTr\s*\(\s*context\s*,\s*'([^']+)'"),
++    re.compile(r"safeTr\s*\(\s*context\s*,\s*\"([^\"]+)\"")
++]
++
++
++def flatten_json(obj: Dict, prefix: str = "") -> Dict[str, str]:
++    """Flatten a nested dictionary into dot-notation keys.
++
++    Lists are converted to string values with their index appended.
++    """
++    items: Dict[str, str] = {}
++    for key, value in obj.items():
++        new_key = f"{prefix}.{key}" if prefix else str(key)
++        if isinstance(value, dict):
++            items.update(flatten_json(value, new_key))
++        elif isinstance(value, list):
++            for idx, item in enumerate(value):
++                list_key = f"{new_key}.{idx}"
++                if isinstance(item, dict):
++                    items.update(flatten_json(item, list_key))
++                else:
++                    items[list_key] = str(item)
++        else:
++            items[new_key] = str(value)
++    return items
++
++
++def find_dart_files(directory: Path) -> Iterable[Path]:
++    for root, _, files in os.walk(directory):
++        for name in files:
++            if name.endswith('.dart'):
++                yield Path(root) / name
++
++
++def extract_keys_from_file(file_path: Path) -> Set[str]:
++    keys: Set[str] = set()
++    try:
++        text = file_path.read_text(encoding='utf-8')
++    except Exception:
++        return keys
++
++    for pattern in PATTERNS:
++        for match in pattern.findall(text):
++            if match:
++                keys.add(match)
++    return keys
++
++
++def collect_used_keys() -> Set[str]:
++    used: Set[str] = set()
++    for dart_file in find_dart_files(LIB_DIR):
++        used.update(extract_keys_from_file(dart_file))
++    return used
++
++
++def load_locale(locale: str) -> Dict[str, str]:
++    path = LANG_DIR / f"{locale}.json"
++    with path.open(encoding='utf-8') as f:
++        data = json.load(f)
++    return flatten_json(data)
++
++
++def calculate_structure_mismatches(locales: Dict[str, Set[str]]) -> List[Dict[str, object]]:
++    all_keys: Set[str] = set().union(*locales.values())
++    mismatches: List[Dict[str, object]] = []
++    for key in sorted(all_keys):
++        present = [loc for loc, keys in locales.items() if key in keys]
++        if len(present) != len(locales):
++            missing = [loc for loc in locales if loc not in present]
++            mismatches.append({"key": key, "presentIn": present, "missingIn": missing})
++    return mismatches
++
++
++def find_duplicate_values(locale_data: Dict[str, str], locale: str) -> List[Dict[str, object]]:
++    value_to_keys: Dict[str, List[str]] = defaultdict(list)
++    for key, value in locale_data.items():
++        value_to_keys[value].append(key)
++
++    duplicates: List[Dict[str, object]] = []
++    for value, keys in value_to_keys.items():
++        if len(keys) > 1:
++            duplicates.append({"locale": locale, "value": value, "keys": sorted(keys)})
++    return duplicates
++
++
++def generate_report() -> Dict[str, object]:
++    used_keys = collect_used_keys()
++
++    en = load_locale('en')
++    idn = load_locale('id')
++    ko = load_locale('ko')
++
++    defined_en = set(en.keys())
++    defined_id = set(idn.keys())
++    defined_ko = set(ko.keys())
++
++    report = {
++        "usedKeys": sorted(used_keys),
++        "definedKeysEn": sorted(defined_en),
++        "definedKeysId": sorted(defined_id),
++        "definedKeysKo": sorted(defined_ko),
++        "missingInEn": sorted(used_keys - defined_en),
++        "missingInId": sorted(used_keys - defined_id),
++        "missingInKo": sorted(used_keys - defined_ko),
++        "unusedInEn": sorted(defined_en - used_keys),
++        "unusedInId": sorted(defined_id - used_keys),
++        "unusedInKo": sorted(defined_ko - used_keys),
++        "structureMismatches": calculate_structure_mismatches({
++            'en': defined_en,
++            'id': defined_id,
++            'ko': defined_ko,
++        }),
++        "duplicateValues": sorted(
++            find_duplicate_values(en, 'en')
++            + find_duplicate_values(idn, 'id')
++            + find_duplicate_values(ko, 'ko'),
++            key=lambda x: (x['locale'], x['value'])
++        ),
++    }
++
++    return report
++
++
++def main() -> None:
++    report = generate_report()
++    REPORT_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding='utf-8')
++    print(f"Audit complete. Report written to {REPORT_PATH.relative_to(ROOT_DIR)}")
++    print(f"Used keys: {len(report['usedKeys'])}")
++    print(f"Defined keys (en): {len(report['definedKeysEn'])}")
++    print(f"Defined keys (id): {len(report['definedKeysId'])}")
++    print(f"Defined keys (ko): {len(report['definedKeysKo'])}")
++
++
++if __name__ == "__main__":
++    main()
