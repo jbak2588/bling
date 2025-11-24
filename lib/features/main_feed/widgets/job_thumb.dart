@@ -3,7 +3,8 @@ import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/features/jobs/screens/job_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart'; // ✅ 이미지 위젯 import
-import 'package:easy_localization/easy_localization.dart'; // 다국어 지원
+import 'package:intl/intl.dart';
+import 'package:bling_app/i18n/strings.g.dart'; // 다국어 지원
 
 /// [개편] 6단계: 메인 피드용 표준 썸네일 (Job 전용)
 ///
@@ -26,34 +27,36 @@ class JobThumb extends StatelessWidget {
     final negotiable = job.isSalaryNegotiable;
 
     if (type == null || amount == null) {
-      return 'jobs.form.salaryNegotiable'.tr(); // 급여 협의 (기본값)
+      return t.jobs.form.salaryNegotiable; // 급여 협의 (기본값)
     }
 
     final currencyFormat = NumberFormat.currency(
-        locale: context.locale.toString(), symbol: '', decimalDigits: 0);
+        locale: Localizations.localeOf(context).toString(),
+        symbol: '',
+        decimalDigits: 0);
     String formattedAmount = currencyFormat.format(amount);
 
     String prefix;
     switch (type) {
       case 'hourly':
         // ✅ [수정] i18n 키 경로 수정
-        prefix = 'jobs.salaryTypes.hourly'.tr();
+        prefix = t.jobs.salaryTypes.hourly;
         break;
       case 'daily':
         // ✅ [수정] i18n 키 경로 수정
-        prefix = 'jobs.salaryTypes.daily'.tr();
+        prefix = t.jobs.salaryTypes.daily;
         break;
       case 'weekly':
         // ✅ [수정] i18n 키 경로 수정 (weekly 키가 json에 없다면 추가 필요)
-        prefix = 'jobs.salaryTypes.weekly'.tr(); // 'weekly' 키가 없으면 기본값 표시됨
+        prefix = t.jobs.salaryTypes.weekly; // 'weekly' 키가 없으면 기본값 표시됨
         break;
       case 'monthly':
         // ✅ [수정] i18n 키 경로 수정
-        prefix = 'jobs.salaryTypes.monthly'.tr();
+        prefix = t.jobs.salaryTypes.monthly;
         break;
       case 'yearly':
         // ✅ [수정] i18n 키 경로 수정 (yearly 키가 json에 없다면 추가 필요)
-        prefix = 'jobs.salaryTypes.yearly'.tr(); // 'yearly' 키가 없으면 기본값 표시됨
+        prefix = t.jobs.salaryTypes.yearly; // 'yearly' 키가 없으면 기본값 표시됨
         break;
       default:
         prefix = type; // 알 수 없는 타입은 그대로 표시
@@ -61,8 +64,8 @@ class JobThumb extends StatelessWidget {
 
     // 인도네시아어의 경우 통화 기호(Rp)를 뒤에 붙임
     String currencySymbol =
-        (context.locale.languageCode == 'id') ? ' Rp' : 'Rp ';
-    if (context.locale.languageCode == 'id') {
+        (Localizations.localeOf(context).languageCode == 'id') ? ' Rp' : 'Rp ';
+    if (Localizations.localeOf(context).languageCode == 'id') {
       formattedAmount = '$prefix $formattedAmount$currencySymbol';
     } else {
       formattedAmount = '$prefix $currencySymbol$formattedAmount';
@@ -70,7 +73,7 @@ class JobThumb extends StatelessWidget {
 
     if (negotiable) {
       // ✅ [수정] 정의되지 않은 Short 키 대신 full 키를 사용하고 괄호로 감쌈
-      formattedAmount += ' (${'jobs.form.salaryNegotiable'.tr()})';
+      formattedAmount += ' (${t.jobs.form.salaryNegotiable})';
     }
 
     return formattedAmount;
@@ -86,7 +89,7 @@ class JobThumb extends StatelessWidget {
         onTap: () {
           final detailScreen = JobDetailScreen(job: job);
           if (onIconTap != null) {
-            onIconTap!(detailScreen, 'main.tabs.jobs');
+            onIconTap!(detailScreen, t.main.tabs.jobs);
           } else {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => detailScreen),

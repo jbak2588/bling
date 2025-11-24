@@ -147,8 +147,8 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
 
     // 2. 결과값이 있는지 확인합니다. (사용자가 뒤로가기를 누르면 null)
     if (result != null && result is Map) {
-      final String? prov = result['prov'] as String?;
-      final String? kab = result['kab'] as String?;
+      final String? prov = result['prov'] ?? '' as String?;
+      final String? kab = result['kab'] ?? '' as String?;
 
       // 3. 유효성 검사: 동네 설정이므로 최소한 '도'와 '시/군' 정보는 필수입니다.
       if (prov != null && kab != null) {
@@ -164,8 +164,12 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
           // 입력값이 "Kecamatan OO" 형태인지 단순 "OO"인지에 따라 처리가 다르지만,
           // LocationFilterScreen 데이터가 순수 이름만 온다면 약어만 붙여줌.
           // 여기서는 안전하게 조합합니다.
-          final kKel = result['kel'] != null ? "Kel. ${result['kel']}" : "";
-          final kKec = result['kec'] != null ? "Kec. ${result['kec']}" : "";
+          final kKel = (result['kel']?.toString() ?? '').isNotEmpty
+              ? "Kel. ${result['kel']?.toString() ?? ''}"
+              : "";
+          final kKec = (result['kec']?.toString() ?? '').isNotEmpty
+              ? "Kec. ${result['kec']?.toString() ?? ''}"
+              : "";
           final kKab = kab.startsWith("KOTA") || kab.startsWith("KAB")
               ? kab
               : "Kab. $kab";

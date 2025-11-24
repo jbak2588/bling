@@ -944,8 +944,7 @@
       "yearly": "연봉",
       "per_case": "건당",
       "etc": "기타",
-      "total": "총 보수",
-      "$value": "$value"
+      "total": "총 보수"
     },
     "workPeriods": {
       "short_term": "단기",
@@ -957,8 +956,7 @@
       "3_months": "3개월",
       "6_months_plus": "6개월 이상",
       "negotiable": "협의 가능",
-      "etc": "기타",
-      "$period": "$period"
+      "etc": "기타"
     },
     "detail": {
       "infoTitle": "상세 정보",
@@ -1049,10 +1047,8 @@
       "travel": "여행",
       "pets": "반려동물",
       "volunteering": "봉사활동",
-      "minimalism": "미니멀리즘",
-      "$interestKey": "$interestKey"
-    },
-    "$categoryKey": "$categoryKey"
+      "minimalism": "미니멀리즘"
+    }
   },
   "friendDetail": {
     "request": "친구 요청",
@@ -1349,8 +1345,7 @@
       "auto": "자동차/정비",
       "kids": "키즈",
       "hospital": "병원/클리닉",
-      "etc": "기타",
-      "$category": "$category"
+      "etc": "기타"
     },
     "detail": {
       "description": "상점 소개",
@@ -1589,8 +1584,7 @@
       "rentPeriods": {
         "daily": "일간",
         "monthly": "월간",
-        "yearly": "연간",
-        "$period": "$period"
+        "yearly": "연간"
       },
       "kos": {
         "bathroomType": "욕실 타입",
@@ -1623,8 +1617,7 @@
       "furnishedTypes": {
         "furnished": "가구 포함",
         "semi_furnished": "부분 가구 포함",
-        "unfurnished": "가구 없음",
-        "$status": "$status"
+        "unfurnished": "가구 없음"
       }
     },
     "info": {

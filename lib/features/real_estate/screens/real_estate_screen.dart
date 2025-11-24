@@ -17,7 +17,9 @@
 // lib/features/real_estate/screens/real_estate_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// compat shim removed; using Slang `t` accessors
 
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/real_estate/screens/room_list_screen.dart';
@@ -139,7 +141,7 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
         children: [
           if (_showSearchBar)
             InlineSearchChip(
-              hintText: 'main.search.hint.realEstate'.tr(),
+              hintText: t.main.search.hint.realEstate,
               openNotifier: _chipOpenNotifier,
               onSubmitted: (kw) =>
                   _searchKeywordNotifier.value = kw.trim().toLowerCase(),
@@ -163,7 +165,7 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
                 return _buildCategoryCard(
                   context,
                   icon: category['icon'] as IconData,
-                  label: (category['labelKey'] as String).tr(),
+                  label: t[category['labelKey'] as String],
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -183,7 +185,7 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Text(
-              'realEstate.disclaimer'.tr(),
+              t.realEstate.disclaimer,
               style: Theme.of(context)
                   .textTheme
                   .bodySmall

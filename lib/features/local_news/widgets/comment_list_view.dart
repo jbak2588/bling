@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/models/comment_model.dart';
 import '../../../core/models/user_model.dart';
@@ -100,15 +101,15 @@ class _CommentListViewState extends State<CommentListView> {
       context: context,
       builder: (context) => AlertDialog(
         // ✅ [다국어 수정]
-        title: Text('deleteConfirm.title'.tr()),
-        content: Text('deleteConfirm.content'.tr()),
+        title: Text(t.deleteConfirm.title),
+        content: Text(t.deleteConfirm.content),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('common.cancel'.tr())),
+              child: Text(t.common.cancel)),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('common.delete'.tr(),
+            child: Text(t.common.delete,
                 style: const TextStyle(color: Colors.red)),
           ),
         ],
@@ -135,8 +136,8 @@ class _CommentListViewState extends State<CommentListView> {
         ScaffoldMessenger.of(context).showSnackBar(
           // ✅ [다국어 수정]
           SnackBar(
-              content: Text('deleteConfirm.failure'
-                  .tr(namedArgs: {'error': e.toString()}))),
+              content: Text(t.deleteConfirm.failure
+                  .replaceAll('{error}', e.toString()))),
         );
       }
     }
@@ -157,7 +158,7 @@ class _CommentListViewState extends State<CommentListView> {
           return Center(
               child: Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Text('commentListView.empty'.tr(),
+            child: Text(t.commentListView.empty,
                 style: const TextStyle(color: Colors.grey)),
           ));
         }
@@ -220,7 +221,7 @@ class _CommentListViewState extends State<CommentListView> {
                   // ✅ [신고하기] 본인 댓글/답글 여부에 따라 다른 메뉴 표시
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert, size: 20),
-                    tooltip: 'common.moreOptions'.tr(),
+                    tooltip: t.common.moreOptions,
                     onSelected: (value) {
                       if (value == 'delete') {
                         _deleteComment(comment.id);
@@ -235,12 +236,12 @@ class _CommentListViewState extends State<CommentListView> {
                       if (isOwner) {
                         items.add(PopupMenuItem(
                           value: 'delete',
-                          child: Text('common.delete'.tr()),
+                          child: Text(t.common.delete),
                         ));
                       } else {
                         items.add(PopupMenuItem(
                           value: 'report',
-                          child: Text('common.report'.tr()),
+                          child: Text(t.common.report),
                         ));
                       }
                       return items;
@@ -254,7 +255,7 @@ class _CommentListViewState extends State<CommentListView> {
                         comment.userId != currentUserId &&
                         widget.postOwnerId != currentUserId)
                     // ✅ [다국어 수정]
-                    ? 'commentListView.secret'.tr()
+                    ? t.commentListView.secret
                     : comment.content,
               ),
               ReplyListView(postId: widget.postId, commentId: comment.id),
@@ -276,7 +277,7 @@ class _CommentListViewState extends State<CommentListView> {
                     icon: const Icon(Icons.reply, size: 18, color: Colors.grey),
                     label:
                         // ✅ [다국어 수정]
-                        Text('commentListView.reply'.tr(),
+                        Text(t.commentListView.reply,
                             style: const TextStyle(color: Colors.grey)),
                   ),
                 ],
@@ -313,7 +314,7 @@ class _CommentListViewState extends State<CommentListView> {
       builder: (dialogContext) {
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
-            title: Text('reportDialog.titleComment'.tr()),
+            title: Text(t.reportDialog.titleComment),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -324,7 +325,7 @@ class _CommentListViewState extends State<CommentListView> {
                     children: reportReasons.map((reasonKey) {
                       final isSelected = selectedReason == reasonKey;
                       return ChoiceChip(
-                        label: Text(reasonKey.tr()),
+                        label: Text(t[reasonKey]),
                         selected: isSelected,
                         onSelected: (_) =>
                             setState(() => selectedReason = reasonKey),
@@ -337,7 +338,7 @@ class _CommentListViewState extends State<CommentListView> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: Text('common.cancel'.tr()),
+                child: Text(t.common.cancel),
               ),
               ElevatedButton(
                 onPressed: (selectedReason != null && !_isReporting)
@@ -352,7 +353,7 @@ class _CommentListViewState extends State<CommentListView> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text('common.report'.tr()),
+                    : Text(t.common.report),
               ),
             ],
           );
@@ -370,7 +371,7 @@ class _CommentListViewState extends State<CommentListView> {
     if (reporterId.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('main.errors.loginRequired'.tr())),
+          SnackBar(content: Text(t.main.errors.loginRequired)),
         );
       }
       return;
@@ -380,7 +381,7 @@ class _CommentListViewState extends State<CommentListView> {
     if (comment.userId == reporterId) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('reportDialog.cannotReportSelfComment'.tr())),
+          SnackBar(content: Text(t.reportDialog.cannotReportSelfComment)),
         );
       }
       return;
@@ -405,14 +406,14 @@ class _CommentListViewState extends State<CommentListView> {
 
       // ✅ [Exception Fix] 저장된 참조 사용 (mounted 체크 불필요, showSnackBar는 내부적으로 체크함)
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('reportDialog.success'.tr())),
+        SnackBar(content: Text(t.reportDialog.success)),
       );
     } catch (e) {
       // ✅ [Exception Fix] 저장된 참조 사용
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text(
-            'reportDialog.fail'.tr(namedArgs: {'error': e.toString()}),
+            t.reportDialog.fail.replaceAll('{error}', e.toString()),
           ),
         ),
       );
@@ -425,17 +426,17 @@ class _CommentListViewState extends State<CommentListView> {
   String _formatTime(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    if (difference.inSeconds < 60) return 'time.now'.tr();
+    if (difference.inSeconds < 60) return t.time.now;
     if (difference.inMinutes < 60) {
-      return 'time.minutesAgo'
-          .tr(namedArgs: {'minutes': difference.inMinutes.toString()});
+      return t.time.minutesAgo
+          .replaceAll('{minutes}', difference.inMinutes.toString());
     }
     if (difference.inHours < 24) {
-      return 'time.hoursAgo'
-          .tr(namedArgs: {'hours': difference.inHours.toString()});
+      return t.time.hoursAgo
+          .replaceAll('{hours}', difference.inHours.toString());
     }
 
     // ✅ [다국어 수정] 날짜 포맷도 JSON 파일에서 가져오도록 변경
-    return DateFormat('time.dateFormatLong'.tr()).format(dateTime);
+    return DateFormat(t.time.dateFormatLong).format(dateTime);
   }
 }

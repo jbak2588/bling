@@ -9,7 +9,7 @@ library;
 import 'dart:async'; // ✅ StreamSubscription 사용 위해 추가
 
 import 'firebase_options.dart';
-import 'package:easy_localization/easy_localization.dart';
+// easy_localization removed; using Slang `strings.g.dart` instead
 import 'package:bling_app/features/location/providers/location_provider.dart'; // ✅ LocationProvider Import
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +24,9 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 // ✅ app_links 및 링크 처리 관련 import 추가 (uni_links 대체)
 import 'package:app_links/app_links.dart';
 import 'package:bling_app/features/shared/controllers/locale_controller.dart'; // ✅ LocaleController import
+// ▼▼▼ [추가] Slang 생성 파일 import ▼▼▼
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 // import 'package:device_info_plus/device_info_plus.dart'; // [Fix] 더 이상 필요하지 않음
 // import 'dart:io'; // [Fix] 더 이상 필요하지 않음
 import 'package:bling_app/features/local_news/models/post_model.dart';
@@ -80,7 +83,8 @@ const bool forceAppCheckDebug =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
+  // ▼▼▼ [追加] Slang initialization: use device locale
+  LocaleSettings.useDeviceLocale();
   await _ensureGoogleMapRenderer();
 
   // 1. Firebase 초기화
@@ -131,19 +135,12 @@ void main() async {
   await _initAppLinks();
 
   runApp(
-    EasyLocalization(
-      supportedLocales: const [Locale('id'), Locale('en'), Locale('ko')],
-      path: 'assets/lang',
-      fallbackLocale: const Locale('en'),
-      // startLocale을 제거하면 EasyLocalization이 기기 언어를 감지하여
-      // supportedLocales 중 하나와 매칭을 시도합니다.
+    // ▼▼▼ [Migration] runApp with TranslationProvider + Slang-backed app
+    TranslationProvider(
       child: MultiProvider(
-        // ✅ MultiProvider로 감싸기
         providers: [
-          // LocaleController는 ChangeNotifier가 아니므로 일반 Provider 사용 및 타입 명시
           Provider<LocaleController>(create: (_) => LocaleController()),
-          ChangeNotifierProvider(
-              create: (_) => LocationProvider()), // ✅ LocationProvider 등록
+          ChangeNotifierProvider(create: (_) => LocationProvider()),
         ],
         child: const BlingApp(),
       ),
@@ -254,9 +251,12 @@ class BlingApp extends StatelessWidget {
       navigatorKey: navigatorKey, // ✅ 네비게이터 키 설정
       title: 'Bling App',
       debugShowCheckedModeBanner: false,
-      localizationsDelegates: context.localizationDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('id'), Locale('en'), Locale('ko')],
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,

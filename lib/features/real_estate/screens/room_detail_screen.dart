@@ -38,7 +38,10 @@ import 'package:bling_app/features/real_estate/screens/edit_room_listing_screen.
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// compat shim removed; using Slang `t` accessors
 // [추가]
 // import 'package:photo_view/photo_view.dart';
 // import 'package:photo_view/photo_view_gallery.dart';
@@ -92,8 +95,8 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('realEstate.detail.chatError'
-                  .tr(namedArgs: {'error': e.toString()})),
+              content: Text(t.realEstate.detail.chatError
+                  .replaceAll('{error}', e.toString())),
               backgroundColor: Colors.red),
         );
       }
@@ -104,15 +107,15 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('realEstate.detail.deleteTitle'.tr()),
-        content: Text('realEstate.detail.deleteContent'.tr()),
+        title: Text(t.realEstate.detail.deleteTitle),
+        content: Text(t.realEstate.detail.deleteContent),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('realEstate.detail.cancel'.tr())),
+              child: Text(t.realEstate.detail.cancel)),
           TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text('realEstate.detail.deleteConfirm'.tr(),
+              child: Text(t.realEstate.detail.deleteConfirm,
                   style: const TextStyle(color: Colors.red))),
         ],
       ),
@@ -123,15 +126,15 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
         await _repository.deleteRoomListing(widget.room.id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('realEstate.detail.deleteSuccess'.tr()),
+              content: Text(t.realEstate.detail.deleteSuccess),
               backgroundColor: Colors.green));
           Navigator.of(context).pop();
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('realEstate.detail.deleteFail'
-                  .tr(namedArgs: {'error': e.toString()})),
+              content: Text(t.realEstate.detail.deleteFail
+                  .replaceAll('{error}', e.toString())),
               backgroundColor: Colors.red));
         }
       }
@@ -250,7 +253,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                     const SizedBox(height: 8),
                     // [추가] Gap 1: '직방' 스타일 핵심 정보
                     Text(
-                      '${'realEstate.form.roomTypes.${room.type}'.tr()} · ${'realEstate.form.listingTypes.${room.listingType}'.tr()}',
+                      '${t['realEstate.form.roomTypes.${room.type}'] ?? ''} · ${t['realEstate.form.listingTypes.${room.listingType}'] ?? ''}',
                       style: TextStyle(
                           fontSize: 15,
                           color: Theme.of(context).primaryColor,
@@ -258,7 +261,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${currencyFormat.format(room.price)} / ${'realEstate.priceUnits.${room.priceUnit}'.tr()}',
+                      '${currencyFormat.format(room.price)} / ${t['realEstate.priceUnits.${room.priceUnit}'] ?? ''}',
                       style: Theme.of(context)
                           .textTheme
                           .headlineSmall
@@ -274,7 +277,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                     // [신규] '작업 8': 'amenities' 대신 'roomType'별 시설 목록 표시
                     _buildDynamicFacilityLists(context, room),
                     const Divider(height: 32),
-                    Text('realEstate.form.details'.tr(),
+                    Text(t.realEstate.form.details,
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 8),
                     Text(room.description,
@@ -285,14 +288,14 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                     ClickableTagList(tags: room.tags),
                     if (room.geoPoint != null) ...[
                       const Divider(height: 32),
-                      Text('realEstate.detail.location'.tr(),
+                      Text(t.realEstate.detail.location,
                           style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 12),
                       MiniMapView(location: room.geoPoint!, markerId: room.id),
                     ],
                     const Divider(height: 32),
 
-                    Text('realEstate.detail.publisherInfo'.tr(),
+                    Text(t.realEstate.detail.publisherInfo,
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 12),
                     // ✅ 기존 _buildOwnerInfo를 공용 AuthorProfileTile로 교체
@@ -306,7 +309,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                             Icon(Icons.verified,
                                 color: Colors.blue.shade700, size: 18),
                             const SizedBox(width: 8),
-                            Text('realEstate.info.verifiedPublisher'.tr(),
+                            Text(t.realEstate.info.verifiedPublisher,
                                 style: TextStyle(
                                     color: Colors.blue.shade700,
                                     fontWeight: FontWeight.bold)),
@@ -327,7 +330,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: Text('realEstate.detail.contact'.tr()),
+                    child: Text(t.realEstate.detail.contact),
                   ),
                 ),
         );
@@ -345,12 +348,12 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
           children: [
             _buildFacilityList(
               context,
-              'realEstate.filter.kos.roomFacilities'.tr(),
+              t.realEstate.filter.kos.roomFacilities,
               room.kosRoomFacilities,
             ),
             _buildFacilityList(
               context,
-              'realEstate.filter.kos.publicFacilities'.tr(),
+              t.realEstate.filter.kos.publicFacilities,
               room.kosPublicFacilities,
             ),
           ],
@@ -358,14 +361,14 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
       case 'apartment':
         return _buildFacilityList(
           context,
-          'realEstate.filter.apartment.facilities'.tr(),
+          t.realEstate.filter.apartment.facilities,
           room.apartmentFacilities,
         );
       case 'house':
       case 'kontrakan':
         return _buildFacilityList(
           context,
-          'realEstate.filter.house.facilities'.tr(),
+          t.realEstate.filter.house.facilities,
           room.houseFacilities,
         );
       case 'ruko':
@@ -373,7 +376,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
       case 'gudang':
         return _buildFacilityList(
           context,
-          'realEstate.filter.commercial.facilities'.tr(),
+          t.realEstate.filter.commercial.facilities,
           room.commercialFacilities,
         );
       default:
@@ -397,7 +400,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
             spacing: 8.0,
             runSpacing: 8.0,
             children: facilityKeys.map((key) {
-              return Chip(label: Text('realEstate.filter.amenities.$key').tr());
+              return Chip(label: Text(t['realEstate.filter.amenities.$key'] ?? ''));
             }).toList(),
           ),
         ],
@@ -415,24 +418,24 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
       children: [
         _buildInfoTile(
           Icons.fullscreen_outlined,
-          'realEstate.form.area'.tr(),
+          t.realEstate.form.area,
           '${room.area.toStringAsFixed(0)} m²',
         ),
         _buildInfoTile(
           Icons.king_bed_outlined,
-          'realEstate.form.rooms'.tr(),
+          t.realEstate.form.rooms,
           '${room.roomCount}',
         ),
         _buildInfoTile(
           Icons.bathtub_outlined,
-          'realEstate.form.bathrooms'.tr(),
+          t.realEstate.form.bathrooms,
           '${room.bathroomCount}',
         ),
         _buildInfoTile(
           Icons.calendar_today_outlined,
-          'realEstate.form.moveInDate'.tr(),
+          t.realEstate.form.moveInDate,
           room.moveInDate == null
-              ? 'realEstate.info.anytime'.tr()
+              ? t.realEstate.info.anytime
               : DateFormat('yyyy-MM-dd').format(room.moveInDate!.toDate()),
         ),
       ],

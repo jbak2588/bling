@@ -8,7 +8,9 @@
 library;
 
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:easy_localization/easy_localization.dart'; // ✅ Import 추가
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// easy_localization compatibility removed; using Slang `t[...]`
 import 'package:flutter/material.dart';
 
 enum LocationSearchMode {
@@ -107,18 +109,18 @@ class LocationProvider extends ChangeNotifier {
   String get displayTitle {
     switch (_mode) {
       case LocationSearchMode.national:
-        return 'locationfilter.national.title'.tr(); // ✅ 다국어 키 적용
+        return t.locationfilter.national.title; // ✅ 다국어 키 적용
       case LocationSearchMode.nearby:
         // ✅ 다국어 키 적용 + 인자 전달
-        return 'locationfilter.nearby.radius'
-            .tr(namedArgs: {'km': _radiusKm.toInt().toString()});
+        return t.locationfilter.nearby.radius
+            .replaceAll('{km}', _radiusKm.toInt().toString());
       case LocationSearchMode.administrative:
         // 가장 하위 행정구역 이름 표시
         if (_adminFilter['kel'] != null) return _adminFilter['kel']!;
         if (_adminFilter['kec'] != null) return _adminFilter['kec']!;
         if (_adminFilter['kab'] != null) return _adminFilter['kab']!;
         if (_adminFilter['prov'] != null) return _adminFilter['prov']!;
-        return 'locationfilter.hint.selectParent'.tr(); // 또는 적절한 기본 문구
+        return t.locationfilter.hint.selectParent; // 또는 적절한 기본 문구
     }
   }
 }

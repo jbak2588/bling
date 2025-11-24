@@ -1,27 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
-class LocaleController extends GetxController {
-  // 앱 시작 시 기본 언어를 인도네시아어로 설정
-  final Rx<Locale> _locale = const Locale('id').obs;
-  Locale get locale => _locale.value;
+class LocaleController {
+  // (기존 메소드들...)
 
-  final locales = const [
-    Locale('id', 'ID'),
-    Locale('ko', 'KR'),
-    Locale('en', 'US'),
-  ];
-
-  // 언어를 순서대로 변경하는 함수
-  void changeLocale() {
-    final currentLang = _locale.value.languageCode;
-    if (currentLang == 'id') {
-      _locale.value = locales[1]; // 한국어로 변경
-    } else if (currentLang == 'ko') {
-      _locale.value = locales[2]; // 영어로 변경
-    } else {
-      _locale.value = locales[0]; // 인도네시아어로 변경
-    }
-    Get.updateLocale(_locale.value); // 앱 전체의 언어를 업데이트
+  // 언어 변경 함수 (이름은 다를 수 있으니 로직을 참고하세요)
+  Future<void> changeLocale(BuildContext context, Locale locale) async {
+    // Replace EasyLocalization API with Slang LocaleSettings
+    LocaleSettings.setLocaleRaw(locale.languageCode);
   }
 }

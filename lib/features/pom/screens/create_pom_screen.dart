@@ -33,7 +33,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart'; // [V2] Re-added
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// compat shim removed; using Slang `t` accessors
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 
@@ -172,7 +174,7 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('pom.create.success'.tr()),
+            content: Text(t.pom.create.success),
             backgroundColor: Colors.green));
         // Return a simple success flag to trigger feed refresh
         Navigator.of(context).pop(true);
@@ -181,7 +183,7 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content:
-                Text('pom.create.fail'.tr(namedArgs: {'error': e.toString()})),
+                Text(t.pom.create.fail.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -193,12 +195,12 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('pom.create.title'.tr()), // [V2] 새 뽐
+        title: Text(t.pom.create.title), // [V2] 새 뽐
         actions: [
           if (!_isSaving)
             TextButton(
                 onPressed: _submitShort,
-                child: Text('pom.create.submit'.tr(),
+                child: Text(t.pom.create.submit,
                     style: TextStyle(
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.bold))),
@@ -214,12 +216,12 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
                 segments: [
                   ButtonSegment(
                     value: PomMediaType.image,
-                    label: Text('pom.create.photo'.tr()),
+                    label: Text(t.pom.create.photo),
                     icon: const Icon(Icons.photo_library_outlined),
                   ),
                   ButtonSegment(
                     value: PomMediaType.video,
-                    label: Text('pom.create.video'.tr()),
+                    label: Text(t.pom.create.video),
                     icon: const Icon(Icons.videocam_outlined),
                   ),
                 ],
@@ -269,7 +271,7 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
               TextField(
                 controller: _titleController, // [V2]
                 decoration: InputDecoration(
-                  labelText: 'pom.create.form.titleLabel'.tr(), // [V2]
+                  labelText: t.pom.create.form.titleLabel, // [V2]
                   border: const OutlineInputBorder(),
                 ),
                 maxLines: 1,
@@ -278,7 +280,7 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
               TextField(
                 controller: _descriptionController, // [V2]
                 decoration: InputDecoration(
-                  labelText: 'pom.create.form.descriptionLabel'.tr(), // [V2]
+                  labelText: t.pom.create.form.descriptionLabel, // [V2]
                   border: const OutlineInputBorder(),
                 ),
                 maxLines: 3,
@@ -288,7 +290,7 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
               Text('Tags', style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: 8),
               CustomTagInputField(
-                hintText: 'pom.search.hint'.tr(),
+                hintText: t.pom.search.hint,
                 titleController: _titleController,
                 onTagsChanged: (tags) {
                   _selectedTags

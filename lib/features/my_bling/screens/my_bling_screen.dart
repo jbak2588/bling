@@ -24,7 +24,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MyBlingScreen extends StatefulWidget {
@@ -64,7 +65,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('myBling.title'.tr()),
+        title: Text(t.myBling.title),
         actions: [
           // ✅ [설정 아이콘] SettingsScreen 연결
           IconButton(
@@ -167,7 +168,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.edit_outlined, size: 20),
-                        label: Text('myBling.editProfile'.tr()),
+                        label: Text(t.myBling.editProfile),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               theme.colorScheme.surfaceContainerHighest,
@@ -211,10 +212,10 @@ class _MyBlingScreenState extends State<MyBlingScreen>
         TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'myBling.tabs.friends'.tr()),
-            Tab(text: 'myBling.tabs.posts'.tr()),
-            Tab(text: 'myBling.tabs.products'.tr()),
-            Tab(text: 'myBling.tabs.bookmarks'.tr()),
+            Tab(text: t.myBling.tabs.friends),
+            Tab(text: t.myBling.tabs.posts),
+            Tab(text: t.myBling.tabs.products),
+            Tab(text: t.myBling.tabs.bookmarks),
           ],
         ),
       ),
@@ -236,7 +237,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
                 style: GoogleFonts.inter(
                     fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 2),
-            Text(labelKey.tr(),
+            Text(t[labelKey],
                 style: GoogleFonts.inter(color: Colors.grey, fontSize: 12)),
           ],
         );

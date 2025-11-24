@@ -7,12 +7,13 @@ import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../widgets/club_member_card.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 class ClubMemberList extends StatelessWidget {
   final String clubId;
   final String ownerId;
-  const ClubMemberList({super.key, required this.clubId, required this.ownerId});
+  const ClubMemberList(
+      {super.key, required this.clubId, required this.ownerId});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,8 @@ class ClubMemberList extends StatelessWidget {
     final bool amIOwner = currentUserId == ownerId;
 
     return Scaffold(
-      body: StreamBuilder<ClubModel>( // [수정] ClubModel 전체를 감시하여 pendingMembers 목록을 가져옴
+      body: StreamBuilder<ClubModel>(
+        // [수정] ClubModel 전체를 감시하여 pendingMembers 목록을 가져옴
         stream: repository.getClubStream(clubId),
         builder: (context, clubSnapshot) {
           if (!clubSnapshot.hasData) {
@@ -36,8 +38,8 @@ class ClubMemberList extends StatelessWidget {
               if (amIOwner && pendingMemberIds.isNotEmpty) ...[
                 SliverToBoxAdapter(
                   child: Padding(
-                         padding: const EdgeInsets.all(16.0),
-                    child: Text('clubs.memberList.pendingMembers'.tr(),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(t.clubs.memberList.pendingMembers,
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
@@ -45,22 +47,39 @@ class ClubMemberList extends StatelessWidget {
                 StreamBuilder<List<UserModel>>(
                   stream: repository.fetchPendingMembers(pendingMemberIds),
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData) return const SliverToBoxAdapter(child: SizedBox.shrink());
+                    if (!snapshot.hasData) {
+                      return const SliverToBoxAdapter(child: SizedBox.shrink());
+                    }
                     final pendingMembers = snapshot.data!;
                     return SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final member = pendingMembers[index];
                           return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
                             child: ListTile(
-                              leading: CircleAvatar(backgroundImage: (member.photoUrl != null && member.photoUrl!.isNotEmpty) ? NetworkImage(member.photoUrl!) : null),
+                              leading: CircleAvatar(
+                                  backgroundImage: (member.photoUrl != null &&
+                                          member.photoUrl!.isNotEmpty)
+                                      ? NetworkImage(member.photoUrl!)
+                                      : null),
                               title: Text(member.nickname),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  IconButton(icon: const Icon(Icons.close, color: Colors.red), onPressed: () => repository.rejectPendingMember(clubId, member.uid)),
-                                  IconButton(icon: const Icon(Icons.check, color: Colors.green), onPressed: () => repository.approvePendingMember(clubId, member.uid)),
+                                  IconButton(
+                                      icon: const Icon(Icons.close,
+                                          color: Colors.red),
+                                      onPressed: () =>
+                                          repository.rejectPendingMember(
+                                              clubId, member.uid)),
+                                  IconButton(
+                                      icon: const Icon(Icons.check,
+                                          color: Colors.green),
+                                      onPressed: () =>
+                                          repository.approvePendingMember(
+                                              clubId, member.uid)),
                                 ],
                               ),
                             ),
@@ -73,12 +92,12 @@ class ClubMemberList extends StatelessWidget {
                 ),
                 const SliverToBoxAdapter(child: Divider(height: 32)),
               ],
-              
+
               // --- 기존 '정식 멤버' 목록 ---
-                 SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                  child: Text('clubs.memberList.allMembers'.tr(),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(t.clubs.memberList.allMembers,
                       style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
@@ -86,13 +105,19 @@ class ClubMemberList extends StatelessWidget {
               StreamBuilder<List<ClubMemberModel>>(
                 stream: repository.fetchMembers(clubId),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) return const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator()));
+                  if (!snapshot.hasData) {
+                    return const SliverToBoxAdapter(
+                        child: Center(child: CircularProgressIndicator()));
+                  }
                   final members = snapshot.data!;
                   return SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final member = members[index];
-                        return ClubMemberCard(member: member, clubId: clubId, clubOwnerId: ownerId);
+                        return ClubMemberCard(
+                            member: member,
+                            clubId: clubId,
+                            clubOwnerId: ownerId);
                       },
                       childCount: members.length,
                     ),

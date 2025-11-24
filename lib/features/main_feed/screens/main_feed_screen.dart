@@ -21,7 +21,8 @@
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart'; // ✅ easy_localization import
+// easy_localization removed during migration to Slang `t[...]`
+import 'package:bling_app/i18n/strings.g.dart';
 
 import '../../../core/models/feed_item_model.dart';
 import '../../local_news/models/post_model.dart';
@@ -67,12 +68,12 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
         if (snapshot.hasError) {
           // ✅ [다국어 수정] 'mainFeed.error' 키를 사용하여 에러 메시지를 표시합니다.
           return Center(
-              child: Text('mainFeed.error'
-                  .tr(namedArgs: {'error': snapshot.error.toString()})));
+              child: Text(t.mainFeed.error
+                  .replaceAll('{error}', snapshot.error.toString())));
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           // ✅ [다국어 수정] 'mainFeed.empty' 키를 사용하여 안내 메시지를 표시합니다.
-          return Center(child: Text('mainFeed.empty'.tr()));
+          return Center(child: Text(t.mainFeed.empty));
         }
 
         final feedItems = snapshot.data!;

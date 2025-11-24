@@ -23,7 +23,9 @@ import 'package:bling_app/features/real_estate/models/room_filters_model.dart';
 import 'package:bling_app/features/real_estate/widgets/room_card.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
@@ -157,7 +159,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
               builder: (_, controller) {
                 return Scaffold(
                   appBar: AppBar(
-                    title: Text('realEstate.filter.title'.tr()),
+                    title: Text(t.realEstate.filter.title),
                     automaticallyImplyLeading: false,
                     actions: [
                       IconButton(
@@ -193,7 +195,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                       const Divider(height: 32),
 
                       // [수정] 카테고리(roomType)는 이미 선택되었으므로 필터에서 비활성화(읽기 전용)
-                      Text('realEstate.form.typeLabel'.tr(),
+                      Text(t.realEstate.form.typeLabel,
                           style: Theme.of(context).textTheme.titleMedium),
                       Wrap(
                         spacing: 8.0,
@@ -207,7 +209,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                           'etc'
                         ].map((type) {
                           return ChoiceChip(
-                            label: Text('realEstate.form.roomTypes.$type'.tr()),
+                            label: Text(t['realEstate.form.roomTypes.$type'] ?? ''),
                             selected: tempFilters.roomType == type,
                             // 이미 선택된 카테고리는 변경 불가 (선택 효과 없음)
                             onSelected: (selected) {},
@@ -221,7 +223,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                     child: Row(
                       children: [
                         TextButton(
-                          child: Text('common.reset'.tr()),
+                          child: Text(t.common.reset),
                           onPressed: () => setModalState(() {
                             tempFilters.clear();
                             // [수정] '작업 20': 카테고리별 동적 기본값으로 리셋
@@ -233,7 +235,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                         ),
                         const Spacer(),
                         ElevatedButton(
-                          child: Text('common.apply'.tr()),
+                          child: Text(t.common.apply),
                           onPressed: () =>
                               Navigator.of(context).pop(tempFilters), // 적용
                         ),
@@ -302,13 +304,13 @@ class _RoomListScreenState extends State<RoomListScreen> {
     return Scaffold(
       appBar: AppBar(
         // 'Kos', 'Apartment' 등 카테고리 이름 표시
-        title: Text('realEstate.form.roomTypes.${widget.roomType}'.tr()),
+        title: Text(t['realEstate.form.roomTypes.${widget.roomType}'] ?? ''),
       ),
       body: Column(
         children: [
           // InlineSearchChip (기존 real_estate_screen.dart와 동일)
           InlineSearchChip(
-            hintText: 'main.search.hint.realEstate'.tr(),
+            hintText: t.main.search.hint.realEstate,
             openNotifier: _chipOpenNotifier,
             onSubmitted: (kw) =>
                 _searchKeywordNotifier.value = kw.trim().toLowerCase(),
@@ -327,7 +329,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                   isLabelVisible: _filterCount > 0,
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.filter_list),
-                    label: Text('common.filter'.tr()),
+                    label: Text(t.common.filter),
                     onPressed: _showFilterSheet,
                   ),
                 ),
@@ -349,8 +351,8 @@ class _RoomListScreenState extends State<RoomListScreen> {
                 if (snapshot.hasError) {
                   return Center(
                     child: Text(
-                      'realEstate.error'
-                          .tr(namedArgs: {'error': snapshot.error.toString()}),
+                      t.realEstate.error
+                          .replaceAll('{error}', snapshot.error.toString()),
                     ),
                   );
                 }
@@ -367,11 +369,11 @@ class _RoomListScreenState extends State<RoomListScreen> {
                             Icon(Icons.search_off,
                                 size: 64, color: Colors.grey[300]),
                             const SizedBox(height: 12),
-                            Text('realEstate.empty'.tr(),
+                            Text(t.realEstate.empty,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyMedium),
                             const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
+                            Text(t.search.empty.checkSpelling,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
@@ -380,8 +382,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                                 icon: const Icon(Icons.map_outlined),
-                                label:
-                                    Text('search.empty.expandToNational'.tr()),
+                                label: Text(t.search.empty.expandToNational),
                                 onPressed: () => context
                                     .read<LocationProvider>()
                                     .setMode(LocationSearchMode.national)),
@@ -400,7 +401,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                           Icon(Icons.search_off,
                               size: 64, color: Colors.grey[300]),
                           const SizedBox(height: 12),
-                          Text('realEstate.empty'.tr(),
+                          Text(t.realEstate.empty,
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyMedium),
                         ],
@@ -433,11 +434,11 @@ class _RoomListScreenState extends State<RoomListScreen> {
                             Icon(Icons.search_off,
                                 size: 64, color: Colors.grey[300]),
                             const SizedBox(height: 12),
-                            Text('realEstate.empty'.tr(),
+                            Text(t.realEstate.empty,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyMedium),
                             const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
+                            Text(t.search.empty.checkSpelling,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
@@ -446,8 +447,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                                 icon: const Icon(Icons.map_outlined),
-                                label:
-                                    Text('search.empty.expandToNational'.tr()),
+                                label: Text(t.search.empty.expandToNational),
                                 onPressed: () => context
                                     .read<LocationProvider>()
                                     .setMode(LocationSearchMode.national)),
@@ -466,7 +466,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                           Icon(Icons.search_off,
                               size: 64, color: Colors.grey[300]),
                           const SizedBox(height: 12),
-                          Text('realEstate.empty'.tr(),
+                          Text(t.realEstate.empty,
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyMedium),
                         ],
@@ -499,13 +499,13 @@ class _RoomListScreenState extends State<RoomListScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // --- 매물 유형 (임대/매매) ---
-        Text('realEstate.form.listingType'.tr(),
+        Text(t.realEstate.form.listingType,
             style: Theme.of(context).textTheme.titleMedium),
         Wrap(
           spacing: 8.0,
           children: ['rent', 'sale'].map((type) {
             return ChoiceChip(
-              label: Text('realEstate.form.listingTypes.$type'.tr()),
+              label: Text(t['realEstate.form.listingTypes.$type'] ?? ''),
               selected: tempFilters.listingType == type,
               onSelected: (selected) => setModalState(
                   () => tempFilters.listingType = selected ? type : null),
@@ -515,7 +515,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
         const Divider(height: 32),
 
         // --- 가격 범위 ---
-        Text('realEstate.filter.priceRange'.tr(),
+        Text(t.realEstate.filter.priceRange,
             style: Theme.of(context).textTheme.titleMedium),
         RangeSlider(
           values: RangeValues(tempFilters.minPrice, tempFilters.maxPrice),
@@ -547,7 +547,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
         const Divider(height: 32),
 
         // --- 면적 범위 ---
-        Text('realEstate.filter.areaRange'.tr(),
+        Text(t.realEstate.filter.areaRange,
             style: Theme.of(context).textTheme.titleMedium),
         RangeSlider(
           values: RangeValues(tempFilters.minArea, tempFilters.maxArea),
@@ -575,13 +575,13 @@ class _RoomListScreenState extends State<RoomListScreen> {
         // --- 임대 기간 (listingType이 'rent'일 때만) ---
         if (tempFilters.listingType == 'rent') ...[
           const SizedBox(height: 8),
-          Text('realEstate.filter.rentPeriod'.tr(),
+          Text(t.realEstate.filter.rentPeriod,
               style: Theme.of(context).textTheme.titleMedium),
           Wrap(
             spacing: 8.0,
             children: ['daily', 'monthly', 'yearly'].map((period) {
               return ChoiceChip(
-                label: Text('realEstate.filter.rentPeriods.$period').tr(),
+                label: Text(t['realEstate.filter.rentPeriods.$period'] ?? ''),
                 selected: tempFilters.rentPeriod == period,
                 onSelected: (selected) => setModalState(
                     () => tempFilters.rentPeriod = selected ? period : null),
@@ -593,7 +593,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
 
         // --- 토지 면적 (Kos 제외) ---
         if (widget.roomType != 'kos') ...[
-          Text('realEstate.filter.landAreaRange'.tr(),
+          Text(t.realEstate.filter.landAreaRange,
               style: Theme.of(context).textTheme.titleMedium),
           RangeSlider(
             values:
@@ -622,7 +622,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
 
         // --- 방/욕실 수 (Kos 제외) ---
         if (widget.roomType != 'kos') ...[
-          Text('realEstate.form.rooms'.tr(),
+          Text(t.realEstate.form.rooms,
               style: Theme.of(context).textTheme.titleMedium),
           Wrap(
             spacing: 8.0,
@@ -636,7 +636,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
             }).toList(),
           ),
           const SizedBox(height: 16),
-          Text('realEstate.form.bathrooms'.tr(),
+          Text(t.realEstate.form.bathrooms,
               style: Theme.of(context).textTheme.titleMedium),
           Wrap(
             spacing: 8.0,
@@ -681,13 +681,13 @@ class _RoomListScreenState extends State<RoomListScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // --- 욕실 타입 ---
-        Text('realEstate.filter.kos.bathroomType'.tr(),
+        Text(t.realEstate.filter.kos.bathroomType,
             style: Theme.of(context).textTheme.titleMedium),
         Wrap(
           spacing: 8.0,
           children: ['in_room', 'out_room'].map((type) {
             return ChoiceChip(
-              label: Text('realEstate.filter.kos.bathroomTypes.$type').tr(),
+              label: Text(t['realEstate.filter.kos.bathroomTypes.$type'] ?? ''),
               selected: tempFilters.kosBathroomType == type,
               onSelected: (selected) => setModalState(
                   () => tempFilters.kosBathroomType = selected ? type : null),
@@ -697,7 +697,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
         const SizedBox(height: 16),
         // --- 전기세 포함 ---
         SwitchListTile(
-          title: Text('realEstate.filter.kos.electricityIncluded'.tr()),
+          title: Text(t.realEstate.filter.kos.electricityIncluded),
           value: tempFilters.isElectricityIncluded ?? false,
           onChanged: (value) =>
               setModalState(() => tempFilters.isElectricityIncluded = value),
@@ -705,7 +705,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
         const Divider(height: 32),
 
         // --- 방 시설 ---
-        Text('realEstate.filter.kos.roomFacilities'.tr(),
+        Text(t.realEstate.filter.kos.roomFacilities,
             style: Theme.of(context).textTheme.titleMedium),
         _buildFacilityChips(
           setModalState,
@@ -716,7 +716,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
         const Divider(height: 32),
 
         // --- 공용 시설 ---
-        Text('realEstate.filter.kos.publicFacilities'.tr(),
+        Text(t.realEstate.filter.kos.publicFacilities,
             style: Theme.of(context).textTheme.titleMedium),
         _buildFacilityChips(
           setModalState,
@@ -737,7 +737,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // --- 아파트 시설 ---
-        Text('realEstate.filter.apartment.facilities'.tr(),
+        Text(t.realEstate.filter.apartment.facilities,
             style: Theme.of(context).textTheme.titleMedium),
         _buildFacilityChips(
           setModalState,
@@ -758,7 +758,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // --- 주택 시설 ---
-        Text('realEstate.filter.house.facilities'.tr(),
+        Text(t.realEstate.filter.house.facilities,
             style: Theme.of(context).textTheme.titleMedium),
         _buildFacilityChips(
           setModalState,
@@ -779,7 +779,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
       children: [
         // [신규] '작업 26': Copilot이 지적한 누락된 상업용 시설 블록 추가
         // --- 상업용 시설 ---
-        Text("realEstate.filter.commercial.facilities".tr(),
+        Text(t.realEstate.filter.commercial.facilities,
             style: Theme.of(context).textTheme.titleMedium),
         _buildFacilityChips(
           setModalState,
@@ -791,7 +791,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
         const Divider(height: 32),
 
         // --- 보증금 범위 ---
-        Text('realEstate.filter.depositRange'.tr(),
+        Text(t.realEstate.filter.depositRange,
             style: Theme.of(context).textTheme.titleMedium),
         RangeSlider(
           values: RangeValues(tempFilters.depositMin, tempFilters.depositMax),
@@ -829,7 +829,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                     'depositMin_${tempFilters.depositMin.toStringAsFixed(0)}'),
                 initialValue: tempFilters.depositMin.round().toString(),
                 decoration: InputDecoration(
-                  labelText: 'realEstate.filter.depositMin'.tr(),
+                  labelText: t.realEstate.filter.depositMin,
                   suffixText: 'Rp',
                   border: const OutlineInputBorder(),
                   isDense: true,
@@ -853,7 +853,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                     'depositMax_${tempFilters.depositMax.toStringAsFixed(0)}'),
                 initialValue: tempFilters.depositMax.round().toString(),
                 decoration: InputDecoration(
-                  labelText: 'realEstate.filter.depositMax'.tr(),
+                  labelText: t.realEstate.filter.depositMax,
                   suffixText: 'Rp',
                   border: const OutlineInputBorder(),
                   isDense: true,
@@ -875,18 +875,18 @@ class _RoomListScreenState extends State<RoomListScreen> {
         const Divider(height: 32),
 
         // --- 층수/층 정보 텍스트 ---
-        Text('realEstate.filter.floorInfo'.tr(),
+        Text(t.realEstate.filter.floorInfo,
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         TextFormField(
           decoration: InputDecoration(
-            hintText: 'realEstate.form.floorInfoHint'.tr(),
+            hintText: t.realEstate.form.floorInfoHint,
             border: const OutlineInputBorder(),
             isDense: true,
             suffixIcon: (tempFilters.floorInfoFilter ?? '').trim().isEmpty
                 ? null
                 : IconButton(
-                    tooltip: 'realEstate.filter.clearFloorInfo'.tr(),
+                    tooltip: t.realEstate.filter.clearFloorInfo,
                     icon: const Icon(Icons.clear),
                     onPressed: () => setModalState(() {
                       tempFilters.floorInfoFilter = '';
@@ -910,14 +910,14 @@ class _RoomListScreenState extends State<RoomListScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('realEstate.filter.furnishedStatus'.tr(),
+        Text(t.realEstate.filter.furnishedStatus,
             style: Theme.of(context).textTheme.titleMedium),
         Wrap(
           spacing: 8.0,
           children:
               ['furnished', 'semi_furnished', 'unfurnished'].map((status) {
             return ChoiceChip(
-              label: Text('realEstate.filter.furnishedTypes.$status'.tr()),
+              label: Text(t['realEstate.filter.furnishedTypes.$status'] ?? ''),
               selected: tempFilters.furnishedStatus == status,
               onSelected: (selected) => setModalState(
                   () => tempFilters.furnishedStatus = selected ? status : null),
@@ -935,13 +935,13 @@ class _RoomListScreenState extends State<RoomListScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('realEstate.filter.propertyCondition'.tr(),
+        Text(t.realEstate.filter.propertyCondition,
             style: Theme.of(context).textTheme.titleMedium),
         Wrap(
           spacing: 8.0,
           children: ['new', 'used'].map((status) {
             return ChoiceChip(
-              label: Text('realEstate.filter.propertyConditions.$status').tr(),
+              label: Text(t['realEstate.filter.propertyConditions.$status'] ?? ''),
               selected: tempFilters.propertyCondition == status,
               onSelected: (selected) => setModalState(() =>
                   tempFilters.propertyCondition = selected ? status : null),
@@ -964,7 +964,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
       children: facilityKeys.map((key) {
         return FilterChip(
           // [수정] 올바른 JSON 키 구조 (예: amenities.kos_room.ac)
-          label: Text('realEstate.filter.amenities.$i18nPrefix.$key'.tr()),
+          label: Text(t['realEstate.filter.amenities.$i18nPrefix.$key'] ?? ''),
           selected: selectedFacilities.contains(key),
           onSelected: (selected) => setModalState(() {
             if (selected) {

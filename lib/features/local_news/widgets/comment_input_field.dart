@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:easy_localization/easy_localization.dart';
+// easy_localization removed during migration to Slang `t[...]`
+import 'package:bling_app/i18n/strings.g.dart';
 
 class CommentInputField extends StatefulWidget {
   final String postId;
@@ -117,7 +118,7 @@ class _CommentInputFieldState extends State<CommentInputField> {
                 // ✅ [다국어 수정] 힌트 텍스트 (외부 제공값이 우선)
                 hintText: widget.hintText.isNotEmpty
                     ? widget.hintText
-                    : 'commentInputField.hintText'.tr(),
+                    : t.commentInputField.hintText,
                 border: const OutlineInputBorder(),
                 isDense: true,
               ),

@@ -25,7 +25,8 @@
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/features/lost_and_found/screens/lost_item_detail_screen.dart'; // [추가]
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
 
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 // ✅ [작업 44] 현상금 포맷을 위해 추가
@@ -74,8 +75,8 @@ class _LostItemCardState extends State<LostItemCard>
                 children: [
                   Chip(
                     label: Text(item.type == 'lost'
-                        ? 'lostAndFound.lost'.tr()
-                        : 'lostAndFound.found'.tr()),
+                        ? t.lostAndFound.lost
+                        : t.lostAndFound.found),
                     backgroundColor: typeColor.withValues(alpha: 0.1),
                     labelStyle: TextStyle(
                         color: typeColor, fontWeight: FontWeight.bold),
@@ -121,9 +122,8 @@ class _LostItemCardState extends State<LostItemCard>
                                 if (item.isResolved)
                                   _ResolvedBadge(
                                     text: isLost
-                                        ? 'lostAndFound.resolve.badgeLost'.tr()
-                                        : 'lostAndFound.resolve.badgeFound'
-                                            .tr(),
+                                        ? t.lostAndFound.resolve.badgeLost
+                                        : t.lostAndFound.resolve.badgeFound,
                                     color:
                                         isLost ? Colors.green : Colors.orange,
                                   ),
@@ -131,7 +131,7 @@ class _LostItemCardState extends State<LostItemCard>
                                     (item.bountyAmount ?? 0) > 0)
                                   Chip(
                                     label: Text(
-                                      'Rp ${NumberFormat.compact(locale: context.locale.toString()).format(item.bountyAmount)}',
+                                      'Rp ${NumberFormat.compact(locale: Localizations.localeOf(context).toString()).format(item.bountyAmount)}',
                                       style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold),
@@ -147,9 +147,8 @@ class _LostItemCardState extends State<LostItemCard>
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'lostAndFound.card.location'.tr(namedArgs: {
-                                'location': item.locationDescription
-                              }),
+                              t.lostAndFound.card.location.replaceAll(
+                                  '{location}', item.locationDescription),
                               style: TextStyle(color: Colors.grey[700]),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,

@@ -5,7 +5,8 @@ import 'package:bling_app/features/find_friends/data/find_friend_repository.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
 
 class BlockedUsersScreen extends StatefulWidget {
   const BlockedUsersScreen({super.key});
@@ -26,22 +27,22 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'blockedUsers.unblockDialog.title'
-                .tr(namedArgs: {'nickname': nickname}),
+            t.blockedUsers.unblockDialog.title
+                .replaceAll('{nickname}', nickname),
           ),
           content: Text(
-            'blockedUsers.unblockDialog.content'
-                .tr(namedArgs: {'nickname': nickname}),
+            t.blockedUsers.unblockDialog.content
+                .replaceAll('{nickname}', nickname),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('common.cancel'.tr()),
+              child: Text(t.common.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: Text(
-                'blockedUsers.unblock'.tr(namedArgs: {'nickname': nickname}),
+                t.blockedUsers.unblock.replaceAll('{nickname}', nickname),
                 style: const TextStyle(color: Colors.red),
               ),
             ),
@@ -58,8 +59,8 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'blockedUsers.unblockSuccess'
-                  .tr(namedArgs: {'nickname': nickname}),
+              t.blockedUsers.unblockSuccess
+                  .replaceAll('{nickname}', nickname),
             ),
             backgroundColor: Colors.green,
           ),
@@ -68,8 +69,8 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'blockedUsers.unblockFailure'
-                  .tr(namedArgs: {'error': e.toString()}),
+              t.blockedUsers.unblockFailure
+                  .replaceAll('{error}', e.toString()),
             ),
             backgroundColor: Colors.red,
           ),
@@ -98,13 +99,13 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
     if (_currentUserId == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: Center(child: Text('common.loginRequired'.tr())),
+        body: Center(child: Text(t.common.loginRequired)),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('blockedUsers.title'.tr()),
+        title: Text(t.blockedUsers.title),
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
@@ -121,7 +122,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
 
           if (blockedUids.isEmpty) {
             return Center(
-              child: Text('blockedUsers.empty'.tr()),
+              child: Text(t.blockedUsers.empty),
             );
           }
 
@@ -134,7 +135,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData || userSnapshot.data == null) {
                     return ListTile(
-                      title: Text('common.unknownUser'.tr()),
+                      title: Text(t.common.unknownUser),
                       subtitle: Text(blockedUserId),
                     );
                   }
@@ -154,8 +155,8 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                     trailing: OutlinedButton(
                       onPressed: () => _showUnblockConfirmationDialog(
                           blockedUser.uid, blockedUser.nickname),
-                      child: Text('blockedUsers.unblock'
-                          .tr(namedArgs: {'nickname': blockedUser.nickname})),
+                      child: Text(t.blockedUsers.unblock
+                          .replaceAll('{nickname}', blockedUser.nickname)),
                     ),
                   );
                 },

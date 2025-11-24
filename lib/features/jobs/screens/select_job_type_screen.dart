@@ -15,7 +15,7 @@ library;
 // lib/features/jobs/screens/select_job_type_screen.dart
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 import '../constants/job_categories.dart'; // ✅ 1단계에서 생성한 JobType enum import
 import 'create_job_screen.dart'; // ✅ 2. 기존 '정규직' 폼
@@ -30,7 +30,7 @@ class SelectJobTypeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('jobs.selectType.title'.tr()), // '일자리 유형 선택'
+        title: Text(t.jobs.selectType.title), // '일자리 유형 선택'
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -102,7 +102,7 @@ class SelectJobTypeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      titleKey.tr(),
+                      t[titleKey],
                       style: Theme.of(context)
                           .textTheme
                           .titleLarge
@@ -110,7 +110,7 @@ class SelectJobTypeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      descriptionKey.tr(),
+                      t[descriptionKey],
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],

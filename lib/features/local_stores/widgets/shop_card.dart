@@ -23,7 +23,7 @@ import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/local_stores/screens/shop_detail_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 // [추가] 거리 계산을 위해 geolocator 임포트
 import 'package:geolocator/geolocator.dart';
 // [추가] GeoPoint 타입 사용을 위해 cloud_firestore 임포트
@@ -101,7 +101,7 @@ class ShopCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    'common.sponsored'.tr(),
+                    t.common.sponsored,
                     style: TextStyle(
                         color: Theme.of(context).primaryColor,
                         fontSize: 12,
@@ -188,7 +188,7 @@ class ShopCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      shop.locationName ?? 'localStores.noLocation'.tr(),
+                      shop.locationName ?? t.localStores.noLocation,
                       overflow: TextOverflow.ellipsis, // 긴 주소는 ... 처리
                       maxLines: 1,
                     ),

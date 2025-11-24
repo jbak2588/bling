@@ -8,7 +8,8 @@ import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
@@ -57,8 +58,8 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('clubs.postDetail.commentFail'
-              .tr(namedArgs: {'error': e.toString()})),
+          content: Text(t.clubs.postDetail.commentFail
+              .replaceAll('{error}', e.toString())),
           backgroundColor: Colors.red,
         ));
       }
@@ -75,15 +76,15 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
     final dt = timestamp.toDate();
     final diff = now.difference(dt);
 
-    if (diff.inMinutes < 1) return 'time.now'.tr();
+    if (diff.inMinutes < 1) return t.time.now;
     if (diff.inHours < 1) {
-      return 'time.minutesAgo'
-          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+      return t.time.minutesAgo
+          .replaceAll('{minutes}', diff.inMinutes.toString());
     }
     if (diff.inDays < 1) {
-      return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
+      return t.time.hoursAgo.replaceAll('{hours}', diff.inHours.toString());
     }
-    return DateFormat('time.dateFormat'.tr()).format(dt);
+    return DateFormat(t.time.dateFormat).format(dt);
   }
 
   // [복원] 누락되었던 _buildAuthorInfo 헬퍼 함수
@@ -95,7 +96,7 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
       return ListTile(
         contentPadding: EdgeInsets.zero,
         leading: const CircleAvatar(child: Icon(Icons.person_off_outlined)),
-        title: Text('clubs.postCard.withdrawnMember'.tr(),
+        title: Text(t.clubs.postCard.withdrawnMember,
             style: const TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.grey)),
         subtitle: const Text(''),
@@ -112,7 +113,7 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
           return ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const CircleAvatar(child: Icon(Icons.person_off)),
-            title: Text('clubs.postDetail.unknownUser'.tr()),
+            title: Text(t.clubs.postDetail.unknownUser),
           );
         }
         final user = UserModel.fromFirestore(snapshot.data!);
@@ -146,8 +147,8 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        title: Text('clubs.postDetail.appBarTitle'
-            .tr(namedArgs: {'title': widget.club.title})),
+        title: Text(t.clubs.postDetail.appBarTitle
+            .replaceAll('{title}', widget.club.title)),
       ),
       body: Column(
         children: [
@@ -184,7 +185,7 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text('clubs.postDetail.commentsTitle'.tr(),
+                    child: Text(t.clubs.postDetail.commentsTitle,
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
@@ -203,7 +204,7 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: Center(
-                              child: Text('clubs.postDetail.noComments'.tr(),
+                              child: Text(t.clubs.postDetail.noComments,
                                   style: const TextStyle(color: Colors.grey))),
                         ),
                       );
@@ -230,7 +231,7 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
                     child: TextField(
                       controller: _commentController,
                       decoration: InputDecoration(
-                        hintText: 'clubs.postDetail.commentHint'.tr(),
+                        hintText: t.clubs.postDetail.commentHint,
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20)),
                         contentPadding:
@@ -345,8 +346,7 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                        user?.nickname ?? 'clubs.postCard.withdrawnMember'.tr(),
+                    Text(user?.nickname ?? t.clubs.postCard.withdrawnMember,
                         style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 2),
                     Text(comment.body),

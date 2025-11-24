@@ -100,7 +100,7 @@ class LocalStoreThumb extends StatelessWidget {
     // 카테고리 ID를 다국어 키로 변환 (예: 'food' -> 'localStores.categories.food')
     //
     /* final categoryKey = 'localStores.categories.${shop.mainCategory ?? 'etc'}'; // ✅ [수정] 'category' 대신 'mainCategory' 필드 사용 -> 추후 실제 필드명으로 변경
-    final categoryString = categoryKey.tr(); // 번역된 카테고리 이름 */
+    final categoryString = t[categoryKey]; // 번역된 카테고리 이름 */
 
     return Expanded(
       child: Padding(

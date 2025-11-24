@@ -30,7 +30,7 @@ import 'package:bling_app/features/my_bling/screens/account_privacy_screen.dart'
 import 'package:bling_app/features/my_bling/screens/app_info_screen.dart';
 import 'package:bling_app/features/my_bling/screens/blocked_users_screen.dart';
 import 'package:bling_app/features/my_bling/screens/notification_settings_screen.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -41,15 +41,15 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('settings.title'.tr()), // "설정"
+        title: Text(t.settings.title), // "설정"
       ),
       body: ListView(
         children: [
           // 1. 계정 및 보안
-          _buildSectionHeader(context, 'settings.account'.tr()), // "계정"
+          _buildSectionHeader(context, t.settings.account), // "계정"
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
-            title: Text('settings.privacy'.tr()), // "개인정보 보호"
+            title: Text(t.settings.privacy), // "개인정보 보호"
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
@@ -58,7 +58,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.block_outlined),
-            title: Text('settings.blockedUsers'.tr()), // "차단된 사용자"
+            title: Text(t.settings.blockedUsers), // "차단된 사용자"
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
@@ -69,7 +69,7 @@ class SettingsScreen extends StatelessWidget {
           const Divider(),
 
           // 2. 앱 설정 (알림, 언어)
-          _buildSectionHeader(context, 'settings.app'.tr()), // "앱 설정"
+          _buildSectionHeader(context, t.settings.app), // "앱 설정"
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
             // JSON 구조에 따라 'settings.notifications'가 객체일 수 있으므로 'settings.notificationsTitle'로 안전하게 사용합니다.
@@ -83,7 +83,7 @@ class SettingsScreen extends StatelessWidget {
           // ✅ [신규] 언어 설정 메뉴 추가
           ListTile(
             leading: const Icon(Icons.language_outlined),
-            title: Text('settings.language'.tr()), // "언어 설정"
+            title: Text(t.settings.language), // "언어 설정"
             subtitle: Text(_getCurrentLanguageName(context)), // 현재 언어 표시
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showLanguageSelector(context),
@@ -92,10 +92,10 @@ class SettingsScreen extends StatelessWidget {
           const Divider(),
 
           // 3. 정보 및 지원
-          _buildSectionHeader(context, 'settings.info'.tr()), // "정보"
+          _buildSectionHeader(context, t.settings.info), // "정보"
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: Text('settings.appInfo'.tr()), // "앱 정보"
+            title: Text(t.settings.appInfo), // "앱 정보"
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(
@@ -113,16 +113,16 @@ class SettingsScreen extends StatelessWidget {
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    title: Text('settings.logout.confirmTitle'.tr()),
-                    content: Text('settings.logout.confirmBody'.tr()),
+                    title: Text(t.settings.logout.confirmTitle),
+                    content: Text(t.settings.logout.confirmBody),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(ctx).pop(false),
-                        child: Text('common.cancel'.tr()),
+                        child: Text(t.common.cancel),
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(ctx).pop(true),
-                        child: Text('common.confirm'.tr()),
+                        child: Text(t.common.confirm),
                       ),
                     ],
                   ),
@@ -140,7 +140,7 @@ class SettingsScreen extends StatelessWidget {
                 foregroundColor: Colors.red,
                 side: const BorderSide(color: Colors.red),
               ),
-              child: Text('settings.logout.button'.tr()), // "로그아웃"
+              child: Text(t.settings.logout.button), // "로그아웃"
             ),
           ),
           const SizedBox(height: 24),
@@ -164,7 +164,8 @@ class SettingsScreen extends StatelessWidget {
   }
 
   String _getCurrentLanguageName(BuildContext context) {
-    final code = context.locale.languageCode;
+    // Prefer Slang's current locale when available, fallback to EasyLocalization
+    final code = LocaleSettings.instance.currentLocale.languageCode;
     switch (code) {
       case 'ko':
         return '한국어';
@@ -177,10 +178,13 @@ class SettingsScreen extends StatelessWidget {
   }
 
   String _t(String key, String defaultValue) {
-    final translated = key.tr();
+    final val = t[key];
+    final translated = val is String ? val : (val?.toString() ?? '');
     if (translated == key || translated.isEmpty) return defaultValue;
     return translated;
   }
+
+  // (removed unused helper `_tWithReplacements`)
 
   void _showLanguageSelector(BuildContext context) {
     showModalBottomSheet(
@@ -203,31 +207,34 @@ class SettingsScreen extends StatelessWidget {
               ),
               ListTile(
                 title: const Text('한국어'),
-                trailing: context.locale.languageCode == 'ko'
+                trailing: Localizations.localeOf(context).languageCode == 'ko'
                     ? const Icon(Icons.check, color: Colors.blue)
                     : null,
                 onTap: () {
-                  context.setLocale(const Locale('ko'));
+                  // 1) Slang(LocaleSettings) 변경
+                  LocaleSettings.setLocale(AppLocale.ko);
                   Navigator.pop(ctx);
                 },
               ),
               ListTile(
                 title: const Text('Bahasa Indonesia'),
-                trailing: context.locale.languageCode == 'id'
+                trailing: Localizations.localeOf(context).languageCode == 'id'
                     ? const Icon(Icons.check, color: Colors.blue)
                     : null,
                 onTap: () {
-                  context.setLocale(const Locale('id'));
+                  // 1) Slang(LocaleSettings) 변경
+                  LocaleSettings.setLocale(AppLocale.id);
                   Navigator.pop(ctx);
                 },
               ),
               ListTile(
                 title: const Text('English'),
-                trailing: context.locale.languageCode == 'en'
+                trailing: Localizations.localeOf(context).languageCode == 'en'
                     ? const Icon(Icons.check, color: Colors.blue)
                     : null,
                 onTap: () {
-                  context.setLocale(const Locale('en'));
+                  // 1) Slang(LocaleSettings) 변경
+                  LocaleSettings.setLocale(AppLocale.en);
                   Navigator.pop(ctx);
                 },
               ),

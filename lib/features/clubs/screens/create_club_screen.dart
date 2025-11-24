@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // [추가] image_picker
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart'; // [추가] 고유 파일명 생성
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 // ✅ 공용 태그 입력 위젯을 import 합니다.
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
@@ -141,8 +141,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
     // ✅ 태그(관심사)를 1개 이상 입력했는지 검사합니다.
     if (_interestTags.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('clubs.createClub.selectAtLeastOneInterest'.tr())),
+        SnackBar(content: Text(t.clubs.createClub.selectAtLeastOneInterest)),
       );
       return;
     }
@@ -205,7 +204,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('clubs.proposal.createSuccess'.tr()),
+          content: Text(t.clubs.proposal.createSuccess),
           backgroundColor: Colors.green,
         ));
         Navigator.of(context).pop();
@@ -213,8 +212,8 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('clubs.proposal.createFail'
-              .tr(namedArgs: {'error': e.toString()})),
+          content: Text(t.clubs.proposal.createFail
+              .replaceAll('{error}', e.toString())),
           backgroundColor: Colors.red,
         ));
       }
@@ -229,13 +228,13 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('clubs.proposal.createTitle'.tr()), // "모임 제안하기"
+        title: Text(t.clubs.proposal.createTitle), // "모임 제안하기"
         actions: [
           // [수정] _isSaving 상태에 따라 버튼 활성화/비활성화
           if (!_isSaving)
             TextButton(
               onPressed: _createClub,
-              child: Text('common.done'.tr()),
+              child: Text(t.common.done),
             )
         ],
       ),
@@ -281,12 +280,12 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: 'clubs.createClub.nameLabel'.tr(),
+                    labelText: t.clubs.createClub.nameLabel,
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'clubs.createClub.nameError'.tr();
+                      return t.clubs.createClub.nameError;
                     }
                     return null;
                   },
@@ -295,13 +294,13 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'clubs.createClub.descriptionLabel'.tr(),
+                    labelText: t.clubs.createClub.descriptionLabel,
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 5,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'clubs.createClub.descriptionError'.tr();
+                      return t.clubs.createClub.descriptionError;
                     }
                     return null;
                   },
@@ -324,7 +323,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 // Row(
                 //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 //   children: [
-                //     Text("interests.title".tr(),
+                //     Text("interests.title" -> `t.interests.title`,
                 //         style: const TextStyle(
                 //             fontWeight: FontWeight.bold, fontSize: 16)),
                 //     Text('${_selectedInterests.length}/3',
@@ -337,7 +336,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 // ..._interestCategories.entries.map((entry) {
                 //   final interestKeys = entry.value;
                 //   return ExpansionTile(
-                //     title: Text("interests.$categoryKey".tr(),
+                //     title: Text("interests.$categoryKey" -> `t['interests.$categoryKey'] ?? ''`,
                 //         style: const TextStyle(fontWeight: FontWeight.w500)),
                 //     children: [
                 //       Padding(
@@ -345,11 +344,11 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 //         child: Wrap(
                 //           spacing: 8.0,
                 //           runSpacing: 4.0,
-                //           children: interestKeys.map((interestKey) {
+                //             children: interestKeys.map((interestKey) {
                 //             final isSelected =
                 //                 _selectedInterests.contains(interestKey);
                 //             return FilterChip(
-                //               label: Text("interests.items.$interestKey".tr()),
+                //               label: Text("interests.items.$interestKey" -> `t['interests.items.$interestKey'] ?? ''`),
                 //               selected: isSelected,
                 //               onSelected: (selected) {
                 //                 setState(() {
@@ -362,8 +361,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 //                           .showSnackBar(
                 //                         SnackBar(
                 //                             content: Text(
-                //                                 'clubs.createClub.maxInterests'
-                //                                     .tr())),
+                //                                 t.clubs.createClub.maxInterests)),
                 //                       );
                 //                     }
                 //                   } else {
@@ -380,12 +378,12 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 // }),
 
                 // ✅ 기존의 복잡한 관심사 선택 UI를 공용 태그 위젯으로 교체합니다.
-                Text("interests.title".tr(),
+                Text(t.interests.title,
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 8),
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: t.tagInput.help,
                   onTagsChanged: (tags) {
                     setState(() {
                       _interestTags = tags;
@@ -396,7 +394,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                 // [추가] 목표 인원 설정: 슬라이더 + 직접 입력
                 const SizedBox(height: 24),
                 Text(
-                  'clubs.proposal.targetMembers'.tr(),
+                  t.clubs.proposal.targetMembers,
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 16),
                 ),
@@ -459,15 +457,14 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                   ],
                 ),
                 Text(
-                  'clubs.proposal.targetMembersCount'.tr(namedArgs: {
-                    'count': _targetMemberCount.toInt().toString()
-                  }),
+                  t.clubs.proposal.targetMembersCount.replaceAll(
+                      '{count}', _targetMemberCount.toInt().toString()),
                 ),
 
                 const SizedBox(height: 24),
                 SwitchListTile(
-                  title: Text('clubs.createClub.privateClub'.tr()),
-                  subtitle: Text('clubs.createClub.privateDescription'.tr()),
+                  title: Text(t.clubs.createClub.privateClub),
+                  subtitle: Text(t.clubs.createClub.privateDescription),
                   value: _isPrivate,
                   onChanged: (value) {
                     setState(() {

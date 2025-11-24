@@ -1,6 +1,7 @@
 // lib/features/marketplace/widgets/ai_report_viewer.dart
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
 
 /// AI 검수 리포트의 내용을 구조화하여 표시하는 공용 위젯
 /// [V3 개편] V3 "증거 연계" 스키마를 파싱하도록 전면 수정
@@ -59,7 +60,7 @@ class AiReportViewer extends StatelessWidget {
       sections.add(_buildReportText(
         context,
         Icons.check_circle_outline,
-        'ai_flow.final_report.summary'.tr(),
+        t.aiFlow.finalReport.summary,
         summary,
       ));
     }
@@ -79,16 +80,15 @@ class AiReportViewer extends StatelessWidget {
       sections.add(_buildReportText(
         context,
         Icons.price_check_outlined,
-        'ai_flow.final_report.suggested_price'.tr(args: ['']),
+        t.aiFlow.finalReport.suggestedPrice,
         priceText,
       ));
     }
 
     // 3. Condition & Details
-    String conditionTitle = 'ai_flow.final_report.condition'.tr();
+    String conditionTitle = t.aiFlow.finalReport.condition;
     if (grade != null && grade.isNotEmpty) {
-      conditionTitle =
-          "${'ai_flow.final_report.condition'.tr()} (Grade: $grade)";
+      conditionTitle = "${t.aiFlow.finalReport.condition} (Grade: $grade)";
     }
 
     if (conditionDetails.isNotEmpty) {
@@ -114,7 +114,7 @@ class AiReportViewer extends StatelessWidget {
       sections.add(_buildReportText(
         context,
         Icons.warning_amber_rounded,
-        'ai_flow.final_report.notes'.tr(),
+        t.aiFlow.finalReport.notes,
         notesForBuyer,
       ));
     }

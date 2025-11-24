@@ -12,7 +12,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 // ✅ [탐색 기능] 1. AppCategories import
 import 'package:bling_app/core/constants/app_categories.dart';
@@ -76,7 +76,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
     if (!_formKey.currentState!.validate() || _isSaving) return;
     if (_images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auctions.create.errors.noPhoto'.tr())));
+          SnackBar(content: Text(t.auctions.create.errors.noPhoto)));
       return;
     }
 
@@ -117,8 +117,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
         startPrice: startPrice,
         currentBid: startPrice,
         bidHistory: [],
-        location:
-            widget.userModel.locationName ?? 'postCard.locationNotSet'.tr(),
+        location: widget.userModel.locationName ?? t.postCard.locationNotSet,
         // V V V --- [추가] 사용자의 지역 정보를 경매 데이터에 포함시킵니다 --- V V V
         locationParts: widget.userModel.locationParts,
         // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
@@ -135,7 +134,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('auctions.create.success'.tr()),
+            content: Text(t.auctions.create.success),
             backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
@@ -143,7 +142,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(
-                'auctions.create.fail'.tr(namedArgs: {'error': e.toString()})),
+                t.auctions.create.fail.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -155,11 +154,10 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('auctions.create.title'.tr()),
+        title: Text(t.auctions.create.title),
         actions: [
           if (!_isSaving)
-            TextButton(
-                onPressed: _submitAuction, child: Text('common.done'.tr()))
+            TextButton(onPressed: _submitAuction, child: Text(t.common.done))
         ],
       ),
       body: Stack(
@@ -169,7 +167,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                Text('auctions.create.form.photoSectionTitle'.tr(),
+                Text(t.auctions.create.form.photoSectionTitle,
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 SizedBox(
@@ -227,33 +225,33 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                      labelText: 'auctions.create.form.title'.tr(),
+                      labelText: t.auctions.create.form.title,
                       border: const OutlineInputBorder()),
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'auctions.form.titleRequired'.tr()
+                      ? t.auctions.form.titleRequired
                       : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                      labelText: 'auctions.create.form.description'.tr(),
+                      labelText: t.auctions.create.form.description,
                       border: const OutlineInputBorder()),
                   maxLines: 5,
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'auctions.form.descriptionRequired'.tr()
+                      ? t.auctions.form.descriptionRequired
                       : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _startPriceController,
                   decoration: InputDecoration(
-                      labelText: 'auctions.create.form.startPrice'.tr(),
+                      labelText: t.auctions.create.form.startPrice,
                       border: const OutlineInputBorder(),
                       prefixText: 'Rp '),
                   keyboardType: TextInputType.number,
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'auctions.form.startPriceRequired'.tr()
+                      ? t.auctions.form.startPriceRequired
                       : null,
                 ),
                 const SizedBox(height: 16),
@@ -261,17 +259,17 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                 DropdownButtonFormField<String>(
                   value: _selectedCategory,
                   decoration: InputDecoration(
-                      labelText: 'auctions.create.form.category'.tr(),
+                      labelText: t.auctions.create.form.category,
                       border: const OutlineInputBorder()),
-                  hint: Text('auctions.create.form.categoryHint'.tr()),
+                  hint: Text(t.auctions.create.form.categoryHint),
                   validator: (value) => (value == null || value.isEmpty)
-                      ? 'auctions.form.categoryRequired'.tr()
+                      ? t.auctions.form.categoryRequired
                       : null,
                   items: AppCategories.auctionCategories
                       .map((category) => DropdownMenuItem(
                             value: category.categoryId,
                             child: Text(
-                                "${category.emoji} ${category.nameKey.tr()}"),
+                                "${category.emoji} ${t[category.nameKey]}"),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -281,7 +279,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                 // ✅ 상세 설명 다음, 기간 설정 전에 태그 입력 필드를 추가합니다.
                 const SizedBox(height: 16),
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: t.tagInput.help,
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;
@@ -292,13 +290,14 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                 DropdownButtonFormField<int>(
                   value: _durationInDays,
                   decoration: InputDecoration(
-                      labelText: 'auctions.create.form.duration'.tr(),
+                      labelText: t.auctions.create.form.duration,
                       border: const OutlineInputBorder()),
                   items: [3, 5, 7]
                       .map((days) => DropdownMenuItem(
-                          value: days,
-                          child: Text('auctions.create.form.durationOption'
-                              .tr(namedArgs: {'days': days.toString()}))))
+                            value: days,
+                            child: Text(t.auctions.create.form.durationOption
+                                .replaceAll('{days}', days.toString())),
+                          ))
                       .toList(),
                   onChanged: (value) {
                     if (value != null) setState(() => _durationInDays = value);
@@ -309,9 +308,9 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                   contentPadding: EdgeInsets.zero,
                   leading:
                       Icon(Icons.location_on_outlined, color: Colors.grey[600]),
-                  title: Text('auctions.create.form.location'.tr()),
+                  title: Text(t.auctions.create.form.location),
                   subtitle: Text(widget.userModel.locationName ??
-                      'postCard.locationNotSet'.tr()),
+                      t.postCard.locationNotSet),
                   dense: true,
                 ),
               ],

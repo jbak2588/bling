@@ -7,7 +7,8 @@ import 'package:bling_app/features/admin/screens/admin_product_detail_screen.dar
 import 'package:bling_app/features/admin/screens/ai_audit_screen.dart'; // [New] AI 감사 화면 import
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart'; // 다국어 사용 위해 추가
+import 'package:bling_app/i18n/strings.g.dart'; // Slang strings
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 // ✅ [신고 관리] 신고 목록 화면 import
@@ -21,13 +22,13 @@ class AdminScreen extends StatelessWidget {
     // ✅ [신고 관리] 관리 메뉴 목록 UI로 변경
     return Scaffold(
       appBar: AppBar(
-        title: Text('admin.screen.title'.tr()), // 예: '관리자 메뉴'
+        title: Text(t.admin.screen.title), // 예: '관리자 메뉴'
       ),
       body: ListView(
         children: [
           ListTile(
             leading: const Icon(Icons.playlist_add_check_circle_outlined),
-            title: Text('admin.menu.aiApproval'.tr()),
+            title: Text(t.admin.menu.aiApproval),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(
@@ -40,7 +41,7 @@ class AdminScreen extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.report_gmailerrorred_outlined),
-            title: Text('admin.menu.reportManagement'.tr()),
+            title: Text(t.admin.menu.reportManagement),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(
@@ -54,8 +55,8 @@ class AdminScreen extends StatelessWidget {
           // [V3.1 New] AI 감사 로그 메뉴 추가
           ListTile(
             leading: const Icon(Icons.history_edu_outlined),
-            title: Text('admin.menu.aiAudit'.tr()),
-            subtitle: Text('admin.menu.aiAuditSubtitle'.tr()),
+            title: Text(t.admin.menu.aiAudit),
+            subtitle: Text(t.admin.menu.aiAuditSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(
@@ -78,7 +79,7 @@ class AiApprovalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('admin.menu.aiApproval'.tr())),
+      appBar: AppBar(title: Text(t.admin.menu.aiApproval)),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('products')
@@ -92,10 +93,10 @@ class AiApprovalScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('admin.aiApproval.error'.tr()));
+            return Center(child: Text(t.admin.aiApproval.error));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('admin.aiApproval.empty'.tr()));
+            return Center(child: Text(t.admin.aiApproval.empty));
           }
 
           final pendingProducts = snapshot.data!.docs;
@@ -119,7 +120,7 @@ class AiApprovalScreen extends StatelessWidget {
                 title: Text(product.title),
                 subtitle: Text(
                   // 날짜 포맷 적용
-                  '${'admin.aiApproval.requestedAt'.tr()}: ${DateFormat('yyyy-MM-dd HH:mm').format(product.createdAt.toDate())}',
+                  '${t.admin.aiApproval.requestedAt}: ${DateFormat('yyyy-MM-dd HH:mm').format(product.createdAt.toDate())}',
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {

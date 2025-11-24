@@ -17,7 +17,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// compat shim removed; using Slang `t` accessors
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 import 'package:bling_app/core/utils/search_helper.dart';
 
@@ -197,7 +199,7 @@ class _PomEditScreenState extends State<PomEditScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('pom.create.success'.tr()), // "성공적으로 저장되었습니다" (재사용)
+            content: Text(t.pom.create.success), // "성공적으로 저장되었습니다" (재사용)
             backgroundColor: Colors.green));
         Navigator.of(context).pop(true); // true 반환하여 갱신 유도
       }
@@ -205,7 +207,7 @@ class _PomEditScreenState extends State<PomEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content:
-                Text('pom.create.fail'.tr(namedArgs: {'error': e.toString()})),
+                Text(t.pom.create.fail.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -217,12 +219,12 @@ class _PomEditScreenState extends State<PomEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('pom.edit.title'.tr()), // "게시글 수정" (키 추가 필요)
+        title: Text(t.pom.edit.title),
         actions: [
           if (!_isSaving)
             TextButton(
               onPressed: _submitUpdate,
-              child: Text('common.save'.tr(), // "저장"
+              child: Text(t['common.save'] ?? '', // "저장"
                   style: TextStyle(
                       color: Theme.of(context).primaryColor,
                       fontWeight: FontWeight.bold)),
@@ -244,7 +246,7 @@ class _PomEditScreenState extends State<PomEditScreen> {
               TextField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                  labelText: 'pom.create.form.titleLabel'.tr(),
+                  labelText: t.pom.create.form.titleLabel,
                   border: const OutlineInputBorder(),
                 ),
                 maxLines: 1,
@@ -253,7 +255,7 @@ class _PomEditScreenState extends State<PomEditScreen> {
               TextField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
-                  labelText: 'pom.create.form.descriptionLabel'.tr(),
+                  labelText: t.pom.create.form.descriptionLabel,
                   border: const OutlineInputBorder(),
                 ),
                 maxLines: 3,
@@ -263,7 +265,7 @@ class _PomEditScreenState extends State<PomEditScreen> {
               const SizedBox(height: 8),
               CustomTagInputField(
                 initialTags: _selectedTags,
-                hintText: 'pom.search.hint'.tr(),
+                hintText: t.pom.search.hint,
                 onTagsChanged: (tags) {
                   _selectedTags
                     ..clear()

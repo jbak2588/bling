@@ -55,7 +55,7 @@ import 'package:bling_app/core/models/chat_room_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -230,7 +230,7 @@ class ChatService {
       final now = Timestamp.now();
       final newRoomData = <String, dynamic>{
         'participants': [currentUser.uid],
-        'lastMessage': 'boards.chatRoomCreated'.tr(),
+        'lastMessage': t.boards.chatRoomCreated,
         'lastTimestamp': now,
         'unreadCounts': {currentUser.uid: 0},
 
@@ -401,7 +401,7 @@ class ChatService {
 
     // 4. 채팅방 lastMessage 및 unreadCounts 업데이트
     final Map<String, dynamic> updateData = {
-      'lastMessage': 'chatRoom.imageMessage'.tr(), // "이미지"
+      'lastMessage': t.chatRoom.imageMessage,
       'lastTimestamp': timestamp,
       'unreadCounts.$myUid': 0,
     };

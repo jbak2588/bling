@@ -29,7 +29,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:bling_app/core/utils/upload_helpers.dart';
 
 import '../models/product_model.dart';
@@ -308,11 +308,15 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     if (result != null && result is Map<String, dynamic>) {
       setState(() {
         // 주소 문자열 조합 (예: Kel. A, Kec. B, Kab. C)
-        final kKel = result['kel'] != null ? "Kel. ${result['kel']}" : "";
-        final kKec = result['kec'] != null ? "Kec. ${result['kec']}" : "";
+        final kKel = (result['kel']?.toString() ?? '').isNotEmpty
+            ? "Kel. ${result['kel']?.toString() ?? ''}"
+            : "";
+        final kKec = (result['kec']?.toString() ?? '').isNotEmpty
+            ? "Kec. ${result['kec']?.toString() ?? ''}"
+            : "";
         final kKab = (result['kab'] ?? "").toString().startsWith("KOTA") ||
                 (result['kab'] ?? "").toString().startsWith("KAB")
-            ? result['kab']
+            ? result['kab'] ?? ''
             : "Kab. ${result['kab'] ?? ''}";
 
         final newAddress =
@@ -326,8 +330,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   }
 
   String _getCategoryName(BuildContext context, Category? category) {
-    if (category == null) return 'selectCategory'.tr();
-    final langCode = context.locale.languageCode;
+    if (category == null) return t.selectCategory;
+    final langCode = Localizations.localeOf(context).languageCode;
     // [작업 74] 부모 이름 + 자식 이름 (예: 디지털기기 > 스마트폰)
     if (_selectedParentCategory != null && !category.isParent) {
       return "${_selectedParentCategory!.displayName(langCode)} > ${category.displayName(langCode)}";
@@ -347,7 +351,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     if (_loadingStatus != null) return;
     if (_existingImageUrls.isEmpty && _images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('marketplace.errors.noPhoto'.tr())),
+        SnackBar(content: Text(t.marketplace.errors.noPhoto)),
       );
       return;
     }
@@ -356,14 +360,14 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     }
 
     setState(() {
-      _loadingStatus = tr('marketplace.edit.saving');
+      _loadingStatus = t.marketplace.edit.saving;
     });
 
     try {
       // 새로 추가된 이미지 업로드 (user-scoped path)
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        throw Exception('marketplace.errors.loginRequired'.tr());
+        throw Exception(t.marketplace.errors.loginRequired);
       }
       final List<String> uploadedUrls =
           await uploadAllProductImages(_images, user.uid);
@@ -384,7 +388,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       //     .doc(user.uid)
       //     .get();
       // if (!userDoc.exists) {
-      //   throw Exception('marketplace.errors.userNotFound'.tr());
+      //   throw Exception(t.marketplace.errors.userNotFound);
       // }
       // final userModel = UserModel.fromFirestore(userDoc);
 
@@ -421,7 +425,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('marketplace.edit.success'.tr())),
+          SnackBar(content: Text(t.marketplace.edit.success)),
         );
         Navigator.of(context).pop(true);
       }
@@ -429,7 +433,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('marketplace.edit.fail'.tr(args: [e.toString()]))),
+              content: Text(
+                  t.marketplace.edit.fail.replaceAll('{0}', e.toString()))),
         );
       }
     } finally {
@@ -442,12 +447,12 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     // [V3 REFACTOR] '_aiRule' 체크 대신 '_selectedCategoryId' 체크로 변경
     if (_selectedCategoryId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('marketplace.errors.noCategory'.tr())),
+        SnackBar(content: Text(t.marketplace.errors.noCategory)),
       );
       return;
     }
 
-    setState(() => _loadingStatus = tr('ai_flow.status.analyzing'));
+    setState(() => _loadingStatus = t.aiFlow.status.analyzing);
 
     try {
       await _aiVerificationService.startVerificationFlow(
@@ -465,8 +470,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('ai_flow.common.error'
-                  .tr(namedArgs: {'error': e.toString()}))),
+              content: Text(
+                  t.aiFlow.common.error.replaceAll('{error}', e.toString()))),
         );
       }
     } finally {
@@ -481,7 +486,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     // 1회만 취소 가능
     if (widget.product.aiCancelCount > 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('marketplace.ai.cancel_limit'.tr())),
+        SnackBar(content: Text(t.marketplace.ai.cancelLimit)),
       );
       return;
     }
@@ -501,7 +506,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('marketplace.ai.cancel_success'.tr())),
+          SnackBar(content: Text(t.marketplace.ai.cancelSuccess)),
         );
         // 화면 갱신을 위해 pop (또는 product 모델 리로드)
         Navigator.of(context).pop();
@@ -510,8 +515,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text('marketplace.ai.cancel_error'.tr(args: [e.toString()]))),
+              content: Text(t.marketplace.ai.cancelError
+                  .replaceAll('{0}', e.toString()))),
         );
       }
     } finally {
@@ -533,12 +538,12 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         bool ackChecked = false;
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
-            title: Text('marketplace.ai.cancel_confirm'.tr()),
+            title: Text(t.marketplace.ai.cancelConfirm),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('marketplace.ai.cancel_limit'.tr()),
+                Text(t.marketplace.ai.cancelLimit),
                 const SizedBox(height: 12),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -549,7 +554,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text('marketplace.ai.cancel_ack_charge'.tr()),
+                      child: Text(t.marketplace.ai.cancelAckCharge),
                     ),
                   ],
                 ),
@@ -558,12 +563,12 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text('common.cancel'.tr()),
+                child: Text(t.common.cancel),
               ),
               TextButton(
                 onPressed:
                     ackChecked ? () => Navigator.of(context).pop(true) : null,
-                child: Text('common.confirm'.tr()),
+                child: Text(t.common.confirm),
               ),
             ],
           );
@@ -580,7 +585,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('marketplace.edit.title'.tr()),
+        title: Text(t.marketplace.edit.title),
         actions: [
           TextButton(
             onPressed: _loadingStatus != null ? null : _saveProduct,
@@ -591,7 +596,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Text(
-                    'marketplace.edit.save'.tr(),
+                    t.marketplace.edit.save,
                     style: TextStyle(
                         color: Theme.of(context)
                             .primaryColor, // [Fix] Use primaryColor
@@ -765,15 +770,15 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: 'marketplace.edit.titleHint'.tr(),
+                    labelText: t.marketplace.edit.titleHint,
                   ),
                   validator: (value) => value == null || value.isEmpty
-                      ? 'marketplace.errors.requiredField'.tr()
+                      ? t.marketplace.errors.requiredField
                       : null,
                 ),
                 const SizedBox(height: 16),
                 // [작업 71] 1. 카테고리 로딩 중이 아닐 때만 선택기 표시
-                if (_loadingStatus == tr('ai_flow.status.loading_category'))
+                if (_loadingStatus == t.aiFlow.status.loadingCategory)
                   ListTile(
                     title: const Text("카테고리 정보 로딩 중..."),
                     leading: SizedBox(
@@ -798,10 +803,10 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                   controller: _priceController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'marketplace.edit.priceHint'.tr(),
+                    labelText: t.marketplace.edit.priceHint,
                   ),
                   validator: (value) => value == null || value.isEmpty
-                      ? 'marketplace.errors.requiredField'.tr()
+                      ? t.marketplace.errors.requiredField
                       : null,
                 ),
                 const SizedBox(height: 16),
@@ -809,38 +814,37 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                   controller: _descriptionController,
                   maxLines: 5,
                   decoration: InputDecoration(
-                    labelText: 'marketplace.edit.descriptionHint'.tr(),
+                    labelText: t.marketplace.edit.descriptionHint,
                   ),
                   validator: (value) => value == null || value.isEmpty
-                      ? 'marketplace.errors.requiredField'.tr()
+                      ? t.marketplace.errors.requiredField
                       : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _addressController,
                   decoration: InputDecoration(
-                    labelText: 'marketplace.edit.addressHint'.tr(),
+                    labelText: t.marketplace.edit.addressHint,
                   ),
                 ),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: _resetLocation,
-                    child: Text('marketplace.edit.resetLocation'.tr()),
+                    child: Text(t.marketplace.edit.resetLocation),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _transactionPlaceController,
                   decoration: InputDecoration(
-                    labelText:
-                        'marketplace.registration.addressDetailHint'.tr(),
+                    labelText: t.marketplace.registration.addressDetailHint,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Text('marketplace.edit.negotiable'.tr()),
+                    Text(t.marketplace.edit.negotiable),
                     Switch(
                       value: _isNegotiable,
                       onChanged: (value) {
@@ -855,16 +859,16 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: _condition,
                   decoration: InputDecoration(
-                    labelText: 'marketplace.condition.label'.tr(),
+                    labelText: t.marketplace.condition.label,
                   ),
                   items: [
                     DropdownMenuItem(
                       value: 'new',
-                      child: Text('marketplace.condition.new'.tr()),
+                      child: Text(t.marketplace.condition.kNew),
                     ),
                     DropdownMenuItem(
                       value: 'used',
-                      child: Text('marketplace.condition.used'.tr()),
+                      child: Text(t.marketplace.condition.used),
                     ),
                   ],
                   onChanged: (value) =>
@@ -875,25 +879,25 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: _status,
                   decoration: InputDecoration(
-                    labelText: 'marketplace.status.label'.tr(),
+                    labelText: t.marketplace.status.label,
                     // [Fix] AI 안심 예약으로 예약된 경우, 비활성화하고 안내 문구 표시
                     helperText:
                         (widget.product.isAiVerified && _status == 'reserved')
-                            ? 'marketplace.errors.aiReserved'.tr()
+                            ? t.marketplace.errors.aiReserved
                             : null,
                   ),
                   items: [
                     DropdownMenuItem(
                       value: 'selling',
-                      child: Text('marketplace.status.selling'.tr()),
+                      child: Text(t.marketplace.status.selling),
                     ),
                     DropdownMenuItem(
                       value: 'reserved',
-                      child: Text('marketplace.status.reserved'.tr()),
+                      child: Text(t.marketplace.status.reserved),
                     ),
                     DropdownMenuItem(
                       value: 'sold',
-                      child: Text('marketplace.status.sold'.tr()),
+                      child: Text(t.marketplace.status.sold),
                     ),
                   ],
                   // [Fix] AI 안심 예약으로 예약된 상품은 판매자가 상태 변경 불가
@@ -906,7 +910,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 const SizedBox(height: 16),
                 CustomTagInputField(
                   initialTags: _tags,
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: t.tagInput.help,
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;
@@ -918,12 +922,12 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 if (!_isAiVerified) ...[
                   const Divider(height: 32),
                   Text(
-                    'ai_flow.cta.title'.tr(),
+                    t.aiFlow.cta.title,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'ai_flow.cta.subtitle'.tr(),
+                    t.aiFlow.cta.subtitle,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
@@ -945,7 +949,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                               LinearProgressIndicator(),
                             ],
                           )
-                        : Text('ai_flow.cta.start_button'.tr()),
+                        : Text(t.aiFlow.cta.startButton),
                   ),
                 ] else ...[
                   const Divider(height: 32),
@@ -960,7 +964,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                           ? null
                           : _confirmCancelAi,
                       child: Text(
-                        'marketplace.ai.cancel_confirm'.tr(),
+                        t.marketplace.ai.cancelConfirm,
                         style: TextStyle(
                           color: (widget.product.aiCancelCount > 0)
                               ? Colors.grey
@@ -974,7 +978,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _loadingStatus != null ? null : _saveProduct,
-                  child: Text('marketplace.edit.save'.tr()),
+                  child: Text(t.marketplace.edit.save),
                 ),
               ],
             ),

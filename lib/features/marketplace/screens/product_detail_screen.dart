@@ -44,9 +44,10 @@ library;
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:bling_app/features/marketplace/models/product_model.dart';
@@ -73,7 +74,7 @@ class CategoryNameWidget extends StatelessWidget {
       {super.key, required this.categoryId, this.categoryParentId});
 
   String _getCategoryName(BuildContext context, Category category) {
-    final langCode = context.locale.languageCode;
+    final langCode = Localizations.localeOf(context).languageCode;
     switch (langCode) {
       case 'ko':
         return category.nameKo;
@@ -115,7 +116,7 @@ class CategoryNameWidget extends StatelessWidget {
               final child = Category.fromFirestore(
                   childDoc as DocumentSnapshot<Map<String, dynamic>>);
               final text =
-                  "${parent.displayName(context.locale.languageCode)} > ${child.displayName(context.locale.languageCode)}";
+                  "${parent.displayName(Localizations.localeOf(context).languageCode)} > ${child.displayName(Localizations.localeOf(context).languageCode)}";
               return Text(text,
                   style: const TextStyle(fontSize: 13, color: Colors.grey));
             } catch (e) {
@@ -233,23 +234,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('marketplace.reservation.title'.tr()),
+        title: Text(t.marketplace.reservation.title),
         content: Text(
-          'marketplace.reservation.content'.tr(
-            namedArgs: {
-              'amount': NumberFormat.currency(
-                      locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0)
-                  .format(depositAmount),
-            },
+          t.marketplace.reservation.content.replaceAll(
+            '{amount}',
+            NumberFormat.currency(
+                    locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0)
+                .format(depositAmount),
           ),
         ),
         actions: [
           TextButton(
-            child: Text('marketplace.dialog.cancel'.tr()),
+            child: Text(t.marketplace.dialog.cancel),
             onPressed: () => Navigator.of(ctx).pop(false),
           ),
           FilledButton(
-            child: Text('marketplace.reservation.confirm'.tr()),
+            child: Text(t.marketplace.reservation.confirm),
             onPressed: () {
               // TODO: 실제 결제 게이트웨이(PG) 연동 로직
               // PG 연동이 성공했다고 가정하고 true 반환
@@ -273,7 +273,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
     if (myUid == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('marketplace.errors.loginRequired'.tr())));
+          SnackBar(content: Text(t.marketplace.errors.loginRequired)));
       setState(() => _isReserving = false);
       return;
     }
@@ -293,7 +293,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('marketplace.reservation.success'.tr())));
+            SnackBar(content: Text(t.marketplace.reservation.success)));
       }
     } catch (e) {
       if (mounted) {
@@ -330,15 +330,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('marketplace.dialog.deleteTitle'.tr()),
-        content: Text('marketplace.dialog.deleteContent'.tr()),
+        title: Text(t.marketplace.dialog.deleteTitle),
+        content: Text(t.marketplace.dialog.deleteContent),
         actions: [
           TextButton(
-            child: Text('marketplace.dialog.cancel'.tr()),
+            child: Text(t.marketplace.dialog.cancel),
             onPressed: () => Navigator.of(ctx).pop(),
           ),
           TextButton(
-            child: Text('marketplace.dialog.deleteConfirm'.tr(),
+            child: Text(t.marketplace.dialog.deleteConfirm,
                 style: const TextStyle(color: Colors.red)),
             onPressed: () {
               Navigator.of(ctx).pop();
@@ -395,14 +395,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           .delete();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('marketplace.dialog.deleteSuccess'.tr())));
+            SnackBar(content: Text(t.marketplace.dialog.deleteSuccess)));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-                'marketplace.errors.deleteError'.tr(args: [e.toString()]))));
+            content: Text(t.marketplace.errors.deleteError
+                .replaceAll('{0}', e.toString()))));
       }
     }
   }
@@ -413,18 +413,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final dt = timestamp.toDate();
     final diff = now.difference(dt);
 
-    if (diff.inMinutes < 1) return 'time.now'.tr();
+    if (diff.inMinutes < 1) return t.time.now;
     if (diff.inHours < 1) {
-      return 'time.minutesAgo'
-          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+      return t.time.minutesAgo
+          .replaceAll('{minutes}', diff.inMinutes.toString());
     }
     if (diff.inDays < 1) {
-      return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
+      return t.time.hoursAgo.replaceAll('{hours}', diff.inHours.toString());
     }
     if (diff.inDays < 7) {
-      return 'time.daysAgo'.tr(namedArgs: {'days': diff.inDays.toString()});
+      return t.time.daysAgo.replaceAll('{days}', diff.inDays.toString());
     }
-    return DateFormat('time.dateFormat'.tr()).format(dt);
+    return DateFormat(t.time.dateFormat).format(dt);
   }
 
   // --- 메인 빌드 함수 ---
@@ -509,8 +509,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                           Text(
                             product.negotiable
-                                ? 'marketplace.detail.makeOffer'.tr()
-                                : 'marketplace.detail.fixedPrice'.tr(),
+                                ? t.marketplace.detail.makeOffer
+                                : t.marketplace.detail.fixedPrice,
                             style: TextStyle(
                               color: product.negotiable
                                   ? Colors.green
@@ -547,10 +547,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           fit: BoxFit.scaleDown,
                           child: Text(
                             (isReserved)
-                                ? 'marketplace.status.reserved'.tr()
+                                ? t.marketplace.status.reserved
                                 : (isSelling
-                                    ? 'marketplace.detail.chat'.tr()
-                                    : 'marketplace.status.sold'.tr()),
+                                    ? t.marketplace.detail.chat
+                                    : t.marketplace.status.sold),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -725,7 +725,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ClickableTagList(tags: product.tags),
                         if (hasLocation) ...[
                           const Divider(height: 32),
-                          Text('marketplace.detail.dealLocation'.tr(),
+                          Text(t.marketplace.detail.dealLocation,
                               style: const TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 12),
@@ -741,7 +741,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         const Divider(height: 32),
                         // ... 통계 라인은 원본과 동일 ...
                         Text(
-                          '${'marketplace.detail.likes'.tr()} ${product.likesCount} ∙ ${'marketplace.detail.chats'.tr()} ${product.chatsCount} ∙ ${'marketplace.detail.views'.tr()} ${product.viewsCount}',
+                          '${t.marketplace.detail.likes} ${product.likesCount} ∙ ${t.marketplace.detail.chats} ${product.chatsCount} ∙ ${t.marketplace.detail.views} ${product.viewsCount}',
                           style:
                               const TextStyle(color: Colors.grey, fontSize: 12),
                         ),
@@ -782,7 +782,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         backgroundColor: Colors.green,
         icon: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white),
         label: Text(
-          "marketplace.takeover.button".tr(),
+          t.marketplace.takeover.button,
           style:
               const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
@@ -803,7 +803,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     strokeWidth: 2, color: Colors.white))
             : const Icon(Icons.shield_outlined, color: Colors.white),
         label: Text(
-          "marketplace.reservation.button".tr(),
+          t.marketplace.reservation.button,
           style: const TextStyle(color: Colors.white),
         ),
       );

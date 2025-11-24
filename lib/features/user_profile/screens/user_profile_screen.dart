@@ -5,7 +5,7 @@ import 'package:bling_app/features/local_news/widgets/post_card.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import '../../shared/widgets/app_bar_icon.dart';
 
 class UserProfileScreen extends StatelessWidget {
@@ -28,7 +28,7 @@ class UserProfileScreen extends StatelessWidget {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
-                title: Text('profileView.title'.tr()),
+                title: Text(t.profileView.title),
                 floating: true,
                 pinned: true,
                 snap: true,
@@ -41,8 +41,8 @@ class UserProfileScreen extends StatelessWidget {
                 delegate: _SliverTabBarDelegate(
                   TabBar(
                     tabs: [
-                      Tab(text: 'profileView.tabs.posts'.tr()),
-                      Tab(text: 'profileView.tabs.interests'.tr()),
+                      Tab(text: t.profileView.tabs.posts),
+                      Tab(text: t.profileView.tabs.interests),
                     ],
                   ),
                 ),
@@ -106,7 +106,7 @@ class UserProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  user.locationName ?? 'postCard.locationNotSet'.tr(),
+                  user.locationName ?? t.postCard.locationNotSet,
                   style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                 ),
               ],
@@ -129,7 +129,7 @@ class UserProfileScreen extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('profileView.noPosts'.tr()));
+          return Center(child: Text(t.profileView.noPosts));
         }
         final postDocs = snapshot.data!.docs;
         return ListView.builder(
@@ -158,7 +158,7 @@ class UserProfileScreen extends StatelessWidget {
         final interests = user.interests ?? [];
 
         if (interests.isEmpty) {
-          return Center(child: Text('profileView.noInterests'.tr()));
+          return Center(child: Text(t.profileView.noInterests));
         }
 
         return SingleChildScrollView(
@@ -169,7 +169,8 @@ class UserProfileScreen extends StatelessWidget {
             children: interests.map((interestKey) {
               return Chip(
                 avatar: const Icon(Icons.check_circle_outline, size: 16),
-                label: Text("interests.items.$interestKey".tr()),
+                // TODO: Refactor dynamic key above these lines.
+                label: Text(t['interests.items.$interestKey'] ?? ''),
               );
             }).toList(),
           ),

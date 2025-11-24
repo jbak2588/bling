@@ -3,7 +3,8 @@ import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/features/lost_and_found/screens/lost_item_detail_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart'; // 다국어 지원
+import 'package:intl/intl.dart';
+import 'package:bling_app/i18n/strings.g.dart'; // 다국어 지원
 // ✅ 현상금 포맷을 위해 추가
 
 /// [개편] 10단계: 메인 피드용 표준 썸네일 (LostItem 전용)
@@ -34,7 +35,7 @@ class LostItemThumb extends StatelessWidget {
         onTap: () {
           // ✅ [Final Fix] Navigator.push 대신 onIconTap 콜백 사용
           final detailScreen = LostItemDetailScreen(item: item);
-          onIconTap(detailScreen, 'main.tabs.lostAndFound'.tr()); // 타이틀 키 전달
+          onIconTap(detailScreen, t.main.tabs.lostAndFound); // 타이틀 키 전달
         },
         child: Card(
           elevation: 1,
@@ -110,7 +111,7 @@ class LostItemThumb extends StatelessWidget {
             right: 8,
             child: Chip(
               label: Text(
-                'Rp ${NumberFormat.compact(locale: context.locale.toString()).format(item.bountyAmount)}',
+                'Rp ${NumberFormat.compact(locale: Localizations.localeOf(context).toString()).format(item.bountyAmount)}',
                 style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,

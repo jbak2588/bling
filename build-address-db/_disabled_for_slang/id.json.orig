@@ -937,8 +937,7 @@
       "yearly": "Tahunan",
       "per_case": "Per kasus",
       "etc": "Lainnya",
-      "total": "Total Bayaran",
-      "$value": "$value"
+      "total": "Total Bayaran"
     },
     "workPeriods": {
       "short_term": "Jangka pendek",
@@ -950,8 +949,7 @@
       "3_months": "3 Bulan",
       "6_months_plus": "6 Bulan+",
       "negotiable": "Bisa nego",
-      "etc": "Lainnya",
-      "$period": "$period"
+      "etc": "Lainnya"
     },
     "detail": {
       "infoTitle": "Informasi detail",
@@ -1042,10 +1040,8 @@
       "travel": "Jalan-jalan",
       "pets": "Hewan peliharaan",
       "volunteering": "Kegiatan sosial",
-      "minimalism": "Minimalisme",
-      "$interestKey": "$interestKey"
-    },
-    "$categoryKey": "$categoryKey"
+      "minimalism": "Minimalisme"
+    }
   },
   "friendDetail": {
     "request": "Kirim Permintaan",
@@ -1342,8 +1338,7 @@
       "auto": "Otomotif/Bengkel",
       "kids": "Produk & Layanan Anak",
       "hospital": "Rumah Sakit/Klinik",
-      "etc": "Lainnya",
-      "$category": "$category"
+      "etc": "Lainnya"
     },
     "detail": {
       "description": "Deskripsi Toko",
@@ -1582,8 +1577,7 @@
       "rentPeriods": {
         "daily": "Harian",
         "monthly": "Bulanan",
-        "yearly": "Tahunan",
-        "$period": "$period"
+        "yearly": "Tahunan"
       },
       "kos": {
         "bathroomType": "Tipe Kamar Mandi",
@@ -1616,8 +1610,7 @@
       "furnishedTypes": {
         "furnished": "Berperabot",
         "semi_furnished": "Semi berperabot",
-        "unfurnished": "Tanpa perabot",
-        "$status": "$status"
+        "unfurnished": "Tanpa perabot"
       }
     },
     "info": {

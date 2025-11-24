@@ -19,7 +19,7 @@ import 'package:bling_app/core/models/user_model.dart';
 // repository import intentionally removed — using direct Firestore query for search
 import 'package:bling_app/features/lost_and_found/widgets/lost_item_card.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:provider/provider.dart';
@@ -120,7 +120,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
         children: [
           if (_showSearchBar)
             InlineSearchChip(
-              hintText: 'main.search.hint.lostAndFound'.tr(),
+              hintText: t.main.search.hint.lostAndFound,
               openNotifier: _chipOpenNotifier,
               onSubmitted: (kw) {
                 _searchKeywordNotifier.value = kw.trim().toLowerCase();
@@ -136,9 +136,9 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
             unselectedLabelColor: Colors.grey[600],
             indicatorColor: Theme.of(context).primaryColor,
             tabs: [
-              Tab(text: 'lostAndFound.tabs.all'.tr()),
-              Tab(text: 'lostAndFound.tabs.lost'.tr()),
-              Tab(text: 'lostAndFound.tabs.found'.tr()),
+              Tab(text: t.lostAndFound.tabs.all),
+              Tab(text: t.lostAndFound.tabs.lost),
+              Tab(text: t.lostAndFound.tabs.found),
             ],
             onTap: (index) => setState(() {}),
           ),
@@ -190,8 +190,8 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                 }
                 if (snapshot.hasError) {
                   return Center(
-                      child: Text('lostAndFound.error'.tr(
-                          namedArgs: {'error': snapshot.error.toString()})));
+                      child: Text(t.lostAndFound.error
+                          .replaceAll('{error}', snapshot.error.toString())));
                 }
 
                 final docs = snapshot.data?.docs ?? [];
@@ -209,11 +209,11 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                             Icon(Icons.search_off,
                                 size: 64, color: Colors.grey[300]),
                             const SizedBox(height: 12),
-                            Text('lostAndFound.empty'.tr(),
+                            Text(t.lostAndFound.empty,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyMedium),
                             const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
+                            Text(t.search.empty.checkSpelling,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
@@ -222,7 +222,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                               icon: const Icon(Icons.map_outlined),
-                              label: Text('search.empty.expandToNational'.tr()),
+                              label: Text(t.search.empty.expandToNational),
                               onPressed: () => context
                                   .read<LocationProvider>()
                                   .setMode(LocationSearchMode.national),
@@ -242,7 +242,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                           Icon(Icons.search_off,
                               size: 64, color: Colors.grey[300]),
                           const SizedBox(height: 12),
-                          Text('lostAndFound.empty'.tr(),
+                          Text(t.lostAndFound.empty,
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyMedium),
                         ],

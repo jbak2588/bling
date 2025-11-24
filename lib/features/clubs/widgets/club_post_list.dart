@@ -4,7 +4,7 @@ import 'package:bling_app/features/clubs/models/club_model.dart'; // [추가]
 import 'package:bling_app/features/clubs/models/club_post_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import '../screens/create_club_post_screen.dart';
 import 'club_post_card.dart';
 
@@ -24,7 +24,7 @@ class ClubPostList extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('clubs.postList.empty'.tr()));
+            return Center(child: Text(t.clubs.postList.empty));
           }
 
           final posts = snapshot.data!;
@@ -52,7 +52,7 @@ class ClubPostList extends StatelessWidget {
                       builder: (_) => CreateClubPostScreen(clubId: club.id)),
                 );
               },
-              tooltip: 'clubs.postList.writeTooltip'.tr(),
+              tooltip: t.clubs.postList.writeTooltip,
               child: const Icon(Icons.edit),
             );
           }

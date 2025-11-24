@@ -3,7 +3,8 @@ import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:bling_app/features/real_estate/screens/room_detail_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart'; // 다국어 지원
+import 'package:intl/intl.dart';
+import 'package:bling_app/i18n/strings.g.dart'; // 다국어 지원
 import 'package:bling_app/core/utils/address_formatter.dart'; // 주소 단축 유틸
 
 /// [개편] 11단계: 메인 피드용 표준 썸네일 (RealEstate 전용)
@@ -34,7 +35,7 @@ class RealEstateThumb extends StatelessWidget {
         onTap: () {
           // ✅ [Final Fix] Navigator.push 대신 onIconTap 콜백 사용
           final detailScreen = RoomDetailScreen(room: room);
-          onIconTap(detailScreen, 'main.tabs.realEstate'); // 타이틀 키 전달
+          onIconTap(detailScreen, t.main.tabs.realEstate); // 타이틀 키 전달
         },
         child: Card(
           elevation: 1,
@@ -105,10 +106,12 @@ class RealEstateThumb extends StatelessWidget {
     // MD: "배지=월세/매매가"
     //
     final priceFormat = NumberFormat.currency(
-        locale: context.locale.toString(), symbol: 'Rp ', decimalDigits: 0);
+        locale: Localizations.localeOf(context).toString(),
+        symbol: 'Rp ',
+        decimalDigits: 0);
     final priceString = priceFormat.format(room.price);
     // 가격 단위 (monthly, yearly 등) - 다국어 키 필요 (예: 'realEstate.priceUnit.monthly')
-    final priceUnitString = 'realEstate.priceUnit.${room.priceUnit}'.tr();
+    final priceUnitString = t['realEstate.priceUnit.${room.priceUnit}'] ?? '';
 
     return Expanded(
       child: Padding(

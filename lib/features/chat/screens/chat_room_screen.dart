@@ -79,7 +79,7 @@ import 'dart:ui' as ui; // [v2.1] 이미지 블러(ImageFiltered)를 위해 impo
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart'; // [v2.1] 이미지 전송 기능 구현을 위해 import
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -312,8 +312,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         if (isNewChat) {
                           return _buildIcebreakers();
                         }
-                        return Center(
-                            child: Text('chat_room.placeholder'.tr()));
+                        return Center(child: Text(t.chatRoom.placeholder));
                       }
 
                       final messages = snapshot.data!;
@@ -389,7 +388,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
-                    'chatRoom.mediaBlocked'.tr(),
+                    t.chatRoom.mediaBlocked,
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: Colors.grey[700]),
                   ),
@@ -423,7 +422,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 child: TextField(
                   controller: _messageController,
                   decoration: InputDecoration(
-                      hintText: 'chat_room.placeholder'.tr(),
+                      hintText: t.chatRoom.placeholder,
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24)),
                       contentPadding:
@@ -452,7 +451,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'chatRoom.startConversation'.tr(),
+              t.chatRoom.startConversation,
               style: theme.textTheme.titleMedium
                   ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
@@ -463,19 +462,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               alignment: WrapAlignment.center,
               children: [
                 ActionChip(
-                  label: Text('chatRoom.icebreaker1'.tr()),
+                  label: Text(t.chatRoom.icebreaker1),
                   onPressed: () =>
-                      _sendMessageWithSuggestion('chatRoom.icebreaker1'.tr()),
+                      _sendMessageWithSuggestion(t.chatRoom.icebreaker1),
                 ),
                 ActionChip(
-                  label: Text('chatRoom.icebreaker2'.tr()),
+                  label: Text(t.chatRoom.icebreaker2),
                   onPressed: () =>
-                      _sendMessageWithSuggestion('chatRoom.icebreaker2'.tr()),
+                      _sendMessageWithSuggestion(t.chatRoom.icebreaker2),
                 ),
                 ActionChip(
-                  label: Text('chatRoom.icebreaker3'.tr()),
+                  label: Text(t.chatRoom.icebreaker3),
                   onPressed: () =>
-                      _sendMessageWithSuggestion('chatRoom.icebreaker3'.tr()),
+                      _sendMessageWithSuggestion(t.chatRoom.icebreaker3),
                 ),
               ],
             ),
@@ -494,7 +493,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     if (_contextItem is JobModel) {
       final job = _contextItem as JobModel;
       title = job.title;
-      subtitle = 'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr();
+      subtitle = t['jobs.salaryTypes.${job.salaryType ?? 'etc'}'];
       if (job.imageUrls != null && job.imageUrls!.isNotEmpty) {
         image = NetworkImage(job.imageUrls!.first);
       }
@@ -633,8 +632,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         r'http[s]?:\/\/[^\n+\s]+|www\.[^\s]+|[\w-]+\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?\/[^\s]*');
 
     return text
-        .replaceAll(linkRegex, '[${'chatRoom.linkHidden'.tr()}]')
-        .replaceAll(phoneRegex, '[${'chatRoom.contactHidden'.tr()}]');
+        .replaceAll(linkRegex, '[${t.chatRoom.linkHidden}]')
+        .replaceAll(phoneRegex, '[${t.chatRoom.contactHidden}]');
   }
 
   // [v2.1] 이미지 메시지 위젯 (보호 모드 블러 처리)

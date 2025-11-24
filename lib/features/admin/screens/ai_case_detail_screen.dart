@@ -24,7 +24,7 @@ import 'package:bling_app/features/marketplace/data/product_repository.dart'; //
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Clipboard
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 class AiCaseDetailScreen extends StatefulWidget {
   final AiCaseModel aiCase;
@@ -78,15 +78,15 @@ class _AiCaseDetailScreenState extends State<AiCaseDetailScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('ai_case.title')),
+        title: Text(t.aiCase.title),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
           tabs: [
-            Tab(text: tr('ai_case.tabs.summary')),
-            Tab(text: tr('ai_case.tabs.takeover_photos')),
-            Tab(text: tr('ai_case.tabs.original_photos')),
-            Tab(text: tr('ai_case.tabs.raw_json')),
+            Tab(text: t.aiCase.tabs.summary),
+            Tab(text: t.aiCase.tabs.takeoverPhotos),
+            Tab(text: t.aiCase.tabs.originalPhotos),
+            Tab(text: t.aiCase.tabs.rawJson),
           ],
         ),
       ),
@@ -234,7 +234,7 @@ class _AiCaseDetailScreenState extends State<AiCaseDetailScreen>
               (result!['discrepancies'] as List).isNotEmpty) ...[
             const Text("Discrepancies (불일치 내역):",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            ...((result['discrepancies'] as List).map((e) => ListTile(
+            ...((result['discrepancies'] ?? '' as List).map((e) => ListTile(
                   leading:
                       const Icon(Icons.error_outline, color: Colors.orange),
                   title: Text(e.toString()),

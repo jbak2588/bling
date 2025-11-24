@@ -2,9 +2,11 @@
 import 'package:bling_app/features/admin/screens/admin_product_detail_screen.dart';
 import 'package:bling_app/features/marketplace/screens/product_detail_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 
@@ -51,31 +53,26 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
   Widget build(BuildContext context) {
     // Debug: log localization context to diagnose missing key warnings
     try {
-      debugPrint('NotificationListScreen.build - locale: ${context.locale}');
       debugPrint(
-          'NotificationListScreen.build - supportedLocales: ${context.supportedLocales}');
+          'NotificationListScreen.build - locale: ${Localizations.localeOf(context)}');
+      // Calling t[...] directly to inspect resolved title
+      final trResult = t.settings.notificationsTitle;
       debugPrint(
-          'NotificationListScreen.build - localizationDelegates: ${context.localizationDelegates}');
-      // Calling .tr() intentionally to show what EasyLocalization resolves at runtime
-      final trResult = 'settings.notificationsTitle'.tr();
-      debugPrint(
-          "NotificationListScreen.build - 'settings.notificationsTitle'.tr(): $trResult");
-      // Note: avoid calling EasyLocalization.of(context)?.tr(...) as analyzer
-      // may not expose a .tr method on the provider type. Use the String.tr() extension above.
+          "NotificationListScreen.build - settings.notificationsTitle: $trResult");
     } catch (e, st) {
       debugPrint('NotificationListScreen.build - localization debug error: $e');
       debugPrint('$st');
     }
     if (_myUid == null) {
       return Scaffold(
-        appBar: AppBar(title: Text('settings.notificationsTitle'.tr())),
-        body: Center(child: Text('main.errors.loginRequired'.tr())),
+        appBar: AppBar(title: Text(t.settings.notificationsTitle)),
+        body: Center(child: Text(t.main.errors.loginRequired)),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('settings.notificationsTitle'.tr()), // "알림"
+        title: Text(t.settings.notificationsTitle), // "알림"
       ),
       body: StreamBuilder<QuerySnapshot>(
         // Task 94에서 저장한 'notifications' 하위 컬렉션을 실시간으로 읽음
@@ -91,7 +88,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('notifications.error'.tr()));
+            return Center(child: Text(t.notifications.error));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             final isNational = context.watch<LocationProvider>().mode ==
@@ -106,11 +103,11 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                       Icon(Icons.notifications_off,
                           size: 64, color: Colors.grey[300]),
                       const SizedBox(height: 12),
-                      Text('notifications.empty'.tr(),
+                      Text(t.notifications.empty,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium),
                       const SizedBox(height: 8),
-                      Text('search.empty.checkSpelling'.tr(),
+                      Text(t.search.empty.checkSpelling,
                           textAlign: TextAlign.center,
                           style: Theme.of(context)
                               .textTheme
@@ -119,7 +116,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                       const SizedBox(height: 16),
                       OutlinedButton.icon(
                         icon: const Icon(Icons.map_outlined),
-                        label: Text('search.empty.expandToNational'.tr()),
+                        label: Text(t.search.empty.expandToNational),
                         onPressed: () => context
                             .read<LocationProvider>()
                             .setMode(LocationSearchMode.national),
@@ -139,7 +136,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                     Icon(Icons.notifications_off,
                         size: 64, color: Colors.grey[300]),
                     const SizedBox(height: 12),
-                    Text('notifications.empty'.tr(),
+                    Text(t.notifications.empty,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium),
                   ],
@@ -243,17 +240,17 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
     final dt = timestamp.toDate();
     final diff = now.difference(dt);
 
-    if (diff.inMinutes < 1) return 'time.now'.tr();
+    if (diff.inMinutes < 1) return t.time.now;
     if (diff.inHours < 1) {
-      return 'time.minutesAgo'
-          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+      return t.time.minutesAgo
+          .replaceAll('{minutes}', diff.inMinutes.toString());
     }
     if (diff.inDays < 1) {
-      return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
+      return t.time.hoursAgo.replaceAll('{hours}', diff.inHours.toString());
     }
     if (diff.inDays < 7) {
-      return 'time.daysAgo'.tr(namedArgs: {'days': diff.inDays.toString()});
+      return t.time.daysAgo.replaceAll('{days}', diff.inDays.toString());
     }
-    return DateFormat('time.dateFormat'.tr()).format(dt);
+    return DateFormat(t.time.dateFormat).format(dt);
   }
 }

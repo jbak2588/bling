@@ -17,7 +17,9 @@ library;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// easy_localization compatibility removed; using Slang `t[...]`
 
 import '../../marketplace/models/product_model.dart';
 import '../../../core/models/user_model.dart';
@@ -32,7 +34,7 @@ class UserProductList extends StatelessWidget {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
 
     if (myUid == null) {
-      return Center(child: Text('main.errors.loginRequired'.tr()));
+      return Center(child: Text(t.main.errors.loginRequired));
     }
 
     // 1. 현재 사용자의 문서를 실시간으로 관찰합니다.
@@ -41,7 +43,7 @@ class UserProductList extends StatelessWidget {
           FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
       builder: (context, userSnapshot) {
         if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-          return Center(child: Text('main.errors.userNotFound'.tr()));
+          return Center(child: Text(t.main.errors.userNotFound));
         }
 
         final user = UserModel.fromFirestore(userSnapshot.data!);
@@ -64,12 +66,12 @@ class UserProductList extends StatelessWidget {
             }
             if (productsSnapshot.hasError) {
               return Center(
-                  child: Text('myBling.products.loadErrorWithMsg'.tr(
-                      namedArgs: {'msg': productsSnapshot.error.toString()})));
+                  child: Text(t.myBling.products.loadErrorWithMsg
+                      .replaceAll('{msg}', productsSnapshot.error.toString())));
             }
             if (!productsSnapshot.hasData ||
                 productsSnapshot.data!.docs.isEmpty) {
-              return Center(child: Text('myBling.products.noInfo'.tr()));
+              return Center(child: Text(t.myBling.products.noInfo));
             }
 
             final products = productsSnapshot.data!.docs

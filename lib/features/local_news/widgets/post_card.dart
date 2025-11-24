@@ -19,7 +19,9 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
+// easy_localization removed during migration to Slang `t[...]`
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -56,18 +58,18 @@ class _PostCardState extends State<PostCard>
     final dt = timestamp.toDate();
     final diff = now.difference(dt);
 
-    if (diff.inMinutes < 1) return 'time.now'.tr();
+    if (diff.inMinutes < 1) return t.time.now;
     if (diff.inHours < 1) {
-      return 'time.minutesAgo'
-          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+      return t.time.minutesAgo
+          .replaceAll('{minutes}', diff.inMinutes.toString());
     }
     if (diff.inDays < 1) {
-      return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
+      return t.time.hoursAgo.replaceAll('{hours}', diff.inHours.toString());
     }
     if (diff.inDays < 7) {
-      return 'time.daysAgo'.tr(namedArgs: {'days': diff.inDays.toString()});
+      return t.time.daysAgo.replaceAll('{days}', diff.inDays.toString());
     }
-    return DateFormat('time.dateFormat'.tr()).format(dt);
+    return DateFormat(t.time.dateFormat).format(dt);
   }
 
   Widget _buildAuthorInfo(
@@ -118,7 +120,7 @@ class _PostCardState extends State<PostCard>
                       ],
                     ),
                     Text(
-                      '${user.locationParts?['kel'] ?? user.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $timeAgo',
+                      '${user.locationParts?['kel'] ?? user.locationParts?['kec'] ?? t.postCard.locationNotSet} • $timeAgo',
                       style:
                           TextStyle(color: Colors.grey.shade600, fontSize: 12),
                     ),
@@ -140,7 +142,7 @@ class _PostCardState extends State<PostCard>
     final kel = widget.post.locationParts != null
         ? (widget.post.locationParts!['kel'] as String?)
         : null;
-    final display = kel ?? locationName ?? 'postCard.locationNotSet'.tr();
+    final display = kel ?? locationName ?? t.postCard.locationNotSet;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -205,7 +207,7 @@ class _PostCardState extends State<PostCard>
                         padding: EdgeInsets.zero,
                         // [수정] 시스템 태그(nameKey 있음)는 번역, 사용자 태그는 그대로 표시
                         label: Text(
-                          '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${tagInfo.nameKey.isNotEmpty ? tagInfo.nameKey.tr() : tagInfo.tagId}',
+                          '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${tagInfo.nameKey.isNotEmpty ? t[tagInfo.nameKey] : tagInfo.tagId}',
                           style: const TextStyle(fontSize: 11),
                         ),
                       ),

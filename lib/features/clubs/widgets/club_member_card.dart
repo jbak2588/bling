@@ -7,7 +7,7 @@ import 'package:bling_app/features/find_friends/screens/find_friend_detail_scree
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class ClubMemberCard extends StatefulWidget {
@@ -34,16 +34,16 @@ class _ClubMemberCardState extends State<ClubMemberCard> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('clubs.memberCard.kickConfirmTitle'
-              .tr(namedArgs: {'memberName': memberName})),
-          content: Text('clubs.memberCard.kickConfirmContent'.tr()),
+          title: Text(t.clubs.memberCard.kickConfirmTitle
+              .replaceAll('{memberName}', memberName)),
+          content: Text(t.clubs.memberCard.kickConfirmContent),
           actions: [
             TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text('common.cancel'.tr())),
+                child: Text(t.common.cancel)),
             TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text('clubs.memberCard.kick'.tr(),
+                child: Text(t.clubs.memberCard.kick,
                     style: const TextStyle(color: Colors.red))),
           ],
         );
@@ -57,16 +57,16 @@ class _ClubMemberCardState extends State<ClubMemberCard> {
         // [핵심] SnackBar를 호출하기 전에, 위젯이 여전히 화면에 있는지(mounted) 확인합니다.
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('clubs.memberCard.kickedSuccess'
-                .tr(namedArgs: {'memberName': memberName})),
+            content: Text(t.clubs.memberCard.kickedSuccess
+                .replaceAll('{memberName}', memberName)),
             backgroundColor: Colors.green,
           ));
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('clubs.memberCard.kickFail'
-                .tr(namedArgs: {'error': e.toString()})),
+            content: Text(t.clubs.memberCard.kickFail
+                .replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
           ));
         }
@@ -131,9 +131,12 @@ class _ClubMemberCardState extends State<ClubMemberCard> {
                 : null,
             onTap: () async {
               if (currentUserId == null) return;
-              
+
               // 현재 로그인한 사용자의 최신 정보를 가져옵니다.
-              final currentUserDoc = await FirebaseFirestore.instance.collection('users').doc(currentUserId).get();
+              final currentUserDoc = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(currentUserId)
+                  .get();
               if (!currentUserDoc.exists || !context.mounted) return;
               final currentUserModel = UserModel.fromFirestore(currentUserDoc);
 

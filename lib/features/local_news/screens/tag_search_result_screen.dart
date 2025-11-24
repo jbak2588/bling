@@ -17,7 +17,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 // ✅ Localize tag names and emojis
 import 'package:bling_app/core/constants/app_tags.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 class TagSearchResultScreen extends StatefulWidget {
   // ✅ tags 또는 keyword 둘 중 하나만 받도록 nullable로 유지
@@ -48,7 +48,7 @@ class _TagSearchResultScreenState extends State<TagSearchResultScreen> {
       ),
     );
     if (info.tagId.isEmpty) return tagId; // fallback to raw id
-    return info.nameKey.tr();
+    return t[info.nameKey];
   }
 
   String displayEmoji(String tagId) {
@@ -79,11 +79,9 @@ class _TagSearchResultScreenState extends State<TagSearchResultScreen> {
       return titleForTags(widget.tags!);
     }
     if (widget.keyword != null && widget.keyword!.isNotEmpty) {
-      return 'search.resultsTitle'.tr(namedArgs: {
-        'keyword': widget.keyword!,
-      });
+      return t.search.resultsTitle.replaceAll('{keyword}', widget.keyword!);
     }
-    return 'search.results'.tr();
+    return t.search.results;
   }
 
   @override
@@ -148,12 +146,12 @@ class _TagSearchResultScreenState extends State<TagSearchResultScreen> {
           }
           if (snap.hasError) {
             return Center(
-              child: Text('search.empty.message'.tr()),
+              child: Text(t.search.empty.message),
             );
           }
           final list = snap.data ?? const <PostModel>[];
           if (list.isEmpty) {
-            return Center(child: Text('search.empty.message'.tr()));
+            return Center(child: Text(t.search.empty.message));
           }
           return ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

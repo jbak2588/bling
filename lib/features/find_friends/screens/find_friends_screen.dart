@@ -45,7 +45,7 @@ import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart'; /
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 
@@ -238,8 +238,8 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
           TabBar(
             controller: _tabController,
             tabs: [
-              Tab(text: "findFriend.tabs.friends".tr()),
-              Tab(text: "findFriend.tabs.groups".tr()),
+              Tab(text: t.findFriend.tabs.friends),
+              Tab(text: t.findFriend.tabs.groups),
             ],
           ),
           // [v2.1] TabBarView가 Column 안에서 확장되도록 Expanded로 감쌈
@@ -260,7 +260,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
           FloatingActionButton(
             heroTag: 'find_friends_filter',
             onPressed: _openLocationFilter,
-            tooltip: 'locationFilter.title'.tr(),
+            tooltip: t.locationFilter.title,
             child: const Icon(Icons.filter_list),
           ),
           const SizedBox(height: 12),
@@ -274,7 +274,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                         const ProfileEditScreen()), // [v2.1] userModel 파라미터 제거 (에러 수정)
               );
             },
-            tooltip: "myBling.editProfile".tr(), // [v2.1] 툴팁 변경
+            tooltip: t.myBling.editProfile, // [v2.1] 툴팁 변경
             child: const Icon(Icons.edit_note_outlined),
           ),
         ],
@@ -305,11 +305,11 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                   children: [
                     Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                     const SizedBox(height: 12),
-                    Text('findFriend.empty'.tr(),
+                    Text(t.findFriend.empty,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 8),
-                    Text('search.empty.checkSpelling'.tr(),
+                    Text(t.search.empty.checkSpelling,
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme
@@ -318,7 +318,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
                         icon: const Icon(Icons.map_outlined),
-                        label: Text('search.empty.expandToNational'.tr()),
+                        label: Text(t.search.empty.expandToNational),
                         onPressed: () => context
                             .read<LocationProvider>()
                             .setMode(LocationSearchMode.national)),
@@ -336,7 +336,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                 children: [
                   Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                   const SizedBox(height: 12),
-                  Text('findFriend.empty'.tr(),
+                  Text(t.findFriend.empty,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium),
                 ],
@@ -368,11 +368,11 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                   children: [
                     Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                     const SizedBox(height: 12),
-                    Text('findFriend.empty'.tr(),
+                    Text(t.findFriend.empty,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 8),
-                    Text('search.empty.checkSpelling'.tr(),
+                    Text(t.search.empty.checkSpelling,
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme
@@ -381,7 +381,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
                         icon: const Icon(Icons.map_outlined),
-                        label: Text('search.empty.expandToNational'.tr()),
+                        label: Text(t.search.empty.expandToNational),
                         onPressed: () => context
                             .read<LocationProvider>()
                             .setMode(LocationSearchMode.national)),
@@ -399,7 +399,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                 children: [
                   Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                   const SizedBox(height: 12),
-                  Text('findFriend.empty'.tr(),
+                  Text(t.findFriend.empty,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium),
                 ],
@@ -518,11 +518,11 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                         Icon(Icons.search_off,
                             size: 64, color: Colors.grey[300]),
                         const SizedBox(height: 12),
-                        Text('clubs.empty'.tr(),
+                        Text(t.clubs.empty,
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.bodyMedium),
                         const SizedBox(height: 8),
-                        Text('search.empty.checkSpelling'.tr(),
+                        Text(t.search.empty.checkSpelling,
                             textAlign: TextAlign.center,
                             style: Theme.of(context)
                                 .textTheme
@@ -531,7 +531,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                         const SizedBox(height: 16),
                         OutlinedButton.icon(
                             icon: const Icon(Icons.map_outlined),
-                            label: Text('search.empty.expandToNational'.tr()),
+                            label: Text(t.search.empty.expandToNational),
                             onPressed: () => context
                                 .read<LocationProvider>()
                                 .setMode(LocationSearchMode.national)),
@@ -549,7 +549,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                     children: [
                       Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                       const SizedBox(height: 12),
-                      Text('clubs.empty'.tr(),
+                      Text(t.clubs.empty,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium),
                     ],
@@ -567,7 +567,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
                     child: Text(
-                      'clubs.sections.active'.tr(), // I18N: "정식 모임"
+                      t.clubs.sections.active, // I18N: "정식 모임"
                       style: Theme.of(context)
                           .textTheme
                           .titleMedium
@@ -594,7 +594,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                     padding: EdgeInsets.fromLTRB(
                         16.0, clubs.isNotEmpty ? 24.0 : 16.0, 16.0, 8.0),
                     child: Text(
-                      'clubs.sections.proposals'.tr(), // I18N: "모임 제안"
+                      t.clubs.sections.proposals, // I18N: "모임 제안"
                       style: Theme.of(context)
                           .textTheme
                           .titleMedium
@@ -625,7 +625,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: InlineSearchChip(
-        hintText: 'main.search.hint.findFriends'.tr(),
+        hintText: t.main.search.hint.findFriends,
         openNotifier: _chipOpenNotifier,
         onSubmitted: (kw) =>
             _searchKeywordNotifier.value = kw.trim().toLowerCase(),

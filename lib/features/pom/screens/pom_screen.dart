@@ -29,7 +29,9 @@ import 'package:bling_app/features/pom/screens/pom_pager_screen.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/pom/models/pom_model.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// removed compat shim; using Slang generated `t` accessors
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import '../widgets/pom_feed_list.dart';
 
@@ -137,10 +139,10 @@ class _PomScreenState extends State<PomScreen> {
   Widget build(BuildContext context) {
     // [V2] 기획서(백서) 기반 탭 구조로 변경
     final List<String> tabs = [
-      'pom.tabs.local'.tr(),
-      'pom.tabs.all'.tr(),
-      'pom.tabs.popular'.tr(), // [V2]
-      'pom.tabs.myPoms'.tr(), // [V2]
+      t.pom.tabs.local,
+      t.pom.tabs.all,
+      t.pom.tabs.popular, // [V2]
+      t.pom.tabs.myPoms, // [V2]
     ];
 
     // 상세 진입 시에는 탭 인덱스는 강제로 0(첫 탭)으로 시작, 그 외에는 전달값을 안전하게 사용
@@ -158,7 +160,7 @@ class _PomScreenState extends State<PomScreen> {
           children: [
             if (_showSearchBar)
               InlineSearchChip(
-                hintText: 'pom.search.hint'.tr(),
+                hintText: t.pom.search.hint,
                 openNotifier: widget.searchNotifier,
                 onSubmitted: _onSearchSubmitted,
                 onClose: _onSearchClosed,

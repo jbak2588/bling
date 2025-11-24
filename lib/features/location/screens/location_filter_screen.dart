@@ -11,7 +11,8 @@ library;
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -137,18 +138,18 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('locationfilter.title'.tr()), // 변경
+        title: Text(t.locationfilter.title), // 변경
         actions: [
           TextButton(
             onPressed: _resetFilter,
-            child: Text('locationfilter.reset'.tr(),
+            child: Text(t.locationfilter.reset,
                 style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: _applyFilter,
             child: Text(
-                'locationfilter.apply'
-                    .tr(), // 변경 (또는 common.confirm 유지 가능하지만 여기선 통일)
+                t[
+                    'locationfilter.apply'], // 변경 (또는 common.confirm 유지 가능하지만 여기선 통일)
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).primaryColor)),
@@ -157,9 +158,9 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'locationfilter.tab.admin'.tr()),
-            Tab(text: 'locationfilter.tab.nearby'.tr()),
-            Tab(text: 'locationfilter.tab.national'.tr()),
+            Tab(text: t.locationfilter.tab.admin),
+            Tab(text: t.locationfilter.tab.nearby),
+            Tab(text: t.locationfilter.tab.national),
           ],
         ),
       ),
@@ -183,7 +184,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
         children: [
           // Province 선택
           _buildFirestoreDropdown(
-            label: 'locationfilter.provinsi'.tr(),
+            label: t.locationfilter.provinsi,
             collectionPath: _colProvinces, // Root collection
             selectedValue: _tempProv,
             onChanged: (val) {
@@ -202,7 +203,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
           // 여기서는 두 컬렉션을 모두 조회하여 합치는 로직이 필요하나, StreamBuilder로는 복잡함.
           // 따라서 _buildDualCollectionDropdown 헬퍼를 사용합니다.
           _buildDualCollectionDropdown(
-            label: 'locationfilter.kabupaten'.tr(),
+            label: t.locationfilter.kabupaten,
             parentPath: _tempProv != null ? '$_colProvinces/$_tempProv' : null,
             cols: [_colKabupaten, _colKota], // 둘 다 조회
             selectedValue: _tempKab,
@@ -226,7 +227,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
           //    (여기서는 단순화를 위해 Kab/Kota 컬렉션을 순차적으로 탐색하는 FutureBuilder 사용)
           if (_tempProv != null && _tempKab != null)
             _buildKecamatanDropdown(
-              label: 'locationfilter.kecamatan'.tr(),
+              label: t.locationfilter.kecamatan,
               provId: _tempProv!,
               kabId: _tempKab!,
               selectedValue: _tempKec,
@@ -238,7 +239,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
               },
             )
           else
-            _disabledDropdown('locationfilter.kecamatan'.tr()), // 변경
+            _disabledDropdown(t.locationfilter.kecamatan), // 변경
           const SizedBox(height: 16),
 
           // Kelurahan 선택
@@ -249,7 +250,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
           if (_tempProv != null && _tempKab != null && _tempKec != null)
             _buildKelurahanDropdown(
               // [간소화] 경로 찾기 로직 내장
-              label: 'locationfilter.kelurahan'.tr(),
+              label: t.locationfilter.kelurahan,
               provId: _tempProv!,
               kabId: _tempKab!,
               kecId: _tempKec!,
@@ -257,7 +258,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
               onChanged: (val) => setState(() => _tempKel = val),
             )
           else
-            _disabledDropdown('locationfilter.kelurahan'.tr()),
+            _disabledDropdown(t.locationfilter.kelurahan),
 
           const SizedBox(height: 24),
           if (_tempProv != null)
@@ -294,7 +295,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
           decoration: BoxDecoration(
               color: Colors.grey.shade100,
               borderRadius: BorderRadius.circular(8)),
-          child: Text('locationfilter.hint.selectParent'.tr(),
+          child: Text(t.locationfilter.hint.selectParent,
               style: const TextStyle(color: Colors.grey)),
         )
       ],
@@ -461,11 +462,11 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               isExpanded: true,
-              hint: Text('locationfilter.hint.all'.tr()),
+              hint: Text(t.locationfilter.hint.all),
               value: items.contains(selectedValue) ? selectedValue : null,
               items: [
                 DropdownMenuItem(
-                    value: null, child: Text('locationfilter.hint.all'.tr())),
+                    value: null, child: Text(t.locationfilter.hint.all)),
                 ...items.map((item) => DropdownMenuItem(
                       value: item,
                       child: Text(item),
@@ -497,8 +498,8 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
           const Icon(Icons.near_me_rounded, size: 64, color: Colors.orange),
           const SizedBox(height: 24),
           Text(
-              "locationfilter.nearby.radius"
-                  .tr(namedArgs: {'km': _tempRadius.toInt().toString()}),
+              t.locationfilter.nearby.radius
+                  .replaceAll('{km}', _tempRadius.toInt().toString()),
               style:
                   const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 32),
@@ -515,7 +516,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
             ),
           ),
           const SizedBox(height: 16),
-          Text("locationfilter.nearby.desc".tr(),
+          Text(t.locationfilter.nearby.desc,
               textAlign: TextAlign.center, // ✅ 텍스트 중앙 정렬 추가
               style: TextStyle(color: Colors.grey.shade600)),
         ],
@@ -531,14 +532,14 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
         children: [
           const Icon(Icons.map_rounded, size: 64, color: Colors.teal),
           const SizedBox(height: 24),
-          Text("locationfilter.national.title".tr(),
+          Text(t.locationfilter.national.title,
               style:
                   const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: Text(
-              "locationfilter.national.desc".tr(),
+              t.locationfilter.national.desc,
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.grey),
             ),

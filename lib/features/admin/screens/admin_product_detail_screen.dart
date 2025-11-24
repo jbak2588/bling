@@ -4,7 +4,7 @@
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // [Task 104] Get Admin UID
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // [Task 102] For copying IDs
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
@@ -57,9 +57,9 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
           onPressed: () {
             Clipboard.setData(ClipboardData(text: value));
             BArtSnackBar.showSuccessSnackBar(
-                title: tr('common.copiedTitle'),
+                title: t.common.copiedTitle,
                 message:
-                    tr('common.copiedMessage', namedArgs: {'title': title}));
+                    t.common.copiedMessage.replaceAll('{title}', title));
           },
         ),
       ),
@@ -213,11 +213,11 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
       barrierDismissible: false,
       builder: (ctx) {
         return AlertDialog(
-          title: Text('admin.aiApproval.rejectTitle'.tr()), // '거절 사유 입력'
+          title: Text(t.admin.aiApproval.rejectTitle), // '거절 사유 입력'
           content: TextFormField(
             controller: reasonController,
             decoration: InputDecoration(
-              labelText: 'admin.aiApproval.rejectReasonHint'.tr(), // '거절 사유'
+              labelText: t.admin.aiApproval.rejectReasonHint, // '거절 사유'
               border: const OutlineInputBorder(),
             ),
             maxLines: 3,
@@ -226,7 +226,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(null),
-              child: Text('common.cancel'.tr()),
+              child: Text(t.common.cancel),
             ),
             FilledButton(
               onPressed: () {
@@ -236,7 +236,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
                 }
               },
               style: FilledButton.styleFrom(backgroundColor: Colors.red),
-              child: Text('common.confirm'.tr()),
+              child: Text(t.common.confirm),
             ),
           ],
         );
@@ -261,7 +261,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        title: Text('admin.aiApproval.detailTitle'.tr()), // '검수 요청 상세'
+        title: Text(t.admin.aiApproval.detailTitle), // '검수 요청 상세'
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -269,24 +269,24 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // [Task 102] 1. ID 정보 (개선 요청 사항)
-            Text('admin.aiApproval.idInfo'.tr(),
+            Text(t.admin.aiApproval.idInfo,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            _buildIdTile(context, tr('admin.aiApproval.labels.userId'),
-                _product!.userId),
             _buildIdTile(
-                context, tr('admin.aiApproval.labels.productId'), _product!.id),
+                context, t.admin.aiApproval.labels.userId, _product!.userId),
+            _buildIdTile(
+                context, t.admin.aiApproval.labels.productId, _product!.id),
             const Divider(height: 30),
 
             // [Task 91] 2. 판매자 정보
-            Text('admin.aiApproval.sellerInfo'.tr(),
+            Text(t.admin.aiApproval.sellerInfo,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             AuthorProfileTile(userId: _product!.userId),
             const Divider(height: 30),
 
             // [Task 91] 2. 상품 원본 정보
-            Text('admin.aiApproval.itemInfo'.tr(),
+            Text(t.admin.aiApproval.itemInfo,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             Text(_product!.title,
@@ -297,7 +297,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
             const Divider(height: 30),
 
             // [Task 91] 3. AI 리포트 뷰어 (사용자와 동일한 UI)
-            Text('admin.aiApproval.aiReport'.tr(),
+            Text(t.admin.aiApproval.aiReport,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             AiReportViewer(
@@ -317,7 +317,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _rejectProduct,
                       icon: const Icon(Icons.close),
-                      label: Text('admin.aiApproval.buttons.reject'.tr()),
+                      label: Text(t.admin.aiApproval.buttons.reject),
                       style:
                           ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     ),
@@ -327,7 +327,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _approveProduct,
                       icon: const Icon(Icons.check),
-                      label: Text('admin.aiApproval.buttons.approve'.tr()),
+                      label: Text(t.admin.aiApproval.buttons.approve),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green),
                     ),

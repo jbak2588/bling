@@ -43,7 +43,7 @@ import 'package:bling_app/features/jobs/data/job_repository.dart';
 import 'package:bling_app/features/jobs/widgets/job_card.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 // ✅ [작업 31] 1. 일자리 유형 선택 화면 import
@@ -169,7 +169,7 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Text('jobs.setLocationPrompt'.tr(),
+          child: Text(t.jobs.setLocationPrompt,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16, color: Colors.grey)),
         ),
@@ -181,7 +181,7 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
         children: [
           if (_showSearchBar)
             InlineSearchChip(
-              hintText: 'main.search.hint.jobs'.tr(),
+              hintText: t.main.search.hint.jobs,
               openNotifier: _chipOpenNotifier,
               onSubmitted: (kw) =>
                   _searchKeywordNotifier.value = kw.trim().toLowerCase(),
@@ -196,9 +196,9 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
             unselectedLabelColor: Colors.grey[600],
             indicatorColor: Theme.of(context).primaryColor,
             tabs: [
-              Tab(text: 'jobs.tabs.all'.tr()), // '전체'
-              Tab(text: 'jobs.tabs.quickGig'.tr()), // '단순 일자리'
-              Tab(text: 'jobs.tabs.regular'.tr()), // '정규/파트타임'
+              Tab(text: t.jobs.tabs.all), // '전체'
+              Tab(text: t.jobs.tabs.quickGig), // '단순 일자리'
+              Tab(text: t.jobs.tabs.regular), // '정규/파트타임'
             ],
             // 탭 변경 시 화면을 다시 그리도록 리스너 추가
             onTap: (index) => setState(() {}),
@@ -243,11 +243,11 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
                             Icon(Icons.search_off,
                                 size: 64, color: Colors.grey[300]),
                             const SizedBox(height: 12),
-                            Text('jobs.screen.empty'.tr(),
+                            Text(t.jobs.screen.empty,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyMedium),
                             const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
+                            Text(t.search.empty.checkSpelling,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
@@ -256,7 +256,7 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                               icon: const Icon(Icons.map_outlined),
-                              label: Text('search.empty.expandToNational'.tr()),
+                              label: Text(t.search.empty.expandToNational),
                               onPressed: () => context
                                   .read<LocationProvider>()
                                   .setMode(LocationSearchMode.national),
@@ -276,7 +276,7 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
                           Icon(Icons.search_off,
                               size: 64, color: Colors.grey[300]),
                           const SizedBox(height: 12),
-                          Text('jobs.screen.empty'.tr(),
+                          Text(t.jobs.screen.empty,
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyMedium),
                         ],

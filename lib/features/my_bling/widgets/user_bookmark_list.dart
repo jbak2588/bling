@@ -17,7 +17,9 @@ library;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// easy_localization compatibility removed; using Slang `t[...]`
 
 import '../../local_news/models/post_model.dart';
 import '../../marketplace/models/product_model.dart';
@@ -76,7 +78,7 @@ class UserBookmarkList extends StatelessWidget {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
 
     if (myUid == null) {
-      return Center(child: Text('main.errors.loginRequired'.tr()));
+      return Center(child: Text(t.main.errors.loginRequired));
     }
 
     // 1. 사용자 정보를 먼저 가져옴
@@ -85,7 +87,7 @@ class UserBookmarkList extends StatelessWidget {
           FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
       builder: (context, userSnapshot) {
         if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-          return Center(child: Text('main.errors.userNotFound'.tr()));
+          return Center(child: Text(t.main.errors.userNotFound));
         }
 
         final user = UserModel.fromFirestore(userSnapshot.data!);
@@ -93,7 +95,7 @@ class UserBookmarkList extends StatelessWidget {
         final productIds = user.bookmarkedProductIds ?? [];
 
         if (postIds.isEmpty && productIds.isEmpty) {
-          return Center(child: Text('myBling.bookmarks.empty'.tr()));
+          return Center(child: Text(t.myBling.bookmarks.empty));
         }
 
         // 2. 찜한 ID 목록을 기반으로 실제 데이터들을 가져옴
@@ -106,7 +108,7 @@ class UserBookmarkList extends StatelessWidget {
             if (itemsSnapshot.hasError ||
                 !itemsSnapshot.hasData ||
                 itemsSnapshot.data!.isEmpty) {
-              return Center(child: Text('myBling.bookmarks.loadError'.tr()));
+              return Center(child: Text(t.myBling.bookmarks.loadError));
             }
 
             final items = itemsSnapshot.data!;

@@ -16,7 +16,7 @@ library;
 // lib/features/jobs/constants/job_categories.dart
 // (신규 파일)
 
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 /// 일자리 유형 ('알바천국' vs '당근 심부름')
 enum JobType {
@@ -140,6 +140,6 @@ class AppJobCategories {
 
   /// 다국어 이름 찾기 (Helper)
   static String getName(String id) {
-    return findById(id).nameKey.tr();
+    return t[findById(id).nameKey];
   }
 }

@@ -1,9 +1,9 @@
 // lib/features/auction/data/auction_repository.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import '../models/auction_model.dart';
 import '../models/bid_model.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 class AuctionRepository {
   // Use a getter so constructing AuctionRepository in tests doesn't require
@@ -78,17 +78,17 @@ class AuctionRepository {
     await _firestore.runTransaction((transaction) async {
       final auctionSnapshot = await transaction.get(auctionRef);
       if (!auctionSnapshot.exists) {
-        throw Exception(tr('auctions.errors.notFound'));
+        throw Exception('t.auctions.errors.notFound');
       }
 
       final auction = AuctionModel.fromFirestore(auctionSnapshot);
 
       if (bid.bidAmount <= auction.currentBid) {
-        throw Exception(tr('auctions.errors.lowerBid'));
+        throw Exception('t.auctions.errors.lowerBid');
       }
 
       if (auction.endAt.toDate().isBefore(DateTime.now())) {
-        throw Exception(tr('auctions.errors.alreadyEnded'));
+        throw Exception(t.auctions.errors.alreadyEnded);
       }
 
       transaction.update(auctionRef, {

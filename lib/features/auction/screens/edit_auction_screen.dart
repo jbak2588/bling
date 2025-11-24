@@ -7,7 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:bling_app/core/constants/app_categories.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
@@ -123,7 +123,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('auctions.edit.success'.tr()),
+            content: Text(t.auctions.edit.success),
             backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
@@ -131,7 +131,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(
-                'auctions.edit.fail'.tr(namedArgs: {'error': e.toString()})),
+                t.auctions.edit.fail.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -143,12 +143,12 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('auctions.edit.title'.tr()),
+        title: Text(t.auctions.edit.title),
         actions: [
           if (!_isSaving)
             TextButton(
                 onPressed: _updateAuction,
-                child: Text('auctions.edit.save'.tr())),
+                child: Text(t.auctions.edit.save)),
         ],
       ),
       body: Stack(
@@ -223,17 +223,17 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: _selectedCategory,
                   decoration: InputDecoration(
-                      labelText: 'auctions.create.form.category'.tr(),
+                      labelText: t.auctions.create.form.category,
                       border: const OutlineInputBorder()),
-                  hint: Text('auctions.create.form.categoryHint'.tr()),
+                  hint: Text(t.auctions.create.form.categoryHint),
                   validator: (value) => (value == null || value.isEmpty)
-                      ? 'auctions.form.categoryRequired'.tr()
+                      ? t.auctions.form.categoryRequired
                       : null,
                   items: AppCategories.auctionCategories
                       .map((category) => DropdownMenuItem(
                             value: category.categoryId,
                             child: Text(
-                                "${category.emoji} ${category.nameKey.tr()}"),
+                                "${category.emoji} ${t[category.nameKey]}"),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -245,26 +245,26 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                      labelText: 'auctions.create.form.title'.tr(),
+                      labelText: t.auctions.create.form.title,
                       border: const OutlineInputBorder()),
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'auctions.form.titleRequired'.tr()
+                      ? t.auctions.form.titleRequired
                       : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                      labelText: 'auctions.create.form.description'.tr(),
+                      labelText: t.auctions.create.form.description,
                       border: const OutlineInputBorder()),
                   maxLines: 5,
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'auctions.form.descriptionRequired'.tr()
+                      ? t.auctions.form.descriptionRequired
                       : null,
                 ),
                 const SizedBox(height: 16),
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: t.tagInput.help,
                   initialTags: _tags,
                   titleController: _titleController,
                   onTagsChanged: (tags) {

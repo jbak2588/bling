@@ -13,7 +13,7 @@ library;
 
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 
 import '../constants/category_icons.dart';
@@ -22,7 +22,7 @@ class ParentCategoryScreen extends StatelessWidget {
   const ParentCategoryScreen({super.key});
 
   String _getCategoryName(BuildContext context, Category category) {
-    final langCode = context.locale.languageCode;
+    final langCode = LocaleSettings.currentLocale.languageCode;
     switch (langCode) {
       case 'ko':
         return category.nameKo;
@@ -37,7 +37,7 @@ class ParentCategoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('selectCategory'.tr())),
+      appBar: AppBar(title: Text(t.selectCategory)),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
             .collection('categories_v2')
@@ -50,12 +50,12 @@ class ParentCategoryScreen extends StatelessWidget {
           }
           if (snapshot.hasError) {
             return Center(
-              child: Text('marketplace.error'
-                  .tr(namedArgs: {'error': snapshot.error.toString()})),
+              child: Text(t.marketplace.error
+                  .replaceAll('{error}', snapshot.error.toString())),
             );
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('category_empty'.tr()));
+            return Center(child: Text(t.categoryEmpty));
           }
 
           final categories = snapshot.data!.docs
@@ -114,7 +114,7 @@ class SubCategoryScreen extends StatelessWidget {
   });
 
   String _getCategoryName(BuildContext context, Category category) {
-    final langCode = context.locale.languageCode;
+    final langCode = LocaleSettings.currentLocale.languageCode;
     switch (langCode) {
       case 'ko':
         return category.nameKo;
@@ -143,12 +143,12 @@ class SubCategoryScreen extends StatelessWidget {
           }
           if (snapshot.hasError) {
             return Center(
-              child: Text('marketplace.error'
-                  .tr(namedArgs: {'error': snapshot.error.toString()})),
+              child: Text(t.marketplace.error
+                  .replaceAll('{error}', snapshot.error.toString())),
             );
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('category_empty'.tr()));
+            return Center(child: Text(t.categoryEmpty));
           }
 
           final categories = snapshot.data!.docs

@@ -36,7 +36,8 @@ import 'package:bling_app/features/jobs/constants/job_categories.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 
 // ✅ [공용 위젯 Import]
@@ -78,8 +79,8 @@ class JobDetailScreen extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('jobs.detail.chatError'
-                  .tr(namedArgs: {'error': e.toString()})),
+              content: Text(t.jobs.detail.chatError
+                  .replaceAll('{error}', e.toString())),
               backgroundColor: Colors.red),
         );
       }
@@ -91,15 +92,15 @@ class JobDetailScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('jobs.dialog.deleteTitle'.tr()),
-        content: Text('jobs.dialog.deleteContent'.tr()),
+        title: Text(t['jobs.dialog.deleteTitle'] ?? ''),
+        content: Text(t['jobs.dialog.deleteContent'] ?? ''),
         actions: [
           TextButton(
-            child: Text('jobs.dialog.cancel'.tr()),
+            child: Text(t['jobs.dialog.cancel'] ?? ''),
             onPressed: () => Navigator.of(ctx).pop(),
           ),
           TextButton(
-            child: Text('jobs.dialog.deleteConfirm'.tr(),
+            child: Text(t['jobs.dialog.deleteConfirm'] ?? '',
                 style: const TextStyle(color: Colors.red)),
             onPressed: () async {
               Navigator.of(ctx).pop();
@@ -107,15 +108,15 @@ class JobDetailScreen extends StatelessWidget {
                 final repo = JobRepository();
                 await repo.deleteJob(job.id, job.userId);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('jobs.dialog.deleteSuccess'.tr())));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(t['jobs.dialog.deleteSuccess'] ?? '')));
                   Navigator.of(context).pop();
                 }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('jobs.errors.deleteError'
-                          .tr(namedArgs: {'error': e.toString()}))));
+                      content: Text(t['jobs.errors.deleteError'] ?? ''
+                          .replaceAll('{error}', e.toString()))));
                 }
               }
             },
@@ -221,7 +222,7 @@ class JobDetailScreen extends StatelessWidget {
                   ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Text(
-            '${'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr()}: ${currencyFormat.format(job.salaryAmount ?? 0)}'
+            '${t['jobs.salaryTypes.${job.salaryType ?? 'etc'}']}: ${currencyFormat.format(job.salaryAmount ?? 0)}'
             '${job.isSalaryNegotiable ? ' (Nego)' : ''}',
             style: TextStyle(
                 fontSize: 18,
@@ -230,11 +231,11 @@ class JobDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-              '${'jobs.workPeriods.${job.workPeriod ?? 'etc'}'.tr()} / ${job.workHours ?? ''}'),
+              '${t['jobs.workPeriods.${job.workPeriod ?? 'etc'}']} / ${job.workHours ?? ''}'),
           const Divider(height: 32),
 
           // --- 3. 상세 설명 ---
-          Text('jobs.detail.infoTitle'.tr(),
+          Text(t.jobs.detail.infoTitle,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           Text(job.description,
@@ -250,7 +251,7 @@ class JobDetailScreen extends StatelessWidget {
 
           // ✅ 3. [공용 위젯 적용] 미니맵
           if (job.geoPoint != null) ...[
-            Text('jobs.detail.locationTitle'.tr(),
+            Text(t.jobs.detail.locationTitle,
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             MiniMapView(
@@ -262,7 +263,7 @@ class JobDetailScreen extends StatelessWidget {
           ],
 
           // ✅ 4. [공용 위젯 적용] 작성자 프로필 타일
-          Text('jobs.detail.authorTitle'.tr(),
+          Text(t.jobs.detail.authorTitle,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           AuthorProfileTile(userId: job.userId),
@@ -277,7 +278,7 @@ class JobDetailScreen extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
           ),
-          child: Text('jobs.detail.apply'.tr()),
+          child: Text(t.jobs.detail.apply),
         ),
       ),
     );

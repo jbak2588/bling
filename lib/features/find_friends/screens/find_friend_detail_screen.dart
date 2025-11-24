@@ -34,7 +34,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
@@ -102,8 +102,8 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                          content: Text('friendDetail.unblocked'
-                              .tr(namedArgs: {'nickname': user.nickname}))),
+                          content: Text(t.friendDetail.unblocked
+                              .replaceAll('{nickname}', user.nickname))),
                     );
                   }
                 } else {
@@ -114,8 +114,8 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                          content: Text('friendDetail.blocked'
-                              .tr(namedArgs: {'nickname': user.nickname}))),
+                          content: Text(t.friendDetail.blocked
+                              .replaceAll('{nickname}', user.nickname))),
                     );
                   }
                 }
@@ -136,15 +136,15 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
               PopupMenuItem<String>(
                 value: 'block',
                 child: Text(isBlockedByMe
-                    ? 'friendDetail.unblock'
-                        .tr(namedArgs: {'nickname': user.nickname})
-                    : 'friendDetail.block'
-                        .tr(namedArgs: {'nickname': user.nickname})),
+                    ? t.friendDetail.unblock
+                        .replaceAll('{nickname}', user.nickname)
+                    : t.friendDetail.block
+                        .replaceAll('{nickname}', user.nickname)),
               ),
               PopupMenuItem<String>(
                 value: 'report',
-                child: Text('friendDetail.report'
-                    .tr(namedArgs: {'nickname': user.nickname})),
+                child: Text(t.friendDetail.report
+                    .replaceAll('{nickname}', user.nickname)),
               ),
             ],
           ),
@@ -194,13 +194,13 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                   ),
                 if (user.bio != null && user.bio!.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Text('findFriend.bioLabel'.tr(),
+                  Text(t.findFriend.bioLabel,
                       style: Theme.of(context).textTheme.titleSmall),
                   Text(user.bio!, style: Theme.of(context).textTheme.bodyLarge),
                 ],
                 if (user.interests != null && user.interests!.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Text('interests.title'.tr(),
+                  Text(t.interests.title,
                       style: Theme.of(context).textTheme.titleSmall),
                   Wrap(
                     spacing: 8.0,
@@ -265,12 +265,13 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                               if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('findFriend.chatLimitReached'
-                                        .tr(namedArgs: {
-                                      'limit':
-                                          result.data['limit']?.toString() ??
-                                              '5'
-                                    })),
+                                    content: Text(
+                                        t.findFriend.chatLimitReached
+                                            .replaceAll(
+                                                '{limit}',
+                                                result.data['limit']
+                                                        ?.toString() ??
+                                                    '5')),
                                   ),
                                 );
                               }
@@ -281,7 +282,7 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                     content: Text(
-                                        "${"friendDetail.chatError".tr()} ${e.toString()}")),
+                                        "${t.friendDetail.chatError} ${e.toString()}")),
                               );
                             }
                           } finally {
@@ -291,8 +292,8 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                           }
                         },
                   label: _isStartingChat
-                      ? Text("findFriend.chatChecking".tr()) // "확인 중..."
-                      : Text("friendDetail.startChat".tr()), // "대화 시작"
+                      ? Text(t.findFriend.chatChecking) // "확인 중..."
+                      : Text(t.friendDetail.startChat), // "대화 시작"
                   icon: _isStartingChat
                       // [v2.1] Container -> SizedBox로 변경 (경고 수정)
                       ? SizedBox(

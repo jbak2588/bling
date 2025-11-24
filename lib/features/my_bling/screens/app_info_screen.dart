@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// easy_localization compatibility removed; using Slang `t[...]`
 
 class AppInfoScreen extends StatelessWidget {
   const AppInfoScreen({super.key});
@@ -7,7 +9,7 @@ class AppInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('settings.appInfo'.tr())),
+      appBar: AppBar(title: Text(t.settings.appInfo)),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

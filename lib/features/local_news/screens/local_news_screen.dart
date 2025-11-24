@@ -44,7 +44,7 @@ import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -206,7 +206,7 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Text('localNewsFeed.setLocationPrompt'.tr(),
+          child: Text(t.localNewsFeed.setLocationPrompt,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16, color: Colors.grey)),
         ),
@@ -221,7 +221,7 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
           children: [
             const Text('📰', style: TextStyle(fontSize: 18)),
             const SizedBox(width: 8),
-            Text('localNewsFeed.allCategory'.tr()), // '전체'
+            Text(t.localNewsFeed.allCategory), // '전체'
           ],
         ),
       ),
@@ -235,7 +235,7 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
             children: [
               Text(tag.emoji ?? '🔹', style: const TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
-              Text(tag.nameKey.tr()), // 태그 이름
+              Text(t[tag.nameKey]), // 태그 이름
             ],
           ),
         );
@@ -248,7 +248,7 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
           // 검색칩은 요청될 때만 보이고, X(취소) 시 완전히 사라집니다.
           if (_showSearchBar)
             InlineSearchChip(
-              hintText: 'main.search.hint.localNews'.tr(),
+              hintText: t.main.search.hint.localNews,
               openNotifier: _chipOpenNotifier,
               onSubmitted: _onSearchSubmitted,
               onClose: _onSearchClosed,
@@ -420,8 +420,8 @@ class _FeedListViewState extends State<_FeedListView>
         }
         if (snapshot.hasError) {
           return Center(
-              child: Text('localNewsFeed.error'
-                  .tr(namedArgs: {'error': snapshot.error.toString()})));
+              child: Text(t.localNewsFeed.error
+                  .replaceAll('{error}', snapshot.error.toString())));
         }
         final allDocs = snapshot.data?.docs ?? [];
         final postsDocs = _applyLocationFilter(allDocs);
@@ -437,11 +437,11 @@ class _FeedListViewState extends State<_FeedListView>
                   children: [
                     Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                     const SizedBox(height: 12),
-                    Text('localNewsFeed.empty'.tr(),
+                    Text(t.localNewsFeed.empty,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 8),
-                    Text('search.empty.checkSpelling'.tr(),
+                    Text(t.search.empty.checkSpelling,
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme
@@ -450,7 +450,7 @@ class _FeedListViewState extends State<_FeedListView>
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
                       icon: const Icon(Icons.map_outlined),
-                      label: Text('search.empty.expandToNational'.tr()),
+                      label: Text(t.search.empty.expandToNational),
                       onPressed: () => context
                           .read<LocationProvider>()
                           .setMode(LocationSearchMode.national),
@@ -469,7 +469,7 @@ class _FeedListViewState extends State<_FeedListView>
                 children: [
                   Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                   const SizedBox(height: 12),
-                  Text('localNewsFeed.empty'.tr(),
+                  Text(t.localNewsFeed.empty,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium),
                 ],

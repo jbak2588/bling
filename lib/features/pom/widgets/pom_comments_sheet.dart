@@ -13,7 +13,9 @@ import 'package:bling_app/features/pom/data/pom_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// compat shim removed; using Slang `t` accessors
 
 class PomCommentsSheet extends StatefulWidget {
   final String pomId;
@@ -58,7 +60,7 @@ class _PomCommentsSheetState extends State<PomCommentsSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
-                  'pom.comments.fail'.tr(namedArgs: {'error': e.toString()})),
+                  t.pom.comments.fail.replaceAll('{error}', e.toString())),
               backgroundColor: Colors.red),
         );
       }
@@ -78,7 +80,7 @@ class _PomCommentsSheetState extends State<PomCommentsSheet> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text('pom.comments.title'.tr(),
+            child: Text(t.pom.comments.title,
                 style:
                     const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
@@ -91,7 +93,7 @@ class _PomCommentsSheetState extends State<PomCommentsSheet> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.data!.isEmpty) {
-                  return Center(child: Text('pom.comments.empty'.tr()));
+                  return Center(child: Text(t.pom.comments.empty));
                 }
 
                 final comments = snapshot.data!;
@@ -113,7 +115,7 @@ class _PomCommentsSheetState extends State<PomCommentsSheet> {
                   child: TextField(
                     controller: _commentController,
                     decoration: InputDecoration(
-                      hintText: 'pom.comments.placeholder'.tr(),
+                      hintText: t.pom.comments.placeholder,
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20)),
                       contentPadding:

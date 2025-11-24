@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 import '../../../core/models/user_model.dart';
 import '../../user_profile/screens/user_profile_screen.dart';
@@ -42,7 +42,7 @@ class AuthorProfileTile extends StatelessWidget {
           );
         }
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Text('postCard.authorNotFound'.tr());
+          return Text(t.postCard.authorNotFound);
         }
 
         final user = UserModel.fromFirestore(snapshot.data!);

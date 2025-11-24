@@ -69,7 +69,7 @@ import 'package:bling_app/core/models/feed_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/main_feed/data/feed_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 // import 'package:bling_app/features/main_screen/main_navigation_screen.dart'; // no longer used here
 
@@ -147,7 +147,7 @@ class HomeScreen extends StatelessWidget {
       children: [
         Flexible(
           child: Text(
-            titleKey.tr(),
+            t[titleKey],
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
@@ -158,7 +158,7 @@ class HomeScreen extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Semantics(
-          label: 'common.new'.tr(),
+          label: 't.common.new',
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
@@ -166,7 +166,7 @@ class HomeScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
-              'common.new'.tr(),
+              't.common.new',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
@@ -288,7 +288,8 @@ class HomeScreen extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final double tsFactor = effectiveTextScale(context); // ≈ textScaleFactor
-    final String lang = context.locale.languageCode; // 'id' | 'ko' | 'en'
+    final String lang =
+        Localizations.localeOf(context).languageCode; // 'id' | 'ko' | 'en'
     final bool longLabelLang = (lang == 'id');
 
     // 5열 사용 조건: 화면폭 충분 + 텍스트가 너무 크지 않음(언어별 임계값)
@@ -327,12 +328,12 @@ class HomeScreen extends StatelessWidget {
                   compact: gridCount == 5,
                   icon: item.icon,
                   svgAsset: item.svg,
-                  label: item.labelKey.tr(),
+                  label: t[item.labelKey],
                   onTap: () {
                     // ⬇️ 기존 onTap 로직 그대로 (절대 수정 X)
                     if (userModel == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('user.notLoggedIn'.tr())),
+                        SnackBar(content: Text(t.user.notLoggedIn)),
                       );
                       return;
                     }
@@ -455,7 +456,7 @@ class HomeScreen extends StatelessWidget {
                   // ⬇️ 기존 onTap 로직 그대로 (절대 수정 X)
                   if (userModel == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('user.notLoggedIn'.tr())),
+                      SnackBar(content: Text(t.user.notLoggedIn)),
                     );
                     return;
                   }
@@ -594,7 +595,7 @@ class HomeScreen extends StatelessWidget {
                       alignment: Alignment
                           .topCenter, // 1줄 텍스트가 (2줄 높이 박스) 상단 중앙에 정렬되도록
                       child: Text(
-                        item.labelKey.tr(),
+                        t[item.labelKey],
                         textAlign: TextAlign.center,
                         maxLines: 2, // 2줄까지 허용
                         overflow: TextOverflow.ellipsis,
@@ -697,8 +698,7 @@ class HomeScreen extends StatelessWidget {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content:
-                                    Text('main.errors.loginRequired'.tr())),
+                                content: Text(t.main.errors.loginRequired)),
                           );
                           return;
                         }
@@ -708,7 +708,7 @@ class HomeScreen extends StatelessWidget {
                         );
                         onIconTap(nextScreen, 'main.tabs.localNews');
                       },
-                      child: Text('common.viewAll'.tr()),
+                      child: Text(t.common.viewAll),
                     )
                   ],
                 ),
@@ -797,8 +797,7 @@ class HomeScreen extends StatelessWidget {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content:
-                                    Text('main.errors.loginRequired'.tr())),
+                                content: Text(t.main.errors.loginRequired)),
                           );
                           return;
                         }
@@ -808,7 +807,7 @@ class HomeScreen extends StatelessWidget {
                         );
                         onIconTap(nextScreen, 'main.tabs.marketplace');
                       },
-                      child: Text('common.viewAll'.tr()),
+                      child: Text(t.common.viewAll),
                     )
                   ],
                 ),
@@ -893,8 +892,7 @@ class HomeScreen extends StatelessWidget {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content:
-                                    Text('main.errors.loginRequired'.tr())),
+                                content: Text(t.main.errors.loginRequired)),
                           );
                           return;
                         }
@@ -910,7 +908,7 @@ class HomeScreen extends StatelessWidget {
                         );
                         onIconTap(nextScreen, 'main.tabs.clubs');
                       },
-                      child: Text('common.viewAll'.tr()),
+                      child: Text(t.common.viewAll),
                     )
                   ],
                 ),
@@ -996,8 +994,7 @@ class HomeScreen extends StatelessWidget {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content:
-                                    Text('main.errors.loginRequired'.tr())),
+                                content: Text(t.main.errors.loginRequired)),
                           );
                           return;
                         }
@@ -1006,7 +1003,7 @@ class HomeScreen extends StatelessWidget {
                         );
                         onIconTap(nextScreen, 'main.tabs.findFriends');
                       },
-                      child: Text('common.viewAll'.tr()),
+                      child: Text(t.common.viewAll),
                     )
                   ],
                 ),
@@ -1093,8 +1090,7 @@ class HomeScreen extends StatelessWidget {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content:
-                                    Text('main.errors.loginRequired'.tr())),
+                                content: Text(t.main.errors.loginRequired)),
                           );
                           return;
                         }
@@ -1104,7 +1100,7 @@ class HomeScreen extends StatelessWidget {
                         );
                         onIconTap(nextScreen, 'main.tabs.jobs');
                       },
-                      child: Text('common.viewAll'.tr()),
+                      child: Text(t.common.viewAll),
                     )
                   ],
                 ),
@@ -1189,8 +1185,7 @@ class HomeScreen extends StatelessWidget {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content:
-                                    Text('main.errors.loginRequired'.tr())),
+                                content: Text(t.main.errors.loginRequired)),
                           );
                           return;
                         }
@@ -1200,7 +1195,7 @@ class HomeScreen extends StatelessWidget {
                         );
                         onIconTap(nextScreen, 'main.tabs.localStores');
                       },
-                      child: Text('common.viewAll'.tr()),
+                      child: Text(t.common.viewAll),
                     )
                   ],
                 ),
@@ -1286,8 +1281,7 @@ class HomeScreen extends StatelessWidget {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content:
-                                    Text('main.errors.loginRequired'.tr())),
+                                content: Text(t.main.errors.loginRequired)),
                           );
                           return;
                         }
@@ -1297,7 +1291,7 @@ class HomeScreen extends StatelessWidget {
                         );
                         onIconTap(nextScreen, 'main.tabs.auction');
                       },
-                      child: Text('common.viewAll'.tr()),
+                      child: Text(t.common.viewAll),
                     )
                   ],
                 ),
@@ -1387,7 +1381,7 @@ class HomeScreen extends StatelessWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                   content:
-                                      Text('main.errors.loginRequired'.tr())),
+                                      Text(t.main.errors.loginRequired)),
                             );
                             return;
                           }
@@ -1399,7 +1393,7 @@ class HomeScreen extends StatelessWidget {
                           );
                           onIconTap(nextScreen, 'main.tabs.pom');
                         },
-                        child: Text('common.viewAll'.tr()),
+                        child: Text(t.common.viewAll),
                       ),
                     ],
                   ),
@@ -1488,8 +1482,7 @@ class HomeScreen extends StatelessWidget {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content:
-                                    Text('main.errors.loginRequired'.tr())),
+                                content: Text(t.main.errors.loginRequired)),
                           );
                           return;
                         }
@@ -1499,7 +1492,7 @@ class HomeScreen extends StatelessWidget {
                         );
                         onIconTap(nextScreen, 'main.tabs.lostAndFound');
                       },
-                      child: Text('common.viewAll'.tr()),
+                      child: Text(t.common.viewAll),
                     )
                   ],
                 ),
@@ -1582,8 +1575,7 @@ class HomeScreen extends StatelessWidget {
                         if (userModel == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content:
-                                    Text('main.errors.loginRequired'.tr())),
+                                content: Text(t.main.errors.loginRequired)),
                           );
                           return;
                         }
@@ -1593,7 +1585,7 @@ class HomeScreen extends StatelessWidget {
                         );
                         onIconTap(nextScreen, 'main.tabs.realEstate');
                       },
-                      child: Text('common.viewAll'.tr()),
+                      child: Text(t.common.viewAll),
                     )
                   ],
                 ),

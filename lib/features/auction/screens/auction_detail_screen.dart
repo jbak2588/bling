@@ -7,7 +7,8 @@ import 'package:bling_app/features/auction/data/auction_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:bling_app/features/auction/screens/edit_auction_screen.dart';
 
 // ✅ [커뮤니티] 1. Q&A (댓글) 위젯 및 모델 import
@@ -58,12 +59,12 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
 
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auctions.detail.errors.loginRequired'.tr())));
+          SnackBar(content: Text(t.auctions.detail.errors.loginRequired)));
       return;
     }
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auctions.detail.errors.invalidAmount'.tr())));
+          SnackBar(content: Text(t.auctions.detail.errors.invalidAmount)));
       return;
     }
 
@@ -82,14 +83,14 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
       FocusScope.of(context).unfocus();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('auctions.detail.bidSuccess'.tr()),
+            content: Text(t.auctions.detail.bidSuccess),
             backgroundColor: Colors.green));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('auctions.detail.bidFail'
-                .tr(namedArgs: {'error': e.toString()})),
+            content: Text(t.auctions.detail.bidFail
+                .replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -102,15 +103,15 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('auctions.delete.confirmTitle'.tr()),
-        content: Text('auctions.delete.confirmContent'.tr()),
+        title: Text(t.auctions.delete.confirmTitle),
+        content: Text(t.auctions.delete.confirmContent),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('common.cancel'.tr())),
+              child: Text(t.common.cancel)),
           TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text('common.delete'.tr(),
+              child: Text(t.common.delete,
                   style: const TextStyle(color: Colors.red))),
         ],
       ),
@@ -121,15 +122,15 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
         await _repository.deleteAuction(widget.auction.id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('auctions.delete.success'.tr()),
+              content: Text(t.auctions.delete.success),
               backgroundColor: Colors.green));
           Navigator.of(context).pop();
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('auctions.delete.fail'
-                  .tr(namedArgs: {'error': e.toString()})),
+              content: Text(t.auctions.delete.fail
+                  .replaceAll('{error}', e.toString())),
               backgroundColor: Colors.red));
         }
       }
@@ -239,7 +240,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                                     ),
                                     child: Center(
                                       child: Text(
-                                        'auctions.card.ended'.tr(),
+                                        t.auctions.card.ended,
                                         // "경매 종료" 텍스트
                                         style: const TextStyle(
                                             color: Colors.white,
@@ -288,13 +289,13 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                                         fontSize: 16)),
                             ],
                           ),
-                          Text('auctions.detail.currentBid'.tr(namedArgs: {
-                            'amount': currencyFormat.format(auction.currentBid)
-                          })),
-                          Text('auctions.detail.endTime'.tr(namedArgs: {
-                            'time': DateFormat('MM/dd HH:mm')
-                                .format(auction.endAt.toDate())
-                          })),
+                          Text(t.auctions.detail.currentBid.replaceAll(
+                              '{amount}',
+                              currencyFormat.format(auction.currentBid))),
+                          Text(t.auctions.detail.endTime.replaceAll(
+                              '{time}',
+                              DateFormat('MM/dd HH:mm')
+                                  .format(auction.endAt.toDate()))),
                           const Divider(height: 32),
                           Text(auction.description,
                               style:
@@ -305,7 +306,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                           ClickableTagList(tags: auction.tags),
                           if (auction.geoPoint != null) ...[
                             const Divider(height: 32),
-                            Text('auctions.detail.location'.tr(),
+                            Text(t.auctions.detail.location,
                                 style: Theme.of(context).textTheme.titleLarge),
                             const SizedBox(height: 12),
                             MiniMapView(
@@ -313,14 +314,14 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                                 markerId: auction.id),
                           ],
                           const Divider(height: 32),
-                          Text('auctions.detail.seller'.tr(),
+                          Text(t.auctions.detail.seller,
                               style: Theme.of(context).textTheme.titleLarge),
                           const SizedBox(height: 12),
                           AuthorProfileTile(userId: auction.ownerId),
 
                           // ✅ [커뮤니티] 3. Q&A 섹션 추가 (댓글/답글)
                           const Divider(height: 32),
-                          Text('auctions.detail.qnaTitle'.tr(),
+                          Text(t.auctions.detail.qnaTitle,
                               style: Theme.of(context).textTheme.titleLarge),
                           const SizedBox(height: 12),
                           // Q&A 입력 필드
@@ -330,7 +331,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                             // 'auctions' 컬렉션을 바라보도록 설정
                             // (내부적으로 'auctions/{id}/comments'에 저장됨)
                             collectionPath: 'auctions',
-                            hintText: 'auctions.detail.qnaHint'.tr(),
+                            hintText: t.auctions.detail.qnaHint,
                             onCommentAdded: (commentData) {
                               // 댓글 등록 성공 시
                               setState(() {
@@ -365,7 +366,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 8.0),
-                  child: Text('auctions.detail.bidsTitle'.tr(),
+                  child: Text(t.auctions.detail.bidsTitle,
                       style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
@@ -384,7 +385,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                         child: Center(
                             child: Padding(
                                 padding: const EdgeInsets.all(16.0),
-                                child: Text('auctions.detail.noBids'.tr()))));
+                                child: Text(t.auctions.detail.noBids))));
                   }
 
                   return SliverList(
@@ -404,7 +405,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                                     leading: const CircleAvatar(
                                         child: Icon(Icons.person_off)),
                                     title: Text(
-                                        'auctions.detail.unknownBidder'.tr()));
+                                        t.auctions.detail.unknownBidder));
                               }
                               final user =
                                   UserModel.fromFirestore(userSnapshot.data!);
@@ -454,7 +455,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                           controller: _bidAmountController,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            labelText: 'auctions.detail.bidAmountLabel'.tr(),
+                            labelText: t.auctions.detail.bidAmountLabel,
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12)),
                           ),
@@ -475,7 +476,7 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                                 height: 24,
                                 child: CircularProgressIndicator(
                                     color: Colors.white, strokeWidth: 2))
-                            : Text('auctions.detail.placeBid'.tr()),
+                            : Text(t.auctions.detail.placeBid),
                       ),
                     ],
                   ),

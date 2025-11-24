@@ -33,7 +33,8 @@ import 'package:bling_app/features/lost_and_found/screens/edit_lost_item_screen.
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
 // ✅ [작업 44] 현상금 포맷을 위해 추가
 
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
@@ -147,8 +148,8 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('lostAndFound.detail.chatError'
-              .tr(namedArgs: {'error': e.toString()})),
+          content: Text(t.lostAndFound.detail.chatError
+              .replaceAll('{error}', e.toString())),
           backgroundColor: Colors.red,
         ));
       }
@@ -160,16 +161,20 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('lostAndFound.detail.deleteTitle'.tr()),
-        content: Text('lostAndFound.detail.deleteContent'.tr()),
+        title: Text(t.lostAndFound.detail.deleteTitle),
+        content: Text(t.lostAndFound.detail.deleteContent),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text('lostAndFound.detail.cancel'.tr())),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(t.lostAndFound.detail.cancel),
+          ),
           TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text('lostAndFound.detail.delete'.tr(),
-                  style: const TextStyle(color: Colors.red))),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              t.lostAndFound.detail.delete,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
         ],
       ),
     );
@@ -179,15 +184,15 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
         await _repository.deleteItem(widget.item.id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('lostAndFound.detail.deleteSuccess'.tr()),
+              content: Text(t.lostAndFound.detail.deleteSuccess),
               backgroundColor: Colors.green));
           Navigator.of(context).pop();
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('lostAndFound.detail.deleteFail'
-                  .tr(namedArgs: {'error': e.toString()})),
+              content: Text(t.lostAndFound.detail.deleteFail
+                  .replaceAll('{error}', e.toString())),
               backgroundColor: Colors.red));
         }
       }
@@ -212,7 +217,7 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        title: Text('lostAndFound.detail.title'.tr()),
+        title: Text(t.lostAndFound.detail.title),
         // V V V --- [추가] 작성자에게만 보이는 수정/삭제 버튼 --- V V V
         actions: [
           if (isOwner)
@@ -262,8 +267,8 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           const SizedBox(height: 16),
           Chip(
             label: Text(widget.item.type == 'lost'
-                ? 'lostAndFound.lost'.tr()
-                : 'lostAndFound.found'.tr()),
+                ? t.lostAndFound.lost
+                : t.lostAndFound.found),
             backgroundColor: typeColor.withValues(alpha: 0.1),
             labelStyle:
                 TextStyle(color: typeColor, fontWeight: FontWeight.bold),
@@ -279,7 +284,7 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           _buildInfoRow(
               context,
               Icons.location_on_outlined,
-              'lostAndFound.detail.location'.tr(),
+              t.lostAndFound.detail.location,
               widget.item.locationDescription),
 
           const SizedBox(height: 16),
@@ -294,9 +299,9 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
             _buildInfoRow(
               context,
               Icons.paid_outlined,
-              'lostAndFound.detail.bounty'.tr(), // '현상금'
+              t.lostAndFound.detail.bounty, // '현상금'
               NumberFormat.currency(
-                locale: context.locale.toString(),
+                locale: Localizations.localeOf(context).toString(),
                 symbol: 'Rp',
                 decimalDigits: 0,
               ).format(_currentItem.bountyAmount!),
@@ -311,7 +316,7 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           const Divider(height: 32),
           _buildLostItemStats(),
           const Divider(height: 32),
-          Text('lostAndFound.detail.registrant'.tr(),
+          Text(t.lostAndFound.detail.registrant,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           // ✅ 기존 _buildOwnerInfo를 공용 AuthorProfileTile로 교체
@@ -319,7 +324,7 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
 
           // ✅ 댓글 입력 및 목록
           const Divider(height: 32),
-          Text('common.comments'.tr(),
+          Text(t.common.comments,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 16),
           CommentListView(
@@ -336,7 +341,7 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
             postId: _currentItem.id,
             collectionPath: 'lost_and_found',
             onCommentAdded: _handleCommentAdded,
-            hintText: 'commentInputField.hintText'.tr(),
+            hintText: t.commentInputField.hintText,
           ),
 
           const SizedBox(height: 80),
@@ -365,10 +370,10 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           ),
           child: Text(
             isResolved
-                ? 'lostAndFound.detail.resolved'.tr() // "해결 완료"
+                ? t.lostAndFound.detail.resolved // "해결 완료"
                 : isOwner
-                    ? 'lostAndFound.detail.markAsResolved'.tr() // "해결 완료로 표시"
-                    : 'lostAndFound.detail.contact'.tr(), // "연락하기"
+                    ? t.lostAndFound.detail.markAsResolved // "해결 완료로 표시"
+                    : t.lostAndFound.detail.contact, // "연락하기"
           ),
         ),
       ),
@@ -380,16 +385,16 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('lostAndFound.resolve.confirmTitle'.tr()),
-        content: Text('lostAndFound.resolve.confirmBody'.tr()),
+        title: Text(t.lostAndFound.resolve.confirmTitle),
+        content: Text(t.lostAndFound.resolve.confirmBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('common.cancel'.tr()),
+            child: Text(t.common.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('lostAndFound.detail.markAsResolved'.tr()),
+            child: Text(t.lostAndFound.detail.markAsResolved),
           ),
         ],
       ),
@@ -406,7 +411,7 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
         });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('lostAndFound.resolve.success'.tr())),
+            SnackBar(content: Text(t.lostAndFound.resolve.success)),
           );
           // 화면을 닫거나 새로고침 (여기서는 닫기)
           Navigator.of(context).pop();
@@ -416,7 +421,7 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'common.error'.tr(namedArgs: {'error': e.toString()}),
+                t.common.error.replaceAll('{error}', e.toString()),
               ),
             ),
           );

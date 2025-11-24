@@ -7,30 +7,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 import 'package:bling_app/main.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  // Note: Avoid EasyLocalization.ensureInitialized in tests to prevent
-  // SharedPreferences plugin access. Configure EasyLocalization inline.
+  testWidgets('App builds', (WidgetTester tester) async {
+    // Set Slang locale for tests
+    LocaleSettings.setLocaleRaw('en');
 
-  testWidgets('App builds with EasyLocalization', (WidgetTester tester) async {
-    // Wrap BlingApp with EasyLocalization so context.* localization is available.
-    await tester.pumpWidget(
-      EasyLocalization(
-        supportedLocales: const [Locale('en'), Locale('ko'), Locale('id')],
-        path: 'assets/lang',
-        fallbackLocale: const Locale('en'),
-        startLocale: const Locale('en'),
-        saveLocale: false,
-        child: const BlingApp(isTest: true),
-      ),
-    );
+    // Pump the app directly for a smoke test
+    await tester.pumpWidget(const BlingApp(isTest: true));
 
-    // Allow first frame and localization init.
+    // Allow first frame to settle
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     // Smoke: MaterialApp should be present without throwing.

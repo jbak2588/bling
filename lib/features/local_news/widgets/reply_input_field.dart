@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 class ReplyInputField extends StatefulWidget {
   final String postId;
@@ -42,7 +42,7 @@ class _ReplyInputFieldState extends State<ReplyInputField> {
 
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception('main.errors.loginRequired'.tr());
+      if (user == null) throw Exception(t.main.errors.loginRequired);
 
       // [수정] userName 저장 로직 제거
       await FirebaseFirestore.instance
@@ -64,8 +64,8 @@ class _ReplyInputFieldState extends State<ReplyInputField> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('replyInputField.failure'
-              .tr(namedArgs: {'error': e.toString()}))));
+          content: Text(t.replyInputField.failure
+              .replaceAll('{error}', e.toString()))));
     }
     if (mounted) setState(() => _isSubmitting = false);
   }
@@ -99,7 +99,7 @@ class _ReplyInputFieldState extends State<ReplyInputField> {
                 maxLines: 3,
                 decoration: InputDecoration(
                   // ✅ [다국어 수정]
-                  hintText: 'replyInputField.hintText'.tr(),
+                  hintText: t.replyInputField.hintText,
                   border: const OutlineInputBorder(),
                   isDense: true,
                   contentPadding:

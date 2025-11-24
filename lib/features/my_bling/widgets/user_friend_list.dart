@@ -19,7 +19,8 @@ import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 
 class UserFriendList extends StatelessWidget {
@@ -29,7 +30,7 @@ class UserFriendList extends StatelessWidget {
   Widget build(BuildContext context) {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
     if (myUid == null) {
-      return Center(child: Text('main.errors.loginRequired'.tr()));
+      return Center(child: Text(t.main.errors.loginRequired));
     }
 
     return StreamBuilder<DocumentSnapshot>(
@@ -38,7 +39,7 @@ class UserFriendList extends StatelessWidget {
           FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Center(child: Text('myBling.friends.loadError'.tr()));
+          return Center(child: Text(t.myBling.friends.loadError));
         }
         final user = UserModel.fromFirestore(
             snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
@@ -53,7 +54,7 @@ class UserFriendList extends StatelessWidget {
         debugPrint('--------------------------');
 
         if (friendUids.isEmpty) {
-          return Center(child: Text('myBling.friends.empty'.tr()));
+          return Center(child: Text(t.myBling.friends.empty));
         }
 
         // 2. 친구 UID 목록을 사용하여 각 친구의 상세 정보를 가져옴
@@ -69,8 +70,8 @@ class UserFriendList extends StatelessWidget {
               builder: (context, friendSnapshot) {
                 if (!friendSnapshot.hasData || !friendSnapshot.data!.exists) {
                   return ListTile(
-                      title: Text('myBling.friends.userNotFound'
-                          .tr(namedArgs: {'uid': friendUid})));
+                      title: Text(t.myBling.friends.userNotFound
+                          .replaceAll('{uid}', friendUid)));
                 }
                 final friend = UserModel.fromFirestore(friendSnapshot.data!
                     as DocumentSnapshot<Map<String, dynamic>>);

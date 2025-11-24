@@ -41,7 +41,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart'; // [Fix] �
 import 'package:bling_app/features/marketplace/data/product_repository.dart';
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:bling_app/features/marketplace/widgets/ai_report_viewer.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -92,9 +92,9 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
           widget.product.aiReport ?? widget.product.aiVerificationData;
       if (report == null) return;
 
-      final dynamic checklist = report['onSiteVerificationChecklist'];
+      final dynamic checklist = report['onSiteVerificationChecklist'] ?? '';
       if (checklist is Map) {
-        final dynamic checks = checklist['checks'];
+        final dynamic checks = checklist['checks'] ?? '';
         if (checks is List) {
           final List<_ChecklistItem> items = [];
           for (var item in checks) {
@@ -162,10 +162,8 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
   Future<void> _startOnSiteVerification() async {
     // [변경 3] 체크리스트 기반 사진 사용: Map -> List 변환
     if (_checklistPhotos.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              StringTranslateExtension('marketplace.takeover.errors.noPhoto')
-                  .tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.marketplace.takeover.errors.noPhoto)));
       return;
     }
 
@@ -192,7 +190,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
         newImageUrls: newImageUrls,
       );
 
-      final dynamic verificationData = result['verification'];
+      final dynamic verificationData = result['verification'] ?? '';
       if (verificationData is Map) {
         _showVerificationResult(Map<String, dynamic>.from(verificationData));
       } else {
@@ -211,7 +209,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
   /// AI 검증 결과 다이얼로그 표시
   void _showVerificationResult(Map<String, dynamic> result) {
     // [Task 110/111] 3-Way-Logic: match는 true, false, 또는 null(AI 실패)일 수 있음
-    final bool? match = result['match'] as bool?; // null을 허용하는 bool?로 받음
+    final bool? match = result['match'] ?? '' as bool?; // null을 허용하는 bool?로 받음
     final String reason = result['reason'] ?? 'No reason provided.';
 
     showDialog(
@@ -229,10 +227,10 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
           size: 48,
         ),
         title: Text(match == true
-            ? 'marketplace.takeover.dialog.matchTitle'.tr()
+            ? t.marketplace.takeover.dialog.matchTitle
             : (match == false
-                ? 'marketplace.takeover.dialog.noMatchTitle'.tr()
-                : 'marketplace.takeover.dialog.failTitle'.tr())),
+                ? t.marketplace.takeover.dialog.noMatchTitle
+                : t.marketplace.takeover.dialog.failTitle)),
         content: Text(reason),
         actions: [
           if (match == true) ...[
@@ -242,7 +240,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
                 Navigator.of(ctx).pop();
                 _finalizeTakeover(); // [3단계] 최종 인수 확정
               },
-              child: Text('marketplace.takeover.dialog.finalize'.tr()),
+              child: Text(t.marketplace.takeover.dialog.finalize),
             ),
           ] else if (match == false) ...[
             // [Case 2: No Match] - 거래 취소
@@ -256,11 +254,11 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
                     Navigator.of(ctx).pop();
                     _cancelReservation(); // [3단계] 거래 취소 (환불)
                   },
-                  child: Text('marketplace.takeover.dialog.cancelDeal'.tr()),
+                  child: Text(t.marketplace.takeover.dialog.cancelDeal),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(ctx).pop(),
-                  child: Text('marketplace.dialog.close'.tr()),
+                  child: Text(t.marketplace.dialog.close),
                 ),
               ],
             ),
@@ -268,14 +266,14 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
             // [Case 3: AI Failure (match == null)] - 재시도 옵션 제공
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('marketplace.dialog.close'.tr()),
+              child: Text(t.marketplace.dialog.close),
             ),
             FilledButton(
               onPressed: () {
                 Navigator.of(ctx).pop();
                 _startOnSiteVerification(); // [Task 110] AI 검증 재시도
               },
-              child: Text('marketplace.takeover.dialog.retry'.tr()),
+              child: Text(t.marketplace.takeover.dialog.retry),
             ),
           ],
         ],
@@ -291,9 +289,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
       await productRepository.completeTakeover(productId: widget.product.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(StringTranslateExtension(
-                    'marketplace.takeover.success.finalized')
-                .tr())));
+            content: Text(t.marketplace.takeover.success.finalized)));
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
@@ -320,9 +316,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
       await productRepository.cancelReservation(productId: widget.product.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(StringTranslateExtension(
-                    'marketplace.takeover.success.cancelled')
-                .tr())));
+            content: Text(t.marketplace.takeover.success.cancelled)));
         Navigator.of(context).pop(); // 상세 화면으로 복귀
       }
     } catch (e) {
@@ -343,8 +337,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(StringTranslateExtension('marketplace.takeover.title').tr()),
+        title: Text(t.marketplace.takeover.title),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -352,31 +345,28 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              StringTranslateExtension('marketplace.takeover.guide.title').tr(),
+              t.marketplace.takeover.guide.title,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            Text(StringTranslateExtension('marketplace.takeover.guide.subtitle')
-                .tr()),
+            Text(t.marketplace.takeover.guide.subtitle),
             const SizedBox(height: 16),
-            // [AI 리팩토링] 공용 위젯을 사용하여 원본 리포트 표시
+
+            // AI 원본 리포트 뷰어
             AiReportViewer(
               aiReport: Map<String, dynamic>.from(widget.product.aiReport ??
                   widget.product.aiVerificationData ??
                   {}),
             ),
 
-            // [변경 4] 체크리스트 항목별 촬영 UI
+            // 체크리스트 항목별 촬영 UI
             if (_checklistItems.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
-                StringTranslateExtension('marketplace.takeover.checklistTitle')
-                    .tr(),
+                t.marketplace.takeover.checklistTitle,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
-
-              // 체크리스트 항목별 카드(사진 슬롯 포함)
               ..._checklistItems.asMap().entries.map((entry) {
                 final index = entry.key;
                 final item = entry.value;
@@ -435,9 +425,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
                       height: 24,
                       child: CircularProgressIndicator(strokeWidth: 3),
                     )
-                  : Text(StringTranslateExtension(
-                          'marketplace.takeover.buttonVerify')
-                      .tr()),
+                  : Text(t.marketplace.takeover.buttonVerify),
             ),
           ],
         ),
@@ -453,7 +441,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
           child: OutlinedButton.icon(
             onPressed: () => _pickPhotoForIndex(index, ImageSource.camera),
             icon: const Icon(Icons.camera_alt),
-            label: Text('marketplace.takeover.camera'.tr()),
+            label: Text(t.marketplace.takeover.camera),
             style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12)),
           ),
@@ -463,7 +451,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
           child: OutlinedButton.icon(
             onPressed: () => _pickPhotoForIndex(index, ImageSource.gallery),
             icon: const Icon(Icons.photo_library),
-            label: Text('marketplace.takeover.gallery'.tr()),
+            label: Text(t.marketplace.takeover.gallery),
             style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12)),
           ),

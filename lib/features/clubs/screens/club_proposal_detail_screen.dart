@@ -4,7 +4,7 @@ import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:bling_app/features/clubs/models/club_proposal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
 
@@ -43,7 +43,7 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('clubs.proposal.detail.loginRequired'.tr())),
+        SnackBar(content: Text(t.clubs.proposal.detail.loginRequired)),
       );
       return;
     }
@@ -73,7 +73,7 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
           );
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('clubs.proposal.detail.left'.tr())),
+          SnackBar(content: Text(t.clubs.proposal.detail.left)),
         );
       } else {
         await _repo.joinClubProposal(_proposal.id, uid);
@@ -99,15 +99,15 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
           );
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('clubs.proposal.detail.joined'.tr())),
+          SnackBar(content: Text(t.clubs.proposal.detail.joined)),
         );
       }
     } catch (e) {
       // If join triggered conversion, server may have deleted proposal; handle gracefully
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('clubs.proposal.detail.error'
-                .tr(namedArgs: {'error': e.toString()}))),
+            content: Text(t.clubs.proposal.detail.error
+                .replaceAll('{error}', e.toString()))),
       );
     } finally {
       if (mounted) setState(() => _isProcessing = false);
@@ -148,15 +148,16 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
               Wrap(
                 spacing: 8,
                 children: _proposal.interestTags
-                    .map((t) => Chip(label: Text(t)))
+                    .map((tag) => Chip(label: Text(tag)))
                     .toList(),
               ),
               const SizedBox(height: 16),
               Text(
-                'clubs.proposal.memberStatus'.tr(namedArgs: {
-                  'current': _proposal.currentMemberCount.toString(),
-                  'target': _proposal.targetMemberCount.toString()
-                }),
+                t.clubs.proposal.memberStatus
+                    .replaceAll(
+                        '{current}', _proposal.currentMemberCount.toString())
+                    .replaceAll(
+                        '{target}', _proposal.targetMemberCount.toString()),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -173,7 +174,7 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
               const SizedBox(height: 12),
               const Divider(),
               const SizedBox(height: 8),
-              Text('clubs.proposal.members'.tr(),
+              Text(t.clubs.proposal.members,
                   style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               _buildMembersList(),
@@ -190,8 +191,8 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
                               strokeWidth: 2, color: Colors.white))
                       : Icon(_isJoined ? Icons.exit_to_app : Icons.group_add),
                   label: Text(_isJoined
-                      ? 'clubs.proposal.leave'.tr()
-                      : 'clubs.proposal.join'.tr()),
+                      ? t.clubs.proposal.leave
+                      : t.clubs.proposal.join),
                 ),
               )
             ],
@@ -203,7 +204,7 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
 
   Widget _buildMembersList() {
     if (_proposal.memberIds.isEmpty) {
-      return Text('clubs.proposal.noMembers'.tr());
+      return Text(t.clubs.proposal.noMembers);
     }
     // show up to 10 members using shared AuthorProfileTile (fetches user info)
     final ids = _proposal.memberIds.take(10).toList();

@@ -21,7 +21,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
 import 'pom_comments_sheet.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/features/pom/screens/pom_edit_screen.dart'; // [추가]
@@ -131,7 +132,7 @@ class _PomPlayerState extends State<PomPlayer> {
         children: [
           ListTile(
             leading: const Icon(Icons.edit),
-            title: Text('common.edit'.tr()), // "수정"
+            title: Text(t.common.edit), // "수정"
             onTap: () async {
               Navigator.pop(ctx);
               _controller?.pause(); // 영상 일시 정지
@@ -152,7 +153,7 @@ class _PomPlayerState extends State<PomPlayer> {
           ),
           ListTile(
             leading: const Icon(Icons.delete, color: Colors.red),
-            title: Text('common.delete'.tr(),
+            title: Text(t.common.delete,
                 style: const TextStyle(color: Colors.red)),
             onTap: () {
               Navigator.pop(ctx);
@@ -168,12 +169,12 @@ class _PomPlayerState extends State<PomPlayer> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('pom.delete.title'.tr()), // "삭제하시겠습니까?"
-        content: Text('pom.delete.content'.tr()), // "삭제된 게시글은 복구할 수 없습니다."
+        title: Text(t.pom.delete.title), // "삭제하시겠습니까?"
+        content: Text(t.pom.delete.content), // "삭제된 게시글은 복구할 수 없습니다."
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('common.cancel'.tr()),
+            child: Text(t.common.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -182,7 +183,7 @@ class _PomPlayerState extends State<PomPlayer> {
                 await _repository.deletePom(widget.pom.id);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('pom.delete.success'.tr())));
+                      SnackBar(content: Text(t.pom.delete.success)));
                   // 삭제 완료 후 플레이어 닫기
                   Navigator.of(context).pop(true);
                 }
@@ -193,7 +194,7 @@ class _PomPlayerState extends State<PomPlayer> {
                 }
               }
             },
-            child: Text('common.delete'.tr(),
+            child: Text(t.common.delete,
                 style: const TextStyle(color: Colors.red)),
           ),
         ],
@@ -395,7 +396,7 @@ class _PomPlayerState extends State<PomPlayer> {
         const SizedBox(height: 20),
         InkWell(
           onTap: _onShare,
-          child: _buildActionButton(icon: Icons.share, label: 'pom.share'.tr()),
+          child: _buildActionButton(icon: Icons.share, label: t.pom.share),
         ),
 
         // V V V --- [추가] 작성자일 경우 더보기(...) 버튼 표시 --- V V V
@@ -405,7 +406,7 @@ class _PomPlayerState extends State<PomPlayer> {
             onTap: _showOwnerMenu,
             child: _buildActionButton(
               icon: Icons.more_horiz,
-              label: 'common.more'.tr(),
+              label: t.common.more,
             ),
           ),
         ],

@@ -29,7 +29,7 @@ import 'package:bling_app/features/categories/screens/parent_category_screen.dar
 import 'package:bling_app/features/marketplace/services/ai_verification_service.dart';
 import '../models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -159,13 +159,13 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
 
   Future<void> _submitProduct() async {
     if (_images.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('marketplace.errors.noPhoto'.tr())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.marketplace.errors.noPhoto)));
       return;
     }
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('marketplace.errors.noCategory'.tr())));
+          SnackBar(content: Text(t.marketplace.errors.noCategory)));
       return;
     }
     if (!_formKey.currentState!.validate()) {
@@ -187,7 +187,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
           .doc(user.uid)
           .get();
       if (!userDoc.exists) {
-        throw Exception('marketplace.errors.userNotFound'.tr());
+        throw Exception(t.marketplace.errors.userNotFound);
       }
       final userModel = UserModel.fromFirestore(userDoc);
 
@@ -244,7 +244,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('marketplace.registration.success'.tr())),
+          SnackBar(content: Text(t.marketplace.registration.success)),
         );
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
@@ -252,8 +252,8 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text('marketplace.registration.fail'.tr(args: [e.toString()])),
+            content: Text(t.marketplace.registration.fail
+                .replaceAll('{0}', e.toString())),
           ),
         );
       }
@@ -266,9 +266,9 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
 
   String _getCategoryName(BuildContext context, Category? category) {
     if (category == null) {
-      return 'selectCategory'.tr();
+      return t.selectCategory;
     }
-    final langCode = context.locale.languageCode;
+    final langCode = Localizations.localeOf(context).languageCode;
     switch (langCode) {
       case 'ko':
         return category.nameKo;
@@ -289,14 +289,13 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         _selectedParentCategoryName == null) {
       // [V3 REFACTOR] 이름이 로드되었는지 확인
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('ai_flow.cta.missing_required_fields'.tr())),
+        SnackBar(content: Text(t.aiFlow.cta.missingRequiredFields)),
       );
       return;
     }
 
     // [작업 68] 로딩 상태 텍스트 설정
-    setState(
-        () => _loadingStatus = tr('ai_flow.status.saving')); // "상품 정보 저장 중..."
+    setState(() => _loadingStatus = t.aiFlow.status.saving); // "상품 정보 저장 중..."
     try {
       final productId =
           FirebaseFirestore.instance.collection('products').doc().id;
@@ -305,7 +304,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       // ...existing code...
       // [작업 68] 로딩 상태 텍스트 변경
       setState(() => _loadingStatus =
-          tr('ai_flow.status.analyzing')); // "AI가 1차 분석 중... (최대 1분)"
+          t.aiFlow.status.analyzing); // "AI가 1차 분석 중... (최대 1분)"
       await _aiVerificationService.startVerificationFlow(
         context: context,
         // [V3 REFACTOR] 'rule' 파라미터 완전 제거
@@ -332,14 +331,14 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('marketplace.registration.title'.tr()),
+        title: Text(t.marketplace.registration.title),
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _submitProduct,
             child: _isLoading
                 ? const CircularProgressIndicator() // Use default (theme) color
                 : Text(
-                    'marketplace.registration.done'.tr(),
+                    t.marketplace.registration.done,
                     style: TextStyle(
                       color: theme
                           .primaryColor, // [Fix] Use primaryColor for visibility
@@ -369,7 +368,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                         height: 24,
                         child: CircularProgressIndicator(strokeWidth: 3),
                       )
-                    : Text('marketplace.registration.done'.tr()),
+                    : Text(t.marketplace.registration.done),
               ),
               const SizedBox(height: 16),
               InkWell(
@@ -413,9 +412,9 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                    labelText: 'marketplace.registration.titleHint'.tr()),
-                validator: (value) => (value == null || value.isEmpty)
-                    ? 'marketplace.errors.requiredField'.tr()
+                    labelText: t.marketplace.registration.titleHint),
+                validator: (value) => value == null || value.isEmpty
+                    ? t.marketplace.errors.requiredField
                     : null,
               ),
               const SizedBox(height: 16),
@@ -435,7 +434,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                 controller: _addressController,
                 readOnly: true, // 사용자가 직접 수정하지 못하도록 설정
                 decoration: InputDecoration(
-                  labelText: 'marketplace.registration.addressHint'.tr(),
+                  labelText: t.marketplace.registration.addressHint,
                   prefixIcon: const Icon(Icons.location_on_outlined),
                 ),
                 // validator 제거 (자동으로 가져오므로)
@@ -444,21 +443,20 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               TextFormField(
                 controller: _transactionPlaceController,
                 decoration: InputDecoration(
-                    labelText:
-                        'marketplace.registration.addressDetailHint'.tr()),
+                    labelText: t.marketplace.registration.addressDetailHint),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _priceController,
                 decoration: InputDecoration(
-                    labelText: 'marketplace.registration.priceHint'.tr()),
+                    labelText: t.marketplace.registration.priceHint),
                 keyboardType: TextInputType.number,
                 validator: (value) => (value == null || value.isEmpty)
-                    ? 'marketplace.errors.requiredField'.tr()
+                    ? t.marketplace.errors.requiredField
                     : null,
               ),
               SwitchListTile(
-                title: Text('marketplace.registration.negotiable'.tr()),
+                title: Text(t.marketplace.registration.negotiable),
                 value: _isNegotiable,
                 onChanged: (value) => setState(() => _isNegotiable = value),
                 contentPadding: EdgeInsets.zero,
@@ -466,15 +464,13 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: _condition,
-                decoration: InputDecoration(
-                    labelText: 'marketplace.condition.label'.tr()),
+                decoration:
+                    InputDecoration(labelText: t.marketplace.condition.label),
                 items: [
                   DropdownMenuItem(
-                      value: 'new',
-                      child: Text('marketplace.condition.new'.tr())),
+                      value: 'new', child: Text(t.marketplace.condition.kNew)),
                   DropdownMenuItem(
-                      value: 'used',
-                      child: Text('marketplace.condition.used'.tr())),
+                      value: 'used', child: Text(t.marketplace.condition.used)),
                 ],
                 onChanged: (value) =>
                     setState(() => _condition = value ?? 'used'),
@@ -483,19 +479,19 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
-                  labelText: 'marketplace.registration.descriptionHint'.tr(),
+                  labelText: t.marketplace.registration.descriptionHint,
                   alignLabelWithHint: true,
                   border: const OutlineInputBorder(),
                 ),
                 maxLines: 5,
                 validator: (value) => (value == null || value.isEmpty)
-                    ? 'marketplace.errors.requiredField'.tr()
+                    ? t.marketplace.errors.requiredField
                     : null,
               ),
               const SizedBox(height: 16), // [간격 확대]
               // ✅ 공용 태그 위젯 추가
               CustomTagInputField(
-                hintText: 'tag_input.help'.tr(),
+                hintText: t.tagInput.help,
                 onTagsChanged: (tags) {
                   setState(() {
                     _tags = tags;
@@ -516,16 +512,16 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                         height: 24,
                         child: CircularProgressIndicator(strokeWidth: 3),
                       )
-                    : Text('marketplace.registration.done'.tr()),
+                    : Text(t.marketplace.registration.done),
               ),
               const SizedBox(height: 16),
 
               // [V2 핵심 추가] AI 검수 옵션 섹션
               const Divider(height: 32),
-              Text('ai_flow.cta.title'.tr(),
+              Text(t.aiFlow.cta.title,
                   style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
-              Text('ai_flow.cta.subtitle'.tr(),
+              Text(t.aiFlow.cta.subtitle,
                   style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 16),
               // [핵심 수정] 버튼 활성/비활성 및 동작 구현
@@ -556,7 +552,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                               LinearProgressIndicator(),
                             ],
                           )
-                        : Text('ai_flow.cta.start_button'.tr()),
+                        : Text(t.aiFlow.cta.startButton),
                   );
                 },
               ),

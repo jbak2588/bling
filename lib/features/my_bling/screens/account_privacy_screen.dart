@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// easy_localization compatibility removed; using Slang `t[...]`
 
 class AccountPrivacyScreen extends StatelessWidget {
   const AccountPrivacyScreen({super.key});
@@ -7,7 +9,7 @@ class AccountPrivacyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('settings.accountPrivacy'.tr())),
+      appBar: AppBar(title: Text(t.settings.accountPrivacy)),
       body: Center(
         child: Text(
           'Coming soon',

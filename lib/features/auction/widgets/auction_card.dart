@@ -21,7 +21,8 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/auction/screens/auction_detail_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
 
 // ✅ [하이퍼로컬] 1. 거리 계산 헬퍼와 UserModel import
 import 'package:bling_app/core/utils/location_helper.dart';
@@ -80,7 +81,7 @@ class _AuctionCardState extends State<AuctionCard>
   // [추가] Duration을 "1일 2:30:15 남음" 형태의 문자열로 변환하는 함수
   String _formatDuration(Duration d) {
     if (d.inSeconds <= 0) {
-      return 'auctions.card.ended'.tr();
+      return t.auctions.card.ended;
     }
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final days = d.inDays;
@@ -88,18 +89,16 @@ class _AuctionCardState extends State<AuctionCard>
     final minutes = twoDigits(d.inMinutes.remainder(60));
     final seconds = twoDigits(d.inSeconds.remainder(60));
     if (days > 0) {
-      return 'auctions.card.timeLeftDays'.tr(namedArgs: {
-        'days': days.toString(),
-        'hours': hours,
-        'minutes': minutes,
-        'seconds': seconds,
-      });
+      return t.auctions.card.timeLeftDays
+          .replaceAll('{days}', days.toString())
+          .replaceAll('{hours}', hours)
+          .replaceAll('{minutes}', minutes)
+          .replaceAll('{seconds}', seconds);
     }
-    return 'auctions.card.timeLeft'.tr(namedArgs: {
-      'hours': hours,
-      'minutes': minutes,
-      'seconds': seconds,
-    });
+    return t.auctions.card.timeLeft
+        .replaceAll('{hours}', hours)
+        .replaceAll('{minutes}', minutes)
+        .replaceAll('{seconds}', seconds);
   }
 
   @override
@@ -154,7 +153,7 @@ class _AuctionCardState extends State<AuctionCard>
                       color: Colors.black.withValues(alpha: 0.5),
                       child: Center(
                         child: Text(
-                          'auctions.card.ended'.tr(),
+                          t.auctions.card.ended,
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 22,
@@ -217,19 +216,19 @@ class _AuctionCardState extends State<AuctionCard>
                   // V V V --- [통합] 경매 상태에 따라 다른 정보를 표시합니다 --- V V V
                   if (isEnded) ...[
                     // --- 경매 종료 시 ---
-                    _buildInfoRow('auctions.card.winningBid'.tr(),
+                    _buildInfoRow(t.auctions.card.winningBid,
                         currencyFormat.format(widget.auction.currentBid),
                         isPrice: true),
                     const SizedBox(height: 4),
                     _buildWinnerInfo(widget.auction),
                   ] else ...[
                     // --- 경매 진행 중 ---
-                    _buildInfoRow('auctions.card.currentBid'.tr(),
+                    _buildInfoRow(t.auctions.card.currentBid,
                         currencyFormat.format(widget.auction.currentBid),
                         isPrice: true),
                     const SizedBox(height: 4),
                     _buildInfoRow(
-                      'auctions.card.endTime'.tr(),
+                      t.auctions.card.endTime,
                       _formatDuration(_timeLeft), // 실시간 타이머 표시
                       isTime: true,
                     ),
@@ -272,10 +271,10 @@ class _AuctionCardState extends State<AuctionCard>
   Widget _buildWinnerInfo(AuctionModel auction) {
     if (auction.bidHistory.isEmpty) {
       return _buildInfoRow(
-          'auctions.card.winner'.tr(), 'auctions.card.noBidders'.tr());
+          t.auctions.card.winner, t.auctions.card.noBidders);
     }
 
-    final winnerId = auction.bidHistory.last['userId'];
+    final winnerId = auction.bidHistory.last['userId'] ?? '';
 
     return FutureBuilder<DocumentSnapshot>(
       future:
@@ -283,11 +282,11 @@ class _AuctionCardState extends State<AuctionCard>
       builder: (context, userSnapshot) {
         if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
           return _buildInfoRow(
-              'auctions.card.winner'.tr(), 'auctions.card.unknownBidder'.tr());
+              t.auctions.card.winner, t.auctions.card.unknownBidder);
         }
         final winner = UserModel.fromFirestore(
             userSnapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
-        return _buildInfoRow('auctions.card.winner'.tr(), winner.nickname);
+        return _buildInfoRow(t.auctions.card.winner, winner.nickname);
       },
     );
   }

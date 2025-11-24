@@ -33,9 +33,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// compat shim removed; using Slang `t` accessors
 
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
@@ -129,7 +132,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
     if (!_formKey.currentState!.validate() || _isSaving) return;
     if (_images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('realEstate.form.imageRequired'.tr())));
+          SnackBar(content: Text(t.realEstate.form.imageRequired)));
       return;
     }
 
@@ -208,7 +211,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('realEstate.form.success'.tr()),
+            content: Text(t.realEstate.form.success),
             backgroundColor: Colors.green));
         // V V V --- [수정] 등록 성공 신호(true)와 함께 화면을 닫습니다 --- V V V
         Navigator.of(context).pop(true);
@@ -218,7 +221,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(
-                'realEstate.form.fail'.tr(namedArgs: {'error': e.toString()})),
+                t.realEstate.form.fail.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -230,12 +233,12 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('realEstate.form.title'.tr()),
+        title: Text(t.realEstate.form.title),
         actions: [
           if (!_isSaving)
             TextButton(
                 onPressed: _submitListing,
-                child: Text('realEstate.form.submit'.tr(),
+                child: Text(t.realEstate.form.submit,
                     style: TextStyle(
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.bold))),
@@ -313,18 +316,18 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                           height: 24,
                           child: CircularProgressIndicator(strokeWidth: 3),
                         )
-                      : Text('realEstate.form.submit'.tr()),
+                      : Text(t.realEstate.form.submit),
                 ),
                 // [수정] '작업 27': 'listingType'을 'roomType' 앞으로 이동
-                Text('realEstate.form.listingType'.tr(),
+                Text(t.realEstate.form.listingType,
                     style: Theme.of(context).textTheme.titleMedium),
                 _buildDropdown<String?>(
                   value: _selectedListingType,
-                  hint: 'realEstate.form.listingTypeHint'.tr(),
+                  hint: t.realEstate.form.listingTypeHint,
                   items: const ['rent', 'sale'],
                   itemBuilder: (type) => DropdownMenuItem(
                     value: type,
-                    child: Text('realEstate.form.listingTypes.$type'.tr()),
+                    child: Text(t['realEstate.form.listingTypes.$type'] ?? ''),
                   ),
                   onChanged: (val) {
                     setState(() => _selectedListingType = val ?? 'rent');
@@ -337,7 +340,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: _type,
                   decoration: InputDecoration(
-                    labelText: 'realEstate.form.typeLabel'.tr(),
+                    labelText: t.realEstate.form.typeLabel,
                     border: const OutlineInputBorder(),
                   ),
                   // 'kos', 'apartment', 'kontrakan', 'house', 'gudang', 'ruko', 'kantor', 'etc'
@@ -353,7 +356,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                   ].map<DropdownMenuItem<String>>((type) {
                     return DropdownMenuItem(
                       value: type,
-                      child: Text('realEstate.form.roomTypes.$type'.tr()),
+                      child: Text(t['realEstate.form.roomTypes.$type'] ?? ''),
                     );
                   }).toList(),
                   onChanged: (value) => setState(() => _type = value!),
@@ -366,11 +369,11 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                       child: TextFormField(
                         controller: _priceController,
                         decoration: InputDecoration(
-                            labelText: 'realEstate.form.priceLabel'.tr(),
+                            labelText: t.realEstate.form.priceLabel,
                             border: const OutlineInputBorder()),
                         keyboardType: TextInputType.number,
                         validator: (v) => (v == null || v.isEmpty)
-                            ? 'realEstate.form.priceRequired'.tr()
+                            ? t.realEstate.form.priceRequired
                             : null,
                       ),
                     ),
@@ -387,8 +390,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                               .map((String value) => DropdownMenuItem<String>(
                                     value: value,
                                     child: Text(
-                                        'realEstate.form.priceUnit.$value'
-                                            .tr()),
+                                        t['realEstate.form.priceUnit.$value'] ?? ''),
                                   ))
                               .toList(),
                           onChanged: (String? newValue) {
@@ -406,32 +408,32 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                      labelText: 'realEstate.form.titleLabel'.tr(),
+                      labelText: t.realEstate.form.titleLabel,
                       border: const OutlineInputBorder()),
                   validator: (v) => (v == null || v.isEmpty)
-                      ? 'realEstate.form.titleRequired'.tr()
+                      ? t.realEstate.form.titleRequired
                       : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                      labelText: 'realEstate.form.descriptionLabel'.tr(),
+                      labelText: t.realEstate.form.descriptionLabel,
                       border: const OutlineInputBorder()),
                   maxLines: 3,
                 ),
 
                 // [수정] 게시자 유형 (listingType은 위로 이동)
                 const SizedBox(height: 16),
-                Text('realEstate.form.publisherType'.tr(),
+                Text(t.realEstate.form.publisherType,
                     style: Theme.of(context).textTheme.titleMedium),
                 _buildDropdown<String?>(
                   value: _selectedPublisherType,
-                  hint: 'realEstate.form.publisherType'.tr(),
+                  hint: t.realEstate.form.publisherType,
                   items: const ['individual', 'agent'],
                   itemBuilder: (type) => DropdownMenuItem(
                     value: type,
-                    child: Text('realEstate.form.publisherTypes.$type'.tr()),
+                    child: Text(t['realEstate.form.publisherTypes.$type'] ?? ''),
                   ),
                   onChanged: (value) => setState(
                       () => _selectedPublisherType = value ?? 'individual'),
@@ -440,15 +442,15 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 // [추가] 면적, 방 수, 욕실 수
                 const SizedBox(height: 24),
                 Text(
-                  'realEstate.form.details'.tr(), // "매물 상세 정보"
+                  t.realEstate.form.details, // "매물 상세 정보"
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _areaController,
                   decoration: InputDecoration(
-                    labelText: 'realEstate.form.area'.tr(), // 면적 (m²)
-                    hintText: 'realEstate.form.areaHint'.tr(), // 예: 33
+                    labelText: t.realEstate.form.area, // 면적 (m²)
+                    hintText: t.realEstate.form.areaHint, // 예: 33
                     border: const OutlineInputBorder(),
                     suffixText: 'm²',
                   ),
@@ -462,7 +464,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                       child: TextFormField(
                         controller: _roomCountController,
                         decoration: InputDecoration(
-                          labelText: 'realEstate.form.rooms'.tr(), // 방 수
+                          labelText: t.realEstate.form.rooms, // 방 수
                           border: const OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.number,
@@ -473,7 +475,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                       child: TextFormField(
                         controller: _bathroomCountController,
                         decoration: InputDecoration(
-                          labelText: 'realEstate.form.bathrooms'.tr(), // 욕실 수
+                          labelText: t.realEstate.form.bathrooms, // 욕실 수
                           border: const OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.number,
@@ -492,17 +494,17 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                     initialValue: _selectedFurnishedStatus,
                     decoration: InputDecoration(
                       labelText:
-                          'realEstate.filter.furnishedStatus'.tr(), // "가구 상태"
+                          t.realEstate.filter.furnishedStatus, // "가구 상태"
                       border: const OutlineInputBorder(),
                     ),
                     hint: Text(
-                        'realEstate.filter.selectFurnished'.tr()), // "가구 상태 선택"
+                        t.realEstate.filter.selectFurnished), // "가구 상태 선택"
                     items: ['furnished', 'semi_furnished', 'unfurnished']
                         .map((status) {
                       return DropdownMenuItem(
                         value: status,
-                        child: Text(
-                            'realEstate.filter.furnishedTypes.$status'.tr()),
+                        child:
+                            Text(t['realEstate.filter.furnishedTypes.$status'] ?? ''),
                       );
                     }).toList(),
                     onChanged: (value) =>
@@ -514,17 +516,16 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                     DropdownButtonFormField<String>(
                       initialValue: _selectedRentPeriod,
                       decoration: InputDecoration(
-                        labelText:
-                            'realEstate.filter.rentPeriod'.tr(), // "임대 기간"
+                        labelText: t.realEstate.filter.rentPeriod, // "임대 기간"
                         border: const OutlineInputBorder(),
                       ),
-                      hint: Text('realEstate.filter.selectRentPeriod'
-                          .tr()), // "임대 기간 선택"
+                      hint: Text(t[
+                          'realEstate.filter.selectRentPeriod']), // "임대 기간 선택"
                       items: ['daily', 'monthly', 'yearly'].map((period) {
                         return DropdownMenuItem(
                           value: period,
-                          child: Text(
-                              'realEstate.filter.rentPeriods.$period'.tr()),
+                          child:
+                              Text(t['realEstate.filter.rentPeriods.$period'] ?? ''),
                         );
                       }).toList(),
                       onChanged: (value) =>
@@ -535,10 +536,9 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                   TextFormField(
                     controller: _maintenanceFeeController,
                     decoration: InputDecoration(
-                      labelText:
-                          'realEstate.form.maintenanceFee'.tr(), // "월 관리비"
-                      hintText: 'realEstate.form.maintenanceFeeHint'
-                          .tr(), // "관리비 (월, Rp)"
+                      labelText: t.realEstate.form.maintenanceFee, // "월 관리비"
+                      hintText: t[
+                          'realEstate.form.maintenanceFeeHint'], // "관리비 (월, Rp)"
                       border: const OutlineInputBorder(),
                       suffixText: 'Rp',
                     ),
@@ -553,9 +553,8 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                   TextFormField(
                     controller: _depositController,
                     decoration: InputDecoration(
-                      labelText: 'realEstate.form.deposit'.tr(), // "보증금"
-                      hintText:
-                          'realEstate.form.depositHint'.tr(), // "보증금 (Rp)"
+                      labelText: t.realEstate.form.deposit, // "보증금"
+                      hintText: t.realEstate.form.depositHint, // "보증금 (Rp)"
                       border: const OutlineInputBorder(),
                       suffixText: 'Rp',
                     ),
@@ -566,9 +565,9 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                   TextFormField(
                     controller: _floorInfoController,
                     decoration: InputDecoration(
-                      labelText: 'realEstate.form.floorInfo'.tr(), // "층수"
-                      hintText: 'realEstate.form.floorInfoHint'
-                          .tr(), // "예: 1층 / 총 5층 중 3층"
+                      labelText: t.realEstate.form.floorInfo, // "층수"
+                      hintText: t[
+                          'realEstate.form.floorInfoHint'], // "예: 1층 / 총 5층 중 3층"
                       border: const OutlineInputBorder(),
                     ),
                   ),
@@ -576,14 +575,14 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
 
                 // [추가] 입주 가능일
                 const SizedBox(height: 16),
-                Text('realEstate.form.moveInDate'.tr(),
+                Text(t.realEstate.form.moveInDate,
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.calendar_today_outlined),
                   label: Text(
                     _selectedMoveInDate == null
-                        ? 'realEstate.form.selectDate'.tr()
+                        ? t.realEstate.form.selectDate
                         : DateFormat('yyyy-MM-dd').format(_selectedMoveInDate!),
                   ),
                   style: OutlinedButton.styleFrom(
@@ -606,7 +605,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 ),
                 if (_selectedMoveInDate != null)
                   TextButton(
-                    child: Text('realEstate.form.clearDate'.tr()),
+                    child: Text(t.realEstate.form.clearDate),
                     onPressed: () => setState(() => _selectedMoveInDate = null),
                   ),
                 // [신규] '작업 7': 'roomType'에 따라 동적으로 시설 입력 UI 표시
@@ -657,12 +656,12 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 24),
-            Text('realEstate.filter.kos.roomFacilities'.tr(),
+            Text(t.realEstate.filter.kos.roomFacilities,
                 style: Theme.of(context).textTheme.titleMedium),
             _buildFacilityChips(
                 RealEstateFacilities.kosRoomFacilities, _kosRoomFacilities),
             const SizedBox(height: 24),
-            Text('realEstate.filter.kos.publicFacilities'.tr(),
+            Text(t.realEstate.filter.kos.publicFacilities,
                 style: Theme.of(context).textTheme.titleMedium),
             _buildFacilityChips(
                 RealEstateFacilities.kosPublicFacilities, _kosPublicFacilities),
@@ -673,7 +672,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 24),
-            Text('realEstate.filter.apartment.facilities'.tr(),
+            Text(t.realEstate.filter.apartment.facilities,
                 style: Theme.of(context).textTheme.titleMedium),
             _buildFacilityChips(
                 RealEstateFacilities.apartmentFacilities, _apartmentFacilities),
@@ -685,7 +684,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 24),
-            Text('realEstate.filter.house.facilities'.tr(),
+            Text(t.realEstate.filter.house.facilities,
                 style: Theme.of(context).textTheme.titleMedium),
             _buildFacilityChips(
                 RealEstateFacilities.houseFacilities, _houseFacilities),
@@ -698,7 +697,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 24),
-            Text('realEstate.filter.commercial.facilities'.tr(),
+            Text(t.realEstate.filter.commercial.facilities,
                 style: Theme.of(context).textTheme.titleMedium),
             _buildFacilityChips(RealEstateFacilities.commercialFacilities,
                 _commercialFacilities),
@@ -716,25 +715,25 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
       children: [
         // --- 'Kos' 전용 필드 ---
         if (_type == 'kos') ...[
-          Text('realEstate.filter.kos.bathroomType'.tr(),
+          Text(t.realEstate.filter.kos.bathroomType,
               style: Theme.of(context).textTheme.titleMedium),
           _buildDropdown<String?>(
             value: _kosBathroomType,
-            hint: 'realEstate.filter.kos.hintBathroomType'.tr(),
+            hint: t.realEstate.filter.kos.hintBathroomType,
             items: const ['in_room', 'out_room'],
             itemBuilder: (type) => DropdownMenuItem(
               value: type,
-              child: Text('realEstate.filter.kos.bathroomTypes.${type ?? ''}')
-                  .tr(),
+              child:
+                  Text(t['realEstate.filter.kos.bathroomTypes.${type ?? ''}']),
             ),
             onChanged: (val) => setState(() => _kosBathroomType = val),
           ),
           const SizedBox(height: 16),
-          Text('realEstate.filter.kos.maxOccupants'.tr(),
+          Text(t.realEstate.filter.kos.maxOccupants,
               style: Theme.of(context).textTheme.titleMedium),
           _buildDropdown<int?>(
             value: _maxOccupants,
-            hint: 'realEstate.filter.kos.hintMaxOccupants'.tr(),
+            hint: t.realEstate.filter.kos.hintMaxOccupants,
             items: const [1, 2, 3], // 1, 2, 3+
             itemBuilder: (val) => DropdownMenuItem(
               value: val,
@@ -743,7 +742,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
             onChanged: (val) => setState(() => _maxOccupants = val),
           ),
           SwitchListTile(
-            title: Text('realEstate.filter.kos.electricityIncluded'.tr()),
+            title: Text(t.realEstate.filter.kos.electricityIncluded),
             value: _isElectricityIncluded ?? false,
             onChanged: (value) =>
                 setState(() => _isElectricityIncluded = value),
@@ -757,7 +756,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
           TextFormField(
             controller: _landAreaController,
             decoration: InputDecoration(
-              labelText: 'realEstate.form.landArea'.tr(),
+              labelText: t.realEstate.form.landArea,
               hintText: '0',
               border: const OutlineInputBorder(),
               suffixText: 'm²',
@@ -772,8 +771,8 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
           TextFormField(
             controller: _depositController,
             decoration: InputDecoration(
-              labelText: 'realEstate.form.deposit'.tr(),
-              hintText: 'realEstate.form.depositHint'.tr(), // "보증금 (Rp)"
+              labelText: t.realEstate.form.deposit,
+              hintText: t.realEstate.form.depositHint, // "보증금 (Rp)"
               border: const OutlineInputBorder(),
               suffixText: 'Rp',
             ),
@@ -783,8 +782,8 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
           TextFormField(
             controller: _floorInfoController,
             decoration: InputDecoration(
-              labelText: 'realEstate.form.floorInfo'.tr(),
-              hintText: 'realEstate.form.floorInfoHint'.tr(),
+              labelText: t.realEstate.form.floorInfo,
+              hintText: t.realEstate.form.floorInfoHint,
               border: const OutlineInputBorder(),
             ),
           ),
@@ -798,16 +797,15 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('realEstate.filter.furnishedStatus'.tr(),
+        Text(t.realEstate.filter.furnishedStatus,
             style: Theme.of(context).textTheme.titleMedium),
         _buildDropdown<String?>(
           value: _furnishedStatus,
-          hint: 'realEstate.filter.furnishedHint'.tr(),
+          hint: t.realEstate.filter.furnishedHint,
           items: const ['furnished', 'semi_furnished', 'unfurnished'],
           itemBuilder: (status) => DropdownMenuItem(
             value: status,
-            child:
-                Text('realEstate.filter.furnishedTypes.${status ?? ''}').tr(),
+            child: Text(t['realEstate.filter.furnishedTypes.${status ?? ''}']),
           ),
           onChanged: (val) => setState(() => _furnishedStatus = val),
         ),
@@ -820,16 +818,16 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('realEstate.filter.propertyCondition'.tr(),
+        Text(t.realEstate.filter.propertyCondition,
             style: Theme.of(context).textTheme.titleMedium),
         _buildDropdown<String?>(
           value: _propertyCondition,
-          hint: 'realEstate.filter.propertyCondition'.tr(),
+          hint: t.realEstate.filter.propertyCondition,
           items: const ['new', 'used'],
           itemBuilder: (status) => DropdownMenuItem(
             value: status,
-            child: Text('realEstate.filter.propertyConditions.${status ?? ''}')
-                .tr(),
+            child:
+                Text(t['realEstate.filter.propertyConditions.${status ?? ''}']),
           ),
           onChanged: (val) => setState(() => _propertyCondition = val),
         ),
@@ -865,7 +863,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
       spacing: 8.0,
       children: facilityKeys.map((key) {
         return FilterChip(
-          label: Text('realEstate.filter.amenities.$key').tr(),
+          label: Text(t['realEstate.filter.amenities.$key'] ?? ''),
           selected: selectedSet.contains(key),
           onSelected: (selected) {
             setState(() {

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:bling_app/features/auth/screens/auth_gate.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
@@ -72,8 +72,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(tr('auth.verification.fail_send',
-                  namedArgs: {'error': e.toString()}))),
+              content: Text(t.auth.verification.failSend
+                  .replaceAll('{error}', e.toString()))),
         );
       }
     }
@@ -88,7 +88,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('auth.verification.title'.tr()),
+        title: Text(t.auth.verification.title),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -106,16 +106,15 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 size: 80, color: Color(0xFF00A66C)),
             const SizedBox(height: 24),
             Text(
-              'auth.verification.sent_title'.tr(),
+              t.auth.verification.sentTitle,
               style:
                   GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             Text(
-              tr('auth.verification.sent_desc', namedArgs: {
-                'email': FirebaseAuth.instance.currentUser?.email ?? ''
-              }),
+              t.auth.verification.sentDesc.replaceAll(
+                  '{email}', FirebaseAuth.instance.currentUser?.email ?? ''),
               style: GoogleFonts.inter(fontSize: 16, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
@@ -125,7 +124,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             ElevatedButton.icon(
               onPressed: _canResendEmail ? _sendVerificationEmail : null,
               icon: const Icon(Icons.email),
-              label: Text('auth.verification.resend'.tr()),
+              label: Text(t.auth.verification.resend),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
               ),
@@ -133,7 +132,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => FirebaseAuth.instance.signOut(),
-              child: Text('auth.verification.logout'.tr()),
+              child: Text(t.auth.verification.logout),
             ),
           ],
         ),

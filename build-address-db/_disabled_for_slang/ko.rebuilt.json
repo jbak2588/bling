@@ -603,7 +603,6 @@
   },
   "interests": {
     "title": "관심사",
-    "$categoryKey": "$categoryKey",
     "items": {
       "$interestKey": "$interestKey"
     },

@@ -42,7 +42,8 @@ library;
 
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 
 // ✅ [수정] UserModel과 최종 ProductModel을 모두 import합니다.
@@ -77,7 +78,7 @@ class _ProductCardState extends State<ProductCard>
 
     if (report == null) return product.description;
 
-    final dynamic condition = report['condition_check'];
+    final dynamic condition = report['condition_check'] ?? '';
     String? condText;
     if (condition is Map) {
       try {
@@ -100,7 +101,7 @@ class _ProductCardState extends State<ProductCard>
       return condText;
     }
 
-    final dynamic summary = report['verification_summary'];
+    final dynamic summary = report['verification_summary'] ?? '';
     if (summary is String && summary.trim().isNotEmpty) {
       return summary;
     }
@@ -113,18 +114,18 @@ class _ProductCardState extends State<ProductCard>
     final dt = timestamp.toDate();
     final diff = now.difference(dt);
 
-    if (diff.inMinutes < 1) return 'time.now'.tr();
+    if (diff.inMinutes < 1) return t.time.now;
     if (diff.inHours < 1) {
-      return 'time.minutesAgo'
-          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+      return t.time.minutesAgo
+          .replaceAll('{minutes}', diff.inMinutes.toString());
     }
     if (diff.inDays < 1) {
-      return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
+      return t.time.hoursAgo.replaceAll('{hours}', diff.inHours.toString());
     }
     if (diff.inDays < 7) {
-      return 'time.daysAgo'.tr(namedArgs: {'days': diff.inDays.toString()});
+      return t.time.daysAgo.replaceAll('{days}', diff.inDays.toString());
     }
-    return DateFormat('time.dateFormat'.tr()).format(dt);
+    return DateFormat(t.time.dateFormat).format(dt);
   }
 
   @override
@@ -170,15 +171,14 @@ class _ProductCardState extends State<ProductCard>
                   if (product.status == 'reserved')
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
-                      child: _buildStatusBadge(
-                          'marketplace.status.reserved'.tr(),
+                      child: _buildStatusBadge(t.marketplace.status.reserved,
                           Colors.blue.shade700),
                     ),
                   if (product.status == 'sold')
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: _buildStatusBadge(
-                          'marketplace.status.sold'.tr(), Colors.grey.shade700),
+                          t.marketplace.status.sold, Colors.grey.shade700),
                     ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,7 +220,7 @@ class _ProductCardState extends State<ProductCard>
                             ),
                             const SizedBox(height: 4.0),
                             Text(
-                              '${product.locationParts?['kel'] ?? product.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $registeredAt',
+                              '${product.locationParts?['kel'] ?? product.locationParts?['kec'] ?? t.postCard.locationNotSet} • $registeredAt',
                               style: TextStyle(
                                   fontSize: 12.0, color: Colors.grey[600]),
                             ),

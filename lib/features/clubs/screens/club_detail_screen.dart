@@ -37,7 +37,7 @@ import 'package:bling_app/features/clubs/widgets/club_post_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:bling_app/features/clubs/screens/club_member_list.dart';
 
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
@@ -78,7 +78,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     if (_currentUserId == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('main.errors.loginRequired'.tr())));
+            SnackBar(content: Text(t.main.errors.loginRequired)));
       }
       return;
     }
@@ -110,13 +110,13 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
 
       if (result == 'joined') {
         showSnackbar(
-            'clubs.detail.joined'.tr(namedArgs: {'title': widget.club.title}));
+            t.clubs.detail.joined.replaceAll('{title}', widget.club.title));
       } else if (result == 'pending') {
-        showSnackbar('clubs.detail.pendingApproval'.tr());
+        showSnackbar(t.clubs.detail.pendingApproval);
       }
     } catch (e) {
       showSnackbar(
-          'clubs.detail.joinFail'.tr(namedArgs: {'error': e.toString()}),
+          t.clubs.detail.joinFail.replaceAll('{error}', e.toString()),
           isError: true);
     } finally {
       // [추가] 로딩 상태 해제
@@ -154,16 +154,16 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('clubs.detail.leaveConfirmTitle'.tr()),
-        content: Text('clubs.detail.leaveConfirmContent'
-            .tr(namedArgs: {'title': widget.club.title})),
+        title: Text(t.clubs.detail.leaveConfirmTitle),
+        content: Text(t.clubs.detail.leaveConfirmContent
+            .replaceAll('{title}', widget.club.title)),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('common.cancel'.tr())),
+              child: Text(t.common.cancel)),
           TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text('clubs.detail.leave'.tr(),
+              child: Text(t.clubs.detail.leave,
                   style: const TextStyle(color: Colors.red))),
         ],
       ),
@@ -173,13 +173,13 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       try {
         await _repository.leaveClub(widget.club.id, _currentUserId!);
         if (mounted) {
-          showSnackbar('clubs.detail.leaveSuccess'
-              .tr(namedArgs: {'title': widget.club.title}));
+          showSnackbar(t.clubs.detail.leaveSuccess
+              .replaceAll('{title}', widget.club.title));
         }
       } catch (e) {
         if (mounted) {
           showSnackbar(
-              'clubs.detail.leaveFail'.tr(namedArgs: {'error': e.toString()}),
+              t.clubs.detail.leaveFail.replaceAll('{error}', e.toString()),
               isError: true);
         }
       }
@@ -228,7 +228,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                             <PopupMenuEntry<String>>[
                           PopupMenuItem<String>(
                             value: 'leave',
-                            child: Text('clubs.detail.leave'.tr()),
+                            child: Text(t.clubs.detail.leave),
                           ),
                         ],
                       );
@@ -240,9 +240,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
             bottom: TabBar(
               controller: _tabController,
               tabs: [
-                Tab(text: 'clubs.detail.tabs.info'.tr()),
-                Tab(text: 'clubs.detail.tabs.board'.tr()),
-                Tab(text: 'clubs.detail.tabs.members'.tr()),
+                Tab(text: t.clubs.detail.tabs.info),
+                Tab(text: t.clubs.detail.tabs.board),
+                Tab(text: t.clubs.detail.tabs.members),
               ],
             ),
           ), // <--- [수정] 여기에 닫는 괄호가 빠져있었습니다.
@@ -263,7 +263,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                 return FloatingActionButton.extended(
                   heroTag: 'club_chat_fab',
                   onPressed: _navigateToGroupChat,
-                  label: Text('clubs.detail.joinChat'.tr()),
+                  label: Text(t.clubs.detail.joinChat),
                   icon: const Icon(Icons.chat_bubble_outline),
                   backgroundColor: Colors.teal,
                 );
@@ -272,7 +272,7 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
               return FloatingActionButton.extended(
                 heroTag: 'club_join_fab',
                 onPressed: _joinClub,
-                label: Text('clubs.detail.joinClub'.tr()),
+                label: Text(t.clubs.detail.joinClub),
                 icon: const Icon(Icons.add),
               );
             },
@@ -326,18 +326,18 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           children: [
             _buildInfoColumn(
                 icon: Icons.group_outlined,
-                label: 'clubs.detail.info.members'.tr(),
+                label: t.clubs.detail.info.members,
                 value: club.membersCount.toString()),
             _buildInfoColumn(
                 icon: Icons.location_on_outlined,
-                label: 'clubs.detail.info.location'.tr(),
+                label: t.clubs.detail.info.location,
                 value: club.location),
           ],
         ),
         const Divider(height: 32),
         // ✅ geoPoint 데이터가 있을 경우 MiniMapView를 추가합니다.
         if (club.geoPoint != null) ...[
-          Text("clubs.detail.location".tr(),
+          Text(t.clubs.detail.location,
               style:
                   const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
@@ -350,13 +350,13 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         ],
 
         // ✅ 개설자 정보 표시를 위해 AuthorProfileTile 추가
-        Text("clubs.detail.owner".tr(),
+        Text(t.clubs.detail.owner,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         AuthorProfileTile(userId: club.ownerId),
         const SizedBox(height: 16),
 
-        Text("interests.title".tr(),
+        Text(t.interests.title,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
 

@@ -43,7 +43,7 @@ import 'package:bling_app/features/local_stores/widgets/shop_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart'; // [추가]
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'create_shop_screen.dart'; // [추가]
@@ -197,7 +197,7 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Text('localStores.setLocationPrompt'.tr(),
+          child: Text(t.localStores.setLocationPrompt,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16, color: Colors.grey)),
         ),
@@ -217,7 +217,7 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
         children: [
           if (_showSearchBar)
             InlineSearchChip(
-              hintText: 'main.search.hint.localStores'.tr(),
+              hintText: t.main.search.hint.localStores,
               openNotifier: _chipOpenNotifier,
               onSubmitted: (kw) =>
                   _searchKeywordNotifier.value = kw.trim().toLowerCase(),
@@ -239,8 +239,8 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: ChoiceChip(
-                    label: Text('localStores.categories.$category'
-                        .tr()), // 'all' 번역도 필요
+                    label: Text(t['localStores.categories.$category'] ??
+                        ''), // 'all' 번역도 필요
                     selected: isSelected,
                     onSelected: (selected) {
                       if (selected) {
@@ -264,13 +264,13 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                   items: [
                     DropdownMenuItem(
                         value: 'default',
-                        child: Text('common.sort.default'.tr())), // 최신순
+                        child: Text(t.common.sort.kDefault)), // 최신순
                     DropdownMenuItem(
                         value: 'distance',
-                        child: Text('common.sort.distance'.tr())), // 거리순
+                        child: Text(t.common.sort.distance)), // 거리순
                     DropdownMenuItem(
                         value: 'popular',
-                        child: Text('common.sort.popular'.tr())), // 인기순
+                        child: Text(t.common.sort.popular)), // 인기순
                   ],
                   onChanged: (value) => setState(() => _sortOption = value!),
                 ),
@@ -288,8 +288,8 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                 }
                 if (snapshot.hasError) {
                   return Center(
-                      child: Text('localStores.error'.tr(
-                          namedArgs: {'error': snapshot.error.toString()})));
+                      child: Text(t.localStores.error
+                          .replaceAll('{error}', snapshot.error.toString())));
                 }
 
                 final allDocs = snapshot.data?.docs ?? [];
@@ -342,11 +342,11 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                             Icon(Icons.search_off,
                                 size: 64, color: Colors.grey[300]),
                             const SizedBox(height: 12),
-                            Text('localStores.empty'.tr(),
+                            Text(t.localStores.empty,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyMedium),
                             const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
+                            Text(t.search.empty.checkSpelling,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
@@ -355,7 +355,7 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                               icon: const Icon(Icons.map_outlined),
-                              label: Text('search.empty.expandToNational'.tr()),
+                              label: Text(t.search.empty.expandToNational),
                               onPressed: () => context
                                   .read<LocationProvider>()
                                   .setMode(LocationSearchMode.national),
@@ -375,7 +375,7 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                           Icon(Icons.search_off,
                               size: 64, color: Colors.grey[300]),
                           const SizedBox(height: 12),
-                          Text('localStores.empty'.tr(),
+                          Text(t.localStores.empty,
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyMedium),
                         ],
@@ -406,10 +406,10 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
           } else {
             // 로그인하지 않은 사용자에 대한 처리
             ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('main.errors.loginRequired'.tr())));
+                SnackBar(content: Text(t.main.errors.loginRequired)));
           }
         },
-        tooltip: 'localStores.create.tooltip'.tr(),
+        tooltip: t.localStores.create.tooltip,
         child: const Icon(Icons.add_business_outlined),
       ),
     );

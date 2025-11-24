@@ -22,7 +22,7 @@
 import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/features/clubs/screens/club_detail_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 // ✅ 1. StatelessWidget을 StatefulWidget으로 변경합니다.
 class ClubCard extends StatefulWidget {
@@ -99,7 +99,7 @@ class _ClubCardState extends State<ClubCard>
                                 .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: Text('common.sponsored'.tr(),
+                          child: Text(t.common.sponsored,
                               style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontSize: 12,
@@ -127,9 +127,8 @@ class _ClubCardState extends State<ClubCard>
                       children: [
                         _buildInfoChip(
                           Icons.group_outlined,
-                          'clubs.card.membersCount'.tr(namedArgs: {
-                            'count': club.membersCount.toString()
-                          }),
+                          t.clubs.card.membersCount.replaceAll(
+                              '{count}', club.membersCount.toString()),
                         ),
                         _buildInfoChip(
                           Icons.location_on_outlined,

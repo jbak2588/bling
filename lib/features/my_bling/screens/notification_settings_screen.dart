@@ -24,7 +24,8 @@ library;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
 // ✅ [푸시 스키마] 태그 목록을 가져오기 위해 AppTags를 import 합니다.
 import '../../../core/models/push_prefs_model.dart';
 import '../../../core/constants/app_tags.dart';
@@ -114,7 +115,7 @@ class _NotificationSettingsScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('settings.notifications.loadError'.tr()),
+              content: Text(t.settings.notifications.loadError),
               backgroundColor: Colors.red),
         );
       }
@@ -152,7 +153,7 @@ class _NotificationSettingsScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('settings.notifications.saveSuccess'.tr()),
+            content: Text(t.settings.notifications.saveSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -163,7 +164,7 @@ class _NotificationSettingsScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('settings.notifications.saveError'.tr()),
+              content: Text(t.settings.notifications.saveError),
               backgroundColor: Colors.red),
         );
       }
@@ -178,7 +179,7 @@ class _NotificationSettingsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('settings.notificationsTitle'.tr()),
+        title: Text(t.settings.notificationsTitle),
         actions: [
           // 저장 버튼
           if (!_isLoading)
@@ -200,12 +201,11 @@ class _NotificationSettingsScreenState
               children: [
                 // 1. 알림 범위(Scope) 설정
                 Text(
-                  'settings.notifications.scopeTitle'.tr(), // '알림 범위'
+                  t.settings.notifications.scopeTitle, // '알림 범위'
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Text(
-                  'settings.notifications.scopeDescription'
-                      .tr(), // '어느 지역 범위까지 알림을 받을지 선택합니다.'
+                  t.settings.notifications.scopeDescription, // '어느 지역 범위까지 알림을 받을지 선택합니다.'
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 16),
@@ -215,7 +215,7 @@ class _NotificationSettingsScreenState
                     return DropdownMenuItem<String>(
                       value: scope,
                       // 'kel' -> 'Kelurahan', 'rt' -> 'RT' 등으로 표시 (다국어 키 필요)
-                      child: Text('settings.notifications.scope.$scope'.tr()),
+                      child: Text(t['settings.notifications.scope.$scope'] ?? ''),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -227,7 +227,7 @@ class _NotificationSettingsScreenState
                   },
                   decoration: InputDecoration(
                     labelText:
-                        'settings.notifications.scopeLabel'.tr(), // '범위 선택'
+                        t.settings.notifications.scopeLabel, // '범위 선택'
                     border: const OutlineInputBorder(),
                   ),
                 ),
@@ -236,12 +236,11 @@ class _NotificationSettingsScreenState
 
                 // 2. 동네 소식 태그 구독 설정
                 Text(
-                  'settings.notifications.tagsTitle'.tr(), // '동네 소식 구독'
+                  t.settings.notifications.tagsTitle, // '동네 소식 구독'
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Text(
-                  'settings.notifications.tagsDescription'
-                      .tr(), // '선택한 주제의 동네 소식이 올라올 때만 알림을 받습니다.'
+                  t.settings.notifications.tagsDescription, // '선택한 주제의 동네 소식이 올라올 때만 알림을 받습니다.'
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 16),
@@ -252,7 +251,7 @@ class _NotificationSettingsScreenState
                     final isSelected = _selectedTags.contains(tag.tagId);
                     return ChoiceChip(
                       label:
-                          Text('${tag.emoji ?? ''} ${tag.nameKey.tr()}'.trim()),
+                          Text('${tag.emoji ?? ''} ${t[tag.nameKey]}'.trim()),
                       selected: isSelected,
                       onSelected: (selected) {
                         setState(() {

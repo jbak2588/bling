@@ -38,7 +38,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:bling_app/core/utils/search_helper.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
@@ -194,7 +194,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('localStores.edit.success'.tr()),
+            content: Text(t.localStores.edit.success),
             backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
@@ -202,7 +202,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(
-                'localStores.edit.fail'.tr(namedArgs: {'error': e.toString()})),
+                t.localStores.edit.fail.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -214,12 +214,12 @@ class _EditShopScreenState extends State<EditShopScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('localStores.edit.title'.tr()),
+        title: Text(t.localStores.edit.title),
         actions: [
           if (!_isSaving)
             TextButton(
                 onPressed: _updateShop,
-                child: Text('localStores.edit.save'.tr(),
+                child: Text(t.localStores.edit.save,
                     style: TextStyle(
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.bold))),
@@ -295,21 +295,21 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.nameLabel'.tr(),
+                      labelText: t.localStores.form.nameLabel,
                       border: const OutlineInputBorder()),
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'localStores.form.nameError'.tr()
+                      ? t.localStores.form.nameError
                       : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.descriptionLabel'.tr(),
+                      labelText: t.localStores.form.descriptionLabel,
                       border: const OutlineInputBorder()),
                   maxLines: 4,
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'localStores.form.descriptionError'.tr()
+                      ? t.localStores.form.descriptionError
                       : null,
                 ),
                 // [추가] 카테고리 선택
@@ -317,25 +317,25 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: _selectedCategory,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.categoryLabel'.tr(),
+                      labelText: t.localStores.form.categoryLabel,
                       border: const OutlineInputBorder()),
                   items: _shopCategories.map((category) {
                     return DropdownMenuItem(
                       value: category,
-                      child: Text('localStores.categories.$category'.tr()),
+                      child: Text(t['localStores.categories.$category'] ?? ''),
                     );
                   }).toList(),
                   onChanged: (value) =>
                       setState(() => _selectedCategory = value!),
                   validator: (value) => value == null
-                      ? 'localStores.form.categoryError'.tr()
+                      ? t.localStores.form.categoryError
                       : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _contactController,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.contactLabel'.tr(),
+                      labelText: t.localStores.form.contactLabel,
                       border: const OutlineInputBorder()),
                   keyboardType: TextInputType.phone,
                 ),
@@ -343,8 +343,8 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 TextFormField(
                   controller: _hoursController,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.hoursLabel'.tr(),
-                      hintText: 'localStores.form.hoursHint'.tr(),
+                      labelText: t.localStores.form.hoursLabel,
+                      hintText: t.localStores.form.hoursHint,
                       border: const OutlineInputBorder()),
                 ),
                 // [추가] 대표 상품/서비스 입력
@@ -352,13 +352,13 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 TextFormField(
                   controller: _productsController,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.productsLabel'.tr(),
-                      hintText: 'localStores.form.productsHint'.tr(),
+                      labelText: t.localStores.form.productsLabel,
+                      hintText: t.localStores.form.productsHint,
                       border: const OutlineInputBorder()),
                 ),
                 const SizedBox(height: 12),
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: t.tagInput.help,
                   initialTags: _tags,
                   titleController: _nameController,
                   onTagsChanged: (tags) => setState(() {
@@ -379,7 +379,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
                           height: 24,
                           child: CircularProgressIndicator(strokeWidth: 3),
                         )
-                      : Text('localStores.edit.save'.tr()),
+                      : Text(t.localStores.edit.save),
                 ),
               ],
             ),

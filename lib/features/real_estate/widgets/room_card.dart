@@ -29,7 +29,8 @@
 import 'package:bling_app/features/real_estate/data/room_repository.dart';
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:bling_app/features/real_estate/screens/room_detail_screen.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -118,11 +119,11 @@ class _RoomCardState extends State<RoomCard>
                       spacing: 4.0,
                       children: [
                         if (room.isSponsored)
-                          _buildBadge(context, 'common.sponsored'.tr(),
+                          _buildBadge(context, t.common.sponsored,
                               Theme.of(context).primaryColor),
                         if (room.isVerified)
-                          _buildBadge(context, 'common.verified'.tr(),
-                              Colors.blue.shade700),
+                          _buildBadge(
+                              context, t.common.verified, Colors.blue.shade700),
                       ],
                     ),
                   ),
@@ -153,11 +154,11 @@ class _RoomCardState extends State<RoomCard>
                       spacing: 4.0,
                       children: [
                         if (room.isSponsored)
-                          _buildBadge(context, 'common.sponsored'.tr(),
+                          _buildBadge(context, t.common.sponsored,
                               Theme.of(context).primaryColor),
                         if (room.isVerified)
-                          _buildBadge(context, 'common.verified'.tr(),
-                              Colors.blue.shade700),
+                          _buildBadge(
+                              context, t.common.verified, Colors.blue.shade700),
                       ],
                     ),
                   ),
@@ -180,7 +181,7 @@ class _RoomCardState extends State<RoomCard>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${currencyFormat.format(room.price)} / ${'realEstate.priceUnits.${room.priceUnit}'.tr()}',
+                    '${currencyFormat.format(room.price)} / ${(t['realEstate.priceUnits.${room.priceUnit}'] ?? '')}',
                     style: TextStyle(
                         fontSize: 17,
                         color: Theme.of(context).primaryColor,
@@ -194,8 +195,7 @@ class _RoomCardState extends State<RoomCard>
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          room.locationName ??
-                              'realEstate.locationUnknown'.tr(),
+                          room.locationName ?? t.realEstate.locationUnknown,
                           style:
                               TextStyle(fontSize: 13, color: Colors.grey[700]),
                           maxLines: 1,
@@ -233,15 +233,16 @@ class _RoomCardState extends State<RoomCard>
     if (room.type == 'kos') {
       // 욕실 타입 텍스트
       final bathroomText = room.kosBathroomType == 'in_room'
-          ? 'realEstate.filter.kos.bathroomTypes.in_room'.tr()
+          ? t.realEstate.filter.kos.bathroomTypes.inRoom
           : (room.kosBathroomType == 'out_room'
-              ? 'realEstate.filter.kos.bathroomTypes.out_room'.tr()
+              ? t.realEstate.filter.kos.bathroomTypes.outRoom
               // 예외 처리 기본값
               : 'Info Kamar Mandi');
 
       // 가구 상태 텍스트
       final furnishedText = room.furnishedStatus != null
-          ? 'realEstate.filter.furnishedTypes.${room.furnishedStatus!}'.tr()
+          ? (t['realEstate.filter.furnishedTypes.${room.furnishedStatus!}'] ??
+              'Info Furnitur')
           : 'Info Furnitur';
 
       return Row(
@@ -273,14 +274,14 @@ class _RoomCardState extends State<RoomCard>
         _buildRoomInfoItem(
           context,
           icon: Icons.king_bed_outlined,
-          label: 'realEstate.form.rooms'
-              .tr(namedArgs: {'count': '${room.roomCount}'}),
+          label: t.realEstate.form.rooms
+              .replaceAll('{count}', '${room.roomCount}'),
         ),
         _buildRoomInfoItem(
           context,
           icon: Icons.bathtub_outlined,
-          label: 'realEstate.form.bathrooms'
-              .tr(namedArgs: {'count': '${room.bathroomCount}'}),
+          label: t.realEstate.form.bathrooms
+              .replaceAll('{count}', '${room.bathroomCount}'),
         ),
       ],
     );

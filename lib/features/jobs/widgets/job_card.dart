@@ -32,7 +32,8 @@ library;
 import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/features/jobs/screens/job_detail_screen.dart'; // [추가]
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
 // [추가] 숫자 포맷을 위해
 import 'package:bling_app/features/jobs/constants/job_categories.dart';
 
@@ -92,7 +93,7 @@ class JobCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      job.locationName ?? 'jobs.card.noLocation'.tr(),
+                      job.locationName ?? t.jobs.card.noLocation,
                       style: TextStyle(color: Colors.grey[700], fontSize: 13),
                     ),
                     const SizedBox(height: 6),
@@ -100,9 +101,9 @@ class JobCard extends StatelessWidget {
                       // 급여 정보 표시
                       job.jobType == JobType.quickGig.name
                           // 'quick_gig' (단순 일자리)
-                          ? '${'jobs.form.totalPayLabel'.tr()}: ${currencyFormat.format(job.salaryAmount ?? 0)}' // '총 보수: 50,000'
+                          ? '${t.jobs.form.totalPayLabel}: ${currencyFormat.format(job.salaryAmount ?? 0)}' // '총 보수: 50,000'
                           // 'regular' (정규직)
-                          : '${'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr()}: ${currencyFormat.format(job.salaryAmount ?? 0)}', // '시급: 50,000'
+                          : '${t['jobs.salaryTypes.${job.salaryType ?? 'etc'}']}: ${currencyFormat.format(job.salaryAmount ?? 0)}', // '시급: 50,000'
                       style: const TextStyle(
                           fontSize: 15,
                           color: Colors.teal,
@@ -115,7 +116,7 @@ class JobCard extends StatelessWidget {
                         Text(AppJobCategories.getName(job.category),
                             style: TextStyle(
                                 fontSize: 12, color: Colors.grey[600])),
-                        Text('jobs.card.minutesAgo'.tr(),
+                        Text(t.jobs.card.minutesAgo,
                             style: TextStyle(
                                 fontSize: 12, color: Colors.grey[600])),
                       ],

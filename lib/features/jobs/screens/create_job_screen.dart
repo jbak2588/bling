@@ -45,7 +45,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import '../constants/job_categories.dart';
 import 'package:bling_app/core/utils/search_helper.dart';
 
@@ -253,8 +253,8 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(_isEditMode
-                ? 'jobs.form.updateSuccess'.tr()
-                : 'jobs.form.submitSuccess'.tr()),
+                ? t.jobs.form.updateSuccess
+                : t.jobs.form.submitSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -264,7 +264,8 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('jobs.form.submitFail'.tr(args: [e.toString()])),
+            content:
+                Text(t.jobs.form.submitFail.replaceAll('{0}', e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -280,16 +281,14 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditMode
-            ? 'jobs.form.editTitle'.tr()
-            : 'jobs.form.titleRegular'.tr()),
+        title: Text(
+            _isEditMode ? t.jobs.form.editTitle : t.jobs.form.titleRegular),
         actions: [
           if (!_isSaving)
             TextButton(
               onPressed: _submitJob,
-              child: Text(_isEditMode
-                  ? 'jobs.form.update'.tr()
-                  : 'jobs.form.submit'.tr()),
+              child:
+                  Text(_isEditMode ? t.jobs.form.update : t.jobs.form.submit),
             ),
         ],
       ),
@@ -309,7 +308,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                         children: [
                           Text(category.icon),
                           const SizedBox(width: 8),
-                          Text(category.nameKey.tr()),
+                          Text(t[category.nameKey]),
                         ],
                       ),
                     );
@@ -323,36 +322,36 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) =>
-                      value == null ? 'jobs.form.categoryValidator'.tr() : null,
+                      value == null ? t.jobs.form.categoryValidator : null,
                 ),
                 const SizedBox(height: 16),
 
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: 'jobs.form.titleLabel'.tr(),
+                    labelText: t.jobs.form.titleLabel,
                     border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'jobs.form.titleValidator'.tr();
+                      return t.jobs.form.titleValidator;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 24),
 
-                Text('jobs.form.salaryInfoTitle'.tr(),
+                Text(t.jobs.form.salaryInfoTitle,
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
 
                 DropdownButtonFormField<String>(
                   initialValue: _selectedSalaryType,
-                  hint: Text('jobs.form.salaryTypeHint'.tr()),
+                  hint: Text(t.jobs.form.salaryTypeHint),
                   items: ['hourly', 'daily', 'monthly', 'per_case']
                       .map((String value) => DropdownMenuItem<String>(
                             value: value,
-                            child: Text('jobs.salaryTypes.$value'.tr()),
+                            child: Text(t['jobs.salaryTypes.$value'] ?? ''),
                           ))
                       .toList(),
                   onChanged: (val) => setState(() => _selectedSalaryType = val),
@@ -364,7 +363,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 TextFormField(
                   controller: _salaryAmountController,
                   decoration: InputDecoration(
-                    labelText: 'jobs.form.salaryAmountLabel'.tr(),
+                    labelText: t.jobs.form.salaryAmountLabel,
                     border: const OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
@@ -372,7 +371,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 ),
 
                 CheckboxListTile(
-                  title: Text('jobs.form.salaryNegotiable'.tr()),
+                  title: Text(t.jobs.form.salaryNegotiable),
                   value: _isSalaryNegotiable,
                   onChanged: (val) =>
                       setState(() => _isSalaryNegotiable = val ?? false),
@@ -381,17 +380,17 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                Text('jobs.form.workInfoTitle'.tr(),
+                Text(t.jobs.form.workInfoTitle,
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
-                Text('jobs.form.workPeriodTitle'.tr(),
+                Text(t.jobs.form.workPeriodTitle,
                     style: Theme.of(context).textTheme.titleSmall),
                 Wrap(
                   spacing: 8.0,
                   children:
                       ['short_term', 'mid_term', 'long_term'].map((period) {
                     return ChoiceChip(
-                      label: Text('jobs.workPeriods.$period'.tr()),
+                      label: Text(t['jobs.workPeriods.$period'] ?? ''),
                       selected: _selectedWorkPeriod == period,
                       onSelected: (selected) {
                         setState(() {
@@ -405,14 +404,14 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 TextFormField(
                   controller: _workHoursController,
                   decoration: InputDecoration(
-                    labelText: 'jobs.form.workHoursLabel'.tr(),
-                    hintText: 'jobs.form.workHoursHint'.tr(),
+                    labelText: t.jobs.form.workHoursLabel,
+                    hintText: t.jobs.form.workHoursHint,
                     border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 24),
 
-                Text('jobs.form.imageSectionTitle'.tr(),
+                Text(t.jobs.form.imageSectionTitle,
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -506,14 +505,14 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'jobs.form.descriptionLabel'.tr(),
-                    hintText: 'jobs.form.descriptionHint'.tr(),
+                    labelText: t.jobs.form.descriptionLabel,
+                    hintText: t.jobs.form.descriptionHint,
                     border: const OutlineInputBorder(),
                   ),
                   maxLines: 8,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'jobs.form.descriptionValidator'.tr();
+                      return t.jobs.form.descriptionValidator;
                     }
                     return null;
                   },
@@ -524,7 +523,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 // ✅ [추가] 태그 입력 위젯 (ProductRegistrationScreen과 동일한 위치 배치)
                 CustomTagInputField(
                   initialTags: _tags, // 수정 시 기존 태그 전달
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: t.tagInput.help,
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;

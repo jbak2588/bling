@@ -25,7 +25,8 @@ import 'package:bling_app/features/auction/data/auction_repository.dart';
 import 'package:bling_app/features/auction/screens/auction_detail_screen.dart'; // ✅ [지도뷰] 1. 상세화면 import
 import 'package:bling_app/features/auction/widgets/auction_card.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
@@ -126,7 +127,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
         children: [
           if (_showSearchBar)
             InlineSearchChip(
-              hintText: 'main.search.hint.auction'.tr(),
+              hintText: t.main.search.hint.auction,
               openNotifier: _chipOpenNotifier,
               onSubmitted: (kw) =>
                   _searchKeywordNotifier.value = kw.trim().toLowerCase(),
@@ -147,8 +148,8 @@ class _AuctionScreenState extends State<AuctionScreen> {
                     _isMapView ? Icons.list_alt_outlined : Icons.map_outlined,
                     color: Colors.grey.shade700),
                 tooltip: _isMapView
-                    ? 'main.mapView.showList'.tr()
-                    : 'main.mapView.showMap'.tr(),
+                    ? t.main.mapView.showList
+                    : t.main.mapView.showMap,
                 onPressed: () {
                   setState(() => _isMapView = !_isMapView);
                 },
@@ -168,8 +169,8 @@ class _AuctionScreenState extends State<AuctionScreen> {
                 }
                 if (snapshot.hasError) {
                   return Center(
-                      child: Text('auctions.errors.fetchFailed'.tr(
-                          namedArgs: {'error': snapshot.error.toString()})));
+                      child: Text(t.auctions.errors.fetchFailed
+                          .replaceAll('{error}', snapshot.error.toString())));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   final isNational = context.watch<LocationProvider>().mode ==
@@ -184,11 +185,11 @@ class _AuctionScreenState extends State<AuctionScreen> {
                             Icon(Icons.search_off,
                                 size: 64, color: Colors.grey[300]),
                             const SizedBox(height: 12),
-                            Text('auctions.empty'.tr(),
+                            Text(t.auctions.empty,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyMedium),
                             const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
+                            Text(t.search.empty.checkSpelling,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
@@ -197,8 +198,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                                 icon: const Icon(Icons.map_outlined),
-                                label:
-                                    Text('search.empty.expandToNational'.tr()),
+                                label: Text(t.search.empty.expandToNational),
                                 onPressed: () => context
                                     .read<LocationProvider>()
                                     .setMode(LocationSearchMode.national)),
@@ -217,7 +217,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
                           Icon(Icons.search_off,
                               size: 64, color: Colors.grey[300]),
                           const SizedBox(height: 12),
-                          Text('auctions.empty'.tr(),
+                          Text(t.auctions.empty,
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyMedium),
                         ],
@@ -250,11 +250,11 @@ class _AuctionScreenState extends State<AuctionScreen> {
                             Icon(Icons.search_off,
                                 size: 64, color: Colors.grey[300]),
                             const SizedBox(height: 12),
-                            Text('auctions.empty'.tr(),
+                            Text(t.auctions.empty,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyMedium),
                             const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
+                            Text(t.search.empty.checkSpelling,
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
@@ -263,8 +263,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                                 icon: const Icon(Icons.map_outlined),
-                                label:
-                                    Text('search.empty.expandToNational'.tr()),
+                                label: Text(t.search.empty.expandToNational),
                                 onPressed: () => context
                                     .read<LocationProvider>()
                                     .setMode(LocationSearchMode.national)),
@@ -283,7 +282,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
                           Icon(Icons.search_off,
                               size: 64, color: Colors.grey[300]),
                           const SizedBox(height: 12),
-                          Text('auctions.empty'.tr(),
+                          Text(t.auctions.empty,
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyMedium),
                         ],
@@ -343,7 +342,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: ChoiceChip(
               label: Text(
-                "${category.emoji} ${category.nameKey.tr()}",
+                "${category.emoji} ${t[category.nameKey]}",
                 style: TextStyle(
                   color: isSelected ? Colors.white : Colors.black87,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -423,7 +422,7 @@ class _AuctionMapViewState extends State<_AuctionMapView> {
           infoWindow: InfoWindow(
             title: auction.title,
             snippet: isEnded
-                ? 'auctions.card.ended'.tr()
+                ? t.auctions.card.ended
                 : currencyFormat.format(auction.currentBid),
             onTap: () {
               Navigator.of(context).push(

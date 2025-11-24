@@ -2,7 +2,7 @@
 // Bling App v0.4
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -80,7 +80,7 @@ class _DataUploaderScreenState extends State<DataUploaderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('admin.dataUploader.title'.tr())),
+      appBar: AppBar(title: Text(t['admin.dataUploader.title'] ?? '')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -89,13 +89,13 @@ class _DataUploaderScreenState extends State<DataUploaderScreen> {
             ElevatedButton.icon(
               onPressed: _isLoading ? null : _uploadData,
               icon: const Icon(Icons.upload_file),
-              label: Text('admin.dataUploader.startLabel'.tr()),
+              label: Text(t['admin.dataUploader.startLabel'] ?? ''),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
             const SizedBox(height: 20),
-            Text('admin.dataUploader.logsLabel'.tr(),
+            Text(t['admin.dataUploader.logsLabel'] ?? '',
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const Divider(),
             Expanded(

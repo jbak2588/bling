@@ -7,7 +7,7 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/core/utils/logging/logger.dart'; // Logger 가 정의된 곳
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:bling_app/core/utils/upload_helpers.dart';
 import 'package:uuid/uuid.dart'; // [Task 108] For unique guided keys
@@ -87,13 +87,12 @@ class _AiEvidenceSuggestionScreenState
         children: [
           ListTile(
             leading: const Icon(Icons.camera_alt),
-            title: Text('ai_flow.common.take_photo'.tr()), // "사진 찍기"
+            title: Text(t.aiFlow.common.takePhoto), // "사진 찍기"
             onTap: () => Navigator.pop(context, ImageSource.camera),
           ),
           ListTile(
             leading: const Icon(Icons.photo_library),
-            title: Text(
-                'ai_flow.common.pick_gallery_multi'.tr()), // "갤러리에서 여러 장 선택"
+            title: Text(t.aiFlow.common.pickGalleryMulti), // "갤러리에서 여러 장 선택"
             onTap: () => Navigator.pop(context, ImageSource.gallery),
           ),
           // [V3 REFACTOR] 'foundEvidence' 기능이 제거됨에 따라
@@ -146,8 +145,7 @@ class _AiEvidenceSuggestionScreenState
       debugPrint('Image pick failed ($source): $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content:
-            Text(tr('marketplace.error', namedArgs: {'error': e.toString()})),
+        content: Text(t.marketplace.error.replaceAll('{error}', e.toString())),
       ));
     }
   }
@@ -177,7 +175,7 @@ class _AiEvidenceSuggestionScreenState
 
     // V3 스키마 기반의 가격 파싱 (ai_final_report_screen과 동일)
     int aiSuggestedPrice = 0;
-    final dynamic priceMap = finalAiReport['priceAssessment'];
+    final dynamic priceMap = finalAiReport['priceAssessment'] ?? '';
     if (priceMap is Map) {
       aiSuggestedPrice = (priceMap['suggestedMin'] as num?)?.toInt() ?? 0;
     }
@@ -259,7 +257,7 @@ class _AiEvidenceSuggestionScreenState
         'subCategoryName': widget.subCategoryName,
         'userPrice': widget.userPrice,
         'userDescription': widget.userDescription,
-        'locale': context.locale.languageCode,
+        'locale': Localizations.localeOf(context).languageCode,
       };
 
       if (!mounted) return;
@@ -293,10 +291,8 @@ class _AiEvidenceSuggestionScreenState
           await _submitProductAsPending(report, allImageUrls, user);
 
           BArtSnackBar.showSuccessSnackBar(
-            title: 'ai_flow.final_report.pending_title'
-                .tr(), // [Task 86] 번역 키 추가 필요
-            message: 'ai_flow.final_report.pending_message'
-                .tr(), // [Task 86] 번역 키 추가 필요
+            title: t.aiFlow.finalReport.pendingTitle,
+            message: t.aiFlow.finalReport.pendingMessage,
           );
           // [Task 86] UX 개선: 이전 화면이 아닌 홈 화면으로 바로 이동
           Navigator.of(context).popUntil((route) => route.isFirst);
@@ -361,8 +357,8 @@ class _AiEvidenceSuggestionScreenState
       debugPrint("======================================================");
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'marketplace.error'.tr(namedArgs: {'error': e.toString()}))));
+          content:
+              Text(t.marketplace.error.replaceAll('{error}', e.toString()))));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -377,9 +373,9 @@ class _AiEvidenceSuggestionScreenState
     // V3는 'widget.suggestedShots' (List<String>)를 직접 사용합니다.
     final List<String> suggestions = widget.suggestedShots;
     return Scaffold(
-      appBar: AppBar(title: Text('ai_flow.evidence.title'.tr())),
+      appBar: AppBar(title: Text(t.aiFlow.evidence.title)),
       body: _submitting
-          ? Center(child: Text('ai_flow.final_report.loading'.tr()))
+          ? Center(child: Text(t.aiFlow.finalReport.loading))
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -388,7 +384,7 @@ class _AiEvidenceSuggestionScreenState
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'ai_flow.evidence.suggestion_title'.tr(),
+                    t.aiFlow.evidence.suggestionTitle,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
@@ -404,12 +400,11 @@ class _AiEvidenceSuggestionScreenState
                       // [V3 UI FIX] Show number of added photos when multiple images present
                       final Widget? subtitleWidget;
                       if (pickedList.isNotEmpty) {
-                        subtitleWidget = Text('ai_flow.common.added_photos'.tr(
-                            namedArgs: {
-                              'count': pickedList.length.toString()
-                            }));
+                        subtitleWidget = Text(t.aiFlow.common.addedPhotos
+                            .replaceAll(
+                                '{count}', pickedList.length.toString()));
                       } else if (skipped) {
-                        subtitleWidget = Text('ai_flow.common.skipped'.tr());
+                        subtitleWidget = Text(t.aiFlow.common.skipped);
                       } else {
                         subtitleWidget = null; // [V3 UI FIX] 중복 안내 문구 제거
                       }
@@ -418,22 +413,22 @@ class _AiEvidenceSuggestionScreenState
                       if (skipped) {
                         trailingWidget = TextButton(
                             onPressed: () => _pick(index),
-                            child: Text('ai_flow.common.add_photo'.tr()));
+                            child: Text(t.aiFlow.common.addPhoto));
                       } else if (pickedList.isNotEmpty) {
                         trailingWidget = TextButton(
                             onPressed: () => _pick(index),
-                            child: Text('ai_flow.common.add_more'.tr()));
+                            child: Text(t.aiFlow.common.addMore));
                       } else {
                         trailingWidget = Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             TextButton(
                                 onPressed: () => _pick(index),
-                                child: Text('ai_flow.common.add_photo'.tr())),
+                                child: Text(t.aiFlow.common.addPhoto)),
                             const SizedBox(width: 8),
                             TextButton(
                                 onPressed: () => _skip(index),
-                                child: Text('ai_flow.common.skip'.tr())),
+                                child: Text(t.aiFlow.common.skip)),
                           ],
                         );
                       }
@@ -489,8 +484,7 @@ class _AiEvidenceSuggestionScreenState
                   // [Task 86] UI 개선: 텍스트 + 진행 바로 변경
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('ai_flow.final_report.loading'
-                        .tr()), // "최종 보고서 생성 중..."
+                    Text(t.aiFlow.finalReport.loading), // "최종 보고서 생성 중..."
                     const SizedBox(height: 12),
                     LinearProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
@@ -505,7 +499,7 @@ class _AiEvidenceSuggestionScreenState
                     ),
                   ],
                 )
-              : Text('ai_flow.guided_camera.next_button'.tr()),
+              : Text(t.aiFlow.guidedCamera.nextButton),
         ),
       ),
     );
@@ -526,7 +520,7 @@ class _AiEvidenceSuggestionScreenState
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              'ai_flow.evidence.initial_images_title'.tr(),
+              t.aiFlow.evidence.initialImagesTitle,
               style: Theme.of(context).textTheme.labelMedium,
             ),
           ),

@@ -23,7 +23,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/features/local_news/widgets/post_card.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 // import 'package:bling_app/features/boards/screens/board_chat_room_screen.dart'; // TODO: 채팅방 구현 후 연결
 
 /// '하이브리드 방식...md' 기획안 4)의 '동네 게시판' 전용 피드 화면
@@ -45,7 +45,7 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
   void initState() {
     super.initState();
     _kelurahanName =
-        widget.userModel.locationParts?['kel'] ?? 'boards.defaultTitle'.tr();
+        widget.userModel.locationParts?['kel'] ?? t.boards.defaultTitle;
     _query = _buildQuery();
   }
 
@@ -89,7 +89,7 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
     //   ));
     // }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('boards.chatRoomComingSoon'.tr())),
+      SnackBar(content: Text(t.boards.chatRoomComingSoon)),
     );
   }
 
@@ -103,7 +103,7 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline_rounded),
             onPressed: _onChatPressed,
-            tooltip: 'boards.chatRoomTitle'.tr(), // '동네 채팅방'
+            tooltip: t.boards.chatRoomTitle, // '동네 채팅방'
           ),
         ],
       ),
@@ -115,14 +115,14 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
           }
           if (snapshot.hasError) {
             return Center(
-                child: Text('common.error'
-                    .tr(namedArgs: {'error': snapshot.error.toString()})));
+                child: Text(t.common.error
+                    .replaceAll('{error}', snapshot.error.toString())));
           }
           final postsDocs = snapshot.data?.docs ?? [];
 
           if (postsDocs.isEmpty) {
             return Center(
-                child: Text('boards.emptyFeed'.tr())); // '첫 번째 동네 소식을 작성해보세요!'
+                child: Text(t.boards.emptyFeed)); // '첫 번째 동네 소식을 작성해보세요!'
           }
 
           return ListView.builder(

@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 // ✅ 새로 만든 공용 위젯을 import 합니다.
 import '../../shared/widgets/custom_tag_input_field.dart';
@@ -130,13 +130,13 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
 
   Future<void> _updatePost() async {
     if (_contentController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('localNewsCreate.alerts.contentRequired'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.localNewsCreate.alerts.contentRequired)));
       return;
     }
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
+          content: Text(t.localNewsCreate.alerts.categoryRequired)));
       return;
     }
 
@@ -176,7 +176,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('localNewsEdit.alerts.success'.tr())),
+        SnackBar(content: Text(t.localNewsEdit.alerts.success)),
       );
       Navigator.of(context).pop(true);
     } catch (e) {
@@ -184,8 +184,8 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'localNewsEdit.alerts.failure'
-                  .tr(namedArgs: {'error': e.toString()}),
+              t.localNewsEdit.alerts.failure
+                  .replaceAll('{error}', e.toString()),
             ),
           ),
         );
@@ -202,10 +202,10 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('localNewsEdit.appBarTitle'.tr()),
+        title: Text(t.localNewsEdit.appBarTitle),
         actions: [
           IconButton(
-            tooltip: 'localNewsEdit.buttons.submit'.tr(),
+            tooltip: t.localNewsEdit.buttons.submit,
             icon: _isSubmitting
                 ? const SizedBox(
                     width: 20,
@@ -228,7 +228,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
             DropdownButtonFormField<PostCategoryModel>(
               initialValue: _selectedCategory,
               decoration: InputDecoration(
-                  labelText: 'localNewsCreate.form.categoryLabel'.tr(),
+                  labelText: t.localNewsCreate.form.categoryLabel,
                   border: const OutlineInputBorder()),
               items: AppCategories.postCategories.map((category) {
                 return DropdownMenuItem<PostCategoryModel>(
@@ -236,7 +236,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
                   child: Row(children: [
                     Text(category.emoji, style: const TextStyle(fontSize: 20)),
                     const SizedBox(width: 10),
-                    Text(category.nameKey.tr()),
+                    Text(t[category.nameKey]),
                   ]),
                 );
               }).toList(),
@@ -248,14 +248,14 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
             TextField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                    labelText: 'localNewsCreate.form.titleLabel'.tr(),
+                    labelText: t.localNewsCreate.form.titleLabel,
                     border: const OutlineInputBorder())),
             const SizedBox(height: 16),
             TextField(
                 controller: _contentController,
                 maxLines: 8,
                 decoration: InputDecoration(
-                    labelText: 'localNewsCreate.form.contentLabel'.tr(),
+                    labelText: t.localNewsCreate.form.contentLabel,
                     border: const OutlineInputBorder())),
             const SizedBox(height: 16),
             // =========================
@@ -267,7 +267,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
                     _recommended.where((id) => !_tags.contains(id)).toList();
                 if (visibleRecs.isEmpty) return <Widget>[];
                 return [
-                  Text('localNewsCreate.form.recommendedTags'.tr(),
+                  Text(t.localNewsCreate.form.recommendedTags,
                       style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   Wrap(
@@ -284,7 +284,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
                                     tagId: '', nameKey: '', descriptionKey: ''),
                               );
                               final name = (tag.nameKey.isNotEmpty)
-                                  ? tag.nameKey.tr()
+                                  ? t[tag.nameKey]
                                   : id;
                               return '${tag.emoji ?? ''} $name'.trim();
                             }(),
@@ -314,7 +314,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
             // ✅ 교체된 공용 커스텀 태그 위젯을 사용합니다.
             CustomTagInputField(
               initialTags: _tags, // 초기 태그 목록을 전달합니다.
-              hintText: 'tag_input.help'.tr(), // 다국어 힌트 텍스트
+              hintText: t.tagInput.help, // 다국어 힌트 텍스트
               onTagsChanged: (tags) {
                 // 태그가 변경될 때마다 화면의 상태(_tags)를 업데이트합니다.
                 setState(() {
@@ -359,7 +359,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : Text('localNewsEdit.buttons.submit'.tr()),
+                    : Text(t.localNewsEdit.buttons.submit),
               ),
             ),
           ),
@@ -381,7 +381,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
           onPressed: totalImageCount >= 10 ? null : _pickImages,
           icon: const Icon(Icons.camera_alt),
           label: Text(
-              '${'localNewsCreate.buttons.addImage'.tr()} ($totalImageCount/10)'),
+              '${t.localNewsCreate.buttons.addImage} ($totalImageCount/10)'),
         ),
         const SizedBox(height: 8),
         if (totalImageCount > 0)

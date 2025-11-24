@@ -25,7 +25,8 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/jobs/data/job_repository.dart';
 import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+// easy_localization removed during migration to Slang `t[...]`
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -166,7 +167,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
   Future<void> _saveJob() async {
     if (!_formKey.currentState!.validate() || _selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('jobs.form.validationError'.tr())),
+        SnackBar(content: Text(t.jobs.form.validationError)),
       );
       return;
     }
@@ -225,8 +226,8 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(_isEditMode
-                  ? 'jobs.form.updateSuccess'.tr()
-                  : 'jobs.form.saveSuccess'.tr())),
+                  ? t.jobs.form.updateSuccess
+                  : t.jobs.form.saveSuccess)),
         );
         Navigator.of(context).pop();
         if (!_isEditMode) Navigator.of(context).pop();
@@ -236,8 +237,8 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('jobs.form.saveError'
-                  .tr(namedArgs: {'error': e.toString()}))),
+              content: Text(
+                  t.jobs.form.saveError.replaceAll('{error}', e.toString()))),
         );
       }
     }
@@ -247,9 +248,8 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditMode
-            ? 'jobs.form.editTitle'.tr()
-            : 'jobs.form.titleQuickGig'.tr()),
+        title: Text(
+            _isEditMode ? t.jobs.form.editTitle : t.jobs.form.titleQuickGig),
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
@@ -280,7 +280,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
                 const SizedBox(height: 24),
                 CustomTagInputField(
                   initialTags: _tags,
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: t.tagInput.help,
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;
@@ -315,7 +315,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
             children: [
               Text(category.icon),
               const SizedBox(width: 8),
-              Text(category.nameKey.tr()),
+              Text(t[category.nameKey]),
             ],
           ),
         );
@@ -326,11 +326,11 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
         }
       },
       decoration: InputDecoration(
-        labelText: 'jobs.form.categoryLabel'.tr(),
+        labelText: t.jobs.form.categoryLabel,
         border: const OutlineInputBorder(),
       ),
       validator: (value) =>
-          value == null ? 'jobs.form.categoryValidator'.tr() : null,
+          value == null ? t.jobs.form.categoryValidator : null,
     );
   }
 
@@ -338,13 +338,13 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
     return TextFormField(
       controller: _titleController,
       decoration: InputDecoration(
-        labelText: 'jobs.form.titleLabel'.tr(),
-        hintText: 'jobs.form.titleHintQuickGig'.tr(),
+        labelText: t.jobs.form.titleLabel,
+        hintText: t.jobs.form.titleHintQuickGig,
         border: const OutlineInputBorder(),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'jobs.form.titleValidator'.tr();
+          return t.jobs.form.titleValidator;
         }
         return null;
       },
@@ -358,8 +358,8 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
         TextFormField(
           controller: _salaryAmountController,
           decoration: InputDecoration(
-            labelText: 'jobs.form.totalPayLabel'.tr(),
-            hintText: 'jobs.form.totalPayHint'.tr(),
+            labelText: t.jobs.form.totalPayLabel,
+            hintText: t.jobs.form.totalPayHint,
             border: const OutlineInputBorder(),
           ),
           keyboardType: TextInputType.number,
@@ -368,13 +368,13 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
             if (value == null ||
                 value.trim().isEmpty ||
                 (double.tryParse(value) ?? 0) <= 0) {
-              return 'jobs.form.totalPayValidator'.tr();
+              return t.jobs.form.totalPayValidator;
             }
             return null;
           },
         ),
         CheckboxListTile(
-          title: Text('jobs.form.negotiable'.tr()),
+          title: Text(t.jobs.form.negotiable),
           value: _isSalaryNegotiable,
           onChanged: (value) {
             setState(() {
@@ -392,13 +392,13 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
     return TextFormField(
       controller: _locationController,
       decoration: InputDecoration(
-        labelText: 'jobs.form.locationLabel'.tr(),
-        hintText: 'jobs.form.locationHint'.tr(),
+        labelText: t.jobs.form.locationLabel,
+        hintText: t.jobs.form.locationHint,
         border: const OutlineInputBorder(),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'jobs.form.locationValidator'.tr();
+          return t.jobs.form.locationValidator;
         }
         return null;
       },
@@ -409,14 +409,14 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
     return TextFormField(
       controller: _descriptionController,
       decoration: InputDecoration(
-        labelText: 'jobs.form.descriptionLabel'.tr(),
-        hintText: 'jobs.form.descriptionHintQuickGig'.tr(),
+        labelText: t.jobs.form.descriptionLabel,
+        hintText: t.jobs.form.descriptionHintQuickGig,
         border: const OutlineInputBorder(),
       ),
       maxLines: 8,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'jobs.form.descriptionValidator'.tr();
+          return t.jobs.form.descriptionValidator;
         }
         return null;
       },
@@ -428,7 +428,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('jobs.form.imageLabel'.tr(),
+        Text(t.jobs.form.imageLabel,
             style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         SizedBox(

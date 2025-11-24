@@ -17,7 +17,7 @@ library;
 
 import 'package:bling_app/features/admin/models/ai_case_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:bling_app/features/admin/screens/ai_case_detail_screen.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -53,13 +53,13 @@ class _AiAuditScreenState extends State<AiAuditScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('ai_audit.title')),
+        title: Text(t.aiAudit.title),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: tr('ai_audit.tabs.all')),
-            Tab(text: tr('ai_audit.tabs.takeover')),
-            Tab(text: tr('ai_audit.tabs.registration')),
+            Tab(text: t.aiAudit.tabs.all),
+            Tab(text: t.aiAudit.tabs.takeover),
+            Tab(text: t.aiAudit.tabs.registration),
           ],
         ),
       ),
@@ -93,10 +93,10 @@ class _AiAuditScreenState extends State<AiAuditScreen>
         }
         if (snapshot.hasError) {
           return Center(
-              child: Text("${tr('ai_audit.list.error')}: ${snapshot.error}"));
+              child: Text("${t.aiAudit.list.error}: ${snapshot.error}"));
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text(tr('ai_audit.list.no_records')));
+          return Center(child: Text(t.aiAudit.list.noRecords));
         }
 
         final docs = snapshot.data!.docs;
@@ -142,17 +142,17 @@ class _AiAuditScreenState extends State<AiAuditScreen>
         ),
         title: Text(
           item.stage == 'takeover'
-              ? tr('ai_audit.list.takeover_title')
-              : tr('ai_audit.list.registration_title'),
+              ? t.aiAudit.list.takeoverTitle
+              : t.aiAudit.list.registrationTitle,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Text("${tr('ai_audit.list.verdict')}: ${item.verdict ?? 'N/A'}"),
+            Text("${t.aiAudit.list.verdict}: ${item.verdict ?? 'N/A'}"),
             Text(
-              "${tr('ai_audit.list.id')}: ${item.caseId.substring(0, 8)}... • ${timeago.format(item.createdAt.toDate())}",
+              "${t.aiAudit.list.id}: ${item.caseId.substring(0, 8)}... • ${timeago.format(item.createdAt.toDate())}",
               style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
           ],

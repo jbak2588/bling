@@ -3,7 +3,8 @@ import 'package:bling_app/features/auction/models/auction_model.dart';
 import 'package:bling_app/features/auction/screens/auction_detail_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart'; // 다국어 지원
+import 'package:intl/intl.dart';
+import 'package:bling_app/i18n/strings.g.dart'; // 다국어 지원
 
 /// [개편] 8단계: 메인 피드용 표준 썸네일 (Auction 전용)
 ///
@@ -28,7 +29,7 @@ class AuctionThumb extends StatelessWidget {
         onTap: () {
           final detailScreen = AuctionDetailScreen(auction: auction);
           if (onIconTap != null) {
-            onIconTap!(detailScreen, 'main.tabs.auction');
+            onIconTap!(detailScreen, t.main.tabs.auction);
           } else {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => detailScreen),
@@ -112,7 +113,7 @@ class AuctionThumb extends StatelessWidget {
               color: Colors.black.withValues(alpha: 0.5), // 반투명 검은색 배경
               child: Center(
                 child: Text(
-                  'auctions.card.ended'.tr(), // "경매 종료" 텍스트 (다국어)
+                  t.auctions.card.ended, // "경매 종료" 텍스트 (다국어)
                   style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -137,7 +138,9 @@ class AuctionThumb extends StatelessWidget {
     // MD: "배지=현재가"
     //
     final priceFormat = NumberFormat.currency(
-        locale: context.locale.toString(), symbol: 'Rp ', decimalDigits: 0);
+        locale: Localizations.localeOf(context).toString(),
+        symbol: 'Rp ',
+        decimalDigits: 0);
     final currentBidString = priceFormat.format(auction.currentBid);
 
     return Expanded(

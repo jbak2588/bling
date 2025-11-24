@@ -12,7 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 import '../constants/category_icons.dart';
 // repository imports removed: using direct Firestore queries against categories_v2
@@ -23,7 +23,7 @@ class SubCategoryScreen extends StatelessWidget {
   const SubCategoryScreen({super.key, required this.parent});
 
   String _displayName(BuildContext context, Category c) {
-    final code = context.locale.languageCode;
+    final code = LocaleSettings.currentLocale.languageCode;
     switch (code) {
       case 'ko':
         return c.nameKo;
@@ -54,13 +54,13 @@ class SubCategoryScreen extends StatelessWidget {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'marketplace.error'
-                    .tr(namedArgs: {'error': snapshot.error.toString()}),
+                t.marketplace.error
+                    .replaceAll('{error}', snapshot.error.toString()),
               ),
             );
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('category_empty'.tr()));
+            return Center(child: Text(t.categoryEmpty));
           }
 
           final items = snapshot.data!.docs

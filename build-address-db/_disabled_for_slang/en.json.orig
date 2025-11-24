@@ -1019,7 +1019,6 @@
       "total": "Total Pay",
       "per_case": "Per case",
       "etc": "Etc",
-      "$value": "$value",
       "yearly": "yearly"
     },
     "workPeriods": {
@@ -1032,8 +1031,7 @@
       "3_months": "3 Months",
       "6_months_plus": "6 Months+",
       "negotiable": "Negotiable",
-      "etc": "Etc",
-      "$period": "$period"
+      "etc": "Etc"
     },
     "detail": {
       "infoTitle": "Details",
@@ -1124,10 +1122,8 @@
       "travel": "Travel",
       "pets": "Pets",
       "volunteering": "Volunteering",
-      "minimalism": "Minimalism",
-      "$interestKey": "$interestKey"
-    },
-    "$categoryKey": "$categoryKey"
+      "minimalism": "Minimalism"
+    }
   },
   "friendDetail": {
     "request": "Send Request",
@@ -1424,8 +1420,7 @@
       "auto": "Auto Repair",
       "kids": "Kids",
       "hospital": "Hospital/Clinic",
-      "etc": "Others",
-      "$category": "$category"
+      "etc": "Others"
     },
     "detail": {
       "description": "Store Description",
@@ -1664,8 +1659,7 @@
       "rentPeriods": {
         "daily": "Daily",
         "monthly": "Monthly",
-        "yearly": "Yearly",
-        "$period": "$period"
+        "yearly": "Yearly"
       },
       "kos": {
         "bathroomType": "Bathroom type",
@@ -1698,8 +1692,7 @@
       "furnishedTypes": {
         "furnished": "Furnished",
         "semi_furnished": "Semi-furnished",
-        "unfurnished": "Unfurnished",
-        "$status": "$status"
+        "unfurnished": "Unfurnished"
       }
     },
     "info": {

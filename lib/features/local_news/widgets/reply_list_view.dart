@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // ✅ 인증 정보 가져오기
-import 'package:easy_localization/easy_localization.dart'; // ✅ 다국어
+import 'package:bling_app/i18n/strings.g.dart'; // ✅ Slang strings
 import '../../../core/utils/localization_utils.dart';
 
 // v0.9 모델 import
@@ -121,12 +121,12 @@ class _ReplyListViewState extends State<ReplyListView> {
                             if (isOwner) {
                               items.add(PopupMenuItem(
                                 value: 'delete',
-                                child: Text('common.delete'.tr()),
+                                child: Text(t.common.delete),
                               ));
                             } else {
                               items.add(PopupMenuItem(
                                 value: 'report',
-                                child: Text('common.report'.tr()),
+                                child: Text(t.common.report),
                               ));
                             }
                             return items;
@@ -149,16 +149,16 @@ class _ReplyListViewState extends State<ReplyListView> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('deleteConfirm.title'.tr()),
-        content: Text('deleteConfirm.content'.tr()),
+        title: Text(t.deleteConfirm.title),
+        content: Text(t.deleteConfirm.content),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('common.cancel'.tr()),
+            child: Text(t.common.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('common.delete'.tr(),
+            child: Text(t.common.delete,
                 style: const TextStyle(color: Colors.red)),
           ),
         ],
@@ -180,8 +180,8 @@ class _ReplyListViewState extends State<ReplyListView> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('replyDelete.fail'
-              .tr(namedArgs: {'error': e.toString()})))); // 다국어 필요
+          content: Text(t.replyDelete.fail
+              .replaceAll('{error}', e.toString())))); // 다국어 필요
     }
   }
 
@@ -201,7 +201,7 @@ class _ReplyListViewState extends State<ReplyListView> {
         builder: (dialogContext) {
           return StatefulBuilder(builder: (context, setState) {
             return AlertDialog(
-              title: Text('reportDialog.titleReply'.tr()), // 답글 신고 제목 (다국어 필요)
+              title: Text(t.reportDialog.titleReply), // 답글 신고 제목 (다국어 필요)
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -212,7 +212,7 @@ class _ReplyListViewState extends State<ReplyListView> {
                       children: reportReasons.map((reasonKey) {
                         final isSelected = selectedReason == reasonKey;
                         return ChoiceChip(
-                          label: Text(reasonKey.tr()),
+                          label: Text(t[reasonKey]),
                           selected: isSelected,
                           onSelected: (_) =>
                               setState(() => selectedReason = reasonKey),
@@ -225,7 +225,7 @@ class _ReplyListViewState extends State<ReplyListView> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: Text('common.cancel'.tr()),
+                  child: Text(t.common.cancel),
                 ),
                 ElevatedButton(
                   onPressed: (selectedReason != null && !_isReporting)
@@ -239,7 +239,7 @@ class _ReplyListViewState extends State<ReplyListView> {
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2))
-                      : Text('common.report'.tr()),
+                      : Text(t.common.report),
                 ),
               ],
             );
@@ -256,7 +256,7 @@ class _ReplyListViewState extends State<ReplyListView> {
     if (reporterId.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('main.errors.loginRequired'.tr())));
+          SnackBar(content: Text(t.main.errors.loginRequired)));
       return;
     }
 
@@ -264,7 +264,7 @@ class _ReplyListViewState extends State<ReplyListView> {
     if (reply.userId == reporterId) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('reportDialog.cannotReportSelfReply'.tr())));
+          SnackBar(content: Text(t.reportDialog.cannotReportSelfReply)));
       return;
     }
 
@@ -286,13 +286,13 @@ class _ReplyListViewState extends State<ReplyListView> {
       await FirebaseFirestore.instance.collection('reports').add(reportData);
       // ✅ [Exception Fix] 저장된 참조 사용
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('reportDialog.success'.tr())),
+        SnackBar(content: Text(t.reportDialog.success)),
       );
     } catch (e) {
       // ✅ [Exception Fix] 저장된 참조 사용
       scaffoldMessenger.showSnackBar(SnackBar(
           content: Text(
-              'reportDialog.fail'.tr(namedArgs: {'error': e.toString()}))));
+              t.reportDialog.fail.replaceAll('{error}', e.toString()))));
     } finally {
       if (mounted) setState(() => _isReporting = false);
     }

@@ -4,7 +4,8 @@ import 'package:bling_app/features/local_news/screens/local_news_detail_screen.d
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // ✅ 1. Firestore import 추가
-import 'package:easy_localization/easy_localization.dart'; // ✅ 이슈 2: 다국어 import
+import 'package:intl/intl.dart';
+import 'package:bling_app/i18n/strings.g.dart'; // ✅ 이슈 2: 다국어 import
 import 'package:bling_app/core/models/user_model.dart'; // ✅ 이슈 1: UserModel import
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart'; // ✅ 이슈 1: 신뢰배지 import
 import 'package:bling_app/core/constants/app_tags.dart'; // ✅ 태그 사전 매핑
@@ -35,7 +36,7 @@ class PostThumb extends StatelessWidget {
           final detailScreen = LocalNewsDetailScreen(post: post);
           if (onIconTap != null) {
             // Delegate to parent to keep top/bottom bars
-            onIconTap!(detailScreen, 'main.tabs.localNews');
+            onIconTap!(detailScreen, t.main.tabs.localNews);
           } else {
             // Fallback: push a full-screen route
             Navigator.of(context).push(
@@ -250,7 +251,7 @@ class PostThumb extends StatelessWidget {
         }
 
         if (matched != null) {
-          final name = matched.nameKey.tr();
+          final name = t[matched.nameKey];
           final emoji = matched.emoji;
           return (emoji != null && emoji.isNotEmpty) ? '$emoji $name' : name;
         }

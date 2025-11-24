@@ -35,7 +35,7 @@ import 'package:bling_app/features/categories/data/firestore_category_repository
 import 'package:bling_app/features/categories/domain/category.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/material.dart';
 import 'package:bling_app/features/shared/widgets/bling_icon.dart'; // ✅ BlingIcon import
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
@@ -165,7 +165,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
     if (widget.onTitleChanged != null) {
       // Always pass a key (not a translated string) so the caller can decide
-      // whether to call .tr() or treat it as raw text. Passing translated
+      // whether to call `t[...]` or treat it as raw text. Passing translated
       // strings previously caused mismatches when the app expected an i18n key.
       final titleKey = category.id == 'all'
           ? 'main.tabs.marketplace'
@@ -183,7 +183,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final langCode = context.locale.languageCode;
+    final langCode = Localizations.localeOf(context).languageCode;
     // ✅ LocationProvider 구독
     final locationProvider = context.watch<LocationProvider>();
 
@@ -244,7 +244,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
           // [수정] 검색바를 NestedScrollView 밖으로 이동 (앱바 바로 아래 고정)
           if (_showSearchBar)
             InlineSearchChip(
-              hintText: 'main.search.hint.marketplace'.tr(),
+              hintText: t.main.search.hint.marketplace,
               openNotifier: _chipOpenNotifier,
               onSubmitted: (kw) =>
                   _searchKeywordNotifier.value = kw.trim().toLowerCase(),
@@ -310,8 +310,8 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       ));
                     }
                     return Center(
-                        child: Text('marketplace.error'.tr(
-                            namedArgs: {'error': snapshot.error.toString()})));
+                        child: Text(t.marketplace.error
+                            .replaceAll('{error}', snapshot.error.toString())));
                   }
 
                   var allDocs = snapshot.data?.docs ?? [];
@@ -361,12 +361,12 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                               Icon(Icons.search_off,
                                   size: 64, color: Colors.grey[300]),
                               const SizedBox(height: 12),
-                              Text('marketplace.empty'.tr(),
+                              Text(t.marketplace.empty,
                                   textAlign: TextAlign.center,
                                   style:
                                       Theme.of(context).textTheme.bodyMedium),
                               const SizedBox(height: 8),
-                              Text('search.empty.checkSpelling'.tr(),
+                              Text(t.search.empty.checkSpelling,
                                   textAlign: TextAlign.center,
                                   style: Theme.of(context)
                                       .textTheme
@@ -375,8 +375,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                               const SizedBox(height: 16),
                               OutlinedButton.icon(
                                 icon: const Icon(Icons.map_outlined),
-                                label:
-                                    Text('search.empty.expandToNational'.tr()),
+                                label: Text(t.search.empty.expandToNational),
                                 style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 12.0, horizontal: 16.0),
@@ -400,7 +399,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                           Icon(Icons.search_off,
                               size: 64, color: Colors.grey[300]),
                           const SizedBox(height: 12),
-                          Text('marketplace.empty'.tr(),
+                          Text(t.marketplace.empty,
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyMedium),
                         ],

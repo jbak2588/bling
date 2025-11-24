@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 class CustomTagInputField extends StatefulWidget {
   final String hintText;
@@ -136,7 +136,7 @@ class _CustomTagInputFieldState extends State<CustomTagInputField> {
 
               return ActionChip(
                 label: Text(isFromTitle
-                    ? '$tag ${'tag_input.fromTitleSuffix'.tr()}'
+                    ? '$tag ${t.tagInput.fromTitleSuffix}'
                     : '#$tag'),
                 avatar: isFromTitle
                     ? const Icon(Icons.auto_awesome, size: 14)
@@ -188,9 +188,8 @@ class _CustomTagInputFieldState extends State<CustomTagInputField> {
                   controller: _textController,
                   focusNode: _focusNode,
                   decoration: InputDecoration(
-                    hintText: _tags.isEmpty
-                        ? widget.hintText
-                        : 'tag_input.addHint'.tr(),
+                    hintText:
+                        _tags.isEmpty ? widget.hintText : t.tagInput.addHint,
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
@@ -217,7 +216,7 @@ class _CustomTagInputFieldState extends State<CustomTagInputField> {
         Padding(
           padding: const EdgeInsets.only(left: 4),
           child: Text(
-            'tag_input.help'.tr(),
+            t.tagInput.help,
             style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
           ),
         ),

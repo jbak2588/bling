@@ -19,7 +19,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:flutter/services.dart'; // 숫자 입력 포맷팅
 import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
@@ -95,7 +95,7 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
     if (!_formKey.currentState!.validate() || _isSaving) return;
     if (_images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('lostAndFound.form.imageRequired'.tr())));
+          SnackBar(content: Text(t.lostAndFound.form.imageRequired)));
       return;
     }
 
@@ -144,15 +144,15 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('lostAndFound.edit.success'.tr()),
+            content: Text(t.lostAndFound.edit.success),
             backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('lostAndFound.edit.fail'
-                .tr(namedArgs: {'error': e.toString()})),
+            content: Text(t.lostAndFound.edit.fail
+                .replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -164,12 +164,12 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('lostAndFound.edit.title'.tr()),
+        title: Text(t.lostAndFound.edit.title),
         actions: [
           if (!_isSaving)
             TextButton(
                 onPressed: _updateItem,
-                child: Text('lostAndFound.edit.save'.tr())),
+                child: Text(t.lostAndFound.edit.save)),
         ],
       ),
       body: Stack(
@@ -183,10 +183,10 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
                   segments: <ButtonSegment<String>>[
                     ButtonSegment<String>(
                         value: 'lost',
-                        label: Text('lostAndFound.form.type.lost'.tr())),
+                        label: Text(t.lostAndFound.form.type.lost)),
                     ButtonSegment<String>(
                         value: 'found',
-                        label: Text('lostAndFound.form.type.found'.tr())),
+                        label: Text(t.lostAndFound.form.type.found)),
                   ],
                   selected: {_type},
                   onSelectionChanged: (newSelection) =>
@@ -196,7 +196,8 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
 
                 // ✅ 현상금(Bounty) 섹션 UI
                 _buildBountySection(),
-                // V V V --- [복원] 누락되었던 이미지 선택/수정 UI --- V V V
+
+                // 이미지 썸네일 리스트
                 SizedBox(
                   height: 100,
                   child: ListView(
@@ -255,32 +256,32 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
                     ],
                   ),
                 ),
-                // ^ ^ ^ --- 여기까지 복원 --- ^ ^ ^
                 const SizedBox(height: 24),
+
                 TextFormField(
                   controller: _itemDescriptionController,
                   decoration: InputDecoration(
-                      labelText: 'lostAndFound.form.itemLabel'.tr(),
+                      labelText: t.lostAndFound.form.itemLabel,
                       border: const OutlineInputBorder()),
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'lostAndFound.form.itemError'.tr()
+                      ? t.lostAndFound.form.itemError
                       : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _locationDescriptionController,
                   decoration: InputDecoration(
-                      labelText: 'lostAndFound.form.locationLabel'.tr(),
+                      labelText: t.lostAndFound.form.locationLabel,
                       border: const OutlineInputBorder()),
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'lostAndFound.form.locationError'.tr()
+                      ? t.lostAndFound.form.locationError
                       : null,
                 ),
                 const SizedBox(height: 16),
 
                 // ✅ 태그 입력 필드
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: t.tagInput.help,
                   initialTags: _tags,
                   onTagsChanged: (tags) => setState(() => _tags = tags),
                 ),
@@ -301,8 +302,8 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
     return Column(
       children: [
         SwitchListTile(
-          title: Text('lostAndFound.form.bountyTitle'.tr()),
-          subtitle: Text('lostAndFound.form.bountyDesc'.tr()),
+          title: Text(t.lostAndFound.form.bountyTitle),
+          subtitle: Text(t.lostAndFound.form.bountyDesc),
           value: _isHunted,
           onChanged: (bool value) {
             setState(() {
@@ -317,7 +318,7 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
             child: TextFormField(
               controller: _bountyAmountController,
               decoration: InputDecoration(
-                labelText: 'lostAndFound.form.bountyAmount'.tr(),
+                labelText: t.lostAndFound.form.bountyAmount,
                 hintText: '50000',
                 prefixText: 'Rp ',
                 border: const OutlineInputBorder(),
@@ -326,7 +327,7 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               validator: (value) {
                 if (_isHunted && (value == null || value.trim().isEmpty)) {
-                  return 'lostAndFound.form.bountyAmountError'.tr();
+                  return t.lostAndFound.form.bountyAmountError;
                 }
                 return null;
               },

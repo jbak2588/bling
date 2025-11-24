@@ -46,10 +46,11 @@ import 'package:bling_app/features/jobs/screens/create_job_screen.dart'; // [추
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
+import 'package:intl/intl.dart';
 // [추가] 리뷰 작성을 위한 위젯 (예: flutter_rating_bar)
 // import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 // [추가] 날짜 포매팅을 위한 intl
@@ -116,8 +117,8 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('localStores.detail.startChatFail'
-                  .tr(namedArgs: {'error': e.toString()})),
+              content: Text(t.localStores.detail.startChatFail
+                  .replaceAll('{error}', e.toString())),
               backgroundColor: Colors.red),
         );
       }
@@ -128,15 +129,15 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('localStores.detail.deleteTitle'.tr()),
-        content: Text('localStores.detail.deleteContent'.tr()),
+        title: Text(t.localStores.detail.deleteTitle),
+        content: Text(t.localStores.detail.deleteContent),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('common.cancel'.tr())),
+              child: Text(t.common.cancel)),
           TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text('common.delete'.tr(),
+              child: Text(t.common.delete,
                   style: const TextStyle(color: Colors.red))),
         ],
       ),
@@ -146,13 +147,13 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
       try {
         await _repository.deleteShop(widget.shop.id);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('localStores.detail.deleteSuccess'.tr()),
+            content: Text(t.localStores.detail.deleteSuccess),
             backgroundColor: Colors.green));
         Navigator.of(context).pop();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('localStores.detail.deleteFail'
-                .tr(namedArgs: {'error': e.toString()})),
+            content: Text(t.localStores.detail.deleteFail
+                .replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     }
@@ -339,7 +340,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                     ),
                     const SizedBox(height: 8),
                     _buildInfoRow(context, Icons.location_on_outlined,
-                        shop.locationName ?? 'localStores.noLocation'.tr()),
+                        shop.locationName ?? t.localStores.noLocation),
                     const SizedBox(height: 4),
                     _buildInfoRow(
                         context, Icons.watch_later_outlined, shop.openHours),
@@ -349,7 +350,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                     const Divider(height: 32),
                     // [추가] 대표 상품/서비스 칩
                     if (shop.products != null && shop.products!.isNotEmpty) ...[
-                      Text('localStores.detail.products'.tr(), // "대표 상품 및 서비스"
+                      Text(t.localStores.detail.products, // "대표 상품 및 서비스"
                           style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 8),
                       Wrap(
@@ -361,7 +362,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                       ),
                       const Divider(height: 32),
                     ],
-                    Text('localStores.detail.description'.tr(),
+                    Text(t.localStores.detail.description,
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 8),
                     Text(shop.description,
@@ -369,8 +370,8 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                     const Divider(height: 32),
                     // [추가] 리뷰 섹션
                     Text(
-                        'localStores.detail.reviews'.tr(
-                            namedArgs: {'count': shop.reviewCount.toString()}),
+                        t.localStores.detail.reviews
+                            .replaceAll('{count}', shop.reviewCount.toString()),
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 8),
                     _buildReviewSection(shop), // 리뷰 목록 및 작성 UI
@@ -391,7 +392,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: Text('localStores.detail.inquire'.tr()),
+                    child: Text(t.localStores.detail.inquire),
                   ),
                 ),
         );
@@ -419,7 +420,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return ListTile(title: Text('localStores.detail.noOwnerInfo'.tr()));
+          return ListTile(title: Text(t.localStores.detail.noOwnerInfo));
         }
         final user = UserModel.fromFirestore(snapshot.data!);
         return Card(
@@ -467,8 +468,8 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                     "☆" * (5 - shop.averageRating.round()),
                 style: TextStyle(color: Colors.yellow[700], fontSize: 20)),
             const SizedBox(width: 8),
-            Text('localStores.detail.reviews'
-                .tr(namedArgs: {'count': shop.reviewCount.toString()})),
+            Text(t.localStores.detail.reviews
+                .replaceAll('{count}', shop.reviewCount.toString())),
           ],
         ),
         const SizedBox(height: 16),
@@ -477,7 +478,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         if (canReview)
           OutlinedButton.icon(
             icon: const Icon(Icons.rate_review_outlined),
-            label: Text('localStores.detail.writeReview'.tr()),
+            label: Text(t.localStores.detail.writeReview),
             onPressed: () {
               _showWriteReviewDialog(shop.id);
             },
@@ -489,7 +490,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
           stream: _repository.fetchReviews(shop.id),
           builder: (context, snapshot) {
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text('localStores.detail.noReviews'.tr()));
+              return Center(child: Text(t.localStores.detail.noReviews));
             }
             final reviews = snapshot.data!;
             return ListView.separated(
@@ -529,19 +530,19 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('localStores.detail.writeReview'.tr()),
-        content: Text('localStores.detail.reviewDialogContent'
-            .tr()), // 실제로는 별점 선택 + 텍스트 입력 필드
+        title: Text(t.localStores.detail.writeReview),
+        content: Text(
+            t.localStores.detail.reviewDialogContent), // 실제로는 별점 선택 + 텍스트 입력 필드
         actions: [
           TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('common.cancel'.tr())),
+              child: Text(t.common.cancel)),
           TextButton(
               onPressed: () {
                 /* (개선) _repository.addReview(...) 호출 */ Navigator.of(context)
                     .pop();
               },
-              child: Text('common.submit'.tr())),
+              child: Text(t.common.submit)),
         ],
       ),
     );

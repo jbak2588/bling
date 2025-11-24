@@ -15,7 +15,7 @@ library;
 import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 class JobRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -63,7 +63,7 @@ class JobRepository {
   // V V V --- [추가] 새로운 구인글을 생성하는 함수 --- V V V
   Future<void> createJob(JobModel job) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw Exception(tr('main.errors.loginRequired'));
+    if (user == null) throw Exception(t.main.errors.loginRequired);
 
     final newJobRef = _firestore.collection('jobs').doc();
 
@@ -84,7 +84,7 @@ class JobRepository {
   Future<void> updateJob(JobModel job) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.uid != job.userId) {
-      throw Exception(tr('main.errors.permissionDenied'));
+      throw Exception(t['main.errors.permissionDenied'] ?? '');
     }
 
     // 수정 시에는 update()를 사용하여 필요한 필드만 갱신하거나,
@@ -97,7 +97,7 @@ class JobRepository {
   Future<void> deleteJob(String jobId, String userId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.uid != userId) {
-      throw Exception(tr('main.errors.permissionDenied'));
+      throw Exception(t['main.errors.permissionDenied'] ?? '');
     }
 
     final jobRef = _firestore.collection('jobs').doc(jobId);

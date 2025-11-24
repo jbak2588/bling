@@ -34,7 +34,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
@@ -128,7 +129,8 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     _priceController.text = widget.userPrice ?? '';
 
     // 1. Summary
-    final dynamic summaryValue = widget.finalReport['verificationSummary'];
+    final dynamic summaryValue =
+        widget.finalReport['verificationSummary'] ?? '';
     if (summaryValue is String && summaryValue.isNotEmpty) {
       _summaryController.text = summaryValue;
     } else {
@@ -136,16 +138,15 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     }
 
     // 2. Notes for Buyer
-    final dynamic notesValue = widget.finalReport['notesForBuyer'];
+    final dynamic notesValue = widget.finalReport['notesForBuyer'] ?? '';
     if (notesValue is String && notesValue.isNotEmpty) {
       _buyerNotesController.text = notesValue.trim();
     } else {
-      _buyerNotesController.text =
-          'ai_flow.final_report.notes_placeholder'.tr();
+      _buyerNotesController.text = t.aiFlow.finalReport.notesPlaceholder;
     }
 
     // 3. Price Assessment
-    final dynamic priceMap = widget.finalReport['priceAssessment'];
+    final dynamic priceMap = widget.finalReport['priceAssessment'] ?? '';
     if (priceMap is Map) {
       final min = priceMap['suggestedMin']?.toString();
       final max = priceMap['suggestedMax']?.toString();
@@ -161,7 +162,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     }
 
     // 4. Condition (Grade + Details)
-    final dynamic conditionMap = widget.finalReport['condition'];
+    final dynamic conditionMap = widget.finalReport['condition'] ?? '';
     final List<String> conditionLines = [];
     if (conditionMap is Map) {
       final String? grade = conditionMap['grade'] as String?;
@@ -234,16 +235,16 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('auctions.create.confirmTitle'.tr()),
-        content: Text('auctions.create.confirmContent'.tr()),
+        title: Text(t.auctions.create.confirmTitle),
+        content: Text(t.auctions.create.confirmContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('common.cancel'.tr()),
+            child: Text(t.common.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('common.confirm'.tr()),
+            child: Text(t.common.confirm),
           ),
         ],
       ),
@@ -276,21 +277,21 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
   Future<void> _finalizeListing() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || _currentUserModel == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('main.errors.userNotFound'.tr())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.main.errors.userNotFound)));
       return;
     }
 
     // [V3 ADMIN VERIFICATION] Read the AI's trust verdict
     final String trustVerdict =
-        widget.finalReport['trustVerdict'] as String? ?? 'clear';
+        widget.finalReport['trustVerdict'] ?? '' as String? ?? 'clear';
     final bool isSuspicious = trustVerdict != 'clear';
 
     // 필수 입력: 경매 선택 시 거래 희망 장소가 비어있으면 제출 불가
     if (_registrationType == RegistrationType.auction &&
         _transactionPlaceController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('marketplace.errors.requiredField'.tr())));
+          SnackBar(content: Text(t.marketplace.errors.requiredField)));
       return;
     }
 
@@ -322,16 +323,16 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text(isSuspicious
-              ? 'ai_flow.final_report.success_pending'.tr()
-              : 'ai_flow.final_report.success'.tr()),
+              ? t.aiFlow.finalReport.successPending
+              : t.aiFlow.finalReport.success),
         ),
       );
       navigator.popUntil((route) => route.isFirst);
     } catch (e) {
       scaffoldMessenger.showSnackBar(
         SnackBar(
-            content:
-                Text('ai_flow.final_report.fail'.tr(args: [e.toString()]))),
+            content: Text(
+                t.aiFlow.finalReport.fail.replaceAll('{0}', e.toString()))),
       );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -344,9 +345,10 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     // V2 UI 컨트롤러들로부터 최종 AI 리포트 객체 구성(간단 버전)
     final int userSelectedPrice = int.tryParse(_priceController.text) ?? 0;
     final int aiSuggestedPrice = int.tryParse(
-            widget.finalReport['suggested_price']?.toString() ??
-                widget.finalReport['price_suggestion']?.toString() ??
-                '0') ??
+            (widget.finalReport['suggested_price'] ??
+                    widget.finalReport['price_suggestion'] ??
+                    '0')
+                .toString()) ??
         0;
 
     // Use the V3 report directly and augment with runtime fields
@@ -426,8 +428,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
       startPrice: startPrice,
       currentBid: startPrice,
       bidHistory: const [],
-      location:
-          _currentUserModel?.locationName ?? 'postCard.locationNotSet'.tr(),
+      location: _currentUserModel?.locationName ?? t.postCard.locationNotSet,
       transactionPlace: _transactionPlaceController.text,
       locationParts: _currentUserModel?.locationParts,
       geoPoint: _currentUserModel?.geoPoint,
@@ -491,7 +492,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     // ... UI 코드는 작업 101과 거의 동일하게 유지 ...
     // 단, TextFormField 들이 _titleController, _priceController, _descriptionController를 사용하도록 변경
     return Scaffold(
-      appBar: AppBar(title: Text('ai_flow.final_report.title'.tr())),
+      appBar: AppBar(title: Text(t.aiFlow.finalReport.title)),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -527,13 +528,13 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
               TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                      labelText: 'marketplace.registration.titleHint'.tr(),
+                      labelText: t.marketplace.registration.titleHint,
                       border: const OutlineInputBorder())),
               const SizedBox(height: 16),
               TextFormField(
                   controller: _priceController,
                   decoration: InputDecoration(
-                      labelText: 'marketplace.registration.priceHint'.tr(),
+                      labelText: t.marketplace.registration.priceHint,
                       border: const OutlineInputBorder()),
                   keyboardType: TextInputType.number),
               const Divider(height: 32),
@@ -541,24 +542,24 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
               TextFormField(
                   controller: _priceSuggestionController,
                   decoration: InputDecoration(
-                      labelText: tr('ai_flow.final_report.suggested_price',
-                          args: ['Rp']),
+                      labelText: t.aiFlow.finalReport.suggestedPrice
+                          .replaceAll('{0}', 'Rp'),
                       border: InputBorder.none,
                       prefixIcon: const Icon(Icons.auto_awesome))),
               // 판매 유형 선택 (일반 판매 / 경매)
               const SizedBox(height: 24),
-              Text('auctions.create.registrationType'.tr(),
+              Text(t.auctions.create.registrationType,
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               SegmentedButton<RegistrationType>(
                 segments: [
                   ButtonSegment(
                       value: RegistrationType.sale,
-                      label: Text('auctions.create.type.sale'.tr()),
+                      label: Text(t.auctions.create.type.sale),
                       icon: const Icon(Icons.storefront_outlined)),
                   ButtonSegment(
                       value: RegistrationType.auction,
-                      label: Text('auctions.create.type.auction'.tr()),
+                      label: Text(t.auctions.create.type.auction),
                       icon: const Icon(Icons.gavel_outlined)),
                 ],
                 selected: {_registrationType},
@@ -570,13 +571,13 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
                 DropdownButtonFormField<int>(
                   initialValue: _durationInDays,
                   decoration: InputDecoration(
-                      labelText: 'auctions.create.form.duration'.tr(),
+                      labelText: t.auctions.create.form.duration,
                       border: const OutlineInputBorder()),
                   items: [3, 5, 7]
                       .map((days) => DropdownMenuItem(
                             value: days,
-                            child: Text('auctions.create.form.durationOption'
-                                .tr(namedArgs: {'days': days.toString()})),
+                            child: Text(t.auctions.create.form.durationOption
+                                .replaceAll('{days}', days.toString())),
                           ))
                       .toList(),
                   onChanged: (value) {
@@ -590,7 +591,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
               TextFormField(
                 controller: _summaryController,
                 decoration: InputDecoration(
-                    labelText: 'ai_flow.final_report.summary'.tr(),
+                    labelText: t.aiFlow.finalReport.summary,
                     border: const OutlineInputBorder()),
                 maxLines: 3,
               ),
@@ -600,7 +601,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
                 key: const Key('buyerNotesField'),
                 controller: _buyerNotesController,
                 decoration: InputDecoration(
-                    labelText: 'ai_flow.final_report.buyer_notes'.tr(),
+                    labelText: t.aiFlow.finalReport.buyerNotes,
                     border: const OutlineInputBorder()),
                 maxLines: 3,
               ),
@@ -609,7 +610,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
               TextFormField(
                 controller: _conditionController,
                 decoration: InputDecoration(
-                    labelText: 'ai_flow.final_report.condition'.tr(),
+                    labelText: t.aiFlow.finalReport.condition,
                     border: const OutlineInputBorder()),
                 maxLines: 8, // V3에서는 더 많은 정보가 표시되므로 늘림
               ),
@@ -617,7 +618,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
-                    labelText: 'ai_flow.final_report.final_description'.tr(),
+                    labelText: t.aiFlow.finalReport.finalDescription,
                     border: const OutlineInputBorder()),
                 maxLines: 12,
               ),
@@ -636,8 +637,8 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
           child: _isSubmitting
               ? const CircularProgressIndicator(color: Colors.white)
               : Text(_registrationType == RegistrationType.sale
-                  ? 'ai_flow.final_report.submit_button'.tr()
-                  : 'auctions.create.submit_button'.tr()),
+                  ? t.aiFlow.finalReport.submitButton
+                  : t.auctions.create.submitButton),
         ),
       ),
     );

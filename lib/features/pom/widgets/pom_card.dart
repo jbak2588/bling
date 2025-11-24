@@ -19,7 +19,9 @@ import 'package:flutter/gestures.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // [V2]
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// compat shim removed; using Slang `t` accessors
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:video_player/video_player.dart'; // [V2]
 import 'package:bling_app/features/pom/screens/pom_pager_screen.dart';
@@ -134,7 +136,7 @@ class _PomCardState extends State<PomCard> {
             if (isOwner) ...[
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: Text('common.edit'.tr()),
+                title: Text(t.common.edit),
                 onTap: () async {
                   Navigator.pop(context);
                   // 수정 화면 이동
@@ -147,7 +149,7 @@ class _PomCardState extends State<PomCard> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: Text('common.delete'.tr(),
+                title: Text(t.common.delete,
                     style: const TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(context);
@@ -159,7 +161,7 @@ class _PomCardState extends State<PomCard> {
 
             ListTile(
               leading: const Icon(Icons.report_outlined),
-              title: Text('pom.report'.tr(args: [authorNickname])),
+              title: Text(t.pom.report.replaceAll('{0}', authorNickname)),
               onTap: () {
                 Navigator.pop(context);
                 _showReportDialog(context, author);
@@ -167,7 +169,7 @@ class _PomCardState extends State<PomCard> {
             ),
             ListTile(
               leading: const Icon(Icons.block_outlined),
-              title: Text('pom.block'.tr(args: [authorNickname])),
+              title: Text(t.pom.block.replaceAll('{0}', authorNickname)),
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -184,12 +186,12 @@ class _PomCardState extends State<PomCard> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('pom.delete.title'.tr()),
-        content: Text('pom.delete.content'.tr()),
+        title: Text(t.pom.delete.title),
+        content: Text(t.pom.delete.content),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('common.cancel'.tr()),
+            child: Text(t.common.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -198,7 +200,7 @@ class _PomCardState extends State<PomCard> {
                 await _repository.deletePom(widget.pom.id);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('pom.delete.success'.tr())),
+                    SnackBar(content: Text(t.pom.delete.success)),
                   );
                 }
               } catch (e) {
@@ -209,7 +211,7 @@ class _PomCardState extends State<PomCard> {
                 }
               }
             },
-            child: Text('common.delete'.tr(),
+            child: Text(t.common.delete,
                 style: const TextStyle(color: Colors.red)),
           ),
         ],
@@ -234,7 +236,7 @@ class _PomCardState extends State<PomCard> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('reportDialog.title'.tr()),
+              title: Text(t.reportDialog.title),
               content: SingleChildScrollView(
                 child: Wrap(
                   spacing: 8,
@@ -242,7 +244,7 @@ class _PomCardState extends State<PomCard> {
                   children: reportReasons.map((reasonKey) {
                     final isSelected = selectedReason == reasonKey;
                     return ChoiceChip(
-                      label: Text(reasonKey.tr()),
+                      label: Text(t[reasonKey]),
                       selected: isSelected,
                       onSelected: (_) =>
                           setState(() => selectedReason = reasonKey),
@@ -253,7 +255,7 @@ class _PomCardState extends State<PomCard> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: Text('common.cancel'.tr()),
+                  child: Text(t.common.cancel),
                 ),
                 ElevatedButton(
                   onPressed: (selectedReason != null && !_isReporting)
@@ -268,7 +270,7 @@ class _PomCardState extends State<PomCard> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text('common.report'.tr()),
+                      : Text(t.common.report),
                 ),
               ],
             );
@@ -285,14 +287,14 @@ class _PomCardState extends State<PomCard> {
 
     final reporterId = FirebaseAuth.instance.currentUser?.uid;
     if (reporterId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('main.errors.loginRequired'.tr())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.main.errors.loginRequired)));
       return;
     }
 
     if (author == null || author.uid == reporterId) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('reportDialog.cannotReportSelf'.tr())));
+          SnackBar(content: Text(t.reportDialog.cannotReportSelf)));
       return;
     }
 
@@ -307,13 +309,13 @@ class _PomCardState extends State<PomCard> {
       );
 
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('reportDialog.success'.tr())),
+        SnackBar(content: Text(t.reportDialog.success)),
       );
     } catch (e) {
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text(
-            'reportDialog.fail'.tr(namedArgs: {'error': e.toString()}),
+            t.reportDialog.fail.replaceAll('{error}', e.toString()),
           ),
         ),
       );
@@ -503,7 +505,8 @@ class _PomCardState extends State<PomCard> {
           // 좋아요 수
           if (_likesCount > 0) // [V2]
             Text(
-              'pom.likesCount'.tr(args: [_likesCount.toString()]), // [V2]
+              t.pom.likesCount
+                  .replaceAll('{0}', _likesCount.toString()), // [V2]
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           if (_likesCount > 0) const SizedBox(height: 4),
@@ -546,7 +549,7 @@ class _PomCardState extends State<PomCard> {
             InkWell(
               onTap: () => setState(() => _isExpanded = !_isExpanded),
               child: Text(
-                _isExpanded ? 'pom.less'.tr() : 'pom.more'.tr(),
+                _isExpanded ? t.pom.less : t.pom.more,
                 style: const TextStyle(color: Colors.grey, height: 1.8),
               ),
             ),
@@ -557,7 +560,7 @@ class _PomCardState extends State<PomCard> {
               onTap: _showComments,
               child: Text(
                 'pom.comments.viewAll'
-                    .tr(args: [widget.pom.commentsCount.toString()]),
+                    .replaceAll('{0}', widget.pom.commentsCount.toString()),
                 style: const TextStyle(color: Colors.grey, fontSize: 14),
               ),
             ),

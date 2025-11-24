@@ -17,7 +17,8 @@ library;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
 
 import '../../local_news/models/post_model.dart';
 import '../../../core/models/user_model.dart';
@@ -33,7 +34,7 @@ class UserPostList extends StatelessWidget {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
 
     if (myUid == null) {
-      return Center(child: Text('main.errors.loginRequired'.tr()));
+      return Center(child: Text(t.main.errors.loginRequired));
     }
 
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -42,14 +43,14 @@ class UserPostList extends StatelessWidget {
           FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
       builder: (context, userSnapshot) {
         if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-          return Center(child: Text('main.errors.userNotFound'.tr()));
+          return Center(child: Text(t.main.errors.userNotFound));
         }
 
         final user = UserModel.fromFirestore(userSnapshot.data!);
         final postIds = user.postIds;
 
         if (postIds == null || postIds.isEmpty) {
-          return Center(child: Text('myBling.posts.empty'.tr()));
+          return Center(child: Text(t.myBling.posts.empty));
         }
 
         // 2. 가져온 postIds 목록을 사용하여 'posts' 컬렉션에서 여러 문서를 한번에 쿼리합니다.
@@ -64,11 +65,11 @@ class UserPostList extends StatelessWidget {
             }
             if (postsSnapshot.hasError) {
               return Center(
-                  child: Text('myBling.posts.loadErrorWithMsg'
-                      .tr(namedArgs: {'msg': postsSnapshot.error.toString()})));
+                  child: Text(t.myBling.posts.loadErrorWithMsg
+                      .replaceAll('{msg}', postsSnapshot.error.toString())));
             }
             if (!postsSnapshot.hasData || postsSnapshot.data!.docs.isEmpty) {
-              return Center(child: Text('myBling.posts.noInfo'.tr()));
+              return Center(child: Text(t.myBling.posts.noInfo));
             }
 
             final posts = postsSnapshot.data!.docs

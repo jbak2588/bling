@@ -36,7 +36,7 @@ import 'package:flutter/foundation.dart'; // listEquals 사용
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 class AiVerificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -145,7 +145,7 @@ class AiVerificationService {
         });
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('marketplace.ai.reactivated'.tr())),
+            SnackBar(content: Text(t.marketplace.ai.reactivated)),
           );
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
@@ -175,7 +175,7 @@ class AiVerificationService {
       String? subName;
       String? parentName;
       try {
-        final lang = context.locale.languageCode;
+        final lang = Localizations.localeOf(context).languageCode;
         final nameField =
             lang == 'ko' ? 'name_ko' : (lang == 'en' ? 'name_en' : 'name_id');
         final subDoc =
@@ -195,7 +195,7 @@ class AiVerificationService {
       final initRes = await initCallable.call({
         // [V3 REFACTOR] V3 'initialproductanalysis' 페이로드
         'imageUrls': initialUrls,
-        'locale': context.locale.languageCode,
+        'locale': Localizations.localeOf(context).languageCode,
         'categoryName': parentName, // [Fix #2] 힌트 전달
         'subCategoryName': subName, // [Fix #2] 힌트 전달
         'confirmedProductName': productName, // [V3 REFACTOR] 추가
@@ -242,7 +242,7 @@ class AiVerificationService {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
-                  'marketplace.error'.tr(namedArgs: {'error': e.toString()}))),
+                  t.marketplace.error.replaceAll('{error}', e.toString()))),
         );
       }
     }
@@ -264,7 +264,7 @@ class AiVerificationService {
     String? subName;
     String? parentName;
     try {
-      final lang = context.locale.languageCode;
+      final lang = Localizations.localeOf(context).languageCode;
       final nameField =
           lang == 'ko' ? 'name_ko' : (lang == 'en' ? 'name_en' : 'name_id');
       final subDoc =
@@ -292,7 +292,7 @@ class AiVerificationService {
       'subCategoryName': subName,
       'userPrice': productPrice,
       'userDescription': productDescription,
-      'locale': context.locale.languageCode,
+      'locale': Localizations.localeOf(context).languageCode,
     });
 
     final reportRaw = (result.data as Map<dynamic, dynamic>?)?['report'];
@@ -304,7 +304,7 @@ class AiVerificationService {
     if (report == null ||
         report['itemSummary'] == null ||
         report['condition'] == null) {
-      throw Exception('ai_flow.errors.incomplete_report'.tr());
+      throw Exception(t.aiFlow.errors.incompleteReport);
     }
 
     // 3. 최종 화면으로 이동 (AiEvidenceSuggestionScreen의 로직과 동일)

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 /// 앱바 하단에 표시되는 인라인 검색 칩 위젯
 ///
@@ -141,7 +141,7 @@ class _InlineSearchChipState extends State<InlineSearchChip> {
                 IconButton(
                   icon: const Icon(Icons.cleaning_services, size: 20),
                   onPressed: _clearText,
-                  tooltip: 'common.clear'.tr(),
+                  tooltip: t.common.clear,
                 ),
               ],
             )
@@ -174,7 +174,7 @@ class _InlineSearchChipState extends State<InlineSearchChip> {
                 IconButton(
                   icon: const Icon(Icons.close, size: 24),
                   onPressed: _cancel,
-                  tooltip: 'common.cancel'.tr(),
+                  tooltip: t.common.cancel,
                 ),
               ],
             )

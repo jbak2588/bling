@@ -9,7 +9,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 class CreateClubPostScreen extends StatefulWidget {
   final String clubId;
@@ -76,7 +76,7 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('clubs.createPost.success'.tr()),
+          content: Text(t.clubs.createPost.success),
           backgroundColor: Colors.green,
         ));
         Navigator.of(context).pop();
@@ -85,7 +85,7 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              'clubs.createPost.fail'.tr(namedArgs: {'error': e.toString()})),
+              t.clubs.createPost.fail.replaceAll('{error}', e.toString())),
           backgroundColor: Colors.red,
         ));
       }
@@ -98,12 +98,12 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('clubs.createPost.title'.tr()),
+        title: Text(t.clubs.createPost.title),
         actions: [
           if (!_isSaving)
             TextButton(
                 onPressed: _submitPost,
-                child: Text('clubs.createPost.submit'.tr()))
+                child: Text(t.clubs.createPost.submit))
         ],
       ),
       body: Stack(
@@ -115,7 +115,7 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
                 TextField(
                   controller: _bodyController,
                   decoration: InputDecoration(
-                      hintText: 'clubs.createPost.bodyHint'.tr(),
+                      hintText: t.clubs.createPost.bodyHint,
                       border: const OutlineInputBorder()),
                   maxLines: 8,
                 ),

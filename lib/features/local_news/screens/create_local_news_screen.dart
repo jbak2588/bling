@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:uuid/uuid.dart'; // 이미지 ID 생성을 위해 추가
 // ✅ 공용 텍스트 입력 기반 태그 위젯
 import '../../shared/widgets/custom_tag_input_field.dart';
@@ -136,7 +136,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
     if (_currentUserModel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('main.errors.userNotFound'.tr())),
+        SnackBar(content: Text(t.main.errors.userNotFound)),
       );
       return;
     }
@@ -198,7 +198,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('localNewsCreate.success'.tr())),
+          SnackBar(content: Text(t.localNewsCreate.success)),
         );
         Navigator.pop(context);
       }
@@ -209,7 +209,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'localNewsCreate.fail'.tr(namedArgs: {'error': e.toString()}),
+              t.localNewsCreate.fail.replaceAll('{error}', e.toString()),
             ),
           ),
         );
@@ -221,7 +221,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('localNewsCreate.title'.tr()),
+        title: Text(t.localNewsCreate.title),
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
@@ -247,13 +247,13 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                   TextFormField(
                     controller: _titleController,
                     decoration: InputDecoration(
-                      labelText: 'localNewsCreate.labels.title'.tr(),
+                      labelText: t.localNewsCreate.labels.title,
                       border: const OutlineInputBorder(),
                     ),
                     // ✅ [UI 개선] 제목 필수 입력
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'localNewsCreate.validation.titleRequired'.tr();
+                        return t.localNewsCreate.validation.titleRequired;
                       }
                       return null;
                     },
@@ -262,14 +262,14 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                   TextFormField(
                     controller: _contentController,
                     decoration: InputDecoration(
-                      labelText: 'localNewsCreate.labels.body'.tr(),
-                      hintText: 'localNewsCreate.hints.body'.tr(),
+                      labelText: t.localNewsCreate.labels.body,
+                      hintText: t.localNewsCreate.hints.body,
                       border: const OutlineInputBorder(),
                     ),
                     maxLines: 8,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'localNewsCreate.validation.bodyRequired'.tr();
+                        return t.localNewsCreate.validation.bodyRequired;
                       }
                       return null;
                     },
@@ -280,12 +280,12 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                   // ✅ 텍스트 입력 기반 태그 캡처
                   // =========================
                   Text(
-                    'localNewsCreate.labels.tags'.tr(), // '태그'
+                    t.localNewsCreate.labels.tags, // '태그'
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const SizedBox(height: 8),
                   CustomTagInputField(
-                    hintText: 'tag_input.help'.tr(),
+                    hintText: t.tagInput.help,
                     initialTags: _tags,
                     onTagsChanged: (tags) {
                       setState(() {
@@ -321,7 +321,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                             height: 24,
                             child: CircularProgressIndicator(strokeWidth: 3),
                           )
-                        : Text('localNewsCreate.buttons.submit'.tr()),
+                        : Text(t.localNewsCreate.buttons.submit),
                   ),
 
                   // --- ✅ [태그 시스템] 가이드형 필드 UI (조건부 표시) ---
@@ -372,17 +372,15 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
       children: [
         const Divider(height: 24),
         Text(
-          'localNewsCreate.labels.guidedTitle'.tr(), // '추가 정보 (선택)' (다국어 키)
+          t.localNewsCreate.labels.guidedTitle, // '추가 정보 (선택)' (다국어 키)
           style: Theme.of(context).textTheme.titleSmall,
         ),
         const SizedBox(height: 16),
         TextFormField(
           controller: _eventLocationController,
           decoration: InputDecoration(
-            labelText: 'localNewsCreate.labels.eventLocation'
-                .tr(), // '이벤트/발생 장소' (다국어 키)
-            hintText: 'localNewsCreate.hints.eventLocation'
-                .tr(), // '예: Jl. Sudirman 123' (다국어 키)
+            labelText: t.localNewsCreate.labels.eventLocation,
+            hintText: t.localNewsCreate.hints.eventLocation,
             border: const OutlineInputBorder(),
           ),
         ),
@@ -399,8 +397,8 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
       // 최대 5장 제한
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('localNewsCreate.validation.imageMaxLimit'
-                .tr())), // 다국어 키 추가 필요
+            content: Text(
+                'localNewsCreate.validation.imageMaxLimit')), // 다국어 키 추가 필요
       );
       return;
     }
@@ -432,7 +430,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
         TextButton.icon(
             onPressed: _pickImages,
             icon: const Icon(Icons.camera_alt),
-            label: Text('localNewsCreate.buttons.addImage'.tr())),
+            label: Text(t.localNewsCreate.buttons.addImage)),
         const SizedBox(height: 8),
         if (_selectedImages.isNotEmpty)
           SizedBox(

@@ -23,7 +23,8 @@ import 'package:bling_app/features/clubs/screens/club_post_detail_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
 
 class ClubPostCard extends StatelessWidget {
   final ClubPostModel post;
@@ -35,30 +36,30 @@ class ClubPostCard extends StatelessWidget {
     final dt = timestamp.toDate();
     final diff = now.difference(dt);
 
-    if (diff.inMinutes < 1) return 'time.now'.tr();
+    if (diff.inMinutes < 1) return t.time.now;
     if (diff.inHours < 1) {
-      return 'time.minutesAgo'
-          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+      return t.time.minutesAgo
+          .replaceAll('{minutes}', diff.inMinutes.toString());
     }
     if (diff.inDays < 1) {
-      return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
+      return t.time.hoursAgo.replaceAll('{hours}', diff.inHours.toString());
     }
-    return DateFormat('time.dateFormat'.tr()).format(dt);
+    return DateFormat(t.time.dateFormat).format(dt);
   }
 
   Future<void> _deletePost(BuildContext context) async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('clubs.post.deleteTitle'.tr()),
-        content: Text('clubs.post.deleteConfirm'.tr()),
+        title: Text(t['clubs.post.deleteTitle'] ?? ''),
+        content: Text(t['clubs.post.deleteConfirm'] ?? ''),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('common.cancel'.tr())),
+              child: Text(t.common.cancel)),
           TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text('clubs.post.deleteConfirm'.tr(),
+              child: Text(t['clubs.post.deleteConfirm'] ?? '',
                   style: TextStyle(color: Colors.red))),
         ],
       ),
@@ -68,12 +69,12 @@ class ClubPostCard extends StatelessWidget {
       try {
         await ClubRepository().deleteClubPost(post.clubId, post.id);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('clubs.post.deleteSuccess'.tr()),
+            content: Text(t['clubs.post.deleteSuccess'] ?? ''),
             backgroundColor: Colors.green));
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('clubs.post.deleteFailWithMsg'
-                .tr(namedArgs: {'msg': e.toString()})),
+            content: Text(t['clubs.post.deleteFailWithMsg'] ??
+                ''.replaceAll('{msg}', e.toString())),
             backgroundColor: Colors.red));
       }
     }
@@ -109,7 +110,7 @@ class ClubPostCard extends StatelessWidget {
               backgroundColor: Colors.white,
               child: Icon(Icons.person_off_outlined, color: Colors.grey),
             ),
-            title: Text('clubs.post.withdrawnMember'.tr(),
+            title: Text(t['clubs.post.withdrawnMember'] ?? '',
                 style:
                     TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
             subtitle:
@@ -117,7 +118,7 @@ class ClubPostCard extends StatelessWidget {
             trailing: (currentUserId == clubOwnerId)
                 ? IconButton(
                     icon: const Icon(Icons.delete_outline, color: Colors.grey),
-                    tooltip: 'clubs.post.deleteTooltip'.tr(),
+                    tooltip: t.clubs.post.deleteTooltip,
                     onPressed: () => _deletePost(context),
                   )
                 : null,
@@ -135,7 +136,7 @@ class ClubPostCard extends StatelessWidget {
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
           return Card(
-              child: ListTile(title: Text('clubs.post.loadingUser'.tr())));
+              child: ListTile(title: Text(t['clubs.post.loadingUser'] ?? '')));
         }
 
         final user = UserModel.fromFirestore(snapshot.data!);
@@ -198,7 +199,8 @@ class ClubPostCard extends StatelessWidget {
                               <PopupMenuEntry<String>>[
                             PopupMenuItem<String>(
                                 value: 'delete',
-                                child: Text('clubs.post.optionDelete'.tr())),
+                                child:
+                                    Text(t['clubs.post.optionDelete'] ?? '')),
                           ],
                         ),
                     ],

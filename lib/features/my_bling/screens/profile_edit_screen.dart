@@ -20,7 +20,8 @@ import 'dart:io';
 
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -185,7 +186,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     if (user == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('profileEdit.errors.noUser'.tr())));
+            SnackBar(content: Text(t.profileEdit.errors.noUser)));
         setState(() => _isSaving = false);
       }
       return;
@@ -232,14 +233,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('profileEdit.successMessage'.tr())));
+            SnackBar(content: Text(t.profileEdit.successMessage)));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-                'profileEdit.errors.updateFailed'.tr(args: [e.toString()]))));
+            content: Text(t.profileEdit.errors.updateFailed
+                .replaceAll('{0}', e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -251,7 +252,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('profileEdit.title'.tr()),
+        title: Text(t.profileEdit.title),
         titleTextStyle: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -306,20 +307,20 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         TextField(
                           controller: _nicknameController,
                           decoration: InputDecoration(
-                              labelText: 'profileEdit.nicknameHint'.tr()),
+                              labelText: t.profileEdit.nicknameHint),
                         ),
                         const SizedBox(height: 16),
                         TextField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
                           decoration: InputDecoration(
-                              labelText: 'profileEdit.phoneHint'.tr()),
+                              labelText: t.profileEdit.phoneHint),
                         ),
                         const SizedBox(height: 16),
                         TextField(
                           controller: _bioController,
                           decoration: InputDecoration(
-                              labelText: 'profileEdit.bioHint'.tr()),
+                              labelText: t.profileEdit.bioHint),
                           maxLines: 3,
                         ),
                         const SizedBox(height: 24),
@@ -332,8 +333,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'profileEdit.locationTitle'.tr(),
-                                style: TextStyle(
+                                t.profileEdit.locationTitle,
+                                style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black54),
                               ),
@@ -346,14 +347,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                                   Expanded(
                                     child: Text(
                                       _userModel?.locationName ??
-                                          'profileEdit.locationNotSet'.tr(),
+                                          t.profileEdit.locationNotSet,
                                       style: const TextStyle(fontSize: 16),
                                     ),
                                   ),
                                   TextButton(
                                     onPressed: _openLocationSetting,
                                     child:
-                                        Text('profileEdit.changeLocation'.tr()),
+                                        Text(t.profileEdit.changeLocation),
                                   )
                                 ],
                               ),
@@ -392,7 +393,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("interests.title".tr(),
+                            Text(t.interests.title,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             Text('${_interests.length}/10',
@@ -401,7 +402,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                                     color: Colors.teal)),
                           ],
                         ),
-                        Text("interests.limit_info".tr(),
+                        Text(t.interests.limitInfo,
                             style: TextStyle(
                                 color: Colors.grey[600], fontSize: 12)),
                         const SizedBox(height: 8),
@@ -409,7 +410,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                           final categoryKey = entry.key;
                           final interestKeys = entry.value;
                           return ExpansionTile(
-                            title: Text("interests.$categoryKey".tr(),
+                            title: Text(t['interests.$categoryKey'] ?? '',
                                 style: const TextStyle(
                                     fontWeight: FontWeight.w500)),
                             children: [
@@ -422,8 +423,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                                     final isSelected =
                                         _interests.contains(interestKey);
                                     return FilterChip(
+                                      // TODO: Refactor dynamic key above these lines.
                                       label: Text(
-                                          "interests.items.$interestKey".tr()),
+                                          t['interests.items.$interestKey'] ?? ''),
                                       selected: isSelected,
                                       onSelected: (selected) {
                                         setState(() {
@@ -434,9 +436,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
                                                 SnackBar(
-                                                    content: Text(
-                                                        "interests.limit_reached"
-                                                            .tr())),
+                                                    content: Text(t[
+                                                        'interests.limit_reached'])),
                                               );
                                             }
                                           } else {
@@ -454,16 +455,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         const SizedBox(height: 24),
                         const Divider(),
                         const SizedBox(height: 16),
-                        Text('profileEdit.privacy.title'.tr(),
+                        Text(t.profileEdit.privacy.title,
                             style: theme.textTheme.titleMedium),
                         SwitchListTile(
-                          title: Text('profileEdit.privacy.showLocation'.tr()),
+                          title: Text(t.profileEdit.privacy.showLocation),
                           value: _showLocationOnMap,
                           onChanged: (val) =>
                               setState(() => _showLocationOnMap = val),
                         ),
                         SwitchListTile(
-                          title: Text('profileEdit.privacy.allowRequests'.tr()),
+                          title: Text(t.profileEdit.privacy.allowRequests),
                           value: _allowFriendRequests,
                           onChanged: (val) {
                             setState(() {
@@ -474,8 +475,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         // [v2.1] '동네 친구' 리스트 노출 토글 (findfriend_form_screen.dart에서 이관)
                         const SizedBox(height: 16),
                         SwitchListTile(
-                          title: Text("findFriend.showProfileLabel".tr()),
-                          subtitle: Text("findFriend.showProfileSubtitle".tr()),
+                          title: Text(t.findFriend.showProfileLabel),
+                          subtitle: Text(t.findFriend.showProfileSubtitle),
                           value: _isVisibleInList,
                           onChanged: (value) {
                             setState(() => _isVisibleInList = value);
@@ -502,7 +503,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                               height: 20,
                               child: CircularProgressIndicator(
                                   strokeWidth: 2, color: Colors.white))
-                          : Text('profileEdit.saveButton'.tr()),
+                          : Text(t.profileEdit.saveButton),
                     ),
                   ),
                 ),

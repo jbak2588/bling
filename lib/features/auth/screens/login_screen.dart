@@ -1,12 +1,12 @@
 // lib/features/auth/screens/login_screen.dart
-// bling_app Version 0.4
+// bling_app Version 0.9
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart'; // [New] Slang import
 import 'dart:io'; // [추가] Platform 확인용
 import 'dart:math'; // [추가] Nonce 생성용
 import 'dart:convert'; // [추가] SHA256 해싱용
@@ -103,8 +103,8 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('login.alerts.unknownError'.tr())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t.login.alerts.unknownError)));
       }
       debugPrint("Apple Login Error: $e");
     } finally {
@@ -137,16 +137,16 @@ class _LoginScreenState extends State<LoginScreen> {
       switch (e.code) {
         case 'user-not-found':
         case 'invalid-credential': // 일반적인 로그인 실패
-          errorMessage = 'login.alerts.userNotFound'.tr();
+          errorMessage = t.login.alerts.userNotFound;
           break;
         case 'wrong-password':
-          errorMessage = 'login.alerts.wrongPassword'.tr();
+          errorMessage = t.login.alerts.wrongPassword;
           break;
         case 'invalid-email':
-          errorMessage = 'login.alerts.invalidEmail'.tr();
+          errorMessage = t.login.alerts.invalidEmail;
           break;
         default:
-          errorMessage = 'login.alerts.unknownError'.tr();
+          errorMessage = t.login.alerts.unknownError;
       }
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -154,8 +154,8 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('login.alerts.unknownError'.tr())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t.login.alerts.unknownError)));
       }
     }
 
@@ -209,8 +209,8 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('login.alerts.unknownError'.tr())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t.login.alerts.unknownError)));
       }
     }
     if (mounted) setState(() => _isLoading = false);
@@ -245,7 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 14),
               // ▼▼▼▼▼ 다국어 키 수정 ▼▼▼▼▼
               Text(
-                'login.subtitle'.tr(), // 'loginSubtitle' -> 'login.subtitle'
+                t.login.subtitle, // [Mod] 키 이름 자동완성 확인
 
                 style: GoogleFonts.inter(
                   color: Colors.grey[800],
@@ -274,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextField(
                       controller: _emailController,
                       decoration: InputDecoration(
-                        labelText: 'login.emailHint'.tr(),
+                        labelText: t.login.emailHint,
                         prefixIcon: const Icon(Icons.mail_outline),
                       ),
                       style: GoogleFonts.montserrat(),
@@ -283,7 +283,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextField(
                       controller: _passwordController,
                       decoration: InputDecoration(
-                        labelText: 'login.passwordHint'.tr(),
+                        labelText: t.login.passwordHint,
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(_showPassword
@@ -313,7 +313,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: Colors.white)
                             // ▼▼▼▼▼ 다국어 키 수정 ▼▼▼▼▼
                             : Text(
-                                'login.buttons.login'.tr(),
+                                t.login.buttons.login,
                                 style: GoogleFonts.inter(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
@@ -329,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             height: 20, width: 20),
                         // ▼▼▼▼▼ 다국어 키 수정 ▼▼▼▼▼
                         label: Text(
-                          'login.buttons.google'.tr(),
+                          t.login.buttons.google,
                           style: GoogleFonts.montserrat(),
                         ),
                         style: OutlinedButton.styleFrom(
@@ -352,7 +352,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           icon: const Icon(Icons.apple,
                               size: 24, color: Colors.white),
                           label: Text(
-                            'login.buttons.apple'.tr(),
+                            t.login.buttons.apple,
                             style: GoogleFonts.montserrat(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -372,13 +372,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text.rich(
                         TextSpan(
                           // ▼▼▼▼▼ 다국어 키 수정 ▼▼▼▼▼
-                          text: '${'login.links.askForAccount'.tr()} ',
+                          text: '${t.login.links.askForAccount} ',
                           style: GoogleFonts.montserrat(
                               color: Colors.grey.shade700),
                           children: [
                             TextSpan(
                               // ▼▼▼▼▼ 다국어 키 수정 ▼▼▼▼▼
-                              text: 'login.links.signUp'.tr(),
+                              text: t.login.links.signUp,
                               style: TextStyle(
                                   color: Colors.teal.shade600,
                                   fontWeight: FontWeight.bold),

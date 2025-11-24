@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 // ❌ 리소스 충돌을 일으키는 google_maps_flutter 패키지는 더 이상 필요 없으므로 삭제합니다. (주석 유지)
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
@@ -243,7 +243,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                       Text(
                         // 요청: 전체 주소 대신 kel만 표시
                         user.locationParts?['kel'] ??
-                            'postCard.locationNotSet'.tr(),
+                            t.postCard.locationNotSet,
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
@@ -271,7 +271,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        title: Text(_currentPost.title ?? 'localNewsDetail.appBarTitle'.tr()),
+        title: Text(_currentPost.title ?? t.localNewsDetail.appBarTitle),
         actions: [
           if (currentUserId != null && currentUserId == _currentPost.userId)
             Padding(
@@ -330,7 +330,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
             if (hasLocation) ...[
               const SizedBox(height: 16),
               // 위치 섹션 제목
-              Text('postCard.location'.tr(),
+              Text(t.postCard.location,
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               // ✅ [수정] 잘못된 _buildGoogleMap/_buildMiniMap 호출을 MiniMapView (공통 위젯)으로 교체
@@ -355,7 +355,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
       bottomNavigationBar: CommentInputField(
         postId: _currentPost.id,
         onCommentAdded: _handleCommentAdded,
-        hintText: 'commentInputField.hintText'.tr(),
+        hintText: t.commentInputField.hintText,
       ),
     );
   }
@@ -379,7 +379,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('common.shareError'.tr()))); // 다국어 필요
+            SnackBar(content: Text(t.common.shareError))); // 다국어 필요
       }
     } finally {
       // 상태 업데이트 없음
@@ -393,12 +393,12 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
 
     if (isOwner) {
       return <PopupMenuEntry<String>>[
-        PopupMenuItem(value: 'edit', child: Text('common.edit'.tr())),
-        PopupMenuItem(value: 'delete', child: Text('common.delete'.tr())),
+        PopupMenuItem(value: 'edit', child: Text(t.common.edit)),
+        PopupMenuItem(value: 'delete', child: Text(t.common.delete)),
       ];
     } else {
       return <PopupMenuEntry<String>>[
-        PopupMenuItem(value: 'report', child: Text('common.report'.tr())),
+        PopupMenuItem(value: 'report', child: Text(t.common.report)),
       ];
     }
   }
@@ -431,19 +431,19 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('common.delete'.tr()),
-        content: Text('localNewsDetail.confirmDelete'.tr()),
+        title: Text(t.common.delete),
+        content: Text(t.localNewsDetail.confirmDelete),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('common.cancel'.tr()),
+            child: Text(t.common.cancel),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
               await _deletePost();
             },
-            child: Text('common.delete'.tr()),
+            child: Text(t.common.delete),
           ),
         ],
       ),
@@ -458,14 +458,14 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           .delete();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('localNewsDetail.deleted'.tr())),
+          SnackBar(content: Text(t.localNewsDetail.deleted)),
         );
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('main.errors.unknown'.tr())),
+          SnackBar(content: Text(t.main.errors.unknown)),
         );
       }
     }
@@ -488,7 +488,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('reportDialog.title'.tr()),
+              title: Text(t.reportDialog.title),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -499,7 +499,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                       children: reportReasons.map((reasonKey) {
                         final isSelected = selectedReason == reasonKey;
                         return ChoiceChip(
-                          label: Text(reasonKey.tr()),
+                          label: Text(t[reasonKey]),
                           selected: isSelected,
                           onSelected: (_) =>
                               setState(() => selectedReason = reasonKey),
@@ -512,7 +512,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: Text('common.cancel'.tr()),
+                  child: Text(t.common.cancel),
                 ),
                 ElevatedButton(
                   onPressed: (selectedReason != null && !_isReporting)
@@ -527,7 +527,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text('common.report'.tr()),
+                      : Text(t.common.report),
                 ),
               ],
             );
@@ -543,13 +543,13 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     final reporterId = FirebaseAuth.instance.currentUser?.uid;
     if (reporterId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('main.errors.loginRequired'.tr())));
+          SnackBar(content: Text(t.main.errors.loginRequired)));
       return;
     }
 
     if (_currentPost.userId == reporterId) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('reportDialog.cannotReportSelf'.tr())));
+          SnackBar(content: Text(t.reportDialog.cannotReportSelf)));
       return;
     }
 
@@ -572,18 +572,18 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('reportDialog.success'.tr())));
+            .showSnackBar(SnackBar(content: Text(t.reportDialog.success)));
       }
       // ✅ [Exception Fix] 저장된 참조 사용
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('reportDialog.success'.tr())),
+        SnackBar(content: Text(t.reportDialog.success)),
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'reportDialog.fail'.tr(namedArgs: {'error': e.toString()}),
+              t.reportDialog.fail.replaceAll('{error}', e.toString()),
             ),
           ),
         );
@@ -592,7 +592,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text(
-            'reportDialog.fail'.tr(namedArgs: {'error': e.toString()}),
+            t.reportDialog.fail.replaceAll('{error}', e.toString()),
           ),
         ),
       );
@@ -640,7 +640,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                     child: Chip(
                       // 표준화: 레이블에 "이모지 + 이름" 표시
                       label: Text(
-                        '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${tagInfo.nameKey.tr()}',
+                        '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${t[tagInfo.nameKey]}',
                         style: const TextStyle(fontSize: 12),
                       ),
                       padding: const EdgeInsets.symmetric(
@@ -806,12 +806,12 @@ Widget _buildLinkPreview(String text) {
       bodyTextOverflow: TextOverflow.ellipsis,
       titleStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
       bodyStyle: TextStyle(color: Colors.grey[600], fontSize: 12),
-      errorTitle: 'linkPreview.errorTitle'.tr(),
-      errorBody: 'linkPreview.errorBody'.tr(),
+      errorTitle: t.linkPreview.errorTitle,
+      errorBody: t.linkPreview.errorBody,
       errorWidget: Container(
         padding: const EdgeInsets.all(12),
         color: Colors.grey[200],
-        child: Text('linkPreview.errorBody'.tr()),
+        child: Text(t.linkPreview.errorBody),
       ),
       cache: const Duration(days: 7), // 미리보기 정보 캐시 기간
       backgroundColor: Colors.grey[100],

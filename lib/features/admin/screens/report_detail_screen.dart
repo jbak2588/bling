@@ -3,7 +3,8 @@ import 'package:bling_app/core/models/comment_model.dart';
 import 'package:bling_app/core/models/reply_model.dart';
 import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 // ✅ User Profile Screen import (사용자 ID 클릭 시 이동)
@@ -131,8 +132,11 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('admin.reportDetail.statusUpdateSuccess'
-                  .tr(namedArgs: {'status': newStatus}))), // 다국어 키 추가 필요
+            content: Text(
+              t.admin.reportDetail.statusUpdateSuccess
+                  .replaceAll('{status}', newStatus),
+            ),
+          ),
         );
         // 상태 업데이트 후 목록 화면으로 돌아가기 (선택 사항)
         // Navigator.pop(context);
@@ -145,8 +149,9 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('admin.reportDetail.statusUpdateFail'
-                  .tr(namedArgs: {'error': e.toString()}))), // 다국어 키 추가 필요
+            content: Text(t.admin.reportDetail.statusUpdateFail
+                .replaceAll('{error}', e.toString())),
+          ),
         );
       }
     } finally {
@@ -171,16 +176,14 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
         );
       } else {
         messenger?.showSnackBar(
-          SnackBar(
-              content: Text('admin.reportDetail.originalPostNotFound'.tr())),
+          SnackBar(content: Text(t.admin.reportDetail.originalPostNotFound)),
         );
       }
     } catch (e) {
       debugPrint('Error navigating to original post: $e');
       if (!mounted) return;
       messenger?.showSnackBar(
-        SnackBar(
-            content: Text('admin.reportDetail.couldNotOpenOriginalPost'.tr())),
+        SnackBar(content: Text(t.admin.reportDetail.couldNotOpenOriginalPost)),
       );
     }
   }
@@ -197,7 +200,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
           ),
         ),
         // 다국어 키: admin.reportDetail.title
-        title: Text('admin.reportDetail.title'.tr()),
+        title: Text(t.admin.reportDetail.title),
       ),
       body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         future: _reportFuture,
@@ -207,7 +210,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
           }
           if (snapshot.hasError || !snapshot.data!.exists) {
             // 다국어 키: admin.reportDetail.loadError
-            return Center(child: Text('admin.reportDetail.loadError'.tr()));
+            return Center(child: Text(t.admin.reportDetail.loadError));
           }
 
           final reportData = snapshot.data!.data() ?? {};
@@ -222,56 +225,54 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildDetailSectionTitle(context,
-                    'admin.reportDetail.sectionReportInfo'.tr()), // '신고 정보'
-                _buildInfoRow(
-                    'admin.reportDetail.idLabel'.tr(), widget.reportId),
-                _buildInfoRow('admin.reportDetail.reporter'.tr(),
+                _buildDetailSectionTitle(
+                    context, t.admin.reportDetail.sectionReportInfo), // '신고 정보'
+                _buildInfoRow(t.admin.reportDetail.idLabel, widget.reportId),
+                _buildInfoRow(t.admin.reportDetail.reporter,
                     reportData['reporterUserId'] ?? 'N/A',
                     isUserId: true), // '신고자'
-                _buildInfoRow('admin.reportDetail.reportedUser'.tr(),
+                _buildInfoRow(t.admin.reportDetail.reportedUser,
                     reportData['reportedUserId'] ?? 'N/A',
                     isUserId: true), // '피신고자'
-                _buildInfoRow('admin.reportDetail.reason'.tr(),
-                    (reportData['reason'] as String? ?? '').tr()), // '신고 사유'
-                _buildInfoRow('admin.reportDetail.reportedAt'.tr(),
-                    formattedDate), // '신고 시각'
-                _buildInfoRow('admin.reportDetail.currentStatus'.tr(),
+                _buildInfoRow(t.admin.reportDetail.reason,
+                    t[reportData['reason'] as String? ?? '']), // '신고 사유'
+                _buildInfoRow(
+                    t.admin.reportDetail.reportedAt, formattedDate), // '신고 시각'
+                _buildInfoRow(t.admin.reportDetail.currentStatus,
                     currentStatus), // '현재 상태'
 
                 // 신고된 게시글 ID (탭하면 상세로 이동)
                 if (_reportedContentType == 'post' &&
                     _reportedContentId.isNotEmpty)
                   _buildLinkRow(
-                    'admin.reportDetail.postIdLabel'.tr(),
+                    t.admin.reportDetail.postIdLabel,
                     _reportedContentId,
                     onTap: () => _openPostById(_reportedContentId),
                   )
                 else if (_reportedContentType == 'comment' &&
                     _reportedParentId.isNotEmpty)
                   _buildLinkRow(
-                    'admin.reportDetail.postIdLabel'.tr(),
+                    t.admin.reportDetail.postIdLabel,
                     _reportedParentId,
                     onTap: () => _openPostById(_reportedParentId),
                   )
                 else if (_reportedContentType == 'reply' &&
                     _reportedGrandparentId.isNotEmpty)
                   _buildLinkRow(
-                    'admin.reportDetail.postIdLabel'.tr(),
+                    t.admin.reportDetail.postIdLabel,
                     _reportedGrandparentId,
                     onTap: () => _openPostById(_reportedGrandparentId),
                   ),
 
                 const Divider(height: 32),
 
-                _buildDetailSectionTitle(context,
-                    'admin.reportDetail.sectionContent'.tr()), // '신고된 콘텐츠'
+                _buildDetailSectionTitle(
+                    context, t.admin.reportDetail.sectionContent), // '신고된 콘텐츠'
 
                 // 신고된 콘텐츠 표시 영역
                 if (_contentFuture == null)
                   Center(
-                      child: Text(
-                          'admin.reportDetail.loadingContent'.tr())) // 로딩 표시
+                      child: Text(t.admin.reportDetail.loadingContent)) // 로딩 표시
                 else
                   FutureBuilder<dynamic>(
                     future: _contentFuture,
@@ -283,8 +284,8 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                       if (contentSnapshot.hasError ||
                           contentSnapshot.data == null) {
                         return Center(
-                            child: Text('admin.reportDetail.contentLoadError'
-                                .tr())); // '콘텐츠 로드 실패'
+                            child: Text(t[
+                                'admin.reportDetail.contentLoadError'])); // '콘텐츠 로드 실패'
                       }
 
                       // 콘텐츠 타입별 위젯 반환
@@ -295,7 +296,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                 const Divider(height: 32),
 
                 _buildDetailSectionTitle(
-                    context, 'admin.reportDetail.sectionActions'.tr()), // '처리'
+                    context, t.admin.reportDetail.sectionActions), // '처리'
 
                 // 상태 변경 버튼들
                 Wrap(
@@ -307,8 +308,8 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                           (currentStatus == 'pending' && !_isUpdatingStatus)
                               ? () => _updateReportStatus('reviewed') // 검토 완료
                               : null,
-                      child: Text(
-                          'admin.reportDetail.actionReviewed'.tr()), // '검토 완료'
+                      child:
+                          Text(t.admin.reportDetail.actionReviewed), // '검토 완료'
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -317,8 +318,8 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                               !_isUpdatingStatus)
                           ? () => _updateReportStatus('action_taken') // 조치 완료
                           : null,
-                      child: Text('admin.reportDetail.actionTaken'
-                          .tr()), // '조치 완료 (예: 삭제)'
+                      child: Text(
+                          'admin.reportDetail.actionTaken'), // '조치 완료 (예: 삭제)'
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -327,8 +328,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                           (currentStatus != 'dismissed' && !_isUpdatingStatus)
                               ? () => _updateReportStatus('dismissed') // 기각
                               : null,
-                      child: Text(
-                          'admin.reportDetail.actionDismissed'.tr()), // '기각'
+                      child: Text(t.admin.reportDetail.actionDismissed), // '기각'
                     ),
                     // 필요시 'pending'으로 되돌리는 버튼 등 추가
                   ],
@@ -427,33 +427,24 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
   // 신고된 콘텐츠 표시 위젯
   Widget _buildReportedContentWidget(dynamic content) {
     String contentText =
-        'admin.reportDetail.contentNotAvailable'.tr(); // '콘텐츠 정보 없음'
+        t.admin.reportDetail.contentNotAvailable; // '콘텐츠 정보 없음'
     String? contentOwnerId;
     String? linkToPostId; // 댓글/답글의 경우 원본 게시글 ID 저장
 
     if (content is PostModel) {
-      contentText = 'admin.reportDetail.content.post'.tr(
-        namedArgs: {
-          'title': content.title ?? '',
-          'body': content.body,
-        },
-      );
+      contentText = t.admin.reportDetail.content.post
+          .replaceAll('{title}', content.title ?? '')
+          .replaceAll('{body}', content.body);
       contentOwnerId = content.userId;
       linkToPostId = content.id;
     } else if (content is CommentModel) {
-      contentText = 'admin.reportDetail.content.comment'.tr(
-        namedArgs: {
-          'content': content.content,
-        },
-      );
+      contentText = t.admin.reportDetail.content.comment
+          .replaceAll('{content}', content.content);
       contentOwnerId = content.userId;
       linkToPostId = _reportedParentId; // 상위 게시글 ID
     } else if (content is ReplyModel) {
-      contentText = 'admin.reportDetail.content.reply'.tr(
-        namedArgs: {
-          'content': content.content,
-        },
-      );
+      contentText = t.admin.reportDetail.content.reply
+          .replaceAll('{content}', content.content);
       contentOwnerId = content.userId;
       linkToPostId = _reportedGrandparentId; // 상위 게시글 ID
     }
@@ -472,7 +463,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
-                  '${'admin.reportDetail.authorIdLabel'.tr()}: $contentOwnerId',
+                  '${t.admin.reportDetail.authorIdLabel}: $contentOwnerId',
                   style: TextStyle(fontSize: 12, color: Colors.grey[600])),
             ),
           if (linkToPostId != null &&
@@ -482,7 +473,7 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
               child: InkWell(
                 onTap: () => _openPostById(linkToPostId!),
                 child: Text(
-                  'admin.reportDetail.viewOriginalPost'.tr(), // '원본 게시글 보기'
+                  t.admin.reportDetail.viewOriginalPost, // '원본 게시글 보기'
                   style: const TextStyle(
                       color: Colors.blue,
                       decoration: TextDecoration.underline,

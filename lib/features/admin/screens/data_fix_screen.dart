@@ -2,7 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 import '../../../core/models/user_model.dart';
 
@@ -152,7 +152,7 @@ class _DataFixScreenState extends State<DataFixScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('admin.dataFix.title'.tr()),
+        title: Text(t['admin.dataFix.title'] ?? ''),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -167,11 +167,11 @@ class _DataFixScreenState extends State<DataFixScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 16)),
               child: _isProcessing
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : Text('admin.dataFix.startWarning'.tr()),
+                  : Text(t['admin.dataFix.startWarning'] ?? ''),
             ),
             const SizedBox(height: 24),
             Text(
-              'admin.dataFix.logsLabel'.tr(),
+              t.admin.dataFix.logsLabel,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const Divider(),

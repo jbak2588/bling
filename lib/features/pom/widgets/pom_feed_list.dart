@@ -17,7 +17,9 @@ import 'package:bling_app/features/pom/models/pom_model.dart';
 import 'package:bling_app/features/pom/widgets/pom_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:easy_localization/easy_localization.dart';
+// ignore: unused_import
+import 'package:bling_app/i18n/strings.g.dart';
+// compat shim removed; using Slang `t` accessors
 
 /// Pom 피드 탭의 유형
 enum PomFeedType {
@@ -120,8 +122,8 @@ class _PomFeedListState extends State<PomFeedList>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('pom.errors.fetchFailed'
-                .tr(namedArgs: {'error': e.toString()}))));
+            content: Text(t.pom.errors.fetchFailed
+                .replaceAll('{error}', e.toString()))));
       }
     } finally {
       if (mounted) {
@@ -136,12 +138,12 @@ class _PomFeedListState extends State<PomFeedList>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('search.resultsTitle'.tr(namedArgs: {'keyword': kw})),
-        content: Text('search.empty.message'.tr(namedArgs: {'keyword': kw})),
+        title: Text(t.search.resultsTitle.replaceAll('{keyword}', kw)),
+        content: Text(t.search.empty.message.replaceAll('{keyword}', kw)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('common.confirm'.tr()),
+            child: Text(t.common.confirm),
           )
         ],
       ),
@@ -176,8 +178,8 @@ class _PomFeedListState extends State<PomFeedList>
         }
         if (snapshot.hasError) {
           return Center(
-              child: Text('pom.errors.fetchFailed'
-                  .tr(namedArgs: {'error': snapshot.error.toString()})));
+              child: Text(t.pom.errors.fetchFailed
+                  .replaceAll('{error}', snapshot.error.toString())));
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           final String emptyKey;
@@ -207,12 +209,12 @@ class _PomFeedListState extends State<PomFeedList>
                   const Icon(Icons.slow_motion_video_outlined,
                       size: 36, color: Colors.grey),
                   const SizedBox(height: 10),
-                  Text(emptyKey.tr(),
+                  Text(t[emptyKey],
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium),
                   if (subKey != null) ...[
                     const SizedBox(height: 6),
-                    Text(subKey.tr(),
+                    Text(t[subKey],
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme

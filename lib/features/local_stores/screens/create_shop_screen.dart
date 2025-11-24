@@ -42,7 +42,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
@@ -119,8 +119,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   Future<void> _submitShop() async {
     if (!_formKey.currentState!.validate() || _isSaving) return;
     if (_images.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('localStores.form.imageError'.tr())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.localStores.form.imageError)));
       return;
     }
 
@@ -188,15 +188,15 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('localStores.create.success'.tr()),
+            content: Text(t.localStores.create.success),
             backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('localStores.create.fail'
-                .tr(namedArgs: {'error': e.toString()})),
+            content: Text(
+                t.localStores.create.fail.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -208,12 +208,12 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('localStores.create.title'.tr()),
+        title: Text(t.localStores.create.title),
         actions: [
           if (!_isSaving)
             TextButton(
                 onPressed: _submitShop,
-                child: Text('common.done'.tr(),
+                child: Text(t.common.done,
                     style: TextStyle(
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.bold))),
@@ -227,9 +227,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
               padding: const EdgeInsets.all(16.0),
               children: [
                 // V V V --- [수정] 다중 이미지 선택 UI --- V V V
-                Text(
-                    'localStores.form.photoLabel'
-                        .tr(namedArgs: {'count': '10'}),
+                Text(t.localStores.form.photoLabel.replaceAll('{count}', '10'),
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 SizedBox(
@@ -286,10 +284,10 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.nameLabel'.tr(),
+                      labelText: t.localStores.form.nameLabel,
                       border: const OutlineInputBorder()),
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'localStores.form.nameError'.tr()
+                      ? t.localStores.form.nameError
                       : null,
                 ),
                 const SizedBox(height: 24),
@@ -305,17 +303,17 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                           height: 24,
                           child: CircularProgressIndicator(strokeWidth: 3),
                         )
-                      : Text('localStores.create.submit'.tr()),
+                      : Text(t.localStores.create.submit),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.descriptionLabel'.tr(),
+                      labelText: t.localStores.form.descriptionLabel,
                       border: const OutlineInputBorder()),
                   maxLines: 4,
                   validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'localStores.form.descriptionError'.tr()
+                      ? t.localStores.form.descriptionError
                       : null,
                 ),
                 // [추가] 카테고리 선택
@@ -323,26 +321,25 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: _selectedCategory,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.categoryLabel'.tr(),
+                      labelText: t.localStores.form.categoryLabel,
                       border: const OutlineInputBorder()),
                   items: _shopCategories.map((category) {
                     return DropdownMenuItem(
                       value: category,
                       child: Text(
-                          'localStores.categories.$category'.tr()), // 번역 키 사용
+                          t['localStores.categories.$category'] ?? ''), // 번역 키 사용
                     );
                   }).toList(),
                   onChanged: (value) =>
                       setState(() => _selectedCategory = value!),
-                  validator: (value) => value == null
-                      ? 'localStores.form.categoryError'.tr()
-                      : null,
+                  validator: (value) =>
+                      value == null ? t.localStores.form.categoryError : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _contactController,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.contactLabel'.tr(),
+                      labelText: t.localStores.form.contactLabel,
                       border: const OutlineInputBorder()),
                   keyboardType: TextInputType.phone,
                 ),
@@ -350,8 +347,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                 TextFormField(
                   controller: _hoursController,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.hoursLabel'.tr(),
-                      hintText: 'localStores.form.hoursHint'.tr(),
+                      labelText: t.localStores.form.hoursLabel,
+                      hintText: t.localStores.form.hoursHint,
                       border: const OutlineInputBorder()),
                 ),
                 // [추가] 대표 상품/서비스 입력
@@ -359,13 +356,13 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                 TextFormField(
                   controller: _productsController,
                   decoration: InputDecoration(
-                      labelText: 'localStores.form.productsLabel'.tr(),
-                      hintText: 'localStores.form.productsHint'.tr(),
+                      labelText: t.localStores.form.productsLabel,
+                      hintText: t.localStores.form.productsHint,
                       border: const OutlineInputBorder()),
                 ),
                 const SizedBox(height: 12),
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: t.tagInput.help,
                   initialTags: _tags,
                   titleController: _nameController,
                   onTagsChanged: (tags) => setState(() {

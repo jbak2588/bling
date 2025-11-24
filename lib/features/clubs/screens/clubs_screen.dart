@@ -55,7 +55,7 @@ import 'package:bling_app/features/clubs/widgets/club_proposal_card.dart'; // [�
 import 'package:bling_app/features/clubs/screens/club_detail_screen.dart';
 // import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
@@ -158,7 +158,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   // ✅ 검색바가 활성화되면 탭보다 위에서 노출
                   if (_showSearchBar)
                     InlineSearchChip(
-                      hintText: 'main.search.hint.clubs'.tr(),
+                      hintText: t.main.search.hint.clubs,
                       openNotifier: _chipOpenNotifier,
                       onSubmitted: (kw) => _searchKeywordNotifier.value =
                           kw.trim().toLowerCase(),
@@ -171,8 +171,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   TabBar(
                     controller: controller,
                     tabs: [
-                      Tab(text: 'clubs.tabs.proposals'.tr()),
-                      Tab(text: 'clubs.tabs.activeClubs'.tr()),
+                      Tab(text: t.clubs.tabs.proposals),
+                      Tab(text: t.clubs.tabs.activeClubs),
                     ],
                   ),
                   // 탭 컨텐츠
@@ -203,7 +203,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
         children: [
           if (_showSearchBar)
             InlineSearchChip(
-              hintText: 'main.search.hint.clubs'.tr(),
+              hintText: t.main.search.hint.clubs,
               openNotifier: _chipOpenNotifier,
               onSubmitted: (kw) =>
                   _searchKeywordNotifier.value = kw.trim().toLowerCase(),
@@ -237,8 +237,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'clubs.screen.error'
-                  .tr(namedArgs: {'error': snapshot.error.toString()}),
+              t.clubs.screen.error
+                  .replaceAll('{error}', snapshot.error.toString()),
             ),
           );
         }
@@ -254,11 +254,11 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   children: [
                     Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                     const SizedBox(height: 12),
-                    Text('clubs.proposal.empty'.tr(),
+                    Text(t.clubs.proposal.empty,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 8),
-                    Text('search.empty.checkSpelling'.tr(),
+                    Text(t.search.empty.checkSpelling,
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme
@@ -267,7 +267,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
                         icon: const Icon(Icons.map_outlined),
-                        label: Text('search.empty.expandToNational'.tr()),
+                        label: Text(t.search.empty.expandToNational),
                         onPressed: () => context
                             .read<LocationProvider>()
                             .setMode(LocationSearchMode.national)),
@@ -285,7 +285,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
                 children: [
                   Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                   const SizedBox(height: 12),
-                  Text('clubs.proposal.empty'.tr(),
+                  Text(t.clubs.proposal.empty,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium),
                 ],
@@ -319,11 +319,11 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   children: [
                     Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                     const SizedBox(height: 12),
-                    Text('clubs.proposal.empty'.tr(),
+                    Text(t.clubs.proposal.empty,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 8),
-                    Text('search.empty.checkSpelling'.tr(),
+                    Text(t.search.empty.checkSpelling,
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme
@@ -332,7 +332,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
                         icon: const Icon(Icons.map_outlined),
-                        label: Text('search.empty.expandToNational'.tr()),
+                        label: Text(t.search.empty.expandToNational),
                         onPressed: () => context
                             .read<LocationProvider>()
                             .setMode(LocationSearchMode.national)),
@@ -350,7 +350,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
                 children: [
                   Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                   const SizedBox(height: 12),
-                  Text('clubs.proposal.empty'.tr(),
+                  Text(t.clubs.proposal.empty,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium),
                 ],
@@ -382,7 +382,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
-            'clubs.tabs.exploreClubs'.tr(),
+            t.clubs.tabs.exploreClubs,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
@@ -402,8 +402,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'clubs.screen.error'
-                  .tr(namedArgs: {'error': snapshot.error.toString()}),
+              t.clubs.screen.error
+                  .replaceAll('{error}', snapshot.error.toString()),
             ),
           );
         }
@@ -419,11 +419,11 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   children: [
                     Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                     const SizedBox(height: 12),
-                    Text('clubs.screen.empty'.tr(),
+                    Text(t.clubs.screen.empty,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 8),
-                    Text('search.empty.checkSpelling'.tr(),
+                    Text(t.search.empty.checkSpelling,
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme
@@ -432,7 +432,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
                         icon: const Icon(Icons.map_outlined),
-                        label: Text('search.empty.expandToNational'.tr()),
+                        label: Text(t.search.empty.expandToNational),
                         onPressed: () => context
                             .read<LocationProvider>()
                             .setMode(LocationSearchMode.national)),
@@ -450,7 +450,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
                 children: [
                   Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                   const SizedBox(height: 12),
-                  Text('clubs.screen.empty'.tr(),
+                  Text(t.clubs.screen.empty,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium),
                 ],
@@ -484,11 +484,11 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   children: [
                     Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                     const SizedBox(height: 12),
-                    Text('clubs.screen.empty'.tr(),
+                    Text(t.clubs.screen.empty,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 8),
-                    Text('search.empty.checkSpelling'.tr(),
+                    Text(t.search.empty.checkSpelling,
                         textAlign: TextAlign.center,
                         style: Theme.of(context)
                             .textTheme
@@ -497,7 +497,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
                         icon: const Icon(Icons.map_outlined),
-                        label: Text('search.empty.expandToNational'.tr()),
+                        label: Text(t.search.empty.expandToNational),
                         onPressed: () => context
                             .read<LocationProvider>()
                             .setMode(LocationSearchMode.national)),
@@ -515,7 +515,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
                 children: [
                   Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
                   const SizedBox(height: 12),
-                  Text('clubs.screen.empty'.tr(),
+                  Text(t.clubs.screen.empty,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium),
                 ],
@@ -561,7 +561,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
-                  'clubs.tabs.myClubs'.tr(),
+                  t.clubs.tabs.myClubs,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

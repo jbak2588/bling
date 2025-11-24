@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:easy_localization/easy_localization.dart';
+
+import 'package:bling_app/i18n/strings.g.dart'; // [New] Import
 // import 'package:geolocator/geolocator.dart';
 // import 'package:flutter_google_maps_webservices/places.dart';
 // import 'package:bling_app/api_keys.dart';
@@ -47,13 +48,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (_nicknameController.text.trim().isEmpty ||
         _emailController.text.trim().isEmpty ||
         _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth.signup.fail.required'.tr())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.auth.signup.fail.required)));
       return;
     }
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth.signup.fail.password_mismatch'.tr())));
+          SnackBar(content: Text(t.auth.signup.fail.passwordMismatch)));
       return;
     }
 
@@ -76,8 +77,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text(tr('auth.verification.fail_send',
-                      namedArgs: {'error': e.toString()}))),
+                  content: Text(t.auth.verification.failSend
+                      .replaceAll('{error}', e.toString()))),
             );
           }
           // 이메일 발송 실패는 가입 실패로 간주하지 않고 진행
@@ -98,28 +99,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
 
       if (mounted) {
-        // [수정] 성공 메시지에 이메일 확인 안내 추가
+        // [Mod] Slang generated getter contains '{email}' placeholder — replace manually
+        final successMsg = t.auth.signup.successEmailSent.replaceAll(
+          '{email}',
+          credential.user?.email ?? _emailController.text.trim(),
+        );
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(tr('auth.signup.success_email_sent',
-                  namedArgs: {'email': _emailController.text.trim()}))),
+          SnackBar(content: Text(successMsg)),
         );
         Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {
-      String errorMessage = 'auth.signup.fail.default'.tr();
+      String errorMessage = t.auth.signup.fail.kDefault;
       if (e.code == 'weak-password') {
-        errorMessage = 'auth.signup.fail.weak_password'.tr();
+        errorMessage = t.auth.signup.fail.weakPassword;
       } else if (e.code == 'email-already-in-use') {
-        errorMessage = 'auth.signup.fail.email_in_use'.tr();
+        errorMessage = t.auth.signup.fail.emailInUse;
       } else if (e.code == 'invalid-email') {
-        errorMessage = 'auth.signup.fail.invalid_email'.tr();
+        errorMessage = t.auth.signup.fail.invalidEmail;
       }
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(errorMessage)));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth.signup.fail.unknown'.tr())));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.auth.signup.fail.unknown)));
     }
 
     if (mounted) {
@@ -134,7 +137,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F6F1),
       appBar: AppBar(
-        title: Text('signup.title'.tr()),
+        title: Text(t.signup.title),
         titleTextStyle: GoogleFonts.inter(
             fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
         backgroundColor: Colors.transparent,
@@ -172,7 +175,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'signup.title'.tr(),
+                    t.signup.title,
                     style: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
@@ -182,7 +185,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(height: 8),
                   // ▼▼▼▼▼ 누락되었던 부제(subtitle) 키 적용 ▼▼▼▼▼
                   Text(
-                    'signup.subtitle'.tr(),
+                    t.signup.subtitle,
                     // ▼▼▼▼▼ Inter 폰트로 변경 ▼▼▼▼▼
                     style: GoogleFonts.inter(
                       color: Colors.grey[700],
@@ -193,13 +196,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextField(
                       controller: _nicknameController,
                       decoration: InputDecoration(
-                          labelText: 'signup.nicknameHint'.tr(),
+                          labelText: t.signup.nicknameHint,
                           prefixIcon: const Icon(Icons.face_outlined))),
                   const SizedBox(height: 18),
                   TextField(
                       controller: _emailController,
                       decoration: InputDecoration(
-                          labelText: 'signup.emailHint'.tr(),
+                          labelText: t.signup.emailHint,
                           prefixIcon: const Icon(Icons.mail_outline)),
                       keyboardType: TextInputType.emailAddress),
                   const SizedBox(height: 18),
@@ -207,7 +210,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       controller: _passwordController,
                       obscureText: !_passwordVisible,
                       decoration: InputDecoration(
-                          labelText: 'signup.passwordHint'.tr(),
+                          labelText: t.signup.passwordHint,
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
                               icon: Icon(_passwordVisible
@@ -220,7 +223,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       controller: _confirmPasswordController,
                       obscureText: !_confirmPasswordVisible,
                       decoration: InputDecoration(
-                          labelText: 'signup.passwordConfirmHint'.tr(),
+                          labelText: t.signup.passwordConfirmHint,
                           prefixIcon: const Icon(Icons.lock_reset_outlined),
                           suffixIcon: IconButton(
                               icon: Icon(_confirmPasswordVisible
@@ -230,37 +233,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   _confirmPasswordVisible =
                                       !_confirmPasswordVisible)))),
                   const SizedBox(height: 18),
-                  // ▼▼▼▼▼ 위치 입력 UI 및 안내문구 제거 (Delayed Profile Activation) ▼▼▼▼▼
-                  // Row(
-                  //   children: [
-                  //     Expanded(
-                  //       child: TextField(
-                  //         controller: _locationController,
-                  //         decoration: InputDecoration(
-                  //           labelText: 'signup.locationHint'.tr(),
-                  //           prefixIcon: const Icon(Icons.location_on_outlined),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //     IconButton(
-                  //       icon: const Icon(Icons.my_location, color: Colors.teal),
-                  //       onPressed:
-                  //           _isGettingLocation ? null : _handleGpsLocation,
-                  //     ),
-                  //   ],
-                  // ),
-                  // const SizedBox(height: 8),
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  //   child: Text(
-                  //     'signup.locationNotice'.tr(),
-                  //     style: Theme.of(context)
-                  //         .textTheme
-                  //         .bodySmall
-                  //         ?.copyWith(color: Colors.grey[600]),
-                  //   ),
-                  // ),
-                  // ▲▲▲▲▲ 위치 입력 UI 및 안내문구 제거 (Delayed Profile Activation) ▲▲▲▲▲
+
                   const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
@@ -280,10 +253,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               child: CircularProgressIndicator(
                                   color: Colors.white, strokeWidth: 3))
                           : Text(
-                              'signup.buttons.signup'.tr(),
+                              t.signup.buttons.signup,
                               style: GoogleFonts.inter(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text.rich(
+                      TextSpan(
+                        text: '${t.login.links.askForAccount} ',
+                        style:
+                            GoogleFonts.montserrat(color: Colors.grey.shade700),
+                        children: [
+                          TextSpan(
+                            text: t.login.buttons.login,
+                            style: TextStyle(
+                                color: Colors.teal.shade600,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],

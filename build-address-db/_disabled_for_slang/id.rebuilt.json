@@ -603,7 +603,6 @@
   },
   "interests": {
     "title": "Minat",
-    "$categoryKey": "$categoryKey",
     "items": {
       "$interestKey": "$interestKey"
     },

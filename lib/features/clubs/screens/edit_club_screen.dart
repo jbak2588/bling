@@ -13,7 +13,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 
 // ✅ 1. GeoPoint 클래스 사용을 위해 cloud_firestore를 import 합니다.
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -130,8 +130,12 @@ class _EditClubScreenState extends State<EditClubScreen> {
     if (result != null && result is Map<String, dynamic>) {
       setState(() {
         // 주소 문자열 생성
-        final kKel = result['kel'] != null ? "Kel. ${result['kel']}" : "";
-        final kKec = result['kec'] != null ? "Kec. ${result['kec']}" : "";
+        final kKel = (result['kel']?.toString() ?? '').isNotEmpty
+            ? "Kel. ${result['kel']?.toString() ?? ''}"
+            : "";
+        final kKec = (result['kec']?.toString() ?? '').isNotEmpty
+            ? "Kec. ${result['kec']?.toString() ?? ''}"
+            : "";
         final kKab = result['kab'] ?? "";
 
         _locationName =
@@ -148,8 +152,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
     // ✅ _interestTags로 유효성 검사
     if (_interestTags.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('clubs.createClub.selectAtLeastOneInterest'.tr())),
+        SnackBar(content: Text(t.clubs.createClub.selectAtLeastOneInterest)),
       );
       return;
     }
@@ -202,15 +205,15 @@ class _EditClubScreenState extends State<EditClubScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('clubs.editClub.success'.tr()),
+            content: Text(t.clubs.editClub.success),
             backgroundColor: Colors.green));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-                'clubs.editClub.fail'.tr(namedArgs: {'error': e.toString()})),
+            content:
+                Text(t.clubs.editClub.fail.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -222,11 +225,11 @@ class _EditClubScreenState extends State<EditClubScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('clubs.editClub.title'.tr()),
+        title: Text(t.clubs.editClub.title),
         actions: [
           if (!_isSaving)
             TextButton(
-                onPressed: _updateClub, child: Text('clubs.editClub.save'.tr()))
+                onPressed: _updateClub, child: Text(t.clubs.editClub.save))
         ],
       ),
       body: Stack(
@@ -276,12 +279,12 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: 'clubs.createClub.nameLabel'.tr(),
+                    labelText: t.clubs.createClub.nameLabel,
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'clubs.createClub.nameError'.tr();
+                      return t.clubs.createClub.nameError;
                     }
                     return null;
                   },
@@ -290,13 +293,13 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'clubs.createClub.descriptionLabel'.tr(),
+                    labelText: t.clubs.createClub.descriptionLabel,
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 5,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'clubs.createClub.descriptionError'.tr();
+                      return t.clubs.createClub.descriptionError;
                     }
                     return null;
                   },
@@ -312,7 +315,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   leading: const Icon(Icons.location_on_outlined),
-                  title: Text('clubs.createClub.locationLabel'.tr()),
+                  title: Text(t.clubs.createClub.locationLabel),
                   subtitle: Text(_locationName),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: _selectLocation,
@@ -320,12 +323,12 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 const SizedBox(height: 24),
 
                 Text(
-                  "interests.title".tr(), /* ... */
+                  t.interests.title, /* ... */
                 ),
                 const SizedBox(height: 8),
                 CustomTagInputField(
                   initialTags: _interestTags,
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: t.tagInput.help,
                   onTagsChanged: (tags) {
                     setState(() {
                       _interestTags = tags;
@@ -334,8 +337,8 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 ),
                 const SizedBox(height: 24),
                 SwitchListTile(
-                  title: Text('clubs.createClub.privateClub'.tr()),
-                  subtitle: Text('clubs.createClub.privateDescription'.tr()),
+                  title: Text(t.clubs.createClub.privateClub),
+                  subtitle: Text(t.clubs.createClub.privateDescription),
                   value: _isPrivate,
                   onChanged: (value) {
                     setState(() {

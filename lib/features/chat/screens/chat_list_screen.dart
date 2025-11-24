@@ -42,7 +42,8 @@ library;
 import 'package:bling_app/core/models/chat_room_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 // [추가] debugPrint
@@ -64,11 +65,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('main.bottomNav.chat'.tr()),
+        title: Text(t.main.bottomNav.chat),
         automaticallyImplyLeading: false,
       ),
       body: _myUid == null
-          ? Center(child: Text('main.errors.loginRequired'.tr()))
+          ? Center(child: Text(t.main.errors.loginRequired))
           : StreamBuilder<List<ChatRoomModel>>(
               stream: _chatService.getChatRoomsStream(),
               builder: (context, snapshot) {
@@ -77,11 +78,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 }
                 if (snapshot.hasError) {
                   return Center(
-                      child: Text('marketplace.error'.tr(
-                          namedArgs: {'error': snapshot.error.toString()})));
+                      child: Text(t.marketplace.error
+                          .replaceAll('{error}', snapshot.error.toString())));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('chat_list.empty'.tr()));
+                  return Center(child: Text(t.chatList.empty));
                 }
 
                 final chatRooms = snapshot.data!;
@@ -115,8 +116,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         }
 
                         final otherUser = userSnapshot.data;
-
-                        
 
                         if (chatRoom.isGroupChat) {
                           return _buildGroupChatItem(context, chatRoom);
@@ -254,19 +253,21 @@ class _ChatListScreenState extends State<ChatListScreen> {
   ListTile _buildDirectChatItem(
       BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
     if (otherUser == null) return const ListTile();
-     // V V V --- [수정] Find Friend UI 개선 --- V V V
+    // V V V --- [수정] Find Friend UI 개선 --- V V V
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: _buildAvatar(imageUrl: otherUser.photoUrl, icon: Icons.favorite_border), // 아이콘 변경
+      leading: _buildAvatar(
+          imageUrl: otherUser.photoUrl, icon: Icons.favorite_border), // 아이콘 변경
       title: Text('Find Friend', // 제목을 'Find Friend'로 고정
           style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text('${otherUser.nickname} • ${chatRoom.lastMessage}', // 부제에 상대방 닉네임 추가
-          maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text(
+          '${otherUser.nickname} • ${chatRoom.lastMessage}', // 부제에 상대방 닉네임 추가
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis),
       trailing: _buildTrailing(chatRoom),
       onTap: () => _navigateToChat(context,
           chatRoom: chatRoom, otherUser: otherUser, type: 'Direct/Friend'),
     );
-    
   }
 
   // V V V --- [수정] 정밀 진단을 위한 로그 출력을 추가합니다 --- V V V

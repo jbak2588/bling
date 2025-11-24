@@ -58,7 +58,7 @@ import 'package:bling_app/features/shared/grab_widgets.dart'; // GrabAppBarShell
 
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -337,7 +337,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     // final activeLocationFilter = _activeLocationFilter; // 제거
     if (userModel == null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('user.notLoggedIn'.tr())));
+          .showSnackBar(SnackBar(content: Text(t.user.notLoggedIn)));
       return;
     }
 
@@ -381,15 +381,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           // ✅ [추가] 카테고리 탭 변경 시 앱바 타이틀 업데이트 콜백
           onTitleChanged: (String newTitle) {
             setState(() {
-              // _appBarTitleKey가 아닌 별도 변수를 쓰거나,
-              // 단순화를 위해 _appBarTitleKey에 직접 텍스트를 넣고
-              // tr() 호출 시 키가 없으면 텍스트 그대로 나오게 하는 방식을 활용할 수 있음.
-              // 하지만 가장 안전한 방법은 화면 갱신을 유도하는 것입니다.
-              // 여기서는 _getAppBarSubTitle 로직과 충돌하지 않게
-              // 현재 화면 컨텐츠(_currentHomePageContent) 상태에서 타이틀을 관리하는 구조가 필요하나,
-              // 기존 구조상 _appBarTitleKey를 덮어쓰는 것이 가장 빠릅니다.
-              // (참고: .tr()은 키가 없으면 키 자체를 리턴하므로,
-              //  newTitle이 번역된 문자열이라면 그대로 표시됩니다.)
               _appBarTitleKey = newTitle;
             });
           },
@@ -461,7 +452,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     if (user == null) {
       // 만약 이 순간에 로그인이 풀려있다면, 사용자에게 알리고 즉시 종료합니다.
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('main.errors.loginRequiredRetry'.tr())),
+        SnackBar(content: Text(t.main.errors.loginRequiredRetry)),
       );
       return;
     }
@@ -532,7 +523,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _showGlobalCreateSheet() {
     if (_userModel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('main.errors.loginRequiredRetry'.tr())),
+        SnackBar(content: Text(t.main.errors.loginRequiredRetry)),
       );
       return;
     }
@@ -554,64 +545,64 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               // 1) 동네소식
               _sheetItem(
                   Icons.article_rounded, // 1. localNews
-                  'main.tabs.localNews'.tr(),
-                  'localNewsCreate.appBarTitle'.tr(),
+                  t.main.tabs.localNews,
+                  t.localNewsCreate.appBarTitle,
                   builder: () => const CreateLocalNewsScreen()),
               // 2) 동네 일자리
               _sheetItem(
                   Icons.work_outline_rounded, // 2. jobs
-                  'main.tabs.jobs'.tr(),
-                  'jobs.form.title'.tr(),
+                  t.main.tabs.jobs,
+                  t.jobs.form.title,
                   builder: () =>
                       SelectJobTypeScreen(userModel: userModel)), // ✅ [작업 31]
               // 3) 분실물센터
               _sheetItem(
                   Icons.report_gmailerrorred_rounded, // 3. lostAndFound
-                  'main.tabs.lostAndFound'.tr(),
-                  'lostAndFound.form.title'.tr(),
+                  t.main.tabs.lostAndFound,
+                  t.lostAndFound.form.title,
                   builder: () => CreateLostItemScreen(userModel: userModel)),
               // 4) 중고거래
               _sheetItem(
                   Icons.store_mall_directory_rounded, // 4. marketplace
-                  'main.tabs.marketplace'.tr(),
-                  'marketplace.registration.title'.tr(),
+                  t.main.tabs.marketplace,
+                  t.marketplace.registration.title,
                   builder: () => const ProductRegistrationScreen()),
               // 5) 동네업체
               _sheetItem(
                   Icons.storefront_rounded, // 5. localStores
-                  'main.tabs.localStores'.tr(),
-                  'localStores.create.title'.tr(),
+                  t.main.tabs.localStores,
+                  t.localStores.create.title,
                   builder: () => CreateShopScreen(userModel: userModel)),
               // 6) 모임
               _sheetItem(
                   Icons.groups_rounded, // 6. clubs
-                  'main.tabs.clubs'.tr(),
-                  'clubs.create.title'.tr(),
+                  t.main.tabs.clubs,
+                  t.clubs.create.title,
                   builder: () => CreateClubScreen(userModel: userModel)),
               // 7) 친구찾기
               _sheetItem(
                   Icons.sentiment_satisfied_alt_rounded, // 7. findFriends
-                  'main.tabs.findFriends'.tr(),
-                  'myBling.editProfile'.tr(), // [v2.1] 툴팁 변경
+                  t.main.tabs.findFriends,
+                  t.myBling.editProfile, // [v2.1] 툴팁 변경
                   builder: () =>
                       const ProfileEditScreen()), // [v2.1] ProfileEditScreen으로 변경
               // 8) 부동산
               _sheetItem(
                   Icons.house_rounded, // 8. realEstate
-                  'main.tabs.realEstate'.tr(),
-                  'realEstate.form.title'.tr(),
+                  t.main.tabs.realEstate,
+                  t.realEstate.form.title,
                   builder: () => CreateRoomListingScreen(userModel: userModel)),
               // 9) 경매
               _sheetItem(
                   Icons.gavel_rounded, // 9. auction
-                  'main.tabs.auction'.tr(),
-                  'auctions.create.title'.tr(),
+                  t.main.tabs.auction,
+                  t.auctions.create.title,
                   builder: () => CreateAuctionScreen(userModel: userModel)),
               // 10) 숏폼
               _sheetItem(
                   Icons.video_camera_back_rounded, // 10. pom
-                  'main.tabs.pom'.tr(),
-                  'pom.create.title'.tr(),
+                  t.main.tabs.pom,
+                  t.pom.create.title,
                   builder: () => CreatePomScreen(userModel: userModel)),
               const SizedBox(height: 12),
             ],
@@ -626,12 +617,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('boards.popup.inactiveTitle'.tr()),
-        content: Text('boards.popup.inactiveBody'.tr()),
+        title: Text(t.boards.popup.inactiveTitle),
+        content: Text(t.boards.popup.inactiveBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('common.cancel'.tr()),
+            child: Text(t.common.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -642,7 +633,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 ),
               );
             },
-            child: Text('boards.popup.writePost'.tr()),
+            child: Text(t.boards.popup.writePost),
           ),
         ],
       ),
@@ -673,7 +664,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   // [수정] 매개변수 이름을 명확하게 변경 (selectedIndex -> currentTab)
   PreferredSizeWidget _buildAppBar(int currentTab) {
     // ✅ locale 의존성만 생성(교체X, 리빌드O)
-    final _ = context.locale;
+    final _ = LocaleSettings.currentLocale;
     final photoUrl = _userModel?.photoUrl;
     // [로직] 검색 아이콘 표시 여부 결정
     // 숨김: 홈 루트(하위 컨텐츠가 없고 _bottomNavIndex == 0) 또는 채팅 탭(_bottomNavIndex == 3)
@@ -748,11 +739,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ✅ 항상 build 시점에 번역되도록 .tr() 호출
+            // ✅ 항상 build 시점에 번역되도록 `t[...]` 호출
             // 👇 [수정] 메인 타이틀도 Flexible로 감싸서 공간을 유연하게 차지하도록 변경
             Flexible(
               child: Text(
-                _appBarTitleKey.tr(),
+                t[_appBarTitleKey],
                 style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold, fontSize: 16),
                 overflow: TextOverflow.ellipsis, // 글자가 길면 ...으로 표시
@@ -815,7 +806,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           }
 
           debugPrint(
-              'MainNavigationScreen - settings.notificationsTitle -> $notifTooltip, locale: ${context.locale}');
+              'MainNavigationScreen - settings.notificationsTitle -> $notifTooltip, locale: ${LocaleSettings.currentLocale}');
 
           return IconButton(
             tooltip: notifTooltip,
@@ -850,16 +841,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final bool? confirmed = await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('admin.reset.confirmTitle'.tr()),
-        content: Text('admin.reset.confirmContent'.tr()),
+        title: Text(t.admin.reset.confirmTitle),
+        content: Text(t.admin.reset.confirmContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('common.cancel'.tr()),
+            child: Text(t.common.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('admin.reset.execute'.tr(),
+            child: Text(t.admin.reset.execute,
                 style: TextStyle(color: Colors.red)),
           ),
         ],
@@ -885,7 +876,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
       if (snapshot.docs.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('admin.reset.noTargets'.tr())),
+          SnackBar(content: Text(t.admin.reset.noTargets)),
         );
         if (mounted) setState(() => _isAdminLoading = false);
         return;
@@ -902,14 +893,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('admin.reset.success'
-                .tr(namedArgs: {'count': snapshot.docs.length.toString()}))),
+            content: Text(t.admin.reset.success
+                .replaceAll('{count}', snapshot.docs.length.toString()))),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(
-                'admin.reset.fail'.tr(namedArgs: {'error': e.toString()}))),
+            content:
+                Text(t.admin.reset.fail.replaceAll('{error}', e.toString()))),
       );
     } finally {
       if (mounted) setState(() => _isAdminLoading = false);
@@ -1054,12 +1045,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             BottomNavigationBarItem(
               icon: const Icon(Icons.home_outlined),
               activeIcon: const Icon(Icons.home),
-              label: 'main.bottomNav.home'.tr(),
+              label: t.main.bottomNav.home,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.holiday_village_outlined),
               activeIcon: const Icon(Icons.holiday_village),
-              label: 'main.bottomNav.board'.tr(),
+              label: t.main.bottomNav.board,
             ),
             // [중앙] 등록 버튼 (FAB 대체)
             BottomNavigationBarItem(
@@ -1093,12 +1084,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 label: Text('$_totalUnreadCount'),
                 child: const Icon(Icons.chat_bubble),
               ),
-              label: 'main.bottomNav.chat'.tr(),
+              label: t.main.bottomNav.chat,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.person_outline),
               activeIcon: const Icon(Icons.person),
-              label: 'main.bottomNav.myBling'.tr(),
+              label: t.main.bottomNav.myBling,
             ),
           ],
         ),
@@ -1182,7 +1173,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       const Icon(Icons.military_tech, color: Colors.brown),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text('drawer.trustDashboard.title'.tr(),
+                        child: Text(t.drawer.trustDashboard.title,
                             style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold, fontSize: 16),
                             overflow: TextOverflow.ellipsis),
@@ -1198,8 +1189,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                             context: context,
                             builder: (_) =>
                                 TrustScoreBreakdownModal(key: UniqueKey())),
-                        child: Text(
-                            'drawer.trustDashboard.breakdownButton'.tr(),
+                        child: Text(t.drawer.trustDashboard.breakdownButton,
                             style: GoogleFonts.inter(
                                 fontSize: 14, fontWeight: FontWeight.w500),
                             overflow: TextOverflow.ellipsis),
@@ -1227,7 +1217,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.edit_outlined),
-                  title: Text('drawer.editProfile'.tr()),
+                  title: Text(t.drawer.editProfile),
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(MaterialPageRoute(
@@ -1286,7 +1276,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.logout),
-                  title: Text('drawer.logout'.tr()),
+                  title: Text(t.drawer.logout),
                   onTap: () async {
                     if (mounted) Navigator.pop(context);
                     await FirebaseAuth.instance.signOut();
@@ -1303,7 +1293,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       required bool isCompleted}) {
     return ListTile(
       leading: Icon(icon, color: isCompleted ? Colors.teal : Colors.grey),
-      title: Text(titleKey.tr(), style: GoogleFonts.inter(fontSize: 15)),
+      title: Text(t[titleKey], style: GoogleFonts.inter(fontSize: 15)),
       trailing: Icon(isCompleted ? Icons.check_circle : Icons.cancel,
           color: isCompleted ? Colors.green : Colors.grey, size: 22),
     );
@@ -1318,11 +1308,11 @@ class SearchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GrabAppBarShell(
-          title: Text(tempSearchQuery ?? 'main.bottomNav.search'.tr())),
+          title: Text(tempSearchQuery ?? t.main.bottomNav.search)),
       body: Center(
           child: Text(tempSearchQuery != null
-              ? "'$tempSearchQuery' ${'search.sheet.comingSoon'.tr()}"
-              : 'main.search.placeholder'.tr())),
+              ? "'$tempSearchQuery' ${t.search.sheet.comingSoon}"
+              : t.main.search.placeholder)),
     );
   }
 }
@@ -1340,7 +1330,7 @@ class TrustScoreBreakdownModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('drawer.trustDashboard.breakdownModalTitle'.tr(),
+      title: Text(t.drawer.trustDashboard.breakdownModalTitle,
           style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
       content: SingleChildScrollView(
         child: Column(
@@ -1367,7 +1357,7 @@ class TrustScoreBreakdownModal extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('drawer.trustDashboard.breakdownClose'.tr()),
+          child: Text(t.drawer.trustDashboard.breakdownClose),
         ),
       ],
     );
@@ -1378,8 +1368,8 @@ class TrustScoreBreakdownModal extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
-          Expanded(child: Text(labelKey.tr(), style: GoogleFonts.inter())),
-          Text(valueKey.tr(),
+          Expanded(child: Text(t[labelKey], style: GoogleFonts.inter())),
+          Text(t[valueKey],
               style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
         ],
       ),

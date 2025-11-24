@@ -8,7 +8,7 @@
 
 import 'package:bling_app/features/clubs/models/club_proposal_model.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/i18n/strings.g.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:bling_app/features/clubs/screens/club_proposal_detail_screen.dart';
 
@@ -69,10 +69,13 @@ class ClubProposalCard extends StatelessWidget {
               const SizedBox(height: 16),
               // [핵심] 인원 달성 현황
               Text(
-                'clubs.proposal.memberStatus'.tr(namedArgs: {
-                  'current': proposal.currentMemberCount.toString(),
-                  'target': proposal.targetMemberCount.toString()
-                }), // "{current}명 / {target}명"
+                t.clubs.proposal.memberStatus
+                    .replaceAll(
+                        '{current}', proposal.currentMemberCount.toString())
+                    .replaceAll(
+                        '{target}',
+                        proposal.targetMemberCount
+                            .toString()), // "{current}명 / {target}명"
                 style:
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),

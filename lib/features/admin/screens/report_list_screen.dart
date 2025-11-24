@@ -1,8 +1,8 @@
 // lib/features/admin/screens/report_list_screen.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-// 날짜 포맷
+import 'package:bling_app/i18n/strings.g.dart';
+import 'package:intl/intl.dart';
 
 import 'report_detail_screen.dart';
 
@@ -14,7 +14,7 @@ class ReportListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         // 다국어 키: admin.reportList.title
-        title: Text('admin.reportList.title'.tr()),
+        title: Text(t.admin.reportList.title),
       ),
       body: StreamBuilder<QuerySnapshot>(
         // Firestore 'reports' 컬렉션에서 'status'가 'pending'인 문서를
@@ -30,11 +30,11 @@ class ReportListScreen extends StatelessWidget {
           }
           if (snapshot.hasError) {
             // 다국어 키: admin.reportList.error
-            return Center(child: Text('admin.reportList.error'.tr()));
+            return Center(child: Text(t.admin.reportList.error));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             // 다국어 키: admin.reportList.empty
-            return Center(child: Text('admin.reportList.empty'.tr()));
+            return Center(child: Text(t.admin.reportList.empty));
           }
 
           final reports = snapshot.data!.docs;
@@ -74,7 +74,7 @@ class ReportListScreen extends StatelessWidget {
               return ListTile(
                 leading: Icon(leadingIcon),
                 // 신고 사유 (다국어 처리 - reportReasons.* 키 사용)
-                title: Text(reason.tr()),
+                title: Text(t[reason]),
                 subtitle: Text('Reported at: $formattedDate'), // 신고 시간
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
