@@ -235,7 +235,7 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
             children: [
               Text(tag.emoji ?? '🔹', style: const TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
-              Text(t[tag.nameKey]), // 태그 이름
+              Text(t[tag.nameKey] ?? tag.tagId), // 태그 이름 (번역 누락 시 tagId로 대체)
             ],
           ),
         );
