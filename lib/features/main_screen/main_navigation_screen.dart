@@ -800,8 +800,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           // we always supply a sensible default label.
           String notifTooltip;
           try {
-            final t =
-                safeTr(context, 'settings.notificationsTitle', fallback: '');
+            final t = safeTr(context, 'notifications.title', fallback: '');
             if (t.trim().isEmpty) {
               notifTooltip = 'Notifications'; // clear English fallback
             } else {
@@ -809,13 +808,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             }
           } catch (e, st) {
             // Keep the debug log but avoid throwing during widget build.
-            debugPrint(
-                'Failed to resolve settings.notificationsTitle: $e\n$st');
+            debugPrint('Failed to resolve notifications.title: $e\n$st');
             notifTooltip = 'Notifications';
           }
 
           debugPrint(
-              'MainNavigationScreen - settings.notificationsTitle -> $notifTooltip, locale: ${context.locale}');
+              'MainNavigationScreen - notifications.title -> $notifTooltip, locale: ${context.locale}');
 
           return IconButton(
             tooltip: notifTooltip,

@@ -21,6 +21,13 @@
       "unknownError": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
     }
   },
+  "notifications": {
+    "title": "Notifikasi",
+    "error": "Gagal memuat notifikasi.",
+    "empty": "Belum ada notifikasi.",
+    "seller_pending_title": "Produk sedang ditinjau",
+    "seller_pending_body": "Daftar Anda '{title}' telah diajukan untuk peninjauan admin."
+  },
   "signup": {
     "title": "Daftar",
     "emailHint": "Alamat Email",
@@ -359,13 +366,6 @@
     },
     "errors": {
       "incomplete_report": "Analisis AI Gagal: AI tidak menghasilkan item laporan yang diperlukan (spesifikasi, kondisi, ringkasan). Silakan coba lagi nanti."
-    },
-    "notifications": {
-      "title": "Notifikasi",
-      "error": "Gagal memuat notifikasi.",
-      "empty": "Belum ada notifikasi.",
-      "seller_pending_title": "Produk sedang ditinjau",
-      "seller_pending_body": "Daftar Anda '{title}' telah diajukan untuk peninjauan admin."
     },
     "common": {
       "pick_from_initial": "Pilih dari foto yang ada",
@@ -2038,39 +2038,35 @@
       "takeover_photos": "Foto Pengambilan",
       "original_photos": "Foto Asli",
       "raw_json": "Raw JSON"
-    }
-  },
-  "tag_input": {
-    "fromTitleSuffix": "(judul)",
-    "addHint": "Tambah tag...",
-    "help": "Gunakan koma (,) atau Enter untuk menambahkan tag."
-  },
-  "auth": {
-    "verification": {
-      "title": "Verifikasi Email",
-      "sent_title": "Email Verifikasi Terkirim",
-      "sent_desc": "Kami telah mengirim tautan ke {email}.\nSilakan klik tautan untuk menyelesaikan verifikasi.",
-      "resend": "Kirim Ulang Email",
-      "logout": "Keluar",
-      "check": "Cek Verifikasi",
-      "success": "Verifikasi email selesai.",
-      "fail_send": "Gagal mengirim email: {error}"
-    }
-    ,
-    "signup": {
-      "success_email_sent": "Pendaftaran berhasil! Kami mengirim tautan verifikasi ke {email}.",
-      "fail": {
-        "required": "Harap isi kolom yang diperlukan.",
-        "password_mismatch": "Kata sandi tidak cocok.",
-        "default": "Pendaftaran gagal. Silakan coba lagi.",
-        "weak_password": "Kata sandi terlalu lemah.",
-        "email_in_use": "Email ini sudah digunakan.",
-        "invalid_email": "Alamat email tidak valid.",
-        "unknown": "Terjadi kesalahan yang tidak diketahui."
+    },
+    "tag_input": {
+      "fromTitleSuffix": "(judul)",
+      "addHint": "Tambah tag...",
+      "help": "Gunakan koma (,) atau Enter untuk menambahkan tag."
+    },
+    "auth": {
+      "verification": {
+        "title": "Verifikasi Email",
+        "sent_title": "Email Verifikasi Terkirim",
+        "sent_desc": "Kami telah mengirim tautan ke {email}.\nSilakan klik tautan untuk menyelesaikan verifikasi.",
+        "resend": "Kirim Ulang Email",
+        "logout": "Keluar",
+        "check": "Cek Verifikasi",
+        "success": "Verifikasi email selesai.",
+        "fail_send": "Gagal mengirim email: {error}"
+      },
+      "signup": {
+        "success_email_sent": "Pendaftaran berhasil! Kami mengirim tautan verifikasi ke {email}.",
+        "fail": {
+          "required": "Harap isi kolom yang diperlukan.",
+          "password_mismatch": "Kata sandi tidak cocok.",
+          "default": "Pendaftaran gagal. Silakan coba lagi.",
+          "weak_password": "Kata sandi terlalu lemah.",
+          "email_in_use": "Email ini sudah digunakan.",
+          "invalid_email": "Alamat email tidak valid.",
+          "unknown": "Terjadi kesalahan yang tidak diketahui."
+        }
       }
     }
-  },
-  "tag_input": {
-    "help": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter."
   }
 }

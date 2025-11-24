@@ -57,9 +57,9 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
       debugPrint(
           'NotificationListScreen.build - localizationDelegates: ${context.localizationDelegates}');
       // Calling .tr() intentionally to show what EasyLocalization resolves at runtime
-      final trResult = 'settings.notificationsTitle'.tr();
+      final trResult = 'notifications.title'.tr();
       debugPrint(
-          "NotificationListScreen.build - 'settings.notificationsTitle'.tr(): $trResult");
+          "NotificationListScreen.build - 'notifications.title'.tr(): $trResult");
       // Note: avoid calling EasyLocalization.of(context)?.tr(...) as analyzer
       // may not expose a .tr method on the provider type. Use the String.tr() extension above.
     } catch (e, st) {
@@ -68,14 +68,14 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
     }
     if (_myUid == null) {
       return Scaffold(
-        appBar: AppBar(title: Text('settings.notificationsTitle'.tr())),
+        appBar: AppBar(title: Text('notifications.title'.tr())),
         body: Center(child: Text('main.errors.loginRequired'.tr())),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('settings.notificationsTitle'.tr()), // "알림"
+        title: Text('notifications.title'.tr()), // "알림"
       ),
       body: StreamBuilder<QuerySnapshot>(
         // Task 94에서 저장한 'notifications' 하위 컬렉션을 실시간으로 읽음

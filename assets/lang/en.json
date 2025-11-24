@@ -21,6 +21,13 @@
       "unknownError": "unknownError"
     }
   },
+    "notifications": {
+    "title": "Notifications",
+    "error": "Failed to load notifications.",
+    "empty": "You have no notifications.",
+    "seller_pending_title": "Product under review",
+    "seller_pending_body": "Your listing '{title}' has been submitted for admin review."
+  },
   "signup": {
     "title": "Sign Up",
     "emailHint": "Email Address",
@@ -465,13 +472,7 @@
       "incomplete_report": "AI Analysis Failed: The AI did not generate required report items (specs, condition, summary). Please try again later."
     }
   },
-  "notifications": {
-    "title": "Notifications",
-    "error": "Failed to load notifications.",
-    "empty": "You have no notifications.",
-    "seller_pending_title": "Product under review",
-    "seller_pending_body": "Your listing '{title}' has been submitted for admin review."
-  },
+
   "registration_flow": {
     "title": "Choose Item Type to Sell",
     "new_item_title": "Register New and Used Items",
@@ -2072,8 +2073,6 @@
         }
       }
     }
-  },
-  "tag_input": {
-    "help": "You can register tags using comma (,) or Enter."
   }
 }
+

@@ -25,6 +25,13 @@
       "unknownError": "unknownError"
     }
   },
+    "notifications": {
+    "title": "알림",
+    "error": "알림을 불러오지 못했습니다.",
+    "empty": "표시할 알림이 없습니다.",
+    "seller_pending_title": "상품 검토 중입니다",
+    "seller_pending_body": "등록하신 상품 '{title}'이(가) 관리자 검토를 위해 제출되었습니다."
+  },
   "signup": {
     "title": "회원가입",
     "emailHint": "이메일 주소",
@@ -385,13 +392,7 @@
       "incomplete_report": "AI 분석 실패: AI가 필수 보고서 항목(스펙, 상태, 요약)을 생성하지 못했습니다. 잠시 후 다시 시도하세요."
     }
   },
-  "notifications": {
-    "title": "알림",
-    "error": "알림을 불러오지 못했습니다.",
-    "empty": "표시할 알림이 없습니다.",
-    "seller_pending_title": "상품 검토 중입니다",
-    "seller_pending_body": "등록하신 상품 '{title}'이(가) 관리자 검토를 위해 제출되었습니다."
-  },
+
   "registration_flow": {
     "title": "판매 상품 종류 선택",
     "new_item_title": "신품 및 중고품 일반 판매 등록",
@@ -2084,8 +2085,5 @@
         "unknown": "알 수 없는 오류가 발생했습니다."
       }
     }
-  },
-  "tag_input": {
-    "help": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다."
   }
 }
