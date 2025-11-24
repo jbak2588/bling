@@ -112,11 +112,7 @@
       }
     }
   },
-  "notifications": {
-    "title": "알림",
-    "error": "알림을 불러오는 중 오류가 발생했습니다.",
-    "empty": "받은 알림이 없습니다."
-  },
+
   "drawer": {
     "editProfile": "프로필 수정",
     "bookmarks": "관심목록",

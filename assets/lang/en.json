@@ -104,11 +104,7 @@
     },
     "results": "results"
   },
-  "notifications": {
-    "title": "Notifications",
-    "error": "Failed to load notifications.",
-    "empty": "No notifications yet."
-  },
+
   "drawer": {
     "editProfile": "Edit Profile",
     "bookmarks": "Bookmarks",
