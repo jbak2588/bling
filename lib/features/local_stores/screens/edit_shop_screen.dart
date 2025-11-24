@@ -327,9 +327,8 @@ class _EditShopScreenState extends State<EditShopScreen> {
                   }).toList(),
                   onChanged: (value) =>
                       setState(() => _selectedCategory = value!),
-                  validator: (value) => value == null
-                      ? t.localStores.form.categoryError
-                      : null,
+                  validator: (value) =>
+                      value == null ? t.localStores.form.categoryError : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -358,7 +357,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 ),
                 const SizedBox(height: 12),
                 CustomTagInputField(
-                  hintText: t.tagInput.help,
+                  hintText: t.shared.tagInput.defaultHint,
                   initialTags: _tags,
                   titleController: _nameController,
                   onTagsChanged: (tags) => setState(() {

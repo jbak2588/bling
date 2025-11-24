@@ -138,11 +138,11 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.locationfilter.title), // 변경
+        title: Text(t.locationFilter.title), // 변경
         actions: [
           TextButton(
             onPressed: _resetFilter,
-            child: Text(t.locationfilter.reset,
+            child: Text(t.locationFilter.reset,
                 style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
@@ -158,9 +158,9 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: t.locationfilter.tab.admin),
-            Tab(text: t.locationfilter.tab.nearby),
-            Tab(text: t.locationfilter.tab.national),
+            Tab(text: 'Admin'),
+            Tab(text: 'Nearby'),
+            Tab(text: 'National'),
           ],
         ),
       ),
@@ -184,7 +184,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
         children: [
           // Province 선택
           _buildFirestoreDropdown(
-            label: t.locationfilter.provinsi,
+            label: t.locationFilter.provinsi,
             collectionPath: _colProvinces, // Root collection
             selectedValue: _tempProv,
             onChanged: (val) {
@@ -203,7 +203,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
           // 여기서는 두 컬렉션을 모두 조회하여 합치는 로직이 필요하나, StreamBuilder로는 복잡함.
           // 따라서 _buildDualCollectionDropdown 헬퍼를 사용합니다.
           _buildDualCollectionDropdown(
-            label: t.locationfilter.kabupaten,
+            label: t.locationFilter.kabupaten,
             parentPath: _tempProv != null ? '$_colProvinces/$_tempProv' : null,
             cols: [_colKabupaten, _colKota], // 둘 다 조회
             selectedValue: _tempKab,
@@ -227,7 +227,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
           //    (여기서는 단순화를 위해 Kab/Kota 컬렉션을 순차적으로 탐색하는 FutureBuilder 사용)
           if (_tempProv != null && _tempKab != null)
             _buildKecamatanDropdown(
-              label: t.locationfilter.kecamatan,
+              label: t.locationFilter.kecamatan,
               provId: _tempProv!,
               kabId: _tempKab!,
               selectedValue: _tempKec,
@@ -239,7 +239,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
               },
             )
           else
-            _disabledDropdown(t.locationfilter.kecamatan), // 변경
+            _disabledDropdown(t.locationFilter.kecamatan), // 변경
           const SizedBox(height: 16),
 
           // Kelurahan 선택
@@ -250,7 +250,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
           if (_tempProv != null && _tempKab != null && _tempKec != null)
             _buildKelurahanDropdown(
               // [간소화] 경로 찾기 로직 내장
-              label: t.locationfilter.kelurahan,
+              label: t.locationFilter.kelurahan,
               provId: _tempProv!,
               kabId: _tempKab!,
               kecId: _tempKec!,
@@ -258,7 +258,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
               onChanged: (val) => setState(() => _tempKel = val),
             )
           else
-            _disabledDropdown(t.locationfilter.kelurahan),
+            _disabledDropdown(t.locationFilter.kelurahan),
 
           const SizedBox(height: 24),
           if (_tempProv != null)
@@ -295,7 +295,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
           decoration: BoxDecoration(
               color: Colors.grey.shade100,
               borderRadius: BorderRadius.circular(8)),
-          child: Text(t.locationfilter.hint.selectParent,
+          child: Text('Select parent area',
               style: const TextStyle(color: Colors.grey)),
         )
       ],
@@ -462,11 +462,11 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               isExpanded: true,
-              hint: Text(t.locationfilter.hint.all),
+              hint: Text(t.locationFilter.all),
               value: items.contains(selectedValue) ? selectedValue : null,
               items: [
                 DropdownMenuItem(
-                    value: null, child: Text(t.locationfilter.hint.all)),
+                    value: null, child: Text(t.locationFilter.all)),
                 ...items.map((item) => DropdownMenuItem(
                       value: item,
                       child: Text(item),
@@ -497,9 +497,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
         children: [
           const Icon(Icons.near_me_rounded, size: 64, color: Colors.orange),
           const SizedBox(height: 24),
-          Text(
-              t.locationfilter.nearby.radius
-                  .replaceAll('{km}', _tempRadius.toInt().toString()),
+          Text('${_tempRadius.toInt()} km',
               style:
                   const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 32),
@@ -516,7 +514,7 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
             ),
           ),
           const SizedBox(height: 16),
-          Text(t.locationfilter.nearby.desc,
+          Text('Select radius for nearby search.',
               textAlign: TextAlign.center, // ✅ 텍스트 중앙 정렬 추가
               style: TextStyle(color: Colors.grey.shade600)),
         ],
@@ -532,14 +530,14 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
         children: [
           const Icon(Icons.map_rounded, size: 64, color: Colors.teal),
           const SizedBox(height: 24),
-          Text(t.locationfilter.national.title,
+          Text('Nationwide',
               style:
                   const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: Text(
-              t.locationfilter.national.desc,
+              'Select nationwide scope for filtering.',
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.grey),
             ),

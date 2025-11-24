@@ -280,7 +280,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
                 const SizedBox(height: 24),
                 CustomTagInputField(
                   initialTags: _tags,
-                  hintText: t.tagInput.help,
+                  hintText: t.shared.tagInput.defaultHint,
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;

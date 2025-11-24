@@ -56,7 +56,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
       debugPrint(
           'NotificationListScreen.build - locale: ${Localizations.localeOf(context)}');
       // Calling t[...] directly to inspect resolved title
-      final trResult = t.settings.notificationsTitle;
+      final trResult = 'Notifications';
       debugPrint(
           "NotificationListScreen.build - settings.notificationsTitle: $trResult");
     } catch (e, st) {
@@ -65,14 +65,14 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
     }
     if (_myUid == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(t.settings.notificationsTitle)),
+        appBar: AppBar(title: const Text('Notifications')),
         body: Center(child: Text(t.main.errors.loginRequired)),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.settings.notificationsTitle), // "알림"
+        title: const Text('Notifications'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         // Task 94에서 저장한 'notifications' 하위 컬렉션을 실시간으로 읽음
@@ -88,7 +88,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text(t.notifications.error));
+            return Center(child: Text(t.main.errors.unknown));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             final isNational = context.watch<LocationProvider>().mode ==
@@ -103,7 +103,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                       Icon(Icons.notifications_off,
                           size: 64, color: Colors.grey[300]),
                       const SizedBox(height: 12),
-                      Text(t.notifications.empty,
+                      Text('No notifications yet.',
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium),
                       const SizedBox(height: 8),
@@ -136,7 +136,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                     Icon(Icons.notifications_off,
                         size: 64, color: Colors.grey[300]),
                     const SizedBox(height: 12),
-                    Text(t.notifications.empty,
+                    Text('No notifications yet.',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium),
                   ],

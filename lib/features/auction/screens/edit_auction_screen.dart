@@ -130,8 +130,8 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-                t.auctions.edit.fail.replaceAll('{error}', e.toString())),
+            content:
+                Text(t.auctions.edit.fail.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -147,8 +147,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
         actions: [
           if (!_isSaving)
             TextButton(
-                onPressed: _updateAuction,
-                child: Text(t.auctions.edit.save)),
+                onPressed: _updateAuction, child: Text(t.auctions.edit.save)),
         ],
       ),
       body: Stack(
@@ -264,7 +263,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
                 ),
                 const SizedBox(height: 16),
                 CustomTagInputField(
-                  hintText: t.tagInput.help,
+                  hintText: t.shared.tagInput.defaultHint,
                   initialTags: _tags,
                   titleController: _titleController,
                   onTagsChanged: (tags) {

@@ -135,8 +135,8 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
       return;
     }
     if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(t.localNewsCreate.alerts.categoryRequired)));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.localNewsCreate.alerts.categoryRequired)));
       return;
     }
 
@@ -314,7 +314,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
             // ✅ 교체된 공용 커스텀 태그 위젯을 사용합니다.
             CustomTagInputField(
               initialTags: _tags, // 초기 태그 목록을 전달합니다.
-              hintText: t.tagInput.help, // 다국어 힌트 텍스트
+              hintText: t.shared.tagInput.defaultHint, // 다국어 힌트 텍스트
               onTagsChanged: (tags) {
                 // 태그가 변경될 때마다 화면의 상태(_tags)를 업데이트합니다.
                 setState(() {

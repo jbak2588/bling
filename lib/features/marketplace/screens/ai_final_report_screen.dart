@@ -142,7 +142,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
     if (notesValue is String && notesValue.isNotEmpty) {
       _buyerNotesController.text = notesValue.trim();
     } else {
-      _buyerNotesController.text = t.aiFlow.finalReport.notesPlaceholder;
+      _buyerNotesController.text = 'No notes provided.';
     }
 
     // 3. Price Assessment
@@ -323,7 +323,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text(isSuspicious
-              ? t.aiFlow.finalReport.successPending
+              ? 'Submission pending review.'
               : t.aiFlow.finalReport.success),
         ),
       );

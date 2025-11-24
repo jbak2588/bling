@@ -66,12 +66,12 @@ class UserProductList extends StatelessWidget {
             }
             if (productsSnapshot.hasError) {
               return Center(
-                  child: Text(t.myBling.products.loadErrorWithMsg
-                      .replaceAll('{msg}', productsSnapshot.error.toString())));
+                  child: Text(t.marketplace.error.replaceAll(
+                      '{error}', productsSnapshot.error.toString())));
             }
             if (!productsSnapshot.hasData ||
                 productsSnapshot.data!.docs.isEmpty) {
-              return Center(child: Text(t.myBling.products.noInfo));
+              return Center(child: Text(t.marketplace.empty));
             }
 
             final products = productsSnapshot.data!.docs

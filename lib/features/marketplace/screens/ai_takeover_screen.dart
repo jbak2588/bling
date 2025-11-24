@@ -230,7 +230,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
             ? t.marketplace.takeover.dialog.matchTitle
             : (match == false
                 ? t.marketplace.takeover.dialog.noMatchTitle
-                : t.marketplace.takeover.dialog.failTitle)),
+                : 'Verification failed')),
         content: Text(reason),
         actions: [
           if (match == true) ...[
@@ -273,7 +273,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
                 Navigator.of(ctx).pop();
                 _startOnSiteVerification(); // [Task 110] AI 검증 재시도
               },
-              child: Text(t.marketplace.takeover.dialog.retry),
+              child: const Text('Retry'),
             ),
           ],
         ],
@@ -288,8 +288,8 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
       final productRepository = ProductRepository();
       await productRepository.completeTakeover(productId: widget.product.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(t.marketplace.takeover.success.finalized)));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(t.marketplace.takeover.success.finalized)));
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
@@ -315,8 +315,8 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
       final productRepository = ProductRepository();
       await productRepository.cancelReservation(productId: widget.product.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(t.marketplace.takeover.success.cancelled)));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(t.marketplace.takeover.success.cancelled)));
         Navigator.of(context).pop(); // 상세 화면으로 복귀
       }
     } catch (e) {
@@ -363,7 +363,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
             if (_checklistItems.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
-                t.marketplace.takeover.checklistTitle,
+                'Verification checklist',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
@@ -441,7 +441,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
           child: OutlinedButton.icon(
             onPressed: () => _pickPhotoForIndex(index, ImageSource.camera),
             icon: const Icon(Icons.camera_alt),
-            label: Text(t.marketplace.takeover.camera),
+            label: const Text('Camera'),
             style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12)),
           ),
@@ -451,7 +451,7 @@ class _AiTakeoverScreenState extends State<AiTakeoverScreen> {
           child: OutlinedButton.icon(
             onPressed: () => _pickPhotoForIndex(index, ImageSource.gallery),
             icon: const Icon(Icons.photo_library),
-            label: Text(t.marketplace.takeover.gallery),
+            label: const Text('Gallery'),
             style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12)),
           ),

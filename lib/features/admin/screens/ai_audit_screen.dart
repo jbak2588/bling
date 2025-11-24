@@ -17,7 +17,7 @@ library;
 
 import 'package:bling_app/features/admin/models/ai_case_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:bling_app/i18n/strings.g.dart';
+// removed unused import
 import 'package:flutter/material.dart';
 import 'package:bling_app/features/admin/screens/ai_case_detail_screen.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -53,13 +53,13 @@ class _AiAuditScreenState extends State<AiAuditScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.aiAudit.title),
+        title: const Text('AI Audit'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: [
-            Tab(text: t.aiAudit.tabs.all),
-            Tab(text: t.aiAudit.tabs.takeover),
-            Tab(text: t.aiAudit.tabs.registration),
+          tabs: const [
+            Tab(text: 'All'),
+            Tab(text: 'Takeover'),
+            Tab(text: 'Registration'),
           ],
         ),
       ),
@@ -92,11 +92,10 @@ class _AiAuditScreenState extends State<AiAuditScreen>
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(
-              child: Text("${t.aiAudit.list.error}: ${snapshot.error}"));
+          return Center(child: Text("Error: ${snapshot.error}"));
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text(t.aiAudit.list.noRecords));
+          return const Center(child: Text('No records'));
         }
 
         final docs = snapshot.data!.docs;
@@ -141,18 +140,16 @@ class _AiAuditScreenState extends State<AiAuditScreen>
           child: Icon(statusIcon, color: statusColor),
         ),
         title: Text(
-          item.stage == 'takeover'
-              ? t.aiAudit.list.takeoverTitle
-              : t.aiAudit.list.registrationTitle,
+          item.stage == 'takeover' ? 'Takeover' : 'Registration',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Text("${t.aiAudit.list.verdict}: ${item.verdict ?? 'N/A'}"),
+            Text("Verdict: ${item.verdict ?? 'N/A'}"),
             Text(
-              "${t.aiAudit.list.id}: ${item.caseId.substring(0, 8)}... • ${timeago.format(item.createdAt.toDate())}",
+              "Case ID: ${item.caseId.substring(0, 8)}... • ${timeago.format(item.createdAt.toDate())}",
               style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
           ],

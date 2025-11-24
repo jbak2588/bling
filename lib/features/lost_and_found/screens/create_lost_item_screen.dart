@@ -137,8 +137,8 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(t.lostAndFound.form.fail
-                .replaceAll('{error}', e.toString())),
+            content: Text(
+                t.lostAndFound.form.fail.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -267,7 +267,7 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
 
                 // ✅ 태그 입력 필드를 추가합니다.
                 CustomTagInputField(
-                  hintText: t.tagInput.help,
+                  hintText: t.shared.tagInput.defaultHint,
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;

@@ -49,12 +49,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _emailController.text.trim().isEmpty ||
         _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(t.auth.signup.fail.required)));
+          .showSnackBar(SnackBar(content: Text(t.signupFailRequired)));
       return;
     }
     if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(t.auth.signup.fail.passwordMismatch)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.signupFailPasswordMismatch)));
       return;
     }
 
@@ -76,9 +76,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(t.auth.verification.failSend
-                      .replaceAll('{error}', e.toString()))),
+              SnackBar(content: Text(t.signupFailUnknown)),
             );
           }
           // 이메일 발송 실패는 가입 실패로 간주하지 않고 진행
@@ -100,29 +98,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       if (mounted) {
         // [Mod] Slang generated getter contains '{email}' placeholder — replace manually
-        final successMsg = t.auth.signup.successEmailSent.replaceAll(
-          '{email}',
-          credential.user?.email ?? _emailController.text.trim(),
-        );
+        final successMsg = t.signup.alerts.signupSuccessLoginNotice;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(successMsg)),
         );
         Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {
-      String errorMessage = t.auth.signup.fail.kDefault;
+      String errorMessage = t.signupFailDefault;
       if (e.code == 'weak-password') {
-        errorMessage = t.auth.signup.fail.weakPassword;
+        errorMessage = t.signupFailWeakPassword;
       } else if (e.code == 'email-already-in-use') {
-        errorMessage = t.auth.signup.fail.emailInUse;
+        errorMessage = t.signupFailEmailInUse;
       } else if (e.code == 'invalid-email') {
-        errorMessage = t.auth.signup.fail.invalidEmail;
+        errorMessage = t.signupFailInvalidEmail;
       }
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(errorMessage)));
     } catch (e) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(t.auth.signup.fail.unknown)));
+          .showSnackBar(SnackBar(content: Text(t.signupFailUnknown)));
     }
 
     if (mounted) {

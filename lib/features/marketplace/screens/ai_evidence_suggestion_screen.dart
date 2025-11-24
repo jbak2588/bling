@@ -87,12 +87,12 @@ class _AiEvidenceSuggestionScreenState
         children: [
           ListTile(
             leading: const Icon(Icons.camera_alt),
-            title: Text(t.aiFlow.common.takePhoto), // "사진 찍기"
+            title: const Text('Take photo'),
             onTap: () => Navigator.pop(context, ImageSource.camera),
           ),
           ListTile(
             leading: const Icon(Icons.photo_library),
-            title: Text(t.aiFlow.common.pickGalleryMulti), // "갤러리에서 여러 장 선택"
+            title: const Text('Pick from gallery'),
             onTap: () => Navigator.pop(context, ImageSource.gallery),
           ),
           // [V3 REFACTOR] 'foundEvidence' 기능이 제거됨에 따라
@@ -291,8 +291,8 @@ class _AiEvidenceSuggestionScreenState
           await _submitProductAsPending(report, allImageUrls, user);
 
           BArtSnackBar.showSuccessSnackBar(
-            title: t.aiFlow.finalReport.pendingTitle,
-            message: t.aiFlow.finalReport.pendingMessage,
+            title: 'Submission queued',
+            message: 'Your submission has been queued for manual review.',
           );
           // [Task 86] UX 개선: 이전 화면이 아닌 홈 화면으로 바로 이동
           Navigator.of(context).popUntil((route) => route.isFirst);
@@ -384,7 +384,7 @@ class _AiEvidenceSuggestionScreenState
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    t.aiFlow.evidence.suggestionTitle,
+                    'Suggested shots',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
@@ -400,9 +400,8 @@ class _AiEvidenceSuggestionScreenState
                       // [V3 UI FIX] Show number of added photos when multiple images present
                       final Widget? subtitleWidget;
                       if (pickedList.isNotEmpty) {
-                        subtitleWidget = Text(t.aiFlow.common.addedPhotos
-                            .replaceAll(
-                                '{count}', pickedList.length.toString()));
+                        subtitleWidget =
+                            Text('${pickedList.length} photos added');
                       } else if (skipped) {
                         subtitleWidget = Text(t.aiFlow.common.skipped);
                       } else {
@@ -417,7 +416,7 @@ class _AiEvidenceSuggestionScreenState
                       } else if (pickedList.isNotEmpty) {
                         trailingWidget = TextButton(
                             onPressed: () => _pick(index),
-                            child: Text(t.aiFlow.common.addMore));
+                            child: const Text('Add more'));
                       } else {
                         trailingWidget = Row(
                           mainAxisSize: MainAxisSize.min,
@@ -520,7 +519,7 @@ class _AiEvidenceSuggestionScreenState
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              t.aiFlow.evidence.initialImagesTitle,
+              'Initial images',
               style: Theme.of(context).textTheme.labelMedium,
             ),
           ),

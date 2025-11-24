@@ -212,8 +212,8 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(t.clubs.proposal.createFail
-              .replaceAll('{error}', e.toString())),
+          content: Text(
+              t.clubs.proposal.createFail.replaceAll('{error}', e.toString())),
           backgroundColor: Colors.red,
         ));
       }
@@ -383,7 +383,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                         fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 8),
                 CustomTagInputField(
-                  hintText: t.tagInput.help,
+                  hintText: t.shared.tagInput.defaultHint,
                   onTagsChanged: (tags) {
                     setState(() {
                       _interestTags = tags;

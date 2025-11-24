@@ -219,7 +219,7 @@ class _PomEditScreenState extends State<PomEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.pom.edit.title),
+        title: Text('${t.common.edit} ${t.pom.title}'),
         actions: [
           if (!_isSaving)
             TextButton(

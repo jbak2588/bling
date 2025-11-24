@@ -95,7 +95,7 @@ class UserBookmarkList extends StatelessWidget {
         final productIds = user.bookmarkedProductIds ?? [];
 
         if (postIds.isEmpty && productIds.isEmpty) {
-          return Center(child: Text(t.myBling.bookmarks.empty));
+          return Center(child: const Text('No bookmarks yet.'));
         }
 
         // 2. 찜한 ID 목록을 기반으로 실제 데이터들을 가져옴
@@ -108,7 +108,7 @@ class UserBookmarkList extends StatelessWidget {
             if (itemsSnapshot.hasError ||
                 !itemsSnapshot.hasData ||
                 itemsSnapshot.data!.isEmpty) {
-              return Center(child: Text(t.myBling.bookmarks.loadError));
+              return Center(child: Text(t.main.errors.unknown));
             }
 
             final items = itemsSnapshot.data!;

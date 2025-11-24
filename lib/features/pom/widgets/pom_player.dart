@@ -169,8 +169,8 @@ class _PomPlayerState extends State<PomPlayer> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(t.pom.delete.title), // "삭제하시겠습니까?"
-        content: Text(t.pom.delete.content), // "삭제된 게시글은 복구할 수 없습니다."
+        title: Text(t.deleteConfirm.title), // "삭제하시겠습니까?"
+        content: Text(t.deleteConfirm.content), // "삭제된 게시글은 복구할 수 없습니다."
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -182,8 +182,8 @@ class _PomPlayerState extends State<PomPlayer> {
               try {
                 await _repository.deletePom(widget.pom.id);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(t.pom.delete.success)));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(t.marketplace.dialog.deleteSuccess)));
                   // 삭제 완료 후 플레이어 닫기
                   Navigator.of(context).pop(true);
                 }
@@ -406,7 +406,7 @@ class _PomPlayerState extends State<PomPlayer> {
             onTap: _showOwnerMenu,
             child: _buildActionButton(
               icon: Icons.more_horiz,
-              label: t.common.more,
+              label: t.pom.more,
             ),
           ),
         ],

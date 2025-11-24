@@ -806,8 +806,11 @@
       "descriptionLabel": "Description",
       "descriptionHint": "e.g. Part-time, 3 days a week, 5-10pm. Salary negotiable.",
       "descriptionValidator": "Please enter a description.",
-      "submitSuccess": "Job post created.",
-      "submitFail": "Failed to create job post: {error}"
+      "submitFail": "Failed to create job post: {error}",
+      "updateSuccess": "Job updated successfully.",
+      "editTitle": "Edit Job",
+      "update": "Update",
+      "submitSuccess": "Job post created."
     },
     "categories": {
       "restaurant": "Restaurant",
@@ -1671,6 +1674,9 @@
       "statusUpdateFail": "Failed to update status: {error}",
       "originalPostNotFound": "Original post not found.",
       "couldNotOpenOriginalPost": "Could not open original post."
+    },
+    "dataFix": {
+      "logsLabel": "Data Fix Logs"
     }
   },
   "tags": {

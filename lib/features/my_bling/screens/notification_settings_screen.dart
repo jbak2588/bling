@@ -179,7 +179,7 @@ class _NotificationSettingsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.settings.notificationsTitle),
+        title: const Text('Notification Settings'),
         actions: [
           // 저장 버튼
           if (!_isLoading)
@@ -205,7 +205,8 @@ class _NotificationSettingsScreenState
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Text(
-                  t.settings.notifications.scopeDescription, // '어느 지역 범위까지 알림을 받을지 선택합니다.'
+                  t.settings.notifications
+                      .scopeDescription, // '어느 지역 범위까지 알림을 받을지 선택합니다.'
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 16),
@@ -215,7 +216,8 @@ class _NotificationSettingsScreenState
                     return DropdownMenuItem<String>(
                       value: scope,
                       // 'kel' -> 'Kelurahan', 'rt' -> 'RT' 등으로 표시 (다국어 키 필요)
-                      child: Text(t['settings.notifications.scope.$scope'] ?? ''),
+                      child:
+                          Text(t['settings.notifications.scope.$scope'] ?? ''),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -226,8 +228,7 @@ class _NotificationSettingsScreenState
                     });
                   },
                   decoration: InputDecoration(
-                    labelText:
-                        t.settings.notifications.scopeLabel, // '범위 선택'
+                    labelText: t.settings.notifications.scopeLabel, // '범위 선택'
                     border: const OutlineInputBorder(),
                   ),
                 ),
@@ -240,7 +241,8 @@ class _NotificationSettingsScreenState
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Text(
-                  t.settings.notifications.tagsDescription, // '선택한 주제의 동네 소식이 올라올 때만 알림을 받습니다.'
+                  t.settings.notifications
+                      .tagsDescription, // '선택한 주제의 동네 소식이 올라올 때만 알림을 받습니다.'
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 16),

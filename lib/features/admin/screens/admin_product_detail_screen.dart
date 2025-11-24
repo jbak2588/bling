@@ -57,9 +57,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
           onPressed: () {
             Clipboard.setData(ClipboardData(text: value));
             BArtSnackBar.showSuccessSnackBar(
-                title: t.common.copiedTitle,
-                message:
-                    t.common.copiedMessage.replaceAll('{title}', title));
+                title: 'Copied', message: '$title copied to clipboard.');
           },
         ),
       ),
@@ -213,12 +211,12 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
       barrierDismissible: false,
       builder: (ctx) {
         return AlertDialog(
-          title: Text(t.admin.aiApproval.rejectTitle), // '거절 사유 입력'
+          title: const Text('Enter rejection reason'), // '거절 사유 입력'
           content: TextFormField(
             controller: reasonController,
-            decoration: InputDecoration(
-              labelText: t.admin.aiApproval.rejectReasonHint, // '거절 사유'
-              border: const OutlineInputBorder(),
+            decoration: const InputDecoration(
+              labelText: 'Rejection reason', // '거절 사유'
+              border: OutlineInputBorder(),
             ),
             maxLines: 3,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -261,7 +259,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        title: Text(t.admin.aiApproval.detailTitle), // '검수 요청 상세'
+        title: const Text('Review request details'), // '검수 요청 상세'
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -269,24 +267,20 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // [Task 102] 1. ID 정보 (개선 요청 사항)
-            Text(t.admin.aiApproval.idInfo,
-                style: Theme.of(context).textTheme.titleLarge),
+            Text('IDs', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            _buildIdTile(
-                context, t.admin.aiApproval.labels.userId, _product!.userId),
-            _buildIdTile(
-                context, t.admin.aiApproval.labels.productId, _product!.id),
+            _buildIdTile(context, 'User ID', _product!.userId),
+            _buildIdTile(context, 'Product ID', _product!.id),
             const Divider(height: 30),
 
             // [Task 91] 2. 판매자 정보
-            Text(t.admin.aiApproval.sellerInfo,
-                style: Theme.of(context).textTheme.titleLarge),
+            Text('Seller info', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             AuthorProfileTile(userId: _product!.userId),
             const Divider(height: 30),
 
             // [Task 91] 2. 상품 원본 정보
-            Text(t.admin.aiApproval.itemInfo,
+            Text('Item information',
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             Text(_product!.title,
@@ -297,8 +291,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
             const Divider(height: 30),
 
             // [Task 91] 3. AI 리포트 뷰어 (사용자와 동일한 UI)
-            Text(t.admin.aiApproval.aiReport,
-                style: Theme.of(context).textTheme.titleLarge),
+            Text('AI Report', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             AiReportViewer(
               aiReport: Map<String, dynamic>.from(
@@ -317,7 +310,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _rejectProduct,
                       icon: const Icon(Icons.close),
-                      label: Text(t.admin.aiApproval.buttons.reject),
+                      label: const Text('Reject'),
                       style:
                           ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     ),
@@ -327,7 +320,7 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _approveProduct,
                       icon: const Icon(Icons.check),
-                      label: Text(t.admin.aiApproval.buttons.approve),
+                      label: const Text('Approve'),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green),
                     ),

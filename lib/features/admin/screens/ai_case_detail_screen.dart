@@ -24,7 +24,7 @@ import 'package:bling_app/features/marketplace/data/product_repository.dart'; //
 import 'package:bling_app/features/marketplace/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Clipboard
-import 'package:bling_app/i18n/strings.g.dart';
+// removed unused import
 
 class AiCaseDetailScreen extends StatefulWidget {
   final AiCaseModel aiCase;
@@ -78,15 +78,15 @@ class _AiCaseDetailScreenState extends State<AiCaseDetailScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.aiCase.title),
+        title: const Text('AI Case'),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
           tabs: [
-            Tab(text: t.aiCase.tabs.summary),
-            Tab(text: t.aiCase.tabs.takeoverPhotos),
-            Tab(text: t.aiCase.tabs.originalPhotos),
-            Tab(text: t.aiCase.tabs.rawJson),
+            const Tab(text: 'Summary'),
+            const Tab(text: 'Takeover Photos'),
+            const Tab(text: 'Original Photos'),
+            const Tab(text: 'Raw JSON'),
           ],
         ),
       ),

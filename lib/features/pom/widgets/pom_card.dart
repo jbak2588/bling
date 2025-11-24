@@ -186,8 +186,8 @@ class _PomCardState extends State<PomCard> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(t.pom.delete.title),
-        content: Text(t.pom.delete.content),
+        title: Text(t.deleteConfirm.title),
+        content: Text(t.deleteConfirm.content),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -200,7 +200,7 @@ class _PomCardState extends State<PomCard> {
                 await _repository.deletePom(widget.pom.id);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(t.pom.delete.success)),
+                    SnackBar(content: Text(t.marketplace.dialog.deleteSuccess)),
                   );
                 }
               } catch (e) {

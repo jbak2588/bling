@@ -295,7 +295,8 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
     }
 
     // [작업 68] 로딩 상태 텍스트 설정
-    setState(() => _loadingStatus = t.aiFlow.status.saving); // "상품 정보 저장 중..."
+    setState(() =>
+        _loadingStatus = 'Saving product information...'); // "상품 정보 저장 중..."
     try {
       final productId =
           FirebaseFirestore.instance.collection('products').doc().id;
@@ -304,7 +305,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       // ...existing code...
       // [작업 68] 로딩 상태 텍스트 변경
       setState(() => _loadingStatus =
-          t.aiFlow.status.analyzing); // "AI가 1차 분석 중... (최대 1분)"
+          'AI is analyzing (may take up to 1 minute)...'); // "AI가 1차 분석 중... (최대 1분)"
       await _aiVerificationService.startVerificationFlow(
         context: context,
         // [V3 REFACTOR] 'rule' 파라미터 완전 제거
@@ -491,7 +492,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               const SizedBox(height: 16), // [간격 확대]
               // ✅ 공용 태그 위젯 추가
               CustomTagInputField(
-                hintText: t.tagInput.help,
+                hintText: t.shared.tagInput.defaultHint,
                 onTagsChanged: (tags) {
                   setState(() {
                     _tags = tags;

@@ -14,9 +14,8 @@ dependencies:
     sdk: flutter
 
   # Slang i18n (new)
-  slang: ^4.11.0
-  slang_flutter: ^4.11.0
-
+  slang: 4.11.0
+  slang_flutter: 4.11.0
   firebase_core: ^4.1.0
   firebase_auth: ^6.0.2
   cloud_firestore: ^6.0.1
@@ -90,7 +89,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   fake_cloud_firestore: ^4.0.0
   build_runner: ^2.4.6
-  slang_build_runner: ^4.11.0
+  slang_build_runner: 4.11.0
 
 flutter:
   uses-material-design: true

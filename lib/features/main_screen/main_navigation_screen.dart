@@ -452,7 +452,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     if (user == null) {
       // 만약 이 순간에 로그인이 풀려있다면, 사용자에게 알리고 즉시 종료합니다.
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.main.errors.loginRequiredRetry)),
+        const SnackBar(content: Text('Please log in to continue.')),
       );
       return;
     }
@@ -523,7 +523,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _showGlobalCreateSheet() {
     if (_userModel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.main.errors.loginRequiredRetry)),
+        const SnackBar(content: Text('Please log in to continue.')),
       );
       return;
     }
@@ -841,8 +841,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final bool? confirmed = await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(t.admin.reset.confirmTitle),
-        content: Text(t.admin.reset.confirmContent),
+        title: const Text('Reset AI cancel counts?'),
+        content: const Text(
+            'This will reset AI cancel counts for all products with non-zero counts. Are you sure?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -850,8 +851,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(t.admin.reset.execute,
-                style: TextStyle(color: Colors.red)),
+            child: const Text('Reset', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -876,7 +876,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
       if (snapshot.docs.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(t.admin.reset.noTargets)),
+          const SnackBar(content: Text('No products to reset.')),
         );
         if (mounted) setState(() => _isAdminLoading = false);
         return;
@@ -893,14 +893,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(t.admin.reset.success
+            content: Text('Reset completed: {count} documents updated.'
                 .replaceAll('{count}', snapshot.docs.length.toString()))),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-                Text(t.admin.reset.fail.replaceAll('{error}', e.toString()))),
+            content: Text(
+                'Reset failed: {error}'.replaceAll('{error}', e.toString()))),
       );
     } finally {
       if (mounted) setState(() => _isAdminLoading = false);

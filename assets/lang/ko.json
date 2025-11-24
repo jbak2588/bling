@@ -807,7 +807,10 @@
       "descriptionHint": "예: 주 3일, 오후 5–10시, 시급 협의 가능 등",
       "descriptionValidator": "상세 설명을 입력해 주세요.",
       "submitSuccess": "일자리 공고가 등록되었습니다.",
-      "submitFail": "일자리 공고 등록에 실패했습니다: {error}"
+      "submitFail": "일자리 공고 등록에 실패했습니다: {error}",
+      "updateSuccess": "일자리 공고가 성공적으로 업데이트되었습니다.",
+      "editTitle": "일자리 수정",
+      "update": "업데이트"
     },
     "categories": {
       "restaurant": "식당",
@@ -1307,145 +1310,299 @@
     }
   },
   "realEstate": {
-    "title": "부동산",
-    "tabs": {
-      "all": "전체",
-      "rent": "임대",
-      "sale": "매매",
-      "myListings": "내 매물"
+    "create": "매물 등록",
+    "form": {
+      "title": "매물 등록",
+      "submit": "등록",
+      "imageRequired": "최소 한 장의 사진을 첨부해 주세요.",
+      "success": "매물이 등록되었습니다.",
+      "fail": "매물 등록에 실패했습니다: {error}",
+      "type": {
+        "kos": "하숙방(Kos)",
+        "kontrakan": "월세(Kontrakan)",
+        "sewa": "임대(Sewa)"
+      },
+      "priceRequired": "가격을 입력해 주세요.",
+      "priceUnit": {
+        "monthly": "/월",
+        "yearly": "/년"
+      },
+      "titleRequired": "제목을 입력해 주세요.",
+      "roomTypes": {
+        "kos": "하숙방(Kos)",
+        "kontrakan": "월세(Kontrakan)",
+        "sewa": "임대(Sewa)",
+        "apartment": "아파트",
+        "house": "주택",
+        "ruko": "상가(Ruko)",
+        "gudang": "창고",
+        "kantor": "사무실",
+        "etc": "기타"
+      },
+      "listingType": "거래 형태",
+      "listingTypeHint": "거래 형태를 선택해 주세요",
+      "listingTypes": {
+        "rent": "임대",
+        "sale": "매매"
+      },
+      "publisherType": "게시자 유형",
+      "publisherTypes": {
+        "individual": "개인",
+        "agent": "중개인"
+      },
+      "area": "면적",
+      "landArea": "대지 면적",
+      "rooms": "방",
+      "bathrooms": "욕실",
+      "bedAbbr": "침실",
+      "bathAbbr": "욕실",
+      "moveInDate": "입주 가능 날짜",
+      "selectDate": "날짜 선택",
+      "clearDate": "날짜 지우기",
+      "amenities": "편의시설",
+      "details": "매물 상세 정보",
+      "maintenanceFee": "월 유지비",
+      "maintenanceFeeHint": "월 유지비 (Rp)",
+      "deposit": "보증금",
+      "depositHint": "보증금 (Rp)",
+      "floorInfo": "층수 정보",
+      "floorInfoHint": "예: 5층 중 3층",
+      "priceLabel": "가격 (IDR)",
+      "titleLabel": "제목",
+      "descriptionLabel": "설명",
+      "typeLabel": "방 유형",
+      "areaHint": "예: 33",
+      "amenity": {
+        "wifi": "Wi‑Fi",
+        "ac": "에어컨",
+        "parking": "주차",
+        "kitchen": "주방"
+      }
     },
-    "setLocationPrompt": "근처 매물을 보려면 위치를 설정해 주세요.",
+    "detail": {
+      "deleteTitle": "매물 삭제",
+      "deleteContent": "이 매물을 삭제하시겠습니까?",
+      "cancel": "취소",
+      "publisherInfo": "게시자 정보",
+      "contact": "연락하기",
+      "deleteConfirm": "삭제",
+      "deleteSuccess": "매물이 삭제되었습니다.",
+      "deleteFail": "매물 삭제 실패: {error}",
+      "chatError": "채팅을 시작할 수 없습니다: {error}",
+      "location": "위치"
+    },
+    "locationUnknown": "위치 정보 없음",
+    "priceUnits": {
+      "monthly": "월",
+      "yearly": "년"
+    },
+    "filter": {
+      "title": "고급 필터",
+      "priceRange": "가격 범위",
+      "areaRange": "면적 범위 (m²)",
+      "landAreaRange": "대지 면적 범위 (m²)",
+      "depositRange": "보증금 범위",
+      "floorInfo": "층수 정보",
+      "depositMin": "최소 보증금",
+      "depositMax": "최대 보증금",
+      "clearFloorInfo": "지우기",
+      "furnishedStatus": "가구 옵션",
+      "rentPeriod": "임대 기간",
+      "selectFurnished": "가구 옵션 선택",
+      "furnishedHint": "가구 옵션 선택",
+      "selectRentPeriod": "임대 기간 선택",
+      "rentPeriods": {
+        "daily": "일간",
+        "monthly": "월간",
+        "yearly": "연간"
+      },
+      "propertyCondition": "매물 상태",
+      "propertyConditions": {
+        "new": "신규",
+        "used": "중고"
+      },
+      "furnishedTypes": {
+        "furnished": "풀옵션",
+        "semi_furnished": "부분 옵션",
+        "unfurnished": "옵션 없음"
+      },
+      "amenities": {
+        "ac": "에어컨",
+        "bed": "침대",
+        "closet": "옷장",
+        "desk": "책상",
+        "wifi": "Wi‑Fi",
+        "kitchen": "주방",
+        "living_room": "거실",
+        "refrigerator": "냉장고",
+        "parking_motorcycle": "오토바이 주차",
+        "parking_car": "자동차 주차",
+        "pool": "수영장",
+        "gym": "헬스장",
+        "security_24h": "24시간 보안",
+        "atm_center": "ATM",
+        "minimarket": "미니마트",
+        "mall_access": "쇼핑몰 접근",
+        "playground": "놀이터",
+        "carport": "카포트",
+        "garden": "정원",
+        "pam": "상수도(PAM)",
+        "telephone": "전화",
+        "water_heater": "온수기",
+        "parking_area": "주차 공간",
+        "electricity": "전기",
+        "container_access": "컨테이너 출입",
+        "kos_room": {
+          "ac": "에어컨",
+          "bed": "침대",
+          "closet": "옷장",
+          "desk": "책상",
+          "wifi": "Wi‑Fi"
+        },
+        "kos_public": {
+          "kitchen": "주방",
+          "living_room": "거실",
+          "refrigerator": "냉장고",
+          "parking_motorcycle": "오토바이 주차",
+          "parking_car": "자동차 주차"
+        },
+        "apartment": {
+          "pool": "수영장",
+          "gym": "헬스장",
+          "security_24h": "24시간 보안",
+          "atm_center": "ATM",
+          "minimarket": "미니마트",
+          "mall_access": "쇼핑몰 접근",
+          "playground": "놀이터"
+        },
+        "house": {
+          "carport": "카포트",
+          "garden": "정원",
+          "pam": "상수도(PAM)",
+          "telephone": "전화",
+          "water_heater": "온수기"
+        },
+        "commercial": {
+          "parking_area": "주차 공간",
+          "security_24h": "24시간 보안",
+          "telephone": "전화",
+          "electricity": "전기",
+          "container_access": "컨테이너 출입"
+        }
+      },
+      "kos": {
+        "bathroomType": "욕실 유형",
+          "bathroomTypes": {
+            "in_room": "실내 욕실",
+            "out_room": "실외 욕실"
+          },
+          "maxOccupants": "최대 거주자 수",
+          "hintBathroomType": "욕실 유형 선택",
+          "hintMaxOccupants": "거주자 수 선택",
+          "electricityIncluded": "전기 포함",
+          "roomFacilities": "객실 시설",
+          "publicFacilities": "공용 시설",
+          "occupant": "명"
+      },
+        "apartment": {
+          "facilities": "아파트 시설"
+        },
+        "house": {
+          "facilities": "주택 시설"
+        },
+        "commercial": {
+          "facilities": "상업용 시설"
+        }
+    },
+    "info": {
+      "bed": "침실",
+      "bath": "욕실",
+      "anytime": "언제든지",
+      "verifiedPublisher": "인증된 게시자"
+    },
+    "disclaimer": "블링은 온라인 광고 플랫폼이며 부동산 중개인이 아닙니다. 게시된 매물의 정보, 가격, 소유권, 진위 여부는 게시자에게 전적으로 책임이 있습니다. 사용자는 거래 전 반드시 게시자 및 관련 기관을 통해 정보를 직접 확인해야 합니다.",
     "empty": "등록된 매물이 없습니다.",
     "error": "오류가 발생했습니다: {error}",
-    "create": {
-      "tooltip": "매물 등록",
-      "title": "새 매물 등록",
-      "submit": "등록",
-      "success": "매물이 등록되었습니다.",
-      "fail": "매물 등록 실패: {error}"
+    "priceUnit": {
+      "monthly": "/월"
     },
     "edit": {
       "title": "매물 수정",
       "save": "저장",
       "success": "매물이 수정되었습니다.",
-      "fail": "매물 수정 실패: {error}",
-      "tooltip": "매물 수정"
-    },
-    "form": {
-      "titleLabel": "제목",
-      "titleError": "제목을 입력해 주세요.",
-      "descriptionLabel": "설명",
-      "descriptionError": "설명을 입력해 주세요.",
-      "priceLabel": "가격 (IDR)",
-      "priceError": "가격을 입력해 주세요.",
-      "categoryLabel": "유형",
-      "categoryError": "유형을 선택해 주세요.",
-      "locationLabel": "위치",
-      "locationError": "위치를 입력해 주세요.",
-      "roomsLabel": "방 개수",
-      "bathLabel": "욕실 개수",
-      "areaLabel": "면적 (m²)",
-      "photoLabel": "사진 (최대 10장)",
-      "imageError": "이미지를 불러올 수 없습니다."
-    },
-    "categories": {
-      "house": "주택",
-      "apartment": "아파트",
-      "kost": "Kost",
-      "villa": "빌라",
-      "office": "사무실",
-      "land": "토지",
-      "shophouse": "상가",
-      "warehouse": "창고",
-      "etc": "기타"
-    },
-    "detail": {
-      "price": "가격",
-      "rooms": "방",
-      "bathrooms": "욕실",
-      "area": "면적",
-      "location": "위치",
-      "contactSeller": "판매자에게 문의",
-      "contactFail": "채팅을 시작할 수 없습니다: {error}",
-      "delete": "삭제",
-      "deleteConfirm": "이 매물을 삭제하시겠습니까?",
-      "deleteSuccess": "매물이 삭제되었습니다.",
-      "deleteFail": "매물 삭제 실패: {error}",
-      "postedBy": "등록자"
+      "fail": "매물 수정 실패: {error}"
     }
   },
   "lostAndFound": {
-    "title": "분실 · 습득",
     "tabs": {
-      "lost": "분실",
-      "found": "습득",
-      "myReports": "내 글"
+      "all": "전체",
+      "lost": "Lost",
+      "found": "Found"
+    },
+    "create": "분실물/습득물 등록",
+    "form": {
+      "title": "분실/습득물 등록",
+      "submit": "등록",
+      "type": {
+        "lost": "분실했습니다",
+        "found": "습득했습니다"
+      },
+      "photoSectionTitle": "사진 추가 (최대 5장)",
+      "imageRequired": "최소 한 장의 사진을 첨부해 주세요.",
+      "itemLabel": "어떤 물건인가요?",
+      "itemError": "물건을 설명해 주세요.",
+      "bountyTitle": "보상금 설정 (선택)",
+      "bountyDesc": "보상금을 설정하면 게시물에 보상금 배지가 표시됩니다.",
+      "bountyAmount": "보상금 금액 (IDR)",
+      "bountyAmountError": "보상금을 활성화하려면 금액을 입력해 주세요.",
+      "success": "등록 완료.",
+      "fail": "등록 실패: {error}",
+      "tagsHint": "태그 추가 (스페이스로 확정)",
+      "locationLabel": "위치",
+      "locationError": "위치를 입력해 주세요."
+    },
+    "detail": {
+      "title": "분실 · 습득",
+      "bounty": "보상금",
+      "registrant": "등록자",
+      "resolved": "해결됨",
+      "markAsResolved": "해결로 표시",
+      "deleteTitle": "게시물 삭제",
+      "deleteContent": "이 게시물을 삭제하시겠습니까? 삭제는 되돌릴 수 없습니다.",
+      "cancel": "취소",
+      "editTooltip": "수정",
+      "deleteTooltip": "삭제",
+      "noUser": "사용자를 찾을 수 없습니다",
+      "chatError": "채팅을 시작할 수 없습니다: {error}",
+      "location": "위치",
+      "contact": "문의하기",
+      "delete": "삭제",
+      "deleteSuccess": "삭제되었습니다.",
+      "deleteFail": "삭제 실패: {error}"
+    },
+    "lost": "분실",
+    "found": "습득",
+    "card": {
+      "location": "위치: {location}"
     },
     "empty": "등록된 글이 없습니다.",
-    "setLocationPrompt": "근처 신고를 보려면 위치를 설정해 주세요.",
-    "create": {
-      "tooltip": "글 등록",
-      "title": "새 글 등록",
-      "submit": "등록",
-      "success": "글이 등록되었습니다.",
-      "fail": "등록 실패: {error}"
+    "error": "오류가 발생했습니다: {error}",
+    "resolve": {
+      "confirmTitle": "해결로 표시하시겠습니까?",
+      "confirmBody": "이 항목을 해결된 것으로 표시합니다.",
+      "success": "해결 처리되었습니다.",
+      "badgeLost": "발견됨!",
+      "badgeFound": "반환됨!"
     },
     "edit": {
       "title": "글 수정",
       "save": "저장",
-      "success": "글이 수정되었습니다.",
-      "fail": "글 수정 실패: {error}"
-    },
-    "form": {
-      "titleLabel": "제목",
-      "titleError": "제목을 입력해 주세요.",
-      "descriptionLabel": "상세 내용",
-      "descriptionError": "상세 내용을 입력해 주세요.",
-      "categoryLabel": "유형",
-      "categoryError": "유형을 선택해 주세요.",
-      "locationLabel": "위치",
-      "locationError": "위치를 입력해 주세요.",
-      "photoLabel": "사진 (최대 10장)"
-    },
-    "categories": {
-      "pet": "반려동물",
-      "item": "개인 소지품",
-      "person": "사람",
-      "scam": "사기 피해",
-      "etc": "기타"
-    },
-    "detail": {
-      "location": "위치",
-      "contact": "문의하기",
-      "contactFail": "채팅을 시작할 수 없습니다: {error}",
-      "delete": "삭제",
-      "deleteConfirm": "이 글을 삭제하시겠습니까?",
-      "deleteSuccess": "삭제되었습니다.",
-      "deleteFail": "삭제 실패: {error}"
+      "success": "수정되었습니다.",
+      "fail": "수정 실패: {error}"
     }
   },
   "community": {
-    "title": "커뮤니티",
-    "empty": "아직 게시물이 없습니다.",
-    "error": "오류가 발생했습니다: {error}",
-    "create": {
-      "title": "새 글",
-      "submit": "등록",
-      "success": "게시글이 등록되었습니다.",
-      "fail": "등록 실패: {error}"
-    },
-    "edit": {
-      "title": "게시글 수정",
-      "save": "저장",
-      "success": "게시글이 수정되었습니다.",
-      "fail": "수정 실패: {error}"
-    },
-    "post": {
-      "delete": "삭제",
-      "deleteConfirm": "이 게시글을 삭제하시겠습니까?",
-      "deleteSuccess": "삭제되었습니다.",
-      "deleteFail": "삭제 실패: {error}"
-    }
+    "title": "커뮤니티"
   },
   "shared": {
     "tagInput": {
@@ -1517,6 +1674,9 @@
       "statusUpdateFail": "상태를 업데이트하지 못했습니다: {error}",
       "originalPostNotFound": "원본 게시글을 찾을 수 없습니다.",
       "couldNotOpenOriginalPost": "원본 게시글을 열 수 없습니다."
+    },
+    "dataFix": {
+      "logsLabel": "Data Fix Logs"
     }
   },
   "tags": {
@@ -1649,5 +1809,6 @@
   "category_empty": "카테고리 없음",
   "user": {
     "notLoggedIn": "로그인되지 않았습니다."
-  }
+  },
+  "signup_fail_password_mismatch": "비밀번호가 일치하지 않습니다."
 }

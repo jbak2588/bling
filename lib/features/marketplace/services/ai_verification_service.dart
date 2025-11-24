@@ -145,7 +145,7 @@ class AiVerificationService {
         });
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(t.marketplace.ai.reactivated)),
+            const SnackBar(content: Text('AI verification reactivated.')),
           );
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
@@ -304,7 +304,7 @@ class AiVerificationService {
     if (report == null ||
         report['itemSummary'] == null ||
         report['condition'] == null) {
-      throw Exception(t.aiFlow.errors.incompleteReport);
+      throw Exception('Incomplete AI report from backend.');
     }
 
     // 3. 최종 화면으로 이동 (AiEvidenceSuggestionScreen의 로직과 동일)

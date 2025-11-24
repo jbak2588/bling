@@ -79,8 +79,8 @@ class JobDetailScreen extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(t.jobs.detail.chatError
-                  .replaceAll('{error}', e.toString())),
+              content: Text(
+                  t.jobs.detail.chatError.replaceAll('{error}', e.toString())),
               backgroundColor: Colors.red),
         );
       }
@@ -108,15 +108,15 @@ class JobDetailScreen extends StatelessWidget {
                 final repo = JobRepository();
                 await repo.deleteJob(job.id, job.userId);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(t['jobs.dialog.deleteSuccess'] ?? '')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(t['jobs.dialog.deleteSuccess'] ?? '')));
                   Navigator.of(context).pop();
                 }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(t['jobs.errors.deleteError'] ?? ''
-                          .replaceAll('{error}', e.toString()))));
+                      content: Text(t['jobs.errors.deleteError'] ??
+                          ''.replaceAll('{error}', e.toString()))));
                 }
               }
             },
@@ -251,8 +251,7 @@ class JobDetailScreen extends StatelessWidget {
 
           // ✅ 3. [공용 위젯 적용] 미니맵
           if (job.geoPoint != null) ...[
-            Text(t.jobs.detail.locationTitle,
-                style: Theme.of(context).textTheme.titleLarge),
+            Text('Location', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
             MiniMapView(
               location: job.geoPoint!,
@@ -263,8 +262,7 @@ class JobDetailScreen extends StatelessWidget {
           ],
 
           // ✅ 4. [공용 위젯 적용] 작성자 프로필 타일
-          Text(t.jobs.detail.authorTitle,
-              style: Theme.of(context).textTheme.titleLarge),
+          Text('Author', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           AuthorProfileTile(userId: job.userId),
 

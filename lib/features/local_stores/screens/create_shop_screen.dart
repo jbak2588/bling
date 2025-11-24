@@ -326,8 +326,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                   items: _shopCategories.map((category) {
                     return DropdownMenuItem(
                       value: category,
-                      child: Text(
-                          t['localStores.categories.$category'] ?? ''), // 번역 키 사용
+                      child: Text(t['localStores.categories.$category'] ??
+                          ''), // 번역 키 사용
                     );
                   }).toList(),
                   onChanged: (value) =>
@@ -362,7 +362,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                 ),
                 const SizedBox(height: 12),
                 CustomTagInputField(
-                  hintText: t.tagInput.help,
+                  hintText: t.shared.tagInput.defaultHint,
                   initialTags: _tags,
                   titleController: _nameController,
                   onTagsChanged: (tags) => setState(() {

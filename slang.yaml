@@ -1,9 +1,10 @@
-base_locale: ko # 기준 언어 (보통 개발할 때 가장 편한 언어)
-fallback_strategy: base_locale # 번역 누락 시 한국어로 표시
-input_directory: assets/lang # JSON 파일 위치
-input_file_pattern: .json # 파일 확장자
-output_directory: lib/i18n # 생성될 Dart 코드 위치 (새로 생성됨)
-output_file_name: strings.g.dart # 생성될 파일명
-namespaces: false # 파일이 하나로 합쳐져 있으므로 false
-translate_var: t # 코드에서 사용할 변수명 (t.login.title)
-key_case: camel # JSON 키가 snake_case여도 코드에선 camelCase로 변환 (선택사항)
+# slang.yaml
+base_locale: id        # ← ko → id 로 변경!!!
+fallback_strategy: base_locale
+input_directory: assets/lang
+input_file_pattern: .json
+output_directory: lib/i18n
+output_file_name: strings.g.dart
+namespaces: false
+translate_var: t
+key_case: camel

@@ -50,7 +50,7 @@ class UserPostList extends StatelessWidget {
         final postIds = user.postIds;
 
         if (postIds == null || postIds.isEmpty) {
-          return Center(child: Text(t.myBling.posts.empty));
+          return Center(child: Text(t.profileView.noPosts));
         }
 
         // 2. 가져온 postIds 목록을 사용하여 'posts' 컬렉션에서 여러 문서를 한번에 쿼리합니다.
@@ -65,11 +65,11 @@ class UserPostList extends StatelessWidget {
             }
             if (postsSnapshot.hasError) {
               return Center(
-                  child: Text(t.myBling.posts.loadErrorWithMsg
-                      .replaceAll('{msg}', postsSnapshot.error.toString())));
+                  child: Text(t.marketplace.error
+                      .replaceAll('{error}', postsSnapshot.error.toString())));
             }
             if (!postsSnapshot.hasData || postsSnapshot.data!.docs.isEmpty) {
-              return Center(child: Text(t.myBling.posts.noInfo));
+              return Center(child: Text(t.profileView.noPosts));
             }
 
             final posts = postsSnapshot.data!.docs

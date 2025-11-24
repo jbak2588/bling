@@ -328,7 +328,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 const SizedBox(height: 8),
                 CustomTagInputField(
                   initialTags: _interestTags,
-                  hintText: t.tagInput.help,
+                  hintText: t.shared.tagInput.defaultHint,
                   onTagsChanged: (tags) {
                     setState(() {
                       _interestTags = tags;

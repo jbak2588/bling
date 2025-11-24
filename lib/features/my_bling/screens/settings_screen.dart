@@ -46,10 +46,11 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         children: [
           // 1. 계정 및 보안
-          _buildSectionHeader(context, t.settings.account), // "계정"
+          _buildSectionHeader(
+              context, t.settings.accountPrivacy), // "계정 & 개인정보"
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
-            title: Text(t.settings.privacy), // "개인정보 보호"
+            title: Text(t.settings.accountPrivacy), // "Account & Privacy"
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
@@ -58,7 +59,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.block_outlined),
-            title: Text(t.settings.blockedUsers), // "차단된 사용자"
+            title: Text(t.blockedUsers.title), // "Blocked Users"
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
@@ -69,7 +70,7 @@ class SettingsScreen extends StatelessWidget {
           const Divider(),
 
           // 2. 앱 설정 (알림, 언어)
-          _buildSectionHeader(context, t.settings.app), // "앱 설정"
+          _buildSectionHeader(context, t.settings.appInfo), // "앱 설정"
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
             // JSON 구조에 따라 'settings.notifications'가 객체일 수 있으므로 'settings.notificationsTitle'로 안전하게 사용합니다.
@@ -83,7 +84,7 @@ class SettingsScreen extends StatelessWidget {
           // ✅ [신규] 언어 설정 메뉴 추가
           ListTile(
             leading: const Icon(Icons.language_outlined),
-            title: Text(t.settings.language), // "언어 설정"
+            title: const Text('Language'), // "언어 설정"
             subtitle: Text(_getCurrentLanguageName(context)), // 현재 언어 표시
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showLanguageSelector(context),
@@ -92,7 +93,7 @@ class SettingsScreen extends StatelessWidget {
           const Divider(),
 
           // 3. 정보 및 지원
-          _buildSectionHeader(context, t.settings.info), // "정보"
+          _buildSectionHeader(context, t.settings.appInfo), // "정보"
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: Text(t.settings.appInfo), // "앱 정보"
@@ -113,8 +114,8 @@ class SettingsScreen extends StatelessWidget {
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    title: Text(t.settings.logout.confirmTitle),
-                    content: Text(t.settings.logout.confirmBody),
+                    title: Text(t.drawer.logout),
+                    content: const Text('Are you sure you want to log out?'),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(ctx).pop(false),
@@ -140,7 +141,7 @@ class SettingsScreen extends StatelessWidget {
                 foregroundColor: Colors.red,
                 side: const BorderSide(color: Colors.red),
               ),
-              child: Text(t.settings.logout.button), // "로그아웃"
+              child: Text(t.drawer.logout), // "Log Out"
             ),
           ),
           const SizedBox(height: 24),

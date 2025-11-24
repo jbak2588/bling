@@ -312,7 +312,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         if (isNewChat) {
                           return _buildIcebreakers();
                         }
-                        return Center(child: Text(t.chatRoom.placeholder));
+                        return Center(child: const Text('No messages yet.'));
                       }
 
                       final messages = snapshot.data!;
@@ -422,7 +422,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 child: TextField(
                   controller: _messageController,
                   decoration: InputDecoration(
-                      hintText: t.chatRoom.placeholder,
+                      hintText: 'Type a message...',
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24)),
                       contentPadding:

@@ -151,8 +151,8 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(t.lostAndFound.edit.fail
-                .replaceAll('{error}', e.toString())),
+            content: Text(
+                t.lostAndFound.edit.fail.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red));
       }
     } finally {
@@ -168,8 +168,7 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         actions: [
           if (!_isSaving)
             TextButton(
-                onPressed: _updateItem,
-                child: Text(t.lostAndFound.edit.save)),
+                onPressed: _updateItem, child: Text(t.lostAndFound.edit.save)),
         ],
       ),
       body: Stack(
@@ -281,7 +280,7 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
 
                 // ✅ 태그 입력 필드
                 CustomTagInputField(
-                  hintText: t.tagInput.help,
+                  hintText: t.shared.tagInput.defaultHint,
                   initialTags: _tags,
                   onTagsChanged: (tags) => setState(() => _tags = tags),
                 ),

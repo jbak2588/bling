@@ -110,7 +110,7 @@ class ClubPostCard extends StatelessWidget {
               backgroundColor: Colors.white,
               child: Icon(Icons.person_off_outlined, color: Colors.grey),
             ),
-            title: Text(t['clubs.post.withdrawnMember'] ?? '',
+            title: Text(t.clubs.postCard.withdrawnMember,
                 style:
                     TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
             subtitle:
@@ -118,7 +118,7 @@ class ClubPostCard extends StatelessWidget {
             trailing: (currentUserId == clubOwnerId)
                 ? IconButton(
                     icon: const Icon(Icons.delete_outline, color: Colors.grey),
-                    tooltip: t.clubs.post.deleteTooltip,
+                    tooltip: t.clubs.postCard.deleteTooltip,
                     onPressed: () => _deletePost(context),
                   )
                 : null,

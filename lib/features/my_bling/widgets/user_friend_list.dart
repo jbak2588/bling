@@ -39,7 +39,7 @@ class UserFriendList extends StatelessWidget {
           FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Center(child: Text(t.myBling.friends.loadError));
+          return Center(child: Text(t.main.errors.userNotFound));
         }
         final user = UserModel.fromFirestore(
             snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
@@ -54,7 +54,7 @@ class UserFriendList extends StatelessWidget {
         debugPrint('--------------------------');
 
         if (friendUids.isEmpty) {
-          return Center(child: Text(t.myBling.friends.empty));
+          return Center(child: Text(t.findFriend.noFriendsFound));
         }
 
         // 2. 친구 UID 목록을 사용하여 각 친구의 상세 정보를 가져옴
@@ -70,8 +70,8 @@ class UserFriendList extends StatelessWidget {
               builder: (context, friendSnapshot) {
                 if (!friendSnapshot.hasData || !friendSnapshot.data!.exists) {
                   return ListTile(
-                      title: Text(t.myBling.friends.userNotFound
-                          .replaceAll('{uid}', friendUid)));
+                      title:
+                          Text('${t.main.errors.userNotFound} ($friendUid)'));
                 }
                 final friend = UserModel.fromFirestore(friendSnapshot.data!
                     as DocumentSnapshot<Map<String, dynamic>>);

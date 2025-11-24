@@ -279,7 +279,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                 // ✅ 상세 설명 다음, 기간 설정 전에 태그 입력 필드를 추가합니다.
                 const SizedBox(height: 16),
                 CustomTagInputField(
-                  hintText: t.tagInput.help,
+                  hintText: t.shared.tagInput.defaultHint,
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;

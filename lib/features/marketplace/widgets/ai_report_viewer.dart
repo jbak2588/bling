@@ -114,7 +114,7 @@ class AiReportViewer extends StatelessWidget {
       sections.add(_buildReportText(
         context,
         Icons.warning_amber_rounded,
-        t.aiFlow.finalReport.notes,
+        t.aiFlow.finalReport.buyerNotes,
         notesForBuyer,
       ));
     }

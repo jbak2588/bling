@@ -285,7 +285,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                   ),
                   const SizedBox(height: 8),
                   CustomTagInputField(
-                    hintText: t.tagInput.help,
+                    hintText: t.shared.tagInput.defaultHint,
                     initialTags: _tags,
                     onTagsChanged: (tags) {
                       setState(() {

@@ -71,9 +71,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(t.auth.verification.failSend
-                  .replaceAll('{error}', e.toString()))),
+          SnackBar(content: Text(t.signupFailUnknown)),
         );
       }
     }
@@ -88,7 +86,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.auth.verification.title),
+        title: Text(t.signup.title),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -106,15 +104,15 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 size: 80, color: Color(0xFF00A66C)),
             const SizedBox(height: 24),
             Text(
-              t.auth.verification.sentTitle,
+              t.signup.title,
               style:
                   GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             Text(
-              t.auth.verification.sentDesc.replaceAll(
-                  '{email}', FirebaseAuth.instance.currentUser?.email ?? ''),
+              // Use signup subtitle as a fallback and show email below
+              '${t.signup.subtitle}\n${FirebaseAuth.instance.currentUser?.email ?? ''}',
               style: GoogleFonts.inter(fontSize: 16, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
@@ -124,7 +122,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             ElevatedButton.icon(
               onPressed: _canResendEmail ? _sendVerificationEmail : null,
               icon: const Icon(Icons.email),
-              label: Text(t.auth.verification.resend),
+              label: const Text('Resend'),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
               ),
@@ -132,7 +130,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => FirebaseAuth.instance.signOut(),
-              child: Text(t.auth.verification.logout),
+              child: Text(t.drawer.logout),
             ),
           ],
         ),

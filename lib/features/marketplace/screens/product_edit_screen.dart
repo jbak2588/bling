@@ -360,7 +360,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     }
 
     setState(() {
-      _loadingStatus = t.marketplace.edit.saving;
+      _loadingStatus = 'Saving...';
     });
 
     try {
@@ -452,7 +452,8 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       return;
     }
 
-    setState(() => _loadingStatus = t.aiFlow.status.analyzing);
+    setState(
+        () => _loadingStatus = 'AI is analyzing (may take up to 1 minute)...');
 
     try {
       await _aiVerificationService.startVerificationFlow(
@@ -778,7 +779,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 ),
                 const SizedBox(height: 16),
                 // [작업 71] 1. 카테고리 로딩 중이 아닐 때만 선택기 표시
-                if (_loadingStatus == t.aiFlow.status.loadingCategory)
+                if (_loadingStatus == 'Loading categories...')
                   ListTile(
                     title: const Text("카테고리 정보 로딩 중..."),
                     leading: SizedBox(
@@ -879,17 +880,17 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: _status,
                   decoration: InputDecoration(
-                    labelText: t.marketplace.status.label,
+                    labelText: 'Status',
                     // [Fix] AI 안심 예약으로 예약된 경우, 비활성화하고 안내 문구 표시
-                    helperText:
-                        (widget.product.isAiVerified && _status == 'reserved')
-                            ? t.marketplace.errors.aiReserved
-                            : null,
+                    helperText: (widget.product.isAiVerified &&
+                            _status == 'reserved')
+                        ? 'This product is reserved by AI verification and cannot be changed.'
+                        : null,
                   ),
                   items: [
                     DropdownMenuItem(
                       value: 'selling',
-                      child: Text(t.marketplace.status.selling),
+                      child: const Text('Selling'),
                     ),
                     DropdownMenuItem(
                       value: 'reserved',
@@ -910,7 +911,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 const SizedBox(height: 16),
                 CustomTagInputField(
                   initialTags: _tags,
-                  hintText: t.tagInput.help,
+                  hintText: t.shared.tagInput.defaultHint,
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;

@@ -135,9 +135,7 @@ class _CustomTagInputFieldState extends State<CustomTagInputField> {
               final isFromTitle = _titleSuggestions.contains(tag);
 
               return ActionChip(
-                label: Text(isFromTitle
-                    ? '$tag ${t.tagInput.fromTitleSuffix}'
-                    : '#$tag'),
+                label: Text(isFromTitle ? '#$tag' : '#$tag'),
                 avatar: isFromTitle
                     ? const Icon(Icons.auto_awesome, size: 14)
                     : null,
@@ -188,8 +186,9 @@ class _CustomTagInputFieldState extends State<CustomTagInputField> {
                   controller: _textController,
                   focusNode: _focusNode,
                   decoration: InputDecoration(
-                    hintText:
-                        _tags.isEmpty ? widget.hintText : t.tagInput.addHint,
+                    hintText: _tags.isEmpty
+                        ? widget.hintText
+                        : t.shared.tagInput.defaultHint,
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
@@ -216,7 +215,7 @@ class _CustomTagInputFieldState extends State<CustomTagInputField> {
         Padding(
           padding: const EdgeInsets.only(left: 4),
           child: Text(
-            t.tagInput.help,
+            t.shared.tagInput.defaultHint,
             style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
           ),
         ),

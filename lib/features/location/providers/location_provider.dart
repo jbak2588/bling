@@ -109,18 +109,17 @@ class LocationProvider extends ChangeNotifier {
   String get displayTitle {
     switch (_mode) {
       case LocationSearchMode.national:
-        return t.locationfilter.national.title; // ✅ 다국어 키 적용
+        return 'Nationwide'; // fallback literal
       case LocationSearchMode.nearby:
-        // ✅ 다국어 키 적용 + 인자 전달
-        return t.locationfilter.nearby.radius
-            .replaceAll('{km}', _radiusKm.toInt().toString());
+        // display radius
+        return '${_radiusKm.toInt()} km';
       case LocationSearchMode.administrative:
         // 가장 하위 행정구역 이름 표시
         if (_adminFilter['kel'] != null) return _adminFilter['kel']!;
         if (_adminFilter['kec'] != null) return _adminFilter['kec']!;
         if (_adminFilter['kab'] != null) return _adminFilter['kab']!;
         if (_adminFilter['prov'] != null) return _adminFilter['prov']!;
-        return t.locationfilter.hint.selectParent; // 또는 적절한 기본 문구
+        return 'Select area'; // 또는 적절한 기본 문구
     }
   }
 }
