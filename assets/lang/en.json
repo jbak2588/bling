@@ -49,6 +49,7 @@
     },
     "errors": {
       "loginRequired": "Login is required.",
+      "loginRequiredRetry": "Login required. Please try again.",
       "userNotFound": "User not found.",
       "unknown": "An unknown error occurred."
     },
@@ -226,7 +227,8 @@
       "cancel_limit": "AI verification can only be canceled once per product. Re-requesting AI verification may incur charges.",
       "cancel_ack_charge": "I understand I may be charged.",
       "cancel_success": "AI verification has been cancelled. The product is now a normal listing.",
-      "cancel_error": "Error cancelling AI verification: {0}"
+      "cancel_error": "Error cancelling AI verification: {0}",
+      "reactivated": "AI verification reactivated."
     },
     "takeover": {
       "button": "On-site pickup & verification",
@@ -244,7 +246,10 @@
         "matchTitle": "AI verification success",
         "noMatchTitle": "AI verification failed",
         "finalize": "Confirm final takeover",
-        "cancelDeal": "Cancel deal (request refund)"
+        "cancelDeal": "Cancel deal (request refund)",
+        "failTitle": "Verification Failed",
+        "retry": "Retry",
+        "checklistTitle": "Verification Checklist"
       },
       "success": {
         "finalized": "Deal completed successfully.",
@@ -254,13 +259,42 @@
     "aiBadge": "AI verified",
     "setLocationPrompt": "Set your neighborhood first to see preloved items!"
   },
+  "ai_audit": {
+    "title": "AI Audit Log",
+    "tabs": {
+      "all": "All",
+      "takeover": "Takeover",
+      "registration": "Registration"
+    },
+    "list": {
+      "takeover_title": "On-site takeover verification",
+      "registration_title": "Product AI Registration",
+      "verdict": "Verdict",
+      "id": "ID",
+      "no_records": "No AI records found.",
+      "error": "Error loading AI records."
+    }
+  },
+  "ai_case": {
+    "title": "AI Case Detail",
+    "tabs": {
+      "summary": "Summary",
+      "takeover_photos": "Takeover Photos",
+      "original_photos": "Original Photos",
+      "raw_json": "Raw JSON"
+    }
+  },
   "ai_flow": {
     "common": {
       "error": "An error occurred: {error}",
       "add_photo": "Add Photo",
+      "add_more": "Add More",
       "skip": "Skip",
       "added_photo": "Photo added: {}",
-      "skipped": "Skipped"
+      "added_photos": "{count} photos added",
+      "skipped": "Skipped",
+      "take_photo": "Take Photo",
+      "pick_gallery_multi": "Pick from Gallery"
     },
     "cta": {
       "title": "🤖 Boost trust with AI verification (optional)",
@@ -321,15 +355,25 @@
       "included_items_label": "Included items",
       "buyer_notes_label": "Buyer notes",
       "skipped_items": "Skipped evidence items",
+      "pending_title": "Review Pending",
+      "pending_message": "Your item is under review.",
+      "notes": "Notes",
+      "notes_placeholder": "Enter notes here...",
+      "success_pending": "Registration pending review.",
       "fail": "Failed to generate final report: {error}"
     },
     "evidence": {
       "all_shots_required": "All suggested shots are required.",
       "title": "Evidence photos",
-      "submit_button": "Submit evidence"
+      "submit_button": "Submit evidence",
+      "initial_images_title": "Initial Images",
+      "suggestion_title": "Suggestions"
     },
     "error": {
       "report_generation": "Failed to generate AI report: {error}"
+    },
+    "errors": {
+      "incomplete_report": "Report is incomplete."
     }
   },
   "registration_flow": {
@@ -343,10 +387,18 @@
     "title": "My Bling",
     "editProfile": "Edit Profile",
     "settings": "Settings",
-    "posts": "Posts",
+    "posts": {
+      "empty": "No posts yet.",
+      "noInfo": "No info",
+      "loadErrorWithMsg": "Failed to load: {error}"
+    },
     "followers": "Followers",
     "neighbors": "Neighbors",
-    "friends": "Friends",
+    "friends": {
+      "empty": "No friends yet.",
+      "loadError": "Failed to load.",
+      "userNotFound": "User not found."
+    },
     "stats": {
       "posts": "Posts",
       "followers": "Followers",
@@ -359,8 +411,16 @@
       "bookmarks": "Bookmarks",
       "friends": "Friends"
     },
+    "products": {
+      "noInfo": "No info",
+      "loadErrorWithMsg": "Failed to load: {error}"
+    },
     "friendRequests": "Received Friend Requests",
-    "sentFriendRequests": "Sent Requests"
+    "sentFriendRequests": "Sent Requests",
+    "bookmarks": {
+      "empty": "No bookmarks.",
+      "loadError": "Failed to load."
+    }
   },
   "profileView": {
     "title": "Profile",
@@ -373,6 +433,7 @@
   },
   "settings": {
     "title": "Settings",
+    "account": "Account",
     "accountPrivacy": "Account & Privacy",
     "notifications": {
       "loadError": "Failed to load notification settings.",
@@ -382,9 +443,27 @@
       "scopeDescription": "Choose how wide your notifications should be (only my neighborhood, nearby areas, etc.).",
       "scopeLabel": "Notification scope",
       "tagsTitle": "Notification topics",
-      "tagsDescription": "Choose which topics you want to receive notifications about (news, jobs, marketplace, etc.)."
+      "tagsDescription": "Choose which topics you want to receive notifications about (news, jobs, marketplace, etc.).",
+      "scope": {
+        "rt": "RT",
+        "rw": "RW",
+        "kel": "Kelurahan",
+        "kec": "Kecamatan"
+      }
     },
-    "appInfo": "App Info"
+    "appInfo": "App Info",
+    "blockedUsers": "Blocked Users",
+    "app": "App Settings",
+    "privacy": "Privacy",
+    "language": "Language",
+    "languageSelect": "Select Language",
+    "info": "Info",
+    "notificationsTitle": "Notifications",
+    "logout": {
+      "button": "Log Out",
+      "confirmTitle": "Log Out",
+      "confirmBody": "Are you sure?"
+    }
   },
   "friendRequests": {
     "title": "Received Friend Requests",
@@ -694,7 +773,10 @@
     "edit": "Edit",
     "submit": "Submit",
     "loginRequired": "Login is required.",
-    "unknownUser": "Unknown user."
+    "unknownUser": "Unknown user.",
+    "more": "More",
+    "copiedTitle": "Copied!",
+    "copiedMessage": "{title} copied to clipboard."
   },
   "reportDialog": {
     "title": "Report Post",
@@ -857,7 +939,9 @@
       "infoTitle": "Details",
       "apply": "Apply",
       "noAuthor": "No author info",
-      "chatError": "Could not start chat: {error}"
+      "chatError": "Could not start chat: {error}",
+      "locationTitle": "Location",
+      "authorTitle": "Author"
     },
     "card": {
       "noLocation": "No location info",
@@ -970,6 +1054,18 @@
     "all": "All",
     "reset": "Reset"
   },
+  "locationfilter": {
+    "title": "Location Filter",
+    "provinsi": "Provinsi",
+    "kabupaten": "Kabupaten",
+    "kota": "Kota",
+    "kecamatan": "Kecamatan",
+    "kelurahan": "Kelurahan",
+    "apply": "Apply Filter",
+    "all": "All",
+    "reset": "Reset"
+  },
+
   "clubs": {
     "tabs": {
       "proposals": "Proposals",
@@ -1307,6 +1403,14 @@
         "titleLabel": "Title",
         "descriptionLabel": "Description"
       }
+    },
+    "delete": {
+      "title": "Delete this post?",
+      "content": "Deleted posts cannot be recovered.",
+      "success": "Post deleted."
+    },
+    "edit": {
+      "title": "Edit Post"
     }
   },
   "realEstate": {
@@ -1626,7 +1730,9 @@
     },
     "menu": {
       "aiApproval": "AI Verification Management",
-      "reportManagement": "Report Management"
+      "reportManagement": "Report Management" ,
+      "aiAudit": "AI Audit Logs",
+      "aiAuditSubtitle": "View Takeover & Enhancement history"
     },
     "aiApproval": {
       "empty": "No products pending AI verification.",
