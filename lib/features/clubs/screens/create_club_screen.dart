@@ -14,6 +14,7 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart'; // [추가] Firebase Storage
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // [추가] image_picker
@@ -155,6 +156,27 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
 
     setState(() => _isSaving = true);
 
+    // Fetch freshest user profile to prefer its location fields when user hasn't selected a custom location
+    final currentUser = FirebaseAuth.instance.currentUser;
+    UserModel? freshUserModel;
+    try {
+      if (currentUser != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .get();
+        if (userDoc.exists) {
+          try {
+            freshUserModel = UserModel.fromFirestore(userDoc);
+          } catch (_) {
+            freshUserModel = null;
+          }
+        }
+      }
+    } catch (_) {
+      freshUserModel = null;
+    }
+
     try {
       String? imageUrl;
       // [수정] 이미지가 선택되었으면 Storage에 업로드
@@ -167,7 +189,9 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
         imageUrl = await ref.getDownloadURL();
       }
 
-      final parts = widget.userModel.locationParts;
+      final parts = _selectedLocationParts ??
+          freshUserModel?.locationParts ??
+          widget.userModel.locationParts;
 
       // [추가] 검색 키워드
       final searchKeywords = SearchHelper.generateSearchIndex(
@@ -181,7 +205,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
         id: '', // Firestore에서 자동 생성
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
-        ownerId: widget.userModel.uid,
+        ownerId: currentUser?.uid ?? widget.userModel.uid,
         location: parts?['kel'] ??
             parts?['kec'] ??
             parts?['kab'] ??
@@ -189,14 +213,14 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
             parts?['prov'] ??
             'Unknown',
         locationParts: parts,
-        geoPoint: widget.userModel.geoPoint,
+        geoPoint: freshUserModel?.geoPoint ?? widget.userModel.geoPoint,
         mainCategory: _mainCategory,
         interestTags: _interestTags,
         imageUrl: imageUrl ?? '',
         createdAt: Timestamp.now(),
         targetMemberCount: _targetMemberCount.toInt(), // 목표 인원
         currentMemberCount: 1,
-        memberIds: [widget.userModel.uid],
+        memberIds: [currentUser?.uid ?? widget.userModel.uid],
         searchIndex: searchKeywords, // [추가] (Model에도 필드 추가되어 있어야 함)
       );
 

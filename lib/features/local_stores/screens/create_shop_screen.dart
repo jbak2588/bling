@@ -130,6 +130,20 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     setState(() => _isSaving = true);
 
     try {
+      // Prefer freshest user location data at submit time: fetch users/{uid}
+      final userDocSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      UserModel? freshUserModel;
+      if (userDocSnapshot.exists) {
+        try {
+          freshUserModel = UserModel.fromFirestore(userDocSnapshot);
+        } catch (_) {
+          freshUserModel = null;
+        }
+      }
+
       // [수정] 여러 이미지를 업로드하는 로직
       List<String> imageUrls = [];
       for (var imageFile in _images) {
@@ -167,9 +181,12 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
         ownerId: user.uid,
-        locationName: widget.userModel.locationName,
-        locationParts: widget.userModel.locationParts,
-        geoPoint: widget.userModel.geoPoint,
+        // Prefer freshly-read user profile if available, fallback to widget.userModel
+        locationName:
+            freshUserModel?.locationName ?? widget.userModel.locationName,
+        locationParts:
+            freshUserModel?.locationParts ?? widget.userModel.locationParts,
+        geoPoint: freshUserModel?.geoPoint ?? widget.userModel.geoPoint,
         category: _selectedCategory, // [추가]
         products: _productsController.text
             .trim()

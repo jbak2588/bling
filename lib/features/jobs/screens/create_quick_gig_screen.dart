@@ -25,6 +25,7 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/jobs/data/job_repository.dart';
 import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -173,10 +174,33 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
     setState(() => _isSaving = true);
 
     try {
-      final userModel = widget.userModel;
+      // Fetch current user and freshest profile; use for uploads and location defaults
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        setState(() => _isSaving = false);
+        return;
+      }
+      UserModel? freshUserModel;
+      try {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .get();
+        if (userDoc.exists) {
+          try {
+            freshUserModel = UserModel.fromFirestore(userDoc);
+          } catch (_) {
+            freshUserModel = null;
+          }
+        }
+      } catch (_) {
+        freshUserModel = null;
+      }
+
+      final effectiveUserModel = freshUserModel ?? widget.userModel;
 
       List<String> finalImageUrls = List.from(_existingImageUrls);
-      final newUrls = await _uploadNewImages(userModel.uid);
+      final newUrls = await _uploadNewImages(currentUser.uid);
       finalImageUrls.addAll(newUrls);
 
       // ✅ [추가] 검색어 생성 시 태그 포함
@@ -187,7 +211,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
 
       final jobData = JobModel(
         id: _isEditMode ? widget.jobToEdit!.id : '',
-        userId: userModel.uid,
+        userId: currentUser.uid,
         jobType: JobType.quickGig.name,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -201,8 +225,10 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
         locationName: _locationController.text.trim(),
         locationParts: _isEditMode
             ? widget.jobToEdit!.locationParts
-            : userModel.locationParts,
-        geoPoint: _isEditMode ? widget.jobToEdit!.geoPoint : userModel.geoPoint,
+            : effectiveUserModel.locationParts,
+        geoPoint: _isEditMode
+            ? widget.jobToEdit!.geoPoint
+            : effectiveUserModel.geoPoint,
         createdAt: _isEditMode ? widget.jobToEdit!.createdAt : Timestamp.now(),
         trustLevelRequired:
             _isEditMode ? widget.jobToEdit!.trustLevelRequired : 'normal',

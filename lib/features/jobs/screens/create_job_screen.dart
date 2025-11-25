@@ -188,6 +188,24 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
       return;
     }
 
+    // Fetch freshest user profile to prefer its location fields for new posts
+    UserModel? freshUserModel;
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (userDoc.exists) {
+        try {
+          freshUserModel = UserModel.fromFirestore(userDoc);
+        } catch (_) {
+          freshUserModel = null;
+        }
+      }
+    } catch (_) {
+      freshUserModel = null;
+    }
+
     try {
       List<String> finalImageUrls = List.from(_existingImageUrls);
 
@@ -214,15 +232,22 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         category: _selectedCategory!.id,
+        // For edit mode keep existing stored values. For new posts prefer freshly-read user profile, fallback to initial/widget values.
         locationName: _isEditMode
             ? widget.jobToEdit!.locationName
-            : (widget.initialLocation ?? widget.userModel.locationName),
+            : (freshUserModel?.locationName ??
+                widget.initialLocation ??
+                widget.userModel.locationName),
         locationParts: _isEditMode
             ? widget.jobToEdit!.locationParts
-            : (widget.initialLocationParts ?? widget.userModel.locationParts),
+            : (freshUserModel?.locationParts ??
+                widget.initialLocationParts ??
+                widget.userModel.locationParts),
         geoPoint: _isEditMode
             ? widget.jobToEdit!.geoPoint
-            : (widget.initialGeoPoint ?? widget.userModel.geoPoint),
+            : (freshUserModel?.geoPoint ??
+                widget.initialGeoPoint ??
+                widget.userModel.geoPoint),
 
         createdAt: _isEditMode ? widget.jobToEdit!.createdAt : Timestamp.now(),
         salaryType: _selectedSalaryType,

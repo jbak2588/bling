@@ -143,6 +143,27 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
       }
 
       // 2. [V2] PomModel 생성 (멀티 콘텐츠)
+      // Prefer freshest user location data at submit time: fetch users/{uid}
+      UserModel? freshUserModel;
+      try {
+        final currentUser = FirebaseAuth.instance.currentUser;
+        if (currentUser != null) {
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(currentUser.uid)
+              .get();
+          if (userDoc.exists) {
+            try {
+              freshUserModel = UserModel.fromFirestore(userDoc);
+            } catch (_) {
+              freshUserModel = null;
+            }
+          }
+        }
+      } catch (_) {
+        freshUserModel = null;
+      }
+
       final newShort = PomModel(
         id: '',
         userId: user.uid,
@@ -151,9 +172,12 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
         thumbnailUrl: thumbnailUrl, // [V2] Fix
         title: _titleController.text.trim(), // [V2] Fix
         description: _descriptionController.text.trim(),
-        location: widget.userModel.locationName ?? 'Unknown',
-        locationParts: widget.userModel.locationParts,
-        geoPoint: widget.userModel.geoPoint,
+        location: freshUserModel?.locationName ??
+            widget.userModel.locationName ??
+            'Unknown',
+        locationParts:
+            freshUserModel?.locationParts ?? widget.userModel.locationParts,
+        geoPoint: freshUserModel?.geoPoint ?? widget.userModel.geoPoint,
         tags: List<String>.from(_selectedTags),
         createdAt: Timestamp.now(),
       );

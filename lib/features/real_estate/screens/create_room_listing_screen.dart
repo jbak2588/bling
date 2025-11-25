@@ -158,15 +158,31 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         description: _descriptionController.text,
       );
 
+      // Prefer freshest user location data at submit time: fetch users/{uid}
+      final userDocSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      UserModel? freshUserModel;
+      if (userDocSnapshot.exists) {
+        try {
+          freshUserModel = UserModel.fromFirestore(userDocSnapshot);
+        } catch (_) {
+          freshUserModel = null;
+        }
+      }
+
       final newListing = RoomListingModel(
         id: '',
         userId: user.uid,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         type: _type,
-        locationName: widget.userModel.locationName,
-        locationParts: widget.userModel.locationParts,
-        geoPoint: widget.userModel.geoPoint,
+        locationName:
+            freshUserModel?.locationName ?? widget.userModel.locationName,
+        locationParts:
+            freshUserModel?.locationParts ?? widget.userModel.locationParts,
+        geoPoint: freshUserModel?.geoPoint ?? widget.userModel.geoPoint,
         price: int.tryParse(_priceController.text) ?? 0,
         // [수정] '작업 27': 'sale'일 경우 'priceUnit'을 기본값('monthly')으로 강제
         priceUnit: _selectedListingType == 'rent' ? _priceUnit : 'monthly',
