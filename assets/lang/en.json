@@ -21,7 +21,7 @@
       "unknownError": "unknownError"
     }
   },
-    "notifications": {
+  "notifications": {
     "title": "Notifications",
     "error": "Failed to load notifications.",
     "empty": "You have no notifications.",
@@ -126,93 +126,6 @@
     "5B68mEyct8tpIr9Eyc8j": "Motorcycle",
     "BnGbVd3W9P3ztu0HBJix": "Other Items"
   },
-  "search": {
-    "resultsTitle": "Results for '{keyword}'",
-    "empty": {
-      "message": "No results found for '{keyword}'.",
-      "expandToNational": "Search Nationally",
-      "checkSpelling": "Check your spelling or try different keywords."
-    },
-    "prompt": "Type a keyword",
-    "sheet": {
-      "localNews": "Search Local News",
-      "localNewsDesc": "Search by title, content, tags",
-      "jobs": "Search Jobs",
-      "jobsDesc": "Search by role, company, tags",
-      "lostAndFound": "Search Lost & Found",
-      "lostAndFoundDesc": "Search by item name, place",
-      "marketplace": "Search Preloved",
-      "marketplaceDesc": "Search by item name, category, tags",
-      "localStores": "Search Local Stores",
-      "localStoresDesc": "Search by store name, business type, keywords",
-      "clubs": "Search Clubs",
-      "clubsDesc": "Search by club name, interests",
-      "findFriends": "Search Find Friends",
-      "findFriendsDesc": "Search by nickname, interests",
-      "realEstate": "Search Real Estate",
-      "realEstateDesc": "Search by listing title, area, tags",
-      "auction": "Search Auctions",
-      "auctionDesc": "Search by item name, tags",
-      "pom": "Search POM",
-      "pomDesc": "Search by title, hashtags",
-      "comingSoon": "Coming soon"
-    },
-    "results": "Results",
-    "locationfilter": {
-      "title": "Location Filter",
-      "reset": "Reset",
-      "apply": "Apply",
-      "provinsi": "Province",
-      "kabupaten": "Regency (Kabupaten)",
-      "kota": "City (Kota)",
-      "kecamatan": "District (Kecamatan)",
-      "kelurahan": "Village (Kelurahan)",
-      "tab": {
-        "admin": "Select Area",
-        "nearby": "Nearby",
-        "national": "National"
-      },
-      "nearby": {
-        "radius": "Search within {km}km radius",
-        "desc": "Adjust the range to find items near you."
-      },
-      "national": {
-        "title": "National Search",
-        "desc": "Search all items and posts without location limits."
-      },
-      "hint": {
-        "selectParent": "Please select a parent region first",
-        "all": "All Areas"
-      }
-    }
-  },
-  "locationfilter": {
-    "title": "Location Filter",
-    "reset": "Reset",
-    "apply": "Apply",
-    "provinsi": "Province",
-    "kabupaten": "Regency (Kabupaten)",
-    "kota": "City (Kota)",
-    "kecamatan": "District (Kecamatan)",
-    "kelurahan": "Village (Kelurahan)",
-    "tab": {
-      "admin": "Select Area",
-      "nearby": "Nearby",
-      "national": "National"
-    },
-    "nearby": {
-      "radius": "Search within {km}km radius",
-      "desc": "Adjust the range to find items near you."
-    },
-    "national": {
-      "title": "National Search",
-      "desc": "Search all items and posts without location limits."
-    },
-    "hint": {
-      "selectParent": "Please select a parent region first",
-      "all": "All Areas"
-    }
-  },
   "drawer": {
     "editProfile": "Edit Profile",
     "bookmarks": "Bookmarks",
@@ -256,7 +169,7 @@
       "descriptionHint": "Detailed Description",
       "success": "Product registered successfully!",
       "tagsHint": "You can register tags using comma (,) or Enter.",
-      "fail": "fail"
+      "fail": "Failed to register product: {error}"
     },
     "edit": {
       "title": "Edit Post",
@@ -330,14 +243,6 @@
       "reserved": "Reserved",
       "sold": "Sold"
     },
-    "ai": {
-      "reactivated": "AI verification reactivated.",
-      "cancel_confirm": "Cancel AI verification",
-      "cancel_limit": "AI verification can only be canceled once per product. Re-requesting AI verification may incur charges.",
-      "cancel_ack_charge": "I understand I may be charged.",
-      "cancel_success": "AI verification has been cancelled. The product is now a normal listing.",
-      "cancel_error": "Error cancelling AI verification: {0}"
-    },
     "takeover": {
       "button": "On-site pickup & verification",
       "title": "AI On-site Verification",
@@ -364,10 +269,21 @@
         "finalized": "Deal completed successfully.",
         "cancelled": "Deal cancelled. Deposit will be refunded."
       },
-      "checklistTitle": "On-site verification checklist"
+      "checklistTitle": "On-site verification checklist",
+      "ai": {
+        "reactivated": "AI verification reactivated."
+      }
     },
     "aiBadge": "AI verified",
-    "setLocationPrompt": "Set your neighborhood first to see preloved items!"
+    "setLocationPrompt": "Set your neighborhood first to see preloved items!",
+    "ai": {
+      "cancel_limit": "AI verification can only be canceled once per product. Re-requesting AI verification may incur charges.",
+      "reactivated": "AI verification reactivated.",
+      "cancel_success": "AI verification has been cancelled. The product is now a normal listing.",
+      "cancel_error": "Error cancelling AI verification: {0}",
+      "cancel_confirm": "Cancel AI verification",
+      "cancel_ack_charge": "I understand I may be charged."
+    }
   },
   "ai_flow": {
     "status": {
@@ -384,8 +300,8 @@
       "pick_from_initial": "Select from existing photos",
       "skip": "Skip",
       "added_photos": "{count} photos added",
-      "added_photo": "Photo added: {}",
       "add_more": "Add more",
+      "added_photo": "Photo added: {}",
       "skipped": "Skipped",
       "verified_from_initial": "Verified from image # {}",
       "retake": "Retake"
@@ -403,6 +319,7 @@
     },
     "gallery_upload": {
       "title": "AI Verification: Select Photos",
+      "instruction": "{category} Analyse the products in the category.",
       "guide": "Please upload at least {count} photos for verification.",
       "min_photo_error": "You must select at least {count} photos.",
       "next_button": "Request AI Analysis"
@@ -414,6 +331,9 @@
       "edit_button": "Edit Manually",
       "save_button": "Save Changes",
       "no_name": "No Item Name",
+      "loading": "The AI is analysing the product...\nPlease wait a moment.",
+      "uploading": "Uploading photos...",
+      "analyzing": "AI is analyzing the photos...\nThis may take up to 1 minute.",
       "error": "Couldn’t recognize the item. Please try again.",
       "auth_error": "Missing user auth info. Cannot start analysis.",
       "question": "Is this the right item?",
@@ -449,7 +369,6 @@
       "condition": "Condition check",
       "included_items": "Included items (comma-separated)",
       "final_description": "Final description",
-      "apply_suggestions": "Apply suggestions to description",
       "included_items_label": "Included items",
       "notes": "Notes for buyer",
       "notes_placeholder": "All recommended photos were provided. AI did not find any noteworthy issues to inform the buyer about.",
@@ -466,13 +385,12 @@
       "submit_button": "Submit for verification"
     },
     "error": {
-      "report_generation": "report generation"
+      "report_generation": "Failed to generate AI report: {error}"
     },
     "errors": {
       "incomplete_report": "AI Analysis Failed: The AI did not generate required report items (specs, condition, summary). Please try again later."
     }
   },
-
   "registration_flow": {
     "title": "Choose Item Type to Sell",
     "new_item_title": "Register New and Used Items",
@@ -488,16 +406,16 @@
     "followers": "Followers",
     "neighbors": "Neighbors",
     "friends": "Friends",
-    "stats": {
-      "posts": "Posts",
-      "followers": "Followers",
-      "neighbors": "Neighbors",
-      "friends": "Friends"
-    },
     "tabs": {
       "posts": "My Posts",
       "products": "My Products",
       "bookmarks": "Bookmarks",
+      "friends": "Friends"
+    },
+    "stats": {
+      "posts": "Posts",
+      "followers": "Followers",
+      "neighbors": "Neighbors",
       "friends": "Friends"
     },
     "friendRequests": "Received Friend Requests",
@@ -609,7 +527,8 @@
       "content": "If undone, you may appear again in their Find Friends list."
     },
     "unrejectSuccess": "Undo reject for {nickname} completed.",
-    "unrejectFailure": "Failed to undo reject: {error}"
+    "unrejectFailure": "Failed to undo reject: {error}",
+    "unknownUser": "Unknown user"
   },
   "prompt": {
     "title": "Welcome to Bling!",
@@ -688,10 +607,8 @@
   "categories": {
     "post": {
       "jalan-perbaikin": {
-        "search": {
-          "hint": "Search POMs, tags, users"
-        },
-        "name": "Road Repair"
+        "name": "Road Repair",
+        "description": "Report road damage or request repairs."
       },
       "daily_life": {
         "name": "Daily/Questions",
@@ -708,12 +625,6 @@
       "local_news": {
         "name": "Local News",
         "description": "Share news and info about our neighborhood."
-      },
-      "november": {
-        "name": "November"
-      },
-      "rain": {
-        "name": "Rain"
       },
       "daily_question": {
         "name": "Have a Question",
@@ -877,9 +788,6 @@
     "copiedTitle": "Copied!",
     "copiedMessage": "{title} copied to clipboard."
   },
-  "commom": {
-    "commets": "Comments"
-  },
   "reportDialog": {
     "title": "Report Post",
     "titleComment": "Report Comment",
@@ -924,10 +832,10 @@
     "icebreaker1": "Hi there! 👋",
     "icebreaker2": "What do you usually do on weekends?",
     "icebreaker3": "Any favorite spots nearby?",
-    "mediaBlocked": "For safety, media sending is restricted for 24 hours.",
-    "imageMessage": "Image",
     "linkHidden": "Protection mode: link hidden",
-    "contactHidden": "Protection mode: contact hidden"
+    "contactHidden": "Protection mode: contact hidden",
+    "mediaBlocked": "For safety, media sending is restricted for 24 hours.",
+    "imageMessage": "Image"
   },
   "jobs": {
     "setLocationPrompt": "Set your location to see job posts!",
@@ -1017,11 +925,11 @@
       "daily": "Daily",
       "weekly": "Weekly",
       "monthly": "Monthly",
-      "total": "Total Pay",
+      "yearly": "yearly",
       "per_case": "Per case",
       "etc": "Etc",
-      "$value": "$value",
-      "yearly": "yearly"
+      "total": "Total Pay",
+      "$value": "$value"
     },
     "workPeriods": {
       "short_term": "Short term",
@@ -1082,7 +990,7 @@
     "prompt_button": "Create My Profile",
     "chatLimitReached": "You have reached your daily limit ({limit}) for starting new chats.",
     "chatChecking": "Checking...",
-    "empty": "empty"
+    "empty": "There are no friends registered nearby."
   },
   "interests": {
     "title": "Interests",
@@ -1283,7 +1191,7 @@
         "error": "An error occurred: {error}"
       }
     },
-    "empty": "empty"
+    "empty": "No clubs yet."
   },
   "findfriend": {
     "form": {
@@ -1308,7 +1216,7 @@
       "lowerBid": "You must enter a higher bid than the current one.",
       "alreadyEnded": "This auction has already ended."
     },
-    "empty": "No auctions.",
+    "empty": "There are no auctions currently in progress.",
     "filter": {
       "tooltip": "Filter",
       "clearTooltip": "Clear filter"
@@ -1318,7 +1226,7 @@
       "title": "Create Auction",
       "registrationType": "Registration type",
       "type": {
-        "sale": "Sale",
+        "sale": "General sales",
         "auction": "Auction"
       },
       "success": "Auction created.",
@@ -1733,13 +1641,6 @@
     "empty": "No lost/found items yet.",
     "error": "An error occurred: {error}",
     "create": "Add lost/found item",
-    "resolve": {
-      "confirmTitle": "Mark as resolved?",
-      "confirmBody": "This will mark the item as resolved.",
-      "success": "Marked as resolved.",
-      "badgeLost": "Found!",
-      "badgeFound": "Returned!"
-    },
     "lost": "Lost",
     "found": "Found",
     "tabs": {
@@ -1776,6 +1677,13 @@
       "save": "Save",
       "success": "Updated.",
       "fail": "Failed to update: {error}"
+    },
+    "resolve": {
+      "confirmTitle": "Mark as resolved?",
+      "confirmBody": "This will mark the item as resolved.",
+      "success": "Marked as resolved.",
+      "badgeLost": "Found!",
+      "badgeFound": "Returned!"
     },
     "detail": {
       "title": "Lost & Found",
@@ -2002,6 +1910,93 @@
     "emptyFeed": "emptyFeed",
     "chatRoomCreated": "chatRoomCreated"
   },
+  "search": {
+    "resultsTitle": "Results for '{keyword}'",
+    "empty": {
+      "message": "No results found for '{keyword}'.",
+      "expandToNational": "Search Nationally",
+      "checkSpelling": "Check your spelling or try different keywords."
+    },
+    "prompt": "Type a keyword",
+    "sheet": {
+      "localNews": "Search Local News",
+      "localNewsDesc": "Search by title, content, tags",
+      "jobs": "Search Jobs",
+      "jobsDesc": "Search by role, company, tags",
+      "lostAndFound": "Search Lost & Found",
+      "lostAndFoundDesc": "Search by item name, place",
+      "marketplace": "Search Preloved",
+      "marketplaceDesc": "Search by item name, category, tags",
+      "localStores": "Search Local Stores",
+      "localStoresDesc": "Search by store name, business type, keywords",
+      "clubs": "Search Clubs",
+      "clubsDesc": "Search by club name, interests",
+      "findFriends": "Search Find Friends",
+      "findFriendsDesc": "Search by nickname, interests",
+      "realEstate": "Search Real Estate",
+      "realEstateDesc": "Search by listing title, area, tags",
+      "auction": "Search Auctions",
+      "auctionDesc": "Search by item name, tags",
+      "pom": "Search POM",
+      "pomDesc": "Search by title, hashtags",
+      "comingSoon": "Coming soon"
+    },
+    "results": "Results",
+    "locationfilter": {
+      "title": "Location Filter",
+      "reset": "Reset",
+      "apply": "Apply",
+      "provinsi": "Province",
+      "kabupaten": "Regency (Kabupaten)",
+      "kota": "City (Kota)",
+      "kecamatan": "District (Kecamatan)",
+      "kelurahan": "Village (Kelurahan)",
+      "tab": {
+        "admin": "Select Area",
+        "nearby": "Nearby",
+        "national": "National"
+      },
+      "nearby": {
+        "radius": "Search within {km}km radius",
+        "desc": "Adjust the range to find items near you."
+      },
+      "national": {
+        "title": "National Search",
+        "desc": "Search all items and posts without location limits."
+      },
+      "hint": {
+        "selectParent": "Please select a parent region first",
+        "all": "All Areas"
+      }
+    }
+  },
+  "locationfilter": {
+    "title": "Location Filter",
+    "reset": "Reset",
+    "apply": "Apply",
+    "provinsi": "Province",
+    "kabupaten": "Regency (Kabupaten)",
+    "kota": "City (Kota)",
+    "kecamatan": "District (Kecamatan)",
+    "kelurahan": "Village (Kelurahan)",
+    "tab": {
+      "admin": "Select Area",
+      "nearby": "Nearby",
+      "national": "National"
+    },
+    "nearby": {
+      "radius": "Search within {km}km radius",
+      "desc": "Adjust the range to find items near you."
+    },
+    "national": {
+      "title": "National Search",
+      "desc": "Search all items and posts without location limits."
+    },
+    "hint": {
+      "selectParent": "Please select a parent region first",
+      "all": "All Areas"
+    }
+  },
   "language": {
     "id": "Bahasa Indonesia",
     "ko": "Korean",
@@ -2010,7 +2005,6 @@
   "location_setting_error": "location setting error",
   "signup_fail_required": "signup fail required",
   "signup_fail_password_mismatch": "signup fail password mismatch",
-  
   "signup_fail_default": "signup fail default",
   "signup_fail_weak_password": "signup fail weak password",
   "signup_fail_email_in_use": "signup fail email in use",
@@ -2043,36 +2037,35 @@
       "takeover_photos": "Takeover Photos",
       "original_photos": "Original Photos",
       "raw_json": "Raw JSON"
+    }
+  },
+  "tag_input": {
+    "fromTitleSuffix": "(title)",
+    "addHint": "Add tag...",
+    "help": "Use comma (,) or Enter to add tags."
+  },
+  "auth": {
+    "verification": {
+      "title": "Email Verification",
+      "sent_title": "Verification Email Sent",
+      "sent_desc": "We sent a link to {email}.\nPlease click the link to complete verification.",
+      "resend": "Resend Email",
+      "logout": "Log Out",
+      "check": "Check Verification",
+      "success": "Email verification completed.",
+      "fail_send": "Failed to send email: {error}"
     },
-    "tag_input": {
-      "fromTitleSuffix": "(title)",
-      "addHint": "Add tag...",
-      "help": "Use comma (,) or Enter to add tags."
-    },
-    "auth": {
-      "verification": {
-        "title": "Email Verification",
-        "sent_title": "Verification Email Sent",
-        "sent_desc": "We sent a link to {email}.\nPlease click the link to complete verification.",
-        "resend": "Resend Email",
-        "logout": "Log Out",
-        "check": "Check Verification",
-        "success": "Email verification completed.",
-        "fail_send": "Failed to send email: {error}"
-      },
-      "signup": {
-        "success_email_sent": "Sign up successful! We've sent a verification link to {email}.",
-        "fail": {
-          "required": "Please fill required fields.",
-          "password_mismatch": "Passwords do not match.",
-          "default": "Sign up failed. Please try again.",
-          "weak_password": "The password is too weak.",
-          "email_in_use": "This email is already in use.",
-          "invalid_email": "The email address is invalid.",
-          "unknown": "An unknown error occurred."
-        }
+    "signup": {
+      "success_email_sent": "Sign up successful! We've sent a verification link to {email}.",
+      "fail": {
+        "required": "Please fill required fields.",
+        "password_mismatch": "Passwords do not match.",
+        "default": "Sign up failed. Please try again.",
+        "weak_password": "The password is too weak.",
+        "email_in_use": "This email is already in use.",
+        "invalid_email": "The email address is invalid.",
+        "unknown": "An unknown error occurred."
       }
     }
   }
 }
-

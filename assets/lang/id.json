@@ -90,12 +90,12 @@
     "errors": {
       "loginRequired": "Diperlukan login.",
       "userNotFound": "Pengguna tidak ditemukan.",
-      "unknown": "unknown"
+      "unknown": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
     },
     "myTown": "Kota Saya",
     "mapView": {
       "showMap": "Tampilkan peta",
-      "showList": "showList"
+      "showList": "Tampilkan daftar"
     },
     "search": {
       "placeholder": "Halaman Pencarian",
@@ -167,8 +167,8 @@
       "addressHint": "Lokasi",
       "addressDetailHint": "Detail lokasi pertemuan",
       "descriptionHint": "Deskripsi Lengkap",
-      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "success": "Produk berhasil didaftarkan!",
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "fail": "Gagal mendaftarkan produk: {error}"
     },
     "edit": {
@@ -179,6 +179,7 @@
       "priceHint": "Ubah Harga (Rp)",
       "negotiable": "Ubah Tawaran Harga",
       "descriptionHint": "Ubah Deskripsi Lengkap",
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "success": "Produk berhasil diedit!",
       "fail": "Gagal memperbarui produk: {error}",
       "resetLocation": "Atur ulang lokasi",
@@ -213,7 +214,7 @@
       "cancel": "Batal",
       "deleteConfirm": "Hapus",
       "deleteSuccess": "Postingan berhasil dihapus.",
-      "close": "close"
+      "close": "Tutup"
     },
     "errors": {
       "deleteError": "Gagal menghapus postingan: {error}",
@@ -276,12 +277,12 @@
     "aiBadge": "AI Terverifikasi",
     "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!",
     "ai": {
+      "cancel_limit": "Verifikasi AI hanya dapat dibatalkan sekali per produk. Meminta ulang verifikasi AI dapat dikenakan biaya.",
       "reactivated": "Verifikasi AI telah diaktifkan kembali.",
-      "cancel_limit": "AI verification can only be canceled once per product. Re-requesting AI verification may incur charges.",
-      "cancel_success": "AI verification has been cancelled. The product is now a normal listing.",
-      "cancel_error": "Error cancelling AI verification: {0}",
-      "cancel_confirm": "Cancel AI verification",
-      "cancel_ack_charge": "I understand I may be charged."
+      "cancel_success": "Verifikasi AI telah dibatalkan. Produk ini sekarang menjadi daftar biasa.",
+      "cancel_error": "Kesalahan saat membatalkan verifikasi AI: {0}",
+      "cancel_confirm": "Batalkan verifikasi AI",
+      "cancel_ack_charge": "Saya mengerti bahwa saya mungkin akan dikenakan biaya."
     }
   },
   "ai_flow": {
@@ -289,6 +290,21 @@
       "saving": "Menyimpan informasi produk...",
       "analyzing": "AI sedang menganalisis... (maks 1 menit)",
       "loading_category": "Memuat info kategori..."
+    },
+    "common": {
+      "error": "Terjadi kesalahan: {error}",
+      "add_photo": "Add Photo",
+      "take_photo": "Ambil Foto",
+      "pick_gallery": "Pilih dari Galeri",
+      "pick_gallery_multi": "Pilih beberapa dari galeri",
+      "pick_from_initial": "Pilih dari foto yang ada",
+      "skip": "Skip",
+      "added_photos": "{count} foto ditambahkan",
+      "add_more": "Tambah lagi",
+      "added_photo": "Photo added: {}",
+      "skipped": "Dilewati",
+      "verified_from_initial": "Terverifikasi dari foto ke-{}",
+      "retake": "Ambil ulang"
     },
     "cta": {
       "title": "🤖 Tingkatkan kepercayaan dengan verifikasi AI (opsional)",
@@ -302,14 +318,19 @@
       "no_categories": "Tidak ada kategori yang tersedia untuk verifikasi."
     },
     "gallery_upload": {
-      "title": "Unggah Foto (1/3)",
+      "title": "Unggah Foto",
       "instruction": "Mari analisis barang {category} Anda.",
       "min_photo_guide": "Pilih minimal {0} foto dari galeri Anda agar AI dapat mengenali barang tersebut.",
       "min_photo_error": "Diperlukan minimal {0} foto.",
       "next_button": "Langkah Berikutnya"
     },
     "prediction": {
-      "title": "Konfirmasi Produk (2/3)",
+      "title": "Konfirmasi Produk",
+      "guide": "AI telah mengenali produk Anda sebagai:",
+      "edit_label": "Sunting jika tidak sesuai",
+      "edit_button": "Mengubah nama produk secara langsung",
+      "save_button": "Perbaikan selesai",
+      "no_name": "nama produk tidak cari",
       "loading": "AI sedang menganalisis produk...\nHarap tunggu.",
       "uploading": "Mengunggah gambar dengan aman...",
       "analyzing": "Menganalisis gambar yang diunggah...",
@@ -324,21 +345,23 @@
     },
     "guided_camera": {
       "title": "Ambil untuk detail produk",
-      "location_error": "Lokasi foto tidak cocok dengan lokasi Anda saat ini. Harap ambil foto di lokasi barang.",
-      "next_button": "Minta Analisis Akhir",
-      "guide": "Untuk memperkaya informasi detail produk, silakan tambahkan foto yang disarankan untuk item di bawah."
+      "guide": "Untuk memperkaya informasi detail produk, silakan tambahkan foto yang disarankan untuk item di bawah.",
+      "location_mismatch_error": "Lokasi foto tidak cocok dengan lokasi Anda saat ini. Harap ambil foto di lokasi barang.",
+      "location_permission_error": "Izin lokasi telah ditolak. Silakan izinkan izin di pengaturan.",
+      "no_location_data_error": "Informasi lokasi tidak dapat ditemukan pada foto. Silakan aktifkan tag lokasi di pengaturan kamera.",
+      "next_button": "Minta Analisis Akhir"
     },
     "final_report": {
       "title": "Tinjauan Iklan oleh AI",
+      "guide": "Ini adalah draf iklan penjualan yang dibuat oleh AI. Periksa dan ubah isinya sebelum dipublikasikan.",
       "loading": "AI sedang menulis iklan penjualan terakhir...",
       "error": "Gagal membuat laporan. Silakan coba lagi.",
       "success": "Laporan akhir berhasil dibuat.",
       "success_pending": "Terdaftar. Akan dipublikasikan setelah ditinjau admin.",
       "pending_title": "Diajukan untuk ditinjau",
       "pending_message": "Hasil verifikasi AI menunjukkan item ini perlu ditinjau oleh admin sebelum dipublikasikan.",
-      "guide": "Ini adalah draf iklan penjualan yang dibuat oleh AI. Periksa dan ubah isinya sebelum dipublikasikan.",
       "submit_button": "Daftarkan",
-      "fail": "fail",
+      "suggested_price": "AI suggested price ({})",
       "summary": "Verification summary",
       "buyer_notes": "Notes for buyer (AI)",
       "key_specs": "Key specs",
@@ -346,12 +369,12 @@
       "condition": "Condition check",
       "included_items": "Included items (comma-separated)",
       "final_description": "Final description",
-      "suggested_price": "AI suggested price ({})",
       "included_items_label": "Included items",
       "notes": "Catatan untuk pembeli",
       "notes_placeholder": "Semua foto yang direkomendasikan telah disediakan. AI tidak menemukan hal penting yang perlu diberitahukan kepada pembeli.",
       "buyer_notes_label": "Buyer notes",
-      "skipped_items": "Skipped evidence items"
+      "skipped_items": "Skipped evidence items",
+      "fail": "Pembuatan laporan gagal."
     },
     "evidence": {
       "all_shots_required": "Semua bidikan diperlukan untuk informasi detail produk.",
@@ -362,24 +385,10 @@
       "submit_button": "Kirim untuk verifikasi"
     },
     "error": {
-      "report_generation": "report generation"
+      "report_generation": "Kesalahan pembuatan laporan: {0}"
     },
     "errors": {
       "incomplete_report": "Analisis AI Gagal: AI tidak menghasilkan item laporan yang diperlukan (spesifikasi, kondisi, ringkasan). Silakan coba lagi nanti."
-    },
-    "common": {
-      "pick_from_initial": "Pilih dari foto yang ada",
-      "take_photo": "Ambil Foto",
-      "pick_gallery": "Pilih dari Galeri",
-      "pick_gallery_multi": "Pilih beberapa dari galeri",
-      "added_photos": "{count} foto ditambahkan",
-      "add_more": "Tambah lagi",
-      "skipped": "Skipped",
-      "add_photo": "Add Photo",
-      "skip": "Skip",
-      "added_photo": "Photo added: {}",
-      "verified_from_initial": "Terverifikasi dari foto ke-{}",
-      "retake": "Ambil ulang"
     }
   },
   "registration_flow": {
@@ -397,24 +406,16 @@
     "followers": "Pengikut",
     "neighbors": "Tetangga",
     "friends": "Teman",
-    "stats": {
-      "posts": "Postingan",
-      "followers": "Pengikut",
-      "neighbors": "Tetangga",
-      "ai": {
-        "reactivated": "Verifikasi AI telah diaktifkan kembali.",
-        "cancel_confirm": "Batalkan verifikasi AI",
-        "cancel_limit": "Verifikasi AI hanya dapat dibatalkan satu kali per produk. Meminta verifikasi AI ulang dapat dikenakan biaya.",
-        "cancel_ack_charge": "Saya mengerti saya mungkin akan dikenai biaya.",
-        "cancel_success": "Verifikasi AI dibatalkan. Produk kembali menjadi listing biasa.",
-        "cancel_error": "Gagal membatalkan verifikasi AI: {0}"
-      },
-      "friends": "Teman"
-    },
     "tabs": {
       "posts": "Postingan Saya",
       "products": "Produk Saya",
       "bookmarks": "Markah",
+      "friends": "Teman"
+    },
+    "stats": {
+      "posts": "Postingan",
+      "followers": "Pengikut",
+      "neighbors": "Tetangga",
       "friends": "Teman"
     },
     "friendRequests": "Permintaan Pertemanan",
@@ -457,9 +458,9 @@
     "app": "Pengaturan Aplikasi",
     "notificationsTitle": "Pengaturan Pemberitahuan",
     "notifications": {
-      "loadError": "loadError",
-      "saveSuccess": "saveSuccess",
-      "saveError": "saveError",
+      "loadError": "Pengaturan tidak dapat dimuat.",
+      "saveSuccess": "Tersimpan.",
+      "saveError": "Gagal menyimpan.",
       "scopeTitle": "Ruang Lingkup Notifikasi",
       "scopeDescription": "Pilih cakupan geografis yang ingin Anda terima notifikasinya.",
       "scope": {
@@ -515,7 +516,7 @@
     "unblockSuccess": "{nickname} telah dibuka blokir.",
     "unblockFailure": "Gagal membuka blokir: {error}",
     "unknownUser": "Pengguna tidak dikenal",
-    "empty": "empty"
+    "empty": "Tidak ada pengguna yang diblokir."
   },
   "rejectedUsers": {
     "title": "Kelola Pengguna yang Ditolak",
@@ -526,7 +527,8 @@
       "content": "Jika penolakan dibatalkan, Anda mungkin akan muncul kembali di daftar cari teman mereka."
     },
     "unrejectSuccess": "Penolakan terhadap {nickname} telah dibatalkan.",
-    "unrejectFailure": "Gagal membatalkan penolakan: {error}"
+    "unrejectFailure": "Gagal membatalkan penolakan: {error}",
+    "unknownUser": "Pengguna tidak dikenal"
   },
   "prompt": {
     "title": "Selamat datang di Bling!",
@@ -594,21 +596,19 @@
     "dateFormatLong": "d MMM"
   },
   "productCard": {
-    "currency": "$"
+    "currency": "Rp"
   },
   "localNewsFeed": {
     "setLocationPrompt": "Silakan atur lingkungan Anda terlebih dahulu untuk melihat cerita lokal!",
     "allCategory": "Semua",
     "empty": "Tidak ada postingan untuk ditampilkan.",
-    "error": "error"
+    "error": "Terjadi kesalahan."
   },
   "categories": {
     "post": {
       "jalan-perbaikin": {
-        "search": {
-          "hint": "Cari POM, tag, pengguna"
-        },
-        "name": "Perbaiki Jalan"
+        "name": "Perbaiki Jalan",
+        "description": "Laporkan jalan rusak atau masalah infrastruktur lainnya."
       },
       "daily_life": {
         "name": "Harian/Tanya",
@@ -625,12 +625,6 @@
       "local_news": {
         "name": "Berita Lokal",
         "description": "Bagikan berita dan informasi tentang lingkungan kita."
-      },
-      "november": {
-        "name": "November"
-      },
-      "rain": {
-        "name": "Hujan"
       },
       "daily_question": {
         "name": "Ada Pertanyaan",
@@ -701,7 +695,7 @@
       "tagRequired": "Pilih minimal 1 tag.",
       "tagMaxLimit": "Maksimal 3 tag.",
       "imageMaxLimit": "Maksimal 5 gambar dapat dilampirkan.",
-      "titleRequired": "titleRequired"
+      "titleRequired": "Harap masukkan judul."
     },
     "buttons": {
       "addImage": "Tambah Gambar",
@@ -793,9 +787,6 @@
     "unknownUser": "unknownUser",
     "copiedTitle": "Disalin!",
     "copiedMessage": "{title} disalin ke clipboard."
-  },
-  "commom": {
-    "commets": "Komentar"
   },
   "reportDialog": {
     "title": "Laporkan Postingan",
@@ -999,7 +990,7 @@
     "prompt_button": "Buat Profil Saya",
     "chatLimitReached": "Anda telah mencapai batas harian ({limit}) untuk memulai obrolan baru.",
     "chatChecking": "Memeriksa...",
-    "empty": "empty"
+    "empty": "Tidak ada teman yang ditemukan di sekitar."
   },
   "interests": {
     "title": "Minat",
@@ -1057,9 +1048,9 @@
     "block": "Blokir",
     "report": "Laporkan",
     "loginRequired": "Diperlukan login.",
-    "unblocked": "unblocked",
-    "blocked": "blocked",
-    "unblock": "unblock"
+    "unblocked": "Dibuka Blokir",
+    "blocked": "Diblokir",
+    "unblock": "Buka Blokir"
   },
   "locationFilter": {
     "title": "Filter Lokasi",
@@ -1165,7 +1156,7 @@
       "maxInterests": "Anda dapat memilih hingga 3 minat.",
       "privateClub": "Grup Privat",
       "privateDescription": "Hanya bisa bergabung lewat undangan.",
-      "locationLabel": "locationLabel"
+      "locationLabel": "Lokasi Grup"
     },
     "editClub": {
       "title": "Edit Informasi Grup",
@@ -1200,7 +1191,7 @@
         "error": "Terjadi kesalahan: {error}"
       }
     },
-    "empty": "empty"
+    "empty": "Tidak ada Grup untuk ditampilkan."
   },
   "findfriend": {
     "form": {
@@ -1330,7 +1321,7 @@
       "categoryError": "Silakan pilih kategori.",
       "productsLabel": "Produk/Layanan Utama",
       "productsHint": "Pisahkan dengan koma, mis. Potong rambut, Pewarnaan, Perm",
-      "imageError": "imageError"
+      "imageError": "Harap unggah minimal satu foto."
     },
     "categories": {
       "all": "Semua",
@@ -1358,10 +1349,10 @@
       "inquire": "Hubungi",
       "noOwnerInfo": "Info pemilik tidak ada",
       "startChatFail": "Tidak dapat memulai chat: {error}",
-      "reviews": "reviews",
-      "writeReview": "writeReview",
-      "noReviews": "noReviews",
-      "reviewDialogContent": "reviewDialogContent"
+      "reviews": "Ulasan",
+      "writeReview": "Tulis Ulasan",
+      "noReviews": "Belum ada ulasan.",
+      "reviewDialogContent": "Tulis ulasan untuk toko ini."
     },
     "noLocation": "Tidak ada info lokasi"
   },
@@ -1592,11 +1583,11 @@
           "out_room": "Kamar mandi di luar"
         },
         "maxOccupants": "Maks. Penghuni",
+        "hintBathroomType": "Pilih Tipe Kamar Mandi",
+        "hintMaxOccupants": "Pilih Jumlah Orang",
         "electricityIncluded": "Termasuk Listrik",
         "roomFacilities": "Fasilitas Kamar",
         "publicFacilities": "Fasilitas Umum",
-        "hintBathroomType": "Pilih Tipe Kamar Mandi",
-        "hintMaxOccupants": "Pilih Jumlah Orang",
         "occupant": "Orang"
       },
       "apartment": {
@@ -1754,7 +1745,15 @@
       "rejectTitle": "Masukkan alasan penolakan",
       "rejectReasonHint": "Alasan penolakan",
       "rejectReasonRequired": "Alasan wajib diisi",
-      "aiReport": "Laporan Analisis AI (V3)"
+      "aiReport": "Laporan Analisis AI (V3)",
+      "labels": {
+        "userId": "ID Pengguna",
+        "productId": "ID Produk"
+      },
+      "buttons": {
+        "reject": "Tolak",
+        "approve": "Setujui"
+      }
     },
     "reports": {
       "title": "Manajemen Laporan",
@@ -1905,11 +1904,11 @@
       "inactiveBody": "Untuk mengaktifkan papan lingkungan, buat dulu satu postingan cerita lokal. Jika tetangga mulai ikut serta, papan akan terbuka otomatis.",
       "writePost": "Tulis Cerita Lokal"
     },
-    "defaultTitle": "defaultTitle",
-    "chatRoomComingSoon": "chatRoomComingSoon",
-    "chatRoomTitle": "chatRoomTitle",
-    "emptyFeed": "emptyFeed",
-    "chatRoomCreated": "chatRoomCreated"
+    "defaultTitle": "Papan Komunitas",
+    "chatRoomComingSoon": "Fitur ruang obrolan segera hadir!",
+    "chatRoomTitle": "Ruang Obrolan Komunitas",
+    "emptyFeed": "Belum ada cerita lokal di papan ini.",
+    "chatRoomCreated": "Ruang obrolan komunitas telah dibuat."
   },
   "search": {
     "resultsTitle": "Hasil untuk '{keyword}'",
@@ -2003,17 +2002,17 @@
     "ko": "Korean",
     "en": "English"
   },
-  "location_setting_error": "location setting error",
-  "signup_fail_required": "signup fail required",
-  "signup_fail_password_mismatch": "signup fail password mismatch",
-  "signup_fail_default": "signup fail default",
-  "signup_fail_weak_password": "signup fail weak password",
-  "signup_fail_email_in_use": "signup fail email in use",
-  "signup_fail_invalid_email": "signup fail invalid email",
-  "signup_fail_unknown": "signup fail unknown",
-  "category_empty": "category empty",
+  "location_setting_error": "Kesalahan pengaturan lokasi: {error}",
+  "signup_fail_required": "Pendaftaran gagal: Kolom wajib tidak terisi",
+  "signup_fail_password_mismatch": "Pendaftaran gagal: Kata sandi tidak cocok",
+  "signup_fail_default": "Pendaftaran gagal: Informasi dasar tidak lengkap",
+  "signup_fail_weak_password": "Gagal mendaftar: Kata sandi lemah",
+  "signup_fail_email_in_use": "Gagal masuk: Saat menggunakan email yang sudah terdaftar",
+  "signup_fail_invalid_email": "Gagal mendaftar: Email tidak valid",
+  "signup_fail_unknown": "Gagal mendaftar: Kesalahan tak terduga",
+  "category_empty": "Kategori kosong",
   "user": {
-    "notLoggedIn": "notLoggedIn"
+    "notLoggedIn": "Pengguna tidak masuk."
   },
   "ai_audit": {
     "title": "Log Audit AI",
@@ -2038,34 +2037,34 @@
       "takeover_photos": "Foto Pengambilan",
       "original_photos": "Foto Asli",
       "raw_json": "Raw JSON"
+    }
+  },
+  "tag_input": {
+    "fromTitleSuffix": "(judul)",
+    "addHint": "Tambah tag...",
+    "help": "Gunakan koma (,) atau Enter untuk menambahkan tag."
+  },
+  "auth": {
+    "verification": {
+      "title": "Verifikasi Email",
+      "sent_title": "Email Verifikasi Terkirim",
+      "sent_desc": "Kami telah mengirim tautan ke {email}.\nSilakan klik tautan untuk menyelesaikan verifikasi.",
+      "resend": "Kirim Ulang Email",
+      "logout": "Keluar",
+      "check": "Cek Verifikasi",
+      "success": "Verifikasi email selesai.",
+      "fail_send": "Gagal mengirim email: {error}"
     },
-    "tag_input": {
-      "fromTitleSuffix": "(judul)",
-      "addHint": "Tambah tag...",
-      "help": "Gunakan koma (,) atau Enter untuk menambahkan tag."
-    },
-    "auth": {
-      "verification": {
-        "title": "Verifikasi Email",
-        "sent_title": "Email Verifikasi Terkirim",
-        "sent_desc": "Kami telah mengirim tautan ke {email}.\nSilakan klik tautan untuk menyelesaikan verifikasi.",
-        "resend": "Kirim Ulang Email",
-        "logout": "Keluar",
-        "check": "Cek Verifikasi",
-        "success": "Verifikasi email selesai.",
-        "fail_send": "Gagal mengirim email: {error}"
-      },
-      "signup": {
-        "success_email_sent": "Pendaftaran berhasil! Kami mengirim tautan verifikasi ke {email}.",
-        "fail": {
-          "required": "Harap isi kolom yang diperlukan.",
-          "password_mismatch": "Kata sandi tidak cocok.",
-          "default": "Pendaftaran gagal. Silakan coba lagi.",
-          "weak_password": "Kata sandi terlalu lemah.",
-          "email_in_use": "Email ini sudah digunakan.",
-          "invalid_email": "Alamat email tidak valid.",
-          "unknown": "Terjadi kesalahan yang tidak diketahui."
-        }
+    "signup": {
+      "success_email_sent": "Pendaftaran berhasil! Kami mengirim tautan verifikasi ke {email}.",
+      "fail": {
+        "required": "Harap isi kolom yang diperlukan.",
+        "password_mismatch": "Kata sandi tidak cocok.",
+        "default": "Pendaftaran gagal. Silakan coba lagi.",
+        "weak_password": "Kata sandi terlalu lemah.",
+        "email_in_use": "Email ini sudah digunakan.",
+        "invalid_email": "Alamat email tidak valid.",
+        "unknown": "Terjadi kesalahan yang tidak diketahui."
       }
     }
   }

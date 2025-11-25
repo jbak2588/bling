@@ -277,15 +277,26 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                               Icon(Icons.location_on_outlined,
                                   size: 16, color: Colors.grey[600]),
                               const SizedBox(width: 4),
-                              Text(auction.location,
+                              Expanded(
+                                child: Text(
+                                  auction.location,
                                   style: TextStyle(
-                                      color: Colors.grey[700], fontSize: 16)),
+                                      color: Colors.grey[700], fontSize: 16),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                               if (distance != null)
-                                Text('  ·  $distance',
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Text(
+                                    '· $distance',
                                     style: TextStyle(
                                         color: Colors.red.shade700,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 16)),
+                                        fontSize: 16),
+                                  ),
+                                ),
                             ],
                           ),
                           Text('auctions.detail.currentBid'.tr(namedArgs: {

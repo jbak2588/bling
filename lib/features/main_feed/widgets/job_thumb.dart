@@ -172,40 +172,48 @@ class JobThumb extends StatelessWidget {
     // MD: "배지=급여(한 줄)"
     final salaryString = _formatSalary(context);
 
+    // Use Expanded so the meta area occupies the remaining space exactly
+    // and avoids tiny bottom overflows when fonts or device metrics change.
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+        // slightly reduced vertical padding to give headroom on small screens
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // MD: "제목"
-            Text(
-              job.title, //
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-              maxLines: 2, // MD: 오버플로우 방지
-              overflow: TextOverflow.ellipsis,
+            // Title + location grouped at the top
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  job.title,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  location,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            // MD: "보조=지역"
-            Text(
-              location,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-              maxLines: 1, // MD: 오버플로우 방지
-              overflow: TextOverflow.ellipsis,
-            ),
-            const Spacer(),
-            // MD: "배지=급여(한 줄)"
+
+            // Salary aligned to the bottom via spaceBetween
             Text(
               salaryString,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor, // 강조 색상
+                    color: Theme.of(context).primaryColor,
                   ),
-              maxLines: 1, // MD: 오버플로우 방지
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ],
