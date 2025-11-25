@@ -21,7 +21,7 @@ library;
 
 import 'package:bling_app/features/auction/models/auction_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
-import 'package:bling_app/features/auction/data/auction_repository.dart';
+// repository import removed: this screen builds queries directly when needed
 import 'package:bling_app/features/auction/screens/auction_detail_screen.dart'; // ✅ [지도뷰] 1. 상세화면 import
 import 'package:bling_app/features/auction/widgets/auction_card.dart';
 import 'package:flutter/material.dart';
@@ -34,22 +34,25 @@ import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'package:bling_app/core/constants/app_categories.dart';
 import 'package:bling_app/features/auction/models/auction_category_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:bling_app/core/utils/location_helper.dart'; // ✅ LocationHelper Import
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class AuctionScreen extends StatefulWidget {
   final UserModel? userModel;
   // [추가] HomeScreen에서 locationFilter를 전달받습니다.
-  final Map<String, String?>? locationFilter;
+  // final Map<String, String?>? locationFilter; // ✅ Provider 사용으로 제거
   final bool autoFocusSearch;
   final ValueNotifier<bool>? searchNotifier;
 
-  const AuctionScreen(
-      {this.userModel,
-      this.locationFilter, // [추가]
-      this.autoFocusSearch = false,
-      this.searchNotifier,
-      super.key});
+  const AuctionScreen({
+    super.key,
+    this.userModel,
+    // this.locationFilter,
+    this.autoFocusSearch = false,
+    this.searchNotifier,
+  });
 
   @override
   State<AuctionScreen> createState() => _AuctionScreenState();
@@ -87,9 +90,38 @@ class _AuctionScreenState extends State<AuctionScreen> {
     _searchKeywordNotifier.addListener(_onKeywordChanged);
   }
 
-  // ✅ [버그 수정 1] 키워드 변경 시 setState 호출
+  // ✅ [버그 수정] 키워드 변경 시 setState 호출 (리스너에 사용)
   void _onKeywordChanged() {
     if (mounted) setState(() {});
+  }
+
+  // ✅ [신규] Provider 상태에 따른 동적 쿼리 빌더
+  Query<Map<String, dynamic>> _buildAuctionQuery(LocationProvider provider) {
+    Query<Map<String, dynamic>> query =
+        FirebaseFirestore.instance.collection('auctions');
+
+    // 1. 위치 필터
+    if (provider.mode == LocationSearchMode.administrative) {
+      final filterEntry = provider.activeQueryFilter;
+      if (filterEntry != null) {
+        query = query.where(filterEntry.key, isEqualTo: filterEntry.value);
+      }
+    } else if (provider.mode == LocationSearchMode.nearby) {
+      // 거리 검색 시 1차 필터링 (Kabupaten 기준) - DB 부하 감소용
+      final userKab = provider.user?.locationParts?['kab'];
+      if (userKab != null) {
+        query = query.where('locationParts.kab', isEqualTo: userKab);
+      }
+    }
+
+    // 2. 카테고리 필터
+    if (_selectedCategoryId != 'all') {
+      query = query.where('category', isEqualTo: _selectedCategoryId);
+    }
+
+    // 3. 정렬 (정석 복구: 서버 사이드 정렬)
+    // [주의] 인덱스 필요 에러 발생 시 링크 클릭 필수
+    return query.orderBy('endAt', descending: false);
   }
 
   // 위치 필터 UI는 상위(MainNavigation)에서 관리합니다. 이 화면에서는 상태만 초기화해 사용합니다.
@@ -119,7 +151,9 @@ class _AuctionScreenState extends State<AuctionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AuctionRepository auctionRepository = AuctionRepository();
+    // Repository not used when building query in-screen; keep local instance removed.
+    // ✅ LocationProvider 구독
+    final locationProvider = context.watch<LocationProvider>();
 
     return Scaffold(
       body: Column(
@@ -158,10 +192,10 @@ class _AuctionScreenState extends State<AuctionScreen> {
           Expanded(
             child: StreamBuilder<List<AuctionModel>>(
               // [수정] fetchAuctions 함수에 현재 필터 상태를 전달합니다.
-              stream: auctionRepository.fetchAuctions(
-                  locationFilter: widget.locationFilter,
-                  categoryId:
-                      _selectedCategoryId), // ✅ [탐색 기능] 4. categoryId 전달
+              stream: _buildAuctionQuery(locationProvider).snapshots().map(
+                  (snap) => snap.docs
+                      .map((doc) => AuctionModel.fromFirestore(doc))
+                      .toList()),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -227,6 +261,38 @@ class _AuctionScreenState extends State<AuctionScreen> {
                 }
 
                 var auctions = snapshot.data!;
+
+                // ✅ [거리순 정렬 로직 추가]
+                if (locationProvider.mode == LocationSearchMode.nearby &&
+                    locationProvider.user?.geoPoint != null) {
+                  final userGeo = locationProvider.user!.geoPoint!;
+                  final radiusKm = locationProvider.radiusKm;
+
+                  // 거리 필터링
+                  auctions = auctions.where((item) {
+                    final pGeo = item.geoPoint;
+                    if (pGeo == null) return false;
+                    // ✅ LocationHelper 사용
+                    final dist =
+                        LocationHelper.getDistanceBetween(userGeo, pGeo);
+                    return dist <= radiusKm;
+                  }).toList();
+
+                  // 거리순 정렬
+                  auctions.sort((a, b) {
+                    final geoA = a.geoPoint!;
+                    final geoB = b.geoPoint!;
+                    // ✅ LocationHelper 사용
+                    final distA =
+                        LocationHelper.getDistanceBetween(userGeo, geoA);
+                    final distB =
+                        LocationHelper.getDistanceBetween(userGeo, geoB);
+                    return distA.compareTo(distB);
+                  });
+                }
+                // ✅ [클라이언트 정렬] 종료 임박순 (기본)
+                // 거리순 정렬이 아닐 때만 수행
+                // The client-side sorting has been removed, relying on Firestore ordering.
                 final kw = _searchKeywordNotifier.value;
                 if (kw.isNotEmpty) {
                   auctions = auctions
@@ -296,7 +362,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
                 return _isMapView
                     ? _AuctionMapView(
                         key: PageStorageKey(
-                            'auction_map_${widget.locationFilter?.hashCode ?? 0}'),
+                            'auction_map_${_selectedCategoryId}_${locationProvider.mode.index}'),
                         auctions: auctions,
                         userModel: widget.userModel,
                       )

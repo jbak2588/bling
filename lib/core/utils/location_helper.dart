@@ -8,58 +8,44 @@
 library;
 
 import 'dart:math' as math;
-import 'package:bling_app/core/utils/logging/logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
 class LocationHelper {
-  /// 현재 기기의 GPS 위치(위도, 경도)를 가져옵니다.
   static Future<Position?> getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
-    try {
-      // 1. 위치 서비스 활성화 여부 확인
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        Logger.error("LocationHelper: GPS Service is disabled");
-        throw Exception("위치 서비스(GPS)가 꺼져 있습니다. 설정에서 켜주세요.");
-      }
-
-      // 2. 위치 권한 확인 및 요청
-      permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          Logger.error("LocationHelper: Permission denied");
-          throw Exception("위치 권한이 거부되었습니다. 앱 설정에서 권한을 허용해주세요.");
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        Logger.error("LocationHelper: Permission denied forever");
-        throw Exception("위치 권한이 영구적으로 거부되었습니다. 앱 설정에서 변경해주세요.");
-      }
-
-      // 3. 현재 위치 가져오기 (최신 API 적용)
-      return await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 20), // [수정] 타임아웃 20초로 연장
-        ),
-      );
-    } catch (e) {
-      Logger.error("LocationHelper: getCurrentLocation error: $e", error: e);
-      rethrow;
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // 위치 서비스를 켤 수 있도록 설정창으로 유도하거나 에러 처리
+      // await Geolocator.openLocationSettings(); // 선택 사항
+      throw Exception("위치 서비스(GPS)가 꺼져 있습니다.");
     }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception("위치 권한이 거부되었습니다.");
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception("위치 권한이 영구적으로 거부되었습니다. 설정에서 변경해주세요.");
+    }
+
+    return await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 15),
+      ),
+    );
   }
 
-  /// 좌표(Position)를 주소 문자열로 변환합니다 (Reverse Geocoding).
   static Future<String?> getAddressFromCoordinates(Position position) async {
     try {
-      Logger.info(
-          "LocationHelper: Start Geocoding for ${position.latitude}, ${position.longitude}");
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
@@ -67,73 +53,111 @@ class LocationHelper {
 
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
-        Logger.info("LocationHelper: Placemark found: $place");
-        // 주소 조합 로직
+        // 주소 조합: 도로명(street)이 가장 정확한 상세 주소임
         List<String> parts = [
-          place.street ?? '',
+          place.street ?? '', // 상세 주소 (예: Jl. Gn. Mahkota No.12)
           place.subLocality ?? '', // Kelurahan
           place.locality ?? '', // Kecamatan
           place.subAdministrativeArea ?? '', // Kabupaten/Kota
           place.administrativeArea ?? '', // Province
           place.postalCode ?? ''
         ];
-        return parts.where((s) => s.isNotEmpty).join(', ');
+        // 중복 제거 및 빈 값 제거
+        return parts.where((s) => s.isNotEmpty).toSet().join(', ');
       }
     } catch (e) {
-      Logger.error("LocationHelper: Geocoding error: $e", error: e);
       throw Exception("주소 변환 실패: $e");
     }
     return null;
   }
 
-  /// 주소 문자열을 분석하여 행정구역 맵으로 변환
+  /// 행정구역 명칭 정규화
+  static String cleanName(String name) {
+    String cleaned = name.trim();
+    final prefixes = [
+      'Provinsi ',
+      'Prov. ',
+      'Kabupaten ',
+      'Kab. ',
+      'Kota ',
+      'Kecamatan ',
+      'Kec. ',
+      'Kelurahan ',
+      'Kel. ',
+      'Desa '
+    ];
+    for (var prefix in prefixes) {
+      if (cleaned.toLowerCase().startsWith(prefix.toLowerCase())) {
+        cleaned = cleaned.substring(prefix.length).trim();
+      }
+    }
+    if (cleaned.toLowerCase().endsWith(' city')) {
+      cleaned = cleaned.substring(0, cleaned.length - 5).trim();
+    }
+    return cleaned;
+  }
+
+  /// Placemark 객체로부터 정교한 파싱 (추천)
+  static Map<String, dynamic> parsePlacemark(Placemark place) {
+    return {
+      'prov': place.administrativeArea != null
+          ? cleanName(place.administrativeArea!)
+          : null,
+      'kab': place.subAdministrativeArea != null
+          ? cleanName(place.subAdministrativeArea!)
+          : null,
+      'kec': place.locality != null ? cleanName(place.locality!) : null,
+      'kel': place.subLocality != null ? cleanName(place.subLocality!) : null,
+      'street': place.street, // ✅ 상세 주소 추가
+      'postalCode': place.postalCode,
+      'country': place.country,
+    };
+  }
+
+  /// 문자열 기반 파싱 (Fallback)
   static Map<String, dynamic> parseAddress(String address) {
     final Map<String, dynamic> parts = {
       'prov': null,
       'kab': null,
       'kec': null,
       'kel': null,
+      'street': null, // 상세 주소 필드 추가
     };
 
+    // 상세 주소 추출 시도: 보통 맨 앞부분이 도로명 주소임
     final tokens = address.split(',').map((e) => e.trim()).toList();
+    if (tokens.isNotEmpty) {
+      parts['street'] = tokens.first;
+    }
 
     for (var token in tokens) {
       final lowerToken = token.toLowerCase();
-
-      if (lowerToken.startsWith('provinsi') ||
+      if (lowerToken.startsWith('prov') ||
           lowerToken.contains('jawa') ||
-          lowerToken.contains('jakarta') ||
-          lowerToken.contains('banten') ||
-          lowerToken.contains('bali')) {
-        parts['prov'] = token;
-      } else if (lowerToken.startsWith('kabupaten') ||
-          lowerToken.startsWith('kab.') ||
+          lowerToken.contains('banten')) {
+        parts['prov'] = cleanName(token);
+      } else if (lowerToken.startsWith('kab') ||
           lowerToken.startsWith('kota')) {
-        parts['kab'] = token;
-      } else if (lowerToken.startsWith('kecamatan') ||
-          lowerToken.startsWith('kec.')) {
-        parts['kec'] = token;
-      } else if (lowerToken.startsWith('kelurahan') ||
-          lowerToken.startsWith('kel.') ||
+        parts['kab'] = cleanName(token);
+      } else if (lowerToken.startsWith('kec')) {
+        parts['kec'] = cleanName(token);
+      } else if (lowerToken.startsWith('kel') ||
           lowerToken.startsWith('desa')) {
-        parts['kel'] = token;
+        parts['kel'] = cleanName(token);
       }
     }
     return parts;
   }
 
-  /// 거리 계산 (Haversine)
   static double getDistanceBetween(GeoPoint point1, GeoPoint point2) {
     const double earthRadiusKm = 6371;
     final double dLat = _degreesToRadians(point2.latitude - point1.latitude);
     final double dLon = _degreesToRadians(point2.longitude - point1.longitude);
-
     final double a = (math.sin(dLat / 2) * math.sin(dLat / 2)) +
         (math.cos(_degreesToRadians(point1.latitude)) *
             math.cos(_degreesToRadians(point2.latitude)) *
             math.sin(dLon / 2) *
             math.sin(dLon / 2));
-
     final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
     return earthRadiusKm * c;
   }
@@ -144,17 +168,14 @@ class LocationHelper {
 
   static String? formatDistanceBetween(
       GeoPoint? userLocation, GeoPoint? itemLocation) {
-    if (userLocation == null || itemLocation == null) {
-      return null;
-    }
+    if (userLocation == null || itemLocation == null) return null;
     final double distance = getDistanceBetween(userLocation, itemLocation);
     return '${distance.toStringAsFixed(1)} km';
   }
 }
 
-// ✅ [하위 호환성 유지] 기존 전역 함수 래퍼
+// 하위 호환성 래퍼
 double getDistanceBetween(GeoPoint point1, GeoPoint point2) =>
     LocationHelper.getDistanceBetween(point1, point2);
-
 String? formatDistanceBetween(GeoPoint? userLocation, GeoPoint? itemLocation) =>
     LocationHelper.formatDistanceBetween(userLocation, itemLocation);

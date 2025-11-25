@@ -10,7 +10,7 @@ class LostAndFoundRepository {
   CollectionReference<Map<String, dynamic>> get _lostAndFoundCollection =>
       _firestore.collection('lost_and_found');
 
-  // V V V --- [수정] fetchItems 함수에 locationFilter를 적용합니다 --- V V V
+  // [참고] 화면단(Screen)에서 직접 쿼리를 구성하므로 이 함수는 보조적으로 사용됩니다.
   Stream<List<LostItemModel>> fetchItems(
       {Map<String, String?>? locationFilter, String? itemType}) {
     // ✅ [작업 39] 'lost'/'found' 필터 파라미터 추가

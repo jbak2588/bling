@@ -20,6 +20,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/models/user_model.dart'; // ✅ Import 추가
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart'; // 숫자 입력 포맷팅
 import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
@@ -102,6 +105,16 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
     setState(() => _isSaving = true);
 
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      // ✅ [Fix] 사용자 최신 정보(위치) 가져오기 (데이터 보정용)
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final userModel =
+          (userDoc.exists) ? UserModel.fromFirestore(userDoc) : null;
       List<String> imageUrls = [];
       for (var image in _images) {
         if (image is XFile) {
@@ -131,7 +144,8 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         locationDescription: _locationDescriptionController.text.trim(),
         imageUrls: imageUrls,
         createdAt: widget.item.createdAt,
-        geoPoint: widget.item.geoPoint,
+        geoPoint: userModel?.geoPoint ?? widget.item.geoPoint,
+        locationParts: userModel?.locationParts ?? widget.item.locationParts,
         // ✅ 현상금 정보 저장
         isHunted: _isHunted,
         tags: _tags,

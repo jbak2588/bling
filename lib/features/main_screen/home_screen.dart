@@ -403,9 +403,8 @@ class HomeScreen extends StatelessWidget {
                           searchNotifier: null);
                     } else if (screen is LostAndFoundScreen) {
                       // Lost & Found now supports inline search chip
-                      nextScreen = LostAndFoundScreen(
+                        nextScreen = LostAndFoundScreen(
                           userModel: userModel,
-                          locationFilter: activeLocationFilter,
                           autoFocusSearch: false,
                           searchNotifier: null);
                     } else if (screen is RealEstateScreen) {
@@ -513,7 +512,6 @@ class HomeScreen extends StatelessWidget {
                     // Auction now supports inline search chip
                     nextScreen = AuctionScreen(
                         userModel: userModel,
-                        locationFilter: activeLocationFilter,
                         autoFocusSearch: false,
                         searchNotifier: searchNotifier);
                   } else if (screen is PomScreen) {
@@ -528,7 +526,6 @@ class HomeScreen extends StatelessWidget {
                     // Lost & Found now supports inline search chip
                     nextScreen = LostAndFoundScreen(
                         userModel: userModel,
-                        locationFilter: activeLocationFilter,
                         autoFocusSearch: false,
                         searchNotifier: searchNotifier);
                   } else if (screen is RealEstateScreen) {
@@ -1293,7 +1290,6 @@ class HomeScreen extends StatelessWidget {
                         }
                         final nextScreen = AuctionScreen(
                           userModel: userModel,
-                          locationFilter: activeLocationFilter,
                         );
                         onIconTap(nextScreen, 'main.tabs.auction');
                       },
@@ -1495,7 +1491,6 @@ class HomeScreen extends StatelessWidget {
                         }
                         final nextScreen = LostAndFoundScreen(
                           userModel: userModel,
-                          locationFilter: activeLocationFilter,
                         );
                         onIconTap(nextScreen, 'main.tabs.lostAndFound');
                       },

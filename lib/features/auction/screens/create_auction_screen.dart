@@ -84,7 +84,15 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-
+    // Fetch latest user profile to ensure we store up-to-date location info
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    UserModel? freshUserModel;
+    if (userDoc.exists) {
+      freshUserModel = UserModel.fromFirestore(userDoc);
+    }
     try {
       List<String> imageUrls = [];
       for (var imageFile in _images) {
@@ -117,12 +125,15 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
         startPrice: startPrice,
         currentBid: startPrice,
         bidHistory: [],
-        location:
-            widget.userModel.locationName ?? 'postCard.locationNotSet'.tr(),
+        // Prefer the freshly-read user profile if available, fallback to widget.userModel
+        location: freshUserModel?.locationName ??
+            widget.userModel.locationName ??
+            'postCard.locationNotSet'.tr(),
         // V V V --- [추가] 사용자의 지역 정보를 경매 데이터에 포함시킵니다 --- V V V
-        locationParts: widget.userModel.locationParts,
+        locationParts:
+            freshUserModel?.locationParts ?? widget.userModel.locationParts,
         // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
-        geoPoint: widget.userModel.geoPoint,
+        geoPoint: freshUserModel?.geoPoint ?? widget.userModel.geoPoint,
         startAt: now,
         endAt: endAt,
         ownerId: user.uid,

@@ -10,6 +10,9 @@ import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/core/constants/app_categories.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+import 'package:bling_app/core/models/user_model.dart'; // ✅ Import 추가
+import 'package:firebase_auth/firebase_auth.dart'; // ✅ Import 추가
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
 
 class EditAuctionScreen extends StatefulWidget {
@@ -77,6 +80,17 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
     setState(() => _isSaving = true);
 
     try {
+      // ✅ [Fix] 사용자 최신 정보(위치) 가져오기
+      final user = FirebaseAuth.instance.currentUser;
+      UserModel? userModel;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (userDoc.exists) userModel = UserModel.fromFirestore(userDoc);
+      }
+
       List<String> imageUrls = [];
       for (var image in _images) {
         if (image is XFile) {
@@ -109,8 +123,10 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
         startPrice: widget.auction.startPrice,
         currentBid: widget.auction.currentBid,
         bidHistory: widget.auction.bidHistory,
-        location: widget.auction.location,
-        geoPoint: widget.auction.geoPoint,
+        // Prefer fresh user profile for location info, fallback to existing auction data
+        location: userModel?.locationName ?? widget.auction.location,
+        locationParts: userModel?.locationParts ?? widget.auction.locationParts,
+        geoPoint: userModel?.geoPoint ?? widget.auction.geoPoint,
         startAt: widget.auction.startAt,
         endAt: widget.auction.endAt,
         ownerId: widget.auction.ownerId,

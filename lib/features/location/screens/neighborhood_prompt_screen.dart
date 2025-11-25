@@ -14,8 +14,8 @@ import 'package:bling_app/features/location/screens/location_filter_screen.dart'
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart'; // Placemark 직접 사용
 import 'package:google_fonts/google_fonts.dart';
-import 'package:bling_app/core/utils/logging/logger.dart';
 
 class NeighborhoodPromptScreen extends StatefulWidget {
   const NeighborhoodPromptScreen({super.key});
@@ -37,92 +37,59 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
     });
 
     try {
-      // 1) 권한 확인 및 위치 가져오기
       final position = await LocationHelper.getCurrentLocation();
-      if (position == null) {
-        throw Exception("위치 권한이 없거나 GPS가 꺼져 있습니다.");
-      }
+      if (position == null) throw Exception("위치 정보를 가져올 수 없습니다.");
 
       setState(() => _statusMessage = "주소를 변환하는 중입니다...");
 
-      // 2) 좌표 -> 주소 변환 (Google Geocoding)
-      final address = await LocationHelper.getAddressFromCoordinates(position);
-      if (address == null) {
-        throw Exception("주소를 찾을 수 없습니다. 다시 시도해주세요.");
-      }
+      // Placemark 객체를 직접 가져와서 정밀 파싱
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
 
-      // 3) 주소 파싱 (Prov, Kab, Kec, Kel 추출)
-      final parts = LocationHelper.parseAddress(address);
+      if (placemarks.isEmpty) throw Exception("주소를 찾을 수 없습니다.");
 
-      // [검증] 최소한 Prov, Kab 정보는 있어야 함
-      if (parts['prov'] == null || parts['kab'] == null) {
-        Logger.warn(
-            "NeighborhoodPrompt: Parsing failed. Parts: $parts"); // 디버깅 로그
-        // 파싱 실패 시 수동 입력 유도
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("주소 정보를 상세히 가져오지 못했습니다. (행정구역 누락)\n수동 설정을 진행합니다."),
-              duration: Duration(seconds: 3),
-            ),
-          );
-          await Future.delayed(const Duration(seconds: 1));
-          if (mounted) _openManualSelection();
-        }
-        return;
-      }
+      final place = placemarks.first;
+
+      // 전체 주소 문자열 조합
+      final String fullAddress = [
+        place.street,
+        place.subLocality,
+        place.locality,
+        place.subAdministrativeArea,
+        place.administrativeArea,
+        place.postalCode
+      ].where((e) => e != null && e.isNotEmpty).join(', ');
+
+      // 정교한 파싱 (LocationHelper.parsePlacemark 사용)
+      // subLocality가 Kelurahan, locality가 Kecamatan, subAdminArea가 Kab/Kota
+      Map<String, dynamic> parts = LocationHelper.parsePlacemark(place);
+
+      // [추가] 만약 Kelurahan(subLocality)이 비어있다면,
+      // locality(Kec) 정보라도 저장하고, street 정보를 parts에 포함
 
       setState(() => _statusMessage = "동네 정보를 저장 중입니다...");
 
-      // [수정] 화면 표시용 약어 주소 생성 (UI 오버플로우 방지)
-      // 예: "Kel. Bencongan, Kec. Kelapa Dua, Kab. Tangerang"
-      String formattedAddress = address; // 기본값은 전체 주소
-      if (parts['kel'] != null &&
-          parts['kec'] != null &&
-          parts['kab'] != null) {
-        // 키워드 제거 및 약어 적용 헬퍼 함수
-        String clean(String? val, String remove) =>
-            val?.replaceAll(RegExp(remove, caseSensitive: false), '').trim() ??
-            '';
-
-        final kel = clean(parts['kel'], 'Kelurahan|Desa');
-        final kec = clean(parts['kec'], 'Kecamatan');
-        final kab = clean(parts['kab'], 'Kabupaten|Kota');
-
-        formattedAddress = "Kel. $kel, Kec. $kec, Kab. $kab";
-      }
-
-      // 4) Firestore 저장
       await _saveLocationToUser(
-        locationName: formattedAddress,
+        locationName: fullAddress,
         locationParts: parts,
         geoPoint: GeoPoint(position.latitude, position.longitude),
       );
-      Logger.info("NeighborhoodPrompt: Location saved successfully.");
-    } catch (e) {
-      String errorMessage = "위치 정보를 가져오는 중 알 수 없는 오류가 발생했습니다.";
-
-      if (e.toString().contains("permission")) {
-        errorMessage = "위치 권한이 필요합니다.";
-      } else if (e.toString().contains("Service")) {
-        errorMessage = "GPS가 꺼져 있습니다.";
-      } else if (e.toString().contains("IOError") ||
-          e.toString().contains("network")) {
-        errorMessage = "네트워크 상태가 좋지 않아 주소를 변환할 수 없습니다.";
-      }
-
-      Logger.error("NeighborhoodPrompt Error: $e", error: e);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            action: SnackBarAction(
-              label: '수동 선택',
-              onPressed: _openManualSelection,
-              textColor: Colors.white,
-            ),
-          ),
+          const SnackBar(content: Text("동네 설정이 완료되었습니다.")),
+        );
+        // ✅ 화면 종료 (이전 화면으로 복귀)
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("오류: ${e.toString()}")),
         );
       }
     } finally {
@@ -137,64 +104,55 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
 
   // 2. 수동 선택 화면 열기
   Future<void> _openManualSelection() async {
-    // 1. LocationFilterScreen을 열고 결과를 기다립니다.
-    // LocationFilterScreen은 '적용' 버튼 클릭 시 provider.adminFilter(Map)를 반환하도록 되어 있습니다.
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (_) => const LocationFilterScreen(initialTabIndex: 0)),
+    // LocationFilterScreen에서 결과를 받아옵니다.
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const LocationFilterScreen()),
     );
 
-    // 2. 결과값이 있는지 확인합니다. (사용자가 뒤로가기를 누르면 null)
-    if (result != null && result is Map) {
-      final String? prov = result['prov'] as String?;
-      final String? kab = result['kab'] as String?;
+    // 결과가 Map 형태(행정구역 필터)로 돌아왔다면 저장 로직 수행
+    if (result != null && result is Map<String, String?> && mounted) {
+      // 필수 값(최소 Kab/Kota) 확인
+      if (result['kab'] == null && result['kota'] == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("최소한 시/군/구(City/District)까지 선택해야 합니다.")),
+        );
+        return;
+      }
 
-      // 3. 유효성 검사: 동네 설정이므로 최소한 '도'와 '시/군' 정보는 필수입니다.
-      if (prov != null && kab != null) {
-        setState(() {
-          _isLoading = true;
-          _statusMessage = "선택한 동네를 저장 중입니다...";
-        });
+      setState(() {
+        _isLoading = true;
+        _statusMessage = "선택한 동네 정보를 저장 중입니다...";
+      });
 
-        try {
-          // [수정] 수동 선택 시에도 통일된 포맷(약어) 적용
-          String formattedName = "";
+      try {
+        // 수동 선택이므로 좌표는 없음 (null)
+        // 주소 문자열 조합 (예: 서울 > 강남구 > 역삼동)
+        String locName = [
+          result['prov'],
+          result['kab'],
+          result['kec'],
+          result['kel']
+        ].where((e) => e != null).join(', ');
 
-          // 입력값이 "Kecamatan OO" 형태인지 단순 "OO"인지에 따라 처리가 다르지만,
-          // LocationFilterScreen 데이터가 순수 이름만 온다면 약어만 붙여줌.
-          // 여기서는 안전하게 조합합니다.
-          final kKel = result['kel'] != null ? "Kel. ${result['kel']}" : "";
-          final kKec = result['kec'] != null ? "Kec. ${result['kec']}" : "";
-          final kKab = kab.startsWith("KOTA") || kab.startsWith("KAB")
-              ? kab
-              : "Kab. $kab";
+        await _saveLocationToUser(
+          locationName: locName,
+          locationParts: result,
+          geoPoint: null,
+        );
 
-          // 역순 조합 (동 -> 구 -> 시) 또는 순차 조합. 인니는 보통 작은 단위부터 씀.
-          // 기존 예시: Kel. Muja Muju, Kec. Umbulharjo, Kab. Yogyakarta
-          formattedName =
-              [kKel, kKec, kKab].where((s) => s.isNotEmpty).join(', ');
-
-          // 5. Firestore 저장 로직 호출
-          await _saveLocationToUser(
-            locationName: formattedName,
-            locationParts: Map<String, dynamic>.from(result),
-            geoPoint: null, // 수동 선택은 좌표가 없으므로 null
-          );
-        } catch (e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("저장 중 오류가 발생했습니다: $e")),
-            );
-            setState(() => _isLoading = false);
-          }
-        }
-      } else {
-        // 필수 정보가 누락된 경우 경고
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("최소한 '도'와 '시/군'까지는 선택해야 합니다.")),
+            const SnackBar(content: Text("동네 설정이 완료되었습니다.")),
           );
+          // ✅ 화면 종료
+          if (Navigator.canPop(context)) Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("저장 실패: ${e.toString()}")),
+          );
+          setState(() => _isLoading = false);
         }
       }
     }
@@ -213,17 +171,22 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
       'locationName': locationName,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
-      'neighborhoodVerified': true, // 인증 완료 플래그
+      'neighborhoodVerified': true,
       'updatedAt': FieldValue.serverTimestamp(),
     });
-
-    // 저장 완료 후 메인 화면(AuthGate -> MainNavigation)으로 이동됨
-    // (StreamBuilder가 자동으로 감지)
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // ✅ 뒤로가기 버튼 (수동 진입 시 탈출구)
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: Navigator.canPop(context)
+            ? const BackButton(color: Colors.black)
+            : null,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -235,7 +198,7 @@ class _NeighborhoodPromptScreenState extends State<NeighborhoodPromptScreen> {
                   size: 80, color: Color(0xFF00A66C)),
               const SizedBox(height: 24),
               Text(
-                '내 동네 설정하기', // i18n 키로 교체 권장
+                '내 동네 설정하기',
                 style: GoogleFonts.inter(
                     fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,

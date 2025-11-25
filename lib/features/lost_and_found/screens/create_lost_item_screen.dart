@@ -90,6 +90,13 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
     }
 
     try {
+      // ✅ [Fix] 사용자 최신 정보(위치) 가져오기
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (!userDoc.exists) throw Exception('User profile not found');
+      final userModel = UserModel.fromFirestore(userDoc);
       List<String> imageUrls = [];
       for (var imageFile in _images) {
         final fileName = const Uuid().v4();
@@ -113,8 +120,8 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
         type: _type,
         itemDescription: _itemDescriptionController.text.trim(),
         locationDescription: _locationDescriptionController.text.trim(),
-        locationParts: widget.userModel.locationParts,
-        geoPoint: widget.userModel.geoPoint,
+        locationParts: userModel.locationParts, // ✅ 저장
+        geoPoint: userModel.geoPoint, // ✅ 저장
         imageUrls: imageUrls,
         createdAt: Timestamp.now(),
         tags: _tags, // ✅ 저장 시 태그 목록을 전달

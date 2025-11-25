@@ -14,29 +14,30 @@
 // =====================================================
 // lib/features/lost_and_found/screens/lost_and_found_screen.dart
 
+import 'dart:math' as math;
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart'; // ✅ Provider Import
+import 'package:provider/provider.dart'; // ✅ Provider Import
 // repository import intentionally removed — using direct Firestore query for search
 import 'package:bling_app/features/lost_and_found/widgets/lost_item_card.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
-import 'package:provider/provider.dart';
-import 'package:bling_app/features/location/providers/location_provider.dart';
+// provider and location_provider already imported above
 
 class LostAndFoundScreen extends StatefulWidget {
   final UserModel? userModel;
-  final Map<String, String?>? locationFilter;
   final bool autoFocusSearch;
   final ValueNotifier<bool>? searchNotifier;
 
   const LostAndFoundScreen({
+    super.key,
     this.userModel,
-    this.locationFilter,
+    // this.locationFilter,
     this.autoFocusSearch = false,
     this.searchNotifier,
-    super.key,
   });
 
   @override
@@ -45,7 +46,6 @@ class LostAndFoundScreen extends StatefulWidget {
 
 class _LostAndFoundScreenState extends State<LostAndFoundScreen>
     with TickerProviderStateMixin {
-  late Map<String, String?>? _locationFilter;
   late final TabController _tabController;
   final List<String?> _tabFilters = [null, 'lost', 'found'];
 
@@ -57,7 +57,6 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
   @override
   void initState() {
     super.initState();
-    _locationFilter = widget.locationFilter;
     _tabController = TabController(length: _tabFilters.length, vsync: this);
 
     if (widget.autoFocusSearch) {
@@ -115,6 +114,9 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
       if (token.isNotEmpty) searchToken = token;
     }
 
+    // ✅ LocationProvider 구독
+    final locationProvider = context.watch<LocationProvider>();
+
     return Scaffold(
       body: Column(
         children: [
@@ -148,24 +150,20 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                 Query<Map<String, dynamic>> query =
                     FirebaseFirestore.instance.collection('lost_and_found');
 
-                // Apply location filter if provided (use most specific key)
-                final filter = _locationFilter;
-                if (filter != null) {
-                  String? key;
-                  if (filter['kel'] != null) {
-                    key = 'kel';
-                  } else if (filter['kec'] != null) {
-                    key = 'kec';
-                  } else if (filter['kab'] != null) {
-                    key = 'kab';
-                  } else if (filter['kota'] != null) {
-                    key = 'kota';
-                  } else if (filter['prov'] != null) {
-                    key = 'prov';
+                // ✅ 1. 위치 필터 적용 (Provider 기준)
+                if (locationProvider.mode ==
+                    LocationSearchMode.administrative) {
+                  final filterEntry = locationProvider.activeQueryFilter;
+                  if (filterEntry != null) {
+                    query = query.where(filterEntry.key,
+                        isEqualTo: filterEntry.value);
                   }
-                  if (key != null) {
-                    final v = filter[key]!.toLowerCase();
-                    query = query.where('locationParts.$key', isEqualTo: v);
+                } else if (locationProvider.mode == LocationSearchMode.nearby) {
+                  // 거리 검색 최적화: 같은 Kab(시/군) 내에서만 1차 필터링
+                  final userKab = locationProvider.user?.locationParts?['kab'];
+                  if (userKab != null && userKab.isNotEmpty) {
+                    query =
+                        query.where('locationParts.kab', isEqualTo: userKab);
                   }
                 }
 
@@ -181,8 +179,9 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                       query.where('searchIndex', arrayContains: searchToken);
                 }
 
-                query = query.orderBy('createdAt', descending: true);
-                return query.snapshots();
+                // 3. 정렬 (정석 복구: 서버 사이드 정렬)
+                // [주의] 이 쿼리를 실행하면 콘솔에 인덱스 생성 링크가 뜹니다. 반드시 클릭하여 생성해야 합니다.
+                return query.orderBy('createdAt', descending: true).snapshots();
               })(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -194,11 +193,43 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                           namedArgs: {'error': snapshot.error.toString()})));
                 }
 
-                final docs = snapshot.data?.docs ?? [];
-                final data = docs.map(LostItemModel.fromFirestore).toList();
+                var docs = snapshot.data?.docs ?? [];
+
+                List<LostItemModel> data;
+
+                // ✅ 2. 거리순 정렬 및 필터링 (Nearby 모드일 때)
+                if (locationProvider.mode == LocationSearchMode.nearby &&
+                    locationProvider.user?.geoPoint != null) {
+                  final userGeo = locationProvider.user!.geoPoint!;
+                  final radiusKm = locationProvider.radiusKm;
+
+                  docs = docs.where((doc) {
+                    final pGeo = (doc.data()['geoPoint'] as GeoPoint?);
+                    if (pGeo == null) return false;
+                    final dist = _calculateDistance(userGeo.latitude,
+                        userGeo.longitude, pGeo.latitude, pGeo.longitude);
+                    return dist <= radiusKm;
+                  }).toList();
+
+                  docs.sort((a, b) {
+                    final geoA = (a.data()['geoPoint'] as GeoPoint);
+                    final geoB = (b.data()['geoPoint'] as GeoPoint);
+                    final distA = _calculateDistance(userGeo.latitude,
+                        userGeo.longitude, geoA.latitude, geoA.longitude);
+                    final distB = _calculateDistance(userGeo.latitude,
+                        userGeo.longitude, geoB.latitude, geoB.longitude);
+                    return distA.compareTo(distB);
+                  });
+
+                  // Map to models after applying distance filtering/sorting
+                  data = docs.map(LostItemModel.fromFirestore).toList();
+                } else {
+                  // Non-nearby modes: map (server already ordered by createdAt)
+                  data = docs.map(LostItemModel.fromFirestore).toList();
+                }
                 if (data.isEmpty) {
-                  final isNational = context.watch<LocationProvider>().mode ==
-                      LocationSearchMode.national;
+                  final isNational =
+                      locationProvider.mode == LocationSearchMode.national;
                   if (!isNational) {
                     return Center(
                       child: Padding(
@@ -266,5 +297,16 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
         ],
       ),
     );
+  }
+
+  // ✅ Haversine 공식 (Marketplace와 동일 로직)
+  double _calculateDistance(
+      double lat1, double lon1, double lat2, double lon2) {
+    var p = 0.017453292519943295;
+    var c = math.cos;
+    var a = 0.5 -
+        c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+    return 12742 * math.asin(math.sqrt(a));
   }
 }

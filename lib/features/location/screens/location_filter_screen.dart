@@ -12,6 +12,7 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/utils/location_helper.dart'; // ✅ LocationHelper import
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -93,9 +94,19 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
   void _applyFilter() {
     final provider = context.read<LocationProvider>();
 
+    // ✅ [Fix] 선택된 값을 정규화(Clean)하여 저장
+    final cleanProv =
+        _tempProv != null ? LocationHelper.cleanName(_tempProv!) : null;
+    final cleanKab =
+        _tempKab != null ? LocationHelper.cleanName(_tempKab!) : null;
+    final cleanKec =
+        _tempKec != null ? LocationHelper.cleanName(_tempKec!) : null;
+    final cleanKel =
+        _tempKel != null ? LocationHelper.cleanName(_tempKel!) : null;
+
     // [수정] 행정구역 탭에서 '지역(Province)'이 선택되지 않은 경우(All Areas)
     // '상위 지역 선택' 에러 대신 '전국 모드'로 전환합니다.
-    if (_tabController.index == 0 && _tempProv == null) {
+    if (_tabController.index == 0 && cleanProv == null) {
       provider.setMode(LocationSearchMode.national);
       Navigator.pop(context, provider.adminFilter);
       return;
@@ -104,10 +115,10 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
     switch (_tabController.index) {
       case 0: // 행정구역
         provider.setAdminFilter(
-          prov: _tempProv,
-          kab: _tempKab,
-          kec: _tempKec,
-          kel: _tempKel,
+          prov: cleanProv,
+          kab: cleanKab,
+          kec: cleanKec,
+          kel: cleanKel,
         );
         break;
       case 1: // 내 주변
@@ -117,8 +128,8 @@ class _LocationFilterScreenState extends State<LocationFilterScreen>
         provider.setMode(LocationSearchMode.national);
         break;
     }
-    // ✅ [수정] 선택된 필터 정보를 반환 (NeighborhoodPromptScreen 등에서 사용)
-    // Provider가 이미 업데이트되었으므로 true만 반환하거나, 명시적으로 필터 맵 반환 가능
+
+    // ✅ [핵심] 선택된 필터 정보를 반환 (NeighborhoodPromptScreen 등에서 사용)
     Navigator.pop(context, provider.adminFilter);
   }
 

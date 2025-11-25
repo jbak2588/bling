@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 // ✅ 새로 만든 공용 위젯을 import 합니다.
+import 'package:bling_app/core/models/user_model.dart'; // ✅ UserModel import
 import '../../shared/widgets/custom_tag_input_field.dart';
 
 import '../../../core/constants/app_categories.dart';
@@ -143,6 +144,17 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
     setState(() => _isSubmitting = true);
 
     try {
+      // ✅ [Fix] 사용자 최신 정보(위치) 가져오기 (데이터 보정용)
+      final user = FirebaseAuth.instance.currentUser;
+      UserModel? userModel;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (userDoc.exists) userModel = UserModel.fromFirestore(userDoc);
+      }
+
       final newImageUrls = await _uploadImages();
       final finalImageUrls = [..._existingImageUrls, ...newImageUrls];
 
@@ -167,6 +179,10 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
         'tags': tagsToSave, // ✅ 비어있으면 daily_life 기본 태그 저장
         'searchIndex': searchKeywords, // [추가]
         'updatedAt': FieldValue.serverTimestamp(),
+        // ✅ [Fix] 위치 정보 업데이트 (기존 데이터 없으면 유저 정보로 채움)
+        'locationName': userModel?.locationName ?? widget.post.locationName,
+        'locationParts': userModel?.locationParts ?? widget.post.locationParts,
+        'geoPoint': userModel?.geoPoint ?? widget.post.geoPoint,
       };
 
       await FirebaseFirestore.instance

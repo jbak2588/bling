@@ -5,8 +5,15 @@
 /// Purpose       : Firestore 사용자 스키마를 정의하며 신뢰와 프로필 제한을 포함합니다.
 /// User Impact   : 계정 데이터를 중앙에서 관리하여 모듈별 신뢰 기반 접근을 가능하게 합니다.
 /// Feature Links : lib/features/auth/screens/signup_screen.dart; lib/features/find_friends/screens/find_friends_screen.dart; lib/features/marketplace/screens/product_registration_screen.dart
-/// Data Model    : Firestore `users/{uid}` 컬렉션; 필드 `trustLevel`, `locationParts{kabupaten,kecamatan,kelurahan,rt,rw}`, `thanksReceived`, `reportCount`, `blockedUsers`, `profileCompleted`, `isDatingProfile`.
-/// Location Scope: Kelurahan·Kecamatan을 저장하며 RT/RW는 선택 사항; 없으면 `locationName`을 사용합니다.
+/// Data Model    : Firestore `users/{uid}` 컬렉션; 필드 `trustLevel`, `locationParts`, `geoPoint`, `thanksReceived`, `reportCount`, `blockedUsers`, `profileCompleted`, `isDatingProfile`.
+/// Location Scope:
+///   - locationName: 전체 주소 문자열 (예: "Jl. Raya No.1, Kel. A, Kec. B...")
+///   - locationParts: {
+///       prov, kab, kec, kel: 행정구역 명칭 (정규화됨, Prefix/Suffix 제거)
+///       street: 상세 주소 (도로명 등),
+///       rt, rw: (선택) 통/반 정보
+///     }
+///   - geoPoint: 위도/경도 (거리 계산용)
 /// Trust Policy  : TrustLevel은 normal→verified→trusted로 상승하며 신고는 점수를 낮춥니다; 차단된 사용자는 채팅 불가.
 /// Monetization  : 판매자 신뢰도에 따라 개인화 프로모션과 마켓 수수료가 적용됩니다.
 /// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `signup_complete`, `profile_completed`, `trust_upgrade`.
