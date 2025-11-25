@@ -6,6 +6,7 @@
 /// User Impact   : 구매자가 주변 상품을 둘러보고 상세 페이지를 열 수 있습니다.
 /// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/location/screens/location_filter_screen.dart
 /// Data Model    : Firestore `products`를 `locationParts.prov`로 쿼리하고 `createdAt`으로 정렬합니다.
+/// Location Note : 각 `product`는 `locationName`, `locationParts`, `geoPoint`를 포함할 수 있으며, 반경 검색에는 `geoPoint`를 사용합니다. `locationParts`의 행정구역 명칭은 `LocationHelper.cleanName`으로 정규화되어야 합니다.
 /// Location Scope: `locationFilter`를 통해 Prov→Kab/Kota→Kec→Kel 값을 지원합니다.
 /// Trust Policy  : `isAiVerified` 상품만 강조하며 미검증 상품은 검토 대상입니다.
 /// Monetization  : 프로모션 상품과 배너 광고를 지원하며 추후 판매 수수료가 예정되어 있습니다.

@@ -6,6 +6,7 @@
 /// User Impact   : 주민이 1~5km 내 이웃이나 데이팅 매치를 발견하도록 돕습니다.
 /// Feature Links : lib/features/find_friends/screens/find_friend_detail_screen.dart; lib/features/find_friends/screens/findfriend_form_screen.dart; lib/features/find_friends/widgets/findfriend_card.dart
 /// Data Model    : `users/{uid}`와 `/users/{uid}/findfriend_profile/main`을 읽고 관계는 `follows` 컬렉션을 사용합니다.
+/// Privacy Note : 피드(목록/카드) 및 요약 UI에서는 `locationParts['street']` 또는 전체 `locationName`을 사용자 동의 없이 노출하지 마세요. 피드에는 행정구역을 약어(`kel.`, `kec.`, `kab.`, `prov.`)로 간략 표기하세요.
 /// Location Scope: Province→Kabupaten/Kota→Kecamatan→Kelurahan로 필터링하며 LocationFilterScreen을 통한 선택적 RT/RW; 기본값은 사용자 `locationParts`입니다.
 /// Trust Policy  : `isDatingProfile`이 true이고 TrustLevel 기준을 충족해야 하며 `blockedUsers`를 존중합니다.
 /// Monetization  : 향후 프로필 노출 프리미엄 부스트 예정; TODO.

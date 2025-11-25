@@ -5,7 +5,9 @@
 /// Purpose       : 이미지, 제목, 가격, 판매자 정보를 포함한 상품 요약 카드를 렌더링합니다.
 /// User Impact   : 주변 상품을 빠르게 살펴보며 전환을 높입니다.
 /// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart
-/// Data Model    : `products` 필드 `title`, `description`, `price`, `imageUrls`, `locationParts`, `createdAt`를 표시하며 판매자 `users/{userId}` 데이터를 가져옵니다.
+/// Data Model    : `products` 필드 `title`, `description`, `price`, `imageUrls`, `locationName`, `locationParts`, `geoPoint`, `createdAt`를 표시하며 판매자 `users/{userId}` 데이터를 가져옵니다.
+/// Location Note : `locationName`은 전체 주소 문자열, `locationParts`는 {prov,kab,kec,kel,street,rt,rw} 구조를 가지며 행정구역명은 `LocationHelper.cleanName`으로 정규화되어야 합니다.
+/// Privacy Note : 사용자 동의 없이 `locationParts['street']`나 전체 `locationName`을 피드(카드/목록)에서 표시하지 마세요. 피드에서는 행정구역만 축약형(`kel.`, `kec.`, `kab.`, `prov.`)으로 보여 주세요.
 /// Location Scope: 타임스탬프 옆에 Kelurahan 또는 Kecamatan 태그를 표시합니다.
 /// Trust Policy  : 판매자의 `trustLevel`에 따른 배지를 아바타 옆에 보여 줍니다.
 /// Monetization  : 프로모션 배지와 가격 강조 슬롯을 제공합니다.

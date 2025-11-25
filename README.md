@@ -19,6 +19,14 @@ Gojek 스타일 런처 UX를 결합한 **하이브리드 로컬 앱**입니다.
 - Lelang(경매), POM(지역 쇼츠)
 - 다국어(Localization) + AppBar GEO 범위 설정
 
+## 📍 Privacy: Location Display Guidelines
+
+- Do not display a user's detailed street address (`locationParts['street']`) or their full `locationName` in feed/list/card UI without explicit user consent.
+- In feed or summary views, only show administrative area names and abbreviate them for privacy and consistency: use `kel.`, `kec.`, `kab.`, `prov.`.
+- Store both `locationName` (full address) and `locationParts` ({prov,kab,kec,kel,street,rt,rw}) in Firestore but respect user privacy when rendering summaries.
+
+These rules are intended to reduce accidental exposure of precise location data in public-facing lists and cards. Developers should follow `LocationHelper.cleanName` to normalize admin names before display or indexing.
+
 ## ✅ 폴더 구조    2025년 8월 19일 Ver 0.4.5 기준
 
 lib
@@ -405,6 +413,100 @@ npm run deploy
 - Issue: 구조 변경 사전 공유 필수
 - 디자인: `/design/` Figma 링크 연계
 - Token Limit 대비 Obsidian + GPT 연계 유지
+
+---
+
+## 📌 Location Filter Usage (개발자 가이드)
+
+이 프로젝트는 지역 기반 필터링을 위해 두 가지 레이어를 사용합니다:
+
+- 서버/Firestore 단계: `locationParts`(prov, kab, kec, kel)로 범위를 좁히는 쿼리를 먼저 수행합니다. 예: `where('locationParts.prov', isEqualTo: 'Banten')`.
+- 클라이언트 최종 필터링: 정확한 반경 필터링 및 정렬은 `geoPoint`를 이용해 클라이언트에서 `LocationHelper.getDistanceBetween(...)`으로 계산합니다. 이는 Firestore에서 지원하지 않는 반경 쿼리의 정확도를 보완합니다.
+
+권장 패턴 (예):
+
+```dart
+// 1) LocationProvider에서 admin 필터를 얻음
+final filter = locationProvider.adminFilter; // {prov, kab, kec, kel}
+
+// 2) 초기 Firestore 쿼리 (범위 좁히기)
+Query productsQuery = FirebaseFirestore.instance.collection('products');
+if (filter['prov'] != null) productsQuery = productsQuery.where('locationParts.prov', isEqualTo: filter['prov']);
+if (filter['kab'] != null) productsQuery = productsQuery.where('locationParts.kab', isEqualTo: filter['kab']);
+
+// 3) fetch and client-side radius filter/sort
+final snapshot = await productsQuery.get();
+final items = snapshot.docs.map((d) => ProductModel.fromFirestore(d)).toList();
+final center = userModel.geoPoint; // 사용자의 GeoPoint
+final nearby = items
+  .map((p) => MapEntry(p, LocationHelper.getDistanceBetween(center.latitude, center.longitude, p.geoPoint.latitude, p.geoPoint.longitude)))
+  .where((e) => e.value <= selectedRadiusKm)
+  .toList()
+  ..sort((a, b) => a.value.compareTo(b.value));
+
+// 이후 nearby.map((e) => e.key) 로 표시
+```
+
+메모:
+- `LocationHelper.cleanName(...)`로 행정구역명을 정규화하면 인덱스와 필터 일관성이 높아집니다.
+- 서버-side `orderBy`와 `where` 조합은 Firestore composite index를 요구할 수 있으므로 콘솔 안내에 따라 인덱스를 추가하세요.
+
+## 🔎 Search Bar & `inline_search_chip()` 사용 가이드
+
+여러 피드/검색 화면에서 일관된 검색 UX를 위해 `inline_search_chip()`과 간단한 검색바 로직을 사용합니다. 주요 패턴은 다음과 같습니다:
+
+- `TextEditingController`로 검색어를 관리합니다.
+- `ValueNotifier<bool>` 또는 `State`로 검색바의 활성(보이기/숨기기) 상태를 토글합니다.
+- `inline_search_chip()`은 현재 활성 필터(태그/카테고리)를 인라인으로 보여주고, 탭하면 해당 필터를 적용하거나 제거할 수 있습니다.
+
+간단한 예제 (피드 화면 내):
+
+```dart
+class ExampleFeedHeader extends StatefulWidget {
+  final ValueNotifier<bool> searchNotifier = ValueNotifier(false);
+  final TextEditingController searchController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // AppBar 내 검색 토글 버튼
+        Row(
+          children: [
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () => searchNotifier.value = !searchNotifier.value,
+            ),
+            // inline chips
+            inline_search_chip(context, tags: activeTags, onRemove: (t) => removeTag(t)),
+          ],
+        ),
+
+        // 검색바: 노티파이어에 따라 표시/숨김
+        ValueListenableBuilder<bool>(
+          valueListenable: searchNotifier,
+          builder: (_, visible, __) {
+            return visible
+                ? Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: TextField(
+                      controller: searchController,
+                      decoration: InputDecoration(hintText: 'search.placeholder'.tr()),
+                      onSubmitted: (q) => applySearch(q),
+                    ),
+                  )
+                : SizedBox.shrink();
+          },
+        ),
+      ],
+    );
+  }
+}
+```
+
+팁:
+- `inline_search_chip()`은 active filter 배열을 받아 렌더링하고 삭제 콜백을 제공합니다. 피드 목록의 쿼리 함수는 이 태그 목록을 파라미터로 받아 Firestore 쿼리를 구성하세요.
+- 검색 입력은 debounce(예: 300ms)하여 불필요한 쿼리를 줄이십시오.
 
 ---
 

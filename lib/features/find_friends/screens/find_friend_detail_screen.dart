@@ -8,6 +8,7 @@
 /// Feature Links : lib/features/find_friends/data/find_friend_repository.dart; lib/features/chat/screens/chat_room_screen.dart
 /// Data Model    : Firestore `users` 프로필 필드.
 /// Location Scope: 사용자 프로필의 `locationName`을 표시하여 지역 매칭에 사용합니다.
+/// Privacy Note : 리스트/카드형 피드에서 `locationParts['street']` 또는 전체 `locationName`을 사용자 동의 없이 표시하지 마세요. 피드에는 행정구역을 축약형(`kel.`, `kec.`, `kab.`, `prov.`)으로 간략 표기하세요.
 /// Trust Policy  : `trustLevel` 배지를 보여 주며 신고 시 상대방 점수가 감소합니다.
 /// Monetization  : 향후 프리미엄 프로필 강조 예정;
 /// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_friend_profile`, `start_chat`.

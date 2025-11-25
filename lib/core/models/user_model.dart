@@ -14,6 +14,7 @@
 ///       rt, rw: (선택) 통/반 정보
 ///     }
 ///   - geoPoint: 위도/경도 (거리 계산용)
+/// Privacy Note : 피드(목록/카드) 화면에는 `locationParts['street']`이나 전체 `locationName`을 사용자 동의 없이 표시하지 마세요. 피드에 표시되는 행정구역은 약어(`kel.`, `kec.`, `kab.`, `prov.`)로 간략 표기하세요.
 /// Trust Policy  : TrustLevel은 normal→verified→trusted로 상승하며 신고는 점수를 낮춥니다; 차단된 사용자는 채팅 불가.
 /// Monetization  : 판매자 신뢰도에 따라 개인화 프로모션과 마켓 수수료가 적용됩니다.
 /// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `signup_complete`, `profile_completed`, `trust_upgrade`.

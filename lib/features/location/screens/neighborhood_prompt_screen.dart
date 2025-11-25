@@ -6,6 +6,7 @@
 /// User Impact   : GPS 자동 설정 또는 수동 선택을 통해 정확한 동네 정보를 입력받습니다.
 /// Feature Links : LocationFilterScreen (수동 선택), LocationHelper (GPS/주소 변환)
 /// Data Model    : users/{uid} 업데이트 (locationParts, locationName, geoPoint, neighborhoodVerified)
+/// Privacy Note : 사용자의 상세 주소(`locationParts['street']`)나 전체 `locationName`은 피드(목록/카드) 화면에서 사용자 동의 없이 표시하지 마세요. 피드에는 행정구역을 축약형(`kel.`, `kec.`, `kab.`, `prov.`)으로 간략 표기하세요.
 /// ============================================================================
 library;
 

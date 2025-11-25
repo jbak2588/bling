@@ -7,6 +7,7 @@
 /// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/marketplace/widgets/product_card.dart
 /// Data Model    : Firestore `products` 필드 `title`, `description`, `price`, `negotiable`, `imageUrls`, `locationName`, `locationParts`, `geoPoint`, `transactionPlace`, `condition`, `isAiVerified`.
 /// Location Scope: 사용자 `locationParts`(Prov→Kab/Kota→Kec→Kel)를 기본으로 사용하며, 반경 검색을 위해 GeoPoint를 저장합니다.
+/// Privacy Note : 피드(목록/카드)나 미리보기 UI에는 `locationParts['street']`이나 전체 `locationName`을 사용자 동의 없이 표시하지 마세요. 피드에는 행정구역만 약어(`kel.`, `kec.`, `kab.`, `prov.`)로 간략 표기하세요.
 /// Trust Policy  : 전화번호 검증 및 trustScore 100 초과 사용자만 등록 가능하며 신고 시 `trustScore`가 감소합니다.
 /// Monetization  : 거래 수수료와 선택형 프로모션 슬롯을 제공합니다.
 /// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_product_listing`, `complete_product_listing`, `upload_product_photo`.

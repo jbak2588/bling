@@ -7,6 +7,7 @@
 /// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/marketplace/widgets/product_card.dart
 /// Data Model    : Firestore `products` 필드 `title`, `description`, `price`, `negotiable`, `imageUrls`, `locationName`, `locationParts`, `geoPoint`, `transactionPlace`, `condition`.
 /// Location Scope: LocationSettingScreen을 통해 Prov→Kec→Kel 재설정을 허용합니다.
+/// Privacy Note : 피드(목록/카드) 또는 요약 뷰에서는 `locationParts['street']` 및 전체 `locationName`을 사용자 동의 없이 노출하지 마세요. 목록에서는 행정구역을 축약형(`kel.`, `kec.`, `kab.`, `prov.`)으로 표시하세요.
 /// Trust Policy  : trustScore 100 초과의 상품 소유자만 수정할 수 있으며 수정 내용은 모더레이션 로그에 기록됩니다.
 /// Monetization  : 수정 후 프리미엄 부스트 적용 가능; TODO: 부스트 과금 정의.
 /// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `start_product_edit`, `complete_product_edit`.

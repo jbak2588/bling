@@ -7,6 +7,7 @@
 /// Feature Links : lib/features/marketplace/screens/product_edit_screen.dart; lib/features/chat/screens/chat_room_screen.dart; lib/features/marketplace/screens/marketplace_screen.dart
 /// Data Model    : Firestore `products` 필드 `viewsCount`, `likesCount`; 즐겨찾기는 `users/{uid}/favorites`에 저장됩니다.
 /// Location Scope: `locationParts.kel`→`kec` 순으로 표시하며 위치 기반 추천을 지원합니다.
+/// Privacy Note : 피드/카드 뷰에서는 상세 주소(`locationParts['street']`)나 전체 `locationName`을 사용자 동의 없이 표시하지 마세요. 피드에 표시되는 행정구역은 약어(`kel.`, `kec.`, `kab.`, `prov.`)로 간략 표기하세요.
 /// Trust Policy  : 판매자 `trustLevel`을 표시하고 신고 시 `reportCount`가 증가합니다.
 /// Monetization  : 프로모션 노출 및 공유 보상 추천을 지원합니다.
 /// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_product`, `click_chat_seller`, `toggle_favorite`, `share_product`.

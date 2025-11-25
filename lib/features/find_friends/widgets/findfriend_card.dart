@@ -5,7 +5,9 @@
 /// Purpose       : 리스트에서 간단한 프로필 요약을 표시합니다.
 /// User Impact   : 주변 친구 후보를 빠르게 훑어볼 수 있게 합니다.
 /// Feature Links : lib/features/find_friends/screens/find_friend_detail_screen.dart
-/// Data Model    : `users` 필드 `nickname`, `age`, `photoUrl`, `locationName`을 사용합니다.
+/// Data Model    : `users` 필드 `nickname`, `age`, `photoUrl`, `locationName`, `locationParts`, `geoPoint`를 사용합니다.
+/// Location Note : `locationParts`는 {prov,kab,kec,kel,street,rt,rw} 구조이며, UI/검색 일관성을 위해 `LocationHelper.cleanName`으로 정규화된 값을 사용하세요.
+/// Privacy Note : 피드(목록/카드)에서 `locationParts['street']`나 전체 `locationName`을 사용자 동의 없이 표시하지 마세요. 피드에는 행정구역만 약어(`kel.`, `kec.`, `kab.`, `prov.`)로 간략 표기하세요.
 /// Location Scope: `locationName`을 표시하며 프로필 위치 계층을 가정합니다.
 /// Trust Policy  : `trustLevel`에 따른 배지를 표시할 수 있음(TODO).
 /// Monetization  : 프로모션 프로필 슬롯을 제공합니다.

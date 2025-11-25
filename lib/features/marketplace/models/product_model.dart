@@ -5,8 +5,10 @@
 /// Purpose       : AI 검증과 상태 추적을 포함한 상품 Firestore 스키마입니다.
 /// User Impact   : 구조화된 정보를 통해 안전한 동네 거래를 지원합니다.
 /// Feature Links : lib/features/marketplace/screens/product_detail_screen.dart; lib/features/marketplace/screens/product_registration_screen.dart
-/// Data Model    : Firestore `products/{productId}` 문서; 필드 `price`, `imageUrls`, `locationParts`, `status`, `isAiVerified`, `likesCount`, `chatsCount`, `viewsCount`.
+/// Data Model    : Firestore `products/{productId}` 문서; 필드 `price`, `imageUrls`, `locationName`, `locationParts`, `geoPoint`, `status`, `isAiVerified`, `likesCount`, `chatsCount`, `viewsCount`.
+/// Location Note : `locationName` (전체 주소)과 `locationParts`({prov,kab,kec,kel,street,rt,rw})를 함께 저장합니다. 행정구역 명칭은 `LocationHelper.cleanName`으로 정규화됩니다.
 /// Location Scope: Kabupaten→Kecamatan→Kelurahan을 저장하며 RT/RW는 선택 사항; 없으면 `locationName`을 사용합니다.
+/// Privacy Note : 피드(리스트/카드) 화면에서 `locationParts['street']` 또는 전체 `locationName`은 사용자 동의 없이 노출하지 마세요. 피드 UI에는 행정구역을 축약형(`kel.`, `kec.`, `kab.`, `prov.`)으로 표시하세요.
 /// Trust Policy  : `isAiVerified` 상품이 우선 노출되며 판매자는 TrustLevel 정책을 따릅니다.
 /// Monetization  : AI 검증 상품은 서비스 수수료를 지불하며 프로모션 배치 가능성이 있습니다.
 /// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `view_product`, `start_chat`, 총거래액(Gross Merchandise Volume, GMV).
