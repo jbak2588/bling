@@ -13,6 +13,7 @@ dependencies:
   easy_localization: ^3.0.7+1
 
   firebase_core: ^4.1.0
+  firebase_crashlytics: ^5.0.5
   firebase_auth: ^6.0.2
   cloud_firestore: ^6.0.1
   firebase_storage: ^13.0.1
@@ -31,7 +32,7 @@ dependencies:
   permission_handler: ^12.0.1
   geoflutterfire_plus: ^0.0.21
 
-  get: ^4.6.6
+  get: 4.7.3
   uuid: ^4.3.3
 
   # ▼▼▼▼▼ Google Places API를 위한 패키지 추가 ▼▼▼▼▼
