@@ -10,7 +10,10 @@ import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
 
 class ClubProposalDetailScreen extends StatefulWidget {
   final ClubProposalModel proposal;
-  const ClubProposalDetailScreen({super.key, required this.proposal});
+  final bool embedded;
+  final VoidCallback? onClose;
+  const ClubProposalDetailScreen(
+      {super.key, required this.proposal, this.embedded = false, this.onClose});
 
   @override
   State<ClubProposalDetailScreen> createState() =>
@@ -116,88 +119,94 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(_proposal.title)),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (_proposal.imageUrl.isNotEmpty)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(_proposal.imageUrl,
-                      width: double.infinity, height: 200, fit: BoxFit.cover),
-                ),
-              const SizedBox(height: 12),
-              Text(_proposal.description, style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  const Icon(Icons.location_on_outlined,
-                      size: 18, color: Colors.grey),
-                  const SizedBox(width: 6),
-                  Expanded(
-                      child: Text(_proposal.location,
-                          style: const TextStyle(
-                              fontSize: 14, color: Colors.grey))),
-                ],
+    final inner = SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_proposal.imageUrl.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(_proposal.imageUrl,
+                    width: double.infinity, height: 200, fit: BoxFit.cover),
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                children: _proposal.interestTags
-                    .map((t) => Chip(label: Text(t)))
-                    .toList(),
+            const SizedBox(height: 12),
+            Text(_proposal.description, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(Icons.location_on_outlined,
+                    size: 18, color: Colors.grey),
+                const SizedBox(width: 6),
+                Expanded(
+                    child: Text(_proposal.location,
+                        style:
+                            const TextStyle(fontSize: 14, color: Colors.grey))),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              children: _proposal.interestTags
+                  .map((t) => Chip(label: Text(t)))
+                  .toList(),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'clubs.proposal.memberStatus'.tr(namedArgs: {
+                'current': _proposal.currentMemberCount.toString(),
+                'target': _proposal.targetMemberCount.toString()
+              }),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            LinearPercentIndicator(
+                percent: _progress,
+                lineHeight: 8.0,
+                progressColor: Theme.of(context).primaryColor,
+                backgroundColor: Colors.grey[200]!,
+                padding: EdgeInsets.zero,
+                barRadius: const Radius.circular(4)),
+            const SizedBox(height: 8),
+            Text(
+                '${_proposal.currentMemberCount} / ${_proposal.targetMemberCount}'),
+            const SizedBox(height: 12),
+            const Divider(),
+            const SizedBox(height: 8),
+            Text('clubs.proposal.members'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            _buildMembersList(),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isProcessing ? null : _onJoinPressed,
+                icon: _isProcessing
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : Icon(_isJoined ? Icons.exit_to_app : Icons.group_add),
+                label: Text(_isJoined
+                    ? 'clubs.proposal.leave'.tr()
+                    : 'clubs.proposal.join'.tr()),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'clubs.proposal.memberStatus'.tr(namedArgs: {
-                  'current': _proposal.currentMemberCount.toString(),
-                  'target': _proposal.targetMemberCount.toString()
-                }),
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              LinearPercentIndicator(
-                  percent: _progress,
-                  lineHeight: 8.0,
-                  progressColor: Theme.of(context).primaryColor,
-                  backgroundColor: Colors.grey[200]!,
-                  padding: EdgeInsets.zero,
-                  barRadius: const Radius.circular(4)),
-              const SizedBox(height: 8),
-              Text(
-                  '${_proposal.currentMemberCount} / ${_proposal.targetMemberCount}'),
-              const SizedBox(height: 12),
-              const Divider(),
-              const SizedBox(height: 8),
-              Text('clubs.proposal.members'.tr(),
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              _buildMembersList(),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isProcessing ? null : _onJoinPressed,
-                  icon: _isProcessing
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : Icon(_isJoined ? Icons.exit_to_app : Icons.group_add),
-                  label: Text(_isJoined
-                      ? 'clubs.proposal.leave'.tr()
-                      : 'clubs.proposal.join'.tr()),
-                ),
-              )
-            ],
-          ),
+            )
+          ],
         ),
       ),
+    );
+
+    if (widget.embedded) {
+      return Container(color: Colors.white, child: inner);
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: Text(_proposal.title)),
+      body: inner,
     );
   }
 

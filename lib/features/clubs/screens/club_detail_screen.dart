@@ -48,7 +48,10 @@ import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 
 class ClubDetailScreen extends StatefulWidget {
   final ClubModel club;
-  const ClubDetailScreen({super.key, required this.club});
+  final bool embedded;
+  final VoidCallback? onClose;
+  const ClubDetailScreen(
+      {super.key, required this.club, this.embedded = false, this.onClose});
 
   @override
   State<ClubDetailScreen> createState() => _ClubDetailScreenState();
@@ -127,7 +130,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   Future<void> _navigateToGroupChat() async {
     final chatRoom = await _chatService.getChatRoom(widget.club.id);
     if (chatRoom == null || !mounted) return;
-
+    if (widget.embedded && widget.onClose != null) {
+      widget.onClose!();
+    }
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ChatRoomScreen(
@@ -192,10 +197,47 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
       stream: _repository.getClubStream(widget.club.id),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
+          if (widget.embedded) {
+            return const Center(child: CircularProgressIndicator());
+          }
           return const Scaffold(
               body: Center(child: CircularProgressIndicator()));
         }
         final club = snapshot.data!;
+
+        final tabBar = TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'clubs.detail.tabs.info'.tr()),
+            Tab(text: 'clubs.detail.tabs.board'.tr()),
+            Tab(text: 'clubs.detail.tabs.members'.tr()),
+          ],
+        );
+
+        final inner = Column(
+          children: [
+            if (widget.embedded)
+              Material(
+                color: Theme.of(context).appBarTheme.backgroundColor ??
+                    Theme.of(context).primaryColor,
+                child: SafeArea(top: true, child: tabBar),
+              ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildInfoTab(context, club),
+                  ClubPostList(club: club),
+                  ClubMemberList(clubId: club.id, ownerId: club.ownerId),
+                ],
+              ),
+            ),
+          ],
+        );
+
+        if (widget.embedded) {
+          return Container(color: Colors.white, child: inner);
+        }
 
         return Scaffold(
           appBar: AppBar(
@@ -206,6 +248,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                   icon: const Icon(Icons.edit_note_outlined),
                   tooltip: '동호회 정보 수정',
                   onPressed: () {
+                    if (widget.embedded && widget.onClose != null) {
+                      widget.onClose!();
+                    }
                     Navigator.of(context).push(
                       MaterialPageRoute(
                           builder: (_) => EditClubScreen(club: club)),
@@ -237,23 +282,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                   }),
             ],
 
-            bottom: TabBar(
-              controller: _tabController,
-              tabs: [
-                Tab(text: 'clubs.detail.tabs.info'.tr()),
-                Tab(text: 'clubs.detail.tabs.board'.tr()),
-                Tab(text: 'clubs.detail.tabs.members'.tr()),
-              ],
-            ),
-          ), // <--- [수정] 여기에 닫는 괄호가 빠져있었습니다.
-          body: TabBarView(
-            controller: _tabController,
-            children: [
-              _buildInfoTab(context, club),
-              ClubPostList(club: club),
-              ClubMemberList(clubId: club.id, ownerId: club.ownerId),
-            ],
+            bottom: tabBar,
           ),
+          body: inner,
           floatingActionButton: StreamBuilder<bool>(
             stream: _repository.isCurrentUserMember(widget.club.id),
             builder: (context, snapshot) {
@@ -262,7 +293,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
               if (isMember) {
                 return FloatingActionButton.extended(
                   heroTag: 'club_chat_fab',
-                  onPressed: _navigateToGroupChat,
+                  onPressed: () {
+                    if (widget.embedded && widget.onClose != null) {
+                      widget.onClose!();
+                    }
+                    _navigateToGroupChat();
+                  },
                   label: Text('clubs.detail.joinChat'.tr()),
                   icon: const Icon(Icons.chat_bubble_outline),
                   backgroundColor: Colors.teal,
@@ -291,6 +327,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         if (club.imageUrl != null && club.imageUrl!.isNotEmpty)
           GestureDetector(
             onTap: () {
+              if (widget.embedded && widget.onClose != null) {
+                widget.onClose!();
+              }
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => ImageGalleryScreen(imageUrls: [club.imageUrl!]),
               ));

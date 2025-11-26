@@ -33,7 +33,17 @@ import 'edit_local_news_screen.dart';
 
 class LocalNewsDetailScreen extends StatefulWidget {
   final PostModel post;
-  const LocalNewsDetailScreen({super.key, required this.post});
+  // When embedded into the main shell, set `embedded=true` to hide its
+  // internal AppBar and use the parent's AppBar/back handling.
+  final bool embedded;
+  final VoidCallback? onClose;
+
+  const LocalNewsDetailScreen({
+    super.key,
+    required this.post,
+    this.embedded = false,
+    this.onClose,
+  });
 
   @override
   State<LocalNewsDetailScreen> createState() => _LocalNewsDetailScreenState();
@@ -262,13 +272,81 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
         _currentPost.mediaUrl != null && _currentPost.mediaUrl!.isNotEmpty;
     final hasLocation = _currentPost.geoPoint != null;
 
+    // If embedded into the app shell, do not render an inner AppBar.
+    // The parent `MainNavigationScreen` will show the AppBar and provide
+    // the back behavior via its leading icon.
+    if (widget.embedded) {
+      return Scaffold(
+        // no appBar when embedded
+        body: SingleChildScrollView(
+          // ✅ 키보드 문제 해결 위해 CommentInputField를 bottomNavigationBar로 이동하고, 본문에 충분한 하단 패딩 확보
+          padding: const EdgeInsets.only(
+              left: 16.0, right: 16.0, top: 16.0, bottom: 80.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildAuthorInfo(_currentPost.userId),
+              const SizedBox(height: 16),
+              _buildTitleAndTags(context, _currentPost),
+              const SizedBox(height: 16),
+              Text(
+                _currentPost.body,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.copyWith(height: 1.5),
+              ),
+              // ✅ [링크 미리보기] 본문 아래에 미리보기 카드 추가
+              _buildLinkPreview(_currentPost.body),
+              const SizedBox(height: 16),
+              // [NEW] 태그 칩 노출 (ClickableTagList)
+              // ✅ 본문 아래 #태그 중복 노출 제거: 상단 칩만 유지
+              if (hasImages)
+                _buildImageSliderWithIndicator(_currentPost.mediaUrl!),
+              if (hasLocation) ...[
+                const SizedBox(height: 16),
+                // 위치 섹션 제목
+                Text('postCard.location'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                MiniMapView(
+                  location: _currentPost.geoPoint!,
+                  markerId: _currentPost.id,
+                ),
+              ],
+              const Divider(height: 32),
+              _buildPostStats(),
+              CommentListView(
+                postId: _currentPost.id,
+                postOwnerId: _currentPost.userId,
+                activeReplyCommentId: _activeReplyCommentId,
+                onReplyTap: _handleReplyTap,
+                onCommentDeleted: _handleCommentDeleted,
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: CommentInputField(
+          postId: _currentPost.id,
+          onCommentAdded: _handleCommentAdded,
+          hintText: 'commentInputField.hintText'.tr(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: AppBarIcon(
             icon: Icons.arrow_back,
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              if (widget.embedded) {
+                widget.onClose?.call();
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
           ),
         ),
         title: Text(_currentPost.title ?? 'localNewsDetail.appBarTitle'.tr()),
