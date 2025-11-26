@@ -108,7 +108,7 @@ import 'package:bling_app/features/main_feed/widgets/lost_item_thumb.dart';
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:bling_app/features/main_feed/widgets/real_estate_thumb.dart';
 
-import 'package:provider/provider.dart'; // PomThumb에서 UserModel 접근 위해
+// provider import removed: not needed after refactor
 
 // 아이콘 그리드에서 사용할 각 기능별 화면을 import 합니다.
 import 'package:bling_app/features/local_news/screens/local_news_screen.dart';
@@ -242,17 +242,9 @@ class _HomeScreenState extends State<HomeScreen>
     with AutomaticKeepAliveClientMixin {
   final FeedRepository _feedRepository = FeedRepository();
 
-  // ✅ Lazy Loading Futures (null = Not Loaded)
-  Future<List<FeedItemModel>>? _localNewsFuture;
-  Future<List<FeedItemModel>>? _jobsFuture;
-  Future<List<FeedItemModel>>? _lostItemsFuture;
-  Future<List<FeedItemModel>>? _productsFuture;
-  Future<List<FeedItemModel>>? _shopsFuture;
-  Future<List<FeedItemModel>>? _clubPostsFuture;
-  Future<List<FeedItemModel>>? _usersFuture;
-  Future<List<FeedItemModel>>? _auctionsFuture;
-  Future<List<FeedItemModel>>? _realEstateFuture;
-  Future<List<FeedItemModel>>? _pomsFuture;
+  // Cached per-section preview data (null = not loaded yet)
+  final Map<AppSection, List<FeedItemModel>?> _sectionData = {};
+  final Set<AppSection> _loadingSections = {};
 
   // 5개 + 더보기 카드
   static const int _previewLimit = 5;
@@ -263,143 +255,90 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    // 초기 실행 시 상단 2개만 로딩
-    _localNewsFuture = _feedRepository.fetchLatestPosts(limit: _previewLimit);
-    _jobsFuture = _feedRepository.fetchLatestJobs(limit: _previewLimit);
+    // 초기 실행 시 상단 2개 섹션만 로딩
+    _loadSectionData(AppSection.posts);
+    _loadSectionData(AppSection.job);
   }
 
-  // 섹션 데이터 로드 트리거
-  void _loadSectionData(AppSection section) {
-    if (_isSectionLoadingOrLoaded(section)) return;
-    setState(() {
+  // 섹션 데이터 로드 트리거 (fills _sectionData)
+  Future<void> _loadSectionData(AppSection section) async {
+    if (_sectionData.containsKey(section) ||
+        _loadingSections.contains(section)) {
+      return;
+    }
+    if (mounted) {
+      setState(() {
+        _loadingSections.add(section);
+      });
+    }
+
+    try {
+      List<FeedItemModel> items = [];
       switch (section) {
         case AppSection.posts:
-          _localNewsFuture =
-              _feedRepository.fetchLatestPosts(limit: _previewLimit);
+          items = await _feedRepository.fetchLatestPosts(limit: _previewLimit);
           break;
         case AppSection.job:
-          _jobsFuture = _feedRepositorySafeFetch(
-              _feedRepository.fetchLatestJobs(limit: _previewLimit));
+          items = await _feedRepository.fetchLatestJobs(limit: _previewLimit);
           break;
         case AppSection.lostAndFound:
-          _lostItemsFuture =
-              _feedRepository.fetchLatestLostItems(limit: _previewLimit);
+          items =
+              await _feedRepository.fetchLatestLostItems(limit: _previewLimit);
           break;
         case AppSection.product:
-          _productsFuture =
-              _feedRepository.fetchLatestProducts(limit: _previewLimit);
+          items =
+              await _feedRepository.fetchLatestProducts(limit: _previewLimit);
           break;
         case AppSection.localStore:
-          _shopsFuture = _feedRepository.fetchLatestShops(limit: _previewLimit);
+          items = await _feedRepository.fetchLatestShops(limit: _previewLimit);
           break;
         case AppSection.findFriend:
-          _usersFuture =
-              _feedRepository.fetchLatestFindFriends(limit: _previewLimit);
+          items = await _feedRepository.fetchLatestFindFriends(
+              limit: _previewLimit);
           break;
         case AppSection.club:
-          _clubPostsFuture = _feedRepositorySafeFetch(
-              _feedRepository.fetchLatestClubPosts(limit: _previewLimit));
+          items =
+              await _feedRepository.fetchLatestClubPosts(limit: _previewLimit);
           break;
         case AppSection.realEstate:
-          _realEstateFuture =
-              _feedRepository.fetchLatestRoomListings(limit: _previewLimit);
+          items = await _feedRepository.fetchLatestRoomListings(
+              limit: _previewLimit);
           break;
         case AppSection.auction:
-          _auctionsFuture =
-              _feedRepository.fetchLatestAuctions(limit: _previewLimit);
+          items =
+              await _feedRepository.fetchLatestAuctions(limit: _previewLimit);
           break;
         case AppSection.pom:
-          _pomsFuture = _feedRepository.fetchLatestPoms(limit: _previewLimit);
+          items = await _feedRepository.fetchLatestPoms(limit: _previewLimit);
           break;
       }
-    });
+
+      if (mounted) {
+        setState(() {
+          _sectionData[section] = items;
+          _loadingSections.remove(section);
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _loadingSections.remove(section));
+    }
   }
 
-  // 작은 helper to avoid analyzer warning when using different repository calls inline
-  Future<List<FeedItemModel>>? _feedRepositorySafeFetch(
-          Future<List<FeedItemModel>>? f) =>
-      f;
-
   bool _isSectionLoadingOrLoaded(AppSection section) {
-    switch (section) {
-      case AppSection.posts:
-        return _localNewsFuture != null;
-      case AppSection.product:
-        return _productsFuture != null;
-      case AppSection.job:
-        return _jobsFuture != null;
-      case AppSection.lostAndFound:
-        return _lostItemsFuture != null;
-      case AppSection.localStore:
-        return _shopsFuture != null;
-      case AppSection.findFriend:
-        return _usersFuture != null;
-      case AppSection.club:
-        return _clubPostsFuture != null;
-      case AppSection.realEstate:
-        return _realEstateFuture != null;
-      case AppSection.auction:
-        return _auctionsFuture != null;
-      case AppSection.pom:
-        return _pomsFuture != null;
-    }
+    return _sectionData.containsKey(section) ||
+        _loadingSections.contains(section);
   }
 
   // 전체 새로고침
   Future<void> _refreshAll() async {
-    setState(() {
-      _localNewsFuture = _feedRepository.fetchLatestPosts(limit: _previewLimit);
-      _jobsFuture = _feedRepository.fetchLatestJobs(limit: _previewLimit);
-      _lostItemsFuture = null;
-      _productsFuture = null;
-      _shopsFuture = null;
-      _clubPostsFuture = null;
-      _usersFuture = null;
-      _auctionsFuture = null;
-      _realEstateFuture = null;
-      _pomsFuture = null;
-    });
-  }
-
-  // 섹션 헤더 타이틀 + NEW 배지 공통 위젯
-  Widget _buildSectionTitle(BuildContext context, String titleKey) {
-    final theme = Theme.of(context);
-    final onSurface90 = theme.colorScheme.onSurface.withValues(alpha: 0.90);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Flexible(
-          child: Text(
-            titleKey.tr(),
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: onSurface90,
-              height: 1.2,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Semantics(
-          label: 'common.new'.tr(),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              'common.new'.tr(),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.2,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+    if (mounted) {
+      setState(() {
+        _sectionData.clear();
+        _loadingSections.clear();
+      });
+    }
+    _loadSectionData(AppSection.posts);
+    _loadSectionData(AppSection.job);
   }
 
   // 접근성 대응: textScalerOf 기반 스케일 추출 유틸
@@ -408,20 +347,7 @@ class _HomeScreenState extends State<HomeScreen>
     return s.scale(basis) / basis;
   }
 
-  // 공통 View all 버튼 스타일
-  ButtonStyle _viewAllButtonStyle(BuildContext context) {
-    final theme = Theme.of(context);
-    return TextButton.styleFrom(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      minimumSize: const Size(0, 0),
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      foregroundColor: theme.colorScheme.primary,
-      textStyle: theme.textTheme.labelMedium?.copyWith(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
+  // 공통 View all 버튼 스타일 (removed - no longer used after header removal)
 
   // SVG 아이콘 경로 기본 폴더
   static const String _iconsPath = 'assets/icons';
@@ -687,101 +613,86 @@ class _HomeScreenState extends State<HomeScreen>
               child:
                   Divider(height: 8, thickness: 8, color: Color(0xFFF0F2F5))),
 
-          // Lazy-loaded sections using new Lazy wrapper
+          // Lazy-loaded sections using new Lazy wrapper (pass cached data)
           // Local News (posts)
           _buildLazySection(
             context: context,
             section: AppSection.posts,
-            future: _localNewsFuture,
-            childBuilder: (preload) => _buildPostCarousel(context, preload),
+            childBuilder: (data) => _buildPostCarousel(context, data),
           ),
 
           // Jobs
           _buildLazySection(
             context: context,
             section: AppSection.job,
-            future: _jobsFuture,
-            childBuilder: (preload) => _buildJobCarousel(context, preload),
+            childBuilder: (data) => _buildJobCarousel(context, data),
           ),
 
           // Lost & Found
           _buildLazySection(
             context: context,
             section: AppSection.lostAndFound,
-            future: _lostItemsFuture,
-            childBuilder: (preload) =>
-                _buildLostAndFoundCarousel(context, preload),
+            childBuilder: (data) => _buildLostAndFoundCarousel(context, data),
           ),
 
           // Marketplace (product)
           _buildLazySection(
             context: context,
             section: AppSection.product,
-            future: _productsFuture,
-            childBuilder: (preload) => _buildProductCarousel(context, preload),
+            childBuilder: (data) => _buildProductCarousel(context, data),
           ),
 
           // Local Stores
           _buildLazySection(
             context: context,
             section: AppSection.localStore,
-            future: _shopsFuture,
-            childBuilder: (preload) =>
-                _buildLocalStoreCarousel(context, preload),
+            childBuilder: (data) => _buildLocalStoreCarousel(context, data),
           ),
 
           // Clubs
           _buildLazySection(
             context: context,
             section: AppSection.club,
-            future: _clubPostsFuture,
-            childBuilder: (preload) => _buildClubCarousel(context, preload),
+            childBuilder: (data) => _buildClubCarousel(context, data),
           ),
 
           // Find Friends
           _buildLazySection(
             context: context,
             section: AppSection.findFriend,
-            future: _usersFuture,
-            childBuilder: (preload) =>
-                _buildFindFriendCarousel(context, preload),
+            childBuilder: (data) => _buildFindFriendCarousel(context, data),
           ),
 
           // Auction
           _buildLazySection(
             context: context,
             section: AppSection.auction,
-            future: _auctionsFuture,
-            childBuilder: (preload) => _buildAuctionCarousel(context, preload),
+            childBuilder: (data) => _buildAuctionCarousel(context, data),
           ),
 
           // Real Estate
           _buildLazySection(
             context: context,
             section: AppSection.realEstate,
-            future: _realEstateFuture,
-            childBuilder: (preload) =>
-                _buildRealEstateCarousel(context, preload),
+            childBuilder: (data) => _buildRealEstateCarousel(context, data),
           ),
 
           // POM
           _buildLazySection(
             context: context,
             section: AppSection.pom,
-            future: _pomsFuture,
-            childBuilder: (preload) => _buildPomCarousel(context, preload),
+            childBuilder: (data) => _buildPomCarousel(context, data),
           ),
         ],
       ),
     );
   }
 
-  // ✅ Lazy Section Wrapper
+  // ✅ Lazy Section Wrapper (passes cached List<FeedItemModel>?)
   Widget _buildLazySection({
     required BuildContext context,
     required AppSection section,
-    required Future<List<FeedItemModel>>? future,
-    required Widget Function(Future<List<FeedItemModel>>?) childBuilder,
+    required Widget Function(List<FeedItemModel>?) childBuilder,
   }) {
     return SliverToBoxAdapter(
       child: VisibilityDetector(
@@ -792,9 +703,9 @@ class _HomeScreenState extends State<HomeScreen>
             _loadSectionData(section);
           }
         },
-        child: future == null
-            ? _buildLoadingPlaceholder() // 로딩 전 플레이스홀더
-            : childBuilder(future), // 로딩 시작 후 (Future 전달)
+        child: _sectionData.containsKey(section)
+            ? childBuilder(_sectionData[section])
+            : _buildLoadingPlaceholder(),
       ),
     );
   }
@@ -843,917 +754,439 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  // ✅ [수정] Future를 파라미터로 받도록 변경
-  Widget _buildPostCarousel(BuildContext context,
-      [Future<List<FeedItemModel>>? preload]) {
-    final future =
-        preload ?? _feedRepository.fetchLatestPosts(limit: _previewLimit);
+  Widget _buildPostCarousel(BuildContext context, List<FeedItemModel>? data) {
+    if (data == null || data.isEmpty) return const SizedBox.shrink();
 
-    return FutureBuilder<List<FeedItemModel>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
-        }
+    final items = data
+        .map((item) => PostModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList();
 
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink();
-        }
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        primary: false,
+        shrinkWrap: true,
+        clipBehavior: Clip.none,
+        itemCount:
+            (items.length < _previewLimit) ? items.length : items.length + 1,
+        itemBuilder: (context, index) {
+          if (index == items.length) {
+            return _buildViewMoreCard(
+                context,
+                LocalNewsScreen(
+                    userModel: widget.userModel,
+                    locationFilter: widget.activeLocationFilter),
+                'main.tabs.localNews');
+          }
+          return Padding(
+            padding: EdgeInsets.only(
+                right: (index ==
+                        ((items.length < _previewLimit)
+                            ? items.length - 1
+                            : items.length))
+                    ? 0
+                    : 12),
+            child: PostThumb(post: items[index], onIconTap: widget.onIconTap),
+          );
+        },
+      ),
+    );
+  }
 
-        final items = snapshot.data!
-            .map((item) => PostModel.fromFirestore(
-                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
-            .toList();
+  Widget _buildProductCarousel(
+      BuildContext context, List<FeedItemModel>? data) {
+    if (data == null || data.isEmpty) return const SizedBox.shrink();
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child:
-                          _buildSectionTitle(context, 'main.tabs.localNews')),
-                  TextButton(
-                    style: _viewAllButtonStyle(context),
-                    onPressed: () {
-                      if (widget.userModel == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('main.errors.loginRequired'.tr())),
-                        );
-                        return;
-                      }
-                      final nextScreen = LocalNewsScreen(
+    final items = data
+        .map((item) => ProductModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList();
+
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        primary: false,
+        shrinkWrap: true,
+        clipBehavior: Clip.none,
+        itemCount:
+            (items.length < _previewLimit) ? items.length : items.length + 1,
+        itemBuilder: (context, index) {
+          if (index == items.length) {
+            return _buildViewMoreCard(
+                context,
+                MarketplaceScreen(
+                    userModel: widget.userModel,
+                    locationFilter: widget.activeLocationFilter),
+                'main.tabs.marketplace');
+          }
+          return Padding(
+            padding: EdgeInsets.only(
+                right: (index ==
+                        ((items.length < _previewLimit)
+                            ? items.length - 1
+                            : items.length))
+                    ? 0
+                    : 12),
+            child: ProductThumb(
+                product: items[index], onIconTap: widget.onIconTap),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildClubCarousel(BuildContext context, List<FeedItemModel>? data) {
+    if (data == null || data.isEmpty) return const SizedBox.shrink();
+
+    final items = data
+        .map((item) => ClubPostModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList();
+
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        primary: false,
+        shrinkWrap: true,
+        clipBehavior: Clip.none,
+        itemCount:
+            (items.length < _previewLimit) ? items.length : items.length + 1,
+        itemBuilder: (context, index) {
+          if (index == items.length) {
+            return _buildViewMoreCard(
+                context,
+                DefaultTabController(
+                    length: 2,
+                    child: ClubsScreen(
                         userModel: widget.userModel,
                         locationFilter: widget.activeLocationFilter,
-                      );
-                      widget.onIconTap(nextScreen, 'main.tabs.localNews');
-                    },
-                    child: Text('common.viewAll'.tr()),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                primary: false,
-                shrinkWrap: true,
-                clipBehavior: Clip.none,
-                itemCount: (items.length < _previewLimit)
-                    ? items.length
-                    : items.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == items.length) {
-                    return _buildViewMoreCard(
-                        context,
-                        LocalNewsScreen(
-                            userModel: widget.userModel,
-                            locationFilter: widget.activeLocationFilter),
-                        'main.tabs.localNews');
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(
-                        right: (index ==
-                                ((items.length < _previewLimit)
-                                    ? items.length - 1
-                                    : items.length))
-                            ? 0
-                            : 12),
-                    child: PostThumb(
-                      post: items[index],
-                      onIconTap: widget.onIconTap,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
+                        tabController: DefaultTabController.of(context))),
+                'main.tabs.clubs');
+          }
+          return Padding(
+            padding: EdgeInsets.only(
+                right: (index ==
+                        ((items.length < _previewLimit)
+                            ? items.length - 1
+                            : items.length))
+                    ? 0
+                    : 12),
+            child: ClubThumb(post: items[index], onIconTap: widget.onIconTap),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildProductCarousel(BuildContext context,
-      [Future<List<FeedItemModel>>? preload]) {
-    final future = preload ?? _feedRepository.fetchLatestProducts(limit: 20);
-    return FutureBuilder<List<FeedItemModel>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink();
-        }
+  Widget _buildFindFriendCarousel(
+      BuildContext context, List<FeedItemModel>? data) {
+    if (data == null || data.isEmpty) return const SizedBox.shrink();
 
-        final items = snapshot.data!
-            .map((item) => ProductModel.fromFirestore(
-                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
-            .toList();
+    final items = data
+        .map((item) => UserModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList();
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child:
-                          _buildSectionTitle(context, 'main.tabs.marketplace')),
-                  TextButton(
-                    style: _viewAllButtonStyle(context),
-                    onPressed: () {
-                      if (widget.userModel == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('main.errors.loginRequired'.tr())),
-                        );
-                        return;
-                      }
-                      final nextScreen = MarketplaceScreen(
-                        userModel: widget.userModel,
-                        locationFilter: widget.activeLocationFilter,
-                      );
-                      widget.onIconTap(nextScreen, 'main.tabs.marketplace');
-                    },
-                    child: Text('common.viewAll'.tr()),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                primary: false,
-                shrinkWrap: true,
-                clipBehavior: Clip.none,
-                itemCount: (items.length < _previewLimit)
-                    ? items.length
-                    : items.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == items.length) {
-                    return _buildViewMoreCard(
-                        context,
-                        MarketplaceScreen(
-                            userModel: widget.userModel,
-                            locationFilter: widget.activeLocationFilter),
-                        'main.tabs.marketplace');
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(
-                        right: (index ==
-                                ((items.length < _previewLimit)
-                                    ? items.length - 1
-                                    : items.length))
-                            ? 0
-                            : 12),
-                    child: ProductThumb(
-                        product: items[index], onIconTap: widget.onIconTap),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        primary: false,
+        shrinkWrap: true,
+        clipBehavior: Clip.none,
+        itemCount:
+            (items.length < _previewLimit) ? items.length : items.length + 1,
+        itemBuilder: (context, index) {
+          if (index == items.length) {
+            return _buildViewMoreCard(
+                context,
+                FindFriendsScreen(userModel: widget.userModel),
+                'main.tabs.findFriends');
+          }
+          return Padding(
+            padding: EdgeInsets.only(
+                right: (index ==
+                        ((items.length < _previewLimit)
+                            ? items.length - 1
+                            : items.length))
+                    ? 0
+                    : 12),
+            child: FindFriendThumb(
+                user: items[index],
+                currentUserModel: widget.userModel,
+                onIconTap: widget.onIconTap),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildClubCarousel(BuildContext context,
-      [Future<List<FeedItemModel>>? preload]) {
-    final future = preload ??
-        _feedRepositorySafeFetch(
-            _feedRepository.fetchLatestClubPosts(limit: 20));
-    return FutureBuilder<List<FeedItemModel>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink();
-        }
+  Widget _buildJobCarousel(BuildContext context, List<FeedItemModel>? data) {
+    if (data == null || data.isEmpty) return const SizedBox.shrink();
 
-        final items = snapshot.data!
-            .map((item) => ClubPostModel.fromFirestore(
-                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
-            .toList();
+    final items = data
+        .map((item) => JobModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList();
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child: _buildSectionTitle(context, 'main.tabs.clubs')),
-                  TextButton(
-                    style: _viewAllButtonStyle(context),
-                    onPressed: () {
-                      if (widget.userModel == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('main.errors.loginRequired'.tr())),
-                        );
-                        return;
-                      }
-                      final nextScreen = DefaultTabController(
-                        length: 2,
-                        child: Builder(
-                          builder: (ctx) => ClubsScreen(
-                            userModel: widget.userModel,
-                            locationFilter: widget.activeLocationFilter,
-                            tabController: DefaultTabController.of(ctx),
-                          ),
-                        ),
-                      );
-                      widget.onIconTap(nextScreen, 'main.tabs.clubs');
-                    },
-                    child: Text('common.viewAll'.tr()),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                primary: false,
-                shrinkWrap: true,
-                clipBehavior: Clip.none,
-                itemCount: (items.length < _previewLimit)
-                    ? items.length
-                    : items.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == items.length) {
-                    return _buildViewMoreCard(
-                        context,
-                        DefaultTabController(
-                            length: 2,
-                            child: ClubsScreen(
-                                userModel: widget.userModel,
-                                locationFilter: widget.activeLocationFilter,
-                                tabController:
-                                    DefaultTabController.of(context))),
-                        'main.tabs.clubs');
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(
-                        right: (index ==
-                                ((items.length < _previewLimit)
-                                    ? items.length - 1
-                                    : items.length))
-                            ? 0
-                            : 12),
-                    child: ClubThumb(
-                        post: items[index], onIconTap: widget.onIconTap),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        primary: false,
+        shrinkWrap: true,
+        clipBehavior: Clip.none,
+        itemCount:
+            (items.length < _previewLimit) ? items.length : items.length + 1,
+        itemBuilder: (context, index) {
+          if (index == items.length) {
+            return _buildViewMoreCard(
+                context,
+                JobsScreen(
+                    userModel: widget.userModel,
+                    locationFilter: widget.activeLocationFilter),
+                'main.tabs.jobs');
+          }
+          return Padding(
+            padding: EdgeInsets.only(
+                right: (index ==
+                        ((items.length < _previewLimit)
+                            ? items.length - 1
+                            : items.length))
+                    ? 0
+                    : 12),
+            child: JobThumb(job: items[index], onIconTap: widget.onIconTap),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildFindFriendCarousel(BuildContext context,
-      [Future<List<FeedItemModel>>? preload]) {
-    final future = preload ?? _feedRepository.fetchLatestFindFriends(limit: 20);
-    return FutureBuilder<List<FeedItemModel>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink();
-        }
+  Widget _buildLocalStoreCarousel(
+      BuildContext context, List<FeedItemModel>? data) {
+    if (data == null || data.isEmpty) return const SizedBox.shrink();
 
-        final items = snapshot.data!
-            .map((item) => UserModel.fromFirestore(
-                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
-            .toList();
+    final items = data
+        .map((item) => ShopModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList();
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child:
-                          _buildSectionTitle(context, 'main.tabs.findFriends')),
-                  TextButton(
-                    style: _viewAllButtonStyle(context),
-                    onPressed: () {
-                      if (widget.userModel == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('main.errors.loginRequired'.tr())),
-                        );
-                        return;
-                      }
-                      final nextScreen =
-                          FindFriendsScreen(userModel: widget.userModel);
-                      widget.onIconTap(nextScreen, 'main.tabs.findFriends');
-                    },
-                    child: Text('common.viewAll'.tr()),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                primary: false,
-                shrinkWrap: true,
-                clipBehavior: Clip.none,
-                itemCount: (items.length < _previewLimit)
-                    ? items.length
-                    : items.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == items.length) {
-                    return _buildViewMoreCard(
-                        context,
-                        FindFriendsScreen(userModel: widget.userModel),
-                        'main.tabs.findFriends');
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(
-                        right: (index ==
-                                ((items.length < _previewLimit)
-                                    ? items.length - 1
-                                    : items.length))
-                            ? 0
-                            : 12),
-                    child: FindFriendThumb(
-                        user: items[index],
-                        currentUserModel: widget.userModel,
-                        onIconTap: widget.onIconTap),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        primary: false,
+        shrinkWrap: true,
+        clipBehavior: Clip.none,
+        itemCount:
+            (items.length < _previewLimit) ? items.length : items.length + 1,
+        itemBuilder: (context, index) {
+          if (index == items.length) {
+            return _buildViewMoreCard(
+                context,
+                LocalStoresScreen(
+                    userModel: widget.userModel,
+                    locationFilter: widget.activeLocationFilter),
+                'main.tabs.localStores');
+          }
+          return Padding(
+            padding: EdgeInsets.only(
+                right: (index ==
+                        ((items.length < _previewLimit)
+                            ? items.length - 1
+                            : items.length))
+                    ? 0
+                    : 12),
+            child: LocalStoreThumb(
+                shop: items[index], onIconTap: widget.onIconTap),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildJobCarousel(BuildContext context,
-      [Future<List<FeedItemModel>>? preload]) {
-    final future = preload ?? _feedRepository.fetchLatestJobs(limit: 20);
-    return FutureBuilder<List<FeedItemModel>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink();
-        }
+  Widget _buildAuctionCarousel(
+      BuildContext context, List<FeedItemModel>? data) {
+    if (data == null || data.isEmpty) return const SizedBox.shrink();
 
-        final items = snapshot.data!
-            .map((item) => JobModel.fromFirestore(
-                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
-            .toList();
+    final items = data
+        .map((item) => AuctionModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList();
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child: _buildSectionTitle(context, 'main.tabs.jobs')),
-                  TextButton(
-                    style: _viewAllButtonStyle(context),
-                    onPressed: () {
-                      if (widget.userModel == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('main.errors.loginRequired'.tr())),
-                        );
-                        return;
-                      }
-                      final nextScreen = JobsScreen(
-                          userModel: widget.userModel,
-                          locationFilter: widget.activeLocationFilter);
-                      widget.onIconTap(nextScreen, 'main.tabs.jobs');
-                    },
-                    child: Text('common.viewAll'.tr()),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                primary: false,
-                shrinkWrap: true,
-                clipBehavior: Clip.none,
-                itemCount: (items.length < _previewLimit)
-                    ? items.length
-                    : items.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == items.length) {
-                    return _buildViewMoreCard(
-                        context,
-                        JobsScreen(
-                            userModel: widget.userModel,
-                            locationFilter: widget.activeLocationFilter),
-                        'main.tabs.jobs');
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(
-                        right: (index ==
-                                ((items.length < _previewLimit)
-                                    ? items.length - 1
-                                    : items.length))
-                            ? 0
-                            : 12),
-                    child: JobThumb(
-                        job: items[index], onIconTap: widget.onIconTap),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        primary: false,
+        shrinkWrap: true,
+        clipBehavior: Clip.none,
+        itemCount:
+            (items.length < _previewLimit) ? items.length : items.length + 1,
+        itemBuilder: (context, index) {
+          if (index == items.length) {
+            return _buildViewMoreCard(
+                context,
+                AuctionScreen(userModel: widget.userModel),
+                'main.tabs.auction');
+          }
+          return Padding(
+            padding: EdgeInsets.only(
+                right: (index ==
+                        ((items.length < _previewLimit)
+                            ? items.length - 1
+                            : items.length))
+                    ? 0
+                    : 12),
+            child: AuctionThumb(
+                auction: items[index], onIconTap: widget.onIconTap),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildLocalStoreCarousel(BuildContext context,
-      [Future<List<FeedItemModel>>? preload]) {
-    final future = preload ?? _feedRepository.fetchLatestShops(limit: 20);
-    return FutureBuilder<List<FeedItemModel>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink();
-        }
+  Widget _buildPomCarousel(BuildContext context, List<FeedItemModel>? data) {
+    if (data == null || data.isEmpty) return const SizedBox.shrink();
 
-        final items = snapshot.data!
-            .map((item) => ShopModel.fromFirestore(
-                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
-            .toList();
+    final allShorts = data
+        .map((item) => PomModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList();
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child:
-                          _buildSectionTitle(context, 'main.tabs.localStores')),
-                  TextButton(
-                    style: _viewAllButtonStyle(context),
-                    onPressed: () {
-                      if (widget.userModel == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('main.errors.loginRequired'.tr())),
-                        );
-                        return;
-                      }
-                      final nextScreen = LocalStoresScreen(
-                          userModel: widget.userModel,
-                          locationFilter: widget.activeLocationFilter);
-                      widget.onIconTap(nextScreen, 'main.tabs.localStores');
-                    },
-                    child: Text('common.viewAll'.tr()),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                primary: false,
-                shrinkWrap: true,
-                clipBehavior: Clip.none,
-                itemCount: (items.length < _previewLimit)
-                    ? items.length
-                    : items.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == items.length) {
-                    return _buildViewMoreCard(
-                        context,
-                        LocalStoresScreen(
-                            userModel: widget.userModel,
-                            locationFilter: widget.activeLocationFilter),
-                        'main.tabs.localStores');
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(
-                        right: (index ==
-                                ((items.length < _previewLimit)
-                                    ? items.length - 1
-                                    : items.length))
-                            ? 0
-                            : 12),
-                    child: LocalStoreThumb(
-                        shop: items[index], onIconTap: widget.onIconTap),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        primary: false,
+        shrinkWrap: true,
+        clipBehavior: Clip.none,
+        itemCount: (allShorts.length < _previewLimit)
+            ? allShorts.length
+            : allShorts.length + 1,
+        itemBuilder: (context, index) {
+          if (index == allShorts.length) {
+            return _buildViewMoreCard(
+                context,
+                PomScreen(
+                    userModel: widget.userModel,
+                    locationFilter: widget.activeLocationFilter),
+                'main.tabs.pom');
+          }
+          return Padding(
+            padding: EdgeInsets.only(
+                right: (index ==
+                        ((allShorts.length < _previewLimit)
+                            ? allShorts.length - 1
+                            : allShorts.length))
+                    ? 0
+                    : 12),
+            child: PomThumb(
+                short: allShorts[index],
+                allShorts: allShorts,
+                currentIndex: index,
+                onIconTap: widget.onIconTap),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildAuctionCarousel(BuildContext context,
-      [Future<List<FeedItemModel>>? preload]) {
-    final future = preload ??
-        _feedRepositorySafeFetch(
-            _feedRepository.fetchLatestAuctions(limit: 20));
-    return FutureBuilder<List<FeedItemModel>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink();
-        }
+  Widget _buildLostAndFoundCarousel(
+      BuildContext context, List<FeedItemModel>? data) {
+    if (data == null || data.isEmpty) return const SizedBox.shrink();
 
-        final items = snapshot.data!
-            .map((item) => AuctionModel.fromFirestore(
-                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
-            .toList();
+    final items = data
+        .map((item) => LostItemModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList();
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child: _buildSectionTitle(context, 'main.tabs.auction')),
-                  TextButton(
-                    style: _viewAllButtonStyle(context),
-                    onPressed: () {
-                      if (widget.userModel == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('main.errors.loginRequired'.tr())),
-                        );
-                        return;
-                      }
-                      final nextScreen =
-                          AuctionScreen(userModel: widget.userModel);
-                      widget.onIconTap(nextScreen, 'main.tabs.auction');
-                    },
-                    child: Text('common.viewAll'.tr()),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                primary: false,
-                shrinkWrap: true,
-                clipBehavior: Clip.none,
-                itemCount: (items.length < _previewLimit)
-                    ? items.length
-                    : items.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == items.length) {
-                    return _buildViewMoreCard(
-                        context,
-                        AuctionScreen(userModel: widget.userModel),
-                        'main.tabs.auction');
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(
-                        right: (index ==
-                                ((items.length < _previewLimit)
-                                    ? items.length - 1
-                                    : items.length))
-                            ? 0
-                            : 12),
-                    child: AuctionThumb(
-                        auction: items[index], onIconTap: widget.onIconTap),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        primary: false,
+        shrinkWrap: true,
+        clipBehavior: Clip.none,
+        itemCount:
+            (items.length < _previewLimit) ? items.length : items.length + 1,
+        itemBuilder: (context, index) {
+          if (index == items.length) {
+            return _buildViewMoreCard(
+                context,
+                LostAndFoundScreen(userModel: widget.userModel),
+                'main.tabs.lostAndFound');
+          }
+          return Padding(
+            padding: EdgeInsets.only(
+                right: (index ==
+                        ((items.length < _previewLimit)
+                            ? items.length - 1
+                            : items.length))
+                    ? 0
+                    : 12),
+            child:
+                LostItemThumb(item: items[index], onIconTap: widget.onIconTap),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildPomCarousel(BuildContext context,
-      [Future<List<FeedItemModel>>? preload]) {
-    final future = preload ?? _feedRepository.fetchLatestPoms(limit: 20);
-    return FutureBuilder<List<FeedItemModel>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink();
-        }
+  Widget _buildRealEstateCarousel(
+      BuildContext context, List<FeedItemModel>? data) {
+    if (data == null || data.isEmpty) return const SizedBox.shrink();
 
-        final allShorts = snapshot.data!
-            .map((item) => PomModel.fromFirestore(
-                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
-            .toList();
+    final items = data
+        .map((item) => RoomListingModel.fromFirestore(
+            item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
+        .toList();
 
-        return Provider.value(
-          value: widget.userModel,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                        child: _buildSectionTitle(context, 'main.tabs.pom')),
-                    TextButton(
-                      style: _viewAllButtonStyle(context),
-                      onPressed: () {
-                        if (widget.userModel == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content:
-                                    Text('main.errors.loginRequired'.tr())),
-                          );
-                          return;
-                        }
-                        final nextScreen = PomScreen(
-                          userModel: widget.userModel,
-                          locationFilter: widget.activeLocationFilter,
-                          initialPoms: null,
-                          initialIndex: 0,
-                        );
-                        widget.onIconTap(nextScreen, 'main.tabs.pom');
-                      },
-                      child: Text('common.viewAll'.tr()),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 240,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  primary: false,
-                  shrinkWrap: true,
-                  clipBehavior: Clip.none,
-                  itemCount: (allShorts.length < _previewLimit)
-                      ? allShorts.length
-                      : allShorts.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == allShorts.length) {
-                      return _buildViewMoreCard(
-                          context,
-                          PomScreen(
-                              userModel: widget.userModel,
-                              locationFilter: widget.activeLocationFilter),
-                          'main.tabs.pom');
-                    }
-                    return Padding(
-                      padding: EdgeInsets.only(
-                          right: (index ==
-                                  ((allShorts.length < _previewLimit)
-                                      ? allShorts.length - 1
-                                      : allShorts.length))
-                              ? 0
-                              : 12),
-                      child: PomThumb(
-                          short: allShorts[index],
-                          allShorts: allShorts,
-                          currentIndex: index,
-                          onIconTap: widget.onIconTap),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildLostAndFoundCarousel(BuildContext context,
-      [Future<List<FeedItemModel>>? preload]) {
-    final future = preload ?? _feedRepository.fetchLatestLostItems(limit: 20);
-    return FutureBuilder<List<FeedItemModel>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        final items = snapshot.data!
-            .map((item) => LostItemModel.fromFirestore(
-                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
-            .toList();
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child: _buildSectionTitle(
-                          context, 'main.tabs.lostAndFound')),
-                  TextButton(
-                    style: _viewAllButtonStyle(context),
-                    onPressed: () {
-                      if (widget.userModel == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('main.errors.loginRequired'.tr())),
-                        );
-                        return;
-                      }
-                      final nextScreen =
-                          LostAndFoundScreen(userModel: widget.userModel);
-                      widget.onIconTap(nextScreen, 'main.tabs.lostAndFound');
-                    },
-                    child: Text('common.viewAll'.tr()),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                primary: false,
-                shrinkWrap: true,
-                clipBehavior: Clip.none,
-                itemCount: (items.length < _previewLimit)
-                    ? items.length
-                    : items.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == items.length) {
-                    return _buildViewMoreCard(
-                        context,
-                        LostAndFoundScreen(userModel: widget.userModel),
-                        'main.tabs.lostAndFound');
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(
-                        right: (index ==
-                                ((items.length < _previewLimit)
-                                    ? items.length - 1
-                                    : items.length))
-                            ? 0
-                            : 12),
-                    child: LostItemThumb(
-                        item: items[index], onIconTap: widget.onIconTap),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildRealEstateCarousel(BuildContext context,
-      [Future<List<FeedItemModel>>? preload]) {
-    final future = preload ??
-        _feedRepositorySafeFetch(
-            _feedRepository.fetchLatestRoomListings(limit: 20));
-    return FutureBuilder<List<FeedItemModel>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        final items = snapshot.data!
-            .map((item) => RoomListingModel.fromFirestore(
-                item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
-            .toList();
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child:
-                          _buildSectionTitle(context, 'main.tabs.realEstate')),
-                  TextButton(
-                    style: _viewAllButtonStyle(context),
-                    onPressed: () {
-                      if (widget.userModel == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('main.errors.loginRequired'.tr())),
-                        );
-                        return;
-                      }
-                      final nextScreen = RealEstateScreen(
-                          userModel: widget.userModel,
-                          locationFilter: widget.activeLocationFilter);
-                      widget.onIconTap(nextScreen, 'main.tabs.realEstate');
-                    },
-                    child: Text('common.viewAll'.tr()),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 240,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                primary: false,
-                shrinkWrap: true,
-                clipBehavior: Clip.none,
-                itemCount: (items.length < _previewLimit)
-                    ? items.length
-                    : items.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == items.length) {
-                    return _buildViewMoreCard(
-                        context,
-                        RealEstateScreen(
-                            userModel: widget.userModel,
-                            locationFilter: widget.activeLocationFilter),
-                        'main.tabs.realEstate');
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(
-                        right: (index ==
-                                ((items.length < _previewLimit)
-                                    ? items.length - 1
-                                    : items.length))
-                            ? 0
-                            : 12),
-                    child: RealEstateThumb(
-                        room: items[index], onIconTap: widget.onIconTap),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
+    return SizedBox(
+      height: 240,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        primary: false,
+        shrinkWrap: true,
+        clipBehavior: Clip.none,
+        itemCount:
+            (items.length < _previewLimit) ? items.length : items.length + 1,
+        itemBuilder: (context, index) {
+          if (index == items.length) {
+            return _buildViewMoreCard(
+                context,
+                RealEstateScreen(
+                    userModel: widget.userModel,
+                    locationFilter: widget.activeLocationFilter),
+                'main.tabs.realEstate');
+          }
+          return Padding(
+            padding: EdgeInsets.only(
+                right: (index ==
+                        ((items.length < _previewLimit)
+                            ? items.length - 1
+                            : items.length))
+                    ? 0
+                    : 12),
+            child: RealEstateThumb(
+                room: items[index], onIconTap: widget.onIconTap),
+          );
+        },
+      ),
     );
   }
 }
