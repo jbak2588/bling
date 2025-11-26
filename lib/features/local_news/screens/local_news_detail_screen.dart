@@ -718,7 +718,9 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                     child: Chip(
                       // 표준화: 레이블에 "이모지 + 이름" 표시
                       label: Text(
-                        '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${tagInfo.nameKey.tr()}',
+                        // Show the tag content itself (no localization). Use the
+                        // shared formatter to make the stored tagId readable.
+                        '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${formatTagLabel(tagInfo.tagId)}',
                         style: const TextStyle(fontSize: 12),
                       ),
                       padding: const EdgeInsets.symmetric(
@@ -854,6 +856,9 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
       ],
     );
   }
+
+  // (No-op) use shared `formatTagLabel` from `app_tags.dart` instead of
+  // keeping a local duplicate implementation.
 
   // ✅ [수정] 버그의 원인이었던 _buildGoogleMap/_buildMiniMap 함수 전체 삭제 (MiniMapView로 대체)
 }

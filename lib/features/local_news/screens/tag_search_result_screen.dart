@@ -48,7 +48,7 @@ class _TagSearchResultScreenState extends State<TagSearchResultScreen> {
       ),
     );
     if (info.tagId.isEmpty) return tagId; // fallback to raw id
-    return info.nameKey.tr();
+    return formatTagLabel(info.tagId);
   }
 
   String displayEmoji(String tagId) {

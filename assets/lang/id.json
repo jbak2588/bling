@@ -300,6 +300,7 @@
     },
     "common": {
       "error": "Terjadi kesalahan: {error}",
+      "more": "Lainnya",
       "add_photo": "Add Photo",
       "take_photo": "Ambil Foto",
       "pick_gallery": "Pilih dari Galeri",
@@ -488,8 +489,7 @@
       "button": "Keluar",
       "confirmTitle": "Keluar",
       "confirmBody": "Apakah Anda yakin ingin keluar?"
-    }
-    ,
+    },
     "deleteAccount": {
       "button": "Minta Penghapusan Akun",
       "confirmTitle": "Minta Penghapusan Akun",
@@ -778,6 +778,7 @@
     "clear": "Hapus",
     "report": "Laporkan",
     "moreOptions": "Opsi lainnya",
+    "more": "Lainnya",
     "viewAll": "Lihat semua",
     "new": "Baru",
     "updated": "Diperbarui",
@@ -960,6 +961,8 @@
     },
     "detail": {
       "infoTitle": "Informasi detail",
+      "locationTitle": "Lokasi",
+      "authorTitle": "Penulis",
       "apply": "Lamar",
       "noAuthor": "Tidak ada info penulis",
       "chatError": "Tidak dapat memulai chat: {error}"
@@ -1770,6 +1773,18 @@
         "reject": "Tolak",
         "approve": "Setujui"
       }
+    },
+    "deletionRequests": {
+      "title": "Kelola Permintaan Penghapusan Akun",
+      "confirmTitle": "Konfirmasi Penghapusan Permanen",
+      "confirmBody": "Hapus secara permanen semua data (Auth, DB, Storage) untuk '{nickname}'? Tindakan ini tidak dapat dibatalkan.",
+      "confirmPermanent": "Hapus Permanen",
+      "deletedSuccess": "Akun pengguna telah dihapus secara permanen.",
+      "deletedFailed": "Gagal menghapus akun: {error}",
+      "empty": "Tidak ada permintaan penghapusan.",
+      "email": "Email",
+      "requestedAt": "Diajukan pada",
+      "approve": "Setujui Penghapusan"
     },
     "reports": {
       "title": "Manajemen Laporan",

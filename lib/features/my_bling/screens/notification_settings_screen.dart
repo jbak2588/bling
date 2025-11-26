@@ -251,8 +251,9 @@ class _NotificationSettingsScreenState
                   children: _filterableTags.map((tag) {
                     final isSelected = _selectedTags.contains(tag.tagId);
                     return ChoiceChip(
-                      label:
-                          Text('${tag.emoji ?? ''} ${tag.nameKey.tr()}'.trim()),
+                      label: Text(
+                          '${tag.emoji ?? ''} ${formatTagLabel(tag.tagId)}'
+                              .trim()),
                       selected: isSelected,
                       onSelected: (selected) {
                         setState(() {

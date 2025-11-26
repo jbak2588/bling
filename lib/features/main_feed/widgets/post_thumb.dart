@@ -250,7 +250,7 @@ class PostThumb extends StatelessWidget {
         }
 
         if (matched != null) {
-          final name = matched.nameKey.tr();
+          final name = formatTagLabel(matched.tagId);
           final emoji = matched.emoji;
           return (emoji != null && emoji.isNotEmpty) ? '$emoji $name' : name;
         }

@@ -34,7 +34,7 @@ class LostItemThumb extends StatelessWidget {
         onTap: () {
           final detailScreen = LostItemDetailScreen(item: item);
           // onIconTap is required for this thumb; delegate navigation to parent
-          onIconTap(detailScreen, 'main.tabs.lost');
+          onIconTap(detailScreen, 'main.tabs.lostAndFound');
         },
         child: Card(
           elevation: 1,

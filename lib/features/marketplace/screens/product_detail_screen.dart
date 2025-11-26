@@ -504,19 +504,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               pinned: true,
               // make leading and action icons easier to read on top of the
               // image by wrapping them in a dark circular background
-              leading: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: AppBarIcon(
-                  icon: Icons.arrow_back,
-                  onPressed: () {
-                    if (widget.embedded && widget.onClose != null) {
-                      widget.onClose!();
-                      return;
-                    }
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
+              leading: widget.embedded
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: AppBarIcon(
+                        icon: Icons.arrow_back,
+                        onPressed: () {
+                          if (widget.embedded && widget.onClose != null) {
+                            widget.onClose!();
+                            return;
+                          }
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ),
               flexibleSpace: FlexibleSpaceBar(
                 background: GestureDetector(
                   onTap: () {

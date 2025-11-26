@@ -300,6 +300,7 @@
     },
     "common": {
       "error": "An error occurred: {error}",
+      "more": "More",
       "add_photo": "Add Photo",
       "take_photo": "Take Photo",
       "pick_gallery": "Pick from Gallery",
@@ -778,6 +779,7 @@
     "clear": "Clear",
     "report": "Report",
     "moreOptions": "More options",
+    "more": "More",
     "viewAll": "View all",
     "new": "New",
     "updated": "Updated",
@@ -960,6 +962,8 @@
     },
     "detail": {
       "infoTitle": "Details",
+      "locationTitle": "Location",
+      "authorTitle": "Author",
       "apply": "Apply",
       "noAuthor": "No author info",
       "chatError": "Could not start chat: {error}"
@@ -1770,6 +1774,18 @@
         "reject": "Reject",
         "approve": "Approve"
       }
+    },
+    "deletionRequests": {
+      "title": "Account Deletion Requests",
+      "confirmTitle": "Confirm Permanent Deletion",
+      "confirmBody": "Permanently delete all data (Auth, DB, Storage) for '{nickname}'? This action cannot be undone.",
+      "confirmPermanent": "Delete Permanently",
+      "deletedSuccess": "User account has been permanently deleted.",
+      "deletedFailed": "Failed to delete account: {error}",
+      "empty": "No deletion requests found.",
+      "email": "Email",
+      "requestedAt": "Requested at",
+      "approve": "Approve Deletion"
     },
     "reports": {
       "title": "Report Management",

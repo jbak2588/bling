@@ -167,6 +167,248 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
         final String? distance =
             formatDistanceBetween(widget.userModel?.geoPoint, auction.geoPoint);
 
+        // Build the body content so we can return only the body when embedded
+        final Widget bodyContent = CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // existing layout preserved
+                  if (auction.images.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              if (widget.embedded && widget.onClose != null) {
+                                widget.onClose!();
+                              }
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => ImageGalleryScreen(
+                                      imageUrls: auction.images),
+                                ),
+                              );
+                            },
+                            child: ImageCarouselCard(
+                              storageId: auction.id,
+                              imageUrls: auction.images,
+                              height: 250,
+                            ),
+                          ),
+                          if (auction.endAt.toDate().isBefore(DateTime.now()))
+                            Positioned.fill(
+                              child: IgnorePointer(
+                                ignoring: true,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.5),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'auctions.card.ended'.tr(),
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(auction.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold)),
+                        if (auction.isAiVerified)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: const AiVerificationBadge(),
+                          ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Icon(Icons.location_on_outlined,
+                                size: 16, color: Colors.grey[600]),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                auction.location,
+                                style: TextStyle(
+                                    color: Colors.grey[700], fontSize: 16),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (distance != null)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Text(
+                                  '· $distance',
+                                  style: TextStyle(
+                                      color: Colors.red.shade700,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16),
+                                ),
+                              ),
+                          ],
+                        ),
+                        Text('auctions.detail.currentBid'.tr(namedArgs: {
+                          'amount': currencyFormat.format(auction.currentBid)
+                        })),
+                        Text('auctions.detail.endTime'.tr(namedArgs: {
+                          'time': DateFormat('MM/dd HH:mm')
+                              .format(auction.endAt.toDate())
+                        })),
+                        const Divider(height: 32),
+                        Text(auction.description,
+                            style: const TextStyle(fontSize: 16, height: 1.5)),
+                        const SizedBox(height: 16),
+                        ClickableTagList(tags: auction.tags),
+                        if (auction.geoPoint != null) ...[
+                          const Divider(height: 32),
+                          Text('auctions.detail.location'.tr(),
+                              style: Theme.of(context).textTheme.titleLarge),
+                          const SizedBox(height: 12),
+                          MiniMapView(
+                              location: auction.geoPoint!,
+                              markerId: auction.id),
+                        ],
+                        const Divider(height: 32),
+                        Text('auctions.detail.seller'.tr(),
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 12),
+                        AuthorProfileTile(userId: auction.ownerId),
+                        const Divider(height: 32),
+                        Text('auctions.detail.qnaTitle'.tr(),
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 12),
+                        CommentInputField(
+                          key: _qnaInputKey,
+                          postId: auction.id,
+                          collectionPath: 'auctions',
+                          hintText: 'auctions.detail.qnaHint'.tr(),
+                          onCommentAdded: (commentData) {
+                            setState(() {
+                              _qnaInputKey = UniqueKey();
+                              _activeReplyCommentId = null;
+                            });
+                            FocusScope.of(context).unfocus();
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        CommentListView(
+                          postId: auction.id,
+                          collectionPath: 'auctions',
+                          postOwnerId: auction.ownerId,
+                          activeReplyCommentId: _activeReplyCommentId,
+                          onReplyTap: (commentId) {
+                            setState(() => _activeReplyCommentId = commentId);
+                          },
+                          onCommentDeleted: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Text('auctions.detail.bidsTitle'.tr(),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+            ),
+            StreamBuilder<List<BidModel>>(
+              stream: _repository.fetchBids(widget.auction.id),
+              builder: (context, bidSnapshot) {
+                if (!bidSnapshot.hasData) {
+                  return const SliverToBoxAdapter(
+                      child: Center(child: CircularProgressIndicator()));
+                }
+                final bids = bidSnapshot.data!;
+                if (bids.isEmpty) {
+                  return SliverToBoxAdapter(
+                      child: Center(
+                          child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text('auctions.detail.noBids'.tr()))));
+                }
+
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final bid = bids[index];
+                      return FutureBuilder<
+                              DocumentSnapshot<Map<String, dynamic>>>(
+                          future: FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(bid.userId)
+                              .get(),
+                          builder: (context, userSnapshot) {
+                            if (!userSnapshot.hasData ||
+                                !userSnapshot.data!.exists) {
+                              return ListTile(
+                                  leading: const CircleAvatar(
+                                      child: Icon(Icons.person_off)),
+                                  title: Text(
+                                      'auctions.detail.unknownBidder'.tr()));
+                            }
+                            final user =
+                                UserModel.fromFirestore(userSnapshot.data!);
+
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundImage: (user.photoUrl != null &&
+                                          user.photoUrl!.isNotEmpty)
+                                      ? NetworkImage(user.photoUrl!)
+                                      : null,
+                                ),
+                                title: Text(user.nickname,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold)),
+                                subtitle:
+                                    Text(currencyFormat.format(bid.bidAmount)),
+                                trailing: Text(DateFormat('HH:mm')
+                                    .format(bid.bidTime.toDate())),
+                              ),
+                            );
+                          });
+                    },
+                    childCount: bids.length,
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+
+        if (widget.embedded) {
+          return DefaultTextStyle(
+            style: Theme.of(context).textTheme.bodyMedium!,
+            child: Container(color: Colors.grey.shade100, child: bodyContent),
+          );
+        }
+
         return Scaffold(
           appBar: AppBar(
             leading: Padding(
@@ -177,7 +419,6 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
               ),
             ),
             title: Text(auction.title),
-            // V V V --- [추가] 경매 주인에게만 보이는 수정/삭제 버튼 --- V V V
             actions: [
               if (isOwner)
                 Padding(
@@ -205,266 +446,8 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                   ),
                 ),
             ],
-            // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
           ),
-          body: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ✅ 기존 이미지 슬라이더를 공용 위젯으로 교체
-                    if (auction.images.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        // ✅ [추가] Stack을 사용하여 이미지 캐러셀 위에 오버레이 추가
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                if (widget.embedded && widget.onClose != null) {
-                                  widget.onClose!();
-                                }
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => ImageGalleryScreen(
-                                        imageUrls: auction.images),
-                                  ),
-                                );
-                              },
-                              child: ImageCarouselCard(
-                                storageId: auction.id,
-                                imageUrls: auction.images,
-                                height: 250,
-                              ),
-                            ),
-                            // ✅ 경매 종료 여부 확인 및 오버레이 표시
-                            if (auction.endAt.toDate().isBefore(DateTime.now()))
-                              Positioned.fill(
-                                // Stack 전체를 덮도록 설정 (탭은 통과)
-                                child: IgnorePointer(
-                                  ignoring: true,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color:
-                                          Colors.black.withValues(alpha: 0.5),
-                                      borderRadius: BorderRadius.circular(12),
-                                      // ImageCarouselCard의 borderRadius와 맞춤
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        'auctions.card.ended'.tr(),
-                                        // "경매 종료" 텍스트
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(auction.title,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineSmall
-                                  ?.copyWith(fontWeight: FontWeight.bold)),
-                          // ✅ [신뢰] 2. AI 검증 배지 표시 (isAiVerified가 true일 때)
-                          if (auction.isAiVerified)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: const AiVerificationBadge(),
-                            ),
-                          const SizedBox(height: 12),
-
-                          // ✅ [하이퍼로컬] 4. 위치 및 거리 표시
-                          Row(
-                            children: [
-                              Icon(Icons.location_on_outlined,
-                                  size: 16, color: Colors.grey[600]),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  auction.location,
-                                  style: TextStyle(
-                                      color: Colors.grey[700], fontSize: 16),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              if (distance != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Text(
-                                    '· $distance',
-                                    style: TextStyle(
-                                        color: Colors.red.shade700,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          Text('auctions.detail.currentBid'.tr(namedArgs: {
-                            'amount': currencyFormat.format(auction.currentBid)
-                          })),
-                          Text('auctions.detail.endTime'.tr(namedArgs: {
-                            'time': DateFormat('MM/dd HH:mm')
-                                .format(auction.endAt.toDate())
-                          })),
-                          const Divider(height: 32),
-                          Text(auction.description,
-                              style:
-                                  const TextStyle(fontSize: 16, height: 1.5)),
-                          const SizedBox(height: 16),
-
-                          // ✅ 태그, 지도, 작성자 정보 공용 위젯 추가
-                          ClickableTagList(tags: auction.tags),
-                          if (auction.geoPoint != null) ...[
-                            const Divider(height: 32),
-                            Text('auctions.detail.location'.tr(),
-                                style: Theme.of(context).textTheme.titleLarge),
-                            const SizedBox(height: 12),
-                            MiniMapView(
-                                location: auction.geoPoint!,
-                                markerId: auction.id),
-                          ],
-                          const Divider(height: 32),
-                          Text('auctions.detail.seller'.tr(),
-                              style: Theme.of(context).textTheme.titleLarge),
-                          const SizedBox(height: 12),
-                          AuthorProfileTile(userId: auction.ownerId),
-
-                          // ✅ [커뮤니티] 3. Q&A 섹션 추가 (댓글/답글)
-                          const Divider(height: 32),
-                          Text('auctions.detail.qnaTitle'.tr(),
-                              style: Theme.of(context).textTheme.titleLarge),
-                          const SizedBox(height: 12),
-                          // Q&A 입력 필드
-                          CommentInputField(
-                            key: _qnaInputKey, // 댓글 작성 후 초기화를 위한 Key
-                            postId: auction.id,
-                            // 'auctions' 컬렉션을 바라보도록 설정
-                            // (내부적으로 'auctions/{id}/comments'에 저장됨)
-                            collectionPath: 'auctions',
-                            hintText: 'auctions.detail.qnaHint'.tr(),
-                            onCommentAdded: (commentData) {
-                              // 댓글 등록 성공 시
-                              setState(() {
-                                _qnaInputKey = UniqueKey(); // 입력창 리셋
-                                _activeReplyCommentId = null; // 답글 상태 초기화
-                              });
-                              FocusScope.of(context).unfocus(); // 키보드 숨기기
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          // Q&A 목록 뷰
-                          CommentListView(
-                            postId: auction.id,
-                            collectionPath:
-                                'auctions', // 'auctions/{id}/comments'에서 읽어옴
-                            postOwnerId: auction.ownerId,
-                            activeReplyCommentId: _activeReplyCommentId,
-                            onReplyTap: (commentId) {
-                              setState(() => _activeReplyCommentId = commentId);
-                            },
-                            onCommentDeleted: () {
-                              // TODO: (선택) 경매의 Q&A 카운트 업데이트
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: Text('auctions.detail.bidsTitle'.tr(),
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
-                ),
-              ),
-              // V V V --- [수정] 입찰자 정보를 가져오는 로직을 복원합니다 --- V V V
-              StreamBuilder<List<BidModel>>(
-                stream: _repository.fetchBids(widget.auction.id),
-                builder: (context, bidSnapshot) {
-                  if (!bidSnapshot.hasData) {
-                    return const SliverToBoxAdapter(
-                        child: Center(child: CircularProgressIndicator()));
-                  }
-                  final bids = bidSnapshot.data!;
-                  if (bids.isEmpty) {
-                    return SliverToBoxAdapter(
-                        child: Center(
-                            child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text('auctions.detail.noBids'.tr()))));
-                  }
-
-                  return SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final bid = bids[index];
-                        return FutureBuilder<
-                                DocumentSnapshot<Map<String, dynamic>>>(
-                            future: FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(bid.userId)
-                                .get(),
-                            builder: (context, userSnapshot) {
-                              if (!userSnapshot.hasData ||
-                                  !userSnapshot.data!.exists) {
-                                return ListTile(
-                                    leading: const CircleAvatar(
-                                        child: Icon(Icons.person_off)),
-                                    title: Text(
-                                        'auctions.detail.unknownBidder'.tr()));
-                              }
-                              final user =
-                                  UserModel.fromFirestore(userSnapshot.data!);
-
-                              return Card(
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 4),
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundImage: (user.photoUrl != null &&
-                                            user.photoUrl!.isNotEmpty)
-                                        ? NetworkImage(user.photoUrl!)
-                                        : null,
-                                  ),
-                                  title: Text(user.nickname,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  subtitle: Text(
-                                      currencyFormat.format(bid.bidAmount)),
-                                  trailing: Text(DateFormat('HH:mm')
-                                      .format(bid.bidTime.toDate())),
-                                ),
-                              );
-                            });
-                      },
-                      childCount: bids.length,
-                    ),
-                  );
-                },
-              ),
-              //
-            ],
-          ),
-          // [수정] 경매 주인이 아닐 경우에만 입찰하기 UI 표시
+          body: bodyContent,
           bottomNavigationBar: isOwner
               ? null
               : Padding(

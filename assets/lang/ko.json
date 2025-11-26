@@ -300,6 +300,7 @@
     },
     "common": {
       "error": "오류가 발생했습니다: {error}",
+      "more": "더보기",
       "add_photo": "사진 추가",
       "take_photo": "사진 찍기",
       "pick_gallery": "갤러리에서 선택",
@@ -488,8 +489,7 @@
       "button": "로그아웃",
       "confirmTitle": "로그아웃",
       "confirmBody": "정말 로그아웃 하시겠습니까?"
-    }
-    ,
+    },
     "deleteAccount": {
       "button": "계정 탈퇴 요청",
       "confirmTitle": "계정 탈퇴 요청",
@@ -778,6 +778,7 @@
     "clear": "지우기",
     "report": "신고",
     "moreOptions": "더보기",
+    "more": "더보기",
     "viewAll": "모두 보기",
     "new": "신규",
     "updated": "업데이트",
@@ -960,6 +961,8 @@
     },
     "detail": {
       "infoTitle": "상세 정보",
+      "locationTitle": "위치",
+      "authorTitle": "작성자",
       "apply": "지원하기",
       "noAuthor": "작성자 정보 없음",
       "chatError": "채팅을 시작할 수 없습니다: {error}"
@@ -1770,6 +1773,18 @@
         "reject": "거절",
         "approve": "승인"
       }
+    },
+    "deletionRequests": {
+      "title": "탈퇴 요청 관리",
+      "confirmTitle": "영구 삭제 확인",
+      "confirmBody": "'{nickname}' 사용자의 모든 데이터(Auth, DB, Storage)를 영구 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
+      "confirmPermanent": "영구 삭제",
+      "deletedSuccess": "사용자 계정이 안전하게 삭제되었습니다.",
+      "deletedFailed": "삭제 실패: {error}",
+      "empty": "접수된 탈퇴 요청이 없습니다.",
+      "email": "이메일",
+      "requestedAt": "요청일",
+      "approve": "삭제 승인"
     },
     "reports": {
       "title": "신고 관리",

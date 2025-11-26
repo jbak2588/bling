@@ -21,9 +21,9 @@ class _DeletionRequestsScreenState extends State<DeletionRequestsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('영구 삭제 확인'),
-        content: Text(
-            "'$nickname' 사용자의 모든 데이터(Auth, DB, Storage)를 영구 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다."),
+        title: Text('admin.deletionRequests.confirmTitle'.tr()),
+        content: Text('admin.deletionRequests.confirmBody'
+            .tr(namedArgs: {'nickname': nickname})),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
@@ -31,7 +31,7 @@ class _DeletionRequestsScreenState extends State<DeletionRequestsScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('영구 삭제'),
+            child: Text('admin.deletionRequests.confirmPermanent'.tr()),
           ),
         ],
       ),
@@ -50,13 +50,15 @@ class _DeletionRequestsScreenState extends State<DeletionRequestsScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('사용자 계정이 안전하게 삭제되었습니다.')),
+          SnackBar(content: Text('admin.deletionRequests.deletedSuccess'.tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('삭제 실패: $e')),
+          SnackBar(
+              content: Text('admin.deletionRequests.deletedFailed'
+                  .tr(namedArgs: {'error': e.toString()}))),
         );
       }
     } finally {
@@ -67,7 +69,7 @@ class _DeletionRequestsScreenState extends State<DeletionRequestsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('탈퇴 요청 관리')),
+      appBar: AppBar(title: Text('admin.deletionRequests.title'.tr())),
       body: Stack(
         children: [
           StreamBuilder<QuerySnapshot>(
@@ -81,7 +83,7 @@ class _DeletionRequestsScreenState extends State<DeletionRequestsScreen> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Center(child: Text('접수된 탈퇴 요청이 없습니다.'));
+                return Center(child: Text('admin.deletionRequests.empty'.tr()));
               }
 
               final users = snapshot.data!.docs;
@@ -108,14 +110,15 @@ class _DeletionRequestsScreenState extends State<DeletionRequestsScreen> {
                           : null,
                     ),
                     title: Text(user.nickname),
-                    subtitle: Text('이메일: ${user.email}\n요청일: $dateStr'),
+                    subtitle: Text(
+                        '${'admin.deletionRequests.email'.tr()}: ${user.email}\n${'admin.deletionRequests.requestedAt'.tr()}: $dateStr'),
                     isThreeLine: true,
                     trailing: ElevatedButton.icon(
                       onPressed: _isProcessing
                           ? null
                           : () => _confirmDeletion(user.uid, user.nickname),
                       icon: const Icon(Icons.delete_forever, size: 18),
-                      label: const Text('삭제 승인'),
+                      label: Text('admin.deletionRequests.approve'.tr()),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,

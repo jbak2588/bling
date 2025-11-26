@@ -477,3 +477,19 @@ class AppTags {
     ),
   ];
 }
+
+// Format a tag id for display: replace underscores/hyphens with spaces
+// and capitalize each word. Example: 'power_outage' -> 'Power Outage'.
+String formatTagLabel(String tagId) {
+  if (tagId.isEmpty) return tagId;
+  final replaced = tagId.replaceAll(RegExp(r'[_\-]+'), ' ').trim();
+  if (replaced.isEmpty) return tagId;
+  final parts = replaced.split(RegExp(r'\s+'));
+  final capitalized = parts.map((p) {
+    if (p.isEmpty) return p;
+    final first = p[0].toUpperCase();
+    final rest = p.length > 1 ? p.substring(1) : '';
+    return '$first$rest';
+  }).join(' ');
+  return capitalized;
+}

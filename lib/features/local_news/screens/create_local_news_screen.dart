@@ -338,7 +338,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                                           descriptionKey: ''),
                                     );
                                     final name = (tag.nameKey.isNotEmpty)
-                                        ? tag.nameKey.tr()
+                                        ? formatTagLabel(tag.tagId)
                                         : id;
                                     return '${tag.emoji ?? ''} $name'.trim();
                                   }(),

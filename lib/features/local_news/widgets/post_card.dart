@@ -205,7 +205,7 @@ class _PostCardState extends State<PostCard>
                         padding: EdgeInsets.zero,
                         // [수정] 시스템 태그(nameKey 있음)는 번역, 사용자 태그는 그대로 표시
                         label: Text(
-                          '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${tagInfo.nameKey.isNotEmpty ? tagInfo.nameKey.tr() : tagInfo.tagId}',
+                          '${tagInfo.emoji != null && tagInfo.emoji!.isNotEmpty ? '${tagInfo.emoji!} ' : ''}${formatTagLabel(tagInfo.tagId)}',
                           style: const TextStyle(fontSize: 11),
                         ),
                       ),

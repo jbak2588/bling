@@ -28,7 +28,7 @@ class ProductThumb extends StatelessWidget {
         onTap: () {
           final detailScreen = ProductDetailScreen(product: product);
           if (onIconTap != null) {
-            onIconTap!(detailScreen, 'main.tabs.product');
+            onIconTap!(detailScreen, 'main.tabs.marketplace');
           } else {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => detailScreen),
