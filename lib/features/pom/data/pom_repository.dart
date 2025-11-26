@@ -257,6 +257,17 @@ class PomRepository {
     await batch.commit();
   }
 
+  /// Delete a comment and decrement the parent pom's commentsCount.
+  Future<void> deletePomComment(String pomId, String commentId) async {
+    final pomRef = _pomCollection.doc(pomId);
+    final commentRef = pomRef.collection('comments').doc(commentId);
+
+    final batch = _firestore.batch();
+    batch.delete(commentRef);
+    batch.update(pomRef, {'commentsCount': FieldValue.increment(-1)});
+    await batch.commit();
+  }
+
   /// [V2] Pom 게시물 신고
   Future<void> addPomReport({
     required String reportedPomId,

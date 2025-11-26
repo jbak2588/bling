@@ -117,7 +117,8 @@
   },
   "chat": {
     "system": {
-      "roomCreated": "Percakapan dimulai."
+      "roomCreated": "Percakapan dimulai.",
+      "userJoined": "{nickname} telah bergabung ke obrolan."
     }
   },
   "category": {
@@ -1393,7 +1394,9 @@
       "viewAll": "Lihat semua {} komentar",
       "empty": "Belum ada komentar.",
       "placeholder": "Tulis komentar...",
-      "fail": "Gagal menambahkan komentar: {error}"
+      "fail": "Gagal menambahkan komentar: {error}",
+      "deleteSuccess": "Komentar telah dihapus.",
+      "deleteFail": "Gagal menghapus komentar: {error}"
     },
     "create": {
       "title": "Unggah POM Baru",

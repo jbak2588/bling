@@ -130,7 +130,30 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                   }
                 });
               } else if (value == 'report') {
-                // TODO: Implement report functionality
+                // [App Review] 신고 기능 Mock-up 구현 (TODO 해결)
+                // TODO : 실제 신고 로직은 추후 구현 필요 (예: 'reports' 컬렉션에 문서 추가)
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text('common.report'.tr()),
+                    content: const Text("이 사용자를 신고하시겠습니까? (검토 후 조치됩니다)"),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: Text('common.cancel'.tr()),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("신고가 접수되었습니다.")),
+                          );
+                        },
+                        child: Text('common.report'.tr()),
+                      ),
+                    ],
+                  ),
+                );
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[

@@ -117,7 +117,8 @@
   },
   "chat": {
     "system": {
-      "roomCreated": "Conversation started."
+      "roomCreated": "Conversation started.",
+      "userJoined": "{nickname} joined the chat."
     }
   },
   "category": {
@@ -1393,7 +1394,9 @@
       "viewAll": "View all {} comments",
       "empty": "No comments yet.",
       "placeholder": "Write a comment...",
-      "fail": "Failed to add comment: {error}"
+      "fail": "Failed to add comment: {error}",
+      "deleteSuccess": "Comment deleted.",
+      "deleteFail": "Failed to delete comment: {error}"
     },
     "create": {
       "title": "Upload New POM",

@@ -57,6 +57,7 @@ import 'package:bling_app/features/clubs/models/club_proposal_model.dart'; // [v
 import 'package:bling_app/features/clubs/widgets/club_card.dart';
 import 'package:bling_app/features/clubs/widgets/club_proposal_card.dart'; // [v2.1] 모임 제안 카드
 import 'package:bling_app/features/clubs/screens/club_detail_screen.dart'; // [v2.1] ClubCard 탭을 위해 추가
+import 'package:bling_app/features/clubs/screens/club_proposal_detail_screen.dart'; // [Added] Import
 
 class FindFriendsScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -606,8 +607,13 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                     // [v2.1] 'unused_import' 경고 해결
                     return InkWell(
                       onTap: () {
-                        // TODO: '모임 제안' 상세 화면으로 이동
-                        // (예: Navigator.push(context, MaterialPageRoute(builder: (_) => ClubProposalDetailScreen(proposal: proposal))));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ClubProposalDetailScreen(proposal: proposal),
+                          ),
+                        );
                       },
                       child: ClubProposalCard(proposal: proposal),
                     );

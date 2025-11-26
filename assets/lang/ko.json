@@ -117,7 +117,8 @@
   },
   "chat": {
     "system": {
-      "roomCreated": "대화가 시작되었습니다."
+      "roomCreated": "대화가 시작되었습니다.",
+      "userJoined": "{nickname}님이 채팅에 참여했습니다."
     }
   },
   "category": {
@@ -1393,7 +1394,9 @@
       "viewAll": "댓글 {}개 모두 보기",
       "empty": "아직 댓글이 없습니다.",
       "placeholder": "댓글을 입력하세요...",
-      "fail": "댓글 등록에 실패했습니다: {error}"
+      "fail": "댓글 등록에 실패했습니다: {error}",
+      "deleteSuccess": "댓글이 삭제되었습니다.",
+      "deleteFail": "댓글 삭제 실패: {error}"
     },
     "create": {
       "title": "새 POM 등록",

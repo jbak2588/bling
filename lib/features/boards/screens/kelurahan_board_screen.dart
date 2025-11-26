@@ -24,7 +24,8 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/features/local_news/widgets/post_card.dart';
 import 'package:easy_localization/easy_localization.dart';
-// import 'package:bling_app/features/boards/screens/board_chat_room_screen.dart'; // TODO: 채팅방 구현 후 연결
+import 'package:bling_app/features/chat/data/chat_service.dart'; // [Added]
+import 'package:bling_app/features/chat/screens/chat_room_screen.dart'; // [Added]
 
 /// '하이브리드 방식...md' 기획안 4)의 '동네 게시판' 전용 피드 화면
 /// 사용자의 현재 Kelurahan을 기준으로 게시글을 필터링합니다.
@@ -80,17 +81,48 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
   }
 
   /// 기획안 4) 그룹 채팅 연동
-  void _onChatPressed() {
-    // TODO: '작업 요청: 12'에서 board_chat_room_screen.dart 생성 후 연결
-    // final kelKey = getKelKey(widget.userModel.locationParts); // 헬퍼 함수 필요
-    // if (kelKey != null) {
-    //   Navigator.push(context, MaterialPageRoute(builder: (_) =>
-    //     BoardChatRoomScreen(kelKey: kelKey)
-    //   ));
-    // }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('boards.chatRoomComingSoon'.tr())),
-    );
+  void _onChatPressed() async {
+    final parts = widget.userModel.locationParts;
+    if (parts == null || parts['kel'] == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('boards.errors.noLocation'.tr())),
+      );
+      return;
+    }
+
+    // 고유 Kelurahan ID 생성 (Prov|Kab|Kec|Kel)
+    final kelKey =
+        '${parts['prov']}|${parts['kab']}|${parts['kec']}|${parts['kel']}';
+
+    try {
+      final chatService = ChatService();
+      // 채팅방 생성 또는 가져오기
+      final chatRoom = await chatService.getOrCreateBoardChatRoom(
+        kelKey: kelKey,
+        roomName: _kelurahanName,
+        currentUser: widget.userModel,
+      );
+
+      if (!mounted) return;
+
+      // 채팅방으로 이동
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatRoomScreen(
+              chatId: chatRoom.id,
+              isGroupChat: true,
+              groupName: chatRoom.groupName,
+              participants: chatRoom.participants,
+            ),
+          ));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('common.error'.tr(namedArgs: {'error': e.toString()}))),
+      );
+    }
   }
 
   @override

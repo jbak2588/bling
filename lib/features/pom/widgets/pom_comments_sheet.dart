@@ -3,7 +3,6 @@
 // - POM 댓글 시트. 댓글 목록, 작성, 삭제 등 다양한 기능 지원.
 // [V2 - 2025-11-03]
 // - Short → Pom 네이밍 정리, 경로: pom/{pomId}/comments
-// - TODO: 댓글 신고 기능 추가 필요 (현재 게시물 신고만 구현됨).
 // =====================================================
 // lib/features/pom/widgets/pom_comments_sheet.dart
 
@@ -177,8 +176,58 @@ class _PomCommentsSheetState extends State<PomCommentsSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(user.nickname,
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Row(
+                      children: [
+                        Text(user.nickname,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
+                        const Spacer(),
+                        PopupMenuButton<String>(
+                          icon: const Icon(Icons.more_horiz, size: 16),
+                          onSelected: (value) async {
+                            if (value == 'report') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("댓글을 신고했습니다.")),
+                              );
+                            } else if (value == 'delete') {
+                              try {
+                                await _repository.deletePomComment(
+                                    widget.pomId, comment.id);
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'pom.comments.deleteSuccess'.tr())),
+                                  );
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text('pom.comments.deleteFail'
+                                            .tr(namedArgs: {
+                                      'error': e.toString()
+                                    }))),
+                                  );
+                                }
+                              }
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'report',
+                              child: Text('common.report'.tr()),
+                            ),
+                            if (comment.userId ==
+                                FirebaseAuth.instance.currentUser?.uid)
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Text('common.delete'.tr()),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 2),
                     Text(comment.body),
                   ],

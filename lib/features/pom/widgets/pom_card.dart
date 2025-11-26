@@ -24,6 +24,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:video_player/video_player.dart'; // [V2]
 import 'package:bling_app/features/pom/screens/pom_pager_screen.dart';
 import 'package:bling_app/features/pom/screens/pom_edit_screen.dart'; // [추가]
+import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart'; // [Added]
 
 /// 기획서(백서) Page 28의 '콘텐츠 카드 구성(피드 UI 기본 단위)'
 /// PomModel을 받아 이미지, 작성자, 내용, 반응(좋아요/댓글)을 표시하는 카드 위젯.
@@ -518,17 +519,17 @@ class _PomCardState extends State<PomCard> {
                     DefaultTextStyle.of(context).style.copyWith(fontSize: 14),
                 children: [
                   TextSpan(
-                    // TODO: 작성자 닉네임 클릭 시 프로필 이동
                     text: author?.nickname ?? '...',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         if (author != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text(
-                                    "Navigating to ${author.nickname}'s profile...")),
-                          );
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    UserProfileScreen(userId: author.uid),
+                              ));
                         }
                       },
                   ),

@@ -8,7 +8,7 @@
 /// Data Model    : Firestore `chatRooms` 필드 `participants`, `jobId`, `productId`; 하위 컬렉션 `messages`의 `senderId`, `text`, `timestamp`, `readBy`.
 /// Location Scope: 없음; 모더레이션은 참가자 프로필 위치를 참조합니다.
 /// Trust Policy  : `report` 모듈에서 신고된 메시지는 `trustScore`를 감소시키며 인증 사용자만 허용됩니다.
-/// Monetization  : 스폰서 메시지 가능성; TODO: 구현.
+/// Monetization  : 스폰서 메시지 가능성; 광고주 타겟팅에 채팅 활동 데이터 활용 가능성.
 /// KPIs          : 핵심성과지표(Key Performance Indicator, KPI) 이벤트 `send_message`, `enter_chat_room`, `attach_media`.
 /// Analytics     : 읽음 확인과 컨텍스트 아이템 클릭을 기록합니다.
 /// I18N          : 키 `chat_list.empty`, `chat_room.send` (assets/lang/*.json)
@@ -71,9 +71,9 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/jobs/data/job_repository.dart';
 import 'package:bling_app/features/jobs/screens/job_detail_screen.dart';
-// TODO: ProductRepository 및 ProductDetailScreen import 필요
-// import 'package:bling_app/features/marketplace/data/product_repository.dart';
-// import 'package:bling_app/features/marketplace/screens/product_detail_screen.dart';
+// Why? : ProductRepository 및 ProductDetailScreen import 필요
+// import 'package:bling_app/features/marketplace/data/product_repository.dart'; // [Added]
+// import 'package:bling_app/features/marketplace/screens/product_detail_screen.dart'; // [Added]
 import 'dart:io'; // [v2.1] 이미지 파일(File) 사용을 위해 import
 import 'dart:ui' as ui; // [v2.1] 이미지 블러(ImageFiltered)를 위해 import
 

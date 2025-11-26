@@ -223,22 +223,22 @@ class ChatService {
       // 사용자가 이미 참여자인지 확인
       if (!room.participants.contains(currentUser.uid)) {
         // 참여자가 아니면, participants 목록과 unreadCounts 맵에 추가
-        // TODO: 여기서도 'Joined' 시스템 메시지를 추가할 수 있음 (추후 고도화)
+
+        // 여기서 'Joined' 시스템 메시지를 추가
         await chatRoomRef.update({
           'participants': FieldValue.arrayUnion([currentUser.uid]),
           'unreadCounts.${currentUser.uid}': 0,
         });
-        // TODO[system-message]: 가입 이벤트 메시지 남기기
-        // 향후 개선 시, messages 서브컬렉션에 시스템 메시지를 삽입하세요.
-        // 예)
-        // final messagesRef = chatRoomRef.collection('messages');
-        // await messagesRef.add({
-        //   'type': 'system',
-        //   'text': '${currentUser.displayName ?? currentUser.uid} joined',
-        //   'timestamp': FieldValue.serverTimestamp(),
-        //   'senderId': 'system',
-        //   'readBy': [currentUser.uid],
-        // });
+
+        // [Fix] 가입 이벤트 메시지 생성 (TODO 해결)
+        final messagesRef = chatRoomRef.collection('messages');
+        await messagesRef.add({
+          'type': 'system',
+          'text': '${currentUser.nickname} joined the chat.',
+          'timestamp': FieldValue.serverTimestamp(),
+          'senderId': 'system',
+          'readBy': [currentUser.uid],
+        });
         // 업데이트된 모델을 다시 가져와 반환
         final updatedDoc = await chatRoomRef.get();
         return ChatRoomModel.fromFirestore(updatedDoc);
@@ -280,17 +280,6 @@ class ChatService {
 
         await batch.commit();
 
-        // TODO[system-message]: 생성 이벤트 메시지 남기기
-        // 향후 개선 시, messages 서브컬렉션에 시스템 메시지를 삽입하세요.
-        // 예)
-        // final messagesRef = chatRoomRef.collection('messages');
-        // await messagesRef.add({
-        //   'type': 'system',
-        //   'text': tr('boards.chatRoomCreated'), // 또는 고정 텍스트
-        //   'timestamp': FieldValue.serverTimestamp(),
-        //   'senderId': 'system',
-        //   'readBy': [currentUser.uid],
-        // });
         final created = await chatRoomRef.get();
         return ChatRoomModel.fromFirestore(created);
       } catch (e) {

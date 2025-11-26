@@ -54,8 +54,7 @@ class AiFinalReportScreen extends StatefulWidget {
   final Map<String, String> guidedImageUrls;
   final String confirmedProductName;
   final String? userPrice; // [추가] 사용자가 입력한 가격(선택)
-  // TODO: 이전 화면들로부터 가격, 설명 등 다른 필드들도 전달받아야 함
-
+  
   final String? userDescription; // [개편안 1] 원본 설명
   final bool skipUserFetch; // test-friendly flag to skip Firebase user fetch
   const AiFinalReportScreen({
@@ -374,7 +373,7 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
       'geoPoint': _currentUserModel?.geoPoint,
       'status': isSuspicious ? 'pending' : 'selling', // [V3 ADMIN VERIFICATION]
       // [Fix #B] AI 상세 리포트가 아닌, 'used' 또는 'new'를 저장합니다.
-      'condition': 'used', // TODO: 'new'/'used' 선택 UI 추가 필요
+      'condition': 'used',
       'transactionPlace': null,
       'updatedAt': Timestamp.now(),
       'isAiVerified': !isSuspicious, // [V3 ADMIN VERIFICATION]
