@@ -115,6 +115,11 @@
       }
     }
   },
+  "chat": {
+    "system": {
+      "roomCreated": "대화가 시작되었습니다."
+    }
+  },
   "category": {
     "PnPa5ZjI9FYQiAGP6I7m": "디지털기기",
     "4hx6hyOYodriXgPiR5bl": "생활용품",
@@ -234,6 +239,7 @@
       "title": "10% 예약금 결제",
       "content": "AI 검증 상품을 예약하려면 10%의 예약금 {amount}를 선결제해야 합니다. 현장 검증 후 거래를 취소하면 예약금은 환불됩니다.",
       "confirm": "결제 및 예약",
+      "mockPay": "테스트 결제 진행(무료)",
       "button": "AI 안심 예약하기",
       "success": "예약이 완료되었습니다. 판매자와 약속을 잡아주세요."
     },

@@ -115,6 +115,11 @@
       }
     }
   },
+  "chat": {
+    "system": {
+      "roomCreated": "Percakapan dimulai."
+    }
+  },
   "category": {
     "PnPa5ZjI9FYQiAGP6I7m": "Perangkat Digital",
     "4hx6hyOYodriXgPiR5bl": "Perlengkapan Rumah",
@@ -234,6 +239,7 @@
       "title": "Pembayaran deposit 10%",
       "content": "Untuk memesan produk yang telah diverifikasi AI, Anda harus membayar deposit 10% sebesar {amount} terlebih dahulu. Jika transaksi dibatalkan setelah verifikasi di lokasi, deposit akan dikembalikan.",
       "confirm": "Bayar dan Pesan",
+      "mockPay": "Tes pembayaran (Gratis)",
       "button": "Reservasi Aman AI",
       "success": "Reservasi berhasil. Silakan atur janji dengan penjual."
     },

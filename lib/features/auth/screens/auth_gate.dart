@@ -11,6 +11,7 @@ import 'package:bling_app/features/user_profile/screens/profile_setup_screen.dar
 import 'package:bling_app/features/auth/screens/email_verification_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart'; // [Add] kDebugMode 사용을 위해
 import 'package:flutter/material.dart';
 
 import 'package:bling_app/features/main_screen/main_navigation_screen.dart';
@@ -26,12 +27,14 @@ class AuthGate extends StatefulWidget {
 class _AuthGateState extends State<AuthGate> {
   // ✅ [추가] 테스트 계정 판별 함수 (user1 ~ user15)
   bool _isTestUser(String? email) {
+    // [보안 패치] 릴리즈 모드에서는 테스트 계정 로직 무효화 (심사 통과 및 보안)
+    if (!kDebugMode) return false;
     if (email == null) return false;
     // 정규식 설명:
     // ^user : user로 시작
-    // ([1-9]|1[0-5]) : 1~9 또는 10~15 숫자
+    // ([1-9]|1[0-5]) : 1~9 또는 10~19 숫자
     // @bling\.com$ : @bling.com으로 끝남
-    final RegExp regex = RegExp(r'^user([1-9]|1[0-5])@bling\.com$');
+    final RegExp regex = RegExp(r'^user([1-9]|1[0-9])@bling\.com$');
     return regex.hasMatch(email);
   }
 

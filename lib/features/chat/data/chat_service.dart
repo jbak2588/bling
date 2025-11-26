@@ -152,10 +152,15 @@ class ChatService {
     final chatDoc = await chatDocRef.get();
 
     if (!chatDoc.exists) {
+      // [UX 패치] 채팅방 생성 시 안내 메시지 자동 발송
+      final initialMessageText =
+          'chat.system.roomCreated'.tr(); // "대화가 시작되었습니다."
+      final now = FieldValue.serverTimestamp();
+
       final chatRoomData = {
         'participants': participants,
-        'lastMessage': '',
-        'lastTimestamp': FieldValue.serverTimestamp(),
+        'lastMessage': initialMessageText, // 미리보기에도 표시
+        'lastTimestamp': now,
         'unreadCounts': {myUid: 0, otherUserId: 0},
         'contextType': contextType,
         if (productId != null) 'productId': productId,
@@ -179,7 +184,20 @@ class ChatService {
         if (roomTitle != null) 'roomTitle': roomTitle,
         if (roomImage != null) 'roomImage': roomImage,
       };
-      await chatDocRef.set(chatRoomData);
+      // Batch 처리로 채팅방 생성 + 첫 메시지 동시 기록
+      final batch = _firestore.batch();
+      batch.set(chatDocRef, chatRoomData);
+
+      final messageRef = chatDocRef.collection('messages').doc();
+      batch.set(messageRef, {
+        'senderId': 'system',
+        'text': initialMessageText,
+        'timestamp': now, // serverTimestamp 사용
+        'readBy': participants, // 모두 읽음 처리
+        'type': 'system',
+      });
+
+      await batch.commit();
     }
     return chatId;
   }
@@ -205,6 +223,7 @@ class ChatService {
       // 사용자가 이미 참여자인지 확인
       if (!room.participants.contains(currentUser.uid)) {
         // 참여자가 아니면, participants 목록과 unreadCounts 맵에 추가
+        // TODO: 여기서도 'Joined' 시스템 메시지를 추가할 수 있음 (추후 고도화)
         await chatRoomRef.update({
           'participants': FieldValue.arrayUnion([currentUser.uid]),
           'unreadCounts.${currentUser.uid}': 0,
@@ -228,9 +247,10 @@ class ChatService {
     } else {
       // --- 2. 채팅방이 없는 경우 (첫 사용자 입장) ---
       final now = Timestamp.now();
+      final initialMsg = 'boards.chatRoomCreated'.tr();
       final newRoomData = <String, dynamic>{
         'participants': [currentUser.uid],
-        'lastMessage': 'boards.chatRoomCreated'.tr(),
+        'lastMessage': initialMsg,
         'lastTimestamp': now,
         'unreadCounts': {currentUser.uid: 0},
 
@@ -245,8 +265,21 @@ class ChatService {
       };
 
       try {
-        // 새 채팅방 문서를 kelKey ID로 생성
-        await chatRoomRef.set(newRoomData);
+        // [UX 패치] 게시판 채팅방도 시스템 메시지와 함께 생성
+        final batch = _firestore.batch();
+        batch.set(chatRoomRef, newRoomData);
+
+        final messageRef = chatRoomRef.collection('messages').doc();
+        batch.set(messageRef, {
+          'senderId': 'system',
+          'text': initialMsg,
+          'timestamp': now,
+          'readBy': [currentUser.uid],
+          'type': 'system',
+        });
+
+        await batch.commit();
+
         // TODO[system-message]: 생성 이벤트 메시지 남기기
         // 향후 개선 시, messages 서브컬렉션에 시스템 메시지를 삽입하세요.
         // 예)

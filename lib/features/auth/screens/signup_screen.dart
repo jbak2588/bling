@@ -5,9 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-// import 'package:geolocator/geolocator.dart';
-// import 'package:flutter_google_maps_webservices/places.dart';
-// import 'package:bling_app/api_keys.dart';
 // ignore: unused_import
 import '../../../core/models/user_model.dart'; // UserModel import
 
@@ -23,10 +20,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  // final _locationController = TextEditingController(); // Delayed Profile Activation 정책에 따라 위치 입력 제거
-  // Map<String, dynamic>? _gpsLocationCache; // Delayed Profile Activation 정책에 따라 위치 입력 제거
-  // final GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: ApiKeys.googleApiKey); // Delayed Profile Activation 정책에 따라 위치 입력 제거
-  // bool _isGettingLocation = false; // Delayed Profile Activation 정책에 따라 위치 입력 제거
+
   bool _isLoading = false;
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
@@ -37,7 +31,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    // _locationController.dispose(); // Delayed Profile Activation 정책에 따라 위치 입력 제거
     super.dispose();
   }
 
@@ -230,37 +223,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   _confirmPasswordVisible =
                                       !_confirmPasswordVisible)))),
                   const SizedBox(height: 18),
-                  // ▼▼▼▼▼ 위치 입력 UI 및 안내문구 제거 (Delayed Profile Activation) ▼▼▼▼▼
-                  // Row(
-                  //   children: [
-                  //     Expanded(
-                  //       child: TextField(
-                  //         controller: _locationController,
-                  //         decoration: InputDecoration(
-                  //           labelText: 'signup.locationHint'.tr(),
-                  //           prefixIcon: const Icon(Icons.location_on_outlined),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //     IconButton(
-                  //       icon: const Icon(Icons.my_location, color: Colors.teal),
-                  //       onPressed:
-                  //           _isGettingLocation ? null : _handleGpsLocation,
-                  //     ),
-                  //   ],
-                  // ),
-                  // const SizedBox(height: 8),
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  //   child: Text(
-                  //     'signup.locationNotice'.tr(),
-                  //     style: Theme.of(context)
-                  //         .textTheme
-                  //         .bodySmall
-                  //         ?.copyWith(color: Colors.grey[600]),
-                  //   ),
-                  // ),
-                  // ▲▲▲▲▲ 위치 입력 UI 및 안내문구 제거 (Delayed Profile Activation) ▲▲▲▲▲
+
                   const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,

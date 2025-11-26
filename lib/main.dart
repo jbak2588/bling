@@ -17,6 +17,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 // import 'package:bling_app/features/auth/screens/auth_gate.dart';
 import 'package:bling_app/features/auth/screens/splash_screen.dart';
 import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
@@ -38,45 +39,8 @@ Future<void> _ensureGoogleMapRenderer() async {
   }
 }
 
-// -----------------------------------------------------------------------------
-// DEVELOPMENT NOTE (App Check Build-Time Toggle)
-//
-// 이 프로젝트는 빌드 시점의 플래그(--dart-define)를 사용하여 Firebase App Check
-// 공급자를 관리합니다. 이 방식은 3가지 시나리오를 완벽하게 지원합니다:
-// 1. 로컬 개발 (Vscode F5)
-// 2. App Distribution (테스터용 빌드)
-// 3. Production (정식 출시 빌드)
-//
-// [시나리오 1: 로컬 개발 (Vscode F5)]
-// - Vscode에서 F5 키로 앱을 실행할 때 (kDebugMode = true)
-// - 별도 설정 없이 자동으로 `AndroidDebugProvider`가 활성화됩니다.
-// - Vscode의 'Debug Console'에서 "AppCheck debug token" 로그를 찾아
-//   Firebase 콘솔의 App Check -> 앱 -> '디버그 토큰 관리'에 등록하십시오.
-//
-// [시나리오 2: App Distribution (테스터용 빌드)]
-// - 테스터에게 배포할 릴리즈(release) 빌드를 생성할 때 사용합니다.
-// - 이 빌드는 `kDebugMode`가 false이지만, 강제로 Debug Provider를 사용해야 합니다.
-// - 아래 명령어로 빌드하십시오:
-//   flutter build apk --release --dart-define=APPCHECK_DEBUG=true
-//   (또는 appbundle)
-// - `APPCHECK_DEBUG=true` 플래그가 `forceAppCheckDebug`를 true로 설정하여,
-//   릴리즈 빌드임에도 `AndroidDebugProvider`를 강제로 사용하게 합니다.
-// - 테스터는 기기의 Logcat(Android) / Console(iOS)에서 자신의 디버그 토큰을
-//   찾아 보스에게 전달해야 하며, 보스는 이 토큰을 Firebase에 등록해야 합니다.
-//
-// [시나리오 3: Production (Google Play / App Store)]
-// - 정식 출시용 빌드입니다.
-// - **어떤 플래그도 사용하지 않고** 표준 빌드 명령을 사용합니다:
-//   flutter build appbundle
-// - `forceAppCheckDebug`와 `kDebugMode`가 모두 false가 되어,
-//   자동으로 `AndroidPlayIntegrityProvider` (Play 스토어) 또는
-//   `AppleAppAttestWithDeviceCheckFallbackProvider` (App 스토어)가 활성화됩니다.
-// -----------------------------------------------------------------------------
 const bool forceAppCheckDebug =
     bool.fromEnvironment('APPCHECK_DEBUG', defaultValue: false);
-
-// [Fix] 복잡한 _shouldUseDebugToken() 함수는 제거하고,
-// `forceAppCheckDebug` 플래그로 관리 방식을 일원화합니다.
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -87,6 +51,16 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // [Crashlytics] 에러 핸들링 설정 (Release 모드 필수)
+  // 1. Flutter 프레임워크 내에서 발생하는 치명적인 에러 포착
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+  // 2. 비동기 에러 포착 (PlatformDispatcher)
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
 
   // [Fix] App Distribution 시나리오를 지원하는 새 App Check 로직
   AndroidAppCheckProvider androidProvider;

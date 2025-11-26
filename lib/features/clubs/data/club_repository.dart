@@ -384,12 +384,12 @@ class ClubRepository {
         return [];
       }
 
-      // Firestore 'whereIn' 쿼리는 한 번에 30개 ID만 조회 가능합니다.
-      // (개선) 사용자가 30개 이상 가입 시, 쿼리를 분할해야 하나 현재는 30개로 제한합니다.
+      // [Fix] Firestore 'whereIn' 제한(10개)에 맞춰 쿼리를 분할 실행합니다.
+      // 사용자가 가입한 모든 클럽을 안전하게 가져옵니다.
       final queryBatches = <List<String>>[];
-      for (var i = 0; i < myClubIds.length; i += 30) {
+      for (var i = 0; i < myClubIds.length; i += 10) {
         queryBatches.add(myClubIds.sublist(
-            i, i + 30 > myClubIds.length ? myClubIds.length : i + 30));
+            i, i + 10 > myClubIds.length ? myClubIds.length : i + 10));
       }
 
       final allClubs = <ClubModel>[];

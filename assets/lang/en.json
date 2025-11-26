@@ -115,6 +115,11 @@
       }
     }
   },
+  "chat": {
+    "system": {
+      "roomCreated": "Conversation started."
+    }
+  },
   "category": {
     "PnPa5ZjI9FYQiAGP6I7m": "Digital Devices",
     "4hx6hyOYodriXgPiR5bl": "Home Essentials",
@@ -233,7 +238,8 @@
     "reservation": {
       "title": "10% deposit payment",
       "content": "To reserve an AI-verified product you must prepay a 10% deposit of {amount}. If the deal is cancelled after on-site verification, the deposit will be refunded.",
-      "confirm": "Pay & Reserve",
+      "confirm": "Pay and Reserve",
+      "mockPay": "Test payment (Free)",
       "button": "Reserve with AI Assurance",
       "success": "Reservation completed. Please arrange a meeting with the seller."
     },
