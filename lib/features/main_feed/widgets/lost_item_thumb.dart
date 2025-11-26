@@ -32,9 +32,9 @@ class LostItemThumb extends StatelessWidget {
       height: 240,
       child: InkWell(
         onTap: () {
-          // ✅ [Final Fix] Navigator.push 대신 onIconTap 콜백 사용
           final detailScreen = LostItemDetailScreen(item: item);
-          onIconTap(detailScreen, 'main.tabs.lostAndFound'.tr()); // 타이틀 키 전달
+          // onIconTap is required for this thumb; delegate navigation to parent
+          onIconTap(detailScreen, 'main.tabs.lost');
         },
         child: Card(
           elevation: 1,

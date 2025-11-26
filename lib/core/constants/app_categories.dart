@@ -5,6 +5,8 @@ import '../../features/auction/models/auction_category_model.dart';
 
 class AppCategories {
   // ✅ [핵심 수정] name과 description을 다국어 키(key)로 변경합니다.
+
+  // ✅ local news 카테고리 (동네소식 전용)
   static final List<PostCategoryModel> postCategories = [
     PostCategoryModel(
       categoryId: 'daily_life',

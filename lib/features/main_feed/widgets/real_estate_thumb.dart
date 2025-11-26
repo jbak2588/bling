@@ -32,9 +32,9 @@ class RealEstateThumb extends StatelessWidget {
       height: 240,
       child: InkWell(
         onTap: () {
-          // ✅ [Final Fix] Navigator.push 대신 onIconTap 콜백 사용
           final detailScreen = RoomDetailScreen(room: room);
-          onIconTap(detailScreen, 'main.tabs.realEstate'); // 타이틀 키 전달
+          // Delegate to parent via onIconTap (required)
+          onIconTap(detailScreen, 'main.tabs.realEstate');
         },
         child: Card(
           elevation: 1,

@@ -11,16 +11,12 @@ import 'package:uuid/uuid.dart'; // 이미지 ID 생성을 위해 추가
 // ✅ 공용 텍스트 입력 기반 태그 위젯
 import '../../shared/widgets/custom_tag_input_field.dart';
 
-// ❌ [태그 시스템] 기존 카테고리 import 제거
-// import '../../../core/constants/app_categories.dart';
-// import '../models/post_category_model.dart';
-
+// ✅ [롤백] 카테고리 import 복구
+import '../../../core/constants/app_categories.dart';
+import '../models/post_category_model.dart';
 // ✅ [태그 시스템] 태그 사전 + 추천 로직
 import '../../../core/constants/app_tags.dart';
 import '../utils/tag_recommender.dart';
-
-// ❌ [태그 시스템] 기존 자유 태그 입력 필드 import 제거
-// import '../../shared/widgets/custom_tag_input_field.dart';
 
 import '../../../core/models/user_model.dart';
 import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
@@ -39,13 +35,13 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
   final _contentController = TextEditingController();
 
   // ✅ [태그 시스템] 텍스트 입력 기반 태그 목록
-  final List<String> _tags = []; // 예: ['power_outage', 'question']
+  List<String> _tags = []; // 예: ['power_outage', 'question']
   // ✅ 추천 태그 상태 및 컨트롤러
   List<String> _recommended = [];
   TagRecommenderController? _reco;
 
-  // ❌ [태그 시스템] _selectedCategory 상태 변수 제거
-  // PostCategoryModel? _selectedCategory;
+  // ✅ [롤백] 선택된 카테고리 상태 변수 (PostCategoryModel 사용)
+  PostCategoryModel? _selectedCategory;
 
   // ✅ [태그 시스템] 가이드형 필드용 컨트롤러 및 상태 변수 추가
   final _eventLocationController = TextEditingController();
@@ -73,6 +69,10 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
         });
       },
     );
+    // 기본 카테고리 초기화
+    if (AppCategories.postCategories.isNotEmpty) {
+      _selectedCategory = AppCategories.postCategories.first;
+    }
   }
 
   @override
@@ -170,9 +170,9 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
         'userId': user.uid,
         'title': _titleController.text.trim(),
         'body': _contentController.text.trim(),
-        // ❌ [태그 시스템] category 제거
-        // 'category': _selectedCategory!.categoryId,
-        // ✅ [태그 시스템] tags (Tag ID 리스트) 저장 - 비었으면 'etc' 기본값
+        // ✅ [롤백] category 복구: 선택된 카테고리 ID 저장
+        'category': _selectedCategory?.categoryId,
+        // ✅ [태그 시스템] tags (Tag ID 리스트) 저장 - 비었으면 'daily_life' 기본값
         'tags': tagsToSave,
         'mediaUrl': imageUrls,
         'mediaType': imageUrls.isNotEmpty ? 'image' : null,
@@ -238,10 +238,42 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // --- ❌ [태그 시스템] 기존 카테고리 드롭다운 제거 ---
-                  // DropdownButtonFormField<PostCategoryModel>( ... )
-
-                  // --- ✅ [태그 시스템] 태그 선택/가이드형 필드 UI는 아래로 이동 ---
+                  // --- ✅ 카테고리 선택 드롭다운 (상단 배치)
+                  DropdownButtonFormField<PostCategoryModel>(
+                    initialValue: _selectedCategory,
+                    decoration: InputDecoration(
+                        labelText: 'localNewsCreate.form.categoryLabel'.tr(),
+                        border: const OutlineInputBorder()),
+                    items: AppCategories.postCategories.map((category) {
+                      return DropdownMenuItem<PostCategoryModel>(
+                        value: category,
+                        child: Row(children: [
+                          Text(category.emoji,
+                              style: const TextStyle(fontSize: 20)),
+                          const SizedBox(width: 10),
+                          Text(category.nameKey.tr()),
+                        ]),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedCategory = value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  if (_selectedCategory != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0, left: 12.0),
+                      child: Text(
+                        _selectedCategory!.descriptionKey.tr(),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: Colors.grey[600]),
+                      ),
+                    ),
+                  const SizedBox(height: 16),
 
                   // --- 기존 제목/본문 입력 ---
                   TextFormField(
@@ -277,27 +309,78 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                   const SizedBox(height: 16),
 
                   // =========================
-                  // ✅ 텍스트 입력 기반 태그 캡처
+                  // ✅ 실시간 추천 태그 블록 (선택된 태그 제외 후 비어있으면 숨김)
                   // =========================
-                  Text(
-                    'localNewsCreate.labels.tags'.tr(), // '태그'
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 8),
+                  for (final _ in [0])
+                    ...(() {
+                      final visibleRecs = _recommended
+                          .where((id) => !_tags.contains(id))
+                          .toList();
+                      if (visibleRecs.isEmpty) return <Widget>[];
+                      return [
+                        Text('localNewsCreate.form.recommendedTags'.tr(),
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final id in visibleRecs)
+                              ChoiceChip(
+                                label: Text(
+                                  () {
+                                    final tag =
+                                        AppTags.localNewsTags.firstWhere(
+                                      (t) => t.tagId == id,
+                                      orElse: () => const TagInfo(
+                                          tagId: '',
+                                          nameKey: '',
+                                          descriptionKey: ''),
+                                    );
+                                    final name = (tag.nameKey.isNotEmpty)
+                                        ? tag.nameKey.tr()
+                                        : id;
+                                    return '${tag.emoji ?? ''} $name'.trim();
+                                  }(),
+                                ),
+                                selected: _tags.contains(id),
+                                onSelected: (_) {
+                                  setState(() {
+                                    if (_tags.contains(id)) {
+                                      _tags.remove(id);
+                                    } else if (_tags.length < 3) {
+                                      _tags.add(id);
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content:
+                                                Text('태그는 최대 3개까지 선택할 수 있어요.')),
+                                      );
+                                    }
+                                  });
+                                },
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                      ];
+                    }()),
+
+                  // ✅ 교체된 공용 커스텀 태그 위젯을 사용합니다.
                   CustomTagInputField(
-                    hintText: 'tag_input.help'.tr(),
-                    initialTags: _tags,
+                    initialTags: _tags, // 초기 태그 목록을 전달합니다.
+                    hintText: 'tag_input.help'.tr(), // 다국어 힌트 텍스트
                     onTagsChanged: (tags) {
+                      // 태그가 변경될 때마다 화면의 상태(_tags)를 업데이트합니다.
                       setState(() {
-                        _tags
-                          ..clear()
-                          ..addAll(tags);
+                        _tags = tags;
                         _updateGuidedFieldsVisibility();
                       });
                     },
-                    titleController: _titleController, // 제목으로부터 제안
+                    titleController: _titleController,
                     autoCreateTitleTag: true,
-                    // [수정] AppTags.newsTags -> localNewsTags 매핑 + _recommended(추천태그) 결합
+                    // [수정] AppTags.newsTags -> localNewsTags 매핑 + _recommended 결합
                     suggestedTags: {
                       ..._recommended,
                       ...AppTags.localNewsTags.map((e) => e.tagId),
@@ -307,9 +390,39 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
                   // --- 기존 이미지 첨부 ---
                   _buildImagePicker(),
+                  const SizedBox(height: 24),
+
+                  // ✅ [복구] 카테고리 선택 드롭다운
+                  DropdownButtonFormField<PostCategoryModel>(
+                    initialValue: _selectedCategory,
+                    decoration: InputDecoration(
+                      labelText: 'localNewsCreate.categoryLabel'.tr(),
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                    ),
+                    items: AppCategories.postCategories.map((category) {
+                      return DropdownMenuItem<PostCategoryModel>(
+                        value: category,
+                        child: Row(
+                          children: [
+                            Text(category.emoji),
+                            const SizedBox(width: 8),
+                            Text(category.nameKey.tr()),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (PostCategoryModel? value) {
+                      if (value != null) {
+                        setState(() => _selectedCategory = value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
 
                   // Bottom primary action for create local news
-                  const SizedBox(height: 16),
+
                   ElevatedButton(
                     onPressed: _isSaving ? null : _savePost,
                     style: ElevatedButton.styleFrom(
@@ -426,44 +539,52 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
   }
 
   Widget _buildImagePicker() {
+    final totalImageCount = _selectedImages.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextButton.icon(
-            onPressed: _pickImages,
-            icon: const Icon(Icons.camera_alt),
-            label: Text('localNewsCreate.buttons.addImage'.tr())),
+        OutlinedButton.icon(
+          onPressed: totalImageCount >= 10 ? null : _pickImages,
+          icon: const Icon(Icons.camera_alt),
+          label: Text(
+              '${'localNewsCreate.buttons.addImage'.tr()} ($totalImageCount/10)'),
+        ),
         const SizedBox(height: 8),
-        if (_selectedImages.isNotEmpty)
-          SizedBox(
-            height: 100,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _selectedImages.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Stack(children: [
-                    ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(File(_selectedImages[index].path),
-                            width: 100, height: 100, fit: BoxFit.cover)),
-                    Positioned(
-                      top: 4,
-                      right: 4,
-                      child: InkWell(
-                        onTap: () => _removeImage(index),
-                        child: const CircleAvatar(
-                            radius: 12,
-                            backgroundColor: Colors.black54,
-                            child: Icon(Icons.close,
-                                color: Colors.white, size: 16)),
+        if (totalImageCount > 0)
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: totalImageCount,
+            itemBuilder: (context, index) {
+              return Stack(
+                children: [
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(File(_selectedImages[index].path),
+                          fit: BoxFit.cover),
+                    ),
+                  ),
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: InkWell(
+                      onTap: () => _removeImage(index),
+                      child: const CircleAvatar(
+                        radius: 12,
+                        backgroundColor: Colors.black54,
+                        child: Icon(Icons.close, color: Colors.white, size: 16),
                       ),
                     ),
-                  ]),
-                );
-              },
-            ),
+                  ),
+                ],
+              );
+            },
           ),
       ],
     );

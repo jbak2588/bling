@@ -27,7 +27,7 @@ class LocalStoreThumb extends StatelessWidget {
         onTap: () {
           final detailScreen = ShopDetailScreen(shop: shop);
           if (onIconTap != null) {
-            onIconTap!(detailScreen, 'main.tabs.localStores');
+            onIconTap!(detailScreen, 'main.tabs.localStore');
           } else {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => detailScreen),

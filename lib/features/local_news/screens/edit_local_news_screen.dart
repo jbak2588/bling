@@ -58,11 +58,12 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
     if (widget.post.mediaUrl != null) {
       _existingImageUrls.addAll(widget.post.mediaUrl!);
     }
-    // ✅ [태그 시스템 수정] category 대신 tags.first 사용
-    final initialTagId =
-        widget.post.tags.isNotEmpty ? widget.post.tags.first : 'etc';
+    // ✅ [롤백] restore category usage: initialize selected category from post.category
+    final initialCategoryId = widget.post.category.isNotEmpty
+        ? widget.post.category
+        : AppCategories.postCategories.first.categoryId;
     _selectedCategory = AppCategories.postCategories.firstWhere(
-      (c) => c.categoryId == initialTagId,
+      (c) => c.categoryId == initialCategoryId,
       orElse: () => AppCategories.postCategories.first,
     );
 

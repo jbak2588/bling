@@ -198,8 +198,22 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       if (mounted && doc.exists) {
         setState(() {
           _userModel = UserModel.fromFirestore(doc);
+
           // ✅ Provider에 사용자 정보 업데이트 (초기 위치 설정)
-          context.read<LocationProvider>().setUser(_userModel);
+          final locationProvider = context.read<LocationProvider>();
+          // 초기 진입(National 모드) 여부 확인
+          final bool isInitialSetup =
+              locationProvider.mode == LocationSearchMode.national;
+
+          locationProvider.setUser(_userModel);
+
+          // ✅ [작업 8] 앱 초기 실행 시 기본 검색 범위를 Province(도) 단위로 설정
+          // (이후 사용자가 필터를 변경해도 덮어쓰지 않도록 isInitialSetup 체크)
+          if (isInitialSetup && _userModel?.locationParts?['prov'] != null) {
+            locationProvider.setAdminFilter(
+              prov: _userModel!.locationParts!['prov'],
+            );
+          }
         });
         // ✅ [게시판] 사용자 위치 로드 후 게시판 활성화 여부 확인
         _checkKelurahanBoardStatus();
@@ -1013,92 +1027,119 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       }
     }
 
-    return Scaffold(
-      // [수정] _selectedIndex(없는 변수) 대신 기존 _bottomNavIndex 전달
-      appBar: _buildAppBar(_bottomNavIndex),
-      drawer: _buildAppDrawer(_userModel),
-      body: IndexedStack(
-        index: effectiveIndex,
-        children: pages,
-      ),
-      // [UI 개선] BottomNavigationBar로 교체 (균형 잡힌 배치 + 텍스트 라벨)
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          // 클릭 효과(물결) 색상 조정
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _bottomNavIndex,
-          onTap: (index) {
-            final hasBoardTab = _isKelurahanBoardActive && _userModel != null;
-            if (index == 1 && !hasBoardTab) {
-              _showBoardActivationPopup();
-              return;
-            }
-            _onBottomNavTapped(index);
-          },
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: Theme.of(context).primaryColor,
+    return PopScope(
+      canPop: _currentHomePageContent == null && _bottomNavIndex == 0,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) return;
 
-          // ✅ [UI 개선] 비활성 아이콘도 회색 대신 브랜드 컬러(연하게) 적용
-          unselectedItemColor:
-              Theme.of(context).primaryColor.withValues(alpha: 0.6),
-          selectedFontSize: 10,
-          unselectedFontSize: 10,
-          elevation: 8,
-          items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.home_outlined),
-              activeIcon: const Icon(Icons.home),
-              label: 'main.bottomNav.home'.tr(),
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.holiday_village_outlined),
-              activeIcon: const Icon(Icons.holiday_village),
-              label: 'main.bottomNav.board'.tr(),
-            ),
-            // [중앙] 등록 버튼 (FAB 대체)
-            BottomNavigationBarItem(
-              icon: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context)
-                          .primaryColor
-                          .withAlpha((0.3 * 255).round()),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+        // If a subcontent is open, close it and stay in app
+        if (_currentHomePageContent != null) {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+          return;
+        }
+
+        // If not on home tab, switch to home tab instead of exiting
+        if (_bottomNavIndex != 0) {
+          _onBottomNavTapped(0);
+          return;
+        }
+      },
+      child: Scaffold(
+        // [수정] _selectedIndex(없는 변수) 대신 기존 _bottomNavIndex 전달
+        appBar: _buildAppBar(_bottomNavIndex),
+        drawer: _buildAppDrawer(_userModel),
+        body: IndexedStack(
+          index: effectiveIndex,
+          children: pages,
+        ),
+        // [UI 개선] BottomNavigationBar로 교체 (균형 잡힌 배치 + 텍스트 라벨)
+        bottomNavigationBar: Theme(
+          data: Theme.of(context).copyWith(
+            // 클릭 효과(물결) 색상 조정
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+          ),
+          child: BottomNavigationBar(
+            currentIndex: _bottomNavIndex,
+            onTap: (index) {
+              final hasBoardTab = _isKelurahanBoardActive && _userModel != null;
+              if (index == 1 && !hasBoardTab) {
+                _showBoardActivationPopup();
+                return;
+              }
+              _onBottomNavTapped(index);
+            },
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white,
+            selectedItemColor: Theme.of(context).primaryColor,
+
+            // ✅ [UI 개선] 비활성 아이콘도 회색 대신 브랜드 컬러(연하게) 적용
+            unselectedItemColor:
+                Theme.of(context).primaryColor.withValues(alpha: 0.6),
+            selectedFontSize: 10,
+            unselectedFontSize: 10,
+            elevation: 8,
+            items: [
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.home_outlined),
+                activeIcon: const Icon(Icons.home),
+                label: 'main.bottomNav.home'.tr(),
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.holiday_village_outlined),
+                activeIcon: const Icon(Icons.holiday_village),
+                label: 'main.bottomNav.board'.tr(),
+              ),
+              // [중앙] 등록 버튼 (FAB 대체)
+              BottomNavigationBarItem(
+                icon: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context)
+                            .primaryColor
+                            .withAlpha((0.3 * 255).round()),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(10),
+                  child: const Icon(Icons.add, color: Colors.white, size: 28),
                 ),
-                padding: const EdgeInsets.all(10),
-                child: const Icon(Icons.add, color: Colors.white, size: 28),
+                label: '',
               ),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Badge(
-                isLabelVisible: _totalUnreadCount > 0,
-                label: Text('$_totalUnreadCount'),
-                child: const Icon(Icons.chat_bubble_outline),
+              BottomNavigationBarItem(
+                icon: Badge(
+                  isLabelVisible: _totalUnreadCount > 0,
+                  label: Text('$_totalUnreadCount'),
+                  child: const Icon(Icons.chat_bubble_outline),
+                ),
+                activeIcon: Badge(
+                  isLabelVisible: _totalUnreadCount > 0,
+                  label: Text('$_totalUnreadCount'),
+                  child: const Icon(Icons.chat_bubble),
+                ),
+                label: 'main.bottomNav.chat'.tr(),
               ),
-              activeIcon: Badge(
-                isLabelVisible: _totalUnreadCount > 0,
-                label: Text('$_totalUnreadCount'),
-                child: const Icon(Icons.chat_bubble),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.person_outline),
+                activeIcon: const Icon(Icons.person),
+                label: 'main.bottomNav.myBling'.tr(),
               ),
-              label: 'main.bottomNav.chat'.tr(),
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline),
-              activeIcon: const Icon(Icons.person),
-              label: 'main.bottomNav.myBling'.tr(),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

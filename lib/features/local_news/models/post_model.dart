@@ -25,9 +25,9 @@ class PostModel {
   final String userId;
   final String? title;
   final String body;
-  // ❌ [태그 시스템] category 필드 제거
-  // final String category;
-  // ✅ [태그 시스템] tags 필드 추가 (필수)
+  // ✅ [롤백] category 필드 복구 (탭 구분을 위해 필수)
+  final String category;
+  // ✅ [태그 시스템] tags 필드 유지 (보조 검색/추천용)
   final List<String> tags; // 태그 ID 목록 (최소 1개 이상)
 
   // final List<String> tags; // 해시태그 목록 -> 기존 tags 필드는 다른 용도였던 것으로 보이므로 주석 처리 또는 제거
@@ -56,10 +56,10 @@ class PostModel {
     required this.userId,
     this.title,
     required this.body,
-    // ❌ [태그 시스템] category 제거
-    // required this.category,
-    // ✅ [태그 시스템] tags 추가
-    required this.tags,
+    // ✅ category is required again for tab separation
+    required this.category,
+    // ✅ tags for auxiliary search/recommendation (optional, default empty)
+    this.tags = const [],
     this.mediaUrl, // ✅ 수정
     this.mediaType,
     this.locationName,
@@ -95,9 +95,9 @@ class PostModel {
       userId: data['userId'] ?? '',
       title: data['title'],
       body: data['body'] ?? '',
-      // ❌ [태그 시스템] category 로드 제거
-      // category: data['category'] ?? 'etc',
-      // ✅ [태그 시스템] tags 로드 (null 이거나 List가 아니면 빈 리스트 반환)
+      // ✅ Restore category from Firestore (fallback to 'daily_life')
+      category: data['category'] ?? 'daily_life',
+      // ✅ tags load (null or non-list -> empty list)
       tags: (data['tags'] is List) ? List<String>.from(data['tags']) : [],
       mediaUrl: mediaUrls, // ✅ 수정된 변수를 사용
       mediaType: data['mediaType'],
@@ -127,9 +127,9 @@ class PostModel {
       'userId': userId,
       'title': title,
       'body': body,
-      // ❌ [태그 시스템] category 저장 제거
-      // 'category': category,
-      // ✅ [태그 시스템] tags 저장
+      // ✅ Store category for tab separation
+      'category': category,
+      // ✅ tags for auxiliary search/recommendation
       'tags': tags,
       'mediaUrl': mediaUrl, // ✅ 수정
       'mediaType': mediaType,

@@ -51,10 +51,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 
-// ❌ [태그 시스템] 기존 카테고리 import 제거
-// import '../../../core/constants/app_categories.dart';
-// ✅ [태그 시스템] 신규 태그 사전 import
-import '../../../core/constants/app_tags.dart';
+// ✅ [롤백] 카테고리 상수 import 복구
+import '../../../core/constants/app_categories.dart';
+// ✅ [태그 시스템] 신규 태그 사전 import (필요시 유지)
+// AppTags import removed: currently unused after category rollback
 import '../widgets/post_card.dart';
 import 'local_news_detail_screen.dart';
 
@@ -90,9 +90,8 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
   // 검색바 표시 여부 (칩 자체를 완전히 숨기기 위함)
   bool _showSearchBar = false;
 
-  // ✅ [태그 시스템] 카테고리 ID 목록 대신 태그 ID 목록으로 변경
-  // (AppTags.localNewsTags 중에서 '상시 추천 태그'만 필터링)
-  late final List<String> _tagIds;
+  // ✅ [롤백] 카테고리 ID 목록으로 복구
+  late final List<String> _categoryIds;
 
   // late final List<Widget> _tabViews;
   late final List<Widget> _listTabViews;
@@ -102,48 +101,30 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
   void initState() {
     super.initState();
 
-    // ✅ [태그 시스템] '상시 추천 태그' 목록을 가져옵니다. (예: AppTags.getRecommendedTags())
-    // ❌ ERROR FIX: 'showInFilter' field does not exist in TagInfo.
-    // DevLog(Source 62)에 따라 AppTags.localNewsTags를 사용해야 하며,
-    // 필터 탭에 표시할 주요 태그 ID 목록을 하드코딩하여 문제를 해결합니다.
-    // (tag_recommender.dart의 _urgent 목록 및 주요 태그 참조)
-    const List<String> filterableTagIds = [
-      'power_outage',
-      'water_outage',
-      'traffic_control', // 'traffic_diversion' 등 app_tags.dart에 정의된 ID 사용
-      'weather_warning',
-      'flood_alert',
-      'air_quality',
-      'disease_alert',
-      'community_event', // 주요 일반 태그
-      'question', // 주요 일반 태그
-      'daily_life', // 주요 일반 태그
+    // ✅ [롤백] AppCategories 기반 탭 구성
+    // 'all' + 정의된 카테고리 ID들
+    _categoryIds = [
+      'all',
+      ...AppCategories.postCategories.map((c) => c.categoryId)
     ];
 
-    final recommendedTags = AppTags.localNewsTags
-        .where((tag) => filterableTagIds.contains(tag.tagId))
-        .toList();
-    // 'all' (전체) + 추천 태그 ID 목록
-    _tagIds = ['all', ...recommendedTags.map((t) => t.tagId)];
+    _tabController = TabController(length: _categoryIds.length, vsync: this);
 
-    _tabController = TabController(length: _tagIds.length, vsync: this);
-
-    // ✅ 2. initState에서 탭 페이지 위젯 리스트를 '딱 한 번만' 생성합니다.
-    // (category 대신 tagId 전달)
-    _listTabViews = _tagIds.map((tagId) {
+    // ✅ 2. 카테고리 기반 탭 뷰 생성
+    _listTabViews = _categoryIds.map((catId) {
       return _FeedListView(
-        key: PageStorageKey('list_view_$tagId'),
-        tagId: tagId, // ✅ category -> tagId
+        key: PageStorageKey('list_view_$catId'),
+        categoryId: catId, // ✅ 복구
         userModel: widget.userModel,
         locationFilter: widget.locationFilter,
         searchKeywordListenable: _searchKeywordNotifier,
       );
     }).toList();
 
-    _mapTabViews = _tagIds.map((tagId) {
+    _mapTabViews = _categoryIds.map((catId) {
       return _FeedMapView(
-        key: PageStorageKey('map_view_$tagId'),
-        tagId: tagId, // ✅ category -> tagId
+        key: PageStorageKey('map_view_$catId'),
+        categoryId: catId, // ✅ 복구
         userModel: widget.userModel,
         locationFilter: widget.locationFilter,
         searchKeywordListenable: _searchKeywordNotifier,
@@ -225,17 +206,15 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
           ],
         ),
       ),
-      // AppCategories 대신 AppTags에서 필터링된 태그 목록을 사용
-      ...AppTags.localNewsTags
-          .where((tag) => _tagIds.contains(tag.tagId)) // initState와 동일한 필터
-          .map((tag) {
+      // ✅ [롤백] AppCategories 기반 탭
+      ...AppCategories.postCategories.map((category) {
         return Tab(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(tag.emoji ?? '🔹', style: const TextStyle(fontSize: 18)),
+              Text(category.emoji, style: const TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
-              Text(tag.nameKey.tr()), // 태그 이름
+              Text(category.nameKey.tr()), // 카테고리 이름
             ],
           ),
         );
@@ -297,13 +276,13 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
 
 // ✅ 1. StatelessWidget을 StatefulWidget으로 변경합니다.
 class _FeedListView extends StatefulWidget {
-  final String tagId; // ✅ category -> tagId
+  final String categoryId; // ✅ [롤백] tagId -> categoryId
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
   final ValueListenable<String>? searchKeywordListenable;
   const _FeedListView(
       {super.key,
-      required this.tagId, // ✅ category -> tagId
+      required this.categoryId, // ✅ [롤백]
       this.userModel,
       this.locationFilter,
       this.searchKeywordListenable});
@@ -355,19 +334,42 @@ class _FeedListViewState extends State<_FeedListView>
 
   // 기존 _buildQuery와 _applyLocationFilter 함수를 State 안으로 이동
   Query<Map<String, dynamic>> _buildQuery() {
-    // widget.userModel 과 같이 widget.을 붙여서 상위 StatefulWidget의 프로퍼티에 접근합니다.
-    final userProv = widget.userModel?.locationParts?['prov'];
+    // Provider 우선: 사용자가 설정한 필터(activeQueryFilter)를 먼저 사용
+    final locationProvider = context.watch<LocationProvider>();
+    final active = locationProvider.activeQueryFilter;
+
     Query<Map<String, dynamic>> query =
         FirebaseFirestore.instance.collection('posts');
-    if (userProv != null && userProv.isNotEmpty) {
-      query = query.where('locationParts.prov', isEqualTo: userProv);
+
+    if (active != null) {
+      // active.key 예: 'locationParts.kec', active.value 예: 'NamaKec'
+      query = query.where(active.key, isEqualTo: active.value);
+    } else if (widget.locationFilter != null) {
+      final filter = widget.locationFilter!;
+      if (filter['kel'] != null) {
+        query = query.where('locationParts.kel', isEqualTo: filter['kel']);
+      } else if (filter['kec'] != null) {
+        query = query.where('locationParts.kec', isEqualTo: filter['kec']);
+      } else if (filter['kab'] != null) {
+        query = query.where('locationParts.kab', isEqualTo: filter['kab']);
+      } else if (filter['kota'] != null) {
+        query = query.where('locationParts.kota', isEqualTo: filter['kota']);
+      } else if (filter['prov'] != null) {
+        query = query.where('locationParts.prov', isEqualTo: filter['prov']);
+      }
+    } else {
+      // 기존 폴백: 전달된 userModel의 prov 사용
+      final userProv = widget.userModel?.locationParts?['prov'];
+      if (userProv != null && userProv.isNotEmpty) {
+        query = query.where('locationParts.prov', isEqualTo: userProv);
+      }
     }
-    // ✅ [태그 시스템] category 쿼리 대신 tag 쿼리 사용
-    if (widget.tagId != 'all') {
-      // query = query.where('category', isEqualTo: widget.category); // ❌ 제거
-      query = query.where('tags',
-          arrayContains: widget.tagId); // ✅ 'tags' 필드에 해당 tagId가 포함되어 있는지
+
+    // ✅ [롤백] 카테고리 기반 필터링 복구
+    if (widget.categoryId != 'all') {
+      query = query.where('category', isEqualTo: widget.categoryId);
     }
+
     final kw = widget.searchKeywordListenable?.value.trim().toLowerCase() ?? '';
     if (kw.isNotEmpty) {
       final searchToken = kw.split(' ').first;
@@ -491,13 +493,13 @@ class _FeedListViewState extends State<_FeedListView>
 }
 
 class _FeedMapView extends StatefulWidget {
-  final String tagId; // ✅ category -> tagId
+  final String categoryId; // ✅ [롤백] tagId -> categoryId
   final UserModel? userModel;
   final Map<String, String?>? locationFilter;
   final ValueListenable<String>? searchKeywordListenable;
   const _FeedMapView(
       {super.key,
-      required this.tagId, // ✅ category -> tagId
+      required this.categoryId, // ✅ [롤백]
       this.userModel,
       this.locationFilter,
       this.searchKeywordListenable});
@@ -557,11 +559,17 @@ class _FeedMapViewState extends State<_FeedMapView> {
   }
 
   Query<Map<String, dynamic>> _buildInitialCameraQuery() {
+    // Provider 우선 적용
+    final locationProvider = context.watch<LocationProvider>();
+    final active = locationProvider.activeQueryFilter;
+
     Query<Map<String, dynamic>> query =
         FirebaseFirestore.instance.collection('posts');
-    final filter = widget.locationFilter;
 
-    if (filter != null) {
+    if (active != null) {
+      query = query.where(active.key, isEqualTo: active.value);
+    } else if (widget.locationFilter != null) {
+      final filter = widget.locationFilter!;
       if (filter['kel'] != null) {
         query = query.where('locationParts.kel', isEqualTo: filter['kel']);
       } else if (filter['kec'] != null) {
@@ -578,11 +586,9 @@ class _FeedMapViewState extends State<_FeedMapView> {
           isEqualTo: widget.userModel!.locationParts!['prov']);
     }
 
-    // ✅ [태그 시스템] category 쿼리 대신 tag 쿼리 사용
-    if (widget.tagId != 'all') {
-      // query = query.where('category', isEqualTo: widget.category); // ❌ 제거
-      query = query.where('tags',
-          arrayContains: widget.tagId); // ✅ 'tags' 필드에 해당 tagId가 포함되어 있는지
+    // ✅ [롤백] 카테고리 기반 필터링 복구
+    if (widget.categoryId != 'all') {
+      query = query.where('category', isEqualTo: widget.categoryId);
     }
     final kw = widget.searchKeywordListenable?.value.trim().toLowerCase() ?? '';
     if (kw.isNotEmpty) {
@@ -593,19 +599,23 @@ class _FeedMapViewState extends State<_FeedMapView> {
   }
 
   Query<Map<String, dynamic>> _buildAllMarkersQuery() {
+    // Provider 우선 적용
+    final locationProvider = context.watch<LocationProvider>();
+    final active = locationProvider.activeQueryFilter;
+
     Query<Map<String, dynamic>> query =
         FirebaseFirestore.instance.collection('posts');
 
-    if (widget.userModel?.locationParts?['prov'] != null) {
+    if (active != null) {
+      query = query.where(active.key, isEqualTo: active.value);
+    } else if (widget.userModel?.locationParts?['prov'] != null) {
       query = query.where('locationParts.prov',
           isEqualTo: widget.userModel!.locationParts!['prov']);
     }
 
-    // ✅ [태그 시스템] category 쿼리 대신 tag 쿼리 사용
-    if (widget.tagId != 'all') {
-      // query = query.where('category', isEqualTo: widget.category); // ❌ 제거
-      query = query.where('tags',
-          arrayContains: widget.tagId); // ✅ 'tags' 필드에 해당 tagId가 포함되어 있는지
+    // ✅ [롤백] 카테고리 기반 필터링 복구
+    if (widget.categoryId != 'all') {
+      query = query.where('category', isEqualTo: widget.categoryId);
     }
     final kw2 =
         widget.searchKeywordListenable?.value.trim().toLowerCase() ?? '';

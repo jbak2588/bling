@@ -36,7 +36,7 @@ class FindFriendThumb extends StatelessWidget {
           final detailScreen = FindFriendDetailScreen(
               user: user, currentUserModel: currentUserModel!);
           if (onIconTap != null) {
-            onIconTap!(detailScreen, 'main.tabs.findFriends');
+            onIconTap!(detailScreen, 'main.tabs.findFriend');
           } else {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => detailScreen),
