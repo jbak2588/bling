@@ -1,0 +1,204 @@
+Embedded-mode 적용 스니펫 및 가이드
+
+목적
+- 앱 셸(AppBar + BottomNav)을 유지하면서 상세 화면을 임베디드로 표시하기 위한 부모-자식 콜백 패턴 스니펫 모음입니다.
+- 각 스니펫은 "어느 파일에, 어디에 넣을지"와 함께 복사/붙여넣어 바로 적용할 수 있게 준비했습니다.
+
+공통 패턴
+- 콜백 서명: void Function(Widget detailScreen, String titleKey)? onIconTap
+- 클릭 처리 템플릿:
+  final detail = SomeDetailScreen(...);
+  if (widget.onIconTap != null) {
+    widget.onIconTap!(detail, 'main.tabs.someTab');
+  } else {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => detail));
+  }
+
+1) lib/features/find_friends/screens/find_friends_screen.dart
+- 변경 위치: FindFriendsScreen 클래스에 optional onIconTap 추가, Club/Proposal 클릭 시 Navigator.push 대체
+
+생성자에 추가:
+```dart
+// FindFriendsScreen 클래스에 추가
+final void Function(Widget, String)? onIconTap;
+
+const FindFriendsScreen({
+  super.key,
+  this.userModel,
+  this.activeLocationFilter,
+  this.autoFocusSearch = false,
+  this.searchNotifier,
+  this.onIconTap, // <- 추가
+});
+```
+
+클럽 클릭 처리 예시(기존 Navigator.push 대체):
+```dart
+final detail = ClubDetailScreen(club: club);
+if (widget.onIconTap != null) {
+  widget.onIconTap!(detail, 'main.tabs.clubs');
+} else {
+  Navigator.of(context).push(MaterialPageRoute(builder: (_) => detail));
+}
+```
+
+모임 제안(Proposal)도 동일 패턴 적용:
+```dart
+final detail = ClubProposalDetailScreen(proposal: proposal);
+if (widget.onIconTap != null) {
+  widget.onIconTap!(detail, 'main.tabs.clubs');
+} else {
+  Navigator.of(context).push(MaterialPageRoute(builder: (_) => detail));
+}
+```
+
+MainNavigationScreen에서 전달 예시:
+```dart
+nextScreen = FindFriendsScreen(
+  userModel: userModel,
+  autoFocusSearch: autoFocus,
+  searchNotifier: _searchTrigger,
+  onIconTap: _navigateToPage, // <- 추가
+);
+```
+
+2) lib/features/real_estate/widgets/room_card.dart
+- 변경 위치: RoomCard 위젯 생성자에 onIconTap 추가, onTap 클릭 처리 대체
+
+생성자 변경:
+```dart
+class RoomCard extends StatefulWidget {
+  final RoomListingModel room;
+  final void Function(Widget, String)? onIconTap; // <- 추가
+  const RoomCard({super.key, required this.room, this.onIconTap});
+  ...
+}
+```
+
+onTap 처리 예시:
+```dart
+final detail = RoomDetailScreen(room: widget.room);
+if (widget.onIconTap != null) {
+  widget.onIconTap!(detail, 'main.tabs.realEstate');
+} else {
+  Navigator.of(context).push(MaterialPageRoute(builder: (_) => detail));
+}
+```
+
+부모(RealEstateScreen)에서 RoomCard 생성 시 전달:
+```dart
+RoomCard(room: room, onIconTap: widget.onIconTap)
+// 또는 RealEstateScreen이 MainNavigation에서 생성될 때 onIconTap: _navigateToPage 를 전달
+```
+
+3) lib/features/clubs/widgets/club_post_card.dart 및 club_proposal_card.dart
+- 변경 위치: 카드 위젯 생성자 + onTap
+
+생성자에 onIconTap 추가:
+```dart
+final void Function(Widget, String)? onIconTap;
+const ClubPostCard({..., this.onIconTap});
+```
+
+클릭시 처리:
+```dart
+final detail = ClubPostDetailScreen(post: post, club: club);
+if (onIconTap != null) {
+  onIconTap!(detail, 'main.tabs.clubs');
+} else {
+  Navigator.of(context).push(MaterialPageRoute(builder: (_) => detail));
+}
+```
+
+ClubsScreen이 카드를 생성하는 곳에서 onIconTap 전달:
+```dart
+ClubPostCard(post: post, onIconTap: widget.onIconTap)
+```
+
+4) lib/features/lost_and_found/widgets/lost_item_card.dart
+- 카드 생성자에 onIconTap 추가 및 onTap 처리 대체
+
+생성자:
+```dart
+final void Function(Widget, String)? onIconTap;
+const LostItemCard({..., this.onIconTap});
+```
+
+onTap:
+```dart
+final detail = LostItemDetailScreen(item: item);
+if (onIconTap != null) {
+  onIconTap!(detail, 'main.tabs.lostAndFound');
+} else {
+  Navigator.of(context).push(MaterialPageRoute(builder: (_) => detail));
+}
+```
+
+5) lib/features/notifications/screens/notification_list_screen.dart
+- 알림 항목에서 ProductDetailScreen(productId: ...) 등을 직접 push 하는 부분 교체
+
+스크린 생성자에 추가:
+```dart
+final void Function(Widget, String)? onIconTap;
+const NotificationListScreen({super.key, this.onIconTap});
+```
+
+클릭 처리:
+```dart
+final detail = ProductDetailScreen(productId: productId);
+if (widget.onIconTap != null) {
+  widget.onIconTap!(detail, 'main.tabs.marketplace');
+} else {
+  Navigator.of(context).push(MaterialPageRoute(builder: (_) => detail));
+}
+```
+
+6) lib/features/pom/widgets/pom_player.dart 및 lib/features/my_bling/widgets/user_friend_list.dart
+- FindFriendDetailScreen으로 직접 push 하는 곳들
+
+예시 대체:
+```dart
+final detail = FindFriendDetailScreen(user: user, currentUserModel: currentUserModel);
+if (onIconTap != null) {
+  onIconTap!(detail, 'main.tabs.findFriends');
+} else {
+  Navigator.of(context).push(MaterialPageRoute(builder: (_) => detail));
+}
+```
+
+이들 위젯에 `final void Function(Widget, String)? onIconTap;` 생성자 파라미터를 추가하고 부모에서 전달하세요.
+
+7) lib/features/main_screen/main_navigation_screen.dart
+- 이미 일부 변경 적용됨. 핵심은 `MainNavigationScreen`이 각 FeedScreen을 생성할 때 `onIconTap: _navigateToPage` 를 전달하는 것입니다.
+
+예:
+```dart
+nextScreen = MarketplaceScreen(
+  userModel: userModel,
+  autoFocusSearch: autoFocus,
+  searchNotifier: _searchTrigger,
+  onIconTap: _navigateToPage,
+);
+```
+
+권장 적용 순서(안전)
+1. `FindFriendsScreen` 변경 + `MainNavigationScreen`에서 전달
+2. `RoomCard` 변경 + `RealEstateScreen`에서 전달
+3. `club_*_card`, `lost_item_card` 등 카드 위젯 변경
+4. `NotificationListScreen` 변경
+5. `flutter analyze` 실행 및 수동 런/스모크 테스트
+
+검증 팁
+- 분석: `flutter analyze`
+- 런: 에뮬레이터에서 홈 → 상세(임베드) → 상세내 이미지/채팅 눌러 전체 화면 전환(embedded onClose 호출) 흐름 확인
+
+커밋/PR 팁
+- 변경 범위가 크면 작은 단위로 커밋
+- PR 본문에 변경 목적(임베디드 모드 일관화)과 체크리스트(분석 통과, 임베디드->갤러리/채팅 전환 확인)를 포함
+
+문제가 생기면 제가 특정 파일 두 개(원하시는 파일)를 직접 apply_patch 형식으로 패치 초안을 만들어 드립니다.
+
+---
+파일 위치: c:\bling\bling_app\embedded_mode_snippets.txt
+
+끝.

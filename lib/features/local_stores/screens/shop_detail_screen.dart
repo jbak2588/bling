@@ -57,7 +57,15 @@ import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 class ShopDetailScreen extends StatefulWidget {
   final ShopModel shop;
   final UserModel? userModel; // [추가]
-  const ShopDetailScreen({super.key, required this.shop, this.userModel});
+  final bool embedded;
+  final VoidCallback? onClose;
+
+  const ShopDetailScreen(
+      {super.key,
+      required this.shop,
+      this.userModel,
+      this.embedded = false,
+      this.onClose});
 
   @override
   State<ShopDetailScreen> createState() => _ShopDetailScreenState();
@@ -101,6 +109,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
           await _chatService.getOtherUserInfo(widget.shop.ownerId);
 
       if (!context.mounted) return;
+      if (widget.embedded && widget.onClose != null) widget.onClose!();
 
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -172,6 +181,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         // --- 1. 메인 이미지 슬라이더 ---
         GestureDetector(
           onTap: () {
+            if (widget.embedded && widget.onClose != null) widget.onClose!();
             Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => FullScreenImageViewer(
                 imageUrls: images,
@@ -245,11 +255,92 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
       stream: _repository.getShopStream(widget.shop.id),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
+          if (widget.embedded) {
+            return const Center(child: CircularProgressIndicator());
+          }
           return const Scaffold(
               body: Center(child: CircularProgressIndicator()));
         }
         final shop = snapshot.data!;
         final isOwner = shop.ownerId == _currentUserId;
+
+        final content = ListView(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 100.0),
+          children: [
+            // [수정] 기존 Image.network를 새로 이식한 _buildImageSlider로 교체
+            _buildImageSlider(shop.imageUrls),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(shop.name,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold)),
+                      ),
+                      // [추가] 인증 배지
+                      if (shop.trustLevelVerified) ...[
+                        const SizedBox(width: 8),
+                        Icon(Icons.verified,
+                            color: Theme.of(context).primaryColor, size: 24),
+                      ]
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  _buildInfoRow(context, Icons.location_on_outlined,
+                      shop.locationName ?? 'localStores.noLocation'.tr()),
+                  const SizedBox(height: 4),
+                  _buildInfoRow(
+                      context, Icons.watch_later_outlined, shop.openHours),
+                  const SizedBox(height: 4),
+                  _buildInfoRow(
+                      context, Icons.phone_outlined, shop.contactNumber),
+                  const Divider(height: 32),
+                  // [추가] 대표 상품/서비스 칩
+                  if (shop.products != null && shop.products!.isNotEmpty) ...[
+                    Text('localStores.detail.products'.tr(), // "대표 상품 및 서비스"
+                        style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8.0, // 칩 사이의 가로 간격
+                      runSpacing: 4.0, // 칩 사이의 세로 간격
+                      children: shop.products!
+                          .map((product) => Chip(label: Text(product.trim())))
+                          .toList(),
+                    ),
+                    const Divider(height: 32),
+                  ],
+                  Text('localStores.detail.description'.tr(),
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  Text(shop.description,
+                      style: const TextStyle(fontSize: 16, height: 1.5)),
+                  const Divider(height: 32),
+                  // [추가] 리뷰 섹션
+                  Text(
+                      'localStores.detail.reviews'.tr(
+                          namedArgs: {'count': shop.reviewCount.toString()}),
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  _buildReviewSection(shop), // 리뷰 목록 및 작성 UI
+                  const Divider(height: 32),
+                  // [끝] 리뷰 섹션
+                  _buildOwnerInfo(shop.ownerId),
+                ],
+              ),
+            )
+          ],
+        );
+
+        if (widget.embedded) {
+          return Container(color: Colors.white, child: content);
+        }
 
         return Scaffold(
           appBar: AppBar(
@@ -257,7 +348,13 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
               padding: const EdgeInsets.only(left: 8.0),
               child: AppBarIcon(
                 icon: Icons.arrow_back,
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  if (widget.embedded && widget.onClose != null) {
+                    widget.onClose!();
+                    return;
+                  }
+                  Navigator.of(context).pop();
+                },
               ),
             ),
             title: Text(shop.name),
@@ -269,6 +366,9 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                   child: AppBarIcon(
                     icon: Icons.work_outline,
                     onPressed: () {
+                      if (widget.embedded && widget.onClose != null) {
+                        widget.onClose!();
+                      }
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => CreateJobScreen(
@@ -290,6 +390,9 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                   child: AppBarIcon(
                     icon: Icons.edit_note_outlined,
                     onPressed: () {
+                      if (widget.embedded && widget.onClose != null) {
+                        widget.onClose!();
+                      }
                       Navigator.of(context)
                           .push(
                             MaterialPageRoute(

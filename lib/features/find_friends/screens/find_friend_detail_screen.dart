@@ -49,11 +49,15 @@ import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 class FindFriendDetailScreen extends StatefulWidget {
   final UserModel user;
   final UserModel currentUserModel;
+  final bool embedded;
+  final VoidCallback? onClose;
 
   const FindFriendDetailScreen({
     super.key,
     required this.user,
     required this.currentUserModel,
+    this.embedded = false,
+    this.onClose,
   });
 
   @override
@@ -77,13 +81,73 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
     bool isBlockedByMe = currentUser.blockedUsers?.contains(user.uid) ?? false;
     bool amIBlocked = user.blockedUsers?.contains(currentUser.uid) ?? false;
 
+    final content = ListView(
+      children: [
+        Hero(
+          tag: 'profile-image-${user.uid}',
+          child: Container(
+            height: 300,
+            decoration: BoxDecoration(
+              image: (user.photoUrl != null && user.photoUrl!.isNotEmpty)
+                  ? DecorationImage(
+                      image: NetworkImage(user.photoUrl!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+              color: (user.photoUrl == null || user.photoUrl!.isEmpty)
+                  ? Colors.grey[300]
+                  : null,
+            ),
+            child: (user.photoUrl == null || user.photoUrl!.isEmpty)
+                ? Icon(Icons.person, size: 150, color: Colors.grey[600])
+                : null,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(user.nickname,
+                      style: Theme.of(context).textTheme.headlineMedium),
+                  TrustLevelBadge(trustLevelLabel: user.trustLevelLabel),
+                ],
+              ),
+              if (user.locationName != null && user.locationName!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(user.locationName!,
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+              if (user.bio != null && user.bio!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (widget.embedded) {
+      return Container(color: Colors.white, child: content);
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: AppBarIcon(
             icon: Icons.arrow_back,
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              if (widget.embedded && widget.onClose != null) {
+                widget.onClose!();
+                return;
+              }
+              Navigator.of(context).pop();
+            },
           ),
         ),
         title: Text(user.nickname),

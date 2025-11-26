@@ -28,7 +28,14 @@ import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 class AuctionDetailScreen extends StatefulWidget {
   final AuctionModel auction;
   final UserModel? userModel; // optional for hyperlocal features
-  const AuctionDetailScreen({super.key, required this.auction, this.userModel});
+  final bool embedded;
+  final VoidCallback? onClose;
+  const AuctionDetailScreen(
+      {super.key,
+      required this.auction,
+      this.userModel,
+      this.embedded = false,
+      this.onClose});
 
   @override
   State<AuctionDetailScreen> createState() => _AuctionDetailScreenState();
@@ -178,6 +185,9 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                   child: AppBarIcon(
                     icon: Icons.edit_note_outlined,
                     onPressed: () {
+                      if (widget.embedded && widget.onClose != null) {
+                        widget.onClose!();
+                      }
                       Navigator.of(context).push(
                         MaterialPageRoute(
                             builder: (_) =>
@@ -212,12 +222,17 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                           alignment: Alignment.center,
                           children: [
                             GestureDetector(
-                              onTap: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => ImageGalleryScreen(
-                                      imageUrls: auction.images),
-                                ),
-                              ),
+                              onTap: () {
+                                if (widget.embedded && widget.onClose != null) {
+                                  widget.onClose!();
+                                }
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => ImageGalleryScreen(
+                                        imageUrls: auction.images),
+                                  ),
+                                );
+                              },
                               child: ImageCarouselCard(
                                 storageId: auction.id,
                                 imageUrls: auction.images,

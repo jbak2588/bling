@@ -37,7 +37,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 // ✅ StatelessWidget을 StatefulWidget으로 변경
 class RoomCard extends StatefulWidget {
   final RoomListingModel room;
-  const RoomCard({super.key, required this.room});
+  final void Function(Widget, String)? onIconTap;
+  const RoomCard({super.key, required this.room, this.onIconTap});
 
   @override
   State<RoomCard> createState() => _RoomCardState();
@@ -65,11 +66,16 @@ class _RoomCardState extends State<RoomCard>
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        // [수정] 클릭 시 상세 화면으로 이동
+        // [수정] 클릭 시 상세 화면으로 이동 (onIconTap 우선 호출)
         onTap: () {
+          final detail = RoomDetailScreen(room: widget.room);
+          if (widget.onIconTap != null) {
+            widget.onIconTap!(detail, 'main.tabs.realEstate');
+            return;
+          }
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => RoomDetailScreen(room: widget.room),
+              builder: (_) => detail,
             ),
           );
         },

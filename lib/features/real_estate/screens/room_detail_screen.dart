@@ -52,7 +52,10 @@ import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 
 class RoomDetailScreen extends StatefulWidget {
   final RoomListingModel room;
-  const RoomDetailScreen({super.key, required this.room});
+  final bool embedded;
+  final VoidCallback? onClose;
+  const RoomDetailScreen(
+      {super.key, required this.room, this.embedded = false, this.onClose});
 
   @override
   State<RoomDetailScreen> createState() => _RoomDetailScreenState();
@@ -162,11 +165,116 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
           .getRoomStream(widget.room.id), // Repository에 getRoomStream 필요
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
+          if (widget.embedded) {
+            return const Center(child: CircularProgressIndicator());
+          }
           return const Scaffold(
               body: Center(child: CircularProgressIndicator()));
         }
         final room = snapshot.data!;
         final isOwner = room.userId == currentUserId;
+
+        final body = ListView(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 100.0),
+          children: [
+            // ✅ 기존 이미지 슬라이더를 공용 위젯으로 교체
+            if (room.imageUrls.isNotEmpty)
+              GestureDetector(
+                onTap: () {
+                  if (widget.embedded && widget.onClose != null) {
+                    widget.onClose!();
+                  }
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) =>
+                        ImageGalleryScreen(imageUrls: room.imageUrls),
+                  ));
+                },
+                child: ImageCarouselCard(
+                  storageId: room.id,
+                  imageUrls: room.imageUrls,
+                  height: 250,
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(room.title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  // [추가] Gap 1: '직방' 스타일 핵심 정보
+                  Text(
+                    '${'realEstate.form.roomTypes.${room.type}'.tr()} · ${'realEstate.form.listingTypes.${room.listingType}'.tr()}',
+                    style: TextStyle(
+                        fontSize: 15,
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${currencyFormat.format(room.price)} / ${'realEstate.priceUnits.${room.priceUnit}'.tr()}',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const Divider(height: 32),
+
+                  // [추가] Gap 1: 방/욕실/면적/입주
+                  _buildInfoGrid(room),
+
+                  // [신규] '작업 8': 'amenities' 대신 'roomType'별 시설 목록 표시
+                  _buildDynamicFacilityLists(context, room),
+                  const Divider(height: 32),
+                  Text('realEstate.form.details'.tr(),
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  Text(room.description,
+                      style: const TextStyle(fontSize: 16, height: 1.5)),
+                  const SizedBox(height: 16),
+
+                  // ✅ 태그, 지도, 작성자 정보 공용 위젯 추가
+                  ClickableTagList(tags: room.tags),
+                  if (room.geoPoint != null) ...[
+                    const Divider(height: 32),
+                    Text('realEstate.detail.location'.tr(),
+                        style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 12),
+                    MiniMapView(location: room.geoPoint!, markerId: room.id),
+                  ],
+                  const Divider(height: 32),
+
+                  Text('realEstate.detail.publisherInfo'.tr(),
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 12),
+                  AuthorProfileTile(userId: room.userId),
+                  if (room.isVerified)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.verified,
+                              color: Colors.blue.shade700, size: 18),
+                          const SizedBox(width: 8),
+                          Text('realEstate.info.verifiedPublisher'.tr(),
+                              style: TextStyle(
+                                  color: Colors.blue.shade700,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            )
+          ],
+        );
+
+        if (widget.embedded) {
+          return Container(color: Colors.white, child: body);
+        }
 
         return Scaffold(
           appBar: AppBar(
@@ -174,7 +282,13 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
               padding: const EdgeInsets.only(left: 8.0),
               child: AppBarIcon(
                 icon: Icons.arrow_back,
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  if (widget.embedded && widget.onClose != null) {
+                    widget.onClose!();
+                    return;
+                  }
+                  Navigator.of(context).pop();
+                },
               ),
             ),
             title: Text(room.title),

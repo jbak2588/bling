@@ -48,7 +48,11 @@ import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 
 class JobDetailScreen extends StatelessWidget {
   final JobModel job;
-  const JobDetailScreen({super.key, required this.job});
+  final bool embedded;
+  final VoidCallback? onClose;
+
+  const JobDetailScreen(
+      {super.key, required this.job, this.embedded = false, this.onClose});
 
   // [기존 로직 유지] 채팅 시작
   void _startChat(BuildContext context) async {
@@ -63,6 +67,8 @@ class JobDetailScreen extends StatelessWidget {
       final otherUser = await chatService.getOtherUserInfo(job.userId);
 
       if (!context.mounted) return;
+
+      if (embedded && onClose != null) onClose!();
 
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -163,13 +169,105 @@ class JobDetailScreen extends StatelessWidget {
 
     final isMyJob = FirebaseAuth.instance.currentUser?.uid == job.userId;
 
+    final content = ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        // ✅ 1. [공용 위젯 적용] 이미지 캐러셀
+        if (job.imageUrls != null && job.imageUrls!.isNotEmpty)
+          GestureDetector(
+            onTap: () {
+              if (embedded && onClose != null) onClose!();
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => ImageGalleryScreen(imageUrls: job.imageUrls!),
+              ));
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12.0),
+              child: ImageCarouselCard(
+                imageUrls: job.imageUrls!,
+                storageId: job.id, // [중요] 상태 유지를 위한 ID
+                height: 250,
+              ),
+            ),
+          ),
+        if (job.imageUrls != null && job.imageUrls!.isNotEmpty)
+          const SizedBox(height: 16),
+
+        // --- 2. 제목 및 기본 정보 ---
+        Text(job.title,
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Text(
+          '${'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr()}: ${currencyFormat.format(job.salaryAmount ?? 0)}'
+          '${job.isSalaryNegotiable ? ' (Nego)' : ''}',
+          style: TextStyle(
+              fontSize: 18,
+              color: Theme.of(context).primaryColor,
+              fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+            '${'jobs.workPeriods.${job.workPeriod ?? 'etc'}'.tr()} / ${job.workHours ?? ''}'),
+        const Divider(height: 32),
+
+        // --- 3. 상세 설명 ---
+        Text('jobs.detail.infoTitle'.tr(),
+            style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        Text(job.description,
+            style: const TextStyle(fontSize: 16, height: 1.5)),
+
+        // ✅ 2. [공용 위젯 적용] 태그 리스트
+        if (job.tags.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          ClickableTagList(tags: job.tags),
+        ],
+
+        const Divider(height: 32),
+
+        // ✅ 3. [공용 위젯 적용] 미니맵
+        if (job.geoPoint != null) ...[
+          Text('jobs.detail.locationTitle'.tr(),
+              style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          MiniMapView(
+            location: job.geoPoint!,
+            markerId: job.id,
+            myLocationEnabled: false,
+          ),
+          const Divider(height: 32),
+        ],
+
+        // ✅ 4. [공용 위젯 적용] 작성자 프로필 타일
+        Text('jobs.detail.authorTitle'.tr(),
+            style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 12),
+        AuthorProfileTile(userId: job.userId),
+
+        const SizedBox(height: 80),
+      ],
+    );
+
+    if (embedded) {
+      return Container(color: Colors.white, child: content);
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: AppBarIcon(
             icon: Icons.arrow_back,
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              if (embedded && onClose != null) {
+                onClose!();
+                return;
+              }
+              Navigator.of(context).pop();
+            },
           ),
         ),
         title: Text(job.title),
@@ -179,7 +277,10 @@ class JobDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.only(right: 8.0),
               child: AppBarIcon(
                 icon: Icons.edit,
-                onPressed: () => _navigateToEdit(context),
+                onPressed: () {
+                  if (embedded && onClose != null) onClose!();
+                  _navigateToEdit(context);
+                },
               ),
             ),
             Padding(
@@ -192,84 +293,7 @@ class JobDetailScreen extends StatelessWidget {
           ]
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          // ✅ 1. [공용 위젯 적용] 이미지 캐러셀
-          if (job.imageUrls != null && job.imageUrls!.isNotEmpty)
-            GestureDetector(
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => ImageGalleryScreen(imageUrls: job.imageUrls!),
-              )),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12.0),
-                child: ImageCarouselCard(
-                  imageUrls: job.imageUrls!,
-                  storageId: job.id, // [중요] 상태 유지를 위한 ID
-                  height: 250,
-                ),
-              ),
-            ),
-          if (job.imageUrls != null && job.imageUrls!.isNotEmpty)
-            const SizedBox(height: 16),
-
-          // --- 2. 제목 및 기본 정보 ---
-          Text(job.title,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text(
-            '${'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr()}: ${currencyFormat.format(job.salaryAmount ?? 0)}'
-            '${job.isSalaryNegotiable ? ' (Nego)' : ''}',
-            style: TextStyle(
-                fontSize: 18,
-                color: Theme.of(context).primaryColor,
-                fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(
-              '${'jobs.workPeriods.${job.workPeriod ?? 'etc'}'.tr()} / ${job.workHours ?? ''}'),
-          const Divider(height: 32),
-
-          // --- 3. 상세 설명 ---
-          Text('jobs.detail.infoTitle'.tr(),
-              style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          Text(job.description,
-              style: const TextStyle(fontSize: 16, height: 1.5)),
-
-          // ✅ 2. [공용 위젯 적용] 태그 리스트
-          if (job.tags.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            ClickableTagList(tags: job.tags),
-          ],
-
-          const Divider(height: 32),
-
-          // ✅ 3. [공용 위젯 적용] 미니맵
-          if (job.geoPoint != null) ...[
-            Text('jobs.detail.locationTitle'.tr(),
-                style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 12),
-            MiniMapView(
-              location: job.geoPoint!,
-              markerId: job.id,
-              myLocationEnabled: false,
-            ),
-            const Divider(height: 32),
-          ],
-
-          // ✅ 4. [공용 위젯 적용] 작성자 프로필 타일
-          Text('jobs.detail.authorTitle'.tr(),
-              style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 12),
-          AuthorProfileTile(userId: job.userId),
-
-          const SizedBox(height: 80),
-        ],
-      ),
+      body: content,
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(

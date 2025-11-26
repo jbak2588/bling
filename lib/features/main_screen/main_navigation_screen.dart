@@ -34,6 +34,8 @@ import 'package:bling_app/features/location/providers/location_provider.dart'; /
 import 'package:bling_app/core/utils/localization_utils.dart';
 // ✅ [신규] 검색 로직을 위해 모든 피드 스크린 import
 import 'package:bling_app/features/local_news/screens/local_news_screen.dart';
+import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
+import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/features/jobs/screens/jobs_screen.dart';
 import 'package:bling_app/features/lost_and_found/screens/lost_and_found_screen.dart';
 import 'package:bling_app/features/marketplace/screens/marketplace_screen.dart';
@@ -43,6 +45,17 @@ import 'package:bling_app/features/clubs/screens/clubs_screen.dart';
 import 'package:bling_app/features/real_estate/screens/real_estate_screen.dart';
 import 'package:bling_app/features/auction/screens/auction_screen.dart';
 import 'package:bling_app/features/pom/screens/pom_screen.dart';
+// Detail screens used by onIconTap -> may be recreated in embedded mode
+import 'package:bling_app/features/marketplace/screens/product_detail_screen.dart';
+import 'package:bling_app/features/local_stores/screens/shop_detail_screen.dart';
+import 'package:bling_app/features/jobs/screens/job_detail_screen.dart';
+import 'package:bling_app/features/auction/screens/auction_detail_screen.dart';
+import 'package:bling_app/features/clubs/screens/club_post_detail_screen.dart';
+import 'package:bling_app/features/clubs/screens/club_detail_screen.dart';
+import 'package:bling_app/features/clubs/screens/club_proposal_detail_screen.dart';
+import 'package:bling_app/features/lost_and_found/screens/lost_item_detail_screen.dart';
+import 'package:bling_app/features/real_estate/screens/room_detail_screen.dart';
+import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 
 import 'package:bling_app/features/jobs/screens/select_job_type_screen.dart';
 import 'package:bling_app/features/local_stores/screens/create_shop_screen.dart';
@@ -65,6 +78,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:provider/provider.dart'; // ✅ Provider Import
+import 'package:bling_app/features/admin/screens/deletion_requests_screen.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/core/models/user_model.dart';
 
@@ -935,8 +949,230 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       // HomeScreen이 화면에 있을 때만 offset 접근
       _savedHomeScrollOffset = _homeScrollController.offset;
     }
+    // If the incoming page is a known detail screen that should run in
+    // embedded mode, recreate it with embedded=true and pass an onClose
+    // callback so the parent shell can clear the embedded content.
+    Widget pageToSet = page;
+    if (page is LocalNewsDetailScreen) {
+      final PostModel p = page.post;
+      pageToSet = LocalNewsDetailScreen(
+        post: p,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    } else if (page is PomScreen) {
+      // Recreate PomScreen in embedded mode and provide onClose.
+      pageToSet = PomScreen(
+        userModel: page.userModel,
+        initialPoms: page.initialPoms,
+        initialIndex: page.initialIndex,
+        locationFilter: page.locationFilter,
+        autoFocusSearch: page.autoFocusSearch,
+        searchNotifier: page.searchNotifier,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    } else if (page is ProductDetailScreen) {
+      pageToSet = ProductDetailScreen(
+        product: page.product,
+        productId: page.productId,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    } else if (page is ShopDetailScreen) {
+      pageToSet = ShopDetailScreen(
+        shop: page.shop,
+        userModel: page.userModel,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    } else if (page is JobDetailScreen) {
+      pageToSet = JobDetailScreen(
+        job: page.job,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    } else if (page is AuctionDetailScreen) {
+      pageToSet = AuctionDetailScreen(
+        auction: page.auction,
+        userModel: page.userModel,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    } else if (page is ClubPostDetailScreen) {
+      pageToSet = ClubPostDetailScreen(
+        post: page.post,
+        club: page.club,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    } else if (page is ClubDetailScreen) {
+      pageToSet = ClubDetailScreen(
+        club: page.club,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    } else if (page is ClubProposalDetailScreen) {
+      pageToSet = ClubProposalDetailScreen(
+        proposal: page.proposal,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    } else if (page is LostItemDetailScreen) {
+      pageToSet = LostItemDetailScreen(
+        item: page.item,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    } else if (page is RoomDetailScreen) {
+      pageToSet = RoomDetailScreen(
+        room: page.room,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    } else if (page is FindFriendDetailScreen) {
+      pageToSet = FindFriendDetailScreen(
+        user: page.user,
+        currentUserModel: page.currentUserModel,
+        embedded: true,
+        onClose: () {
+          if (!mounted) return;
+          setState(() {
+            _currentHomePageContent = null;
+            _appBarTitleKey = 'main.myTown';
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_homeScrollController.hasClients) {
+              _homeScrollController.jumpTo(_savedHomeScrollOffset);
+            }
+          });
+        },
+      );
+    }
+
     setState(() {
-      _currentHomePageContent = page;
+      _currentHomePageContent = pageToSet;
       _appBarTitleKey = titleKey; // 키 그대로 저장
       _currentSection = _sectionFromTitleKey(titleKey);
     });
@@ -1321,6 +1557,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       onTap:
                           _confirmResetAiCounts, // [Fix] _resetAiCancelCounts -> _confirmResetAiCounts
                     ),
+
+                  // ✅ [작업 14] 탈퇴 요청 목록 화면 연결
+                  ListTile(
+                    leading: Icon(
+                      Icons.person_off,
+                      color: Colors.red,
+                    ),
+                    title: const Text('ADMIN: Account Deletion Requests'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const DeletionRequestsScreen(),
+                      ));
+                    },
+                  ),
                 ],
                 const Divider(),
                 ListTile(

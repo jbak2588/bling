@@ -49,7 +49,10 @@ import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class LostItemDetailScreen extends StatefulWidget {
   final LostItemModel item;
-  const LostItemDetailScreen({super.key, required this.item});
+  final bool embedded;
+  final VoidCallback? onClose;
+  const LostItemDetailScreen(
+      {super.key, required this.item, this.embedded = false, this.onClose});
 
   @override
   State<LostItemDetailScreen> createState() => _LostItemDetailScreenState();
@@ -134,6 +137,8 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
 
       if (!context.mounted) return;
 
+      if (widget.embedded && widget.onClose != null) widget.onClose!();
+
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ChatRoomScreen(
@@ -203,13 +208,125 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
     final Color typeColor =
         widget.item.type == 'lost' ? Colors.redAccent : Colors.blueAccent;
 
+    final Widget content = ListView(
+      controller: _scrollController,
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
+      children: [
+        // ✅ 기존 이미지를 공용 이미지 캐러셀로 교체
+        if (widget.item.imageUrls.isNotEmpty)
+          GestureDetector(
+            onTap: () {
+              if (widget.embedded && widget.onClose != null) widget.onClose!();
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) =>
+                    ImageGalleryScreen(imageUrls: widget.item.imageUrls),
+              ));
+            },
+            child: ImageCarouselCard(
+              storageId: widget.item.id,
+              imageUrls: widget.item.imageUrls,
+              height: 250,
+            ),
+          ),
+        const SizedBox(height: 16),
+        Chip(
+          label: Text(widget.item.type == 'lost'
+              ? 'lostAndFound.lost'.tr()
+              : 'lostAndFound.found'.tr()),
+          backgroundColor: typeColor.withValues(alpha: 0.1),
+          labelStyle: TextStyle(color: typeColor, fontWeight: FontWeight.bold),
+          side: BorderSide(color: typeColor),
+        ),
+        const SizedBox(height: 8),
+        Text(widget.item.itemDescription,
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold)),
+        const Divider(height: 32),
+        _buildInfoRow(
+            context,
+            Icons.location_on_outlined,
+            'lostAndFound.detail.location'.tr(),
+            widget.item.locationDescription),
+
+        const SizedBox(height: 16),
+
+        // ✅ 태그, 지도, 작성자 정보 공용 위젯 추가
+        ClickableTagList(tags: _currentItem.tags),
+
+        // ✅ [작업 44] 1. 현상금 정보 표시
+        if (_currentItem.isHunted && (_currentItem.bountyAmount ?? 0) > 0) ...[
+          const SizedBox(height: 24),
+          _buildInfoRow(
+            context,
+            Icons.paid_outlined,
+            'lostAndFound.detail.bounty'.tr(), // '현상금'
+            NumberFormat.currency(
+              locale: context.locale.toString(),
+              symbol: 'Rp',
+              decimalDigits: 0,
+            ).format(_currentItem.bountyAmount!),
+            color: Colors.orange,
+          ),
+        ],
+        if (widget.item.geoPoint != null) ...[
+          const SizedBox(height: 16),
+          MiniMapView(
+              location: widget.item.geoPoint!, markerId: widget.item.id),
+        ],
+        const Divider(height: 32),
+        _buildLostItemStats(),
+        const Divider(height: 32),
+        Text('lostAndFound.detail.registrant'.tr(),
+            style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        // ✅ 기존 _buildOwnerInfo를 공용 AuthorProfileTile로 교체
+        AuthorProfileTile(userId: widget.item.userId),
+
+        // ✅ 댓글 입력 및 목록
+        const Divider(height: 32),
+        Text('common.comments'.tr(),
+            style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 16),
+        CommentListView(
+          postId: _currentItem.id,
+          postOwnerId: _currentItem.userId,
+          collectionPath: 'lost_and_found',
+          activeReplyCommentId: _activeReplyCommentId,
+          onReplyTap: _handleReplyTap,
+          onCommentDeleted: _handleCommentDeleted,
+        ),
+        const SizedBox(height: 12),
+        // 항상 표시되는 댓글 입력란 (본문 맨 하단)
+        CommentInputField(
+          postId: _currentItem.id,
+          collectionPath: 'lost_and_found',
+          onCommentAdded: _handleCommentAdded,
+          hintText: 'commentInputField.hintText'.tr(),
+        ),
+
+        const SizedBox(height: 80),
+      ],
+    );
+
+    if (widget.embedded) {
+      return Container(color: Colors.white, child: content);
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: AppBarIcon(
             icon: Icons.arrow_back,
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              if (widget.embedded && widget.onClose != null) {
+                widget.onClose!();
+                return;
+              }
+              Navigator.of(context).pop();
+            },
           ),
         ),
         title: Text('lostAndFound.detail.title'.tr()),

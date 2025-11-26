@@ -175,7 +175,18 @@ class ProductDetailScreen extends StatefulWidget {
   // [V3 NOTIFICATION] ID 또는 객체로 화면을 로드할 수 있도록 허용
   final ProductModel? product;
   final String? productId;
-  const ProductDetailScreen({super.key, this.product, this.productId})
+  // Embedded mode: when true, don't render a nested Scaffold/AppBar/FAB.
+  // Parent shell will provide AppBar and BottomNavigationBar. When the
+  // detail is embedded and needs to trigger a full-screen push, call
+  // `onClose` first so the parent can clear the embedded content.
+  final bool embedded;
+  final VoidCallback? onClose;
+  const ProductDetailScreen(
+      {super.key,
+      this.product,
+      this.productId,
+      this.embedded = false,
+      this.onClose})
       : assert(product != null || productId != null,
             'product 또는 productId 중 하나는 필수입니다.');
 
@@ -466,6 +477,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
+          if (widget.embedded) {
+            return const Center(child: CircularProgressIndicator());
+          }
           return Scaffold(
               appBar: AppBar(),
               body: const Center(child: CircularProgressIndicator()));
@@ -481,6 +495,193 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         // [AI 인수] 내가 예약한 상품인지 확인
         final bool isReservedByMe =
             isReserved && product.buyerId != null && product.buyerId == myUid;
+
+        // Build the main body content (the part that should be embedded)
+        final Widget bodyContent = CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 300,
+              pinned: true,
+              // make leading and action icons easier to read on top of the
+              // image by wrapping them in a dark circular background
+              leading: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: AppBarIcon(
+                  icon: Icons.arrow_back,
+                  onPressed: () {
+                    if (widget.embedded && widget.onClose != null) {
+                      widget.onClose!();
+                      return;
+                    }
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+              flexibleSpace: FlexibleSpaceBar(
+                background: GestureDetector(
+                  onTap: () {
+                    if (imageUrls.isNotEmpty) {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => ImageGalleryScreen(
+                            imageUrls: imageUrls, initialIndex: _currentIndex),
+                      ));
+                    }
+                  },
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (imageUrls.isEmpty)
+                        Container(
+                            color: Colors.grey[200],
+                            child: const Icon(Icons.image_not_supported,
+                                size: 60, color: Colors.grey))
+                      else
+                        PageView.builder(
+                          controller: _pageController,
+                          itemCount: imageUrls.length,
+                          onPageChanged: (index) =>
+                              setState(() => _currentIndex = index),
+                          itemBuilder: (context, index) {
+                            return Hero(
+                              tag: 'product_image_$index',
+                              child: Image.network(imageUrls[index],
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity),
+                            );
+                          },
+                        ),
+                      if (imageUrls.length > 1)
+                        Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 18,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(imageUrls.length, (idx) {
+                                return Container(
+                                  margin:
+                                      const EdgeInsets.symmetric(horizontal: 2),
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    color: _currentIndex == idx
+                                        ? Colors.white
+                                        : Colors.white.withAlpha(115),
+                                    shape: BoxShape.circle,
+                                  ),
+                                );
+                              }),
+                            )),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: AppBarIcon(
+                    icon: Icons.share,
+                    onPressed: () => SharePlus.instance.share(
+                      ShareParams(
+                          text: 'Check out this product: ${product.title}'),
+                    ),
+                  ),
+                ),
+                if (isMyProduct)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: AppBarIcon(
+                      icon: Icons.edit,
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ProductEditScreen(product: product),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (isMyProduct)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: AppBarIcon(
+                        icon: Icons.delete, onPressed: _showDeleteDialog),
+                  ),
+              ],
+            ),
+            SliverList(
+              delegate: SliverChildListDelegate([
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AuthorProfileTile(userId: product.userId),
+                      const Divider(height: 32),
+                      Text(product.title,
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      if (product.isAiVerified)
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 16.0),
+                          child: AiVerificationBadge(),
+                        ),
+                      Row(children: [
+                        CategoryNameWidget(
+                            categoryId: product.categoryId,
+                            categoryParentId: product.categoryParentId),
+                        Text(" ∙ ${_formatTimestamp(product.createdAt)}",
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.grey)),
+                      ]),
+                      const SizedBox(height: 16),
+
+                      // [개편안 2] 1. 사용자가 작성한 설명 (항상 표시)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Text(
+                          product.description,
+                          style: const TextStyle(fontSize: 16, height: 1.6),
+                        ),
+                      ),
+
+                      // [개편안 2] 2. AI 검증 리포트 (검증된 경우에만 표시)
+                      if (product.isAiVerified)
+                        AiReportViewer(
+                          aiReport: Map<String, dynamic>.from(
+                              product.aiReport ??
+                                  product.aiVerificationData ??
+                                  {}),
+                        ),
+
+                      // ✅ 3. 공용 위젯 추가
+                      ClickableTagList(tags: product.tags),
+                      if (hasLocation) ...[
+                        const Divider(height: 32),
+                        Text('marketplace.detail.dealLocation'.tr(),
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 12),
+                        MiniMapView(
+                          location: product.geoPoint!,
+                          markerId: product.id,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ]),
+            ),
+          ],
+        );
+
+        if (widget.embedded) {
+          return DefaultTextStyle(
+            style: Theme.of(context).textTheme.bodyMedium!,
+            child: Container(color: Colors.grey.shade100, child: bodyContent),
+          );
+        }
 
         return Scaffold(
           floatingActionButton: _buildFloatingActionButton(
@@ -592,195 +793,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
             ),
           ),
-          body: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                expandedHeight: 300,
-                pinned: true,
-                // make leading and action icons easier to read on top of the
-                // image by wrapping them in a dark circular background
-                leading: Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: AppBarIcon(
-                    icon: Icons.arrow_back,
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ),
-                flexibleSpace: FlexibleSpaceBar(
-                  background: GestureDetector(
-                    onTap: () {
-                      if (imageUrls.isNotEmpty) {
-                        // ✅ 2. ImageGalleryScreen 호출로 교체
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => ImageGalleryScreen(
-                              imageUrls: imageUrls,
-                              initialIndex: _currentIndex),
-                        ));
-                      }
-                    },
-                    // ... 나머지 이미지 PageView 부분은 원본과 동일 ...
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        if (imageUrls.isEmpty)
-                          Container(
-                              color: Colors.grey[200],
-                              child: const Icon(Icons.image_not_supported,
-                                  size: 60, color: Colors.grey))
-                        else
-                          PageView.builder(
-                            controller: _pageController,
-                            itemCount: imageUrls.length,
-                            onPageChanged: (index) =>
-                                setState(() => _currentIndex = index),
-                            itemBuilder: (context, index) {
-                              return Hero(
-                                tag: 'product_image_$index',
-                                child: Image.network(imageUrls[index],
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity),
-                              );
-                            },
-                          ),
-                        if (imageUrls.length > 1)
-                          Positioned(
-                              left: 0,
-                              right: 0,
-                              bottom: 18,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children:
-                                    List.generate(imageUrls.length, (idx) {
-                                  return Container(
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 2),
-                                    width: 7,
-                                    height: 7,
-                                    decoration: BoxDecoration(
-                                      color: _currentIndex == idx
-                                          ? Colors.white
-                                          : Colors.white.withAlpha(115),
-                                      shape: BoxShape.circle,
-                                    ),
-                                  );
-                                }),
-                              )),
-                      ],
-                    ),
-                  ),
-                ),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: AppBarIcon(
-                      icon: Icons.share,
-                      onPressed: () => SharePlus.instance.share(
-                        ShareParams(
-                            text: 'Check out this product: ${product.title}'),
-                      ),
-                    ),
-                  ),
-                  if (isMyProduct)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: AppBarIcon(
-                        icon: Icons.edit,
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ProductEditScreen(product: product),
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (isMyProduct)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: AppBarIcon(
-                          icon: Icons.delete, onPressed: _showDeleteDialog),
-                    ),
-                ],
-              ),
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AuthorProfileTile(userId: product.userId),
-                        const Divider(height: 32),
-                        Text(product.title,
-                            style: const TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 8),
-                        if (product.isAiVerified)
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 16.0),
-                            child: AiVerificationBadge(),
-                          ),
-                        Row(children: [
-                          CategoryNameWidget(
-                              categoryId: product.categoryId,
-                              categoryParentId: product.categoryParentId),
-                          Text(" ∙ ${_formatTimestamp(product.createdAt)}",
-                              style: const TextStyle(
-                                  fontSize: 13, color: Colors.grey)),
-                        ]),
-                        const SizedBox(height: 16),
-
-                        // [개편안 2] 1. 사용자가 작성한 설명 (항상 표시)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16.0),
-                          child: Text(
-                            product.description,
-                            style: const TextStyle(fontSize: 16, height: 1.6),
-                          ),
-                        ),
-
-                        // [개편안 2] 2. AI 검증 리포트 (검증된 경우에만 표시)
-                        if (product.isAiVerified)
-                          AiReportViewer(
-                            aiReport: Map<String, dynamic>.from(
-                                product.aiReport ??
-                                    product.aiVerificationData ??
-                                    {}),
-                          ),
-
-                        // ✅ 3. 공용 위젯 추가
-                        ClickableTagList(tags: product.tags),
-                        if (hasLocation) ...[
-                          const Divider(height: 32),
-                          Text('marketplace.detail.dealLocation'.tr(),
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 12),
-                          MiniMapView(
-                            location: product.geoPoint!,
-                            markerId: product.id,
-                            // [Fix #1] 80초 멈춤(Jank) 현상 해결을 위해 myLocation 비활성화
-                            myLocationEnabled: false,
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-
-                        const Divider(height: 32),
-                        // ... 통계 라인은 원본과 동일 ...
-                        Text(
-                          '${'marketplace.detail.likes'.tr()} ${product.likesCount} ∙ ${'marketplace.detail.chats'.tr()} ${product.chatsCount} ∙ ${'marketplace.detail.views'.tr()} ${product.viewsCount}',
-                          style:
-                              const TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                        // [Fix #2] 1px 오버플로우 방지를 위해 정적 높이 사용
-                        const SizedBox(height: 80.0),
-                      ],
-                    ),
-                  ),
-                ]),
-              ),
-            ],
-          ),
+          body: bodyContent,
         );
       },
     );

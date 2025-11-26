@@ -15,9 +15,15 @@ import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 class ClubPostDetailScreen extends StatefulWidget {
   final ClubPostModel post;
   final ClubModel club;
+  final bool embedded;
+  final VoidCallback? onClose;
 
   const ClubPostDetailScreen(
-      {super.key, required this.post, required this.club});
+      {super.key,
+      required this.post,
+      required this.club,
+      this.embedded = false,
+      this.onClose});
 
   @override
   State<ClubPostDetailScreen> createState() => _ClubPostDetailScreenState();
@@ -137,124 +143,146 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final inner = Column(
+      children: [
+        Expanded(
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildAuthorInfo(widget.post.userId),
+                      const Divider(height: 24),
+                      Text(widget.post.body,
+                          style: const TextStyle(fontSize: 16, height: 1.5)),
+                      const SizedBox(height: 16),
+                      if (widget.post.imageUrls != null &&
+                          widget.post.imageUrls!.isNotEmpty)
+                        ...widget.post.imageUrls!.map((url) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  if (widget.embedded &&
+                                      widget.onClose != null) {
+                                    widget.onClose!();
+                                  }
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (_) => Image.network(url)));
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(url),
+                                ),
+                              ),
+                            )),
+                      const Divider(height: 32),
+                      _buildActionRow(),
+                      const Divider(height: 32),
+                    ],
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text('clubs.postDetail.commentsTitle'.tr(),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
+                ),
+              ),
+              StreamBuilder<List<ClubCommentModel>>(
+                stream: _repository.getClubPostCommentsStream(
+                    widget.club.id, widget.post.id),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const SliverToBoxAdapter(
+                        child: Center(child: CircularProgressIndicator()));
+                  }
+                  final comments = snapshot.data!;
+                  if (comments.isEmpty) {
+                    return SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Center(
+                            child: Text('clubs.postDetail.noComments'.tr(),
+                                style: const TextStyle(color: Colors.grey))),
+                      ),
+                    );
+                  }
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildCommentItem(comments[index]),
+                      childCount: comments.length,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        // --- 댓글 입력창 ---
+        SafeArea(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _commentController,
+                    decoration: InputDecoration(
+                      hintText: 'clubs.postDetail.commentHint'.tr(),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _submitComment(),
+                  ),
+                ),
+                IconButton(
+                  icon: _isSendingComment
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.send),
+                  onPressed: _isSendingComment ? null : _submitComment,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (widget.embedded) {
+      return Container(color: Colors.white, child: inner);
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: AppBarIcon(
             icon: Icons.arrow_back,
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              if (widget.embedded && widget.onClose != null) {
+                widget.onClose!();
+                return;
+              }
+              Navigator.of(context).pop();
+            },
           ),
         ),
         title: Text('clubs.postDetail.appBarTitle'
             .tr(namedArgs: {'title': widget.club.title})),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildAuthorInfo(widget.post.userId),
-                        const Divider(height: 24),
-                        Text(widget.post.body,
-                            style: const TextStyle(fontSize: 16, height: 1.5)),
-                        const SizedBox(height: 16),
-                        if (widget.post.imageUrls != null &&
-                            widget.post.imageUrls!.isNotEmpty)
-                          ...widget.post.imageUrls!.map((url) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(url),
-                                ),
-                              )),
-                        const Divider(height: 32),
-                        _buildActionRow(),
-                        const Divider(height: 32),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text('clubs.postDetail.commentsTitle'.tr(),
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                StreamBuilder<List<ClubCommentModel>>(
-                  stream: _repository.getClubPostCommentsStream(
-                      widget.club.id, widget.post.id),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const SliverToBoxAdapter(
-                          child: Center(child: CircularProgressIndicator()));
-                    }
-                    final comments = snapshot.data!;
-                    if (comments.isEmpty) {
-                      return SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Center(
-                              child: Text('clubs.postDetail.noComments'.tr(),
-                                  style: const TextStyle(color: Colors.grey))),
-                        ),
-                      );
-                    }
-                    return SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => _buildCommentItem(comments[index]),
-                        childCount: comments.length,
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          // --- 댓글 입력창 ---
-          SafeArea(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _commentController,
-                      decoration: InputDecoration(
-                        hintText: 'clubs.postDetail.commentHint'.tr(),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _submitComment(),
-                    ),
-                  ),
-                  IconButton(
-                    icon: _isSendingComment
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.send),
-                    onPressed: _isSendingComment ? null : _submitComment,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+      body: inner,
     );
   }
 

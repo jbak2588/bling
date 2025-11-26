@@ -40,6 +40,13 @@ class PomScreen extends StatefulWidget {
   final Map<String, String?>? locationFilter;
   final bool autoFocusSearch;
   final ValueNotifier<bool>? searchNotifier;
+  // Embedded mode: when true the screen will not render its own Scaffold
+  // floatingActionButton or AppBar; parent shell provides those. When a
+  // full-screen pager should be opened immediately (initialPoms), the
+  // embedded instance will call `onClose` before pushing the pager so
+  // that the parent can restore shell UI correctly.
+  final bool embedded;
+  final VoidCallback? onClose;
 
   const PomScreen({
     this.userModel,
@@ -48,6 +55,8 @@ class PomScreen extends StatefulWidget {
     this.locationFilter,
     this.autoFocusSearch = false,
     this.searchNotifier,
+    this.embedded = false,
+    this.onClose,
     super.key,
   });
 
@@ -84,6 +93,12 @@ class _PomScreenState extends State<PomScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final int startIndex =
             widget.initialIndex.clamp(0, widget.initialPoms!.length - 1);
+        // If embedded, prefer to close the embedded host first so the
+        // full-screen pager is pushed on a clean navigator stack.
+        if (widget.embedded && widget.onClose != null) {
+          widget.onClose!();
+        }
+
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => PomPagerScreen(
@@ -149,65 +164,81 @@ class _PomScreenState extends State<PomScreen> {
             ? widget.initialIndex.clamp(0, tabs.length - 1)
             : 0;
 
+    // When embedded, do not create a nested Scaffold (parent provides AppBar
+    // and bottom navigation). Render the same content that would be inside
+    // the Scaffold body.
+    final bodyContent = Column(
+      children: [
+        if (_showSearchBar)
+          InlineSearchChip(
+            hintText: 'pom.search.hint'.tr(),
+            openNotifier: widget.searchNotifier,
+            onSubmitted: _onSearchSubmitted,
+            onClose: _onSearchClosed,
+          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: TabBar(
+            tabs: tabs.map((name) => Tab(text: name)).toList(),
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            labelColor: const Color(0xFF00A66C),
+            unselectedLabelColor: const Color(0xFF616161),
+            indicatorColor: const Color(0xFF00A66C),
+          ),
+        ),
+        Expanded(
+          child: TabBarView(
+            children: [
+              PomFeedList(
+                feedType: PomFeedType.local,
+                userModel: widget.userModel,
+                locationFilter: widget.locationFilter,
+                searchKeywordListenable: _searchKeywordNotifier,
+                refreshToken: _refreshToken,
+              ),
+              PomFeedList(
+                feedType: PomFeedType.all,
+                userModel: widget.userModel,
+                searchKeywordListenable: _searchKeywordNotifier,
+                refreshToken: _refreshToken,
+              ),
+              PomFeedList(
+                feedType: PomFeedType.popular,
+                userModel: widget.userModel,
+                locationFilter: widget.locationFilter,
+                searchKeywordListenable: _searchKeywordNotifier,
+                refreshToken: _refreshToken,
+              ),
+              PomFeedList(
+                feedType: PomFeedType.myPoms,
+                userModel: widget.userModel,
+                searchKeywordListenable: _searchKeywordNotifier,
+                refreshToken: _refreshToken,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (widget.embedded) {
+      return DefaultTabController(
+        length: tabs.length,
+        initialIndex: safeTabIndex,
+        child: Container(
+          color: Colors.grey.shade100,
+          child: bodyContent,
+        ),
+      );
+    }
+
     return DefaultTabController(
       length: tabs.length,
       initialIndex: safeTabIndex,
       child: Scaffold(
         backgroundColor: Colors.grey.shade100,
-        body: Column(
-          children: [
-            if (_showSearchBar)
-              InlineSearchChip(
-                hintText: 'pom.search.hint'.tr(),
-                openNotifier: widget.searchNotifier,
-                onSubmitted: _onSearchSubmitted,
-                onClose: _onSearchClosed,
-              ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: TabBar(
-                tabs: tabs.map((name) => Tab(text: name)).toList(),
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                labelColor: const Color(0xFF00A66C),
-                unselectedLabelColor: const Color(0xFF616161),
-                indicatorColor: const Color(0xFF00A66C),
-              ),
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  PomFeedList(
-                    feedType: PomFeedType.local,
-                    userModel: widget.userModel,
-                    locationFilter: widget.locationFilter,
-                    searchKeywordListenable: _searchKeywordNotifier,
-                    refreshToken: _refreshToken,
-                  ),
-                  PomFeedList(
-                    feedType: PomFeedType.all,
-                    userModel: widget.userModel,
-                    searchKeywordListenable: _searchKeywordNotifier,
-                    refreshToken: _refreshToken,
-                  ),
-                  PomFeedList(
-                    feedType: PomFeedType.popular,
-                    userModel: widget.userModel,
-                    locationFilter: widget.locationFilter,
-                    searchKeywordListenable: _searchKeywordNotifier,
-                    refreshToken: _refreshToken,
-                  ),
-                  PomFeedList(
-                    feedType: PomFeedType.myPoms,
-                    userModel: widget.userModel,
-                    searchKeywordListenable: _searchKeywordNotifier,
-                    refreshToken: _refreshToken,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+        body: bodyContent,
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             final created = await Navigator.of(context).push<bool>(
