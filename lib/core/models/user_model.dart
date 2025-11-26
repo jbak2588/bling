@@ -93,6 +93,10 @@ class UserModel {
   final bool? marketingAgreed; // 마케팅 수신 동의 (선택)
   final Timestamp createdAt; // 가입 시각 (Firestore Timestamp)
 
+  // ✅ [작업 14] 계정 탈퇴 요청 플래그
+  final bool isDeletionRequested;
+  final Timestamp? deletionRequestedAt;
+
   // [친구찾기/데이팅]
   // [관리자/운영]
   final bool isAdmin; // [추가]
@@ -164,6 +168,9 @@ class UserModel {
     this.rejectedUsers,
     this.clubs, // [추가]
     this.searchIndex = const [],
+    // ✅ [작업 14] 생성자 추가
+    this.isDeletionRequested = false,
+    this.deletionRequestedAt,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -260,6 +267,9 @@ class UserModel {
       searchIndex: data['searchIndex'] != null
           ? List<String>.from(data['searchIndex'])
           : [],
+      // ✅ [작업 14] 필드 로드
+      isDeletionRequested: data['isDeletionRequested'] ?? false,
+      deletionRequestedAt: data['deletionRequestedAt'],
     );
   }
 
@@ -324,6 +334,9 @@ class UserModel {
       'lastActiveAt': lastActiveAt,
       'clubs': clubs, // [추가]
       'searchIndex': searchIndex,
+      // ✅ [작업 14] 필드 저장
+      'isDeletionRequested': isDeletionRequested,
+      'deletionRequestedAt': deletionRequestedAt,
     };
   }
 

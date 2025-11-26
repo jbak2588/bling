@@ -489,6 +489,13 @@
       "confirmTitle": "Keluar",
       "confirmBody": "Apakah Anda yakin ingin keluar?"
     }
+    ,
+    "deleteAccount": {
+      "button": "Minta Penghapusan Akun",
+      "confirmTitle": "Minta Penghapusan Akun",
+      "confirmBody": "Apakah Anda yakin ingin mengajukan permintaan penghapusan akun? Data Anda akan dihapus setelah persetujuan admin.",
+      "requested": "Permintaan penghapusan Anda telah diterima. Data akan dihapus setelah disetujui oleh admin."
+    }
   },
   "friendRequests": {
     "title": "Permintaan Pertemanan",

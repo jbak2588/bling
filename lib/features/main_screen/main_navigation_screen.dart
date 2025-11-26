@@ -78,6 +78,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:provider/provider.dart'; // ✅ Provider Import
+import 'package:bling_app/features/admin/screens/deletion_requests_screen.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/core/models/user_model.dart';
 
@@ -1556,6 +1557,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       onTap:
                           _confirmResetAiCounts, // [Fix] _resetAiCancelCounts -> _confirmResetAiCounts
                     ),
+
+                  // ✅ [작업 14] 탈퇴 요청 목록 화면 연결
+                  ListTile(
+                    leading: Icon(
+                      Icons.person_off,
+                      color: Colors.red,
+                    ),
+                    title: const Text('ADMIN: Account Deletion Requests'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const DeletionRequestsScreen(),
+                      ));
+                    },
+                  ),
                 ],
                 const Divider(),
                 ListTile(

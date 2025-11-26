@@ -32,6 +32,7 @@ import 'package:bling_app/features/my_bling/screens/blocked_users_screen.dart';
 import 'package:bling_app/features/my_bling/screens/notification_settings_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -141,6 +142,74 @@ class SettingsScreen extends StatelessWidget {
                 side: const BorderSide(color: Colors.red),
               ),
               child: Text('settings.logout.button'.tr()), // "로그아웃"
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // 계정 탈퇴 요청 버튼 (즉시 삭제 대신 요청 상태로 기록)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: OutlinedButton(
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text('settings.deleteAccount.confirmTitle'.tr()),
+                    content: Text('settings.deleteAccount.confirmBody'.tr()),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        child: Text('common.cancel'.tr()),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        child: Text('common.confirm'.tr()),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm == true) {
+                  try {
+                    final uid = FirebaseAuth.instance.currentUser?.uid;
+                    if (uid != null) {
+                      // ✅ [작업 14] 즉시 삭제 대신 '탈퇴 요청' 상태로 변경
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(uid)
+                          .update({
+                        'isDeletionRequested': true,
+                        'deletionRequestedAt': FieldValue.serverTimestamp(),
+                      });
+
+                      // 로그아웃 처리
+                      await FirebaseAuth.instance.signOut();
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  'settings.deleteAccount.requested'.tr())),
+                        );
+                        Navigator.of(context)
+                            .popUntil((route) => route.isFirst);
+                      }
+                    }
+                  } catch (e) {
+                    // 실패 시 간단한 피드백
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('common.error_occurred'.tr())),
+                      );
+                    }
+                  }
+                }
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+                side: const BorderSide(color: Colors.red),
+              ),
+              child: Text('settings.deleteAccount.button'.tr()),
             ),
           ),
           const SizedBox(height: 24),

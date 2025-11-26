@@ -489,6 +489,13 @@
       "confirmTitle": "Log Out",
       "confirmBody": "Are you sure you want to log out?"
     }
+    ,
+    "deleteAccount": {
+      "button": "Request Account Deletion",
+      "confirmTitle": "Request Account Deletion",
+      "confirmBody": "Are you sure you want to request account deletion? Your data will be removed after admin approval.",
+      "requested": "Your deletion request has been received. Data will be deleted after admin approval."
+    }
   },
   "friendRequests": {
     "title": "Received Friend Requests",

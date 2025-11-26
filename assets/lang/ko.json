@@ -489,6 +489,13 @@
       "confirmTitle": "로그아웃",
       "confirmBody": "정말 로그아웃 하시겠습니까?"
     }
+    ,
+    "deleteAccount": {
+      "button": "계정 탈퇴 요청",
+      "confirmTitle": "계정 탈퇴 요청",
+      "confirmBody": "계정을 즉시 삭제하는 대신 탈퇴 요청을 접수합니다. 계속 진행하시겠습니까?",
+      "requested": "탈퇴 요청이 접수되었습니다. 관리자 승인 후 데이터가 삭제됩니다."
+    }
   },
   "friendRequests": {
     "title": "받은 친구 요청",
