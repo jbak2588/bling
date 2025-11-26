@@ -525,7 +525,9 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 5, // 가로:세로 비율
+      // Increase vertical space for each grid tile to avoid overflow on
+      // smaller devices or when text sizes are large.
+      childAspectRatio: 3.2, // was 5
       children: [
         _buildInfoTile(
           Icons.fullscreen_outlined,
@@ -555,19 +557,28 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
 
   Widget _buildInfoTile(IconData icon, String label, String value) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, color: Colors.grey[700], size: 24),
+        Icon(icon, color: Colors.grey[700], size: 20),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(label,
-                style: const TextStyle(fontSize: 14, color: Colors.grey)),
-            Text(value,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14, color: Colors.grey)),
+              const SizedBox(height: 2),
+              Text(value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
         )
       ],
     );
