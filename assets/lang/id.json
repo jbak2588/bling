@@ -798,9 +798,9 @@
     "error": "error",
     "shareError": "shareError",
     "edit": "edit",
-    "submit": "submit",
-    "loginRequired": "loginRequired",
-    "unknownUser": "unknownUser",
+    "submit": "Simpan",
+    "loginRequired": "Diperlukan login.",
+    "unknownUser": "Pengguna tidak diketahui",
     "copiedTitle": "Disalin!",
     "copiedMessage": "{title} disalin ke clipboard."
   },
@@ -1156,7 +1156,7 @@
     },
     "createPost": {
       "title": "Posting Baru",
-      "submit": "Kirim",
+      "submit": "Simpan",
       "success": "Postingan berhasil dikirim.",
       "fail": "Gagal mengirim postingan: {error}",
       "bodyHint": "Masukkan konten..."

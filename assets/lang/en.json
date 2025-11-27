@@ -796,12 +796,12 @@
       "distance": "Distance",
       "popular": "Popular"
     },
-    "error": "error",
-    "shareError": "shareError",
-    "edit": "edit",
-    "submit": "submit",
-    "loginRequired": "loginRequired",
-    "unknownUser": "unknownUser",
+    "error": "Error",
+    "shareError": "Share error",
+    "edit": "Edit",
+    "submit": "Submit",
+    "loginRequired": "Login is required.",
+    "unknownUser": "Unknown user",
     "copiedTitle": "Copied!",
     "copiedMessage": "{title} copied to clipboard."
   },
@@ -1415,7 +1415,7 @@
       "photo": "Photo",
       "video": "Video",
       "titleImage": "Upload Photos",
-      "submit": "Upload",
+      "submit": "Register",
       "success": "POM uploaded.",
       "fail": "Failed to upload POM: {error}",
       "form": {
