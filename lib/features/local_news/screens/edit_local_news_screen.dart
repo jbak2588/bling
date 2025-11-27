@@ -398,7 +398,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
           onPressed: totalImageCount >= 10 ? null : _pickImages,
           icon: const Icon(Icons.camera_alt),
           label: Text(
-              '${'localNewsCreate.buttons.addImage'.tr()} ($totalImageCount/10)'),
+              '${'localNewsCreate.buttons.addImage'.tr()} ($totalImageCount/5)'),
         ),
         const SizedBox(height: 8),
         if (totalImageCount > 0)
