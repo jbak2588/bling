@@ -390,39 +390,8 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
                   // --- 기존 이미지 첨부 ---
                   _buildImagePicker(),
-                  // const SizedBox(height: 24),
-
-                  // // ✅ [복구] 카테고리 선택 드롭다운
-                  // DropdownButtonFormField<PostCategoryModel>(
-                  //   initialValue: _selectedCategory,
-                  //   decoration: InputDecoration(
-                  //     labelText: 'localNewsCreate.categoryLabel'.tr(),
-                  //     border: const OutlineInputBorder(),
-                  //     contentPadding: const EdgeInsets.symmetric(
-                  //         horizontal: 12, vertical: 8),
-                  //   ),
-                  //   items: AppCategories.postCategories.map((category) {
-                  //     return DropdownMenuItem<PostCategoryModel>(
-                  //       value: category,
-                  //       child: Row(
-                  //         children: [
-                  //           Text(category.emoji),
-                  //           const SizedBox(width: 8),
-                  //           Text(category.nameKey.tr()),
-                  //         ],
-                  //       ),
-                  //     );
-                  //   }).toList(),
-                  //   onChanged: (PostCategoryModel? value) {
-                  //     if (value != null) {
-                  //       setState(() => _selectedCategory = value);
-                  //     }
-                  //   },
-                  // ),
-                  const SizedBox(height: 16),
 
                   // Bottom primary action for create local news
-
                   ElevatedButton(
                     onPressed: _isSaving ? null : _savePost,
                     style: ElevatedButton.styleFrom(
@@ -547,7 +516,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
           onPressed: totalImageCount >= 10 ? null : _pickImages,
           icon: const Icon(Icons.camera_alt),
           label: Text(
-              '${'localNewsCreate.buttons.addImage'.tr()} ($totalImageCount/10)'),
+              '${'localNewsCreate.buttons.addImage'.tr()} ($totalImageCount/5)'),
         ),
         const SizedBox(height: 8),
         if (totalImageCount > 0)

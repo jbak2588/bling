@@ -689,8 +689,8 @@
       "titleLabel": "Judul",
       "contentLabel": "Masukkan konten",
       "tagsLabel": "Tag",
-      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
-      "recommendedTags": "recommendedTags"
+      "tagsHint": "(Pilih 1-3 tag)",
+      "recommendedTags": "Tag yang Direkomendasikan"
     },
     "labels": {
       "title": "Judul",
@@ -713,7 +713,7 @@
     },
     "buttons": {
       "addImage": "Tambah Gambar",
-      "submit": "Kirim"
+      "submit": "Simpan"
     },
     "alerts": {
       "contentRequired": "Harap masukkan konten.",
