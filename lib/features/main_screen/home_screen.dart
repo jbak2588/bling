@@ -258,6 +258,17 @@ class _HomeScreenState extends State<HomeScreen>
     // 초기 실행 시 상단 2개 섹션만 로딩
     _loadSectionData(AppSection.posts);
     _loadSectionData(AppSection.job);
+    // 스크롤 위치에 따라 '위로 가기' 버튼 표시
+    widget.controller.addListener(_onScroll);
+  }
+
+  bool _showScrollToTop = false;
+
+  void _onScroll() {
+    final show = widget.controller.hasClients && widget.controller.offset > 300;
+    if (show != _showScrollToTop) {
+      if (mounted) setState(() => _showScrollToTop = show);
+    }
   }
 
   // 섹션 데이터 로드 트리거 (fills _sectionData)
@@ -345,6 +356,87 @@ class _HomeScreenState extends State<HomeScreen>
   double effectiveTextScale(BuildContext context, {double basis = 16}) {
     final s = MediaQuery.textScalerOf(context);
     return s.scale(basis) / basis;
+  }
+
+  // (removed simple wrapper) use _buildSectionTitleWithIcon directly
+
+  /// Header builder that can optionally render a leading SVG icon sized
+  /// to match the title font size.
+  Widget _buildSectionTitleWithIcon(BuildContext context, String titleKey,
+      {String? svgAsset}) {
+    final theme = Theme.of(context);
+    final onSurface90 = theme.colorScheme.onSurface.withValues(alpha: 0.90);
+    final titleStyle = theme.textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: onSurface90,
+      height: 1.2,
+    );
+
+    final double iconSize = (titleStyle?.fontSize ?? 16.0) * 1.4;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (svgAsset != null) ...[
+          SvgPicture.asset(
+            svgAsset,
+            width: iconSize,
+            height: iconSize,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(width: 8),
+        ],
+        Flexible(
+          child: Text(
+            titleKey.tr(),
+            overflow: TextOverflow.ellipsis,
+            style: titleStyle,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Semantics(
+          label: 'common.new'.tr(),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              'common.new'.tr(),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String? _iconForSection(AppSection section) {
+    try {
+      final item = menuItems.firstWhere((m) => m.section == section);
+      return item.svg;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  ButtonStyle _viewAllButtonStyle(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextButton.styleFrom(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      minimumSize: const Size(0, 0),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      foregroundColor: theme.colorScheme.primary,
+      textStyle: theme.textTheme.labelMedium?.copyWith(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+    );
   }
 
   // 공통 View all 버튼 스타일 (removed - no longer used after header removal)
@@ -444,248 +536,290 @@ class _HomeScreenState extends State<HomeScreen>
 
     final double childAspectRatio = tileWidth / tileHeight;
 
-    return RefreshIndicator(
-      onRefresh: _refreshAll,
-      child: CustomScrollView(
-        controller: widget.controller,
-        slivers: [
-          // ❌ [작업 47] _searchChip 호출 제거 (컴파일 에러 원인)
+    return Stack(
+      children: [
+        RefreshIndicator(
+          onRefresh: _refreshAll,
+          child: CustomScrollView(
+            controller: widget.controller,
+            slivers: [
+              // ❌ [작업 47] _searchChip 호출 제거 (컴파일 에러 원인)
 
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            sliver: SliverGrid.count(
-              crossAxisCount: gridCount,
-              crossAxisSpacing: crossGap,
-              mainAxisSpacing: 12,
-              childAspectRatio: childAspectRatio,
-              children: menuItems.map((item) {
-                // 홈그리드 2차 버전 코드 니펫 시작
-                final textStyle = (gridCount == 5
-                        ? Theme.of(context).textTheme.labelSmall
-                        : Theme.of(context).textTheme.bodySmall)
-                    ?.copyWith(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.8),
-                  fontWeight: FontWeight.w500,
-                  height: 1.1, // 줄간격
-                );
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                sliver: SliverGrid.count(
+                  crossAxisCount: gridCount,
+                  crossAxisSpacing: crossGap,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: childAspectRatio,
+                  children: menuItems.map((item) {
+                    // 홈그리드 2차 버전 코드 니펫 시작
+                    final textStyle = (gridCount == 5
+                            ? Theme.of(context).textTheme.labelSmall
+                            : Theme.of(context).textTheme.bodySmall)
+                        ?.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.8),
+                      fontWeight: FontWeight.w500,
+                      height: 1.1, // 줄간격
+                    );
 
-                final minTextHeight = (textStyle?.fontSize ?? 12.0) *
-                    (textStyle?.height ?? 1.1) *
-                    2;
+                    final minTextHeight = (textStyle?.fontSize ?? 12.0) *
+                        (textStyle?.height ?? 1.1) *
+                        2;
 
-                final iconBoxSize =
-                    math.min(tileWidth * 0.999, tileHeight * 0.68);
+                    final iconBoxSize =
+                        math.min(tileWidth * 0.999, tileHeight * 0.68);
 
-                return InkWell(
-                  onTap: () {
-                    if (widget.userModel == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('user.notLoggedIn'.tr())),
-                      );
-                      return;
-                    }
-                    final screen = item.screen;
-                    late Widget nextScreen;
-                    if (screen is LocalNewsScreen) {
-                      nextScreen = LocalNewsScreen(
-                        userModel: widget.userModel,
-                        locationFilter: widget.activeLocationFilter,
-                        autoFocusSearch: false,
-                        searchNotifier: widget.searchNotifier,
-                      );
-                    } else if (screen is MarketplaceScreen) {
-                      nextScreen = MarketplaceScreen(
-                          userModel: widget.userModel,
-                          locationFilter: widget.activeLocationFilter,
-                          autoFocusSearch: false,
-                          searchNotifier: widget.searchNotifier);
-                    } else if (item.labelKey == 'main.tabs.clubs') {
-                      nextScreen = DefaultTabController(
-                        length: 2,
-                        child: Builder(
-                          builder: (ctx) => ClubsScreen(
+                    return InkWell(
+                      onTap: () {
+                        if (widget.userModel == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('user.notLoggedIn'.tr())),
+                          );
+                          return;
+                        }
+                        final screen = item.screen;
+                        late Widget nextScreen;
+                        if (screen is LocalNewsScreen) {
+                          nextScreen = LocalNewsScreen(
                             userModel: widget.userModel,
                             locationFilter: widget.activeLocationFilter,
                             autoFocusSearch: false,
                             searchNotifier: widget.searchNotifier,
-                            tabController: DefaultTabController.of(ctx),
-                          ),
-                        ),
-                      );
-                    } else if (screen is FindFriendsScreen) {
-                      nextScreen = FindFriendsScreen(
-                          userModel: widget.userModel,
-                          autoFocusSearch: false,
-                          searchNotifier: widget.searchNotifier);
-                    } else if (screen is JobsScreen) {
-                      nextScreen = JobsScreen(
-                          userModel: widget.userModel,
-                          locationFilter: widget.activeLocationFilter,
-                          autoFocusSearch: false,
-                          searchNotifier: widget.searchNotifier);
-                    } else if (screen is LocalStoresScreen) {
-                      nextScreen = LocalStoresScreen(
-                          userModel: widget.userModel,
-                          locationFilter: widget.activeLocationFilter,
-                          autoFocusSearch: false,
-                          searchNotifier: widget.searchNotifier);
-                    } else if (screen is AuctionScreen) {
-                      nextScreen = AuctionScreen(
-                          userModel: widget.userModel,
-                          autoFocusSearch: false,
-                          searchNotifier: widget.searchNotifier);
-                    } else if (screen is PomScreen) {
-                      nextScreen = PomScreen(
-                          userModel: widget.userModel,
-                          initialPoms: null,
-                          initialIndex: 0,
-                          autoFocusSearch: false,
-                          searchNotifier: widget.searchNotifier);
-                    } else if (screen is LostAndFoundScreen) {
-                      nextScreen = LostAndFoundScreen(
-                          userModel: widget.userModel,
-                          autoFocusSearch: false,
-                          searchNotifier: widget.searchNotifier);
-                    } else if (screen is RealEstateScreen) {
-                      nextScreen = RealEstateScreen(
-                          userModel: widget.userModel,
-                          locationFilter: widget.activeLocationFilter,
-                          autoFocusSearch: false,
-                          searchNotifier: widget.searchNotifier);
-                    } else {
-                      nextScreen = screen;
-                    }
-                    widget.onIconTap(nextScreen, item.labelKey);
-                  },
-                  borderRadius: BorderRadius.circular(12.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: iconBoxSize,
-                        height: iconBoxSize,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 10.0,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.all(gridCount == 5 ? 10.0 : 12.0),
-                        child: item.svg != null
-                            ? SvgPicture.asset(
-                                item.svg!,
-                                width: double.infinity,
-                                height: double.infinity,
-                              )
-                            : Icon(
-                                item.icon,
-                                size: 28.0,
-                                color: Theme.of(context).primaryColor,
+                          );
+                        } else if (screen is MarketplaceScreen) {
+                          nextScreen = MarketplaceScreen(
+                              userModel: widget.userModel,
+                              locationFilter: widget.activeLocationFilter,
+                              autoFocusSearch: false,
+                              searchNotifier: widget.searchNotifier);
+                        } else if (item.labelKey == 'main.tabs.clubs') {
+                          nextScreen = DefaultTabController(
+                            length: 2,
+                            child: Builder(
+                              builder: (ctx) => ClubsScreen(
+                                userModel: widget.userModel,
+                                locationFilter: widget.activeLocationFilter,
+                                autoFocusSearch: false,
+                                searchNotifier: widget.searchNotifier,
+                                tabController: DefaultTabController.of(ctx),
                               ),
+                            ),
+                          );
+                        } else if (screen is FindFriendsScreen) {
+                          nextScreen = FindFriendsScreen(
+                              userModel: widget.userModel,
+                              autoFocusSearch: false,
+                              searchNotifier: widget.searchNotifier);
+                        } else if (screen is JobsScreen) {
+                          nextScreen = JobsScreen(
+                              userModel: widget.userModel,
+                              locationFilter: widget.activeLocationFilter,
+                              autoFocusSearch: false,
+                              searchNotifier: widget.searchNotifier);
+                        } else if (screen is LocalStoresScreen) {
+                          nextScreen = LocalStoresScreen(
+                              userModel: widget.userModel,
+                              locationFilter: widget.activeLocationFilter,
+                              autoFocusSearch: false,
+                              searchNotifier: widget.searchNotifier);
+                        } else if (screen is AuctionScreen) {
+                          nextScreen = AuctionScreen(
+                              userModel: widget.userModel,
+                              autoFocusSearch: false,
+                              searchNotifier: widget.searchNotifier);
+                        } else if (screen is PomScreen) {
+                          nextScreen = PomScreen(
+                              userModel: widget.userModel,
+                              initialPoms: null,
+                              initialIndex: 0,
+                              autoFocusSearch: false,
+                              searchNotifier: widget.searchNotifier);
+                        } else if (screen is LostAndFoundScreen) {
+                          nextScreen = LostAndFoundScreen(
+                              userModel: widget.userModel,
+                              autoFocusSearch: false,
+                              searchNotifier: widget.searchNotifier);
+                        } else if (screen is RealEstateScreen) {
+                          nextScreen = RealEstateScreen(
+                              userModel: widget.userModel,
+                              locationFilter: widget.activeLocationFilter,
+                              autoFocusSearch: false,
+                              searchNotifier: widget.searchNotifier);
+                        } else {
+                          nextScreen = screen;
+                        }
+                        widget.onIconTap(nextScreen, item.labelKey);
+                      },
+                      borderRadius: BorderRadius.circular(12.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: iconBoxSize,
+                            height: iconBoxSize,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 10.0,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            padding:
+                                EdgeInsets.all(gridCount == 5 ? 10.0 : 12.0),
+                            child: item.svg != null
+                                ? SvgPicture.asset(
+                                    item.svg!,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  )
+                                : Icon(
+                                    item.icon,
+                                    size: 28.0,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                          ),
+                          SizedBox(height: gridCount == 5 ? 4.0 : 6.0),
+                          Container(
+                            height: minTextHeight,
+                            alignment: Alignment.topCenter,
+                            child: Text(
+                              item.labelKey.tr(),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: textStyle,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: gridCount == 5 ? 4.0 : 6.0),
-                      Container(
-                        height: minTextHeight,
-                        alignment: Alignment.topCenter,
-                        child: Text(
-                          item.labelKey.tr(),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: textStyle,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SliverToBoxAdapter(
+                  child: Divider(
+                      height: 8, thickness: 8, color: Color(0xFFF0F2F5))),
+
+              // Lazy-loaded sections using new Lazy wrapper (pass cached data)
+              // Local News (posts)
+              _buildLazySection(
+                context: context,
+                section: AppSection.posts,
+                childBuilder: (data) => _buildPostCarousel(context, data),
+              ),
+
+              // Jobs
+              _buildLazySection(
+                context: context,
+                section: AppSection.job,
+                childBuilder: (data) => _buildJobCarousel(context, data),
+              ),
+
+              // Lost & Found
+              _buildLazySection(
+                context: context,
+                section: AppSection.lostAndFound,
+                childBuilder: (data) =>
+                    _buildLostAndFoundCarousel(context, data),
+              ),
+
+              // Marketplace (product)
+              _buildLazySection(
+                context: context,
+                section: AppSection.product,
+                childBuilder: (data) => _buildProductCarousel(context, data),
+              ),
+
+              // Local Stores
+              _buildLazySection(
+                context: context,
+                section: AppSection.localStore,
+                childBuilder: (data) => _buildLocalStoreCarousel(context, data),
+              ),
+
+              // Clubs
+              _buildLazySection(
+                context: context,
+                section: AppSection.club,
+                childBuilder: (data) => _buildClubCarousel(context, data),
+              ),
+
+              // Find Friends
+              _buildLazySection(
+                context: context,
+                section: AppSection.findFriend,
+                childBuilder: (data) => _buildFindFriendCarousel(context, data),
+              ),
+
+              // Auction
+              _buildLazySection(
+                context: context,
+                section: AppSection.auction,
+                childBuilder: (data) => _buildAuctionCarousel(context, data),
+              ),
+
+              // Real Estate
+              _buildLazySection(
+                context: context,
+                section: AppSection.realEstate,
+                childBuilder: (data) => _buildRealEstateCarousel(context, data),
+              ),
+
+              // POM
+              _buildLazySection(
+                context: context,
+                section: AppSection.pom,
+                childBuilder: (data) => _buildPomCarousel(context, data),
+              ),
+
+              // 공간 확보: POM과 하단 네비게이션 사이에 여유를 둡니다.
+              const SliverToBoxAdapter(child: SizedBox(height: 50)),
+            ],
+          ),
+        ),
+
+        // Floating 'scroll to top' button overlay
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: _showScrollToTop ? 1.0 : 0.0,
+            child: IgnorePointer(
+              ignoring: !_showScrollToTop,
+              child: FloatingActionButton.small(
+                onPressed: () async {
+                  if (widget.controller.hasClients) {
+                    await widget.controller.animateTo(0,
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeOut);
+                  }
+                },
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                child: Icon(Icons.arrow_upward,
+                    color: Theme.of(context).colorScheme.onPrimary),
+              ),
             ),
           ),
-          const SliverToBoxAdapter(
-              child:
-                  Divider(height: 8, thickness: 8, color: Color(0xFFF0F2F5))),
-
-          // Lazy-loaded sections using new Lazy wrapper (pass cached data)
-          // Local News (posts)
-          _buildLazySection(
-            context: context,
-            section: AppSection.posts,
-            childBuilder: (data) => _buildPostCarousel(context, data),
-          ),
-
-          // Jobs
-          _buildLazySection(
-            context: context,
-            section: AppSection.job,
-            childBuilder: (data) => _buildJobCarousel(context, data),
-          ),
-
-          // Lost & Found
-          _buildLazySection(
-            context: context,
-            section: AppSection.lostAndFound,
-            childBuilder: (data) => _buildLostAndFoundCarousel(context, data),
-          ),
-
-          // Marketplace (product)
-          _buildLazySection(
-            context: context,
-            section: AppSection.product,
-            childBuilder: (data) => _buildProductCarousel(context, data),
-          ),
-
-          // Local Stores
-          _buildLazySection(
-            context: context,
-            section: AppSection.localStore,
-            childBuilder: (data) => _buildLocalStoreCarousel(context, data),
-          ),
-
-          // Clubs
-          _buildLazySection(
-            context: context,
-            section: AppSection.club,
-            childBuilder: (data) => _buildClubCarousel(context, data),
-          ),
-
-          // Find Friends
-          _buildLazySection(
-            context: context,
-            section: AppSection.findFriend,
-            childBuilder: (data) => _buildFindFriendCarousel(context, data),
-          ),
-
-          // Auction
-          _buildLazySection(
-            context: context,
-            section: AppSection.auction,
-            childBuilder: (data) => _buildAuctionCarousel(context, data),
-          ),
-
-          // Real Estate
-          _buildLazySection(
-            context: context,
-            section: AppSection.realEstate,
-            childBuilder: (data) => _buildRealEstateCarousel(context, data),
-          ),
-
-          // POM
-          _buildLazySection(
-            context: context,
-            section: AppSection.pom,
-            childBuilder: (data) => _buildPomCarousel(context, data),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
+  }
+
+  @override
+  void dispose() {
+    try {
+      widget.controller.removeListener(_onScroll);
+    } catch (_) {}
+    super.dispose();
   }
 
   // ✅ Lazy Section Wrapper (passes cached List<FeedItemModel>?)
@@ -762,37 +896,72 @@ class _HomeScreenState extends State<HomeScreen>
             item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
         .toList();
 
-    return SizedBox(
-      height: 240,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        primary: false,
-        shrinkWrap: true,
-        clipBehavior: Clip.none,
-        itemCount:
-            (items.length < _previewLimit) ? items.length : items.length + 1,
-        itemBuilder: (context, index) {
-          if (index == items.length) {
-            return _buildViewMoreCard(
-                context,
-                LocalNewsScreen(
-                    userModel: widget.userModel,
-                    locationFilter: widget.activeLocationFilter),
-                'main.tabs.localNews');
-          }
-          return Padding(
-            padding: EdgeInsets.only(
-                right: (index ==
-                        ((items.length < _previewLimit)
-                            ? items.length - 1
-                            : items.length))
-                    ? 0
-                    : 12),
-            child: PostThumb(post: items[index], onIconTap: widget.onIconTap),
-          );
-        },
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: _buildSectionTitleWithIcon(
+                      context, 'main.tabs.localNews',
+                      svgAsset: _iconForSection(AppSection.posts))),
+              TextButton(
+                style: _viewAllButtonStyle(context),
+                onPressed: () {
+                  if (widget.userModel == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('main.errors.loginRequired'.tr())),
+                    );
+                    return;
+                  }
+                  final nextScreen = LocalNewsScreen(
+                      userModel: widget.userModel,
+                      locationFilter: widget.activeLocationFilter);
+                  widget.onIconTap(nextScreen, 'main.tabs.localNews');
+                },
+                child: Text('common.viewAll'.tr()),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 240,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            primary: false,
+            shrinkWrap: true,
+            clipBehavior: Clip.none,
+            itemCount: (items.length < _previewLimit)
+                ? items.length
+                : items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == items.length) {
+                return _buildViewMoreCard(
+                    context,
+                    LocalNewsScreen(
+                        userModel: widget.userModel,
+                        locationFilter: widget.activeLocationFilter),
+                    'main.tabs.localNews');
+              }
+              return Padding(
+                padding: EdgeInsets.only(
+                    right: (index ==
+                            ((items.length < _previewLimit)
+                                ? items.length - 1
+                                : items.length))
+                        ? 0
+                        : 12),
+                child:
+                    PostThumb(post: items[index], onIconTap: widget.onIconTap),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -805,38 +974,72 @@ class _HomeScreenState extends State<HomeScreen>
             item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
         .toList();
 
-    return SizedBox(
-      height: 240,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        primary: false,
-        shrinkWrap: true,
-        clipBehavior: Clip.none,
-        itemCount:
-            (items.length < _previewLimit) ? items.length : items.length + 1,
-        itemBuilder: (context, index) {
-          if (index == items.length) {
-            return _buildViewMoreCard(
-                context,
-                MarketplaceScreen(
-                    userModel: widget.userModel,
-                    locationFilter: widget.activeLocationFilter),
-                'main.tabs.marketplace');
-          }
-          return Padding(
-            padding: EdgeInsets.only(
-                right: (index ==
-                        ((items.length < _previewLimit)
-                            ? items.length - 1
-                            : items.length))
-                    ? 0
-                    : 12),
-            child: ProductThumb(
-                product: items[index], onIconTap: widget.onIconTap),
-          );
-        },
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: _buildSectionTitleWithIcon(
+                      context, 'main.tabs.marketplace',
+                      svgAsset: _iconForSection(AppSection.product))),
+              TextButton(
+                style: _viewAllButtonStyle(context),
+                onPressed: () {
+                  if (widget.userModel == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('main.errors.loginRequired'.tr())),
+                    );
+                    return;
+                  }
+                  final nextScreen = MarketplaceScreen(
+                      userModel: widget.userModel,
+                      locationFilter: widget.activeLocationFilter);
+                  widget.onIconTap(nextScreen, 'main.tabs.marketplace');
+                },
+                child: Text('common.viewAll'.tr()),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 240,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            primary: false,
+            shrinkWrap: true,
+            clipBehavior: Clip.none,
+            itemCount: (items.length < _previewLimit)
+                ? items.length
+                : items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == items.length) {
+                return _buildViewMoreCard(
+                    context,
+                    MarketplaceScreen(
+                        userModel: widget.userModel,
+                        locationFilter: widget.activeLocationFilter),
+                    'main.tabs.marketplace');
+              }
+              return Padding(
+                padding: EdgeInsets.only(
+                    right: (index ==
+                            ((items.length < _previewLimit)
+                                ? items.length - 1
+                                : items.length))
+                        ? 0
+                        : 12),
+                child: ProductThumb(
+                    product: items[index], onIconTap: widget.onIconTap),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -848,40 +1051,77 @@ class _HomeScreenState extends State<HomeScreen>
             item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
         .toList();
 
-    return SizedBox(
-      height: 240,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        primary: false,
-        shrinkWrap: true,
-        clipBehavior: Clip.none,
-        itemCount:
-            (items.length < _previewLimit) ? items.length : items.length + 1,
-        itemBuilder: (context, index) {
-          if (index == items.length) {
-            return _buildViewMoreCard(
-                context,
-                DefaultTabController(
-                    length: 2,
-                    child: ClubsScreen(
-                        userModel: widget.userModel,
-                        locationFilter: widget.activeLocationFilter,
-                        tabController: DefaultTabController.of(context))),
-                'main.tabs.clubs');
-          }
-          return Padding(
-            padding: EdgeInsets.only(
-                right: (index ==
-                        ((items.length < _previewLimit)
-                            ? items.length - 1
-                            : items.length))
-                    ? 0
-                    : 12),
-            child: ClubThumb(post: items[index], onIconTap: widget.onIconTap),
-          );
-        },
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: _buildSectionTitleWithIcon(context, 'main.tabs.clubs',
+                      svgAsset: _iconForSection(AppSection.club))),
+              TextButton(
+                style: _viewAllButtonStyle(context),
+                onPressed: () {
+                  if (widget.userModel == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('main.errors.loginRequired'.tr())),
+                    );
+                    return;
+                  }
+                  final nextScreen = DefaultTabController(
+                      length: 2,
+                      child: ClubsScreen(
+                          userModel: widget.userModel,
+                          locationFilter: widget.activeLocationFilter,
+                          tabController: DefaultTabController.of(context)));
+                  widget.onIconTap(nextScreen, 'main.tabs.clubs');
+                },
+                child: Text('common.viewAll'.tr()),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 240,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            primary: false,
+            shrinkWrap: true,
+            clipBehavior: Clip.none,
+            itemCount: (items.length < _previewLimit)
+                ? items.length
+                : items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == items.length) {
+                return _buildViewMoreCard(
+                    context,
+                    DefaultTabController(
+                        length: 2,
+                        child: ClubsScreen(
+                            userModel: widget.userModel,
+                            locationFilter: widget.activeLocationFilter,
+                            tabController: DefaultTabController.of(context))),
+                    'main.tabs.clubs');
+              }
+              return Padding(
+                padding: EdgeInsets.only(
+                    right: (index ==
+                            ((items.length < _previewLimit)
+                                ? items.length - 1
+                                : items.length))
+                        ? 0
+                        : 12),
+                child:
+                    ClubThumb(post: items[index], onIconTap: widget.onIconTap),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -894,38 +1134,71 @@ class _HomeScreenState extends State<HomeScreen>
             item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
         .toList();
 
-    return SizedBox(
-      height: 240,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        primary: false,
-        shrinkWrap: true,
-        clipBehavior: Clip.none,
-        itemCount:
-            (items.length < _previewLimit) ? items.length : items.length + 1,
-        itemBuilder: (context, index) {
-          if (index == items.length) {
-            return _buildViewMoreCard(
-                context,
-                FindFriendsScreen(userModel: widget.userModel),
-                'main.tabs.findFriends');
-          }
-          return Padding(
-            padding: EdgeInsets.only(
-                right: (index ==
-                        ((items.length < _previewLimit)
-                            ? items.length - 1
-                            : items.length))
-                    ? 0
-                    : 12),
-            child: FindFriendThumb(
-                user: items[index],
-                currentUserModel: widget.userModel,
-                onIconTap: widget.onIconTap),
-          );
-        },
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: _buildSectionTitleWithIcon(
+                      context, 'main.tabs.findFriends',
+                      svgAsset: _iconForSection(AppSection.findFriend))),
+              TextButton(
+                style: _viewAllButtonStyle(context),
+                onPressed: () {
+                  if (widget.userModel == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('main.errors.loginRequired'.tr())),
+                    );
+                    return;
+                  }
+                  final nextScreen =
+                      FindFriendsScreen(userModel: widget.userModel);
+                  widget.onIconTap(nextScreen, 'main.tabs.findFriends');
+                },
+                child: Text('common.viewAll'.tr()),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 240,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            primary: false,
+            shrinkWrap: true,
+            clipBehavior: Clip.none,
+            itemCount: (items.length < _previewLimit)
+                ? items.length
+                : items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == items.length) {
+                return _buildViewMoreCard(
+                    context,
+                    FindFriendsScreen(userModel: widget.userModel),
+                    'main.tabs.findFriends');
+              }
+              return Padding(
+                padding: EdgeInsets.only(
+                    right: (index ==
+                            ((items.length < _previewLimit)
+                                ? items.length - 1
+                                : items.length))
+                        ? 0
+                        : 12),
+                child: FindFriendThumb(
+                    user: items[index],
+                    currentUserModel: widget.userModel,
+                    onIconTap: widget.onIconTap),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -937,37 +1210,70 @@ class _HomeScreenState extends State<HomeScreen>
             item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
         .toList();
 
-    return SizedBox(
-      height: 240,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        primary: false,
-        shrinkWrap: true,
-        clipBehavior: Clip.none,
-        itemCount:
-            (items.length < _previewLimit) ? items.length : items.length + 1,
-        itemBuilder: (context, index) {
-          if (index == items.length) {
-            return _buildViewMoreCard(
-                context,
-                JobsScreen(
-                    userModel: widget.userModel,
-                    locationFilter: widget.activeLocationFilter),
-                'main.tabs.jobs');
-          }
-          return Padding(
-            padding: EdgeInsets.only(
-                right: (index ==
-                        ((items.length < _previewLimit)
-                            ? items.length - 1
-                            : items.length))
-                    ? 0
-                    : 12),
-            child: JobThumb(job: items[index], onIconTap: widget.onIconTap),
-          );
-        },
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: _buildSectionTitleWithIcon(context, 'main.tabs.jobs',
+                      svgAsset: _iconForSection(AppSection.job))),
+              TextButton(
+                style: _viewAllButtonStyle(context),
+                onPressed: () {
+                  if (widget.userModel == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('main.errors.loginRequired'.tr())),
+                    );
+                    return;
+                  }
+                  final nextScreen = JobsScreen(
+                      userModel: widget.userModel,
+                      locationFilter: widget.activeLocationFilter);
+                  widget.onIconTap(nextScreen, 'main.tabs.jobs');
+                },
+                child: Text('common.viewAll'.tr()),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 240,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            primary: false,
+            shrinkWrap: true,
+            clipBehavior: Clip.none,
+            itemCount: (items.length < _previewLimit)
+                ? items.length
+                : items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == items.length) {
+                return _buildViewMoreCard(
+                    context,
+                    JobsScreen(
+                        userModel: widget.userModel,
+                        locationFilter: widget.activeLocationFilter),
+                    'main.tabs.jobs');
+              }
+              return Padding(
+                padding: EdgeInsets.only(
+                    right: (index ==
+                            ((items.length < _previewLimit)
+                                ? items.length - 1
+                                : items.length))
+                        ? 0
+                        : 12),
+                child: JobThumb(job: items[index], onIconTap: widget.onIconTap),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -980,38 +1286,72 @@ class _HomeScreenState extends State<HomeScreen>
             item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
         .toList();
 
-    return SizedBox(
-      height: 240,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        primary: false,
-        shrinkWrap: true,
-        clipBehavior: Clip.none,
-        itemCount:
-            (items.length < _previewLimit) ? items.length : items.length + 1,
-        itemBuilder: (context, index) {
-          if (index == items.length) {
-            return _buildViewMoreCard(
-                context,
-                LocalStoresScreen(
-                    userModel: widget.userModel,
-                    locationFilter: widget.activeLocationFilter),
-                'main.tabs.localStores');
-          }
-          return Padding(
-            padding: EdgeInsets.only(
-                right: (index ==
-                        ((items.length < _previewLimit)
-                            ? items.length - 1
-                            : items.length))
-                    ? 0
-                    : 12),
-            child: LocalStoreThumb(
-                shop: items[index], onIconTap: widget.onIconTap),
-          );
-        },
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: _buildSectionTitleWithIcon(
+                      context, 'main.tabs.localStores',
+                      svgAsset: _iconForSection(AppSection.localStore))),
+              TextButton(
+                style: _viewAllButtonStyle(context),
+                onPressed: () {
+                  if (widget.userModel == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('main.errors.loginRequired'.tr())),
+                    );
+                    return;
+                  }
+                  final nextScreen = LocalStoresScreen(
+                      userModel: widget.userModel,
+                      locationFilter: widget.activeLocationFilter);
+                  widget.onIconTap(nextScreen, 'main.tabs.localStores');
+                },
+                child: Text('common.viewAll'.tr()),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 240,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            primary: false,
+            shrinkWrap: true,
+            clipBehavior: Clip.none,
+            itemCount: (items.length < _previewLimit)
+                ? items.length
+                : items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == items.length) {
+                return _buildViewMoreCard(
+                    context,
+                    LocalStoresScreen(
+                        userModel: widget.userModel,
+                        locationFilter: widget.activeLocationFilter),
+                    'main.tabs.localStores');
+              }
+              return Padding(
+                padding: EdgeInsets.only(
+                    right: (index ==
+                            ((items.length < _previewLimit)
+                                ? items.length - 1
+                                : items.length))
+                        ? 0
+                        : 12),
+                child: LocalStoreThumb(
+                    shop: items[index], onIconTap: widget.onIconTap),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -1024,36 +1364,68 @@ class _HomeScreenState extends State<HomeScreen>
             item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
         .toList();
 
-    return SizedBox(
-      height: 240,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        primary: false,
-        shrinkWrap: true,
-        clipBehavior: Clip.none,
-        itemCount:
-            (items.length < _previewLimit) ? items.length : items.length + 1,
-        itemBuilder: (context, index) {
-          if (index == items.length) {
-            return _buildViewMoreCard(
-                context,
-                AuctionScreen(userModel: widget.userModel),
-                'main.tabs.auction');
-          }
-          return Padding(
-            padding: EdgeInsets.only(
-                right: (index ==
-                        ((items.length < _previewLimit)
-                            ? items.length - 1
-                            : items.length))
-                    ? 0
-                    : 12),
-            child: AuctionThumb(
-                auction: items[index], onIconTap: widget.onIconTap),
-          );
-        },
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: _buildSectionTitleWithIcon(
+                      context, 'main.tabs.auction',
+                      svgAsset: _iconForSection(AppSection.auction))),
+              TextButton(
+                style: _viewAllButtonStyle(context),
+                onPressed: () {
+                  if (widget.userModel == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('main.errors.loginRequired'.tr())),
+                    );
+                    return;
+                  }
+                  final nextScreen = AuctionScreen(userModel: widget.userModel);
+                  widget.onIconTap(nextScreen, 'main.tabs.auction');
+                },
+                child: Text('common.viewAll'.tr()),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 240,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            primary: false,
+            shrinkWrap: true,
+            clipBehavior: Clip.none,
+            itemCount: (items.length < _previewLimit)
+                ? items.length
+                : items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == items.length) {
+                return _buildViewMoreCard(
+                    context,
+                    AuctionScreen(userModel: widget.userModel),
+                    'main.tabs.auction');
+              }
+              return Padding(
+                padding: EdgeInsets.only(
+                    right: (index ==
+                            ((items.length < _previewLimit)
+                                ? items.length - 1
+                                : items.length))
+                        ? 0
+                        : 12),
+                child: AuctionThumb(
+                    auction: items[index], onIconTap: widget.onIconTap),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -1065,42 +1437,74 @@ class _HomeScreenState extends State<HomeScreen>
             item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
         .toList();
 
-    return SizedBox(
-      height: 240,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        primary: false,
-        shrinkWrap: true,
-        clipBehavior: Clip.none,
-        itemCount: (allShorts.length < _previewLimit)
-            ? allShorts.length
-            : allShorts.length + 1,
-        itemBuilder: (context, index) {
-          if (index == allShorts.length) {
-            return _buildViewMoreCard(
-                context,
-                PomScreen(
-                    userModel: widget.userModel,
-                    locationFilter: widget.activeLocationFilter),
-                'main.tabs.pom');
-          }
-          return Padding(
-            padding: EdgeInsets.only(
-                right: (index ==
-                        ((allShorts.length < _previewLimit)
-                            ? allShorts.length - 1
-                            : allShorts.length))
-                    ? 0
-                    : 12),
-            child: PomThumb(
-                short: allShorts[index],
-                allShorts: allShorts,
-                currentIndex: index,
-                onIconTap: widget.onIconTap),
-          );
-        },
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: _buildSectionTitleWithIcon(context, 'main.tabs.pom',
+                      svgAsset: _iconForSection(AppSection.pom))),
+              TextButton(
+                style: _viewAllButtonStyle(context),
+                onPressed: () {
+                  if (widget.userModel == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('main.errors.loginRequired'.tr())),
+                    );
+                    return;
+                  }
+                  final nextScreen = PomScreen(
+                      userModel: widget.userModel,
+                      locationFilter: widget.activeLocationFilter);
+                  widget.onIconTap(nextScreen, 'main.tabs.pom');
+                },
+                child: Text('common.viewAll'.tr()),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 240,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            primary: false,
+            shrinkWrap: true,
+            clipBehavior: Clip.none,
+            itemCount: (allShorts.length < _previewLimit)
+                ? allShorts.length
+                : allShorts.length + 1,
+            itemBuilder: (context, index) {
+              if (index == allShorts.length) {
+                return _buildViewMoreCard(
+                    context,
+                    PomScreen(
+                        userModel: widget.userModel,
+                        locationFilter: widget.activeLocationFilter),
+                    'main.tabs.pom');
+              }
+              return Padding(
+                padding: EdgeInsets.only(
+                    right: (index ==
+                            ((allShorts.length < _previewLimit)
+                                ? allShorts.length - 1
+                                : allShorts.length))
+                        ? 0
+                        : 12),
+                child: PomThumb(
+                    short: allShorts[index],
+                    allShorts: allShorts,
+                    currentIndex: index,
+                    onIconTap: widget.onIconTap),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -1113,36 +1517,69 @@ class _HomeScreenState extends State<HomeScreen>
             item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
         .toList();
 
-    return SizedBox(
-      height: 240,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        primary: false,
-        shrinkWrap: true,
-        clipBehavior: Clip.none,
-        itemCount:
-            (items.length < _previewLimit) ? items.length : items.length + 1,
-        itemBuilder: (context, index) {
-          if (index == items.length) {
-            return _buildViewMoreCard(
-                context,
-                LostAndFoundScreen(userModel: widget.userModel),
-                'main.tabs.lostAndFound');
-          }
-          return Padding(
-            padding: EdgeInsets.only(
-                right: (index ==
-                        ((items.length < _previewLimit)
-                            ? items.length - 1
-                            : items.length))
-                    ? 0
-                    : 12),
-            child:
-                LostItemThumb(item: items[index], onIconTap: widget.onIconTap),
-          );
-        },
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: _buildSectionTitleWithIcon(
+                      context, 'main.tabs.lostAndFound',
+                      svgAsset: _iconForSection(AppSection.lostAndFound))),
+              TextButton(
+                style: _viewAllButtonStyle(context),
+                onPressed: () {
+                  if (widget.userModel == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('main.errors.loginRequired'.tr())),
+                    );
+                    return;
+                  }
+                  final nextScreen =
+                      LostAndFoundScreen(userModel: widget.userModel);
+                  widget.onIconTap(nextScreen, 'main.tabs.lostAndFound');
+                },
+                child: Text('common.viewAll'.tr()),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 240,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            primary: false,
+            shrinkWrap: true,
+            clipBehavior: Clip.none,
+            itemCount: (items.length < _previewLimit)
+                ? items.length
+                : items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == items.length) {
+                return _buildViewMoreCard(
+                    context,
+                    LostAndFoundScreen(userModel: widget.userModel),
+                    'main.tabs.lostAndFound');
+              }
+              return Padding(
+                padding: EdgeInsets.only(
+                    right: (index ==
+                            ((items.length < _previewLimit)
+                                ? items.length - 1
+                                : items.length))
+                        ? 0
+                        : 12),
+                child: LostItemThumb(
+                    item: items[index], onIconTap: widget.onIconTap),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -1155,38 +1592,72 @@ class _HomeScreenState extends State<HomeScreen>
             item.originalDoc as DocumentSnapshot<Map<String, dynamic>>))
         .toList();
 
-    return SizedBox(
-      height: 240,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        primary: false,
-        shrinkWrap: true,
-        clipBehavior: Clip.none,
-        itemCount:
-            (items.length < _previewLimit) ? items.length : items.length + 1,
-        itemBuilder: (context, index) {
-          if (index == items.length) {
-            return _buildViewMoreCard(
-                context,
-                RealEstateScreen(
-                    userModel: widget.userModel,
-                    locationFilter: widget.activeLocationFilter),
-                'main.tabs.realEstate');
-          }
-          return Padding(
-            padding: EdgeInsets.only(
-                right: (index ==
-                        ((items.length < _previewLimit)
-                            ? items.length - 1
-                            : items.length))
-                    ? 0
-                    : 12),
-            child: RealEstateThumb(
-                room: items[index], onIconTap: widget.onIconTap),
-          );
-        },
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: _buildSectionTitleWithIcon(
+                      context, 'main.tabs.realEstate',
+                      svgAsset: _iconForSection(AppSection.realEstate))),
+              TextButton(
+                style: _viewAllButtonStyle(context),
+                onPressed: () {
+                  if (widget.userModel == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('main.errors.loginRequired'.tr())),
+                    );
+                    return;
+                  }
+                  final nextScreen = RealEstateScreen(
+                      userModel: widget.userModel,
+                      locationFilter: widget.activeLocationFilter);
+                  widget.onIconTap(nextScreen, 'main.tabs.realEstate');
+                },
+                child: Text('common.viewAll'.tr()),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 240,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            primary: false,
+            shrinkWrap: true,
+            clipBehavior: Clip.none,
+            itemCount: (items.length < _previewLimit)
+                ? items.length
+                : items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == items.length) {
+                return _buildViewMoreCard(
+                    context,
+                    RealEstateScreen(
+                        userModel: widget.userModel,
+                        locationFilter: widget.activeLocationFilter),
+                    'main.tabs.realEstate');
+              }
+              return Padding(
+                padding: EdgeInsets.only(
+                    right: (index ==
+                            ((items.length < _previewLimit)
+                                ? items.length - 1
+                                : items.length))
+                        ? 0
+                        : 12),
+                child: RealEstateThumb(
+                    room: items[index], onIconTap: widget.onIconTap),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
