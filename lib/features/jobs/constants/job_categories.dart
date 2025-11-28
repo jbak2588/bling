@@ -22,6 +22,7 @@ import 'package:easy_localization/easy_localization.dart';
 enum JobType {
   regular, // 정규직/파트타임
   quickGig, // 단순/일회성
+  talent, // 인재/재능 기반 (신규)
 }
 
 /// 단일 일자리 카테고리 모델
@@ -41,8 +42,8 @@ class JobCategory {
 
 /// 앱에서 사용되는 모든 일자리 카테고리 목록
 class AppJobCategories {
-  static final List<JobCategory> allCategories = [
-    // --- 1. 'regular' (정규/파트타임) 일자리 ---
+  // 정규/파트타임 카테고리
+  static final List<JobCategory> regularJobCategories = [
     JobCategory(
       id: 'service',
       nameKey: 'jobs.categories.service', // '서비스'
@@ -85,8 +86,10 @@ class AppJobCategories {
       jobType: JobType.regular,
       icon: '📎',
     ),
+  ];
 
-    // --- 2. 'quick_gig' (단순/일회성) 일자리 ---
+  // 단기/심부름 카테고리
+  static final List<JobCategory> quickGigCategories = [
     JobCategory(
       id: 'quick_gig_delivery',
       nameKey: 'jobs.categories.quick_gig_delivery', // '오토바이 배송'
@@ -97,7 +100,7 @@ class AppJobCategories {
       id: 'quick_gig_transport',
       nameKey: 'jobs.categories.quick_gig_transport', // '오토바이 이동 (Ojek)'
       jobType: JobType.quickGig,
-      icon: '🙋‍♂️', // (아이콘 예시)
+      icon: '🙋‍♂️',
     ),
     JobCategory(
       id: 'quick_gig_moving',
@@ -124,6 +127,41 @@ class AppJobCategories {
       icon: '💡',
     ),
   ];
+
+  // Talent (재능/인재) 카테고리
+  static final List<JobCategory> talentCategories = [
+    JobCategory(
+      id: 'talent_tutoring',
+      nameKey: 'jobs.categories.talent_tutoring',
+      jobType: JobType.talent,
+      icon: '📚',
+    ),
+    JobCategory(
+      id: 'talent_design',
+      nameKey: 'jobs.categories.talent_design',
+      jobType: JobType.talent,
+      icon: '🎨',
+    ),
+    JobCategory(
+      id: 'talent_home_service',
+      nameKey: 'jobs.categories.talent_home_service',
+      jobType: JobType.talent,
+      icon: '🔧',
+    ),
+    JobCategory(
+      id: 'talent_other',
+      nameKey: 'jobs.categories.talent_other',
+      jobType: JobType.talent,
+      icon: '✨',
+    ),
+  ];
+
+  // 모든 카테고리 합치기 (getter로 제공)
+  static List<JobCategory> get allCategories => [
+        ...regularJobCategories,
+        ...quickGigCategories,
+        ...talentCategories,
+      ];
 
   /// 특정 JobType에 해당하는 카테고리 목록만 가져옵니다.
   static List<JobCategory> getCategoriesByType(JobType type) {

@@ -357,7 +357,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     }
 
     setState(() {
-      _loadingStatus = tr('marketplace.edit.saving');
+      _loadingStatus = 'marketplace.edit.saving'.tr();
     });
 
     try {
@@ -444,7 +444,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       return;
     }
 
-    setState(() => _loadingStatus = tr('ai_flow.status.analyzing'));
+    setState(() => _loadingStatus = 'ai_flow.status.analyzing'.tr());
 
     try {
       await _aiVerificationService.startVerificationFlow(
@@ -767,7 +767,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 ),
                 const SizedBox(height: 16),
                 // [작업 71] 1. 카테고리 로딩 중이 아닐 때만 선택기 표시
-                if (_loadingStatus == tr('ai_flow.status.loading_category'))
+                if (_loadingStatus == 'ai_flow.status.loading_category'.tr())
                   ListTile(
                     title: const Text("카테고리 정보 로딩 중..."),
                     leading: SizedBox(

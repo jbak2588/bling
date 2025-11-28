@@ -78,6 +78,18 @@ class LocalNewsRepository {
 
       // Finally remove the Firestore document
       await docRef.delete();
+
+      // 게시글 삭제 후 소유자 users.{uid}.postIds에서 ID 제거 시도
+      try {
+        final ownerId = data != null ? data['userId'] as String? : null;
+        if (ownerId != null && ownerId.isNotEmpty) {
+          await _firestore.collection('users').doc(ownerId).update({
+            'postIds': FieldValue.arrayRemove([postId])
+          });
+        }
+      } catch (e) {
+        // ignore errors removing id from user doc
+      }
     }
   }
 }

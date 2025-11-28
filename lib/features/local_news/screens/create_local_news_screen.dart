@@ -187,6 +187,28 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
       await newPostRef.set(postData);
 
+      // 2. ✅ [추가] 사용자의 postIds 배열에 새 게시글 ID 추가 (제품과 동일한 패턴)
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentAuthUser.uid)
+            .update({
+          'postIds': FieldValue.arrayUnion([newPostRef.id]),
+        });
+      } catch (e) {
+        // users 문서가 없거나 update 권한이 없을 경우 merge로 안전하게 생성/병합 시도
+        try {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(currentAuthUser.uid)
+              .set({
+            'postIds': [newPostRef.id]
+          }, SetOptions(merge: true));
+        } catch (_) {
+          // 실패해도 게시물 생성은 성공 상태로 유지; 로그는 필요시 추가
+        }
+      }
+
       if (!mounted) return;
       BArtSnackBar.showSuccessSnackBar(
           title: '', message: 'localNewsCreate.success'.tr());

@@ -73,7 +73,7 @@
       "marketplace": "Preloved",
       "findFriends": "Cari Teman",
       "clubs": "Grup",
-      "jobs": "Lowongan",
+      "jobs": "Loker",
       "localStores": "Toko Lokal",
       "auction": "Lelang",
       "pom": "POM",
@@ -760,6 +760,7 @@
       "success": "Postingan berhasil diperbarui.",
       "failure": "Gagal memperbarui: {error}"
     }
+    ,"success": "Postingan berhasil diperbarui."
   },
   "commentInputField": {
     "secretCommentLabel": "Rahasia",

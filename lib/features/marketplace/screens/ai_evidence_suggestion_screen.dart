@@ -147,7 +147,7 @@ class _AiEvidenceSuggestionScreenState
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content:
-            Text(tr('marketplace.error', namedArgs: {'error': e.toString()})),
+            Text('marketplace.error'.tr(namedArgs: {'error': e.toString()})),
       ));
     }
   }

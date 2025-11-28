@@ -78,15 +78,15 @@ class _AiCaseDetailScreenState extends State<AiCaseDetailScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('ai_case.title')),
+        title: Text('ai_case.title'.tr()),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
           tabs: [
-            Tab(text: tr('ai_case.tabs.summary')),
-            Tab(text: tr('ai_case.tabs.takeover_photos')),
-            Tab(text: tr('ai_case.tabs.original_photos')),
-            Tab(text: tr('ai_case.tabs.raw_json')),
+            Tab(text: 'ai_case.tabs.summary'.tr()),
+            Tab(text: 'ai_case.tabs.takeover_photos'.tr()),
+            Tab(text: 'ai_case.tabs.original_photos'.tr()),
+            Tab(text: 'ai_case.tabs.raw_json'.tr()),
           ],
         ),
       ),

@@ -78,17 +78,17 @@ class AuctionRepository {
     await _firestore.runTransaction((transaction) async {
       final auctionSnapshot = await transaction.get(auctionRef);
       if (!auctionSnapshot.exists) {
-        throw Exception(tr('auctions.errors.notFound'));
+        throw Exception('auctions.errors.notFound'.tr());
       }
 
       final auction = AuctionModel.fromFirestore(auctionSnapshot);
 
       if (bid.bidAmount <= auction.currentBid) {
-        throw Exception(tr('auctions.errors.lowerBid'));
+        throw Exception('auctions.errors.lowerBid'.tr());
       }
 
       if (auction.endAt.toDate().isBefore(DateTime.now())) {
-        throw Exception(tr('auctions.errors.alreadyEnded'));
+        throw Exception('auctions.errors.alreadyEnded'.tr());
       }
 
       transaction.update(auctionRef, {

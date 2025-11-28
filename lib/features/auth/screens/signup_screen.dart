@@ -69,8 +69,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text(tr('auth.verification.fail_send',
-                      namedArgs: {'error': e.toString()}))),
+                  content: Text('auth.verification.fail_send'
+                      .tr(namedArgs: {'error': e.toString()}))),
             );
           }
           // 이메일 발송 실패는 가입 실패로 간주하지 않고 진행
@@ -94,8 +94,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         // [수정] 성공 메시지에 이메일 확인 안내 추가
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(tr('auth.signup.success_email_sent',
-                  namedArgs: {'email': _emailController.text.trim()}))),
+              content: Text('auth.signup.success_email_sent'
+                  .tr(namedArgs: {'email': _emailController.text.trim()}))),
         );
         Navigator.of(context).pop();
       }

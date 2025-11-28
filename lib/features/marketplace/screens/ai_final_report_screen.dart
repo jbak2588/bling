@@ -54,7 +54,7 @@ class AiFinalReportScreen extends StatefulWidget {
   final Map<String, String> guidedImageUrls;
   final String confirmedProductName;
   final String? userPrice; // [추가] 사용자가 입력한 가격(선택)
-  
+
   final String? userDescription; // [개편안 1] 원본 설명
   final bool skipUserFetch; // test-friendly flag to skip Firebase user fetch
   const AiFinalReportScreen({
@@ -540,8 +540,8 @@ class _AiFinalReportScreenState extends State<AiFinalReportScreen> {
               TextFormField(
                   controller: _priceSuggestionController,
                   decoration: InputDecoration(
-                      labelText: tr('ai_flow.final_report.suggested_price',
-                          args: ['Rp']),
+                      labelText: 'ai_flow.final_report.suggested_price'
+                          .tr(args: ['Rp']),
                       border: InputBorder.none,
                       prefixIcon: const Icon(Icons.auto_awesome))),
               // 판매 유형 선택 (일반 판매 / 경매)

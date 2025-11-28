@@ -72,8 +72,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(tr('auth.verification.fail_send',
-                  namedArgs: {'error': e.toString()}))),
+              content: Text('auth.verification.fail_send'
+                  .tr(namedArgs: {'error': e.toString()}))),
         );
       }
     }
@@ -113,7 +113,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              tr('auth.verification.sent_desc', namedArgs: {
+              'auth.verification.sent_desc'.tr(namedArgs: {
                 'email': FirebaseAuth.instance.currentUser?.email ?? ''
               }),
               style: GoogleFonts.inter(fontSize: 16, color: Colors.grey[600]),

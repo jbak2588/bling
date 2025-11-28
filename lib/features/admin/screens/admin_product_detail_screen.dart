@@ -57,9 +57,9 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
           onPressed: () {
             Clipboard.setData(ClipboardData(text: value));
             BArtSnackBar.showSuccessSnackBar(
-                title: tr('common.copiedTitle'),
+                title: 'common.copiedTitle'.tr(),
                 message:
-                    tr('common.copiedMessage', namedArgs: {'title': title}));
+                    'common.copiedMessage'.tr(namedArgs: {'title': title}));
           },
         ),
       ),
@@ -272,10 +272,10 @@ class _AdminProductDetailScreenState extends State<AdminProductDetailScreen> {
             Text('admin.aiApproval.idInfo'.tr(),
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            _buildIdTile(context, tr('admin.aiApproval.labels.userId'),
+            _buildIdTile(context, 'admin.aiApproval.labels.userId'.tr(),
                 _product!.userId),
-            _buildIdTile(
-                context, tr('admin.aiApproval.labels.productId'), _product!.id),
+            _buildIdTile(context, 'admin.aiApproval.labels.productId'.tr(),
+                _product!.id),
             const Divider(height: 30),
 
             // [Task 91] 2. 판매자 정보

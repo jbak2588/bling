@@ -63,7 +63,7 @@ class JobRepository {
   // V V V --- [추가] 새로운 구인글을 생성하는 함수 --- V V V
   Future<void> createJob(JobModel job) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw Exception(tr('main.errors.loginRequired'));
+    if (user == null) throw Exception('main.errors.loginRequired'.tr());
 
     final newJobRef = _firestore.collection('jobs').doc();
 
@@ -84,7 +84,7 @@ class JobRepository {
   Future<void> updateJob(JobModel job) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.uid != job.userId) {
-      throw Exception(tr('main.errors.permissionDenied'));
+      throw Exception('main.errors.permissionDenied'.tr());
     }
 
     // 수정 시에는 update()를 사용하여 필요한 필드만 갱신하거나,
@@ -97,7 +97,7 @@ class JobRepository {
   Future<void> deleteJob(String jobId, String userId) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.uid != userId) {
-      throw Exception(tr('main.errors.permissionDenied'));
+      throw Exception('main.errors.permissionDenied'.tr());
     }
 
     final jobRef = _firestore.collection('jobs').doc(jobId);

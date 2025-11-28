@@ -534,6 +534,17 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
           .collection('posts')
           .doc(_currentPost.id)
           .delete();
+      // 게시글 삭제 후 사용자의 postIds 배열에서 ID 제거
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_currentPost.userId)
+            .update({
+          'postIds': FieldValue.arrayRemove([_currentPost.id]),
+        });
+      } catch (e) {
+        // 실패하면 무시 (로그 필요 시 추가)
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('localNewsDetail.deleted'.tr())),

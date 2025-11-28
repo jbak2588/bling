@@ -163,6 +163,27 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
 
       await _repository.updatePost(widget.post.id, data);
 
+      // ✅ 편집 저장 후: 소유자 users.{uid}.postIds에 해당 postId가 없으면 추가
+      try {
+        final ownerRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.post.userId);
+        final ownerSnap = await ownerRef.get();
+        final ownerData = ownerSnap.exists ? ownerSnap.data() : null;
+        final List<dynamic> postIdsRaw =
+            ownerData != null && ownerData['postIds'] != null
+                ? List<dynamic>.from(ownerData['postIds'])
+                : [];
+        final contains = postIdsRaw.contains(widget.post.id);
+        if (!contains) {
+          await ownerRef.update({
+            'postIds': FieldValue.arrayUnion([widget.post.id])
+          });
+        }
+      } catch (e) {
+        // 실패해도 편집 동작에는 영향 없음. 필요시 로깅 추가 가능.
+      }
+
       if (!mounted) return;
       BArtSnackBar.showSuccessSnackBar(
           title: '', message: 'localNewsEdit.success'.tr());

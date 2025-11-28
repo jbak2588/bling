@@ -291,7 +291,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
 
     // [작업 68] 로딩 상태 텍스트 설정
     setState(
-        () => _loadingStatus = tr('ai_flow.status.saving')); // "상품 정보 저장 중..."
+        () => _loadingStatus = 'ai_flow.status.saving'.tr()); // "상품 정보 저장 중..."
     try {
       final productId =
           FirebaseFirestore.instance.collection('products').doc().id;
@@ -300,7 +300,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       // ...existing code...
       // [작업 68] 로딩 상태 텍스트 변경
       setState(() => _loadingStatus =
-          tr('ai_flow.status.analyzing')); // "AI가 1차 분석 중... (최대 1분)"
+          'ai_flow.status.analyzing'.tr()); // "AI가 1차 분석 중... (최대 1분)"
       await _aiVerificationService.startVerificationFlow(
         context: context,
         // [V3 REFACTOR] 'rule' 파라미터 완전 제거
