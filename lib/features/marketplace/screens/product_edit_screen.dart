@@ -42,7 +42,7 @@ import '../../location/screens/location_filter_screen.dart';
 // ✅ 공용 태그 위젯 import  : 2025년 8월 30일
 import '../../shared/widgets/custom_tag_input_field.dart';
 import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart'; // [추가] AI 뱃지
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+// search index generation removed to avoid background indexing costs
 // [V3 REFACTOR] 'AI 룰 엔진' 모델 종속성 완전 삭제
 
 import 'package:bling_app/features/marketplace/services/ai_verification_service.dart';
@@ -372,11 +372,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       // 기존 이미지 + 새로 업로드된 이미지 합치기
       final allImageUrls = [..._existingImageUrls, ...uploadedUrls];
 
-      // [추가] 수정 시에도 검색 키워드 갱신
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        tags: _tags,
-      );
+      // Search index generation removed (resource optimization)
 
       // [작업 8] 사용자 프로필 위치로 덮어쓰는 로직 제거.
       // 대신 화면에서 편집된(_resetLocation 통해) 정보를 사용합니다.
@@ -404,7 +400,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         'status': _status, // [Fix] Save the updated status
 
         'tags': _tags, // ✅ 수정된 태그를 업데이트 데이터에 포함 : 2025년 8월 30일
-        'searchIndex': searchKeywords, // [추가] searchIndex 업데이트
+        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
         'updatedAt': Timestamp.now(),
         'userUpdatedAt': Timestamp.now(), // [Fix #40] 사용자가 직접 저장했으므로 '끌어올리기'
 
@@ -583,20 +579,17 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
       appBar: AppBar(
         title: Text('marketplace.edit.title'.tr()),
         actions: [
-          TextButton(
+          IconButton(
             onPressed: _loadingStatus != null ? null : _saveProduct,
-            child: _loadingStatus != null
+            icon: _loadingStatus != null
                 ? const SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(
-                    'marketplace.edit.save'.tr(),
-                    style: TextStyle(
-                        color: Theme.of(context)
-                            .primaryColor, // [Fix] Use primaryColor
-                        fontWeight: FontWeight.bold),
+                : Icon(
+                    Icons.save,
+                    color: Theme.of(context).primaryColor,
                   ),
           ),
         ],
@@ -907,7 +900,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                 const SizedBox(height: 16),
                 CustomTagInputField(
                   initialTags: _tags,
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: 'tag_input.addHint'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;
@@ -972,13 +965,23 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                     ),
                 ],
 
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _loadingStatus != null ? null : _saveProduct,
-                  child: Text('marketplace.edit.save'.tr()),
-                ),
+                const SizedBox(height: 72),
               ],
             ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _loadingStatus != null ? null : _saveProduct,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _loadingStatus != null
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('marketplace.edit.save'.tr()),
           ),
         ),
       ),

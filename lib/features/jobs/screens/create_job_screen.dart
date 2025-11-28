@@ -47,7 +47,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../constants/job_categories.dart';
-import 'package:bling_app/core/utils/search_helper.dart';
+// search index generation removed to save resources
 
 // ✅ [추가] 공용 태그 위젯 import
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
@@ -220,12 +220,6 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         }
       }
 
-      // ✅ [추가] 검색 키워드 생성 시 태그 포함
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        tags: _tags, // 태그 전달
-      );
-
       final jobData = JobModel(
         id: _isEditMode ? widget.jobToEdit!.id : '',
         userId: user.uid,
@@ -258,9 +252,8 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         imageUrls: finalImageUrls,
         jobType: widget.jobType.name,
 
-        // ✅ [추가] 태그 및 검색 인덱스 저장
+        // ✅ [추가] 태그 저장 — 'searchIndex' intentionally omitted; client-side token generation disabled; use server-side/background indexing.
         tags: _tags,
-        searchIndex: searchKeywords,
 
         viewsCount: _isEditMode ? widget.jobToEdit!.viewsCount : 0,
         likesCount: _isEditMode ? widget.jobToEdit!.likesCount : 0,
@@ -309,13 +302,13 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
             ? 'jobs.form.editTitle'.tr()
             : 'jobs.form.titleRegular'.tr()),
         actions: [
-          if (!_isSaving)
-            TextButton(
-              onPressed: _submitJob,
-              child: Text(_isEditMode
-                  ? 'jobs.form.update'.tr()
-                  : 'jobs.form.submit'.tr()),
-            ),
+          IconButton(
+            onPressed: _isSaving ? null : _submitJob,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : const Icon(Icons.save),
+          ),
         ],
       ),
       body: Stack(
@@ -549,7 +542,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                 // ✅ [추가] 태그 입력 위젯 (ProductRegistrationScreen과 동일한 위치 배치)
                 CustomTagInputField(
                   initialTags: _tags, // 수정 시 기존 태그 전달
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: 'tag_input.addHint'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;
@@ -557,8 +550,8 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                   },
                 ),
 
-                // 태그 입력 필드 밑 여백 확보
-                const SizedBox(height: 32),
+                // 태그 입력 필드 밑 여백 확보 (avoid bottom bar overlap)
+                const SizedBox(height: 88),
               ],
             ),
           ),
@@ -569,6 +562,26 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                   child: CircularProgressIndicator(color: Colors.white)),
             ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: SizedBox(
+            height: 52,
+            child: FilledButton(
+              onPressed: _isSaving ? null : _submitJob,
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(_isEditMode
+                      ? 'jobs.form.updateAction'.tr()
+                      : 'jobs.form.submitAction'.tr()),
+            ),
+          ),
+        ),
       ),
     );
   }

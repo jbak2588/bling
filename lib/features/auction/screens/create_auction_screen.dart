@@ -16,7 +16,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 // ✅ [탐색 기능] 1. AppCategories import
 import 'package:bling_app/core/constants/app_categories.dart';
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+// search index generation removed to reduce background indexing
 
 class CreateAuctionScreen extends StatefulWidget {
   final UserModel userModel;
@@ -110,13 +110,6 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
               Duration(days: _durationInDays).inMilliseconds);
       final startPrice = int.tryParse(_startPriceController.text) ?? 0;
 
-      // [추가] 검색 키워드
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        tags: _tags,
-        description: _descriptionController.text,
-      );
-
       final newAuction = AuctionModel(
         id: '',
         title: _titleController.text.trim(),
@@ -139,7 +132,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
         ownerId: user.uid,
         category: _selectedCategory, // ✅ [탐색 기능] 3. 저장 시 category 전달
         tags: _tags, // ✅ 저장 시 태그 목록을 전달
-        searchIndex: searchKeywords, // [추가]
+        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
       );
 
       await _repository.createAuction(newAuction);
@@ -168,9 +161,13 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
       appBar: AppBar(
         title: Text('auctions.create.title'.tr()),
         actions: [
-          if (!_isSaving)
-            TextButton(
-                onPressed: _submitAuction, child: Text('common.done'.tr()))
+          IconButton(
+            onPressed: _isSaving ? null : _submitAuction,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : const Icon(Icons.save),
+          )
         ],
       ),
       body: Stack(
@@ -292,14 +289,14 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                 // ✅ 상세 설명 다음, 기간 설정 전에 태그 입력 필드를 추가합니다.
                 const SizedBox(height: 16),
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: 'tag_input.addHint'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;
                     });
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 88),
                 DropdownButtonFormField<int>(
                   value: _durationInDays,
                   decoration: InputDecoration(
@@ -333,6 +330,20 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                 color: Colors.black.withValues(alpha: 0.5),
                 child: const Center(child: CircularProgressIndicator())),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isSaving ? null : _submitAuction,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('auctions.create.submit'.tr()),
+          ),
+        ),
       ),
     );
   }

@@ -296,29 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: !_showPassword,
                       style: GoogleFonts.montserrat(),
                     ),
-                    const SizedBox(height: 28),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _loginWithEmail,
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          backgroundColor: Colors.teal.shade400,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: _isLoading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white)
-                            // ▼▼▼▼▼ 다국어 키 수정 ▼▼▼▼▼
-                            : Text(
-                                'login.buttons.login'.tr(),
-                                style: GoogleFonts.inter(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                      ),
-                    ),
+                    const SizedBox(height: 88),
                     const SizedBox(height: 14),
                     SizedBox(
                       width: double.infinity,
@@ -398,6 +376,30 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          child: SizedBox(
+            height: 50,
+            child: FilledButton(
+              onPressed: _isLoading ? null : _loginWithEmail,
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.teal.shade400,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : Text(
+                      'login.buttons.login'.tr(),
+                      style: GoogleFonts.inter(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+            ),
           ),
         ),
       ),

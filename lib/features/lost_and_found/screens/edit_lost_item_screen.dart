@@ -24,7 +24,7 @@ import 'package:bling_app/core/models/user_model.dart'; // ✅ Import 추가
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart'; // 숫자 입력 포맷팅
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+// search index generation removed to reduce background processing
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
 class EditLostItemScreen extends StatefulWidget {
@@ -129,13 +129,6 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         }
       }
 
-      // [추가] 검색 키워드 생성
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _itemDescriptionController.text, // 물품명/설명을 제목으로 사용
-        tags: _tags,
-        description: _locationDescriptionController.text,
-      );
-
       final updatedItem = LostItemModel(
         id: widget.item.id,
         userId: widget.item.userId,
@@ -149,7 +142,7 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         // ✅ 현상금 정보 저장
         isHunted: _isHunted,
         tags: _tags,
-        searchIndex: searchKeywords, // [추가]
+        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
         bountyAmount:
             _isHunted ? num.tryParse(_bountyAmountController.text) : null,
       );
@@ -180,10 +173,10 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
       appBar: AppBar(
         title: Text('lostAndFound.edit.title'.tr()),
         actions: [
-          if (!_isSaving)
-            TextButton(
-                onPressed: _updateItem,
-                child: Text('lostAndFound.edit.save'.tr())),
+          IconButton(
+            onPressed: _isSaving ? null : _updateItem,
+            icon: const Icon(Icons.save),
+          ),
         ],
       ),
       body: Stack(
@@ -294,10 +287,11 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
 
                 // ✅ 태그 입력 필드
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: 'tag_input.addHint'.tr(),
                   initialTags: _tags,
                   onTagsChanged: (tags) => setState(() => _tags = tags),
                 ),
+                const SizedBox(height: 88),
               ],
             ),
           ),
@@ -306,6 +300,20 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
                 color: Colors.black.withValues(alpha: 0.1),
                 child: const Center(child: CircularProgressIndicator())),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isSaving ? null : _updateItem,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('common.save'.tr()),
+          ),
+        ),
       ),
     );
   }

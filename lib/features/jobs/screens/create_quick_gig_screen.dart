@@ -34,7 +34,7 @@ import 'package:uuid/uuid.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 import '../constants/job_categories.dart';
-import 'package:bling_app/core/utils/search_helper.dart';
+// search index generation removed to reduce background indexing
 
 // ✅ [추가] 공용 태그 위젯 import
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
@@ -203,12 +203,6 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
       final newUrls = await _uploadNewImages(currentUser.uid);
       finalImageUrls.addAll(newUrls);
 
-      // ✅ [추가] 검색어 생성 시 태그 포함
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        tags: _tags, // 태그 전달
-      );
-
       final jobData = JobModel(
         id: _isEditMode ? widget.jobToEdit!.id : '',
         userId: currentUser.uid,
@@ -233,9 +227,8 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
         trustLevelRequired:
             _isEditMode ? widget.jobToEdit!.trustLevelRequired : 'normal',
 
-        // ✅ [추가] 태그 및 검색 인덱스 저장
+        // ✅ [추가] 태그 저장 — 'searchIndex' intentionally omitted; client-side token generation disabled; use server-side/background indexing.
         tags: _tags,
-        searchIndex: searchKeywords,
 
         viewsCount: _isEditMode ? widget.jobToEdit!.viewsCount : 0,
         likesCount: _isEditMode ? widget.jobToEdit!.likesCount : 0,
@@ -278,7 +271,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
             : 'jobs.form.titleQuickGig'.tr()),
         actions: [
           IconButton(
-            icon: const Icon(Icons.check),
+            icon: const Icon(Icons.save),
             onPressed: _isSaving ? null : _saveJob,
           ),
         ],
@@ -306,7 +299,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
                 const SizedBox(height: 24),
                 CustomTagInputField(
                   initialTags: _tags,
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: 'tag_input.addHint'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;
@@ -314,7 +307,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
                   },
                 ),
                 // 태그 입력 필드 하단 여백 확보
-                const SizedBox(height: 32),
+                const SizedBox(height: 88),
               ],
             ),
           ),
@@ -325,6 +318,27 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
                   child: CircularProgressIndicator(color: Colors.white)),
             ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            height: 50,
+            child: FilledButton(
+              onPressed: _isSaving ? null : _saveJob,
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text(_isEditMode
+                      ? 'jobs.form.update'.tr()
+                      : 'jobs.form.save'.tr()),
+            ),
+          ),
+        ),
       ),
     );
   }

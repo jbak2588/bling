@@ -224,33 +224,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       !_confirmPasswordVisible)))),
                   const SizedBox(height: 18),
 
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _signUp,
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        backgroundColor: Colors.teal.shade400,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 3))
-                          : Text(
-                              'signup.buttons.signup'.tr(),
-                              style: GoogleFonts.inter(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                    ),
-                  ),
+                  const SizedBox(height: 88),
                 ],
               ),
+            ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          child: SizedBox(
+            height: 50,
+            child: FilledButton(
+              onPressed: _isLoading ? null : _signUp,
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.teal.shade400,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 3))
+                  : Text(
+                      'signup.buttons.signup'.tr(),
+                      style: GoogleFonts.inter(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
             ),
           ),
         ),

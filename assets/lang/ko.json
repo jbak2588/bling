@@ -690,19 +690,23 @@
       "contentLabel": "내용을 입력하세요",
       "tagsLabel": "태그",
       "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다.",
-      "recommendedTags": "추천 태그"
+      "recommendedTags": "추천 태그",
+      "photoSectionTitle": "사진 추가 (선택, 최대 5장)"
     },
     "labels": {
       "title": "제목",
       "body": "내용",
       "tags": "태그",
       "guidedTitle": "추가 정보 (선택)",
-      "eventLocation": "이벤트/발생 장소"
+      "eventLocation": "이벤트/발생 장소",
+      "eventInfo": "행사 정보",
+      "eventAddress": "행사 장소"
     },
     "hints": {
       "body": "동네 소식이나 질문을 자유롭게 공유해보세요...",
       "tagSelection": "(태그 1~3개 선택)",
-      "eventLocation": "예: Jl. Sudirman 123"
+      "eventLocation": "예: Jl. Sudirman 123",
+      "eventDate": "날짜 선택"
     },
     "validation": {
       "bodyRequired": "내용을 입력해주세요.",
@@ -726,6 +730,24 @@
     "success": "게시글이 등록되었습니다.",
     "fail": "게시글 등록 실패: {error}"
   },
+  "localNewsEdit": {
+    "appBarTitle": "게시물 수정",
+    "buttons": {
+      "submit": "수정하기"
+    },
+    "alerts": {
+      "success": "게시물이 수정되었습니다.",
+      "failure": "수정 실패: {error}"
+    }
+  },
+  "tag_input": {
+    "hint": "쉼표(,) 또는 엔터로 태그를 등록하세요.",
+    "suggestedLabel": "추천 태그",
+    "maxReached": "태그는 최대 {max}개까지 등록할 수 있습니다.",
+    "fromTitleSuffix": "(제목)",
+    "addHint": "태그 추가...",
+    "help": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다."
+  },
   "localNewsDetail": {
     "appBarTitle": "게시물",
     "menu": {
@@ -744,16 +766,6 @@
     },
     "confirmDelete": "confirmDelete",
     "deleted": "deleted"
-  },
-  "localNewsEdit": {
-    "appBarTitle": "게시물 수정",
-    "buttons": {
-      "submit": "수정하기"
-    },
-    "alerts": {
-      "success": "게시물이 수정되었습니다.",
-      "failure": "수정 실패: {error}"
-    }
   },
   "commentInputField": {
     "secretCommentLabel": "비밀댓글",
@@ -775,6 +787,7 @@
     "confirm": "확인",
     "delete": "삭제",
     "done": "완료",
+    "save": "저장",
     "clear": "지우기",
     "report": "신고",
     "moreOptions": "더보기",
@@ -802,7 +815,8 @@
     "loginRequired": "로그인이 필요합니다.",
     "unknownUser": "알 수 없는 사용자",
     "copiedTitle": "복사됨!",
-    "copiedMessage": "{title}이(가) 클립보드에 복사되었습니다."
+    "copiedMessage": "{title}이(가) 클립보드에 복사되었습니다.",
+    "select": "선택"
   },
   "reportDialog": {
     "title": "게시물 신고",
@@ -915,7 +929,11 @@
       "descriptionHint": "예) 주 3회, 오후 5시-10시 파트타임 구합니다. 시급은 협의 가능합니다.",
       "descriptionValidator": "상세 설명을 입력해주세요.",
       "submitSuccess": "구인글이 등록되었습니다.",
-      "submitFail": "구인글 등록에 실패했습니다: {error}"
+      "submitFail": "구인글 등록에 실패했습니다: {error}",
+      "submitAction": "구인 등록",
+      "save": "저장",
+      "editTitle": "구인글 수정",
+      "updateAction": "구인글 수정하기"
     },
     "categories": {
       "restaurant": "식당",
@@ -1193,6 +1211,7 @@
       "imageError": "대표 이미지를 선택해주세요.",
       "createSuccess": "모임 제안이 생성되었습니다.",
       "createFail": "모임 제안 생성에 실패했습니다: {error}",
+      "createAction": "제안 만들기",
       "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다.",
       "targetMembers": "목표 인원",
       "targetMembersCount": "총 {count}명",
@@ -1250,6 +1269,7 @@
       "success": "경매가 등록되었습니다.",
       "fail": "경매 등록에 실패했습니다: {error}",
       "submit_button": "경매 시작하기",
+      "submit": "경매 시작하기",
       "confirmTitle": "경매로 등록하시겠습니까?",
       "confirmContent": "경매로 등록하면 일반 판매로 되돌릴 수 없으며, 낙찰 시 수수료(5%)가 부과됩니다. 계속하시겠습니까?",
       "errors": {
@@ -1421,6 +1441,9 @@
         "titleLabel": "제목",
         "descriptionLabel": "설명"
       }
+    },
+    "edit": {
+      "title": "POM 수정"
     }
   },
   "realEstate": {
@@ -2071,11 +2094,7 @@
       "raw_json": "Raw JSON"
     }
   },
-  "tag_input": {
-    "fromTitleSuffix": "(제목)",
-    "addHint": "태그 추가...",
-    "help": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다."
-  },
+  
   "auth": {
     "verification": {
       "title": "이메일 인증",

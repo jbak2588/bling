@@ -24,7 +24,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 // ✅ 공용 태그 입력 위젯을 import 합니다.
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+// search index generation intentionally omitted to avoid client-side resource usage
 
 class CreateClubScreen extends StatefulWidget {
   final UserModel userModel;
@@ -193,13 +193,6 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
           freshUserModel?.locationParts ??
           widget.userModel.locationParts;
 
-      // [추가] 검색 키워드
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        tags: _interestTags,
-        description: _descriptionController.text,
-      );
-
       // [수정] ClubModel 대신 ClubProposalModel 생성
       final newProposal = ClubProposalModel(
         id: '', // Firestore에서 자동 생성
@@ -221,7 +214,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
         targetMemberCount: _targetMemberCount.toInt(), // 목표 인원
         currentMemberCount: 1,
         memberIds: [currentUser?.uid ?? widget.userModel.uid],
-        searchIndex: searchKeywords, // [추가] (Model에도 필드 추가되어 있어야 함)
+        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
       );
 
       // [수정] createClub -> createClubProposal 호출
@@ -255,12 +248,13 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
       appBar: AppBar(
         title: Text('clubs.proposal.createTitle'.tr()), // "모임 제안하기"
         actions: [
-          // [수정] _isSaving 상태에 따라 버튼 활성화/비활성화
-          if (!_isSaving)
-            TextButton(
-              onPressed: _createClub,
-              child: Text('common.done'.tr()),
-            )
+          IconButton(
+            onPressed: _isSaving ? null : _createClub,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : const Icon(Icons.save),
+          )
         ],
       ),
       body: Stack(
@@ -409,7 +403,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                         fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 8),
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: 'tag_input.addHint'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _interestTags = tags;
@@ -499,6 +493,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                     });
                   },
                 ),
+                const SizedBox(height: 88),
               ],
             ),
           ),
@@ -510,6 +505,24 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                   child: CircularProgressIndicator(color: Colors.white)),
             ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: SizedBox(
+            height: 52,
+            child: FilledButton(
+              onPressed: _isSaving ? null : _createClub,
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text('clubs.proposal.createAction'.tr()),
+            ),
+          ),
+        ),
       ),
     );
   }

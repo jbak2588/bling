@@ -1,24 +1,19 @@
-// lib/features/local_news/views/edit_local_news_screen.dart
-
+// lib/features/local_news/screens/edit_local_news_screen.dart
 import 'dart:io';
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-// ✅ 새로 만든 공용 위젯을 import 합니다.
-import 'package:bling_app/core/models/user_model.dart'; // ✅ UserModel import
-import '../../shared/widgets/custom_tag_input_field.dart';
-
 import '../../../core/constants/app_categories.dart';
-import '../models/post_category_model.dart';
-import '../models/post_model.dart';
-// ✅ 태그 사전 + 추천 로직
-import '../../../core/constants/app_tags.dart';
-import '../utils/tag_recommender.dart';
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+import '../../shared/widgets/custom_tag_input_field.dart';
+import 'package:bling_app/features/local_news/models/post_model.dart';
+import '../../local_news/utils/tag_recommender.dart';
+import '../../../core/utils/popups/snackbars.dart';
+import '../data/local_news_repository.dart';
 
 class EditLocalNewsScreen extends StatefulWidget {
   final PostModel post;
@@ -29,433 +24,409 @@ class EditLocalNewsScreen extends StatefulWidget {
 }
 
 class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
-  final _contentController = TextEditingController();
+  final _bodyController = TextEditingController();
 
-  // ❌ 공용 위젯으로 대체되었으므로 기존 태그 컨트롤러는 제거합니다.
-  // final _tagInputController = TextEditingController();
-
-  // ✅ 태그 목록 상태는 그대로 유지합니다. 공용 위젯이 이 상태를 업데이트합니다.
-  List<String> _tags = [];
-  // ✅ 추천 태그 상태
-  List<String> _recommended = [];
-  TagRecommenderController? _reco;
-
-  final List<XFile> _newSelectedImages = [];
+  // Images: existing URLs, newly added files, and deleted existing URLs tracker
   final List<String> _existingImageUrls = [];
-  final _picker = ImagePicker();
+  final List<XFile> _newImages = [];
+  final List<String> _deletedImageUrls = [];
+  final ImagePicker _picker = ImagePicker();
 
-  PostCategoryModel? _selectedCategory;
-  bool _isSubmitting = false;
+  List<String> _tags = [];
+  List<String> _recommended = [];
+
+  int _selectedCategoryIndex = 0;
+
+  DateTime? _eventDate;
+  final _eventAddressController = TextEditingController();
+  bool _eventExpanded = false;
+
+  bool _isLoading = false;
+  Timer? _debounce;
+
+  final LocalNewsRepository _repository = LocalNewsRepository();
 
   @override
   void initState() {
     super.initState();
+    // initialize fields from widget.post
     _titleController.text = widget.post.title ?? '';
-    _contentController.text = widget.post.body;
+    _bodyController.text = widget.post.body;
     _tags = List<String>.from(widget.post.tags);
 
     if (widget.post.mediaUrl != null) {
       _existingImageUrls.addAll(widget.post.mediaUrl!);
     }
-    // ✅ [롤백] restore category usage: initialize selected category from post.category
-    final initialCategoryId = widget.post.category.isNotEmpty
-        ? widget.post.category
-        : AppCategories.postCategories.first.categoryId;
-    _selectedCategory = AppCategories.postCategories.firstWhere(
-      (c) => c.categoryId == initialCategoryId,
-      orElse: () => AppCategories.postCategories.first,
-    );
 
-    // ✅ (선택) 기존 포스트의 태그를 초기 세팅했다면 그대로 두고, 추천 컨트롤러만 연결합니다.
-    _reco = TagRecommenderController(
-      titleController: _titleController,
-      contentController: _contentController,
-      excludeProvider: () => _tags.toSet(),
-      onRecommend: (tags) {
-        if (!mounted) return;
-        setState(() => _recommended = tags);
-      },
-    );
+    // init category index from post.category
+    final idx = AppCategories.postCategories
+        .indexWhere((c) => c.categoryId == widget.post.category);
+    _selectedCategoryIndex = idx >= 0 ? idx : 0;
+
+    _eventDate = widget.post.eventDate;
+    _eventAddressController.text = widget.post.eventAddress ?? '';
+    _eventExpanded =
+        (_eventDate != null) || (_eventAddressController.text.isNotEmpty);
+
+    _titleController.addListener(_onTextChangedForRecommend);
+    _bodyController.addListener(_onTextChangedForRecommend);
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _titleController.dispose();
-    _contentController.dispose();
-    // ❌ 더 이상 사용하지 않으므로 dispose 호출도 제거합니다.
-    // _tagInputController.dispose();
-    _reco?.dispose();
+    _bodyController.dispose();
+    _eventAddressController.dispose();
     super.dispose();
   }
 
+  void _onTextChangedForRecommend() {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      try {
+        final recs = recommendTagsFromText(
+          title: _titleController.text,
+          content: _bodyController.text,
+        );
+        if (mounted) setState(() => _recommended = recs);
+      } catch (_) {}
+    });
+  }
+
   Future<void> _pickImages() async {
-    final pickedImages =
-        await _picker.pickMultiImage(imageQuality: 70, limit: 10);
-    if (pickedImages.isNotEmpty) {
-      setState(() {
-        _newSelectedImages.addAll(pickedImages
-            .take(10 - _existingImageUrls.length - _newSelectedImages.length));
-      });
+    try {
+      final picked = await _picker.pickMultiImage(imageQuality: 80);
+      if (picked.isNotEmpty) {
+        setState(() {
+          final available = 5 - (_existingImageUrls.length + _newImages.length);
+          if (available > 0) _newImages.addAll(picked.take(available));
+        });
+      }
+    } catch (e) {
+      BArtSnackBar.showErrorSnackBar(
+          title: '', message: 'localNewsCreate.imagePickFail'.tr());
     }
   }
 
-  void _removeNewImage(int index) {
+  void _removeExistingImageAt(int index) {
     setState(() {
-      _newSelectedImages.removeAt(index);
+      final url = _existingImageUrls.removeAt(index);
+      _deletedImageUrls.add(url);
     });
   }
 
-  void _removeExistingImage(int index) {
-    setState(() {
-      _existingImageUrls.removeAt(index);
-    });
+  void _removeNewImageAt(int index) {
+    setState(() => _newImages.removeAt(index));
   }
 
-  Future<List<String>> _uploadImages() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      throw Exception('User not logged in');
-    }
-    final userId = user.uid;
-    final postId = widget.post.id;
-
-    List<String> downloadUrls = [];
-    for (var image in _newSelectedImages) {
-      final ref = FirebaseStorage.instance.ref(
-          'post_images/$userId/$postId/${DateTime.now().millisecondsSinceEpoch}_${image.name}');
-      await ref.putFile(File(image.path));
-      downloadUrls.add(await ref.getDownloadURL());
-    }
-    return downloadUrls;
-  }
-
-  Future<void> _updatePost() async {
-    if (_contentController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('localNewsCreate.alerts.contentRequired'.tr())));
-      return;
-    }
-    if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('localNewsCreate.alerts.categoryRequired'.tr())));
-      return;
-    }
-
-    setState(() => _isSubmitting = true);
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
 
     try {
-      // ✅ [Fix] 사용자 최신 정보(위치) 가져오기 (데이터 보정용)
       final user = FirebaseAuth.instance.currentUser;
-      UserModel? userModel;
-      if (user != null) {
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-        if (userDoc.exists) userModel = UserModel.fromFirestore(userDoc);
+      if (user == null) throw Exception('User not authenticated');
+
+      // 1) upload new images if any
+      List<String> uploadedUrls = [];
+      if (_newImages.isNotEmpty) {
+        final files = _newImages.map((x) => File(x.path)).toList();
+        uploadedUrls = await _repository.uploadImages(files, user.uid);
       }
 
-      final newImageUrls = await _uploadImages();
-      final finalImageUrls = [..._existingImageUrls, ...newImageUrls];
+      // 2) final images = existing + uploaded
+      final finalImageList = [..._existingImageUrls, ...uploadedUrls];
 
-      // ✅ 태그 기본값 정책 정합: 비어있으면 'daily_life'로 저장
+      // 3) prepare tags
+      final tagsToSave = _tags.isEmpty ? ['daily_life'] : List.of(_tags);
 
-      final List<String> tagsToSave =
-          _tags.isEmpty ? ['daily_life'] : List.of(_tags);
-
-      // [추가] 검색 키워드 갱신
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        tags: tagsToSave,
-        description: _contentController.text,
-      );
-
-      final updatedData = {
+      // 4) prepare update map (repository will set updatedAt)
+      final Map<String, dynamic> data = {
         'title': _titleController.text.trim(),
-        'body': _contentController.text.trim(),
-        'mediaUrl': finalImageUrls,
-        'mediaType': finalImageUrls.isNotEmpty ? 'image' : null,
-        'category': _selectedCategory!.categoryId,
-        'tags': tagsToSave, // ✅ 비어있으면 daily_life 기본 태그 저장
-        'searchIndex': searchKeywords, // [추가]
-        'updatedAt': FieldValue.serverTimestamp(),
-        // ✅ [Fix] 위치 정보 업데이트 (기존 데이터 없으면 유저 정보로 채움)
-        'locationName': userModel?.locationName ?? widget.post.locationName,
-        'locationParts': userModel?.locationParts ?? widget.post.locationParts,
-        'geoPoint': userModel?.geoPoint ?? widget.post.geoPoint,
+        'body': _bodyController.text.trim(),
+        'category':
+            AppCategories.postCategories[_selectedCategoryIndex].categoryId,
+        'tags': tagsToSave,
+        'mediaUrl': finalImageList,
+        'mediaType': finalImageList.isNotEmpty ? 'image' : null,
+        'eventAddress': _eventAddressController.text.trim().isNotEmpty
+            ? _eventAddressController.text.trim()
+            : null,
       };
 
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.post.id)
-          .update(updatedData);
+      if (_eventDate != null) {
+        data['eventDate'] = Timestamp.fromDate(_eventDate!);
+      }
+
+      await _repository.updatePost(widget.post.id, data);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('localNewsEdit.alerts.success'.tr())),
-      );
+      BArtSnackBar.showSuccessSnackBar(
+          title: '', message: 'localNewsEdit.success'.tr());
       Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'localNewsEdit.alerts.failure'
-                  .tr(namedArgs: {'error': e.toString()}),
-            ),
-          ),
-        );
+        BArtSnackBar.showErrorSnackBar(
+            title: '',
+            message:
+                'localNewsEdit.fail'.tr(namedArgs: {'error': e.toString()}));
       }
     } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  // ❌ 기존 커스텀 태그 위젯 빌드 함수는 완전히 제거합니다.
-  // Widget _buildCustomChipsInput() { ... }
+  Widget _buildImageScroller() {
+    final total = _existingImageUrls.length + _newImages.length;
+    return SizedBox(
+      height: 96,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: total + 1,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        itemBuilder: (context, index) {
+          if (index == total) {
+            return GestureDetector(
+              onTap: (_existingImageUrls.length + _newImages.length) >= 5
+                  ? null
+                  : _pickImages,
+              child: Container(
+                width: 96,
+                height: 96,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Icon(Icons.add_a_photo_outlined,
+                    color: Colors.grey.shade700),
+              ),
+            );
+          }
+
+          Widget img;
+          bool isExisting = index < _existingImageUrls.length;
+          int imgIndex = isExisting ? index : index - _existingImageUrls.length;
+
+          if (isExisting) {
+            img = Image.network(_existingImageUrls[imgIndex],
+                width: 96, height: 96, fit: BoxFit.cover);
+          } else {
+            img = Image.file(File(_newImages[imgIndex].path),
+                width: 96, height: 96, fit: BoxFit.cover);
+          }
+
+          return Stack(
+            children: [
+              ClipRRect(borderRadius: BorderRadius.circular(8), child: img),
+              Positioned(
+                top: 4,
+                right: 4,
+                child: InkWell(
+                  onTap: () {
+                    if (isExisting) {
+                      _removeExistingImageAt(imgIndex);
+                    } else {
+                      _removeNewImageAt(imgIndex);
+                    }
+                  },
+                  child: const CircleAvatar(
+                      radius: 12,
+                      backgroundColor: Colors.black54,
+                      child: Icon(Icons.close, color: Colors.white, size: 16)),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _pickEventDate() async {
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: _eventDate ?? now,
+      firstDate: DateTime(now.year - 2),
+      lastDate: DateTime(now.year + 5),
+    );
+    if (date == null) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_eventDate ?? now),
+    );
+    if (time == null) return;
+
+    setState(() => _eventDate =
+        DateTime(date.year, date.month, date.day, time.hour, time.minute));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('localNewsEdit.appBarTitle'.tr()),
+        title: Text('localNewsEdit.title'.tr()),
         actions: [
           IconButton(
-            tooltip: 'localNewsEdit.buttons.submit'.tr(),
-            icon: _isSubmitting
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : const Icon(Icons.check),
-            onPressed: _isSubmitting ? null : _updatePost,
-          ),
+            onPressed: _isLoading ? null : _save,
+            icon: _isLoading
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Icon(Icons.save),
+          )
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            DropdownButtonFormField<PostCategoryModel>(
-              initialValue: _selectedCategory,
-              decoration: InputDecoration(
-                  labelText: 'localNewsCreate.form.categoryLabel'.tr(),
-                  border: const OutlineInputBorder()),
-              items: AppCategories.postCategories.map((category) {
-                return DropdownMenuItem<PostCategoryModel>(
-                  value: category,
-                  child: Row(children: [
-                    Text(category.emoji, style: const TextStyle(fontSize: 20)),
-                    const SizedBox(width: 10),
-                    Text(category.nameKey.tr()),
-                  ]),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) setState(() => _selectedCategory = value);
-              },
-            ),
-            const SizedBox(height: 16),
-            TextField(
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. category
+              DropdownButtonFormField<int>(
+                initialValue: _selectedCategoryIndex,
+                decoration: InputDecoration(
+                    labelText: 'localNewsCreate.form.categoryLabel'.tr(),
+                    border: const OutlineInputBorder()),
+                items: List.generate(AppCategories.postCategories.length, (i) {
+                  final c = AppCategories.postCategories[i];
+                  return DropdownMenuItem<int>(
+                      value: i,
+                      child: Row(children: [
+                        Text(c.emoji),
+                        const SizedBox(width: 8),
+                        Text(c.nameKey.tr())
+                      ]));
+                }),
+                onChanged: (v) =>
+                    setState(() => _selectedCategoryIndex = v ?? 0),
+                validator: (v) => v == null
+                    ? 'localNewsCreate.validation.categoryRequired'.tr()
+                    : null,
+              ),
+              const SizedBox(height: 16),
+
+              // 2. title
+              TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                    labelText: 'localNewsCreate.form.titleLabel'.tr(),
-                    border: const OutlineInputBorder())),
-            const SizedBox(height: 16),
-            TextField(
-                controller: _contentController,
-                maxLines: 8,
-                decoration: InputDecoration(
-                    labelText: 'localNewsCreate.form.contentLabel'.tr(),
-                    border: const OutlineInputBorder())),
-            const SizedBox(height: 16),
-            // =========================
-            // ✅ 실시간 추천 태그 블록 (선택된 태그 제외 후 비어있으면 숨김)
-            // =========================
-            for (final _ in [0])
-              ...(() {
-                final visibleRecs =
-                    _recommended.where((id) => !_tags.contains(id)).toList();
-                if (visibleRecs.isEmpty) return <Widget>[];
-                return [
-                  Text('localNewsCreate.form.recommendedTags'.tr(),
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final id in visibleRecs)
-                        ChoiceChip(
-                          label: Text(
-                            () {
-                              final tag = AppTags.localNewsTags.firstWhere(
-                                (t) => t.tagId == id,
-                                orElse: () => const TagInfo(
-                                    tagId: '', nameKey: '', descriptionKey: ''),
-                              );
-                              final name = (tag.nameKey.isNotEmpty)
-                                  ? formatTagLabel(tag.tagId)
-                                  : id;
-                              return '${tag.emoji ?? ''} $name'.trim();
-                            }(),
-                          ),
-                          selected: _tags.contains(id),
-                          onSelected: (_) {
-                            setState(() {
-                              if (_tags.contains(id)) {
-                                _tags.remove(id);
-                              } else if (_tags.length < 3) {
-                                _tags.add(id);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('태그는 최대 3개까지 선택할 수 있어요.')),
-                                );
-                              }
-                            });
-                          },
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                ];
-              }()),
-
-            // ✅ 교체된 공용 커스텀 태그 위젯을 사용합니다.
-            CustomTagInputField(
-              initialTags: _tags, // 초기 태그 목록을 전달합니다.
-              hintText: 'tag_input.help'.tr(), // 다국어 힌트 텍스트
-              onTagsChanged: (tags) {
-                // 태그가 변경될 때마다 화면의 상태(_tags)를 업데이트합니다.
-                setState(() {
-                  _tags = tags;
-                });
-              },
-              titleController: _titleController,
-              autoCreateTitleTag: true,
-              // [수정] AppTags.newsTags -> localNewsTags 매핑 + _recommended 결합
-              suggestedTags: {
-                ..._recommended,
-                ...AppTags.localNewsTags.map((e) => e.tagId),
-              }.toList(),
-              maxTags: 3,
-            ),
-
-            const SizedBox(height: 16),
-            _buildImagePicker(),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-      // ✅ 하단 고정 저장 바: SafeArea + Material(elevation)로 네비게이션바 위에 분리감 제공
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Material(
-          elevation: 8,
-          color: Theme.of(context).colorScheme.surface,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            child: SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: FilledButton(
-                onPressed: _isSubmitting ? null : _updatePost,
-                child: _isSubmitting
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text('localNewsEdit.buttons.submit'.tr()),
+                    labelText: 'localNewsCreate.labels.title'.tr(),
+                    border: const OutlineInputBorder()),
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'localNewsCreate.validation.titleRequired'.tr()
+                    : null,
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+              const SizedBox(height: 16),
 
-  Widget _buildImagePicker() {
-    // ... (이 부분은 기존 코드와 동일하여 생략하지 않고 그대로 둡니다)
-    final existingImageCount = _existingImageUrls.length;
-    final newImageCount = _newSelectedImages.length;
-    final totalImageCount = existingImageCount + newImageCount;
+              // 3. body
+              TextFormField(
+                controller: _bodyController,
+                decoration: InputDecoration(
+                    labelText: 'localNewsCreate.labels.body'.tr(),
+                    hintText: 'localNewsCreate.hints.body'.tr(),
+                    border: const OutlineInputBorder()),
+                maxLines: 10,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'localNewsCreate.validation.bodyRequired'.tr()
+                    : null,
+              ),
+              const SizedBox(height: 16),
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        OutlinedButton.icon(
-          onPressed: totalImageCount >= 10 ? null : _pickImages,
-          icon: const Icon(Icons.camera_alt),
-          label: Text(
-              '${'localNewsCreate.buttons.addImage'.tr()} ($totalImageCount/5)'),
-        ),
-        const SizedBox(height: 8),
-        if (totalImageCount > 0)
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: totalImageCount,
-            itemBuilder: (context, index) {
-              Widget imageWidget;
-              bool isExisting;
-              int imageIndex;
+              // 4. images
+              Text('localNewsCreate.form.photoSectionTitle'.tr(),
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              _buildImageScroller(),
+              const SizedBox(height: 16),
 
-              if (index < existingImageCount) {
-                isExisting = true;
-                imageIndex = index;
-                imageWidget =
-                    Image.network(_existingImageUrls[index], fit: BoxFit.cover);
-              } else {
-                isExisting = false;
-                imageIndex = index - existingImageCount;
-                imageWidget = Image.file(
-                    File(_newSelectedImages[imageIndex].path),
-                    fit: BoxFit.cover);
-              }
+              // 5. tags
+              Text('Tags', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              CustomTagInputField(
+                  initialTags: _tags,
+                  hintText: 'tag_input.addHint'.tr(),
+                  onTagsChanged: (tags) => setState(() => _tags = tags),
+                  maxTags: 5),
+              const SizedBox(height: 8),
+              if (_recommended.isNotEmpty) ...[
+                Text('localNewsCreate.form.recommendedTags'.tr(),
+                    style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: _recommended.map((t) {
+                    final already = _tags.contains(t);
+                    return ChoiceChip(
+                      label: Text(t),
+                      selected: already,
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            if (!already) _tags.add(t);
+                          } else {
+                            _tags.remove(t);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+              ],
 
-              return Stack(
+              // 6. event info
+              ExpansionTile(
+                initiallyExpanded: _eventExpanded,
+                onExpansionChanged: (v) => setState(() => _eventExpanded = v),
+                title: Text('localNewsCreate.labels.eventInfo'.tr()),
                 children: [
-                  Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: imageWidget,
-                    ),
+                  ListTile(
+                    title: Text(_eventDate == null
+                        ? 'localNewsCreate.hints.eventDate'.tr()
+                        : DateFormat.yMMMd().add_jm().format(_eventDate!)),
+                    trailing: TextButton(
+                        onPressed: _pickEventDate,
+                        child: Text('common.select'.tr())),
                   ),
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: InkWell(
-                      onTap: () => isExisting
-                          ? _removeExistingImage(imageIndex)
-                          : _removeNewImage(imageIndex),
-                      child: const CircleAvatar(
-                        radius: 12,
-                        backgroundColor: Colors.black54,
-                        child: Icon(Icons.close, color: Colors.white, size: 16),
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8),
+                    child: TextFormField(
+                      controller: _eventAddressController,
+                      decoration: InputDecoration(
+                          labelText: 'localNewsCreate.labels.eventAddress'.tr(),
+                          border: const OutlineInputBorder()),
                     ),
                   ),
                 ],
-              );
-            },
+              ),
+
+              const SizedBox(height: 72),
+            ],
           ),
-      ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isLoading ? null : _save,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('localNewsEdit.buttons.save'.tr()),
+          ),
+        ),
+      ),
     );
   }
 }

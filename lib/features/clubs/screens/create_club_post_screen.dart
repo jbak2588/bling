@@ -100,10 +100,13 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
       appBar: AppBar(
         title: Text('clubs.createPost.title'.tr()),
         actions: [
-          if (!_isSaving)
-            TextButton(
-                onPressed: _submitPost,
-                child: Text('clubs.createPost.submit'.tr()))
+          IconButton(
+            onPressed: _isSaving ? null : _submitPost,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : const Icon(Icons.save),
+          )
         ],
       ),
       body: Stack(
@@ -146,6 +149,7 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
                                 color: Colors.grey),
                           ),
                         ),
+                      const SizedBox(height: 88),
                     ],
                   ),
                 ),
@@ -158,6 +162,20 @@ class _CreateClubPostScreenState extends State<CreateClubPostScreen> {
                 child: const Center(
                     child: CircularProgressIndicator(color: Colors.white))),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isSaving ? null : _submitPost,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('clubs.createPost.submit'.tr()),
+          ),
+        ),
       ),
     );
   }

@@ -256,6 +256,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: theme.textTheme.titleLarge?.color),
+        actions: [
+          IconButton(
+            onPressed: _isSaving ? null : _saveChanges,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.save),
+          )
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -481,33 +493,34 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                             setState(() => _isVisibleInList = value);
                           },
                         ),
+                        const SizedBox(height: 88),
                       ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _isSaving ? null : _saveChanges,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.primaryColor,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: _isSaving
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white))
-                          : Text('profileEdit.saveButton'.tr()),
                     ),
                   ),
                 ),
               ],
             ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            height: 50,
+            child: FilledButton(
+              onPressed: _isSaving ? null : _saveChanges,
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text('profileEdit.saveButton'.tr()),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

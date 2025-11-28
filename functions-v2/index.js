@@ -348,6 +348,8 @@ exports.onProductStatusPending = onDocumentUpdated(
     },
 );
 
+
+
 /**
    * ============================================================================
    * [V3 NEW] 관리자가 'pending' 상품을 승인/거절할 때 알림 (Task 103/106)

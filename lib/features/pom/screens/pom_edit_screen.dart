@@ -19,7 +19,7 @@ import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
-import 'package:bling_app/core/utils/search_helper.dart';
+// search index generation removed to reduce background indexing
 
 class PomEditScreen extends StatefulWidget {
   final PomModel pom;
@@ -175,13 +175,6 @@ class _PomEditScreenState extends State<PomEditScreen> {
         }
       }
 
-      // 2. 검색 인덱스 생성
-      final searchIndex = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        description: _descriptionController.text,
-        tags: _selectedTags,
-      );
-
       // 3. 업데이트 데이터 구성
       final updateData = {
         'title': _titleController.text.trim(),
@@ -189,7 +182,7 @@ class _PomEditScreenState extends State<PomEditScreen> {
         'tags': _selectedTags,
         'mediaUrls': finalMediaUrls,
         'thumbnailUrl': thumbnailUrl,
-        'searchIndex': searchIndex,
+        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
         // 'updatedAt': FieldValue.serverTimestamp(), // 필요 시 추가
       };
 
@@ -219,14 +212,15 @@ class _PomEditScreenState extends State<PomEditScreen> {
       appBar: AppBar(
         title: Text('pom.edit.title'.tr()), // "게시글 수정" (키 추가 필요)
         actions: [
-          if (!_isSaving)
-            TextButton(
-              onPressed: _submitUpdate,
-              child: Text('common.save'.tr(), // "저장"
-                  style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold)),
-            ),
+          IconButton(
+            onPressed: _isSaving ? null : _submitUpdate,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.save),
+          ),
         ],
       ),
       body: Stack(
@@ -263,7 +257,7 @@ class _PomEditScreenState extends State<PomEditScreen> {
               const SizedBox(height: 8),
               CustomTagInputField(
                 initialTags: _selectedTags,
-                hintText: 'pom.search.hint'.tr(),
+                hintText: 'tag_input.addHint'.tr(),
                 onTagsChanged: (tags) {
                   _selectedTags
                     ..clear()
@@ -271,6 +265,7 @@ class _PomEditScreenState extends State<PomEditScreen> {
                 },
                 maxTags: 5,
               ),
+              const SizedBox(height: 88),
             ],
           ),
           if (_isSaving)
@@ -279,6 +274,24 @@ class _PomEditScreenState extends State<PomEditScreen> {
               child: const Center(child: CircularProgressIndicator()),
             ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            height: 50,
+            child: FilledButton(
+              onPressed: _isSaving ? null : _submitUpdate,
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text('common.save'.tr()),
+            ),
+          ),
+        ),
       ),
     );
   }

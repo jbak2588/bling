@@ -691,19 +691,23 @@
       "contentLabel": "Enter content",
       "tagsLabel": "Tags",
       "tagsHint": "You can register tags using comma (,) or Enter.",
-      "recommendedTags": "recommendedTags"
+      "recommendedTags": "recommendedTags",
+      "photoSectionTitle": "Attach Photos (optional, max 5)"
     },
     "labels": {
       "title": "Title",
       "body": "Content",
       "tags": "Tags",
       "guidedTitle": "Additional Info (Optional)",
-      "eventLocation": "Event/Incident Location"
+      "eventLocation": "Event/Incident Location",
+      "eventInfo": "Event info",
+      "eventAddress": "Event address"
     },
     "hints": {
       "body": "Share your neighborhood news or ask questions...",
       "tagSelection": "(Select 1-3 tags)",
-      "eventLocation": "e.g., Jl. Sudirman 123"
+      "eventLocation": "e.g., Jl. Sudirman 123",
+      "eventDate": "Select date"
     },
     "validation": {
       "bodyRequired": "Please enter the content.",
@@ -748,8 +752,10 @@
   },
   "localNewsEdit": {
     "appBarTitle": "Edit Post",
+    "title": "Edit Post",
     "buttons": {
-      "submit": "Update"
+      "submit": "Update",
+      "save": "Save"
     },
     "alerts": {
       "success": "Post updated successfully.",
@@ -776,6 +782,7 @@
     "confirm": "Confirm",
     "delete": "Delete",
     "done": "Done",
+    "save": "Save",
     "clear": "Clear",
     "report": "Report",
     "moreOptions": "More options",
@@ -803,7 +810,8 @@
     "loginRequired": "Login is required.",
     "unknownUser": "Unknown user",
     "copiedTitle": "Copied!",
-    "copiedMessage": "{title} copied to clipboard."
+    "copiedMessage": "{title} copied to clipboard.",
+    "select": "Select"
   },
   "reportDialog": {
     "title": "Report Post",
@@ -916,7 +924,11 @@
       "descriptionHint": "e.g. Part-time, 3 days a week, 5-10pm. Salary negotiable.",
       "descriptionValidator": "Please enter a description.",
       "submitSuccess": "Job post created.",
-      "submitFail": "Failed to create job post: {error}"
+      "submitFail": "Failed to create job post: {error}",
+      "submitAction": "Post Job",
+      "save": "Save",
+      "editTitle": "Edit Job",
+      "updateAction": "Update Job"
     },
     "categories": {
       "restaurant": "Restaurant",
@@ -1194,6 +1206,7 @@
       "imageError": "Please select a cover image.",
       "createSuccess": "Your club proposal has been created.",
       "createFail": "Failed to create proposal: {error}",
+      "createAction": "Create Proposal",
       "tagsHint": "You can register tags using comma (,) or Enter.",
       "targetMembers": "Target members",
       "targetMembersCount": "Total {count} members",
@@ -1251,6 +1264,7 @@
       "success": "Auction created.",
       "fail": "Failed to create auction: {error}",
       "submit_button": "Start Auction",
+      "submit": "Start Auction",
       "confirmTitle": "List as an auction?",
       "confirmContent": "Once listed as an auction, you can't switch back to a normal sale. A 5% fee will be charged upon a successful bid. Continue?",
       "errors": {
@@ -1422,6 +1436,9 @@
         "titleLabel": "Title",
         "descriptionLabel": "Description"
       }
+    }
+    ,"edit": {
+      "title": "Edit POM"
     }
   },
   "realEstate": {

@@ -509,10 +509,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
     switch (_currentSection) {
       case AppSection.board:
-        target = const CreateLocalNewsScreen();
+        target = CreateLocalNewsScreen(user: userModel);
         break;
       case AppSection.localNews:
-        target = const CreateLocalNewsScreen();
+        target = CreateLocalNewsScreen(user: userModel);
         break;
       case AppSection.marketplace:
         target = const ProductRegistrationScreen();
@@ -584,7 +584,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   Icons.article_rounded, // 1. localNews
                   'main.tabs.localNews'.tr(),
                   'localNewsCreate.appBarTitle'.tr(),
-                  builder: () => const CreateLocalNewsScreen()),
+                  builder: () => CreateLocalNewsScreen(user: userModel)),
               // 2) 동네 일자리
               _sheetItem(
                   Icons.work_outline_rounded, // 2. jobs
@@ -664,9 +664,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
+              if (_userModel == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text('main.errors.loginRequiredRetry'.tr())),
+                );
+                return;
+              }
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => const CreateLocalNewsScreen(),
+                  builder: (_) =>
+                      CreateLocalNewsScreen(user: _userModel as UserModel),
                 ),
               );
             },

@@ -35,7 +35,7 @@ import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart'; // [V2] Re-added
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+// search index generation removed to reduce background indexing
 
 class CreatePomScreen extends StatefulWidget {
   final UserModel userModel;
@@ -185,12 +185,7 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
       // 3. Firestore에 저장
       final data = newShort.toJson();
 
-      // [수정] 기존 하드코딩 로직을 SearchHelper로 대체
-      data['searchIndex'] = SearchHelper.generateSearchIndex(
-        title: newShort.title,
-        description: newShort.description,
-        tags: newShort.tags ?? const [],
-      );
+      // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
 
       await FirebaseFirestore.instance.collection('pom').add(data);
 
@@ -219,13 +214,15 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
       appBar: AppBar(
         title: Text('pom.create.title'.tr()), // [V2] 새 뽐
         actions: [
-          if (!_isSaving)
-            TextButton(
-                onPressed: _submitShort,
-                child: Text('pom.create.submit'.tr(),
-                    style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold))),
+          IconButton(
+            onPressed: _isSaving ? null : _submitShort,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.save),
+          ),
         ],
       ),
       body: Stack(
@@ -312,7 +309,7 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
               Text('Tags', style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: 8),
               CustomTagInputField(
-                hintText: 'pom.search.hint'.tr(),
+                hintText: 'tag_input.addHint'.tr(),
                 titleController: _titleController,
                 onTagsChanged: (tags) {
                   _selectedTags
@@ -321,6 +318,8 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
                 },
                 maxTags: 5,
               ),
+              // 공간 확보: 하단 버튼이 컨텐츠를 가리지 않도록 여백 추가
+              const SizedBox(height: 88),
             ],
           ),
           if (_isSaving)
@@ -329,6 +328,25 @@ class _CreatePomScreenState extends State<CreatePomScreen> {
               child: const Center(child: CircularProgressIndicator()),
             ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            height: 50,
+            child: FilledButton(
+              onPressed: _isSaving ? null : _submitShort,
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text('pom.create.submit'.tr()),
+            ),
+          ),
+        ),
       ),
     );
   }

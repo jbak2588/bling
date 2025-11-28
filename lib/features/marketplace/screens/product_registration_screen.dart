@@ -44,7 +44,7 @@ import '../../../../core/models/user_model.dart';
 // ✅ 공용 태그 위젯 import
 import '../../shared/widgets/custom_tag_input_field.dart'; // 2025년 8월 30일
 import 'package:bling_app/core/utils/upload_helpers.dart';
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+// Search index generation removed to reduce background indexing work
 
 class ProductRegistrationScreen extends StatefulWidget {
   const ProductRegistrationScreen({super.key});
@@ -195,12 +195,6 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       // 이미지 업로드 (공용 helper 사용)
       final uploadedUrls = await uploadAllProductImages(_images, user.uid);
 
-      // [추가] 검색 키워드 생성
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        tags: _tags,
-      );
-
       final newProductId =
           FirebaseFirestore.instance.collection('products').doc().id;
 
@@ -222,7 +216,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         condition: _condition,
         status: 'selling',
         isAiVerified: false,
-        searchIndex: searchKeywords, // [추가] searchIndex 저장
+        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
         userUpdatedAt: Timestamp.now(),
@@ -335,19 +329,12 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       appBar: AppBar(
         title: Text('marketplace.registration.title'.tr()),
         actions: [
-          TextButton(
+          IconButton(
             onPressed: _isLoading ? null : _submitProduct,
-            child: _isLoading
-                ? const CircularProgressIndicator() // Use default (theme) color
-                : Text(
-                    'marketplace.registration.done'.tr(),
-                    style: TextStyle(
-                      color: theme
-                          .primaryColor, // [Fix] Use primaryColor for visibility
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Icon(Icons.save, color: theme.primaryColor),
           ),
         ],
       ),
@@ -358,20 +345,6 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // [Fix] 하단에 '일반 등록' 버튼 추가 (UX 일관성)
-              ElevatedButton(
-                onPressed: _isLoading ? null : _submitProduct,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 3),
-                      )
-                    : Text('marketplace.registration.done'.tr()),
-              ),
               const SizedBox(height: 16),
               InkWell(
                 onTap: _pickImages,
@@ -496,7 +469,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               const SizedBox(height: 16), // [간격 확대]
               // ✅ 공용 태그 위젯 추가
               CustomTagInputField(
-                hintText: 'tag_input.help'.tr(),
+                hintText: 'tag_input.addHint'.tr(),
                 onTagsChanged: (tags) {
                   setState(() {
                     _tags = tags;
@@ -505,20 +478,6 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               ),
               const SizedBox(height: 24),
 
-              // [Fix] 하단에 '일반 등록' 버튼 추가 (UX 일관성)
-              ElevatedButton(
-                onPressed: _isLoading ? null : _submitProduct,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 3),
-                      )
-                    : Text('marketplace.registration.done'.tr()),
-              ),
               const SizedBox(height: 16),
 
               // [V2 핵심 추가] AI 검수 옵션 섹션
@@ -562,6 +521,20 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                 },
               ),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isLoading ? null : _submitProduct,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('marketplace.registration.done'.tr()),
           ),
         ),
       ),

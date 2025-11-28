@@ -17,7 +17,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 // ✅ 1. GeoPoint 클래스 사용을 위해 cloud_firestore를 import 합니다.
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:bling_app/core/utils/search_helper.dart';
+// search index generation intentionally omitted to avoid client-side resource usage
 // ✅ 공용 태그 입력 위젯을 import 합니다.
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 // ✅ 위치 설정을 위해 LocationFilterScreen을 import 합니다.
@@ -168,12 +168,6 @@ class _EditClubScreenState extends State<EditClubScreen> {
       }
 
       // ClubModel 객체를 업데이트된 정보로 새로 만듭니다.
-      // [추가] 검색 키워드 생성
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        tags: _interestTags,
-        description: _descriptionController.text,
-      );
 
       final updatedClub = ClubModel(
         id: widget.club.id,
@@ -195,7 +189,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
         createdAt: widget.club.createdAt,
         kickedMembers: widget.club.kickedMembers,
         pendingMembers: widget.club.pendingMembers,
-        searchIndex: searchKeywords,
+        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
       );
 
       await _repository.updateClub(updatedClub);
@@ -224,9 +218,10 @@ class _EditClubScreenState extends State<EditClubScreen> {
       appBar: AppBar(
         title: Text('clubs.editClub.title'.tr()),
         actions: [
-          if (!_isSaving)
-            TextButton(
-                onPressed: _updateClub, child: Text('clubs.editClub.save'.tr()))
+          IconButton(
+            onPressed: _isSaving ? null : _updateClub,
+            icon: const Icon(Icons.save),
+          )
         ],
       ),
       body: Stack(
@@ -325,14 +320,14 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 const SizedBox(height: 8),
                 CustomTagInputField(
                   initialTags: _interestTags,
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: 'tag_input.addHint'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _interestTags = tags;
                     });
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 88),
                 SwitchListTile(
                   title: Text('clubs.createClub.privateClub'.tr()),
                   subtitle: Text('clubs.createClub.privateDescription'.tr()),
@@ -351,6 +346,20 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 color: Colors.black54,
                 child: const Center(child: CircularProgressIndicator())),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isSaving ? null : _updateClub,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('common.save'.tr()),
+          ),
+        ),
       ),
     );
   }

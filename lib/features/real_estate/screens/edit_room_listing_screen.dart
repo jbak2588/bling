@@ -32,7 +32,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // [추가] Timestamp 클래스
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+// search index generation removed to reduce background indexing
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
 class EditRoomListingScreen extends StatefulWidget {
@@ -194,12 +194,6 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
       }
 
       // V V V --- [핵심 수정] RoomListingModel에 실제로 존재하는 필드만 사용하여 객체를 생성합니다 --- V V V
-      // [추가] 검색 키워드
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        tags: _tags,
-        description: _descriptionController.text,
-      );
 
       final updatedListing = RoomListingModel(
         id: widget.room.id,
@@ -237,9 +231,9 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
         kosBathroomType: _kosBathroomType,
         isElectricityIncluded: _isElectricityIncluded,
         maxOccupants: _maxOccupants,
-        // tags and searchIndex
-        tags: _tags,
-        searchIndex: searchKeywords,
+        // tags (searchIndex intentionally omitted — client-side token generation disabled; use server-side/background indexing)
+        tags:
+            _tags, // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
         // --- 기존 정보 보존 ---
         locationName: widget.room.locationName,
         locationParts: widget.room.locationParts,
@@ -275,13 +269,10 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
       appBar: AppBar(
         title: Text('realEstate.edit.title'.tr()),
         actions: [
-          if (!_isSaving)
-            TextButton(
-                onPressed: _updateListing,
-                child: Text('realEstate.edit.save'.tr(),
-                    style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold)))
+          IconButton(
+            onPressed: _isSaving ? null : _updateListing,
+            icon: const Icon(Icons.save),
+          )
         ],
       ),
       body: Stack(
@@ -465,7 +456,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                 Text('Tags', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 CustomTagInputField(
-                  hintText: 'e.g. furnished, near_station, quiet',
+                  hintText: 'tag_input.addHint'.tr(),
                   initialTags: _tags,
                   titleController: _titleController,
                   onTagsChanged: (tags) {
@@ -622,21 +613,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                   ),
                 ],
 
-                const SizedBox(height: 24),
-                // Bottom primary action consistent with AppBar
-                ElevatedButton(
-                  onPressed: _isSaving ? null : _updateListing,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 3),
-                        )
-                      : Text('realEstate.edit.save'.tr()),
-                ),
+                const SizedBox(height: 72),
 
                 // 상업용 상세 입력은 _buildDynamicDetailInputs()에서 처리합니다.
               ],
@@ -647,6 +624,20 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                 color: Colors.black.withValues(alpha: 0.5),
                 child: const Center(child: CircularProgressIndicator())),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isSaving ? null : _updateListing,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('realEstate.edit.save'.tr()),
+          ),
+        ),
       ),
     );
   }

@@ -179,6 +179,18 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         title: const Text('프로필 완성하기'),
         centerTitle: true,
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            onPressed: _isLoading ? null : _completeSetup,
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.save),
+          )
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -296,24 +308,30 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 _buildCheckbox('마케팅 정보 수신 동의 (선택)', _marketingAgreed,
                     (val) => setState(() => _marketingAgreed = val!)),
 
-                const SizedBox(height: 40),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _completeSetup,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00A66C),
-                      foregroundColor: Colors.white,
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('시작하기',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ),
+                const SizedBox(height: 88),
               ],
+            ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            height: 50,
+            child: FilledButton(
+              onPressed: _isLoading ? null : _completeSetup,
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('시작하기',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ),

@@ -43,7 +43,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+// search index generation removed to avoid extra background work
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
 class CreateShopScreen extends StatefulWidget {
@@ -170,12 +170,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         ..._tags,
       }.toList();
 
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _nameController.text,
-        description: _descriptionController.text,
-        tags: combinedTags,
-      );
-
       final newShop = ShopModel(
         id: '',
         name: _nameController.text.trim(),
@@ -198,7 +192,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         openHours: _hoursController.text.trim(),
         imageUrls: imageUrls, // [수정]
         createdAt: Timestamp.now(),
-        searchIndex: searchKeywords, // [추가]
+        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
       );
 
       await _repository.createShop(newShop);
@@ -227,13 +221,13 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
       appBar: AppBar(
         title: Text('localStores.create.title'.tr()),
         actions: [
-          if (!_isSaving)
-            TextButton(
-                onPressed: _submitShop,
-                child: Text('common.done'.tr(),
-                    style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold))),
+          IconButton(
+            onPressed: _isSaving ? null : _submitShop,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : const Icon(Icons.save),
+          ),
         ],
       ),
       body: Stack(
@@ -310,21 +304,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                       : null,
                 ),
                 const SizedBox(height: 24),
-                // Bottom primary action for better discoverability
-                ElevatedButton(
-                  onPressed: _isSaving ? null : _submitShop,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 3),
-                        )
-                      : Text('localStores.create.submit'.tr()),
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 72),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
@@ -382,7 +362,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                 ),
                 const SizedBox(height: 12),
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: 'tag_input.addHint'.tr(),
                   initialTags: _tags,
                   titleController: _nameController,
                   onTagsChanged: (tags) => setState(() {
@@ -391,6 +371,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                       ..addAll(tags);
                   }),
                 ),
+                const SizedBox(height: 88),
               ],
             ),
           ),
@@ -399,6 +380,20 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                 color: Colors.black.withValues(alpha: 0.5),
                 child: const Center(child: CircularProgressIndicator())),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isSaving ? null : _submitShop,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('localStores.create.submit'.tr()),
+          ),
+        ),
       ),
     );
   }

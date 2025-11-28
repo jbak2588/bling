@@ -38,7 +38,7 @@ import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+// search index generation removed to reduce background indexing
 
 class CreateRoomListingScreen extends StatefulWidget {
   final UserModel userModel;
@@ -151,13 +151,6 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         imageUrls.add(await ref.getDownloadURL());
       }
 
-      // [추가] 검색 키워드
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        tags: _tags,
-        description: _descriptionController.text,
-      );
-
       // Prefer freshest user location data at submit time: fetch users/{uid}
       final userDocSnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -194,8 +187,8 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         houseFacilities: _houseFacilities.toList(),
         commercialFacilities: _commercialFacilities.toList(),
         createdAt: Timestamp.now(),
-        tags: _tags, // ✅ 태그 저장
-        searchIndex: searchKeywords, // [추가]
+        tags:
+            _tags, // ✅ 태그 저장 — 'searchIndex' intentionally omitted; client-side token generation disabled; use server-side/background indexing.
         // [추가] Gap 1, 4 필드 저장
         listingType: _selectedListingType,
         publisherType: _selectedPublisherType,
@@ -248,13 +241,15 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
       appBar: AppBar(
         title: Text('realEstate.form.title'.tr()),
         actions: [
-          if (!_isSaving)
-            TextButton(
-                onPressed: _submitListing,
-                child: Text('realEstate.form.submit'.tr(),
-                    style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold))),
+          IconButton(
+            onPressed: _isSaving ? null : _submitListing,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.save),
+          ),
         ],
       ),
       body: Stack(
@@ -317,20 +312,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Bottom primary action consistent with appBar
-                ElevatedButton(
-                  onPressed: _isSaving ? null : _submitListing,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 3),
-                        )
-                      : Text('realEstate.form.submit'.tr()),
-                ),
+                const SizedBox(height: 72),
                 // [수정] '작업 27': 'listingType'을 'roomType' 앞으로 이동
                 Text('realEstate.form.listingType'.tr(),
                     style: Theme.of(context).textTheme.titleMedium),
@@ -646,7 +628,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 Text('Tags', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 CustomTagInputField(
-                  hintText: 'e.g. furnished, near_station, quiet',
+                  hintText: 'tag_input.addHint'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;
@@ -661,6 +643,20 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 color: Colors.black.withValues(alpha: 0.1),
                 child: const Center(child: CircularProgressIndicator())),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isSaving ? null : _submitListing,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('realEstate.form.submit'.tr()),
+          ),
+        ),
       ),
     );
   }

@@ -13,7 +13,7 @@ import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 import 'package:bling_app/core/models/user_model.dart'; // ✅ Import 추가
 import 'package:firebase_auth/firebase_auth.dart'; // ✅ Import 추가
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+// search index generation removed to reduce background indexing
 
 class EditAuctionScreen extends StatefulWidget {
   final AuctionModel auction;
@@ -107,13 +107,6 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
         }
       }
 
-      // [추가] 검색 키워드
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _titleController.text,
-        tags: _tags,
-        description: _descriptionController.text,
-      );
-
       final updatedAuction = AuctionModel(
         id: widget.auction.id,
         title: _titleController.text.trim(),
@@ -132,7 +125,7 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
         ownerId: widget.auction.ownerId,
         category: _selectedCategory,
         tags: _tags,
-        searchIndex: searchKeywords,
+        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
       );
 
       await _repository.updateAuction(updatedAuction);
@@ -161,10 +154,10 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
       appBar: AppBar(
         title: Text('auctions.edit.title'.tr()),
         actions: [
-          if (!_isSaving)
-            TextButton(
-                onPressed: _updateAuction,
-                child: Text('auctions.edit.save'.tr())),
+          IconButton(
+            onPressed: _isSaving ? null : _updateAuction,
+            icon: const Icon(Icons.save),
+          ),
         ],
       ),
       body: Stack(
@@ -280,13 +273,14 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
                 ),
                 const SizedBox(height: 16),
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: 'tag_input.addHint'.tr(),
                   initialTags: _tags,
                   titleController: _titleController,
                   onTagsChanged: (tags) {
                     setState(() => _tags = tags);
                   },
                 ),
+                const SizedBox(height: 88),
               ],
             ),
           ),
@@ -295,6 +289,20 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
                 color: Colors.black.withValues(alpha: 0.5),
                 child: const Center(child: CircularProgressIndicator())),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isSaving ? null : _updateAuction,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('common.save'.tr()),
+          ),
+        ),
       ),
     );
   }

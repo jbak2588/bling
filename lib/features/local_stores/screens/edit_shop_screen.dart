@@ -39,7 +39,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:bling_app/core/utils/search_helper.dart';
+// search index generation removed to avoid background indexing costs
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
 class EditShopScreen extends StatefulWidget {
@@ -146,22 +146,6 @@ class _EditShopScreenState extends State<EditShopScreen> {
         }
       }
 
-      // [추가] 검색 키워드 생성
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _nameController.text,
-        description: _descriptionController.text,
-        tags: _productsController.text.trim().isEmpty
-            ? _tags
-            : {
-                ..._productsController.text
-                    .trim()
-                    .split(',')
-                    .map((e) => e.trim())
-                    .where((e) => e.isNotEmpty),
-                ..._tags
-              }.toList(),
-      );
-
       final updatedShop = ShopModel(
         id: widget.shop.id,
         name: _nameController.text.trim(),
@@ -187,7 +171,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
         trustLevelVerified: widget.shop.trustLevelVerified,
         viewsCount: widget.shop.viewsCount,
         likesCount: widget.shop.likesCount,
-        searchIndex: searchKeywords,
+        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
       );
 
       await _repository.updateShop(updatedShop);
@@ -216,13 +200,13 @@ class _EditShopScreenState extends State<EditShopScreen> {
       appBar: AppBar(
         title: Text('localStores.edit.title'.tr()),
         actions: [
-          if (!_isSaving)
-            TextButton(
-                onPressed: _updateShop,
-                child: Text('localStores.edit.save'.tr(),
-                    style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold))),
+          IconButton(
+            onPressed: _isSaving ? null : _updateShop,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : const Icon(Icons.save),
+          ),
         ],
       ),
       body: Stack(
@@ -358,7 +342,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 ),
                 const SizedBox(height: 12),
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: 'tag_input.addHint'.tr(),
                   initialTags: _tags,
                   titleController: _nameController,
                   onTagsChanged: (tags) => setState(() {
@@ -367,20 +351,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
                       ..addAll(tags);
                   }),
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _isSaving ? null : _updateShop,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 3),
-                        )
-                      : Text('localStores.edit.save'.tr()),
-                ),
+                const SizedBox(height: 88),
               ],
             ),
           ),
@@ -390,6 +361,20 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 child: const Center(
                     child: CircularProgressIndicator(color: Colors.white))),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isSaving ? null : _updateShop,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('localStores.edit.save'.tr()),
+          ),
+        ),
       ),
     );
   }

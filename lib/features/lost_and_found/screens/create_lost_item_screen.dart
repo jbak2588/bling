@@ -25,7 +25,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
-import 'package:bling_app/core/utils/search_helper.dart'; // [추가]
+// search index generation removed to reduce background processing
 
 class CreateLostItemScreen extends StatefulWidget {
   final UserModel userModel;
@@ -107,13 +107,6 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
         imageUrls.add(await ref.getDownloadURL());
       }
 
-      // [추가] 검색 키워드 생성
-      final searchKeywords = SearchHelper.generateSearchIndex(
-        title: _itemDescriptionController.text, // 물품명/설명을 제목으로 사용
-        tags: _tags,
-        description: _locationDescriptionController.text,
-      );
-
       final newItem = LostItemModel(
         id: '',
         userId: user.uid,
@@ -127,7 +120,7 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
         tags: _tags, // ✅ 저장 시 태그 목록을 전달
         // ✅ 현상금 정보 저장
         isHunted: _isHunted,
-        searchIndex: searchKeywords, // [추가]
+        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
         bountyAmount:
             _isHunted ? num.tryParse(_bountyAmountController.text) : null,
       );
@@ -159,13 +152,13 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
       appBar: AppBar(
         title: Text('lostAndFound.form.title'.tr()),
         actions: [
-          if (!_isSaving)
-            TextButton(
-                onPressed: _submitItem,
-                child: Text('lostAndFound.form.submit'.tr(),
-                    style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold))),
+          IconButton(
+            onPressed: _isSaving ? null : _submitItem,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : const Icon(Icons.save),
+          ),
         ],
       ),
       body: Stack(
@@ -274,27 +267,14 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
 
                 // ✅ 태그 입력 필드를 추가합니다.
                 CustomTagInputField(
-                  hintText: 'tag_input.help'.tr(),
+                  hintText: 'tag_input.addHint'.tr(),
                   onTagsChanged: (tags) {
                     setState(() {
                       _tags = tags;
                     });
                   },
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _isSaving ? null : _submitItem,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 3),
-                        )
-                      : Text('lostAndFound.form.submit'.tr()),
-                ),
+                const SizedBox(height: 72),
               ],
             ),
           ),
@@ -303,6 +283,20 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
                 color: Colors.black.withValues(alpha: 0.1),
                 child: const Center(child: CircularProgressIndicator())),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: FilledButton(
+            onPressed: _isSaving ? null : _submitItem,
+            style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14)),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20, height: 20, child: CircularProgressIndicator())
+                : Text('lostAndFound.form.submit'.tr()),
+          ),
+        ),
       ),
     );
   }
