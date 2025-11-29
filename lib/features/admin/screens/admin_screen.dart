@@ -102,51 +102,69 @@ class AdminScreen extends StatelessWidget {
     if (confirm != true) return;
 
     try {
-      // 1. 참여자가 없거나 빈 배열인 문서 쿼리
-      // Note: Firestore 쿼리 제한으로 빈 배열([]) 쿼리가 까다로울 수 있어, 클라이언트 필터링 병행
-      final snapshot =
-          await FirebaseFirestore.instance.collection('chatRooms').get();
+      // Collections to check — codebase uses both `chatRooms` and `chats` in places.
+      final collectionsToCheck = ['chatRooms', 'chats'];
+      int totalDeleted = 0;
+      final List<String> processedCollections = [];
 
-      final batch = FirebaseFirestore.instance.batch();
-      int count = 0;
+      for (final colName in collectionsToCheck) {
+        debugPrint('[Admin] Checking collection: $colName');
+        final snapshot =
+            await FirebaseFirestore.instance.collection(colName).get();
 
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
+        if (snapshot.docs.isEmpty) {
+          debugPrint('[Admin] No documents found in $colName');
+          continue;
+        }
 
-        // 1. participants 필드 존재 여부 및 타입 확인
-        var participants = [];
-        if (data.containsKey('participants') && data['participants'] != null) {
-          try {
-            // List 타입이 아니면 빈 배열로 취급 (깨진 데이터)
-            if (data['participants'] is List) {
-              participants = List<dynamic>.from(data['participants']);
+        final batch = FirebaseFirestore.instance.batch();
+        int deletedInThisCollection = 0;
+
+        for (var doc in snapshot.docs) {
+          final data = doc.data();
+
+          // 1. participants 필드 존재 여부 및 타입 확인
+          var participants = [];
+          if (data.containsKey('participants') &&
+              data['participants'] != null) {
+            try {
+              if (data['participants'] is List) {
+                participants = List<dynamic>.from(data['participants']);
+              }
+            } catch (e) {
+              participants = [];
             }
-          } catch (e) {
-            // 변환 에러 시 빈 배열로 간주
-            participants = [];
+          }
+
+          // 2. 삭제 조건: 참여자가 0명이거나, 필드가 없었거나, 비정상 데이터인 경우
+          if (participants.isEmpty) {
+            batch.delete(doc.reference);
+            deletedInThisCollection++;
+            debugPrint('[Admin] Deleting ghost chat from $colName: ${doc.id}');
           }
         }
 
-        // 2. 삭제 조건: 참여자가 0명이거나, 필드가 없었거나, 비정상 데이터인 경우
-        // [옵션] '|| participants.length == 1'을 추가하면 혼자 남은 방도 삭제 가능
-        if (participants.isEmpty) {
-          batch.delete(doc.reference);
-          count++;
-          debugPrint('[Admin] Deleting ghost chat: ${doc.id}'); // 디버깅 로그 추가
+        if (deletedInThisCollection > 0) {
+          await batch.commit();
+          totalDeleted += deletedInThisCollection;
+          processedCollections.add('$colName($deletedInThisCollection)');
+        } else {
+          processedCollections.add('$colName(0)');
         }
       }
 
-      if (count > 0) {
-        await batch.commit();
-        if (context.mounted) {
+      if (context.mounted) {
+        if (totalDeleted > 0) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$count개의 유령 채팅방이 삭제되었습니다.')),
+            SnackBar(
+                content: Text(
+                    '${totalDeleted}개의 유령 채팅방이 삭제되었습니다. (${processedCollections.join(', ')})')),
           );
-        }
-      } else {
-        if (context.mounted) {
+        } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('정리할 채팅방이 없습니다.')),
+            SnackBar(
+                content: Text(
+                    '정리할 채팅방이 없습니다. 확인한 컬렉션: ${processedCollections.join(', ')}')),
           );
         }
       }
