@@ -2,6 +2,34 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// ============================================================================
+/// [Future Feature Plan: Talent Review System]
+/// 재능 마켓의 신뢰도를 위한 후기 시스템 구현 계획 (TODO)
+///
+/// 1. 데이터 모델 (New Model): 'TalentReviewModel'
+///    - id (String): 리뷰 ID
+///    - talentId (String): 대상 재능 ID
+///    - reviewerId (String): 작성자 ID (구매자)
+///    - sellerId (String): 판매자 ID (판매자 평판 집계용)
+///    - rating (double): 별점 (1.0 ~ 5.0)
+///    - content (String): 후기 내용
+// ignore: unintended_html_in_doc_comment
+///    - images (List<String>): 후기 사진
+///    - createdAt (Timestamp): 작성일
+///
+/// 2. Firestore 구조 (Sub-collection 권장)
+///    - Path: /talents/{talentId}/reviews/{reviewId}
+///    - 이유: 개별 재능에 종속된 데이터이며, 리뷰 수가 많아질 수 있음.
+///
+/// 3. 집계 로직 (Aggregation) - Cloud Functions 또는 트랜잭션 사용
+///    - 리뷰 작성 시 -> 해당 'talents' 문서의 'rating'(평점 평균)과 'reviewsCount'(총 개수) 업데이트.
+///    - 동시에 'users/{sellerId}'의 'talentStats' (판매자 전체 평점)도 업데이트 권장.
+///
+/// 4. UI/UX 흐름
+///    - 채팅방에서 '거래 완료' 버튼 클릭 -> '후기 작성' 팝업 노출.
+///    - TalentDetailScreen 하단에 '후기 목록(Review List)' 섹션 추가.
+/// ============================================================================
+
 /// 재능 마켓(Talent Market)의 게시글 데이터 모델
 /// Firestore 컬렉션: 'talents'
 class TalentModel {

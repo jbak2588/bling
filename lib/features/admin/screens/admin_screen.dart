@@ -161,7 +161,7 @@ class AdminScreen extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
                 content: Text(
-                    '${totalDeleted}개의 유령 채팅방이 삭제되었습니다. (${processedCollections.join(', ')})')),
+                    '$totalDeleted개의 유령 채팅방이 삭제되었습니다. (${processedCollections.join(', ')})')),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -853,6 +853,7 @@
   },
   "chat_list": {
     "appBarTitle": "Obrolan",
+    "leave_confirm": "Keluar dari ruang obrolan ini? Riwayat percakapan mungkin hilang.",
     "empty": "Belum ada percakapan."
   },
   "chat_room": {

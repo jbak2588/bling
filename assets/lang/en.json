@@ -853,6 +853,7 @@
   },
   "chat_list": {
     "appBarTitle": "Chats",
+    "leave_confirm": "Leave this chat? Conversation history may be lost.",
     "empty": "No conversations yet."
   },
   "chat_room": {
