@@ -102,21 +102,18 @@ class AdminScreen extends StatelessWidget {
     if (confirm != true) return;
 
     try {
-      // Collections to check — codebase uses both `chatRooms` and `chats` in places.
-      final collectionsToCheck = ['chatRooms', 'chats'];
+      // 프로젝트에서는 실제로 `chats` 컬렉션만 사용하므로 `chats`만 검사합니다.
+      final colName = 'chats';
       int totalDeleted = 0;
       final List<String> processedCollections = [];
 
-      for (final colName in collectionsToCheck) {
-        debugPrint('[Admin] Checking collection: $colName');
-        final snapshot =
-            await FirebaseFirestore.instance.collection(colName).get();
+      debugPrint('[Admin] Checking collection: $colName');
+      final snapshot =
+          await FirebaseFirestore.instance.collection(colName).get();
 
-        if (snapshot.docs.isEmpty) {
-          debugPrint('[Admin] No documents found in $colName');
-          continue;
-        }
-
+      if (snapshot.docs.isEmpty) {
+        debugPrint('[Admin] No documents found in $colName');
+      } else {
         final batch = FirebaseFirestore.instance.batch();
         int deletedInThisCollection = 0;
 
@@ -124,12 +121,18 @@ class AdminScreen extends StatelessWidget {
           final data = doc.data();
 
           // 1. participants 필드 존재 여부 및 타입 확인
-          var participants = [];
+          var participants = <dynamic>[];
           if (data.containsKey('participants') &&
               data['participants'] != null) {
             try {
-              if (data['participants'] is List) {
-                participants = List<dynamic>.from(data['participants']);
+              final p = data['participants'];
+              // List일 경우
+              if (p is List) {
+                participants = List<dynamic>.from(p);
+              }
+              // Map 형태로 저장된 경우 (uid: true 등) -> 키 개수로 판단
+              else if (p is Map) {
+                participants = List<dynamic>.from(p.keys);
               }
             } catch (e) {
               participants = [];
