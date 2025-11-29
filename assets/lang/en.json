@@ -489,8 +489,7 @@
       "button": "Log Out",
       "confirmTitle": "Log Out",
       "confirmBody": "Are you sure you want to log out?"
-    }
-    ,
+    },
     "deleteAccount": {
       "button": "Request Account Deletion",
       "confirmTitle": "Request Account Deletion",
@@ -731,6 +730,27 @@
     "success": "Post created successfully.",
     "fail": "Failed to create post: {error}"
   },
+  "localNewsEdit": {
+    "appBarTitle": "Edit Post",
+    "title": "Edit Post",
+    "buttons": {
+      "submit": "Update",
+      "save": "Save"
+    },
+    "alerts": {
+      "success": "Post updated successfully.",
+      "failure": "Failed to update: {error}"
+    },
+    "success": "Post updated successfully."
+  },
+  "tag_input": {
+    "hint": "Use comma (,) or Enter to add tags.",
+    "suggestedLabel": "Recommended Tags",
+    "maxReached": "Tags can be registered up to a maximum of {max} items.",
+    "fromTitleSuffix": "(title)",
+    "addHint": "Add tag...",
+    "help": "Use comma (,) or Enter to add tags."
+  },
   "localNewsDetail": {
     "appBarTitle": "Post",
     "menu": {
@@ -746,22 +766,7 @@
     },
     "buttons": {
       "comment": "Add a comment"
-    },
-    "confirmDelete": "confirmDelete",
-    "deleted": "deleted"
-  },
-  "localNewsEdit": {
-    "appBarTitle": "Edit Post",
-    "title": "Edit Post",
-    "buttons": {
-      "submit": "Update",
-      "save": "Save"
-    },
-    "alerts": {
-      "success": "Post updated successfully.",
-      "failure": "Failed to update: {error}"
     }
-    ,"success": "Post updated successfully."
   },
   "commentInputField": {
     "secretCommentLabel": "Secret",
@@ -864,22 +869,85 @@
     "imageMessage": "Image"
   },
   "jobs": {
-    "setLocationPrompt": "Set your location to see job posts!",
+    "setLocationPrompt": "Set your neighborhood to see job posts around you!",
     "screen": {
-      "empty": "No job postings found in this area.",
-      "createTooltip": "Post a Job"
+     "empty": "There are no job posts yet.",
+  "createTooltip": "Create new job post"
     },
     "tabs": {
       "all": "All",
-      "quickGig": "Quick Gigs",
-      "regular": "Part-time/Full-time"
+      "quickGig": "Quick Gig",
+     "regular": "Regular / Part-time",
+      "talents": "Find Experts"
     },
     "selectType": {
-      "title": "Select Job Type",
-      "regularTitle": "Part-time / Full-time Job",
-      "regularDesc": "Regular work like cafe, restaurant, office",
-      "quickGigTitle": "Quick Gig / Simple Help",
-      "quickGigDesc": "Motorcycle delivery, moving, cleaning, etc."
+       "title": "Choose job post type",
+      "subtitle": "What kind of post would you like to create?",
+      "regular": {
+  "title": "Regular / part-time job",
+      "desc": "Hire staff for your shop or long-term part-time positions."
+      },
+  "quick": {
+      "title": "Urgent help / one-time gig",
+      "desc": "Need one-time help like carrying boxes, waiting in line, and more."
+      },
+      "talent": {
+      "title": "Register as a freelancer",
+      "desc": "Offer your skills and talents to neighbors nearby.",
+      "badge": "NEW"
+      }
+    },
+    "talent": {
+      "create": {
+       "title": "Register your talent",
+        "labels": {
+          "category": "Category",
+            "title": "Title (e.g. Detailed move-in cleaning service)",
+          "price": "Price",
+             "description": "Detailed description",
+          "descriptionHint": "Describe your experience, work style, available time, and other details.",
+          "portfolio": "Portfolio",
+          "location": "Service Area"
+        },
+        "priceUnits": {
+          "project": "Per Project",
+          "hourly": "Per Hour",
+          "negotiable": "Negotiable"
+        },
+        "errors": {
+          "categoryRequired": "Please select a category.",
+          "titleRequired": "Title is required.",
+          "priceRequired": "Price is required.",
+          "descriptionRequired": "Description is required.",
+          "portfolioRequired": "Please upload at least 1 portfolio photo.",
+        "maxImages": "You can upload up to 10 images."
+        },
+        "submit": "Register Talent",
+      "success": "Your talent has been registered successfully."
+      }
+      ,
+      "detail": {
+        "title": "Talent Detail",
+        "descriptionTitle": "Detailed description",
+        "locationUnknown": "No location info"
+      },
+      "delete": {
+        "confirmTitle": "Delete confirmation",
+        "confirmBody": "Are you sure you want to delete this talent?",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
+      "action": {
+        "contact": "Contact"
+      },
+      "messages": {
+        "deletedSuccessTitle": "Done",
+        "deletedSuccessBody": "Deleted.",
+        "loginRequiredTitle": "Notice",
+        "loginRequiredBody": "Login is required.",
+        "chatErrorTitle": "Error",
+        "chatErrorBody": "Failed to connect chat room: {error}"
+      }
     },
     "form": {
       "title": "Post a Job",
@@ -948,7 +1016,11 @@
       "quick_gig_moving": "Moving Help",
       "quick_gig_cleaning": "Cleaning/Housework",
       "quick_gig_queuing": "Wait in Line",
-      "quick_gig_etc": "Other Errands"
+      "quick_gig_etc": "Other Errands",
+      "talent_tutoring": "Tutoring",
+      "talent_design": "Design",
+      "talent_home_service": "Home Service",
+      "talent_other": "Other"
     },
     "salaryTypes": {
       "hourly": "Hourly",
@@ -1437,8 +1509,8 @@
         "titleLabel": "Title",
         "descriptionLabel": "Description"
       }
-    }
-    ,"edit": {
+    },
+    "edit": {
       "title": "Edit POM"
     }
   },
@@ -2089,11 +2161,6 @@
       "original_photos": "Original Photos",
       "raw_json": "Raw JSON"
     }
-  },
-  "tag_input": {
-    "fromTitleSuffix": "(title)",
-    "addHint": "Add tag...",
-    "help": "Use comma (,) or Enter to add tags."
   },
   "auth": {
     "verification": {

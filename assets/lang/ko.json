@@ -738,8 +738,8 @@
     "alerts": {
       "success": "게시물이 수정되었습니다.",
       "failure": "수정 실패: {error}"
-    }
-    ,"success": "게시물이 수정되었습니다."
+    },
+    "success": "게시물이 수정되었습니다."
   },
   "tag_input": {
     "hint": "쉼표(,) 또는 엔터로 태그를 등록하세요.",
@@ -764,9 +764,7 @@
     },
     "buttons": {
       "comment": "댓글 달기"
-    },
-    "confirmDelete": "confirmDelete",
-    "deleted": "deleted"
+    }
   },
   "commentInputField": {
     "secretCommentLabel": "비밀댓글",
@@ -871,20 +869,83 @@
   "jobs": {
     "setLocationPrompt": "구인글을 보려면 먼저 내 동네를 설정해주세요!",
     "screen": {
-      "empty": "해당 지역에 등록된 구인 게시글이 없습니다.",
+      "empty": "게시글이 없습니다.",
       "createTooltip": "새 구인글 등록"
     },
     "tabs": {
       "all": "전체",
-      "quickGig": "단기 심부름",
-      "regular": "파트타임/정규직"
+      "quickGig": "단순알바",
+      "regular": "정규직",
+      "talents": "전문가 찾기"
     },
     "selectType": {
-      "title": "일자리 유형 선택",
-      "regularTitle": "파트타임 / 정규직",
-      "regularDesc": "카페·식당·사무 등 일반 근무",
-      "quickGigTitle": "퀵긱 / 단기 심부름",
-      "quickGigDesc": "오토바이 심부름, 이사, 청소 등"
+      "title": "구인(구직) 유형 선택",
+      "subtitle": "어떤 게시글을 등록하시겠습니까?",
+      "regular": {
+        "title": "정규직/알바",
+        "desc": "가게 직원이나 장기 아르바이트를 구합니다."
+      },
+      "quick": {
+        "title": "급한 도움/심부름",
+        "desc": "짐 옮기기, 줄서기 등 일회성 도움이 필요합니다."
+      },
+      "talent": {
+        "title": "전문가(프리랜서) 등록",
+        "desc": "내 기술과 재능을 이웃에게 판매합니다.",
+        "badge": "NEW"
+      }
+    },
+     "talent": {
+      "create": {
+        "title": "재능 등록",
+        "labels": {
+          "category": "카테고리",
+          "title": "제목 (예: 꼼꼼한 입주청소 해드립니다)",
+          "price": "가격",
+          "description": "상세 설명",
+          "descriptionHint": "경력, 작업 방식, 가능 시간 등을 자세히 적어주세요.",
+          "portfolio": "포트폴리오",
+          "location": "활동 지역"
+        },
+        "priceUnits": {
+          "project": "건당",
+          "hourly": "시간당",
+          "negotiable": "협의"
+        },
+        "errors": {
+          "categoryRequired": "카테고리를 선택해주세요.",
+          "titleRequired": "제목을 입력해주세요.",
+          "priceRequired": "가격을 입력해주세요.",
+          "descriptionRequired": "내용을 입력해주세요.",
+          "portfolioRequired": "포트폴리오 사진을 최소 1장 등록해주세요.",
+          "maxImages": "최대 10장까지 업로드 가능합니다."
+        },
+        "submit": "재능 등록하기",
+        "success": "재능이 성공적으로 등록되었습니다."
+      }
+      ,
+      "detail": {
+        "title": "재능 상세",
+        "descriptionTitle": "상세 설명",
+        "locationUnknown": "위치 정보 없음"
+      },
+      "delete": {
+        "confirmTitle": "삭제 확인",
+        "confirmBody": "정말 이 재능을 삭제하시겠습니까?",
+        "cancel": "취소",
+        "confirm": "삭제"
+      },
+      "action": {
+        "contact": "문의하기"
+      },
+      "messages": {
+        "deletedSuccessTitle": "완료",
+        "deletedSuccessBody": "삭제되었습니다.",
+        "loginRequiredTitle": "알림",
+        "loginRequiredBody": "로그인이 필요한 서비스입니다.",
+        "chatErrorTitle": "오류",
+        "chatErrorBody": "채팅방 연결 실패: {error}"
+      }
     },
     "form": {
       "title": "구인글 등록",
@@ -953,7 +1014,11 @@
       "quick_gig_moving": "이사/짐 나르기",
       "quick_gig_cleaning": "청소/집안일",
       "quick_gig_queuing": "줄서기",
-      "quick_gig_etc": "기타 심부름"
+      "quick_gig_etc": "기타 심부름",
+      "talent_tutoring": "과외",
+      "talent_design": "디자인",
+      "talent_home_service": "가사/홈 서비스",
+      "talent_other": "기타"
     },
     "salaryTypes": {
       "hourly": "시급",
@@ -2095,7 +2160,6 @@
       "raw_json": "Raw JSON"
     }
   },
-  
   "auth": {
     "verification": {
       "title": "이메일 인증",

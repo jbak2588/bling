@@ -127,6 +127,11 @@ class ChatService {
     String? productImage,
     String? jobId,
     String? jobTitle,
+    String? jobImage,
+    // 재능 마켓 관련 파라미터 추가
+    String? talentId,
+    String? talentTitle,
+    String? talentImage,
     String? shopId,
     String? shopName,
     String? shopImage,
@@ -144,8 +149,14 @@ class ChatService {
     List<String> participants = [myUid, otherUserId];
     participants.sort();
 
-    String contextId =
-        productId ?? jobId ?? shopId ?? lostItemId ?? roomId ?? 'direct';
+    // 컨텍스트 ID에 talentId 포함
+    String contextId = productId ??
+        jobId ??
+        talentId ??
+        shopId ??
+        lostItemId ??
+        roomId ??
+        'direct';
     String chatId = '${contextId}_${participants.join('_')}';
 
     final chatDocRef = _firestore.collection('chats').doc(chatId);
@@ -168,6 +179,11 @@ class ChatService {
         if (productImage != null) 'productImage': productImage,
         if (jobId != null) 'jobId': jobId,
         if (jobTitle != null) 'jobTitle': jobTitle,
+        if (jobImage != null) 'jobImage': jobImage,
+        // 재능 마켓 정보
+        if (talentId != null) 'talentId': talentId,
+        if (talentTitle != null) 'talentTitle': talentTitle,
+        if (talentImage != null) 'talentImage': talentImage,
         if (shopId != null) 'shopId': shopId,
         if (shopName != null) 'shopName': shopName,
         if (shopImage != null) 'shopImage': shopImage,

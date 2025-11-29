@@ -73,7 +73,7 @@
       "marketplace": "Preloved",
       "findFriends": "Cari Teman",
       "clubs": "Grup",
-      "jobs": "Loker",
+      "jobs": "Kerja",
       "localStores": "Toko Lokal",
       "auction": "Lelang",
       "pom": "POM",
@@ -369,19 +369,19 @@
       "pending_title": "Diajukan untuk ditinjau",
       "pending_message": "Hasil verifikasi AI menunjukkan item ini perlu ditinjau oleh admin sebelum dipublikasikan.",
       "submit_button": "Daftarkan",
-      "suggested_price": "AI suggested price ({})",
-      "summary": "Verification summary",
-      "buyer_notes": "Notes for buyer (AI)",
-      "key_specs": "Key specs",
+      "suggested_price": "Harga yang disarankan oleh AI ({})",
+      "summary": "Ringkasan verifikasi",
+      "buyer_notes": "Catatan untuk pembeli (AI)",
+      "key_specs": "Spesifikasi utama",
       "specs": "Spesifikasi utama",
-      "condition": "Condition check",
-      "included_items": "Included items (comma-separated)",
-      "final_description": "Final description",
-      "included_items_label": "Included items",
+      "condition": "Pemeriksaan kondisi",
+      "included_items": "Item yang termasuk (dipisahkan dengan koma)",
+      "final_description": "Deskripsi akhir",
+      "included_items_label": "Barang-barang yang termasuk",
       "notes": "Catatan untuk pembeli",
       "notes_placeholder": "Semua foto yang direkomendasikan telah disediakan. AI tidak menemukan hal penting yang perlu diberitahukan kepada pembeli.",
-      "buyer_notes_label": "Buyer notes",
-      "skipped_items": "Skipped evidence items",
+      "buyer_notes_label": "Catatan pembeli",
+      "skipped_items": "Item bukti yang dilewati",
       "fail": "Pembuatan laporan gagal."
     },
     "evidence": {
@@ -730,6 +730,27 @@
     "success": "Postingan berhasil dibuat.",
     "fail": "Gagal membuat postingan: {error}"
   },
+  "localNewsEdit": {
+    "appBarTitle": "Ubah Postingan",
+    "title": "Sunting Postingan",
+    "buttons": {
+      "submit": "Perbarui",
+      "save": "Simpan"
+    },
+    "alerts": {
+      "success": "Postingan berhasil diperbarui.",
+      "failure": "Gagal memperbarui: {error}"
+    },
+    "success": "Postingan berhasil diperbarui."
+  },
+  "tag_input": {
+    "hint": "Gunakan koma (,) atau Enter untuk menambahkan tag.",
+    "suggestedLabel": "Tag yang Direkomendasikan",
+    "maxReached": "Tag dapat didaftarkan hingga maksimal {max} buah.",
+    "fromTitleSuffix": "(judul)",
+    "addHint": "Tambah tag...",
+    "help": "Gunakan koma (,) atau Enter untuk menambahkan tag."
+  },
   "localNewsDetail": {
     "appBarTitle": "Postingan",
     "menu": {
@@ -745,22 +766,7 @@
     },
     "buttons": {
       "comment": "Tambahkan komentar"
-    },
-    "confirmDelete": "confirmDelete",
-    "deleted": "deleted"
-  },
-  "localNewsEdit": {
-    "appBarTitle": "Ubah Postingan",
-    "title": "Sunting Postingan",
-    "buttons": {
-      "submit": "Perbarui",
-      "save": "Simpan"
-    },
-    "alerts": {
-      "success": "Postingan berhasil diperbarui.",
-      "failure": "Gagal memperbarui: {error}"
     }
-    ,"success": "Postingan berhasil diperbarui."
   },
   "commentInputField": {
     "secretCommentLabel": "Rahasia",
@@ -865,34 +871,97 @@
   "jobs": {
     "setLocationPrompt": "Silakan atur lokasi Anda untuk melihat lowongan!",
     "screen": {
-      "empty": "Tidak ada lowongan di area ini.",
-      "createTooltip": "Pasang Lowongan Baru"
+      "empty": "Belum ada lowongan kerja.",
+      "createTooltip": "Posting Lowongan Baru"
     },
     "tabs": {
       "all": "Semua",
-      "quickGig": "Gig Cepat",
-      "regular": "Paruh Waktu/Penuh Waktu"
+      "quickGig": "Bantua Cepat",
+      "regular": "Paruh/Penuh Waktu",
+    "talents": "Cari ahli"
     },
     "selectType": {
-      "title": "Pilih Jenis Lowongan",
-      "regularTitle": "Pekerjaan Paruh Waktu / Penuh Waktu",
-      "regularDesc": "Kerja reguler seperti kafe, restoran, kantor",
-      "quickGigTitle": "Gig Cepat / Bantuan Sederhana",
-      "quickGigDesc": "Kurir motor, bantu pindahan, bersih-bersih, dll."
+      "title": "Pilih jenis iklan kerja",
+      "subtitle": "Jenis postingan apa yang Anda inginkan?",
+      "regular": {
+        "title": "Loker",
+        "desc": "Kerja reguler seperti kafe, restoran, kantor"
+      },
+      "quick": {
+        "title": "Bantuan cepat/Kerja harian",
+        "desc": "Kurir motor, bantu pindahan, bersih-bersih, dll."
+      },
+      "talent": {
+        "title": "Jual Layanan",
+        "desc": "Jual skill dan keahlianmu kepada tetangga di sekitar.",
+        "badge": "BARU"
+      }
+    },
+    "talent": {
+      "create": {
+        "title": "Daftar Jasa",
+        "labels": {
+          "category": "Kategori",
+          "title": "Judul (contoh: Jasa bersih-bersih rumah baru yang rapi)",
+          "price": "Tarif",
+          "description": "Deskripsi detail",
+          "descriptionHint": "Tulis pengalaman, cara kerja, jam yang tersedia, dan info penting lainnya.",
+          "portfolio": "Portofolio",
+          "location": "Area Layanan"
+        },
+        "priceUnits": {
+          "project": "Per Proyek",
+          "hourly": "Per Jam",
+          "negotiable": "Bisa nego"
+        },
+        "errors": {
+          "categoryRequired": "Pilih kategori.",
+          "titleRequired": "Judul wajib diisi.",
+          "priceRequired": "Silakan isi tarif.",
+          "descriptionRequired": "Silakan isi deskripsi.",
+          "portfolioRequired": "Unggah minimal 1 foto portofolio.",
+          "maxImages": "Maksimal 10 foto."
+        },
+        "submit": "Daftarkan Jasa",
+        "success": "Jasamu berhasil didaftarkan."
+      }
+      ,
+      "detail": {
+        "title": "Detail Jasa",
+        "descriptionTitle": "Deskripsi detail",
+        "locationUnknown": "Info lokasi tidak tersedia"
+      },
+      "delete": {
+        "confirmTitle": "Konfirmasi Hapus",
+        "confirmBody": "Apakah Anda yakin ingin menghapus jasa ini?",
+        "cancel": "Batal",
+        "confirm": "Hapus"
+      },
+      "action": {
+        "contact": "Hubungi"
+      },
+      "messages": {
+        "deletedSuccessTitle": "Selesai",
+        "deletedSuccessBody": "Telah dihapus.",
+        "loginRequiredTitle": "Pemberitahuan",
+        "loginRequiredBody": "Anda harus masuk untuk menggunakan layanan ini.",
+        "chatErrorTitle": "Kesalahan",
+        "chatErrorBody": "Gagal menghubungkan ruang obrolan: {error}"
+      }
     },
     "form": {
-      "title": "Pasang Lowongan",
+      "title": "Posting Lowongan",
       "titleHint": "Judul pekerjaan",
       "descriptionPositionHint": "Deskripsikan posisi",
       "categoryHint": "Kategori",
       "categorySelectHint": "Pilih kategori",
       "categoryValidator": "Silakan pilih kategori.",
       "locationHint": "Lokasi",
-      "submit": "Pasang Lowongan",
+      "submit": "Posting Lowongan",
       "titleLabel": "Judul",
       "titleValidator": "Silakan masukkan judul.",
-      "titleRegular": "Pasang Lowongan Paruh/Penuh Waktu",
-      "titleQuickGig": "Pasang Gig Cepat",
+      "titleRegular": "Posting Lowongan Paruh/Penuh Waktu",
+      "titleQuickGig": "Posting Bantuan Cepat",
       "validationError": "Harap lengkapi semua kolom wajib.",
       "saveSuccess": "Lowongan berhasil disimpan.",
       "saveError": "Gagal menyimpan lowongan: {error}",
@@ -947,7 +1016,11 @@
       "quick_gig_moving": "Bantu Pindahan",
       "quick_gig_cleaning": "Bersih-bersih/Rumah",
       "quick_gig_queuing": "Joki Antrian",
-      "quick_gig_etc": "Jasa lainnya"
+      "quick_gig_etc": "Jasa lainnya",
+      "talent_tutoring": "Les Privat",
+      "talent_design": "Desain",
+      "talent_home_service": "Layanan Rumah",
+      "talent_other": "Lainnya"
     },
     "salaryTypes": {
       "hourly": "Per jam",
@@ -1435,10 +1508,10 @@
       "form": {
         "titleLabel": "Judul",
         "descriptionLabel": "Deskripsi"
+      },
+      "edit": {
+        "title": "Sunting POM"
       }
-    ,"edit": {
-      "title": "Sunting POM"
-    }
     }
   },
   "realEstate": {
@@ -2088,11 +2161,6 @@
       "original_photos": "Foto Asli",
       "raw_json": "Raw JSON"
     }
-  },
-  "tag_input": {
-    "fromTitleSuffix": "(judul)",
-    "addHint": "Tambah tag...",
-    "help": "Gunakan koma (,) atau Enter untuk menambahkan tag."
   },
   "auth": {
     "verification": {

@@ -113,11 +113,23 @@ class JobCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(AppJobCategories.getName(job.category),
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.grey[600])),
-                        Text('jobs.card.minutesAgo'.tr(),
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.grey[600])),
+                            style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                        fontSize: 12,
+                                        color: Colors.grey[600]) ??
+                                const TextStyle(
+                                    fontSize: 12, color: Colors.grey)),
+                        Text(_formatTimeAgo(job.createdAt.toDate()),
+                            style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                        fontSize: 12,
+                                        color: Colors.grey[600]) ??
+                                const TextStyle(
+                                    fontSize: 12, color: Colors.grey)),
                       ],
                     )
                   ],
@@ -142,5 +154,22 @@ class JobCard extends StatelessWidget {
       ),
       child: Icon(Icons.work_outline, size: 40, color: Colors.grey.shade400),
     );
+  }
+
+  // [수정] 다국어 키를 적용한 시간 포맷팅 헬퍼 메서드
+  String _formatTimeAgo(DateTime dateTime) {
+    final diff = DateTime.now().difference(dateTime);
+    if (diff.inDays > 365) {
+      return DateFormat('yyyy-MM-dd').format(dateTime);
+    } else if (diff.inDays > 0) {
+      return 'time.daysAgo'.tr(namedArgs: {'days': diff.inDays.toString()});
+    } else if (diff.inHours > 0) {
+      return 'time.hoursAgo'.tr(namedArgs: {'hours': diff.inHours.toString()});
+    } else if (diff.inMinutes > 0) {
+      return 'time.minutesAgo'
+          .tr(namedArgs: {'minutes': diff.inMinutes.toString()});
+    } else {
+      return 'time.justNow'.tr();
+    }
   }
 }

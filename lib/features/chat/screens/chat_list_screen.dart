@@ -116,8 +116,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
                         final otherUser = userSnapshot.data;
 
-                        
-
                         if (chatRoom.isGroupChat) {
                           return _buildGroupChatItem(context, chatRoom);
                         } else if (chatRoom.roomId != null &&
@@ -162,7 +160,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
   ListTile _buildGroupChatItem(BuildContext context, ChatRoomModel chatRoom) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: _buildAvatar(imageUrl: chatRoom.groupImage, icon: Icons.groups),
+      leading: _buildAvatar(
+          imageUrl: chatRoom.groupImage ?? chatRoom.talentImage,
+          icon: Icons.groups),
       title: Text(chatRoom.groupName ?? 'Group Chat',
           style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(chatRoom.lastMessage,
@@ -177,7 +177,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: _buildAvatar(
-          imageUrl: chatRoom.roomImage, icon: Icons.house_outlined),
+          imageUrl:
+              chatRoom.roomImage ?? chatRoom.talentImage ?? otherUser?.photoUrl,
+          icon: Icons.house_outlined),
       title: Text(chatRoom.roomTitle ?? 'Real Estate',
           style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}',
@@ -193,7 +195,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
     // V V V --- [수정] Lost & Found UI 개선 --- V V V
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: _buildLostAndFoundAvatar(chatRoom.contextType),
+      leading: _buildAvatar(
+          imageUrl: chatRoom.productImage ??
+              chatRoom.talentImage ??
+              otherUser?.photoUrl,
+          icon: Icons.search_off),
       title: Text('Lost & Found', // 제목을 'Lost & Found'로 고정
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
       subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}',
@@ -209,7 +215,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: _buildAvatar(
-          imageUrl: chatRoom.shopImage, icon: Icons.storefront_outlined),
+          imageUrl:
+              chatRoom.shopImage ?? chatRoom.talentImage ?? otherUser?.photoUrl,
+          icon: Icons.storefront_outlined),
       title: Text(chatRoom.shopName ?? 'Shop',
           style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}',
@@ -224,7 +232,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
       BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: _buildAvatar(icon: Icons.work_outline),
+      leading: _buildAvatar(
+          imageUrl:
+              chatRoom.jobImage ?? chatRoom.talentImage ?? otherUser?.photoUrl,
+          icon: Icons.work_outline),
       title: Text(chatRoom.jobTitle ?? 'Job Posting',
           style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}',
@@ -240,7 +251,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: _buildAvatar(
-          imageUrl: chatRoom.productImage, icon: Icons.shopping_bag_outlined),
+          imageUrl: chatRoom.productImage ??
+              chatRoom.talentImage ??
+              otherUser?.photoUrl,
+          icon: Icons.shopping_bag_outlined),
       title: Text(chatRoom.productTitle ?? 'Product',
           style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text('${otherUser?.nickname ?? ''} • ${chatRoom.lastMessage}',
@@ -254,19 +268,21 @@ class _ChatListScreenState extends State<ChatListScreen> {
   ListTile _buildDirectChatItem(
       BuildContext context, ChatRoomModel chatRoom, UserModel? otherUser) {
     if (otherUser == null) return const ListTile();
-     // V V V --- [수정] Find Friend UI 개선 --- V V V
+    // V V V --- [수정] Find Friend UI 개선 --- V V V
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: _buildAvatar(imageUrl: otherUser.photoUrl, icon: Icons.favorite_border), // 아이콘 변경
+      leading: _buildAvatar(
+          imageUrl: otherUser.photoUrl, icon: Icons.favorite_border), // 아이콘 변경
       title: Text('Find Friend', // 제목을 'Find Friend'로 고정
           style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text('${otherUser.nickname} • ${chatRoom.lastMessage}', // 부제에 상대방 닉네임 추가
-          maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text(
+          '${otherUser.nickname} • ${chatRoom.lastMessage}', // 부제에 상대방 닉네임 추가
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis),
       trailing: _buildTrailing(chatRoom),
       onTap: () => _navigateToChat(context,
           chatRoom: chatRoom, otherUser: otherUser, type: 'Direct/Friend'),
     );
-    
   }
 
   // V V V --- [수정] 정밀 진단을 위한 로그 출력을 추가합니다 --- V V V
@@ -292,24 +308,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
         productTitle: chatRoom.productTitle ??
             chatRoom.jobTitle ??
             chatRoom.shopName ??
-            chatRoom.roomTitle,
+            chatRoom.roomTitle ??
+            chatRoom.talentTitle,
       ),
     ));
   }
   // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
-  Widget _buildLostAndFoundAvatar(String? type) {
-    final isLost = type == 'lost';
-    return CircleAvatar(
-      radius: 28,
-      backgroundColor: isLost ? Colors.red.shade50 : Colors.blue.shade50,
-      child: Icon(
-        isLost ? Icons.search_off : Icons.task_alt_outlined,
-        color: isLost ? Colors.redAccent : Colors.blueAccent,
-        size: 28,
-      ),
-    );
-  }
+  // Legacy: specialized Lost & Found avatar removed — unified avatar renderer `_buildAvatar` is used.
 
   Widget _buildAvatar({String? imageUrl, required IconData icon}) {
     return CircleAvatar(

@@ -71,15 +71,28 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/jobs/data/job_repository.dart';
 import 'package:bling_app/features/jobs/screens/job_detail_screen.dart';
+import 'package:bling_app/core/models/chat_room_model.dart';
+import 'package:bling_app/features/jobs/data/talent_repository.dart';
+import 'package:bling_app/features/jobs/models/talent_model.dart';
+import 'package:bling_app/features/jobs/screens/talent_detail_screen.dart';
 // Why? : ProductRepository 및 ProductDetailScreen import 필요
-// import 'package:bling_app/features/marketplace/data/product_repository.dart'; // [Added]
-// import 'package:bling_app/features/marketplace/screens/product_detail_screen.dart'; // [Added]
+import 'package:bling_app/features/marketplace/data/product_repository.dart';
+import 'package:bling_app/features/marketplace/models/product_model.dart';
+import 'package:bling_app/features/marketplace/screens/product_detail_screen.dart';
+import 'package:bling_app/features/local_stores/data/shop_repository.dart';
+import 'package:bling_app/features/local_stores/models/shop_model.dart';
+import 'package:bling_app/features/local_stores/screens/shop_detail_screen.dart';
+import 'package:bling_app/features/real_estate/data/room_repository.dart';
+import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
+import 'package:bling_app/features/real_estate/screens/room_detail_screen.dart';
 import 'dart:io'; // [v2.1] 이미지 파일(File) 사용을 위해 import
 import 'dart:ui' as ui; // [v2.1] 이미지 블러(ImageFiltered)를 위해 import
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart'; // [v2.1] 이미지 전송 기능 구현을 위해 import
 import 'package:easy_localization/easy_localization.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -131,7 +144,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   // V V V --- [추가] 컨텍스트 헤더를 위한 상태 변수 --- V V V
   dynamic _contextItem; // JobModel 또는 ProductModel을 저장
   bool _isContextLoading = true;
-  // ChatRoomModel? _chatRoomModel;
+  ChatRoomModel? _chatRoomModel;
   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
   bool get isNewChat => widget.isNewChat;
@@ -170,7 +183,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         });
       }
     } else {
-      if (mounted) setState(() => _isLoadingParticipants = false);
+      if (mounted) {
+        setState(() => _isLoadingParticipants = false);
+      }
     }
   }
 
@@ -191,12 +206,57 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         });
       }
 
-      // setState(() => _chatRoomModel = chatRoom);
+      // store chatRoom for header fallback image/title if needed
+      if (mounted) {
+        setState(() => _chatRoomModel = chatRoom);
+      }
 
-      // [수정] _chatRoomModel 변수에 저장하는 대신, 직접 사용
       if (chatRoom.jobId != null) {
         final job = await JobRepository().fetchJob(chatRoom.jobId!);
         if (job != null && mounted) setState(() => _contextItem = job);
+      } else if (chatRoom.talentId != null) {
+        // Load talent context when present
+        final talent =
+            await TalentRepository().getTalentById(chatRoom.talentId!);
+        if (talent != null && mounted) setState(() => _contextItem = talent);
+      } else if (chatRoom.shopId != null) {
+        // Load shop context when present
+        final shop = await ShopRepository().fetchShop(chatRoom.shopId!);
+        if (mounted) {
+          setState(() => _contextItem = shop);
+        }
+      } else if (chatRoom.roomId != null) {
+        // Load room/listing context when present
+        try {
+          final room =
+              await RoomRepository().getRoomStream(chatRoom.roomId!).first;
+          if (mounted) {
+            setState(() => _contextItem = room);
+          }
+        } catch (e) {
+          debugPrint('Failed to fetch room listing: $e');
+        }
+      } else if (chatRoom.productId != null) {
+        // Load product context when present
+        final product =
+            await ProductRepository().fetchProductById(chatRoom.productId!);
+        if (product != null && mounted) setState(() => _contextItem = product);
+      } else if (chatRoom.lostItemId != null) {
+        // Load lost & found item when present
+        try {
+          final doc = await FirebaseFirestore.instance
+              .collection('lost_and_found')
+              .doc(chatRoom.lostItemId!)
+              .get();
+          if (doc.exists && mounted) {
+            final lostItem = LostItemModel.fromFirestore(doc);
+            if (mounted) {
+              setState(() => _contextItem = lostItem);
+            }
+          }
+        } catch (e) {
+          debugPrint('Failed to fetch lost item: $e');
+        }
       }
       // else if (chatRoom.productId != null) {
       //   final product = await ProductRepository().fetchProduct(chatRoom.productId!);
@@ -205,7 +265,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     } catch (e) {
       debugPrint("컨텍스트 정보를 불러오는데 실패했습니다: $e");
     } finally {
-      if (mounted) setState(() => _isContextLoading = false);
+      if (mounted) {
+        setState(() => _isContextLoading = false);
+      }
     }
   }
 
@@ -489,14 +551,117 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   Widget _buildContextHeader() {
     ImageProvider? image;
     String title = '';
-    String subtitle = '';
+    String descriptionText = '';
+    String locationText = '';
+    String priceText = '';
 
     if (_contextItem is JobModel) {
       final job = _contextItem as JobModel;
       title = job.title;
-      subtitle = 'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr();
+      descriptionText = job.description;
+      locationText = job.locationName ?? '';
+      // Keep previous salary subtitle behavior in priceText for jobs
+      priceText = 'jobs.salaryTypes.${job.salaryType ?? 'etc'}'.tr();
       if (job.imageUrls != null && job.imageUrls!.isNotEmpty) {
         image = NetworkImage(job.imageUrls!.first);
+      }
+    } else if (_contextItem is TalentModel) {
+      final talent = _contextItem as TalentModel;
+      title = talent.title;
+      descriptionText = talent.description;
+      locationText = talent.locationName ?? '';
+      if (talent.price != 0) {
+        try {
+          final localeStr = context.locale.toString();
+          final nf = NumberFormat.simpleCurrency(locale: localeStr);
+          priceText = nf.format(talent.price);
+          if (talent.priceUnit.isNotEmpty) {
+            // Use localized unit string if available, otherwise fallback to raw unit
+            final rawUnit = talent.priceUnit;
+            final unitKey = 'jobs.priceUnit.$rawUnit';
+            final localizedUnit = unitKey.tr();
+            if (localizedUnit == unitKey) {
+              // translation missing, fallback to raw unit text
+              priceText = '$priceText /$rawUnit';
+            } else {
+              priceText = '$priceText $localizedUnit';
+            }
+          }
+        } catch (e) {
+          // Fallback to raw format if NumberFormat fails for any locale
+          priceText = '${talent.price} ${talent.priceUnit}';
+        }
+      }
+      if (talent.portfolioUrls.isNotEmpty) {
+        image = NetworkImage(talent.portfolioUrls.first);
+      } else if (_chatRoomModel?.talentImage != null) {
+        image = NetworkImage(_chatRoomModel!.talentImage!);
+      }
+    } else if (_contextItem is ProductModel) {
+      final product = _contextItem as ProductModel;
+      title = product.title;
+      descriptionText = product.description;
+      locationText = product.locationName ?? '';
+      try {
+        final nf = NumberFormat.currency(locale: context.locale.toString());
+        priceText = nf.format(product.price);
+      } catch (e) {
+        priceText = product.price.toString();
+      }
+      if (product.imageUrls.isNotEmpty) {
+        image = NetworkImage(product.imageUrls.first);
+      } else if (_chatRoomModel?.productImage != null &&
+          _chatRoomModel!.productImage!.isNotEmpty) {
+        image = NetworkImage(_chatRoomModel!.productImage!);
+      }
+    } else if (_contextItem is LostItemModel) {
+      final lost = _contextItem as LostItemModel;
+      title = lost.itemDescription;
+      descriptionText = '';
+      locationText = lost.locationDescription;
+      if (lost.isHunted && lost.bountyAmount != null) {
+        try {
+          final nf = NumberFormat.currency(locale: context.locale.toString());
+          priceText = nf.format(lost.bountyAmount);
+        } catch (e) {
+          priceText = lost.bountyAmount.toString();
+        }
+      }
+      if (lost.imageUrls.isNotEmpty) {
+        image = NetworkImage(lost.imageUrls.first);
+      } else if (_chatRoomModel?.productImage != null &&
+          _chatRoomModel!.productImage!.isNotEmpty) {
+        // legacy: lost item images stored in productImage field for compatibility
+        image = NetworkImage(_chatRoomModel!.productImage!);
+      }
+    } else if (_contextItem is ShopModel) {
+      final shop = _contextItem as ShopModel;
+      title = shop.name;
+      descriptionText = shop.description;
+      locationText = shop.locationName ?? '';
+      // shop typically doesn't have price, leave priceText empty
+      if (shop.imageUrls.isNotEmpty) {
+        image = NetworkImage(shop.imageUrls.first);
+      } else if (_chatRoomModel?.shopImage != null &&
+          _chatRoomModel!.shopImage!.isNotEmpty) {
+        image = NetworkImage(_chatRoomModel!.shopImage!);
+      }
+    } else if (_contextItem is RoomListingModel) {
+      final room = _contextItem as RoomListingModel;
+      title = room.title;
+      descriptionText = room.description;
+      locationText = room.locationName ?? '';
+      try {
+        final nf = NumberFormat.currency(locale: context.locale.toString());
+        priceText = nf.format(room.price);
+      } catch (e) {
+        priceText = room.price.toString();
+      }
+      if (room.imageUrls.isNotEmpty) {
+        image = NetworkImage(room.imageUrls.first);
+      } else if (_chatRoomModel?.roomImage != null &&
+          _chatRoomModel!.roomImage!.isNotEmpty) {
+        image = NetworkImage(_chatRoomModel!.roomImage!);
       }
     }
     // else if (_contextItem is ProductModel) {
@@ -515,10 +680,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           if (_contextItem is JobModel) {
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => JobDetailScreen(job: _contextItem)));
+          } else if (_contextItem is TalentModel) {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => TalentDetailScreen(talent: _contextItem)));
+          } else if (_contextItem is ProductModel) {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: _contextItem)));
+          } else if (_contextItem is ShopModel) {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => ShopDetailScreen(shop: _contextItem)));
+          } else if (_contextItem is RoomListingModel) {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => RoomDetailScreen(room: _contextItem)));
           }
-          // else if (_contextItem is ProductModel) {
-          //   Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProductDetailScreen(product: _contextItem)));
-          // }
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -544,13 +718,43 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
+                  // Title row: title (left) and optional price (right)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      if (priceText.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        Text(priceText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13)),
+                      ]
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  // description (one-line preview)
+                  if (descriptionText.isNotEmpty)
+                    Text(descriptionText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: Colors.grey.shade800, fontSize: 13)),
+                  const SizedBox(height: 6),
+                  // location (left) — price moved up to title row
+                  Text(locationText,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  Text(subtitle,
                       style:
-                          TextStyle(color: Colors.grey.shade700, fontSize: 12)),
+                          TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                 ],
               )),
               const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),

@@ -400,7 +400,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         productId: product.id,
         productTitle: product.title,
         productImage:
-            product.imageUrls.isNotEmpty ? product.imageUrls.first : '',
+            product.imageUrls.isNotEmpty ? product.imageUrls.first : null,
       );
 
       final otherUser = await chatService.getOtherUserInfo(product.userId);

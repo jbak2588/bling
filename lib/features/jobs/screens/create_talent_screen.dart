@@ -43,17 +43,14 @@ class _CreateTalentScreenState extends State<CreateTalentScreen> {
   String _selectedPriceUnit = 'project'; // 기본값: 건당
   final List<XFile> _portfolioImages = [];
 
-  // 가격 단위 옵션 (다국어 키 필요)
-  final Map<String, String> _priceUnits = {
-    'project': '건당', // jobs.price_unit.project
-    'hourly': '시간당', // jobs.price_unit.hourly
-    'negotiable': '협의', // jobs.price_unit.negotiable
-  };
+  // [수정] _priceUnits는 build 메서드 내에서 tr()로 생성하도록 변경 (여기서는 제거)
 
   Future<void> _pickImages() async {
     if (_portfolioImages.length >= 10) {
+      // [수정] 다국어 키 적용
       BArtSnackBar.showErrorSnackBar(
-          title: '알림', message: '최대 10장까지 업로드 가능합니다.');
+          title: 'common.notice'.tr(),
+          message: 'jobs.talent.create.errors.maxImages'.tr());
       return;
     }
     final List<XFile> images =
@@ -70,12 +67,15 @@ class _CreateTalentScreenState extends State<CreateTalentScreen> {
   Future<void> _submitTalent() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategory == null) {
-      BArtSnackBar.showErrorSnackBar(title: '알림', message: '카테고리를 선택해주세요.');
+      BArtSnackBar.showErrorSnackBar(
+          title: 'common.notice'.tr(),
+          message: 'jobs.talent.create.errors.categoryRequired'.tr());
       return;
     }
     if (_portfolioImages.isEmpty) {
       BArtSnackBar.showErrorSnackBar(
-          title: '알림', message: '포트폴리오 사진을 최소 1장 등록해주세요.');
+          title: 'common.notice'.tr(),
+          message: 'jobs.talent.create.errors.portfolioRequired'.tr());
       return;
     }
 
@@ -122,11 +122,14 @@ class _CreateTalentScreenState extends State<CreateTalentScreen> {
       if (mounted) {
         Navigator.pop(context);
         BArtSnackBar.showSuccessSnackBar(
-            title: '완료', message: '재능이 성공적으로 등록되었습니다.');
+            title: 'jobs.talent.success'.tr(),
+            message: 'jobs.talent.create.success'.tr());
       }
     } catch (e) {
       if (mounted) {
-        BArtSnackBar.showErrorSnackBar(title: '오류', message: e.toString());
+        // [수정] 에러 메시지 명확화
+        BArtSnackBar.showErrorSnackBar(
+            title: 'common.error'.tr(), message: e.toString());
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -135,13 +138,19 @@ class _CreateTalentScreenState extends State<CreateTalentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Talent 카테고리 필터링 (AppJobCategories 구현에 따라 조정 필요)
     final talentCategories = AppJobCategories.allCategories
         .where((c) => c.jobType == JobType.talent)
         .toList();
 
+    // [추가] 가격 단위 다국어 맵 생성
+    final Map<String, String> priceUnits = {
+      'project': 'jobs.talent.create.priceUnits.project'.tr(),
+      'hourly': 'jobs.talent.create.priceUnits.hourly'.tr(),
+      'negotiable': 'jobs.talent.create.priceUnits.negotiable'.tr(),
+    };
+
     return Scaffold(
-      appBar: AppBar(title: const Text('재능 등록')),
+      appBar: AppBar(title: Text('jobs.talent.create.title'.tr())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -151,15 +160,17 @@ class _CreateTalentScreenState extends State<CreateTalentScreen> {
             children: [
               // 1. 카테고리
               DropdownButtonFormField<String>(
-                initialValue: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: '카테고리',
-                  border: OutlineInputBorder(),
+                isExpanded: true,
+                // ignore: deprecated_member_use
+                value: _selectedCategory,
+                decoration: InputDecoration(
+                  labelText: 'jobs.talent.create.labels.category'.tr(),
+                  border: const OutlineInputBorder(),
                 ),
                 items: talentCategories
                     .map((c) => DropdownMenuItem(
                           value: c.id,
-                          child: Text(c.nameKey.tr()), // 다국어 적용
+                          child: Text(c.nameKey.tr()),
                         ))
                     .toList(),
                 onChanged: (val) => setState(() => _selectedCategory = val),
@@ -169,11 +180,13 @@ class _CreateTalentScreenState extends State<CreateTalentScreen> {
               // 2. 제목
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: '제목 (예: 꼼꼼한 입주청소 해드립니다)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'jobs.talent.create.labels.title'.tr(),
+                  border: const OutlineInputBorder(),
                 ),
-                validator: (v) => v!.isEmpty ? '제목을 입력해주세요.' : null,
+                validator: (v) => v!.isEmpty
+                    ? 'jobs.talent.create.errors.titleRequired'.tr()
+                    : null,
               ),
               const SizedBox(height: 16),
 
@@ -185,27 +198,32 @@ class _CreateTalentScreenState extends State<CreateTalentScreen> {
                     child: TextFormField(
                       controller: _priceController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: '가격',
+                      decoration: InputDecoration(
+                        labelText: 'jobs.talent.create.labels.price'.tr(),
                         prefixText: 'Rp ',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
-                      validator: (v) => v!.isEmpty ? '가격을 입력해주세요.' : null,
+                      validator: (v) => v!.isEmpty
+                          ? 'jobs.talent.create.errors.priceRequired'.tr()
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     flex: 1,
                     child: DropdownButtonFormField<String>(
-                      initialValue: _selectedPriceUnit,
+                      isExpanded: true,
+                      // ignore: deprecated_member_use
+                      value: _selectedPriceUnit,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(horizontal: 10),
                       ),
-                      items: _priceUnits.entries
+                      items: priceUnits.entries
                           .map((e) => DropdownMenuItem(
                                 value: e.key,
-                                child: Text(e.value),
+                                child: Text(e.value,
+                                    overflow: TextOverflow.ellipsis),
                               ))
                           .toList(),
                       onChanged: (v) => setState(() => _selectedPriceUnit = v!),
@@ -219,17 +237,20 @@ class _CreateTalentScreenState extends State<CreateTalentScreen> {
               TextFormField(
                 controller: _descController,
                 maxLines: 6,
-                decoration: const InputDecoration(
-                  labelText: '상세 설명',
-                  hintText: '경력, 작업 방식, 가능 시간 등을 자세히 적어주세요.',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'jobs.talent.create.labels.description'.tr(),
+                  hintText: 'jobs.talent.create.labels.descriptionHint'.tr(),
+                  border: const OutlineInputBorder(),
                 ),
-                validator: (v) => v!.isEmpty ? '내용을 입력해주세요.' : null,
+                validator: (v) => v!.isEmpty
+                    ? 'jobs.talent.create.errors.descriptionRequired'.tr()
+                    : null,
               ),
               const SizedBox(height: 16),
 
               // 5. 포트폴리오 이미지
-              Text('포트폴리오 (${_portfolioImages.length}/10)',
+              Text(
+                  '${'jobs.talent.create.labels.portfolio'.tr()} (${_portfolioImages.length}/10)',
                   style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               SizedBox(
@@ -286,8 +307,9 @@ class _CreateTalentScreenState extends State<CreateTalentScreen> {
               // 6. 위치 정보 (Read Only)
               ListTile(
                 leading: const Icon(Icons.location_on, color: Colors.grey),
-                title: const Text('활동 지역'),
-                subtitle: Text(widget.user.locationName ?? '위치 정보 없음'),
+                title: Text('jobs.talent.create.labels.location'.tr()),
+                subtitle:
+                    Text(widget.user.locationName ?? 'location.unknown'.tr()),
                 contentPadding: EdgeInsets.zero,
               ),
               const SizedBox(height: 40),
@@ -310,9 +332,9 @@ class _CreateTalentScreenState extends State<CreateTalentScreen> {
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(color: Colors.white))
-                : const Text('재능 등록하기',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                : Text('jobs.talent.create.submit'.tr(),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ),
       ),

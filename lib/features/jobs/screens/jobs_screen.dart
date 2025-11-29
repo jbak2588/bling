@@ -38,16 +38,19 @@ library;
 // (파일 내용...)
 
 import 'package:bling_app/features/jobs/models/job_model.dart';
+import 'package:bling_app/features/jobs/models/talent_model.dart'; // [추가]
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/jobs/data/job_repository.dart';
+import 'package:bling_app/features/jobs/data/talent_repository.dart'; // [추가]
 import 'package:bling_app/features/jobs/widgets/job_card.dart';
+import 'package:bling_app/features/jobs/widgets/talent_card.dart'; // [추가]
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 // ✅ [작업 31] 1. 일자리 유형 선택 화면 import
-import 'package:bling_app/features/jobs/constants/job_categories.dart';
+// import 'package:bling_app/features/jobs/constants/job_categories.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 class JobsScreen extends StatefulWidget {
@@ -69,14 +72,15 @@ class JobsScreen extends StatefulWidget {
   _JobsScreenState createState() => _JobsScreenState();
 }
 
-class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
+class _JobsScreenState extends State<JobsScreen>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  // ✅ [작업 31] 6. 탭별 JobType 필터 값
-  final List<String?> _tabFilters = [
-    null, // 'all' (전체)
-    JobType.quickGig.name, // 'quick_gig' (단순 일자리)
-    JobType.regular.name, // 'regular' (정규직)
-  ];
+  final TalentRepository _talentRepo = TalentRepository(); // [추가]
+
+  // [수정] 탭 구조 변경: [전체(Jobs+Talent)] -> [구인(Jobs)] -> [재능(Talent)]
+  // 기존의 quick/regular 구분은 '구인' 탭 내부의 필터로 이동하거나, 일단 단순화하여 처리
+  // 여기서는 3탭 구조를 유지하되 의미를 변경합니다.
+  final List<String> _tabs = ['all', 'jobs', 'talents'];
 
   // 검색칩 상태
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
@@ -109,10 +113,210 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
         .toList();
   }
 
+  // [리팩토링] 기존 StreamBuilder를 메서드로 분리
+  Widget _buildJobFeed(JobRepository repo) {
+    return StreamBuilder<List<JobModel>>(
+      stream: repo.fetchJobs(
+        locationFilter: widget.locationFilter,
+        searchToken: _searchKeywordNotifier.value.isNotEmpty
+            ? _searchKeywordNotifier.value.trim().split(' ').first
+            : null,
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        final allJobs = snapshot.data ?? [];
+        var filteredJobs = _applyLocationFilter(allJobs);
+
+        if (filteredJobs.isEmpty) {
+          final isNational = context.watch<LocationProvider>().mode ==
+              LocationSearchMode.national;
+          if (!isNational) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
+                    const SizedBox(height: 12),
+                    Text('jobs.screen.empty'.tr(),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium),
+                    const SizedBox(height: 8),
+                    Text('search.empty.checkSpelling'.tr(),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: Colors.grey)),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.map_outlined),
+                      label: Text('search.empty.expandToNational'.tr()),
+                      onPressed: () => context
+                          .read<LocationProvider>()
+                          .setMode(LocationSearchMode.national),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
+                  const SizedBox(height: 12),
+                  Text('jobs.screen.empty'.tr(),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: filteredJobs.length,
+          itemBuilder: (context, index) {
+            final job = filteredJobs[index];
+            return JobCard(job: job);
+          },
+        );
+      },
+    );
+  }
+
+  // [수정] 통합 대시보드: 전문가(가로) + 구인(세로)
+  Widget _buildAllFeed(Map<String, String?>? locationFilter) {
+    final JobRepository jobRepo = JobRepository();
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. 전문가/재능 섹션 (가로 스크롤)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('jobs.tabs.talents'.tr(),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18)),
+                GestureDetector(
+                  onTap: () => _tabController.animateTo(2),
+                  child: Text('common.viewAll'.tr(),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 175, // [수정] 카드 높이를 늘려 오버플로우 여유 확보
+            child: FutureBuilder<List<TalentModel>>(
+              future: _talentRepo.fetchTalents(limit: 5),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || (snapshot.data?.isEmpty ?? true)) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                        child: Text('jobs.screen.empty'.tr(),
+                            style: const TextStyle(color: Colors.grey))),
+                  );
+                }
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    final screenWidth = MediaQuery.of(context).size.width;
+                    // [수정] 너비를 85%로 늘려 시원하게 보이게 조정
+                    final itemWidth = screenWidth * 0.80;
+                    return Padding(
+                      // [수정] 너무 붙지 않도록 최소한의 간격(8.0) 부여
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: SizedBox(
+                        width: itemWidth,
+                        child: TalentCard(talent: snapshot.data![index]),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+
+          const Divider(height: 32, thickness: 8, color: Color(0xFFF5F5F5)),
+
+          // 2. [섹션] 구인/알바 (세로 리스트)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('jobs.selectType.regular.title'.tr(),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18)),
+                GestureDetector(
+                  onTap: () =>
+                      _tabController.animateTo(1), // [수정] 구인 탭(1번)으로 이동
+                  child: Text('common.viewAll'.tr(),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                ),
+              ],
+            ),
+          ),
+          StreamBuilder<List<JobModel>>(
+            stream: jobRepo.fetchJobs(locationFilter: locationFilter),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(child: CircularProgressIndicator()));
+              }
+              if (!snapshot.hasData || (snapshot.data?.isEmpty ?? true)) {
+                return Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Center(child: Text('jobs.screen.empty'.tr())),
+                );
+              }
+
+              final jobs = snapshot.data!.take(10).toList();
+
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: jobs.length,
+                itemBuilder: (context, index) => JobCard(job: jobs[index]),
+              );
+            },
+          ),
+
+          const SizedBox(height: 80),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabFilters.length, vsync: this);
+    _tabController = TabController(length: _tabs.length, vsync: this);
 
     // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
     if (widget.autoFocusSearch) {
@@ -190,113 +394,112 @@ class _JobsScreenState extends State<JobsScreen> with TickerProviderStateMixin {
                 _searchKeywordNotifier.value = '';
               },
             ),
+          // [추가] 상단 바로가기 그리드 (미니 홈 스타일)
+          // Padding(
+          //   padding:
+          //       const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          //   child: Row(
+          //     children: [
+          //       _buildLauncherCard(
+          //         context,
+          //         icon: Icons.work_outline,
+          //         color: Colors.blueAccent,
+          //         title: 'jobs.selectType.regular.title'.tr(), // "일자리 찾기"
+          //         onTap: () => _tabController.animateTo(1), // 구인 탭으로 이동
+          //       ),
+          //       const SizedBox(width: 12),
+          //       _buildLauncherCard(
+          //         context,
+          //         icon: Icons.verified_user_outlined,
+          //         color: const Color(0xFF00B14F),
+          //         title: 'jobs.selectType.talent.title'.tr(), // "전문가 찾기"
+          //         onTap: () => _tabController.animateTo(2), // 재능 탭으로 이동
+          //       ),
+          //     ],
+          //   ),
+          // ),
+
           TabBar(
             controller: _tabController,
             labelColor: Theme.of(context).primaryColor,
             unselectedLabelColor: Colors.grey[600],
             indicatorColor: Theme.of(context).primaryColor,
             tabs: [
-              Tab(text: 'jobs.tabs.all'.tr()), // '전체'
-              Tab(text: 'jobs.tabs.quickGig'.tr()), // '단순 일자리'
-              Tab(text: 'jobs.tabs.regular'.tr()), // '정규/파트타임'
+              Tab(text: 'jobs.tabs.all'.tr()), // 전체 (통합)
+              Tab(text: 'jobs.tabs.regular'.tr()), // 구인
+              Tab(text: 'jobs.tabs.talents'.tr()), // 재능
             ],
-            // 탭 변경 시 화면을 다시 그리도록 리스너 추가
             onTap: (index) => setState(() {}),
           ),
           Expanded(
-            child: StreamBuilder<List<JobModel>>(
-              // [수정] Stream 타입을 JobModel 리스트로 변경
-              stream: jobRepository.fetchJobs(
-                locationFilter: widget.locationFilter,
-                // ✅ [작업 31] 6. 현재 탭의 jobType 필터 전달
-                jobType: _tabFilters[_tabController.index],
-                // ✅ [검색] DB 기반 검색을 위해 키워드의 첫 토큰을 전달
-                searchToken: _searchKeywordNotifier.value.isNotEmpty
-                    ? _searchKeywordNotifier.value.trim().split(' ').first
-                    : null,
-              ),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Tab 0: 통합 대시보드 (전문가/구인 통합)
+                _buildAllFeed(widget.locationFilter),
 
-                final allJobs = snapshot.data ?? [];
-                // [수정] 2차 필터링 적용 (위치)
-                var filteredJobs = _applyLocationFilter(allJobs);
-                // [수정] 클라이언트 키워드 필터링 제거 (DB 쿼리로 대체)
-                // 단, DB 쿼리는 '첫 단어'만 매칭하므로, 필요하다면 여기서 2차 정밀 필터링을 할 수도 있음.
-                // 현재는 성능을 위해 제거하고 DB 결과 그대로 사용.
+                // Tab 1: 구인 피드 (기존 로직 유지)
+                _buildJobFeed(jobRepository),
 
-                if (filteredJobs.isEmpty) {
-                  final isNational = context.watch<LocationProvider>().mode ==
-                      LocationSearchMode.national;
-                  if (!isNational) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.search_off,
-                                size: 64, color: Colors.grey[300]),
-                            const SizedBox(height: 12),
-                            Text('jobs.screen.empty'.tr(),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.bodyMedium),
-                            const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(color: Colors.grey)),
-                            const SizedBox(height: 16),
-                            OutlinedButton.icon(
-                              icon: const Icon(Icons.map_outlined),
-                              label: Text('search.empty.expandToNational'.tr()),
-                              onPressed: () => context
-                                  .read<LocationProvider>()
-                                  .setMode(LocationSearchMode.national),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.search_off,
-                              size: 64, color: Colors.grey[300]),
-                          const SizedBox(height: 12),
-                          Text('jobs.screen.empty'.tr(),
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyMedium),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  itemCount: filteredJobs.length,
-                  itemBuilder: (context, index) {
-                    final job = filteredJobs[index]; // [수정]
-                    return JobCard(job: job);
-                  },
-                );
-              },
+                // Tab 2: 재능 피드 (신규)
+                _buildTalentFeed(),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // [추가] 런처 카드 위젯
+  // Widget _buildLauncherCard(BuildContext context,
+  //     {required IconData icon,
+  //     required Color color,
+  //     required String title,
+  //     required VoidCallback onTap}) {
+  //   return Expanded(
+  //     child: InkWell(
+  //       onTap: onTap,
+  //       borderRadius: BorderRadius.circular(12),
+  //       child: Container(
+  //         padding: const EdgeInsets.symmetric(vertical: 16),
+  //         decoration: BoxDecoration(
+  //           color: color.withValues(alpha: 0.1),
+  //           borderRadius: BorderRadius.circular(12),
+  //           border: Border.all(color: color.withValues(alpha: 0.2)),
+  //         ),
+  //         child: Column(
+  //           children: [
+  //             Icon(icon, size: 28, color: color),
+  //             const SizedBox(height: 8),
+  //             Text(title,
+  //                 style: const TextStyle(
+  //                     fontWeight: FontWeight.bold, fontSize: 14)),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  // [추가] 재능 피드 빌더
+  Widget _buildTalentFeed() {
+    return FutureBuilder<List<TalentModel>>(
+      future: _talentRepo.fetchTalents(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('jobs.screen.empty'.tr()));
+        }
+        return ListView.builder(
+          padding: EdgeInsets.zero,
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) =>
+              TalentCard(talent: snapshot.data![index]),
+        );
+      },
     );
   }
 }
