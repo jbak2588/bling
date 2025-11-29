@@ -44,8 +44,10 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // [추가] 삭제 로직용
 import 'package:flutter/material.dart';
 // [추가] debugPrint
+import 'package:bling_app/core/utils/popups/snackbars.dart';
 
 import 'chat_room_screen.dart';
 
@@ -63,96 +65,168 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('main.bottomNav.chat'.tr()),
-        automaticallyImplyLeading: false,
+      appBar: AppBar(title: Text('main.bottomNav.chat'.tr())),
+      body: StreamBuilder<List<ChatRoomModel>>(
+        stream: _chatService.getChatRoomsStream(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final chatRooms = snapshot.data ?? [];
+          if (chatRooms.isEmpty) {
+            return Center(child: Text('chat_list.empty'.tr()));
+          }
+
+          return ListView.separated(
+            itemCount: chatRooms.length,
+            separatorBuilder: (context, index) =>
+                const Divider(height: 1, indent: 82),
+            itemBuilder: (context, index) {
+              final chatRoom = chatRooms[index];
+
+              final otherUid = !chatRoom.isGroupChat
+                  ? chatRoom.participants
+                      .firstWhere((uid) => uid != _myUid, orElse: () => '')
+                  : '';
+
+              if (!chatRoom.isGroupChat && otherUid.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              return FutureBuilder<UserModel?>(
+                future: !chatRoom.isGroupChat
+                    ? _chatService.getOtherUserInfo(otherUid)
+                    : Future.value(null),
+                builder: (context, userSnapshot) {
+                  if (userSnapshot.connectionState == ConnectionState.waiting &&
+                      !chatRoom.isGroupChat) {
+                    return const ListTile(title: Text("..."));
+                  }
+
+                  final otherUser = userSnapshot.data;
+
+                  // determine the child item widget based on chat type
+                  Widget item;
+                  if (chatRoom.isGroupChat) {
+                    item = _buildGroupChatItem(context, chatRoom);
+                  } else if (chatRoom.roomId != null &&
+                      chatRoom.roomId!.isNotEmpty) {
+                    item =
+                        _buildRealEstateChatItem(context, chatRoom, otherUser);
+                  } else if (chatRoom.lostItemId != null &&
+                      chatRoom.lostItemId!.isNotEmpty) {
+                    item = _buildLostAndFoundChatItem(
+                        context, chatRoom, otherUser);
+                  } else if (chatRoom.shopId != null &&
+                      chatRoom.shopId!.isNotEmpty) {
+                    item = _buildShopChatItem(context, chatRoom, otherUser);
+                  } else if (chatRoom.jobId != null &&
+                      chatRoom.jobId!.isNotEmpty) {
+                    item = _buildJobChatItem(context, chatRoom, otherUser);
+                  } else if (chatRoom.productId != null &&
+                      chatRoom.productId!.isNotEmpty) {
+                    item = _buildProductChatItem(context, chatRoom, otherUser);
+                  } else {
+                    item = _buildDirectChatItem(context, chatRoom, otherUser);
+                  }
+
+                  // Wrap in Dismissible to allow leaving the chat room
+                  return Dismissible(
+                    key: Key(chatRoom.id),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    confirmDismiss: (direction) async {
+                      return await showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Text('common.delete'.tr()),
+                          content: Text('chat_list.leave_confirm'.tr()),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(false),
+                              child: Text('common.cancel'.tr()),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(true),
+                              child: Text('common.delete'.tr(),
+                                  style: const TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    onDismissed: (direction) async {
+                      await _leaveChatRoom(chatRoom.id);
+                    },
+                    child: item,
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
-      body: _myUid == null
-          ? Center(child: Text('main.errors.loginRequired'.tr()))
-          : StreamBuilder<List<ChatRoomModel>>(
-              stream: _chatService.getChatRoomsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                      child: Text('marketplace.error'.tr(
-                          namedArgs: {'error': snapshot.error.toString()})));
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('chat_list.empty'.tr()));
-                }
-
-                final chatRooms = snapshot.data!;
-
-                return ListView.separated(
-                  itemCount: chatRooms.length,
-                  separatorBuilder: (context, index) =>
-                      const Divider(height: 1, indent: 82),
-                  itemBuilder: (context, index) {
-                    final chatRoom = chatRooms[index];
-
-                    final otherUid = !chatRoom.isGroupChat
-                        ? chatRoom.participants.firstWhere(
-                            (uid) => uid != _myUid,
-                            orElse: () => '')
-                        : '';
-
-                    if (!chatRoom.isGroupChat && otherUid.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-
-                    return FutureBuilder<UserModel?>(
-                      future: !chatRoom.isGroupChat
-                          ? _chatService.getOtherUserInfo(otherUid)
-                          : Future.value(null),
-                      builder: (context, userSnapshot) {
-                        if (userSnapshot.connectionState ==
-                                ConnectionState.waiting &&
-                            !chatRoom.isGroupChat) {
-                          return const ListTile(title: Text("..."));
-                        }
-
-                        final otherUser = userSnapshot.data;
-
-                        if (chatRoom.isGroupChat) {
-                          return _buildGroupChatItem(context, chatRoom);
-                        } else if (chatRoom.roomId != null &&
-                            chatRoom.roomId!.isNotEmpty) {
-                          return _buildRealEstateChatItem(
-                              context, chatRoom, otherUser);
-                        }
-                        // V V V --- [수정] Lost & Found 와 Find Friend UI 로직 추가 --- V V V
-                        else if (chatRoom.lostItemId != null &&
-                            chatRoom.lostItemId!.isNotEmpty) {
-                          return _buildLostAndFoundChatItem(
-                              context, chatRoom, otherUser);
-                        } else if (chatRoom.shopId != null &&
-                            chatRoom.shopId!.isNotEmpty) {
-                          return _buildShopChatItem(
-                              context, chatRoom, otherUser);
-                        } else if (chatRoom.jobId != null &&
-                            chatRoom.jobId!.isNotEmpty) {
-                          return _buildJobChatItem(
-                              context, chatRoom, otherUser);
-                        } else if (chatRoom.productId != null &&
-                            chatRoom.productId!.isNotEmpty) {
-                          return _buildProductChatItem(
-                              context, chatRoom, otherUser);
-                        }
-                        // 'direct' 또는 contextId가 없는 모든 경우는 '친구 찾기'로 간주
-                        else {
-                          return _buildDirectChatItem(
-                              context, chatRoom, otherUser);
-                        }
-                      },
-                    );
-                  },
-                );
-              },
-            ),
     );
+  }
+
+  // [수정] 채팅방 나가기 로직 (마지막 1인이면 방 삭제)
+  Future<void> _leaveChatRoom(String roomId) async {
+    final myUid = FirebaseAuth.instance.currentUser?.uid;
+    if (myUid == null) return;
+
+    final docRef = FirebaseFirestore.instance.collection('chats').doc(roomId);
+
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final snapshot = await transaction.get(docRef);
+        if (!snapshot.exists) return;
+
+        final data = snapshot.data() ?? {};
+
+        // participants가 List 또는 Map 형태로 저장될 수 있으므로 모두 처리
+        var participants = <String>[];
+        var participantsIsMap = false;
+        if (data.containsKey('participants') && data['participants'] != null) {
+          final p = data['participants'];
+          if (p is List) {
+            participants = List<String>.from(p.map((e) => e.toString()));
+          } else if (p is Map) {
+            participants = List<String>.from(p.keys.map((k) => k.toString()));
+            participantsIsMap = true;
+          }
+        }
+
+        // 내가 포함되어 있고, 나 혼자뿐이라면 -> 방 삭제
+        if (participants.contains(myUid) && participants.length <= 1) {
+          transaction.delete(docRef);
+        }
+        // 다른 사람이 있다면 -> 내 ID만 제거
+        else if (participants.contains(myUid)) {
+          if (participantsIsMap) {
+            // Map 형태면 participants.<uid> 필드를 삭제
+            transaction.update(docRef, {
+              'participants.$myUid': FieldValue.delete(),
+            });
+          } else {
+            // List 형태면 arrayRemove 사용
+            transaction.update(docRef, {
+              'participants': FieldValue.arrayRemove([myUid])
+            });
+          }
+        }
+      });
+    } catch (e) {
+      debugPrint('Failed to leave chat room: $e');
+      if (mounted) {
+        BArtSnackBar.showErrorSnackBar(
+            title: 'common.error'.tr(), message: e.toString());
+      }
+    }
   }
 
   // 각 채팅 유형별 ListTile을 만드는 헬퍼 함수들
@@ -305,11 +379,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
         participants: chatRoom.participants,
         otherUserId: otherUid,
         otherUserName: otherUser?.nickname ?? 'User',
-        productTitle: chatRoom.productTitle ??
+        productTitle: chatRoom.groupName ??
+            chatRoom.talentTitle ??
+            chatRoom.productTitle ??
             chatRoom.jobTitle ??
             chatRoom.shopName ??
-            chatRoom.roomTitle ??
-            chatRoom.talentTitle,
+            chatRoom.roomTitle,
       ),
     ));
   }
