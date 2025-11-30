@@ -66,6 +66,8 @@ import 'package:bling_app/features/pom/screens/create_pom_screen.dart';
 import 'package:bling_app/features/lost_and_found/screens/create_lost_item_screen.dart';
 import 'package:bling_app/features/auction/screens/create_auction_screen.dart';
 import 'package:bling_app/features/real_estate/screens/create_room_listing_screen.dart';
+import 'package:bling_app/features/together/screens/create_together_screen.dart'; // ✅ [작업 19]
+import 'package:bling_app/features/together/screens/together_screen.dart'; // ✅ [작업 19]
 
 import 'package:bling_app/features/shared/grab_widgets.dart'; // GrabAppBarShell
 
@@ -112,6 +114,7 @@ enum AppSection {
   realEstate,
   auction,
   pom,
+  together, // ✅ [작업 19] 11번째 섹션 추가
 }
 
 class MainNavigationScreen extends StatefulWidget {
@@ -474,6 +477,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           searchNotifier: _searchTrigger,
         );
         break;
+      // ✅ [작업 19] TogetherScreen 연결
+      case AppSection.together:
+        titleKey = 'home.menu.together';
+        nextScreen = TogetherScreen(
+          userModel: userModel,
+          locationFilter:
+              Provider.of<LocationProvider>(context, listen: false).adminFilter,
+        );
+        break;
       case AppSection.home:
       case AppSection.board:
         return;
@@ -547,6 +559,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         );
         if (!mounted) return;
         return;
+      // ✅ [작업 19] Together 화면에서 FAB 클릭 시 전단지 만들기 화면 이동
+      case AppSection.together:
+        target = const CreateTogetherScreen();
+        break;
       case AppSection.home:
         // 홈 루트로 오면 이미 위에서 전역 시트를 띄우므로 여기선 기본값 처리 없음
         return;
@@ -641,6 +657,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   'main.tabs.pom'.tr(),
                   'pom.create.title'.tr(),
                   builder: () => CreatePomScreen(userModel: userModel)),
+              // ✅ [작업 19] 11. Together (함께 해요)
+              _sheetItem(
+                  Icons.volunteer_activism_rounded, // 11. together
+                  'home.menu.together'.tr(),
+                  '함께 할 이웃 찾기', // 다국어 키 권장: 'together.create.subtitle'.tr()
+                  builder: () => const CreateTogetherScreen()),
               const SizedBox(height: 12),
             ],
           ),
@@ -1211,6 +1233,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         return AppSection.lostAndFound;
       case 'main.tabs.realEstate':
         return AppSection.realEstate;
+      // ✅ [작업 19] 키 매핑 추가
+      case 'home.menu.together':
+        return AppSection.together;
       default:
         return AppSection.home;
     }

@@ -356,8 +356,13 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
                   return 'lostAndFound.form.bountyAmountError'.tr();
                 }
                 final int amount = int.tryParse(value.replaceAll(',', '')) ?? 0;
-                if (amount < 10000) return '최소 10,000 Rp 이상 설정해주세요.';
-                if (amount > 100000000) return '금액이 너무 큽니다.';
+                if (amount < 10000) {
+                  return 'lostAndFound.form.bountyAmountMin'
+                      .tr(namedArgs: {'min': '10,000'});
+                }
+                if (amount > 100000000) {
+                  return 'lostAndFound.form.bountyAmountMax'.tr();
+                }
                 return null;
               },
             ),

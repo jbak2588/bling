@@ -240,7 +240,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                             Icon(Icons.search_off,
                                 size: 64, color: Colors.grey[300]),
                             const SizedBox(height: 12),
-                            Text('lostAndFound.empty'.tr(),
+                            Text('lostAndFound.emptyLocation'.tr(),
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyMedium),
                             const SizedBox(height: 8),
@@ -258,6 +258,17 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                                   .read<LocationProvider>()
                                   .setMode(LocationSearchMode.national),
                             ),
+                            // If an administrative location filter is active, offer quick reset to view all
+                            if (locationProvider.activeQueryFilter != null) ...[
+                              const SizedBox(height: 12),
+                              OutlinedButton.icon(
+                                icon: const Icon(Icons.refresh),
+                                label: Text('common.viewAll'.tr()),
+                                onPressed: () => context
+                                    .read<LocationProvider>()
+                                    .setMode(LocationSearchMode.national),
+                              ),
+                            ],
                           ],
                         ),
                       ),

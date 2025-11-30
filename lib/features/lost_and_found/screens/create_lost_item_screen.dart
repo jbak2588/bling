@@ -340,8 +340,13 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
                 }
                 // 최소/최대 금액 검사 (숫자 파싱 전 콤마 제거)
                 final int amount = int.tryParse(value.replaceAll(',', '')) ?? 0;
-                if (amount < 10000) return '최소 10,000 Rp 이상 설정해주세요.';
-                if (amount > 100000000) return '금액이 너무 큽니다.';
+                if (amount < 10000) {
+                  return 'lostAndFound.form.bountyAmountMin'
+                      .tr(namedArgs: {'min': '10,000'});
+                }
+                if (amount > 100000000) {
+                  return 'lostAndFound.form.bountyAmountMax'.tr();
+                }
                 return null;
               },
             ),

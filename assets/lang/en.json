@@ -1751,6 +1751,7 @@
   },
   "lostAndFound": {
     "empty": "No lost/found items yet.",
+    "emptyLocation": "No items were found in the selected area. Try viewing all regions to browse more posts.",
     "error": "An error occurred: {error}",
     "create": "Add lost/found item",
     "lost": "Lost",
@@ -1761,7 +1762,12 @@
       "found": "Found"
     },
     "card": {
-      "location": "Location: {location}"
+      "location": "Location: {location}",
+      "foundIt": "Found 😊",
+      "returned": "Returned 🫶",
+      "hunted": "Hunted",
+      "lost": "Lost",
+      "found": "Found"
     },
     "form": {
       "title": "Register Lost/Found Item",
@@ -1780,6 +1786,8 @@
       "bountyDesc": "When enabled, a bounty tag will appear on your post.",
       "bountyAmount": "Bounty amount (IDR)",
       "bountyAmountError": "Enter a bounty amount to enable bounty.",
+      "bountyAmountMin": "Minimum amount is {min}.",
+      "bountyAmountMax": "Maximum amount is 100,000,000.",
       "success": "Registered.",
       "fail": "Failed to register: {error}",
       "tagsHint": "You can register tags using comma (,) or Enter."
@@ -1792,10 +1800,14 @@
     },
     "resolve": {
       "whoHelped": "Who helped you?",
+      "whoHelpedLost": "If someone from the chat list helped, please select them.",
+      "whoReturnedFound": "Who did you return it to? Tap to select the person who returned it.",
       "noCandidates": "No neighbors with chat history found.",
       "offlineResolved": "Resolved outside the app",
       "leaveReview": "Leave a thank you note (Optional)",
+      "leaveReviewFound": "Write a short message for the owner (Optional)",
       "reviewHint": "Ex: Thanks for bringing it to me in the rain!",
+      "reviewHintFound": "Ex: Thank you for returning this to the owner in person.",
       "systemMessage": "Thank you — trust points have been awarded!",
       "success": "Marked as resolved.",
       "confirmTitle": "Mark as Resolved?",
@@ -1806,6 +1818,9 @@
     "detail": {
       "title": "Lost & Found",
       "location": "Location",
+      "reviewTitle": "Heartwarming Review",
+      "reviewBy": "Helped by {name}",
+      "helpedBy": "Helped by {name}",
       "bounty": "Bounty",
       "registrant": "Registrant",
       "contact": "Contact",

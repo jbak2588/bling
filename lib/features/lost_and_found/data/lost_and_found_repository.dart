@@ -17,7 +17,6 @@ class LostAndFoundRepository {
     Query<Map<String, dynamic>> query = _firestore
         .collection('lost_and_found')
         .orderBy('createdAt', descending: true);
-    final String? kab = locationFilter?['kab'];
 
     if (locationFilter != null) {
       if (locationFilter['prov'] != null &&
@@ -44,17 +43,9 @@ class LostAndFoundRepository {
       query = query.where('type', isEqualTo: itemType);
     }
 
-    return query.snapshots().asyncMap((snapshot) async {
-      if (snapshot.docs.isEmpty && kab != null && kab != 'Tangerang') {
-        final fallbackSnapshot = await _firestore
-            .collection('lost_and_found')
-            .where('locationParts.kab', isEqualTo: 'Tangerang')
-            .orderBy('createdAt', descending: true)
-            .get();
-        return fallbackSnapshot.docs
-            .map((doc) => LostItemModel.fromFirestore(doc))
-            .toList();
-      }
+    // ✅ [작업 6] 하드코딩된 'Tangerang' 폴백 제거.
+    // 실제 위치 기반 필터링 결과만 반환하여 데이터 정확성 확보.
+    return query.snapshots().map((snapshot) {
       return snapshot.docs
           .map((doc) => LostItemModel.fromFirestore(doc))
           .toList();

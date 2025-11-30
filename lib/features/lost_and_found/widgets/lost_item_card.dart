@@ -93,11 +93,47 @@ class _LostItemCardState extends State<LostItemCard>
                       if (item.imageUrls.isNotEmpty)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: ImageCarouselCard(
-                            imageUrls: item.imageUrls,
-                            storageId: item.id,
-                            width: 80,
-                            height: 80,
+                          child: Stack(
+                            children: [
+                              ImageCarouselCard(
+                                imageUrls: item.imageUrls,
+                                storageId: item.id,
+                                width: 80,
+                                height: 80,
+                              ),
+                              // 오버레이: 해결된 게시물인 경우 이미지 위에 반투명 레이어와 텍스트 표시
+                              if (item.isResolved)
+                                Positioned.fill(
+                                  child: Container(
+                                    color:
+                                        (isLost ? Colors.green : Colors.orange)
+                                            .withValues(alpha: 0.65),
+                                    child: Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.12),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        child: Text(
+                                          isLost
+                                              ? 'lostAndFound.card.foundIt'.tr()
+                                              : 'lostAndFound.card.returned'
+                                                  .tr(),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       if (item.imageUrls.isNotEmpty) const SizedBox(width: 16),
@@ -132,8 +168,10 @@ class _LostItemCardState extends State<LostItemCard>
                                   // ✅ [작업 6] 상태 배지: Hunted(현상금) 우선, 아니면 타입 표시
                                   _ResolvedBadge(
                                     text: item.isHunted
-                                        ? 'HUNTED'
-                                        : (isLost ? 'LOST' : 'FOUND'),
+                                        ? 'lostAndFound.card.hunted'.tr()
+                                        : (isLost
+                                            ? 'lostAndFound.card.lost'.tr()
+                                            : 'lostAndFound.card.found'.tr()),
                                     color: item.isHunted
                                         ? Colors.orange
                                         : typeColor,

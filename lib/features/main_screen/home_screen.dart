@@ -104,9 +104,16 @@ import 'package:bling_app/features/main_feed/widgets/pom_thumb.dart';
 // ▼▼▼▼▼ [개편] 9단계: Lost & Found 썸네일 및 모델 import ▼▼▼▼▼
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/features/main_feed/widgets/lost_item_thumb.dart';
+
 // ▼▼▼▼▼ [개편] 10단계: Real Estate 썸네일 및 모델 import ▼▼▼▼▼
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:bling_app/features/main_feed/widgets/real_estate_thumb.dart';
+
+// ▼▼▼▼▼ [개편] 11단계: Together 썸네일 및 모델 import ▼▼▼▼▼
+import 'package:bling_app/features/together/screens/together_screen.dart';
+import 'package:bling_app/features/together/widgets/together_card.dart'; // Thumb 대용
+import 'package:bling_app/features/together/data/together_repository.dart';
+import 'package:bling_app/features/together/models/together_post_model.dart';
 
 // provider import removed: not needed after refactor
 
@@ -477,7 +484,7 @@ class _HomeScreenState extends State<HomeScreen>
         section: AppSection.localStore),
     // 6. clubs (모임)
     MenuItem(
-        svg: '$_iconsPath/ico_community.svg',
+        svg: '$_iconsPath/ico_together.svg',
         labelKey: 'main.tabs.clubs',
         // Placeholder only for routing metadata; real screen is built in onTap
         screen: const Placeholder(),
@@ -506,6 +513,12 @@ class _HomeScreenState extends State<HomeScreen>
         labelKey: 'main.tabs.pom',
         screen: const PomScreen(),
         section: AppSection.pom),
+    // 11. together (함께 해요)
+    MenuItem(
+        svg: '$_iconsPath/ico_together.svg',
+        labelKey: 'home.menu.together',
+        screen: TogetherScreen(),
+        section: null),
   ];
 
   @override
@@ -714,6 +727,89 @@ class _HomeScreenState extends State<HomeScreen>
                 context: context,
                 section: AppSection.posts,
                 childBuilder: (data) => _buildPostCarousel(context, data),
+              ),
+
+              // ✅ Together (함께 해요) — header + live stream carousel
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                              child: _buildSectionTitleWithIcon(
+                                  context, 'home.menu.together',
+                                  svgAsset: '$_iconsPath/ico_together.svg')),
+                          TextButton(
+                            style: _viewAllButtonStyle(context),
+                            onPressed: () {
+                              if (widget.userModel == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'main.errors.loginRequired'.tr())),
+                                );
+                                return;
+                              }
+                              final nextScreen = TogetherScreen(
+                                  userModel: widget.userModel,
+                                  locationFilter: widget.activeLocationFilter);
+                              widget.onIconTap(
+                                  nextScreen, 'home.menu.together');
+                            },
+                            child: Text('common.viewAll'.tr()),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 220,
+                      child: StreamBuilder<List<TogetherPostModel>>(
+                        stream: TogetherRepository().fetchActivePosts(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          final items = snapshot.data!;
+                          return ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            primary: false,
+                            shrinkWrap: true,
+                            clipBehavior: Clip.none,
+                            itemCount: (items.length < _previewLimit)
+                                ? items.length
+                                : items.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index == items.length) {
+                                return _buildViewMoreCard(
+                                    context,
+                                    TogetherScreen(
+                                        userModel: widget.userModel,
+                                        locationFilter:
+                                            widget.activeLocationFilter),
+                                    'home.menu.together');
+                              }
+                              return TogetherCard(
+                                post: items[index],
+                                onTap: () {
+                                  widget.onIconTap(
+                                      TogetherScreen(
+                                          userModel: widget.userModel),
+                                      'home.menu.together');
+                                },
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
               ),
 
               // Jobs

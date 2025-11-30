@@ -1751,6 +1751,7 @@
   },
   "lostAndFound": {
     "empty": "Belum ada barang hilang/temuan.",
+    "emptyLocation": "Tidak ada barang yang ditemukan di area yang dipilih. Coba lihat semua area untuk melihat postingan lainnya.",
     "error": "Terjadi kesalahan: {error}",
     "create": "Tambah barang hilang/temuan",
     "lost": "Hilang",
@@ -1761,7 +1762,12 @@
       "found": "Menemukan"
     },
     "card": {
-      "location": "Lokasi: {location}"
+      "location": "Lokasi: {location}",
+      "foundIt": "Ketemu 😊",
+      "returned": "Diserahkan ke pemilik 🫶",
+      "hunted": "Ada bounty",
+      "lost": "Hilang",
+      "found": "Ditemukan"
     },
     "form": {
       "title": "Daftarkan Barang Hilang/Temuan",
@@ -1780,6 +1786,8 @@
       "bountyDesc": "Jika diaktifkan, tag bounty akan muncul pada postingan.",
       "bountyAmount": "Jumlah bounty (IDR)",
       "bountyAmountError": "Masukkan jumlah bounty untuk mengaktifkan bounty.",
+      "bountyAmountMin": "Jumlah minimal adalah {min}.",
+      "bountyAmountMax": "Jumlah maksimal adalah 100,000,000.",
       "success": "Berhasil didaftarkan.",
       "fail": "Gagal mendaftarkan barang: {error}",
       "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter."
@@ -1792,10 +1800,14 @@
     },
     "resolve": {
       "whoHelped": "Siapa yang membantu Anda?",
+      "whoHelpedLost": "Pilih orang yang membantu dari daftar chat jika ada.",
+      "whoReturnedFound": "Kepada siapa Anda mengembalikan barang ini? Pilih orang yang mengembalikan.",
       "noCandidates": "Tidak ada tetangga dengan riwayat obrolan.",
       "offlineResolved": "Diselesaikan di luar aplikasi",
       "leaveReview": "Tinggalkan ucapan terima kasih (Opsional)",
+      "leaveReviewFound": "Tulis pesan penyerahan untuk pemilik (Opsional)",
       "reviewHint": "Cth: Terima kasih sudah mengantar walau hujan!",
+      "reviewHintFound": "Contoh: Terima kasih telah mengembalikan barang ini kepada pemilik.",
       "systemMessage": "Terima kasih — poin kepercayaan telah diberikan!",
       "success": "Ditandai sebagai selesai.",
       "confirmTitle": "Tandai Selesai?",
@@ -1809,6 +1821,9 @@
       "location": "Lokasi",
       "registrant": "Pendaftar",
       "contact": "Hubungi",
+      "reviewTitle": "Ulasan Terima Kasih",
+      "reviewBy": "Dibantu oleh {name}",
+      "helpedBy": "Dibantu oleh {name}",
       "resolved": "Selesai",
       "markAsResolved": "Tandai Selesai",
       "deleteTitle": "Hapus Postingan",

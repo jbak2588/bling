@@ -6,6 +6,7 @@ import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/utils/location_helper.dart';
 import '../../shared/widgets/app_bar_icon.dart';
 
 class UserProfileScreen extends StatelessWidget {
@@ -105,9 +106,15 @@ class UserProfileScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  user.locationName ?? 'postCard.locationNotSet'.tr(),
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                Flexible(
+                  child: Text(
+                    _safeLocationLabel(user),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    softWrap: false,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ],
             ),
@@ -176,6 +183,51 @@ class UserProfileScreen extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+String _safeLocationLabel(UserModel user) {
+  try {
+    final parts = user.locationParts;
+    if (parts != null && parts.isNotEmpty) {
+      final List<String> elems = [];
+      final prov =
+          parts['prov'] ?? parts['administrativeArea'] ?? parts['province'];
+      final kab =
+          parts['kab'] ?? parts['subAdministrativeArea'] ?? parts['city'];
+      final kec = parts['kec'] ?? parts['locality'] ?? parts['district'];
+      final kel = parts['kel'] ?? parts['subLocality'] ?? parts['subdistrict'];
+
+      if (kel is String && kel.isNotEmpty) {
+        elems.add(LocationHelper.cleanName(kel));
+      }
+      if (kec is String && kec.isNotEmpty) {
+        elems.add(LocationHelper.cleanName(kec));
+      }
+      if (kab is String && kab.isNotEmpty) {
+        elems.add(LocationHelper.cleanName(kab));
+      }
+      if (prov is String && prov.isNotEmpty) {
+        elems.add(LocationHelper.cleanName(prov));
+      }
+
+      if (elems.isNotEmpty) return elems.join(', ');
+    }
+
+    // Fallback: remove potential street (assumed first token) from locationName
+    if (user.locationName != null && user.locationName!.isNotEmpty) {
+      final tokens =
+          user.locationName!.split(',').map((s) => s.trim()).toList();
+      if (tokens.length > 1) {
+        return tokens.sublist(1).join(', ');
+      }
+      // If only one token present, return it but ensure it's not an obvious street-like value
+      return user.locationName!;
+    }
+
+    return 'postCard.locationNotSet'.tr();
+  } catch (_) {
+    return 'postCard.locationNotSet'.tr();
   }
 }
 

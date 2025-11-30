@@ -34,6 +34,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/models/chat_room_model.dart';
 // ✅ [작업 44] 현상금 포맷을 위해 추가
 
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
@@ -45,6 +46,7 @@ import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:bling_app/features/local_news/widgets/comment_input_field.dart';
 import 'package:bling_app/features/local_news/widgets/comment_list_view.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
+import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart'; // ✅ [작업 9] 프로필 이동을 위해 추가
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class LostItemDetailScreen extends StatefulWidget {
@@ -63,9 +65,12 @@ class LostItemDetailScreen extends StatefulWidget {
 class _ResolveBottomSheet extends StatefulWidget {
   final List<UserModel> candidates;
   final Function(String?, String?) onConfirm;
+  final String itemType; // 'lost' or 'found'
 
   const _ResolveBottomSheet(
-      {required this.candidates, required this.onConfirm});
+      {required this.candidates,
+      required this.onConfirm,
+      required this.itemType});
 
   @override
   State<_ResolveBottomSheet> createState() => _ResolveBottomSheetState();
@@ -87,7 +92,11 @@ class _ResolveBottomSheetState extends State<_ResolveBottomSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('lostAndFound.resolve.whoHelped'.tr(),
+          // Choose copy depending on whether this is a lost or found item
+          Text(
+              widget.itemType == 'lost'
+                  ? 'lostAndFound.resolve.whoHelpedLost'.tr()
+                  : 'lostAndFound.resolve.whoReturnedFound'.tr(),
               style:
                   const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
@@ -152,13 +161,19 @@ class _ResolveBottomSheetState extends State<_ResolveBottomSheet> {
             ),
           const Divider(),
           const SizedBox(height: 8),
-          Text('lostAndFound.resolve.leaveReview'.tr(),
-              style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            widget.itemType == 'lost'
+                ? 'lostAndFound.resolve.leaveReview'.tr()
+                : 'lostAndFound.resolve.leaveReviewFound'.tr(),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: _reviewController,
             decoration: InputDecoration(
-              hintText: 'lostAndFound.resolve.reviewHint'.tr(),
+              hintText: widget.itemType == 'lost'
+                  ? 'lostAndFound.resolve.reviewHint'.tr()
+                  : 'lostAndFound.resolve.reviewHintFound'.tr(),
               border: const OutlineInputBorder(),
             ),
             maxLines: 2,
@@ -348,20 +363,56 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
       controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
       children: [
-        // ✅ 기존 이미지를 공용 이미지 캐러셀로 교체
-        if (widget.item.imageUrls.isNotEmpty)
+        // ✅ 기존 이미지를 공용 이미지 캐러셀로 교체 (해결된 경우 오버레이 표시)
+        if (_currentItem.imageUrls.isNotEmpty)
           GestureDetector(
             onTap: () {
               if (widget.embedded && widget.onClose != null) widget.onClose!();
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) =>
-                    ImageGalleryScreen(imageUrls: widget.item.imageUrls),
+                    ImageGalleryScreen(imageUrls: _currentItem.imageUrls),
               ));
             },
-            child: ImageCarouselCard(
-              storageId: widget.item.id,
-              imageUrls: widget.item.imageUrls,
-              height: 250,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: Stack(
+                children: [
+                  ImageCarouselCard(
+                    storageId: _currentItem.id,
+                    imageUrls: _currentItem.imageUrls,
+                    height: 250,
+                  ),
+                  if (_currentItem.isResolved)
+                    Positioned.fill(
+                      child: Container(
+                        color: (_currentItem.type == 'lost'
+                                ? Colors.green
+                                : Colors.orange)
+                            .withValues(alpha: 0.65),
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              _currentItem.type == 'lost'
+                                  ? 'lostAndFound.card.foundIt'.tr()
+                                  : 'lostAndFound.card.returned'.tr(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         const SizedBox(height: 16),
@@ -390,6 +441,88 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
 
         // ✅ 태그, 지도, 작성자 정보 공용 위젯 추가
         ClickableTagList(tags: _currentItem.tags),
+
+        // ✅ [작업 50] 감사 리뷰 카드: 해결된 게시글에 작성된 후기 표시
+        if (_currentItem.isResolved &&
+            _currentItem.reviewText != null &&
+            _currentItem.reviewText!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.green.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.favorite_border, color: Colors.green),
+                    const SizedBox(width: 8),
+                    Text('lostAndFound.detail.reviewTitle'.tr(),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.green)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text('"${_currentItem.reviewText!}"'),
+                if (_currentItem.resolverId != null) ...[
+                  const SizedBox(height: 8),
+                  FutureBuilder<UserModel>(
+                    future:
+                        _chatService.getOtherUserInfo(_currentItem.resolverId!),
+                    builder: (context, snap) {
+                      if (!snap.hasData) return const SizedBox.shrink();
+                      final user = snap.data!;
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  UserProfileScreen(userId: user.uid),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 14,
+                                backgroundImage: user.photoUrl != null
+                                    ? NetworkImage(user.photoUrl!)
+                                    : null,
+                                child: user.photoUrl == null
+                                    ? const Icon(Icons.person, size: 14)
+                                    : null,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '- ${'lostAndFound.detail.helpedBy'.tr(namedArgs: {
+                                      'name': user.nickname
+                                    })}',
+                                style: TextStyle(
+                                  color: Colors.blue[700],
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ]
+              ],
+            ),
+          ),
+        ],
 
         // ✅ [작업 44] 1. 현상금 정보 표시
         if (_currentItem.isHunted && (_currentItem.bountyAmount ?? 0) > 0) ...[
@@ -499,17 +632,53 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
         controller: _scrollController,
         padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
         children: [
-          // ✅ 기존 이미지를 공용 이미지 캐러셀로 교체
-          if (widget.item.imageUrls.isNotEmpty)
+          // ✅ 기존 이미지를 공용 이미지 캐러셀로 교체 (해결된 경우 오버레이 표시)
+          if (_currentItem.imageUrls.isNotEmpty)
             GestureDetector(
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) =>
-                    ImageGalleryScreen(imageUrls: widget.item.imageUrls),
+                    ImageGalleryScreen(imageUrls: _currentItem.imageUrls),
               )),
-              child: ImageCarouselCard(
-                storageId: widget.item.id,
-                imageUrls: widget.item.imageUrls,
-                height: 250,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Stack(
+                  children: [
+                    ImageCarouselCard(
+                      storageId: _currentItem.id,
+                      imageUrls: _currentItem.imageUrls,
+                      height: 250,
+                    ),
+                    if (_currentItem.isResolved)
+                      Positioned.fill(
+                        child: Container(
+                          color: (_currentItem.type == 'lost'
+                                  ? Colors.green
+                                  : Colors.orange)
+                              .withValues(alpha: 0.65),
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                _currentItem.type == 'lost'
+                                    ? 'lostAndFound.card.foundIt'.tr()
+                                    : 'lostAndFound.card.returned'.tr(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           const SizedBox(height: 16),
@@ -539,6 +708,86 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
 
           // ✅ 태그, 지도, 작성자 정보 공용 위젯 추가
           ClickableTagList(tags: _currentItem.tags),
+
+          // ✅ [작업 50] 감사 리뷰 카드: 해결된 게시글에 작성된 후기 표시
+          if (_currentItem.isResolved &&
+              _currentItem.reviewText != null &&
+              _currentItem.reviewText!.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.favorite_border, color: Colors.green),
+                      const SizedBox(width: 8),
+                      Text('lostAndFound.detail.reviewTitle'.tr(),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text('"${_currentItem.reviewText!}"'),
+                  if (_currentItem.resolverId != null) ...[
+                    const SizedBox(height: 8),
+                    FutureBuilder<UserModel>(
+                      future: _chatService
+                          .getOtherUserInfo(_currentItem.resolverId!),
+                      builder: (context, snap) {
+                        if (!snap.hasData) return const SizedBox.shrink();
+                        final user = snap.data!;
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    UserProfileScreen(userId: user.uid),
+                              ),
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 14,
+                                backgroundImage: user.photoUrl != null
+                                    ? NetworkImage(user.photoUrl!)
+                                    : null,
+                                child: user.photoUrl == null
+                                    ? const Icon(Icons.person, size: 14)
+                                    : null,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '- ${'lostAndFound.detail.helpedBy'.tr(namedArgs: {
+                                      'name': user.nickname
+                                    })}',
+                                style: TextStyle(
+                                  color: Colors.blue[700],
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ]
+                ],
+              ),
+            ),
+          ],
 
           // ✅ [작업 44] 1. 현상금 정보 표시
           if (_currentItem.isHunted &&
@@ -687,7 +936,7 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
               // 선택된 이웃이 있다면 관련 채팅방에 시스템 감사 메시지 전송
               if (selectedUserId != null) {
                 try {
-                  dynamic targetRoom;
+                  ChatRoomModel? targetRoom;
                   for (var room in relatedChats) {
                     if (room.participants.contains(selectedUserId)) {
                       targetRoom = room;
@@ -719,6 +968,7 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
               }
             }
           },
+          itemType: widget.item.type,
         ),
       );
     } catch (e) {
