@@ -1,7 +1,12 @@
 // lib/features/together/data/together_repository.dart
 
+import 'dart:io';
+
 import 'package:bling_app/features/together/models/together_post_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:uuid/uuid.dart';
 
 class TogetherRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -112,5 +117,41 @@ class TogetherRepository {
   /// 6. [Delete] 게시글 삭제
   Future<void> deletePost(String postId) async {
     await _postsCollection.doc(postId).delete();
+  }
+
+  /// 이미지 업로드 함수
+  Future<String> uploadImage(File imageFile) async {
+    final fileName = '${const Uuid().v4()}.jpg';
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+    final uid = user.uid;
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child('together_images')
+        .child(uid)
+        .child(fileName);
+
+    final task = ref.putFile(imageFile);
+    await task;
+    return await ref.getDownloadURL();
+  }
+
+  /// 이미지 업로드를 시작하는 UploadTask를 반환합니다.
+  /// UI에서 업로드 진행률/취소 등을 제어하려면 이 메서드를 사용하세요.
+  UploadTask uploadImageAsTask(File imageFile) {
+    final fileName = '${const Uuid().v4()}.jpg';
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+    final uid = user.uid;
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child('together_images')
+        .child(uid)
+        .child(fileName);
+    return ref.putFile(imageFile);
   }
 }

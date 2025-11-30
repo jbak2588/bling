@@ -11,6 +11,9 @@ class TogetherPostModel {
   final String description; // "오늘 저녁 8시, 센트럴 파크 입구에서..."
   final Timestamp meetTime; // 모임 시간
   final String location; // 모임 장소 (텍스트 or 좌표 정보)
+  // ✅ [추가] 지도 좌표 및 이미지
+  final GeoPoint? geoPoint;
+  final String? imageUrl;
 
   final int maxParticipants; // 최대 모집 인원
   final List<String> participants; // 참여자 UID 리스트
@@ -29,6 +32,8 @@ class TogetherPostModel {
     required this.description,
     required this.meetTime,
     required this.location,
+    this.geoPoint,
+    this.imageUrl,
     required this.maxParticipants,
     required this.participants,
     required this.qrCodeString,
@@ -47,6 +52,8 @@ class TogetherPostModel {
       description: data['description'] ?? '',
       meetTime: data['meetTime'] ?? Timestamp.now(),
       location: data['location'] ?? '',
+      geoPoint: data['geoPoint'] as GeoPoint?,
+      imageUrl: data['imageUrl'] as String?,
       maxParticipants: data['maxParticipants'] ?? 4,
       participants: List<String>.from(data['participants'] ?? []),
       qrCodeString: data['qrCodeString'] ?? '',
@@ -63,6 +70,8 @@ class TogetherPostModel {
       'description': description,
       'meetTime': meetTime,
       'location': location,
+      'geoPoint': geoPoint,
+      'imageUrl': imageUrl,
       'maxParticipants': maxParticipants,
       'participants': participants,
       'qrCodeString': qrCodeString,

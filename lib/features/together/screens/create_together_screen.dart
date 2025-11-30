@@ -1,10 +1,19 @@
 // lib/features/together/screens/create_together_screen.dart
 
+import 'dart:async';
+import 'dart:io';
+// removed UploadTask-based retry logic; no math required
+
+import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 import 'package:bling_app/features/together/data/together_repository.dart';
 import 'package:bling_app/features/together/models/together_post_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+// no firebase_storage UploadTask usage here
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 class CreateTogetherScreen extends StatefulWidget {
@@ -17,17 +26,108 @@ class CreateTogetherScreen extends StatefulWidget {
 class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
-  final _locationController = TextEditingController();
+  final _locationDescController = TextEditingController();
 
-  DateTime _selectedDate =
-      DateTime.now().add(const Duration(hours: 1)); // 기본 1시간 뒤
+  DateTime _selectedDate = DateTime.now().add(const Duration(hours: 1));
   String _selectedTheme = 'neon';
-  bool _isSubmitting = false;
 
-// [수정 코드]
-  void _submit() async {
-    // ✅ [Fix] 중괄호 {} 추가로 스타일 경고 해결
-    if (_titleController.text.isEmpty || _locationController.text.isEmpty) {
+  File? _selectedImage;
+  String? _uploadedImageUrl;
+  GeoPoint? _selectedGeoPoint;
+
+  bool _isSubmitting = false;
+  bool _isLoadingLocation = false;
+
+  // upload state
+  bool _isUploading = false;
+  bool _uploadFailed = false;
+  String? _uploadError;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    _locationDescController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() => _selectedImage = File(picked.path));
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    setState(() => _isLoadingLocation = true);
+    try {
+      final locationSettings =
+          LocationSettings(accuracy: LocationAccuracy.high);
+      final pos = await Geolocator.getCurrentPosition(
+          locationSettings: locationSettings);
+      setState(() => _selectedGeoPoint = GeoPoint(pos.latitude, pos.longitude));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('together.locationError'.tr())));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingLocation = false);
+    }
+  }
+
+  // Upload with exponential backoff retry.
+  // Returns download URL on success, or null on failure/cancel.
+  Future<String?> _startImageUpload(File imageFile) async {
+    final repo = TogetherRepository();
+
+    if (!mounted) return null;
+    setState(() {
+      _isUploading = true;
+      _uploadFailed = false;
+      _uploadError = null;
+    });
+
+    try {
+      final url = await repo.uploadImage(imageFile);
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+          _uploadFailed = false;
+          _uploadError = null;
+          _uploadedImageUrl = url;
+        });
+      }
+      return url;
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+          _uploadFailed = true;
+          _uploadError = e.toString();
+        });
+      }
+      return null;
+    }
+  }
+
+  // _cancelUpload removed: no UploadTask cancellation available
+
+  Future<void> _submit() async {
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('together.enterTitle'.tr())));
+      return;
+    }
+    if (_descController.text.isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('together.enterDesc'.tr())));
+      return;
+    }
+    if (_locationDescController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('together.enterLocationDesc'.tr())));
       return;
     }
 
@@ -36,43 +136,55 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
     if (user == null) return;
 
     try {
+      final repo = TogetherRepository();
+      String? imageUrl = _uploadedImageUrl;
+      if (_selectedImage != null && imageUrl == null) {
+        imageUrl = await _startImageUpload(_selectedImage!);
+      }
+
       final newPost = TogetherPostModel(
         id: const Uuid().v4(),
         hostId: user.uid,
         title: _titleController.text,
         description: _descController.text,
         meetTime: Timestamp.fromDate(_selectedDate),
-        location: _locationController.text,
-        maxParticipants: 4, // MVP: 4명 고정
-        participants: [user.uid], // 주최자 자동 참여
-        qrCodeString: const Uuid().v4(), // 고유 QR 코드 생성
+        location: _locationDescController.text,
+        geoPoint: _selectedGeoPoint,
+        imageUrl: imageUrl,
+        maxParticipants: 4,
+        participants: [user.uid],
+        qrCodeString: const Uuid().v4(),
         designTheme: _selectedTheme,
         createdAt: Timestamp.now(),
       );
 
-      await TogetherRepository().createPost(newPost);
+      await repo.createPost(newPost);
 
       if (!mounted) return;
-      Navigator.pop(context); // 생성 후 닫기
+      Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('together.createFail'.tr())));
+      }
     } finally {
-      setState(() => _isSubmitting = false);
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("전단지 만들기")),
+      appBar: AppBar(title: Text('together.createTitle'.tr())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. 디자인 선택
-            const Text("디자인 테마", style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('together.theme'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
               children: ['neon', 'paper', 'dark'].map((theme) {
@@ -94,72 +206,171 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
               }).toList(),
             ),
             const SizedBox(height: 24),
-
-            // 2. 입력 필드
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                  labelText: "무엇을 함께 할까요? (제목)", hintText: "예: 한강 러닝, 담배 타임"),
-              maxLength: 20,
+              decoration: InputDecoration(
+                  labelText: 'together.whatLabel'.tr(),
+                  hintText: 'together.whatHint'.tr()),
+              maxLength: 100,
             ),
             const SizedBox(height: 16),
             TextField(
-              controller: _locationController,
-              decoration: const InputDecoration(
-                  labelText: "어디서 모일까요? (장소)",
-                  prefixIcon: Icon(Icons.location_on_outlined)),
+              controller: _descController,
+              decoration: InputDecoration(
+                  labelText: 'together.descLabel'.tr(),
+                  hintText: 'together.descHint'.tr(),
+                  border: const OutlineInputBorder(),
+                  alignLabelWithHint: true),
+              maxLines: 3,
             ),
+            const SizedBox(height: 24),
+            Text('together.imageOptional'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey),
+                  image: _selectedImage != null
+                      ? DecorationImage(
+                          image: FileImage(_selectedImage!), fit: BoxFit.cover)
+                      : null,
+                ),
+                child: _selectedImage == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                            const Icon(Icons.add_photo_alternate,
+                                size: 40, color: Colors.grey),
+                            Text('together.tapToAddPhoto'.tr(),
+                                style: const TextStyle(color: Colors.grey))
+                          ])
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (_isUploading)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const LinearProgressIndicator(),
+                      const SizedBox(height: 6),
+                      Text('uploading'.tr()),
+                    ]),
+              ),
+            if (!_isUploading && _uploadFailed)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: _selectedImage == null
+                            ? null
+                            : () async {
+                                final url =
+                                    await _startImageUpload(_selectedImage!);
+                                if (url != null && mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content:
+                                              Text('upload.success'.tr())));
+                                }
+                              },
+                        icon: const Icon(Icons.refresh),
+                        label: Text('upload.retry'.tr()),
+                      ),
+                      if (_uploadError != null) const SizedBox(height: 8),
+                      if (_uploadError != null)
+                        Text(_uploadError!,
+                            style: const TextStyle(color: Colors.red)),
+                    ]),
+              ),
+            const SizedBox(height: 24),
+            Text('together.whereLabel'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            if (_selectedGeoPoint == null)
+              Container(
+                width: double.infinity,
+                height: 150,
+                color: Colors.grey[100],
+                child: Center(
+                    child: _isLoadingLocation
+                        ? const CircularProgressIndicator()
+                        : ElevatedButton.icon(
+                            onPressed: _getCurrentLocation,
+                            icon: const Icon(Icons.my_location),
+                            label: Text('together.setCurrentLocation'.tr()))),
+              )
+            else
+              Stack(children: [
+                SizedBox(
+                    height: 150,
+                    child: MiniMapView(
+                        location: _selectedGeoPoint!,
+                        markerId: 'create_together')),
+                Positioned(
+                    top: 8,
+                    right: 8,
+                    child: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: IconButton(
+                            icon:
+                                const Icon(Icons.refresh, color: Colors.black),
+                            onPressed: _getCurrentLocation))),
+              ]),
+            const SizedBox(height: 8),
+            TextField(
+                controller: _locationDescController,
+                decoration: InputDecoration(
+                    labelText: 'together.whereLabel'.tr(),
+                    hintText: 'together.whereHint'.tr(),
+                    prefixIcon: const Icon(Icons.location_on_outlined))),
             const SizedBox(height: 16),
-
-            // 3. 시간 선택
-            // 3. 시간 선택
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text("언제 모일까요?"),
+              title: Text('together.whenLabel'.tr()),
               subtitle: Text(
-                  "${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day} ${_selectedDate.hour.toString().padLeft(2, '0')}:${_selectedDate.minute.toString().padLeft(2, '0')}"),
+                  '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day} ${_selectedDate.hour.toString().padLeft(2, '0')}:${_selectedDate.minute.toString().padLeft(2, '0')}'),
               trailing: const Icon(Icons.calendar_today),
               onTap: () async {
-                // ✅ [Fix] 날짜 및 시간 선택 로직 구현 (변수 업데이트로 final 경고 해결)
                 final DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: _selectedDate,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 30)),
-                );
-
+                    context: context,
+                    initialDate: _selectedDate,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 30)));
                 if (pickedDate != null && mounted) {
                   final TimeOfDay? pickedTime = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.fromDateTime(_selectedDate),
-                  );
-
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(_selectedDate));
                   if (pickedTime != null) {
-                    setState(() {
-                      _selectedDate = DateTime(
+                    setState(() => _selectedDate = DateTime(
                         pickedDate.year,
                         pickedDate.month,
                         pickedDate.day,
                         pickedTime.hour,
-                        pickedTime.minute,
-                      );
-                    });
+                        pickedTime.minute));
                   }
                 }
               },
             ),
-
             const SizedBox(height: 32),
             SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _isSubmitting ? null : _submit,
-                icon: const Icon(Icons.print),
-                label: const Text("전단지 붙이기 (생성)"),
-                style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16)),
-              ),
-            )
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                    onPressed: _isSubmitting ? null : _submit,
+                    icon: const Icon(Icons.check),
+                    label: Text('together.submitBtn'.tr()),
+                    style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16)))),
           ],
         ),
       ),

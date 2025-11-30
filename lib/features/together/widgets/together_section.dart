@@ -5,6 +5,7 @@ import 'package:bling_app/features/together/models/together_post_model.dart';
 import 'package:bling_app/features/together/widgets/together_card.dart';
 import 'package:bling_app/features/together/screens/create_together_screen.dart'; // 다음 단계 파일
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // ✅ 추가
 
 class TogetherSection extends StatelessWidget {
   const TogetherSection({super.key});
@@ -22,9 +23,10 @@ class TogetherSection extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Together / 함께 해요", // 다국어 키: home.together.title
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                "together.sectionTitle".tr(), // ✅ 수정: "Together / 함께 해요"
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               IconButton(
                 icon: const Icon(Icons.add_circle_outline),
@@ -101,7 +103,7 @@ class TogetherSection extends StatelessWidget {
           border: Border.all(
               color: Colors.grey, style: BorderStyle.values[1]), // 점선 느낌(흉내)
         ),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.add, size: 40, color: Colors.grey),
@@ -109,7 +111,8 @@ class TogetherSection extends StatelessWidget {
             Text(
               "New\nFlyer",
               textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.grey),
             ),
           ],
         ),
@@ -129,7 +132,7 @@ class TogetherSection extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text("지금 진행 중인 모임이 없어요."),
+          Text("together.emptyList".tr(), textAlign: TextAlign.center),
           TextButton(
             onPressed: () {
               Navigator.push(
@@ -137,7 +140,7 @@ class TogetherSection extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const CreateTogetherScreen()),
               );
             },
-            child: const Text("첫 번째 모임 만들기"),
+            child: Text("together.createFirst".tr()),
           )
         ],
       ),
@@ -150,17 +153,17 @@ class TogetherSection extends StatelessWidget {
         context: context,
         builder: (_) => AlertDialog(
               title: Text(post.title),
-              content: const Text("참여하시겠습니까? (QR 입장권이 발급됩니다)"),
+              content: Text("together.joinConfirm".tr()),
               actions: [
                 TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("취소")),
+                    child: Text("common.cancel".tr())),
                 TextButton(
                     onPressed: () async {
                       // Repository join 호출 로직 연결 필요
                       Navigator.pop(context);
                     },
-                    child: const Text("참여하기")),
+                    child: Text("together.btnJoin".tr())),
               ],
             ));
   }

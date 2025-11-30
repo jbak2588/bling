@@ -4,6 +4,7 @@ import 'package:bling_app/features/together/models/together_post_model.dart';
 import 'package:bling_app/features/together/widgets/together_card.dart';
 import 'package:bling_app/features/together/screens/together_detail_screen.dart'; // ✅ 추가
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // ✅ 추가
 
 class TogetherScreen extends StatelessWidget {
   final UserModel? userModel;
@@ -36,7 +37,7 @@ class TogetherScreen extends StatelessWidget {
                     size: 64, color: Colors.grey),
                 const SizedBox(height: 16),
                 Text(
-                  "아직 등록된 모임이 없어요.\n첫 번째 모임을 주최해보세요!",
+                  "together.emptyList".tr(), // ✅ 수정: "아직 등록된 모임이 없어요..."
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey[600]),
                 ),

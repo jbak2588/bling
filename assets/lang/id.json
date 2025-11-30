@@ -70,6 +70,7 @@
     "tabs": {
       "newFeed": "Berita Baru",
       "localNews": "Cerita Lokal",
+      "together": "Ayo Bareng",
       "marketplace": "Preloved",
       "findFriends": "Cari Teman",
       "clubs": "Grup",
@@ -618,6 +619,45 @@
     "empty": "Tidak ada postingan untuk ditampilkan.",
     "error": "Terjadi kesalahan."
   },
+  "together": {
+    "title": "Ayo Bareng",
+    "sectionTitle": "Ayo Bareng / Together",
+    "newFlyer": "Flyer Baru",
+    "emptyList": "Belum ada acara aktif.\nJadilah host pertama!",
+    "createFirst": "Buat Acara Pertama",
+    "createTitle": "Buat Flyer",
+    "editTitle": "Edit Flyer",
+    "theme": "Tema Desain",
+    "whatLabel": "Mau ngapain bareng? (Judul)",
+    "whatHint": "Cth: Lari pagi, Ngopi bareng",
+    "whereLabel": "Di mana? (Lokasi)",
+    "whenLabel": "Kapan?",
+    "submitBtn": "Tempel Flyer",
+    "updateBtn": "Update Flyer",
+    "detailTitle": "Detail Acara",
+    "labelWhen": "KAPAN",
+    "labelWhere": "DIMANA",
+    "labelWhat": "ACARA",
+    "statusHost": "Anda Host-nya",
+    "statusJoined": "Bergabung (Cek Tiket)",
+    "btnJoin": "Ikutan (Join)",
+    "participants": "Peserta: {current} / {max}",
+    "loginRequired": "Perlu login.",
+    "joinSuccess": "Berhasil! Cek tiket QR Anda.",
+    "joinConfirm": "Apakah Anda ingin bergabung? Tiket QR akan diterbitkan.",
+    "joinFail": "Gagal bergabung: {error}",
+    "createFail": "Gagal membuat flyer: {error}",
+    "updateFail": "Gagal memperbarui flyer: {error}",
+    "deleteFail": "Gagal menghapus flyer: {error}",
+    "deleteConfirm": "Yakin ingin menghapus flyer ini?",
+    "deleted": "Berhasil dihapus.",
+    "descLabel": "Deskripsi",
+    "descHint": "Jelaskan acara secara rinci (waktu, agenda, persyaratan).",
+    "imageOptional": "Gambar (opsional)",
+    "tapToAddPhoto": "Ketuk untuk menambahkan foto",
+    "setCurrentLocation": "Atur lokasi saat ini",
+    "whereHint": "contoh: Taman Kota, dekat air mancur"
+  },
   "categories": {
     "post": {
       "jalan-perbaikin": {
@@ -780,6 +820,7 @@
     "empty": "Belum ada komentar. Jadilah yang pertama berkomentar!",
     "reply": "Balas",
     "delete": "Hapus",
+    "deleteTitle": "Hapus",
     "deleted": "[Komentar ini telah dihapus]",
     "secret": "Ini adalah komentar rahasia yang hanya dapat dilihat oleh penulis dan pemilik postingan."
   },
@@ -818,6 +859,14 @@
     "copiedTitle": "Disalin!",
     "copiedMessage": "{title} disalin ke clipboard.",
     "select": "Pilih"
+  },
+  "upload": {
+    "pause": "Jeda",
+    "resume": "Lanjutkan",
+    "cancel": "Batal",
+    "retry": "Coba lagi",
+    "uploading": "Mengunggah...",
+    "failed": "Unggah gagal"
   },
   "reportDialog": {
     "title": "Laporkan Postingan",
@@ -2207,5 +2256,12 @@
         "unknown": "Terjadi kesalahan yang tidak diketahui."
       }
     }
+
+      ,
+      "home": {
+        "menu": {
+          "together": "Ayo Bareng"
+        }
+      }
   }
 }

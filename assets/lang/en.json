@@ -70,6 +70,7 @@
     "tabs": {
       "newFeed": "New Feed",
       "localNews": "Local News",
+      "together": "Together",
       "marketplace": "Preloved",
       "findFriends": "Find Friends",
       "clubs": "Clubs",
@@ -618,6 +619,45 @@
     "empty": "No posts to show.",
     "error": "error"
   },
+  "together": {
+    "title": "Together",
+    "sectionTitle": "Together",
+    "newFlyer": "New Flyer",
+    "emptyList": "No active gatherings yet.\nBe the first host!",
+    "createFirst": "Create First Gathering",
+    "createTitle": "Create Flyer",
+    "editTitle": "Edit Flyer",
+    "theme": "Design Theme",
+    "whatLabel": "What to do together? (Title)",
+    "whatHint": "Ex: Morning Jog, Coffee Break",
+    "whereLabel": "Where? (Location)",
+    "whenLabel": "When?",
+    "submitBtn": "Post Flyer",
+    "updateBtn": "Update Flyer",
+    "detailTitle": "Gathering Detail",
+    "labelWhen": "WHEN",
+    "labelWhere": "WHERE",
+    "labelWhat": "WHAT",
+    "statusHost": "You are the Host",
+    "statusJoined": "Joined (Check Ticket)",
+    "btnJoin": "Join Together",
+    "participants": "Participants: {current} / {max}",
+    "loginRequired": "Login required.",
+    "joinSuccess": "Joined! Check your ticket for QR.",
+    "joinConfirm": "Do you want to join? A QR ticket will be issued.",
+    "joinFail": "Failed to join: {error}",
+    "createFail": "Failed to create flyer: {error}",
+    "updateFail": "Failed to update flyer: {error}",
+    "deleteFail": "Failed to delete flyer: {error}",
+    "deleteConfirm": "Are you sure you want to delete this flyer?",
+    "deleted": "Deleted successfully.",
+    "descLabel": "Description",
+    "descHint": "Describe the event in detail (time, agenda, requirements).",
+    "imageOptional": "Image (optional)",
+    "tapToAddPhoto": "Tap to add photo",
+    "setCurrentLocation": "Set current location",
+    "whereHint": "e.g. Central Park, near the fountain"
+  },
   "categories": {
     "post": {
       "jalan-perbaikin": {
@@ -780,6 +820,7 @@
     "empty": "No comments yet. Be the first!",
     "reply": "Reply",
     "delete": "Delete",
+    "deleteTitle": "Delete",
     "deleted": "[This comment has been deleted]",
     "secret": "This is a secret comment only visible to the author and post owner."
   },
@@ -818,6 +859,14 @@
     "copiedTitle": "Copied!",
     "copiedMessage": "{title} copied to clipboard.",
     "select": "Select"
+  },
+  "upload": {
+    "pause": "Pause",
+    "resume": "Resume",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "uploading": "Uploading...",
+    "failed": "Upload failed"
   },
   "reportDialog": {
     "title": "Report Post",
@@ -2207,5 +2256,12 @@
         "unknown": "An unknown error occurred."
       }
     }
+
+      ,
+      "home": {
+        "menu": {
+          "together": "Together"
+        }
+      }
   }
 }

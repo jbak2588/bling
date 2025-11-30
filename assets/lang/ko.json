@@ -70,6 +70,7 @@
     "tabs": {
       "newFeed": "새 소식",
       "localNews": "동네 소식",
+      "together": "함께 해요",
       "marketplace": "중고거래",
       "findFriends": "친구찾기",
       "clubs": "모임",
@@ -618,6 +619,45 @@
     "empty": "표시할 게시물이 없습니다.",
     "error": "오류가 발생했습니다.}"
   },
+  "together": {
+    "title": "함께 해요",
+    "sectionTitle": "Together / 함께 해요",
+    "newFlyer": "새 전단지",
+    "emptyList": "지금 진행 중인 모임이 없어요.\n첫 번째 모임을 주최해보세요!",
+    "createFirst": "첫 번째 모임 만들기",
+    "createTitle": "전단지 만들기",
+    "editTitle": "전단지 수정하기",
+    "theme": "디자인 테마",
+    "whatLabel": "무엇을 함께 할까요? (제목)",
+    "whatHint": "예: 한강 러닝, 담배 타임",
+    "whereLabel": "어디서 모일까요? (장소)",
+    "whenLabel": "언제 모일까요?",
+    "submitBtn": "전단지 붙이기 (생성)",
+    "updateBtn": "수정 완료",
+    "detailTitle": "모임 상세",
+    "labelWhen": "일시",
+    "labelWhere": "장소",
+    "labelWhat": "내용",
+    "statusHost": "내가 주최한 모임입니다",
+    "statusJoined": "참여 완료 (티켓 확인)",
+    "btnJoin": "함께 하기 (Join)",
+    "participants": "참여 현황: {current} / {max} 명",
+    "loginRequired": "로그인이 필요합니다.",
+    "joinSuccess": "참여 완료! 나의 티켓함에서 QR을 확인하세요.",
+    "joinConfirm": "참여하시겠습니까? (QR 입장권이 발급됩니다)",
+    "joinFail": "참여 실패: {error}",
+    "createFail": "전단지 생성에 실패했습니다: {error}",
+    "updateFail": "전단지 수정에 실패했습니다: {error}",
+    "deleteFail": "삭제에 실패했습니다: {error}",
+    "deleteConfirm": "정말로 이 모임을 삭제하시겠습니까?",
+    "deleted": "삭제되었습니다.",
+    "descLabel": "설명",
+    "descHint": "행사에 대해 자세히 설명하세요 (시간, 일정, 준비물 등).",
+    "imageOptional": "이미지 (선택)",
+    "tapToAddPhoto": "사진을 추가하려면 탭하세요",
+    "setCurrentLocation": "현재 위치 설정",
+    "whereHint": "예: 한강공원 잔디밭 근처"
+  },
   "categories": {
     "post": {
       "jalan-perbaikin": {
@@ -778,6 +818,7 @@
     "empty": "아직 댓글이 없습니다. 첫 댓글을 남겨보세요!",
     "reply": "답글",
     "delete": "삭제",
+    "deleteTitle": "삭제",
     "deleted": "[삭제된 댓글입니다]",
     "secret": "작성자와 게시물 주인만 볼 수 있는 비밀 댓글입니다."
   },
@@ -816,6 +857,14 @@
     "copiedTitle": "복사됨!",
     "copiedMessage": "{title}이(가) 클립보드에 복사되었습니다.",
     "select": "선택"
+  },
+  "upload": {
+    "pause": "일시정지",
+    "resume": "다시 시작",
+    "cancel": "취소",
+    "retry": "다시 시도",
+    "uploading": "업로드 중...",
+    "failed": "업로드 실패"
   },
   "reportDialog": {
     "title": "게시물 신고",
@@ -2205,5 +2254,12 @@
         "unknown": "알 수 없는 오류가 발생했습니다."
       }
     }
+
+      ,
+      "home": {
+        "menu": {
+          "together": "함께 해요"
+        }
+      }
   }
 }

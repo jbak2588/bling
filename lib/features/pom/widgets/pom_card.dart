@@ -205,7 +205,10 @@ class _PomCardState extends State<PomCard> {
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
+                    SnackBar(
+                      content: Text('pom.errors.fetchFailed'
+                          .tr(namedArgs: {'error': e.toString()})),
+                    ),
                   );
                 }
               }

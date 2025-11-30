@@ -188,8 +188,9 @@ class _PomPlayerState extends State<PomPlayer> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text('Error: $e')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('pom.errors.fetchFailed'
+                          .tr(namedArgs: {'error': e.toString()}))));
                 }
               }
             },

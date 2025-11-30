@@ -111,6 +111,7 @@ import 'package:bling_app/features/main_feed/widgets/real_estate_thumb.dart';
 
 // ▼▼▼▼▼ [개편] 11단계: Together 썸네일 및 모델 import ▼▼▼▼▼
 import 'package:bling_app/features/together/screens/together_screen.dart';
+import 'package:bling_app/features/together/screens/together_detail_screen.dart';
 import 'package:bling_app/features/together/widgets/together_card.dart'; // Thumb 대용
 import 'package:bling_app/features/together/data/together_repository.dart';
 import 'package:bling_app/features/together/models/together_post_model.dart';
@@ -370,7 +371,7 @@ class _HomeScreenState extends State<HomeScreen>
   /// Header builder that can optionally render a leading SVG icon sized
   /// to match the title font size.
   Widget _buildSectionTitleWithIcon(BuildContext context, String titleKey,
-      {String? svgAsset}) {
+      {String? svgAsset, double iconScale = 1.0}) {
     final theme = Theme.of(context);
     final onSurface90 = theme.colorScheme.onSurface.withValues(alpha: 0.90);
     final titleStyle = theme.textTheme.titleMedium?.copyWith(
@@ -385,11 +386,14 @@ class _HomeScreenState extends State<HomeScreen>
       mainAxisSize: MainAxisSize.min,
       children: [
         if (svgAsset != null) ...[
-          SvgPicture.asset(
-            svgAsset,
-            width: iconSize,
-            height: iconSize,
-            fit: BoxFit.contain,
+          Transform.scale(
+            scale: iconScale,
+            child: SvgPicture.asset(
+              svgAsset,
+              width: iconSize,
+              height: iconSize,
+              fit: BoxFit.contain,
+            ),
           ),
           const SizedBox(width: 8),
         ],
@@ -484,7 +488,7 @@ class _HomeScreenState extends State<HomeScreen>
         section: AppSection.localStore),
     // 6. clubs (모임)
     MenuItem(
-        svg: '$_iconsPath/ico_together.svg',
+        svg: '$_iconsPath/ico_community.svg',
         labelKey: 'main.tabs.clubs',
         // Placeholder only for routing metadata; real screen is built in onTap
         screen: const Placeholder(),
@@ -516,7 +520,7 @@ class _HomeScreenState extends State<HomeScreen>
     // 11. together (함께 해요)
     MenuItem(
         svg: '$_iconsPath/ico_together.svg',
-        labelKey: 'home.menu.together',
+        labelKey: 'main.tabs.together',
         screen: TogetherScreen(),
         section: null),
   ];
@@ -722,13 +726,6 @@ class _HomeScreenState extends State<HomeScreen>
                       height: 8, thickness: 8, color: Color(0xFFF0F2F5))),
 
               // Lazy-loaded sections using new Lazy wrapper (pass cached data)
-              // Local News (posts)
-              _buildLazySection(
-                context: context,
-                section: AppSection.posts,
-                childBuilder: (data) => _buildPostCarousel(context, data),
-              ),
-
               // ✅ Together (함께 해요) — header + live stream carousel
               SliverToBoxAdapter(
                 child: Column(
@@ -741,8 +738,9 @@ class _HomeScreenState extends State<HomeScreen>
                         children: [
                           Expanded(
                               child: _buildSectionTitleWithIcon(
-                                  context, 'home.menu.together',
-                                  svgAsset: '$_iconsPath/ico_together.svg')),
+                                  context, 'main.tabs.together',
+                                  svgAsset: '$_iconsPath/ico_together.svg',
+                                  iconScale: 1.2)),
                           TextButton(
                             style: _viewAllButtonStyle(context),
                             onPressed: () {
@@ -758,7 +756,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   userModel: widget.userModel,
                                   locationFilter: widget.activeLocationFilter);
                               widget.onIconTap(
-                                  nextScreen, 'home.menu.together');
+                                  nextScreen, 'main.tabs.together');
                             },
                             child: Text('common.viewAll'.tr()),
                           ),
@@ -791,15 +789,18 @@ class _HomeScreenState extends State<HomeScreen>
                                         userModel: widget.userModel,
                                         locationFilter:
                                             widget.activeLocationFilter),
-                                    'home.menu.together');
+                                    'main.tabs.together');
                               }
                               return TogetherCard(
                                 post: items[index],
                                 onTap: () {
-                                  widget.onIconTap(
-                                      TogetherScreen(
-                                          userModel: widget.userModel),
-                                      'home.menu.together');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => TogetherDetailScreen(
+                                          post: items[index]),
+                                    ),
+                                  );
                                 },
                               );
                             },
@@ -810,6 +811,13 @@ class _HomeScreenState extends State<HomeScreen>
                     const SizedBox(height: 12),
                   ],
                 ),
+              ),
+
+              // Local News (posts)
+              _buildLazySection(
+                context: context,
+                section: AppSection.posts,
+                childBuilder: (data) => _buildPostCarousel(context, data),
               ),
 
               // Jobs

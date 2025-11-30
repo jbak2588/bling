@@ -51,8 +51,8 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
   Future<void> _handleJoin() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("로그인이 필요합니다.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("together.loginRequired".tr()))); // ✅ 수정
       return;
     }
 
@@ -71,11 +71,12 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("참여 완료! 나의 티켓함에서 QR을 확인하세요.")),
+        SnackBar(content: Text("together.joinSuccess".tr())), // ✅ 수정
       );
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('참여 실패: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              'together.joinFail'.tr(namedArgs: {'error': e.toString()}))));
     } finally {
       if (mounted) setState(() => _isJoining = false);
     }
@@ -87,7 +88,7 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('common.deleteTitle'.tr()),
-        content: const Text('정말로 이 모임을 삭제하시겠습니까?'),
+        content: Text('together.deleteConfirm'.tr()), // ✅ 수정
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -107,15 +108,16 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
         await TogetherRepository().deletePost(widget.post.id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('삭제되었습니다.')),
+            SnackBar(content: Text('together.deleted'.tr())), // ✅ 수정
           );
           Navigator.of(context).pop();
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('삭제 실패: $e')),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'together.deleteFail'.tr(namedArgs: {'error': e.toString()})),
+          ));
         }
       }
     }
@@ -131,7 +133,7 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100], // 배경은 깔끔하게
       appBar: AppBar(
-        title: const Text("모임 상세"),
+        title: Text("together.detailTitle".tr()),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -211,13 +213,13 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
                   const SizedBox(height: 30),
 
                   // Info Rows
-                  _buildInfoRow(
-                      Icons.calendar_today, "WHEN", dateStr, txtColor),
+                  _buildInfoRow(Icons.calendar_today, "together.labelWhen".tr(),
+                      dateStr, txtColor),
                   const SizedBox(height: 20),
-                  _buildInfoRow(Icons.location_on, "WHERE",
+                  _buildInfoRow(Icons.location_on, "together.labelWhere".tr(),
                       widget.post.location, txtColor),
                   const SizedBox(height: 20),
-                  _buildInfoRow(Icons.info_outline, "WHAT",
+                  _buildInfoRow(Icons.info_outline, "together.labelWhat".tr(),
                       widget.post.description, txtColor),
 
                   const SizedBox(height: 40),
@@ -235,7 +237,10 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
                         Icon(Icons.people, color: txtColor),
                         const SizedBox(width: 8),
                         Text(
-                          "참여 현황: ${widget.post.participants.length} / ${widget.post.maxParticipants} 명",
+                          "together.participants".tr(namedArgs: {
+                            'current': '${widget.post.participants.length}',
+                            'max': '${widget.post.maxParticipants}'
+                          }),
                           style: TextStyle(
                               color: txtColor, fontWeight: FontWeight.bold),
                         ),
@@ -265,10 +270,10 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
                         _isHost
-                            ? "내가 주최한 모임입니다"
+                            ? "together.statusHost".tr()
                             : _isJoined
-                                ? "참여 완료 (티켓 확인)"
-                                : "함께 하기 (Join Now)",
+                                ? "together.statusJoined".tr()
+                                : "together.btnJoin".tr(),
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),

@@ -479,7 +479,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         break;
       // ✅ [작업 19] TogetherScreen 연결
       case AppSection.together:
-        titleKey = 'home.menu.together';
+        titleKey = 'main.tabs.together';
         nextScreen = TogetherScreen(
           userModel: userModel,
           locationFilter:
@@ -1234,7 +1234,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       case 'main.tabs.realEstate':
         return AppSection.realEstate;
       // ✅ [작업 19] 키 매핑 추가
-      case 'home.menu.together':
+      case 'main.tabs.together':
         return AppSection.together;
       default:
         return AppSection.home;

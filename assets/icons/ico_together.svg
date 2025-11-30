@@ -1,22 +1,42 @@
 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- 바닥 그림자 (모든 아이콘 공통) -->
-  <ellipse opacity="0.2" cx="20" cy="36" rx="19" ry="1" fill="#6B7184"></ellipse>
+  <!-- 그림자 확대 -->
+  <ellipse cx="20" cy="35" rx="19" ry="3" fill="#6B7184" opacity="0.18"></ellipse>
 
-  <!-- 왼쪽 사람 얼굴 -->
-  <rect x="8" y="14" width="8" height="8" rx="4" fill="#7346ED"></rect>
-  <!-- 오른쪽 사람 얼굴 -->
-  <rect x="24" y="14" width="8" height="8" rx="4" fill="#2B7CD4"></rect>
+  <!-- 확대된 전단지 그룹 (전체 스케일 1.22x 적용) -->
+  <g transform="translate(4 2) scale(1.22) rotate(-5 12 15)">
+    
+    <!-- 전단지 배경 -->
+    <rect x="0" y="0" width="24" height="30" rx="4" fill="#FFF7D8" stroke="#E8E2CC" stroke-width="0.8"></rect>
 
-  <!-- 왼쪽 사람 몸통 -->
-  <path d="M9 27C9 24.7909 10.7909 23 13 23H15C17.2091 23 19 24.7909 19 27V29H9V27Z" fill="#9672F6"></path>
-  <!-- 오른쪽 사람 몸통 -->
-  <path d="M21 27C21 24.7909 22.7909 23 25 23H27C29.2091 23 31 24.7909 31 27V29H21V27Z" fill="#76B6FB"></path>
+    <!-- 접힌 모서리 -->
+    <path d="M24 26 L20 30 H24 V26Z" fill="#E6DFC7"></path>
 
-  <!-- 가운데 말풍선 (함께 대화/모임) -->
-  <path d="M18 12C18 9.79086 19.7909 8 22 8H24.5C26.7091 8 28.5 9.79086 28.5 12C28.5 13.4902 27.7121 14.8009 26.5 15.5L24.5 17.5L22.5 15.5C20.6548 15.5 18 14.2091 18 12Z" fill="#FFB84D"></path>
+    <!-- 테이프 -->
+    <rect x="6" y="-2" width="12" height="4" rx="1" fill="#FFFFFF" opacity="0.55"></rect>
 
-  <!-- 말풍선 안 작은 버블 (대화 느낌) -->
-  <circle cx="22" cy="11.5" r="1.2" fill="white"></circle>
-  <circle cx="24.8" cy="11.5" r="1.2" fill="white"></circle>
-  <circle cx="23.4" cy="13.5" r="0.9" fill="white"></circle>
+    <!-- 중앙 사람 -->
+    <circle cx="12" cy="12.5" r="3.5" fill="#4B70F2"></circle>
+    <path d="M8.5 19C8.5 17.1 10 15.6 12 15.6H13.9C15.9 15.6 17.4 17.1 17.4 19V21.3H8.5V19Z" fill="#6F8CFF"></path>
+
+    <!-- 왼쪽 사람 -->
+    <circle cx="6" cy="14" r="2.8" fill="#FFB851"></circle>
+    <path d="M3.6 20C3.6 18.5 4.8 17.4 6.1 17.4H7.4C8.7 17.4 9.9 18.5 9.9 20V21.5H3.6V20Z" fill="#FFDCA3"></path>
+
+    <!-- 오른쪽 사람 -->
+    <circle cx="18" cy="14" r="2.8" fill="#4FD4FF"></circle>
+    <path d="M15.6 20C15.6 18.5 16.8 17.4 18.1 17.4H19.4C20.7 17.4 21.9 18.5 21.9 20V21.5H15.6V20Z" fill="#A9ECFF"></path>
+
+    <!-- 텍스트 라인 -->
+    <rect x="4" y="24" width="12" height="1.7" rx="0.8" fill="#C7BBA0"></rect>
+    <rect x="4" y="27" width="8" height="1.4" rx="0.7" fill="#DDD2B8"></rect>
+
+    <!-- QR -->
+    <g transform="translate(15 23)">
+      <rect x="0" y="0" width="6.5" height="6.5" rx="1" fill="white" stroke="#C4C4C4" stroke-width="0.6"></rect>
+      <rect x="1" y="1" width="1.7" height="1.7" fill="#1F2933"></rect>
+      <rect x="3.6" y="1" width="1.7" height="1.7" fill="#1F2933"></rect>
+      <rect x="1" y="3.6" width="1.7" height="1.7" fill="#1F2933"></rect>
+      <rect x="3.4" y="3.6" width="1" height="1" fill="#1F2933"></rect>
+    </g>
+  </g>
 </svg>
