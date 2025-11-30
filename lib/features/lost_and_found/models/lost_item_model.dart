@@ -33,6 +33,10 @@ class LostItemModel {
   final bool isResolved;
   final Timestamp? resolvedAt;
 
+  // ✅ [작업 3] 해결 기여자 및 후기 필드 추가
+  final String? resolverId; // 물건을 찾아주거나 돌려준 고마운 이웃의 ID
+  final String? reviewText; // 미담 후기
+
   // ✅ [작업 42] 댓글 및 조회수 기능 추가
   final int viewsCount;
   final int commentsCount;
@@ -57,6 +61,10 @@ class LostItemModel {
     // ✅ [작업 41]
     this.isResolved = false,
     this.resolvedAt,
+
+    // ✅ [작업 3]
+    this.resolverId,
+    this.reviewText,
 
     // ✅ [작업 42]
     this.viewsCount = 0,
@@ -87,6 +95,9 @@ class LostItemModel {
       // ✅ [작업 41]
       isResolved: data['isResolved'] ?? false,
       resolvedAt: data['resolvedAt'] as Timestamp?,
+      // ✅ [작업 3]
+      resolverId: data['resolverId'],
+      reviewText: data['reviewText'],
 
       // ✅ [작업 42]
       viewsCount: data['viewsCount'] ?? 0,
@@ -113,6 +124,9 @@ class LostItemModel {
       // ✅ [작업 41]
       'isResolved': isResolved,
       'resolvedAt': resolvedAt,
+      // ✅ [작업 3]
+      'resolverId': resolverId,
+      'reviewText': reviewText,
 
       // ✅ [작업 42]
       'viewsCount': viewsCount,
