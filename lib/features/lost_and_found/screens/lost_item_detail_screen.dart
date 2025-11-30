@@ -25,7 +25,7 @@
 // =====================================================
 
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
-// import 'package:bling_app/core/models/user_model.dart';
+import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:bling_app/features/lost_and_found/data/lost_and_found_repository.dart';
@@ -56,6 +56,130 @@ class LostItemDetailScreen extends StatefulWidget {
 
   @override
   State<LostItemDetailScreen> createState() => _LostItemDetailScreenState();
+}
+
+// [추가 코드]
+// ✅ [작업 3] 별도 위젯으로 분리한 해결/미담 작성 바텀시트
+class _ResolveBottomSheet extends StatefulWidget {
+  final List<UserModel> candidates;
+  final Function(String?, String?) onConfirm;
+
+  const _ResolveBottomSheet(
+      {required this.candidates, required this.onConfirm});
+
+  @override
+  State<_ResolveBottomSheet> createState() => _ResolveBottomSheetState();
+}
+
+class _ResolveBottomSheetState extends State<_ResolveBottomSheet> {
+  String? _selectedUserId;
+  final TextEditingController _reviewController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('lostAndFound.resolve.whoHelped'.tr(),
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          if (widget.candidates.isEmpty)
+            Text('lostAndFound.resolve.noCandidates'.tr(),
+                style: const TextStyle(color: Colors.grey)),
+          if (widget.candidates.isNotEmpty)
+            SizedBox(
+              height: 100,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.candidates.length,
+                itemBuilder: (context, index) {
+                  final user = widget.candidates[index];
+                  final isSelected = _selectedUserId == user.uid;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedUserId = isSelected ? null : user.uid;
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Column(
+                        children: [
+                          Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 30,
+                                backgroundImage: user.photoUrl != null
+                                    ? NetworkImage(user.photoUrl!)
+                                    : null,
+                                child: user.photoUrl == null
+                                    ? const Icon(Icons.person)
+                                    : null,
+                              ),
+                              if (isSelected)
+                                const Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: CircleAvatar(
+                                    radius: 10,
+                                    backgroundColor: Colors.green,
+                                    child: Icon(Icons.check,
+                                        size: 14, color: Colors.white),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(user.nickname,
+                              style: TextStyle(
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal)),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          const Divider(),
+          const SizedBox(height: 8),
+          Text('lostAndFound.resolve.leaveReview'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _reviewController,
+            decoration: InputDecoration(
+              hintText: 'lostAndFound.resolve.reviewHint'.tr(),
+              border: const OutlineInputBorder(),
+            ),
+            maxLines: 2,
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                widget.onConfirm(
+                    _selectedUserId, _reviewController.text.trim());
+                Navigator.of(context).pop();
+              },
+              child: Text('lostAndFound.detail.markAsResolved'.tr()),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
 }
 
 class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
@@ -467,9 +591,9 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           onPressed: isResolved
               ? null
               : () {
-                  // 2. 작성자(Owner)인 경우: '해결 완료' 함수 호출
+                  // 2. 작성자(Owner)인 경우: '해결 완료' 다이얼로그 호출
                   if (isOwner) {
-                    _markAsResolved(context);
+                    _showResolveDialog(context); // ✅ 함수 변경됨
                   } else {
                     // 3. 타인인 경우: '연락하기' (채팅) 함수 호출
                     _startChat(context);
@@ -493,52 +617,78 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
   }
 
   // ✅ [작업 41] 3. '해결 완료' 확인 팝업 및 Firestore 업데이트 로직
-  Future<void> _markAsResolved(BuildContext context) async {
-    final bool? confirmed = await showDialog<bool>(
+  // ✅ [작업 3] 해결 처리 및 미담 작성 다이얼로그 로직
+  Future<void> _showResolveDialog(BuildContext context) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    // 1. 로딩 표시
+    showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('lostAndFound.resolve.confirmTitle'.tr()),
-        content: Text('lostAndFound.resolve.confirmBody'.tr()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('common.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('lostAndFound.detail.markAsResolved'.tr()),
-          ),
-        ],
-      ),
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    if (confirmed == true && mounted) {
-      try {
-        await FirebaseFirestore.instance
-            .collection('lost_and_found')
-            .doc(widget.item.id)
-            .update({
-          'isResolved': true,
-          'resolvedAt': FieldValue.serverTimestamp(),
-        });
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('lostAndFound.resolve.success'.tr())),
-          );
-          // 화면을 닫거나 새로고침 (여기서는 닫기)
-          Navigator.of(context).pop();
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'common.error'.tr(namedArgs: {'error': e.toString()}),
-              ),
-            ),
-          );
-        }
+    try {
+      // 채팅방 목록 조회 (1회성)
+      final allChats = await _chatService.getChatRoomsStream().first;
+
+      // 현재 아이템과 연관된 채팅방 필터링
+      final relatedChats =
+          allChats.where((room) => room.lostItemId == widget.item.id).toList();
+
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // 로딩 닫기
+
+      // 2. 채팅 상대방 ID 목록 추출
+      List<String> candidateIds = [];
+      for (var room in relatedChats) {
+        final otherId = room.participants
+            .firstWhere((uid) => uid != currentUser.uid, orElse: () => '');
+        if (otherId.isNotEmpty) candidateIds.add(otherId);
       }
+      candidateIds = candidateIds.toSet().toList(); // 중복 제거
+
+      // 사용자 정보 조회
+      Map<String, UserModel> candidatesMap = {};
+      if (candidateIds.isNotEmpty) {
+        candidatesMap = await _chatService.getParticipantsInfo(candidateIds);
+      }
+
+      if (!context.mounted) return;
+
+      // 3. 바텀시트 표시
+      await showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (ctx) => _ResolveBottomSheet(
+          candidates: candidatesMap.values.toList(),
+          onConfirm: (selectedUserId, review) async {
+            try {
+              // Repository 호출
+              await _repository.resolveItemWithReview(
+                itemId: widget.item.id,
+                resolverId: selectedUserId,
+                reviewText: review,
+              );
+
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('lostAndFound.resolve.success'.tr())));
+                Navigator.of(context).pop(); // 화면 닫기
+              }
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Error: $e'), backgroundColor: Colors.red));
+              }
+            }
+          },
+        ),
+      );
+    } catch (e) {
+      if (mounted) Navigator.of(context).pop(); // 에러 시 로딩 닫기
+      debugPrint('Error in resolve dialog: $e');
     }
   }
 
