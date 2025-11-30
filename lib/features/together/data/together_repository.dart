@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:bling_app/features/together/models/together_post_model.dart';
+import 'package:bling_app/features/together/models/together_ticket_model.dart'; // ✅ 추가
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -100,12 +101,15 @@ class TogetherRepository {
   }
 
   /// 4. [Read] 내 티켓 목록 불러오기
-  Stream<List<Map<String, dynamic>>> fetchMyTickets(String userId) {
+  Stream<List<TogetherTicketModel>> fetchMyTickets(String userId) {
+    // ✅ 타입 변경
     return _userTicketsCollection(userId)
         .orderBy('meetTime', descending: false)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) => doc.data()).toList();
+      return snapshot.docs
+          .map((doc) => TogetherTicketModel.fromMap(doc.data())) // ✅ 모델 변환
+          .toList();
     });
   }
 

@@ -200,6 +200,27 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
                   ),
                   const SizedBox(height: 20),
 
+                  // Image banner (optional)
+                  if (widget.post.imageUrl != null) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 160,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.network(
+                          widget.post.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (ctx, err, st) => Container(
+                            color: Colors.grey[200],
+                            child:
+                                const Center(child: Icon(Icons.broken_image)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
                   // Title
                   Text(
                     widget.post.title,

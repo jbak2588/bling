@@ -660,7 +660,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               // ✅ [작업 19] 11. Together (함께 해요)
               _sheetItem(
                   Icons.volunteer_activism_rounded, // 11. together
-                  'home.menu.together'.tr(),
+                  'main.tabs.together'.tr(),
                   '함께 할 이웃 찾기', // 다국어 키 권장: 'together.create.subtitle'.tr()
                   builder: () => const CreateTogetherScreen()),
               const SizedBox(height: 12),

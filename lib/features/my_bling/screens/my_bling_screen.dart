@@ -19,6 +19,7 @@ import 'package:bling_app/features/my_bling/widgets/user_bookmark_list.dart';
 import 'package:bling_app/features/my_bling/widgets/user_friend_list.dart';
 import 'package:bling_app/features/my_bling/widgets/user_post_list.dart';
 import 'package:bling_app/features/my_bling/widgets/user_product_list.dart';
+import 'package:bling_app/features/together/widgets/user_ticket_list.dart'; // ✅ 추가
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -198,6 +199,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
             const UserPostList(),
             const UserProductList(),
             const UserBookmarkList(),
+            UserTicketList(userId: widget.userModel.uid),
           ],
         ),
       ),
@@ -215,6 +217,7 @@ class _MyBlingScreenState extends State<MyBlingScreen>
             Tab(text: 'myBling.tabs.posts'.tr()),
             Tab(text: 'myBling.tabs.products'.tr()),
             Tab(text: 'myBling.tabs.bookmarks'.tr()),
+            Tab(text: 'myBling.tabs.tickets'.tr()), // ✅ 티켓 탭 추가
           ],
         ),
       ),
