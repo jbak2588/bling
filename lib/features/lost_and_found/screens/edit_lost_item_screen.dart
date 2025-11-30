@@ -345,11 +345,18 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
                 border: const OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                _CurrencyInputFormatter(), // ✅ 하단 클래스 추가
+              ],
               validator: (value) {
-                if (_isHunted && (value == null || value.trim().isEmpty)) {
+                if (!_isHunted) return null;
+                if (value == null || value.trim().isEmpty) {
                   return 'lostAndFound.form.bountyAmountError'.tr();
                 }
+                final int amount = int.tryParse(value.replaceAll(',', '')) ?? 0;
+                if (amount < 10000) return '최소 10,000 Rp 이상 설정해주세요.';
+                if (amount > 100000000) return '금액이 너무 큽니다.';
                 return null;
               },
             ),
@@ -357,5 +364,26 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         const SizedBox(height: 16),
       ],
     );
+  }
+}
+
+// ✅ [작업 6] 숫자 입력 시 자동으로 3자리 콤마를 찍어주는 포맷터
+class _CurrencyInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.selection.baseOffset == 0) {
+      return newValue;
+    }
+
+    final plain = newValue.text.replaceAll(',', '');
+    if (plain.isEmpty) return newValue.copyWith(text: '');
+    int value = int.tryParse(plain) ?? 0;
+    final formatter = NumberFormat('#,###');
+    String newText = formatter.format(value);
+
+    return newValue.copyWith(
+        text: newText,
+        selection: TextSelection.collapsed(offset: newText.length));
   }
 }
