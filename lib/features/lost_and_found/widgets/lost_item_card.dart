@@ -48,15 +48,19 @@ class _LostItemCardState extends State<LostItemCard>
   Widget build(BuildContext context) {
     super.build(context); // ✅ KeepAlive를 위해 호출
     final item = widget.item; // ✅ item 참조 방식 변경
-    final Color typeColor =
-        item.type == 'lost' ? Colors.redAccent : Colors.blueAccent;
+    // ✅ [작업 6] 타입별 색상 코딩 적용 (Lost: Red / Found: Green)
     final bool isLost = item.type == 'lost';
+    final Color typeColor = isLost ? Colors.redAccent : Colors.green;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
       clipBehavior: Clip.antiAlias, // InkWell 효과가 Card 모서리를 따르도록 함
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      // ✅ [작업 6] 테두리에 색상 포인트 추가
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: typeColor.withValues(alpha: 0.3), width: 1),
+      ),
       // ✅ [작업 41] Stack 유지 (향후 오버레이 확장 가능); 현재는 내부 레이아웃에서 배지 처리
       child: Stack(
         children: [
@@ -119,29 +123,20 @@ class _LostItemCardState extends State<LostItemCard>
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
                                 if (item.isResolved)
+                                  // 해결된 경우에는 무난한 회색 배지
                                   _ResolvedBadge(
-                                    text: isLost
-                                        ? 'lostAndFound.resolve.badgeLost'.tr()
-                                        : 'lostAndFound.resolve.badgeFound'
-                                            .tr(),
-                                    color:
-                                        isLost ? Colors.green : Colors.orange,
-                                  ),
-                                if (item.isHunted &&
-                                    (item.bountyAmount ?? 0) > 0)
-                                  Chip(
-                                    label: Text(
-                                      'Rp ${NumberFormat.compact(locale: context.locale.toString()).format(item.bountyAmount)}',
-                                      style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    backgroundColor: Colors.orange,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 4, vertical: 0),
-                                    visualDensity: VisualDensity.compact,
-                                    avatar: const Icon(Icons.paid_outlined,
-                                        color: Colors.white, size: 14),
+                                    text: 'lostAndFound.detail.resolved'.tr(),
+                                    color: Colors.grey,
+                                  )
+                                else
+                                  // ✅ [작업 6] 상태 배지: Hunted(현상금) 우선, 아니면 타입 표시
+                                  _ResolvedBadge(
+                                    text: item.isHunted
+                                        ? 'HUNTED'
+                                        : (isLost ? 'LOST' : 'FOUND'),
+                                    color: item.isHunted
+                                        ? Colors.orange
+                                        : typeColor,
                                   ),
                               ],
                             ),
