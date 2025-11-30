@@ -33,28 +33,48 @@ lib
 ├── api_keys.dart
 ├── core
 │   ├── constants
-│   │   └── app_categories.dart
+│   │   ├── app_categories.dart
+│   │   └── app_tags.dart
 │   ├── models
 │   │   ├── chat_message_model.dart
 │   │   ├── chat_room_model.dart
 │   │   ├── comment_model.dart
 │   │   ├── feed_item_model.dart
+│   │   ├── push_prefs_model.dart
 │   │   ├── reply_model.dart
 │   │   └── user_model.dart
-│   ├── router
+│   ├── services
+│   │   └── notification_service.dart
 │   ├── theme
 │   │   └── grab_theme.dart
 │   └── utils
-│       └── address_formatter.dart
+│       ├── address_formatter.dart
+│       ├── localization_utils.dart
+│       ├── location_helper.dart
+│       ├── logging
+│       │   └── logger.dart
+│       ├── popups
+│       │   └── snackbars.dart
+│       └── upload_helpers.dart
 ├── features
 │   ├── admin
+│   │   ├── models
+│   │   │   └── ai_case_model.dart
 │   │   └── screens
+│   │       ├── admin_product_detail_screen.dart
+│   │       ├── admin_screen.dart
+│   │       ├── ai_audit_screen.dart
+│   │       ├── ai_case_detail_screen.dart
 │   │       ├── data_fix_screen.dart
-│   │       └── data_uploader_screen.dart
+│   │       ├── data_uploader_screen.dart
+│   │       ├── deletion_requests_screen.dart
+│   │       ├── report_detail_screen.dart
+│   │       └── report_list_screen.dart
 │   ├── auction
 │   │   ├── data
 │   │   │   └── auction_repository.dart
 │   │   ├── models
+│   │   │   ├── auction_category_model.dart
 │   │   │   ├── auction_model.dart
 │   │   │   └── bid_model.dart
 │   │   ├── screens
@@ -67,14 +87,32 @@ lib
 │   ├── auth
 │   │   └── screens
 │   │       ├── auth_gate.dart
+│   │       ├── email_verification_screen.dart
 │   │       ├── login_screen.dart
-│   │       └── signup_screen.dart
+│   │       ├── signup_screen.dart
+│   │       └── splash_screen.dart
+│   ├── boards
+│   │   ├── models
+│   │   │   ├── board_chat_room_model.dart
+│   │   │   ├── board_model.dart
+│   │   │   └── board_thread_model.dart
+│   │   └── screens
+│   │       └── kelurahan_board_screen.dart
 │   ├── categories
+│   │   ├── constants
+│   │   │   └── category_icons.dart
+│   │   ├── data
+│   │   │   ├── category_admin_repository.dart
+│   │   │   ├── category_repository.dart
+│   │   │   └── firestore_category_repository.dart
 │   │   ├── domain
 │   │   │   └── category.dart
-│   │   └── screens
-│   │       ├── parent_category_screen.dart
-│   │       └── sub_category_screen.dart
+│   │   ├── screens
+│   │   │   ├── category_admin_screen.dart
+│   │   │   ├── parent_category_screen.dart
+│   │   │   └── sub_category_screen.dart
+│   │   └── services
+│   │       └── category_sync_service.dart
 │   ├── chat
 │   │   ├── data
 │   │   │   └── chat_service.dart
@@ -87,15 +125,19 @@ lib
 │   ├── clubs
 │   │   ├── data
 │   │   │   └── club_repository.dart
+│   │   ├── docs
+│   │   │   └── 6.1 Groups _ Grup Komunitas _ 지역 모임 (V2.0)[업데이트 11월2일].md
 │   │   ├── models
 │   │   │   ├── club_comment_model.dart
 │   │   │   ├── club_member_model.dart
 │   │   │   ├── club_model.dart
-│   │   │   └── club_post_model.dart
+│   │   │   ├── club_post_model.dart
+│   │   │   └── club_proposal_model.dart
 │   │   ├── screens
 │   │   │   ├── club_detail_screen.dart
 │   │   │   ├── club_member_list.dart
 │   │   │   ├── club_post_detail_screen.dart
+│   │   │   ├── club_proposal_detail_screen.dart
 │   │   │   ├── clubs_screen.dart
 │   │   │   ├── create_club_post_screen.dart
 │   │   │   ├── create_club_screen.dart
@@ -104,36 +146,47 @@ lib
 │   │       ├── club_card.dart
 │   │       ├── club_member_card.dart
 │   │       ├── club_post_card.dart
-│   │       └── club_post_list.dart
-│   ├── community
-│   │   └── screens
-│   │       └── community_screen.dart
+│   │       ├── club_post_list.dart
+│   │       └── club_proposal_card.dart
 │   ├── find_friends
 │   │   ├── data
-│   │   │   ├── find_friend_repository.dart
-│   │   │   └── follow_repository.dart
+│   │   │   └── find_friend_repository.dart
+│   │   ├── devlog_n_docs
+│   │   │   ├── DevLog_ Bling 앱 개선 작업 (Job 0 - 45).md
+│   │   │   ├── 동네 친구 (Find Friends _ Cari Teman Lokal) V.21 2025년11월7일버전.md
+│   │   │   └── 💎 블링 '동네 친구' (Find Friends) 기능 개편 기획안 (v2).md
 │   │   ├── models
-│   │   │   ├── follow_model.dart
-│   │   │   └── friend_request_model.dart
 │   │   ├── screens
 │   │   │   ├── find_friend_detail_screen.dart
-│   │   │   ├── find_friends_screen.dart
-│   │   │   ├── findfriend_edit_screen.dart
-│   │   │   └── findfriend_form_screen.dart
+│   │   │   └── find_friends_screen.dart
 │   │   └── widgets
 │   │       └── findfriend_card.dart
 │   ├── jobs
+│   │   ├── constants
+│   │   │   └── job_categories.dart
 │   │   ├── data
-│   │   │   └── job_repository.dart
+│   │   │   ├── job_repository.dart
+│   │   │   └── talent_repository.dart
 │   │   ├── models
-│   │   │   └── job_model.dart
+│   │   │   ├── job_model.dart
+│   │   │   └── talent_model.dart
 │   │   ├── screens
 │   │   │   ├── create_job_screen.dart
+│   │   │   ├── create_quick_gig_screen.dart
+│   │   │   ├── create_talent_screen.dart
+│   │   │   ├── edit_talent_screen.dart
 │   │   │   ├── job_detail_screen.dart
-│   │   │   └── jobs_screen.dart
+│   │   │   ├── jobs_screen.dart
+│   │   │   ├── select_job_type_screen.dart
+│   │   │   └── talent_detail_screen.dart
 │   │   └── widgets
-│   │       └── job_card.dart
+│   │       ├── job_card.dart
+│   │       └── talent_card.dart
 │   ├── local_news
+│   │   ├── data
+│   │   │   └── local_news_repository.dart
+│   │   ├── devlog_docs
+│   │   │   └── Bling 프로젝트 DevLog (작업 세션 요약) 2025년 10월 30일.md
 │   │   ├── models
 │   │   │   ├── post_category_model.dart
 │   │   │   └── post_model.dart
@@ -143,6 +196,8 @@ lib
 │   │   │   ├── local_news_detail_screen.dart
 │   │   │   ├── local_news_screen.dart
 │   │   │   └── tag_search_result_screen.dart
+│   │   ├── utils
+│   │   │   └── tag_recommender.dart
 │   │   └── widgets
 │   │       ├── comment_input_field.dart
 │   │       ├── comment_list_view.dart
@@ -163,6 +218,8 @@ lib
 │   │   └── widgets
 │   │       └── shop_card.dart
 │   ├── location
+│   │   ├── providers
+│   │   │   └── location_provider.dart
 │   │   └── screens
 │   │       ├── location_filter_screen.dart
 │   │       └── neighborhood_prompt_screen.dart
@@ -181,56 +238,97 @@ lib
 │   ├── main_feed
 │   │   ├── data
 │   │   │   └── feed_repository.dart
-│   │   └── screens
-│   │       └── main_feed_screen.dart
+│   │   ├── screens
+│   │   │   └── main_feed_screen.dart
+│   │   └── widgets
+│   │       ├── auction_thumb.dart
+│   │       ├── club_thumb.dart
+│   │       ├── find_friend_thumb.dart
+│   │       ├── job_thumb.dart
+│   │       ├── local_store_thumb.dart
+│   │       ├── lost_item_thumb.dart
+│   │       ├── pom_thumb.dart
+│   │       ├── post_thumb.dart
+│   │       ├── product_thumb.dart
+│   │       └── real_estate_thumb.dart
 │   ├── main_screen
 │   │   ├── home_screen.dart
 │   │   └── main_navigation_screen.dart
 │   ├── marketplace
+│   │   ├── data
+│   │   │   ├── ai_case_repository.dart
+│   │   │   └── product_repository.dart
+│   │   ├── devlog_n_docs
+│   │   │   ├── 4. Pre-Loved Items _ 중고물품 거래 (V3.0) 11월16일버전.docx
+│   │   │   ├── 4. Pre-Loved Items _ 중고물품 거래 (V3.0) 11월16일버전.md
+│   │   │   ├── AI 검수 엔진 리팩토링 및 안정화 DevLog V3 11월 16일버전.docx
+│   │   │   ├── AI 검수 엔진 리팩토링 및 안정화 DevLog V3 11월 16일버전.md
+│   │   │   ├── Bling App  AI 검수 시스템 V2 초기 버전 개발 성공 DevLog.md
+│   │   │   └── Marketplace AI 기능 개발일지 (DevLog)-25년 11월 11일.docx
 │   │   ├── models
 │   │   │   └── product_model.dart
 │   │   ├── screens
+│   │   │   ├── ai_evidence_suggestion_screen.dart
+│   │   │   ├── ai_final_report_screen.dart
+│   │   │   ├── ai_takeover_screen.dart
 │   │   │   ├── marketplace_screen.dart
 │   │   │   ├── product_detail_screen.dart
 │   │   │   ├── product_edit_screen.dart
 │   │   │   └── product_registration_screen.dart
+│   │   ├── services
+│   │   │   └── ai_verification_service.dart
 │   │   └── widgets
+│   │       ├── ai_report_viewer.dart
+│   │       ├── ai_verification_badge.dart
 │   │       └── product_card.dart
 │   ├── my_bling
 │   │   ├── screens
+│   │   │   ├── account_privacy_screen.dart
+│   │   │   ├── app_info_screen.dart
 │   │   │   ├── blocked_users_screen.dart
-│   │   │   ├── friend_requests_screen.dart
 │   │   │   ├── my_bling_screen.dart
+│   │   │   ├── notification_settings_screen.dart
 │   │   │   ├── profile_edit_screen.dart
-│   │   │   ├── sent_friend_requests_screen.dart
 │   │   │   └── settings_screen.dart
 │   │   └── widgets
 │   │       ├── user_bookmark_list.dart
 │   │       ├── user_friend_list.dart
 │   │       ├── user_post_list.dart
 │   │       └── user_product_list.dart
+│   ├── notifications
+│   │   ├── menu
+│   │   └── screens
+│   │       └── notification_list_screen.dart
 │   ├── pom
 │   │   ├── data
-│   │   │   └── short_repository.dart
+│   │   │   └── pom_repository.dart
 │   │   ├── models
-│   │   │   ├── short_comment_model.dart
-│   │   │   └── short_model.dart
+│   │   │   ├── pom_comment_model.dart
+│   │   │   └── pom_model.dart
 │   │   ├── screens
-│   │   │   ├── create_short_screen.dart
+│   │   │   ├── create_pom_screen.dart
+│   │   │   ├── pom_edit_screen.dart
+│   │   │   ├── pom_pager_screen.dart
 │   │   │   └── pom_screen.dart
 │   │   └── widgets
-│   │       ├── short_comments_sheet.dart
-│   │       └── short_player.dart
+│   │       ├── pom_card.dart
+│   │       ├── pom_comments_sheet.dart
+│   │       ├── pom_feed_list.dart
+│   │       └── pom_player.dart
 │   ├── real_estate
+│   │   ├── constants
+│   │   │   └── real_estate_facilities.dart
 │   │   ├── data
 │   │   │   └── room_repository.dart
 │   │   ├── models
+│   │   │   ├── room_filters_model.dart
 │   │   │   └── room_listing_model.dart
 │   │   ├── screens
 │   │   │   ├── create_room_listing_screen.dart
 │   │   │   ├── edit_room_listing_screen.dart
 │   │   │   ├── real_estate_screen.dart
-│   │   │   └── room_detail_screen.dart
+│   │   │   ├── room_detail_screen.dart
+│   │   │   └── room_list_screen.dart
 │   │   └── widgets
 │   │       └── room_card.dart
 │   ├── shared
@@ -240,16 +338,23 @@ lib
 │   │   ├── screens
 │   │   │   └── image_gallery_screen.dart
 │   │   └── widgets
+│   │       ├── app_bar_icon.dart
+│   │       ├── author_profile_tile.dart
+│   │       ├── bling_icon.dart
+│   │       ├── clickable_tag_list.dart
 │   │       ├── custom_tag_input_field.dart
+│   │       ├── image_carousel_card.dart
+│   │       ├── inline_search_chip.dart
+│   │       ├── mini_map_view.dart
 │   │       └── trust_level_badge.dart
 │   └── user_profile
 │       └── screens
+│           ├── profile_setup_screen.dart
 │           └── user_profile_screen.dart
 ├── firebase_options.dart
 └── main.dart
 assets
 ├── data
-│   └── sample_posts.json
 ├── icons
 │   └── google_logo.png
 ├── lang

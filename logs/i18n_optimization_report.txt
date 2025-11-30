@@ -1,0 +1,999 @@
+
+==================================================
+📊 Analysis Report
+==================================================
+Total Keys in en.json: 1561
+Used Keys in Code:     947
+Potential Unused Keys: 663
+==================================================
+
+⚠️  TOP DUPLICATED VALUES (Candidate for merging into "common")
+
+"Save" is used in 10 keys:
+   - marketplace.registration.done
+   - localNewsEdit.buttons.save
+   - common.save
+   - jobs.form.save
+   - findFriend.save
+   - clubs.editClub.save
+   - auctions.edit.save
+   - localStores.edit.save
+   - realEstate.edit.save
+   - lostAndFound.edit.save
+
+"Location" is used in 10 keys:
+   - profileEdit.locationTitle
+   - postCard.location
+   - jobs.form.locationHint
+   - jobs.detail.locationTitle
+   - clubs.detail.info.location
+   - clubs.detail.location
+   - auctions.create.form.location
+   - auctions.detail.location
+   - realEstate.detail.location
+   - lostAndFound.detail.location
+
+"An error occurred: {error}" is used in 9 keys:
+   - marketplace.error
+   - ai_flow.common.error
+   - friendRequests.error
+   - mainFeed.error
+   - clubs.proposal.detail.error
+   - localStores.error
+   - pom.errors.fetchFailed
+   - realEstate.error
+   - lostAndFound.error
+
+"Delete" is used in 9 keys:
+   - marketplace.detail.delete
+   - marketplace.dialog.deleteConfirm
+   - commentListView.delete
+   - common.delete
+   - jobs.talent.delete.confirm
+   - localStores.detail.delete
+   - realEstate.detail.deleteConfirm
+   - lostAndFound.detail.delete
+   - lostAndFound.detail.deleteTooltip
+
+"All" is used in 9 keys:
+   - localNewsFeed.allCategory
+   - categories.auction.all
+   - jobs.tabs.all
+   - findFriend.preferredGenderAll
+   - locationFilter.all
+   - localStores.categories.all
+   - pom.tabs.all
+   - lostAndFound.tabs.all
+   - ai_audit.tabs.all
+
+"You can register tags using comma (,) or Enter." is used in 8 keys:
+   - marketplace.registration.tagsHint
+   - marketplace.edit.tagsHint
+   - localNewsCreate.form.tagsHint
+   - clubs.createClub.tagsHint
+   - clubs.proposal.tagsHint
+   - auctions.create.form.tagsHint
+   - lostAndFound.form.tagsHint
+   - shared.tagInput.defaultHint
+
+"Category" is used in 7 keys:
+   - marketplace.detail.category
+   - localNewsCreate.form.categoryLabel
+   - jobs.talent.create.labels.category
+   - jobs.form.categoryHint
+   - jobs.form.categoryLabel
+   - auctions.create.form.category
+   - localStores.form.categoryLabel
+
+"Login is required." is used in 6 keys:
+   - main.errors.loginRequired
+   - marketplace.errors.loginRequired
+   - common.loginRequired
+   - jobs.talent.messages.loginRequiredBody
+   - findFriend.loginRequired
+   - friendDetail.loginRequired
+
+"Cancel" is used in 6 keys:
+   - marketplace.dialog.cancel
+   - common.cancel
+   - jobs.talent.delete.cancel
+   - localStores.detail.cancel
+   - realEstate.detail.cancel
+   - lostAndFound.detail.cancel
+
+"Please select a category." is used in 6 keys:
+   - marketplace.errors.noCategory
+   - localNewsCreate.alerts.categoryRequired
+   - jobs.talent.create.errors.categoryRequired
+   - jobs.form.categoryValidator
+   - auctions.form.categoryRequired
+   - localStores.form.categoryError
+
+"Title" is used in 6 keys:
+   - localNewsCreate.form.titleLabel
+   - localNewsCreate.labels.title
+   - jobs.form.titleLabel
+   - auctions.create.form.title
+   - pom.create.form.titleLabel
+   - realEstate.form.titleLabel
+
+"Log Out" is used in 4 keys:
+   - drawer.logout
+   - settings.logout.button
+   - settings.logout.confirmTitle
+   - auth.verification.logout
+
+"Edit" is used in 4 keys:
+   - marketplace.detail.edit
+   - localNewsDetail.menu.edit
+   - common.edit
+   - lostAndFound.detail.editTooltip
+
+"Friends" is used in 4 keys:
+   - myBling.friends
+   - myBling.tabs.friends
+   - myBling.stats.friends
+   - findFriend.tabs.friends
+
+"Interests" is used in 4 keys:
+   - profileView.tabs.interests
+   - profileEdit.interests.title
+   - findFriend.interestsLabel
+   - interests.title
+
+"Unknown user" is used in 4 keys:
+   - blockedUsers.unknownUser
+   - rejectedUsers.unknownUser
+   - common.unknownUser
+   - clubs.postDetail.unknownUser
+
+"Other" is used in 4 keys:
+   - categories.auction.etc.name
+   - reportReasons.etc
+   - jobs.categories.talent_other
+   - realEstate.form.roomTypes.etc
+
+"Comments" is used in 4 keys:
+   - localNewsDetail.stats.comments
+   - common.comments
+   - clubs.postDetail.commentsTitle
+   - pom.comments.title
+
+"Reset" is used in 4 keys:
+   - common.reset
+   - locationFilter.reset
+   - search.locationfilter.reset
+   - locationfilter.reset
+
+"Apply" is used in 4 keys:
+   - common.apply
+   - jobs.detail.apply
+   - search.locationfilter.apply
+   - locationfilter.apply
+
+"No location info" is used in 4 keys:
+   - jobs.talent.detail.locationUnknown
+   - jobs.card.noLocation
+   - localStores.noLocation
+   - realEstate.locationUnknown
+
+"Contact" is used in 4 keys:
+   - jobs.talent.action.contact
+   - localStores.form.contactLabel
+   - realEstate.detail.contact
+   - lostAndFound.detail.contact
+
+"Description" is used in 4 keys:
+   - jobs.form.descriptionLabel
+   - auctions.create.form.description
+   - pom.create.form.descriptionLabel
+   - realEstate.form.descriptionLabel
+
+"Could not start chat: {error}" is used in 4 keys:
+   - jobs.detail.chatError
+   - localStores.detail.startChatFail
+   - realEstate.detail.chatError
+   - lostAndFound.detail.chatError
+
+"Register" is used in 4 keys:
+   - localStores.create.submit
+   - pom.create.submit
+   - realEstate.form.submit
+   - lostAndFound.form.submit
+
+"Bed" is used in 4 keys:
+   - realEstate.form.bedAbbr
+   - realEstate.filter.amenities.bed
+   - realEstate.filter.amenities.kos_room.bed
+   - realEstate.info.bed
+
+"Neighborhood" is used in 3 keys:
+   - main.bottomNav.board
+   - marketplace.registration.addressHint
+   - address_neighborhood
+
+"Edit Profile" is used in 3 keys:
+   - drawer.editProfile
+   - myBling.editProfile
+   - findFriend.editProfileTitle
+
+"+50" is used in 3 keys:
+   - drawer.trustDashboard.breakdown.kelurahanAuth
+   - drawer.trustDashboard.breakdown.rtRwAuth
+   - drawer.trustDashboard.breakdown.profileComplete
+
+"Edit Post" is used in 3 keys:
+   - marketplace.edit.title
+   - localNewsEdit.appBarTitle
+   - localNewsEdit.title
+
+"Share" is used in 3 keys:
+   - marketplace.detail.share
+   - localNewsDetail.menu.share
+   - pom.share
+
+"Delete Post" is used in 3 keys:
+   - marketplace.dialog.deleteTitle
+   - clubs.postCard.deleteTitle
+   - lostAndFound.detail.deleteTitle
+
+"Are you sure you want to delete this post? This action cannot be undone." is used in 3 keys:
+   - marketplace.dialog.deleteContent
+   - clubs.postCard.deleteContent
+   - lostAndFound.detail.deleteContent
+
+"Failed to delete post: {error}" is used in 3 keys:
+   - marketplace.errors.deleteError
+   - clubs.postCard.deleteFail
+   - lostAndFound.detail.deleteFail
+
+"New" is used in 3 keys:
+   - marketplace.condition.new
+   - common.new
+   - realEstate.filter.propertyConditions.new
+
+"More" is used in 3 keys:
+   - ai_flow.common.more
+   - common.more
+   - pom.more
+
+"Posts" is used in 3 keys:
+   - myBling.posts
+   - myBling.stats.posts
+   - profileView.tabs.posts
+
+"Submit" is used in 3 keys:
+   - localNewsCreate.buttons.submit
+   - common.submit
+   - clubs.createPost.submit
+
+"Report" is used in 3 keys:
+   - localNewsDetail.menu.report
+   - common.report
+   - friendDetail.report
+
+"Negotiable" is used in 3 keys:
+   - jobs.talent.create.priceUnits.negotiable
+   - jobs.form.negotiable
+   - jobs.workPeriods.negotiable
+
+"Etc" is used in 3 keys:
+   - jobs.categories.etc
+   - jobs.salaryTypes.etc
+   - jobs.workPeriods.etc
+
+"Location Filter" is used in 3 keys:
+   - locationFilter.title
+   - search.locationfilter.title
+   - locationfilter.title
+
+"Members" is used in 3 keys:
+   - clubs.detail.tabs.members
+   - clubs.detail.info.members
+   - clubs.proposal.members
+
+"$type" is used in 3 keys:
+   - realEstate.form.roomTypes.$type
+   - realEstate.form.listingTypes.$type
+   - realEstate.form.publisherTypes.$type
+
+"AC" is used in 3 keys:
+   - realEstate.form.amenity.ac
+   - realEstate.filter.amenities.ac
+   - realEstate.filter.amenities.kos_room.ac
+
+"Kitchen" is used in 3 keys:
+   - realEstate.form.amenity.kitchen
+   - realEstate.filter.amenities.kitchen
+   - realEstate.filter.amenities.kos_public.kitchen
+
+"24h Security" is used in 3 keys:
+   - realEstate.filter.amenities.security_24h
+   - realEstate.filter.amenities.apartment.security_24h
+   - realEstate.filter.amenities.commercial.security_24h
+
+"Telephone" is used in 3 keys:
+   - realEstate.filter.amenities.telephone
+   - realEstate.filter.amenities.house.telephone
+   - realEstate.filter.amenities.commercial.telephone
+
+"Report Management" is used in 3 keys:
+   - admin.menu.reportManagement
+   - admin.reports.title
+   - admin.reportList.title
+
+"Log In" is used in 2 keys:
+   - login.title
+   - login.buttons.login
+
+--------------------------------------------------
+🗑️  POTENTIAL UNUSED KEYS (Total: 663)
+    (These keys are not found in .dart files)
+--------------------------------------------------
+   - login.title
+   - login.links.findPassword
+   - notifications.seller_pending_title
+   - notifications.seller_pending_body
+   - signup.locationHint
+   - signup.locationNotice
+   - signup.buttons.checkDuplicate
+   - signup.links.askForLogin
+   - signup.links.login
+   - signup.alerts.passwordMismatch
+   - signup.alerts.passwordTooShort
+   - signup.alerts.emailInUse
+   - signup.alerts.nicknameInUse
+   - signup.alerts.nicknameAvailable
+   - signup.alerts.nicknameNotChecked
+   - signup.alerts.signupSuccessLoginNotice
+   - signup.alerts.unknownError
+   - signup.policy.title
+   - signup.policy.description
+   - signup.policy.agree
+   - main.appBar.locationNotSet
+   - main.appBar.locationError
+   - main.appBar.locationLoading
+   - main.tabs.newFeed
+   - main.myTown
+   - main.search.chipPlaceholder
+   - main.search.hint.globalSheet
+   - main.search.hint.pom
+   - chat.system.userJoined
+   - category.PnPa5ZjI9FYQiAGP6I7m
+   - category.4hx6hyOYodriXgPiR5bl
+   - category.OkjaREVlnybYXdJKZvF7
+   - category.lhxeaWRmfmd2gElvHy8y
+   - category.wyYkvRznDcngqzuJvOIJ
+   - category.IJ9rF047d2rRnFFkdLyw
+   - category.6WtvHv9Mm2M49KIVRdZT
+   - category.5B68mEyct8tpIr9Eyc8j
+   - category.BnGbVd3W9P3ztu0HBJix
+   - drawer.bookmarks
+   - drawer.uploadSampleData
+   - drawer.trustDashboard.kelurahanAuth
+   - drawer.trustDashboard.rtRwAuth
+   - drawer.trustDashboard.phoneAuth
+   - drawer.trustDashboard.profileComplete
+   - drawer.trustDashboard.feedThanks
+   - drawer.trustDashboard.marketThanks
+   - drawer.trustDashboard.reports
+   - drawer.trustDashboard.breakdown.kelurahanAuth
+   - drawer.trustDashboard.breakdown.rtRwAuth
+   - drawer.trustDashboard.breakdown.phoneAuth
+   - drawer.trustDashboard.breakdown.profileComplete
+   - drawer.trustDashboard.breakdown.feedThanks
+   - drawer.trustDashboard.breakdown.marketThanks
+   - drawer.trustDashboard.breakdown.reports
+   - drawer.runDataFix
+   - marketplace.registration.tagsHint
+   - marketplace.edit.done
+   - marketplace.edit.tagsHint
+   - marketplace.detail.description
+   - marketplace.detail.sellerInfo
+   - marketplace.detail.favorite
+   - marketplace.detail.unfavorite
+   - marketplace.detail.share
+   - marketplace.detail.edit
+   - marketplace.detail.delete
+   - marketplace.detail.category
+   - marketplace.detail.categoryError
+   - marketplace.detail.categoryNone
+   - marketplace.detail.views
+   - marketplace.detail.likes
+   - marketplace.detail.chats
+   - marketplace.detail.noSeller
+   - marketplace.detail.noLocation
+   - marketplace.detail.seller
+   - marketplace.takeover.title
+   - marketplace.takeover.guide.title
+   - marketplace.takeover.guide.subtitle
+   - marketplace.takeover.photoTitle
+   - marketplace.takeover.buttonVerify
+   - marketplace.takeover.errors.noPhoto
+   - marketplace.takeover.success.finalized
+   - marketplace.takeover.success.cancelled
+   - marketplace.takeover.checklistTitle
+   - marketplace.takeover.ai.reactivated
+   - marketplace.setLocationPrompt
+   - ai_flow.common.more
+   - ai_flow.common.pick_gallery
+   - ai_flow.common.pick_from_initial
+   - ai_flow.common.added_photo
+   - ai_flow.common.verified_from_initial
+   - ai_flow.common.retake
+   - ai_flow.category_selection.title
+   - ai_flow.category_selection.error
+   - ai_flow.category_selection.no_categories
+   - ai_flow.gallery_upload.title
+   - ai_flow.gallery_upload.instruction
+   - ai_flow.gallery_upload.guide
+   - ai_flow.gallery_upload.min_photo_error
+   - ai_flow.gallery_upload.next_button
+   - ai_flow.prediction.title
+   - ai_flow.prediction.guide
+   - ai_flow.prediction.edit_label
+   - ai_flow.prediction.edit_button
+   - ai_flow.prediction.save_button
+   - ai_flow.prediction.no_name
+   - ai_flow.prediction.loading
+   - ai_flow.prediction.uploading
+   - ai_flow.prediction.analyzing
+   - ai_flow.prediction.error
+   - ai_flow.prediction.auth_error
+   - ai_flow.prediction.question
+   - ai_flow.prediction.confirm_button
+   - ai_flow.prediction.reject_button
+   - ai_flow.prediction.analysis_error
+   - ai_flow.prediction.retry_button
+   - ai_flow.prediction.back_button
+   - ai_flow.guided_camera.title
+   - ai_flow.guided_camera.guide
+   - ai_flow.guided_camera.location_mismatch_error
+   - ai_flow.guided_camera.location_permission_error
+   - ai_flow.guided_camera.no_location_data_error
+   - ai_flow.final_report.guide
+   - ai_flow.final_report.error
+   - ai_flow.final_report.key_specs
+   - ai_flow.final_report.specs
+   - ai_flow.final_report.included_items
+   - ai_flow.final_report.included_items_label
+   - ai_flow.final_report.buyer_notes_label
+   - ai_flow.final_report.skipped_items
+   - ai_flow.evidence.all_shots_required
+   - ai_flow.evidence.pick_initial_title
+   - ai_flow.evidence.submit_button
+   - ai_flow.error.report_generation
+   - registration_flow.title
+   - registration_flow.new_item_title
+   - registration_flow.new_item_desc
+   - registration_flow.used_item_title
+   - registration_flow.used_item_desc
+   - myBling.settings
+   - myBling.posts
+   - myBling.followers
+   - myBling.neighbors
+   - myBling.friends
+   - myBling.stats.posts
+   - myBling.stats.followers
+   - myBling.stats.neighbors
+   - myBling.stats.friends
+   - myBling.friendRequests
+   - myBling.sentFriendRequests
+   - myBling.products.empty
+   - myBling.products.detailsTitle
+   - myBling.products.editButton
+   - myBling.products.deleteConfirm
+   - myBling.products.deleteSuccess
+   - myBling.products.deleteFail
+   - myBling.postList.empty
+   - myBling.postList.writeButton
+   - myBling.friendList.noFriends
+   - settings.notifications.scope.rt
+   - settings.notifications.scope.rw
+   - settings.notifications.scope.kel
+   - settings.notifications.scope.kec
+   - settings.languageSelect
+   - friendRequests.title
+   - friendRequests.noRequests
+   - friendRequests.acceptSuccess
+   - friendRequests.rejectSuccess
+   - friendRequests.error
+   - friendRequests.tooltip.accept
+   - friendRequests.tooltip.reject
+   - friendRequests.defaultChatMessage
+   - sentFriendRequests.title
+   - sentFriendRequests.noRequests
+   - sentFriendRequests.statusLabel
+   - sentFriendRequests.status.pending
+   - sentFriendRequests.status.accepted
+   - sentFriendRequests.status.rejected
+   - blockedUsers.noBlockedUsers
+   - blockedUsers.unknownUser
+   - rejectedUsers.title
+   - rejectedUsers.noRejectedUsers
+   - rejectedUsers.unreject
+   - rejectedUsers.unrejectDialog.title
+   - rejectedUsers.unrejectDialog.content
+   - rejectedUsers.unrejectSuccess
+   - rejectedUsers.unrejectFailure
+   - rejectedUsers.unknownUser
+   - prompt.title
+   - prompt.subtitle
+   - prompt.button
+   - location.title
+   - location.searchHint
+   - location.gpsButton
+   - location.success
+   - location.error
+   - location.empty
+   - location.permissionDenied
+   - location.rtLabel
+   - location.rwLabel
+   - location.rtHint
+   - location.rwHint
+   - location.rtRequired
+   - location.rwRequired
+   - location.rtRwInfo
+   - location.saveThisLocation
+   - location.manualSelect
+   - location.refreshFromGps
+   - profileEdit.interests.title
+   - profileEdit.interests.hint
+   - productCard.currency
+   - categories.post.jalan-perbaikin.name
+   - categories.post.jalan-perbaikin.description
+   - categories.post.daily_life.name
+   - categories.post.daily_life.description
+   - categories.post.help_share.name
+   - categories.post.help_share.description
+   - categories.post.incident_report.name
+   - categories.post.incident_report.description
+   - categories.post.local_news.name
+   - categories.post.local_news.description
+   - categories.post.daily_question.name
+   - categories.post.daily_question.description
+   - categories.post.store_promo.name
+   - categories.post.store_promo.description
+   - categories.post.etc.name
+   - categories.post.etc.description
+   - categories.auction.all
+   - categories.auction.collectibles.name
+   - categories.auction.collectibles.description
+   - categories.auction.digital.name
+   - categories.auction.digital.description
+   - categories.auction.fashion.name
+   - categories.auction.fashion.description
+   - categories.auction.vintage.name
+   - categories.auction.vintage.description
+   - categories.auction.art_craft.name
+   - categories.auction.art_craft.description
+   - categories.auction.etc.name
+   - categories.auction.etc.description
+   - localNewsCreate.form.titleLabel
+   - localNewsCreate.form.contentLabel
+   - localNewsCreate.form.tagsLabel
+   - localNewsCreate.form.tagsHint
+   - localNewsCreate.labels.tags
+   - localNewsCreate.labels.guidedTitle
+   - localNewsCreate.labels.eventLocation
+   - localNewsCreate.hints.tagSelection
+   - localNewsCreate.hints.eventLocation
+   - localNewsCreate.validation.tagRequired
+   - localNewsCreate.validation.tagMaxLimit
+   - localNewsCreate.validation.imageMaxLimit
+   - localNewsCreate.buttons.addImage
+   - localNewsCreate.alerts.contentRequired
+   - localNewsCreate.alerts.categoryRequired
+   - localNewsCreate.alerts.success
+   - localNewsCreate.alerts.failure
+   - localNewsCreate.alerts.loginRequired
+   - localNewsCreate.alerts.userNotFound
+   - localNewsEdit.appBarTitle
+   - localNewsEdit.buttons.submit
+   - localNewsEdit.alerts.success
+   - localNewsEdit.alerts.failure
+   - tag_input.hint
+   - tag_input.suggestedLabel
+   - tag_input.maxReached
+   - localNewsDetail.menu.edit
+   - localNewsDetail.menu.report
+   - localNewsDetail.menu.share
+   - localNewsDetail.stats.views
+   - localNewsDetail.stats.comments
+   - localNewsDetail.stats.likes
+   - localNewsDetail.stats.thanks
+   - localNewsDetail.buttons.comment
+   - commentInputField.secretCommentLabel
+   - commentInputField.replyHintText
+   - commentInputField.button.send
+   - commentListView.delete
+   - commentListView.deleted
+   - common.done
+   - common.updated
+   - common.bookmark
+   - reportReasons.spam
+   - reportReasons.abuse
+   - reportReasons.inappropriate
+   - reportReasons.illegal
+   - reportReasons.etc
+   - replyInputField.button.send
+   - chat_list.appBarTitle
+   - jobs.screen.createTooltip
+   - jobs.tabs.quickGig
+   - jobs.selectType.regular.desc
+   - jobs.selectType.quick.title
+   - jobs.selectType.quick.desc
+   - jobs.selectType.talent.desc
+   - jobs.selectType.talent.badge
+   - jobs.form.titleHint
+   - jobs.form.descriptionPositionHint
+   - jobs.form.categoryHint
+   - jobs.form.categorySelectHint
+   - jobs.form.submit
+   - jobs.form.salaryLabel
+   - jobs.form.salaryHint
+   - jobs.form.salaryValidator
+   - jobs.form.workPeriodLabel
+   - jobs.form.workPeriodHint
+   - jobs.categories.restaurant
+   - jobs.categories.cafe
+   - jobs.categories.retail
+   - jobs.categories.delivery
+   - jobs.categories.etc
+   - jobs.categories.service
+   - jobs.categories.sales_marketing
+   - jobs.categories.delivery_logistics
+   - jobs.categories.it
+   - jobs.categories.design
+   - jobs.categories.education
+   - jobs.categories.quick_gig_delivery
+   - jobs.categories.quick_gig_transport
+   - jobs.categories.quick_gig_moving
+   - jobs.categories.quick_gig_cleaning
+   - jobs.categories.quick_gig_queuing
+   - jobs.categories.quick_gig_etc
+   - jobs.categories.talent_tutoring
+   - jobs.categories.talent_design
+   - jobs.categories.talent_home_service
+   - jobs.categories.talent_other
+   - jobs.salaryTypes.per_case
+   - jobs.salaryTypes.etc
+   - jobs.salaryTypes.total
+   - jobs.workPeriods.short_term
+   - jobs.workPeriods.mid_term
+   - jobs.workPeriods.long_term
+   - jobs.workPeriods.one_time
+   - jobs.workPeriods.1_week
+   - jobs.workPeriods.1_month
+   - jobs.workPeriods.3_months
+   - jobs.workPeriods.6_months_plus
+   - jobs.workPeriods.negotiable
+   - jobs.workPeriods.etc
+   - jobs.detail.noAuthor
+   - jobs.card.minutesAgo
+   - findFriend.title
+   - findFriend.tabs.clubs
+   - findFriend.editTitle
+   - findFriend.editProfileTitle
+   - findFriend.save
+   - findFriend.profileImagesLabel
+   - findFriend.bioHint
+   - findFriend.bioValidator
+   - findFriend.ageLabel
+   - findFriend.ageHint
+   - findFriend.genderLabel
+   - findFriend.genderMale
+   - findFriend.genderFemale
+   - findFriend.genderHint
+   - findFriend.interestsLabel
+   - findFriend.preferredAgeLabel
+   - findFriend.preferredAgeUnit
+   - findFriend.preferredGenderLabel
+   - findFriend.preferredGenderAll
+   - findFriend.saveSuccess
+   - findFriend.saveFailed
+   - findFriend.loginRequired
+   - findFriend.noFriendsFound
+   - findFriend.prompt_title
+   - findFriend.prompt_button
+   - interests.category_creative
+   - interests.category_sports
+   - interests.category_food_drink
+   - interests.category_entertainment
+   - interests.category_growth
+   - interests.category_lifestyle
+   - interests.items.drawing
+   - interests.items.instrument
+   - interests.items.photography
+   - interests.items.writing
+   - interests.items.crafting
+   - interests.items.gardening
+   - interests.items.soccer
+   - interests.items.hiking
+   - interests.items.camping
+   - interests.items.running
+   - interests.items.biking
+   - interests.items.golf
+   - interests.items.workout
+   - interests.items.foodie
+   - interests.items.cooking
+   - interests.items.baking
+   - interests.items.coffee
+   - interests.items.wine
+   - interests.items.tea
+   - interests.items.movies
+   - interests.items.music
+   - interests.items.concerts
+   - interests.items.gaming
+   - interests.items.reading
+   - interests.items.investing
+   - interests.items.language
+   - interests.items.coding
+   - interests.items.travel
+   - interests.items.pets
+   - interests.items.volunteering
+   - interests.items.minimalism
+   - friendDetail.request
+   - friendDetail.requestSent
+   - friendDetail.alreadyFriends
+   - friendDetail.requestFailed
+   - friendDetail.loginRequired
+   - locationFilter.provinsi
+   - locationFilter.kabupaten
+   - locationFilter.kota
+   - locationFilter.kecamatan
+   - locationFilter.kelurahan
+   - locationFilter.apply
+   - locationFilter.all
+   - locationFilter.reset
+   - clubs.postCard.deleteTitle
+   - clubs.postCard.deleteContent
+   - clubs.postCard.deleteSuccess
+   - clubs.postCard.deleteFail
+   - clubs.postCard.deleteTooltip
+   - clubs.postCard.loadingUser
+   - clubs.createClub.success
+   - clubs.createClub.fail
+   - clubs.createClub.title
+   - clubs.createClub.tagsHint
+   - clubs.createClub.maxInterests
+   - clubs.editClub.save
+   - clubs.proposal.imageError
+   - clubs.proposal.tagsHint
+   - findfriend.form.title
+   - auctions.filter.tooltip
+   - auctions.filter.clearTooltip
+   - auctions.create.tooltip
+   - auctions.create.form.tagsHint
+   - auctions.edit.tooltip
+   - auctions.edit.save
+   - auctions.delete.tooltip
+   - localStores.edit.tooltip
+   - localStores.categories.all
+   - localStores.categories.food
+   - localStores.categories.cafe
+   - localStores.categories.massage
+   - localStores.categories.beauty
+   - localStores.categories.nail
+   - localStores.categories.auto
+   - localStores.categories.kids
+   - localStores.categories.hospital
+   - localStores.categories.etc
+   - localStores.detail.deleteTooltip
+   - localStores.detail.delete
+   - localStores.detail.cancel
+   - pom.title
+   - pom.emptyPopular
+   - pom.emptyMine
+   - pom.emptyHintPopular
+   - pom.emptyCtaMine
+   - pom.empty
+   - pom.errors.videoSource
+   - pom.create.titleImage
+   - realEstate.create
+   - realEstate.priceUnits.monthly
+   - realEstate.priceUnits.yearly
+   - realEstate.priceUnit.monthly
+   - realEstate.form.priceUnit.monthly
+   - realEstate.form.priceUnit.yearly
+   - realEstate.form.roomTypes.kos
+   - realEstate.form.roomTypes.kontrakan
+   - realEstate.form.roomTypes.sewa
+   - realEstate.form.roomTypes.apartment
+   - realEstate.form.roomTypes.house
+   - realEstate.form.roomTypes.ruko
+   - realEstate.form.roomTypes.gudang
+   - realEstate.form.roomTypes.kantor
+   - realEstate.form.roomTypes.etc
+   - realEstate.form.listingTypes.rent
+   - realEstate.form.listingTypes.sale
+   - realEstate.form.publisherTypes.individual
+   - realEstate.form.publisherTypes.agent
+   - realEstate.form.bedAbbr
+   - realEstate.form.bathAbbr
+   - realEstate.form.amenities
+   - realEstate.form.amenity.wifi
+   - realEstate.form.amenity.ac
+   - realEstate.form.amenity.parking
+   - realEstate.form.amenity.kitchen
+   - realEstate.filter.amenities.ac
+   - realEstate.filter.amenities.bed
+   - realEstate.filter.amenities.closet
+   - realEstate.filter.amenities.desk
+   - realEstate.filter.amenities.wifi
+   - realEstate.filter.amenities.kitchen
+   - realEstate.filter.amenities.living_room
+   - realEstate.filter.amenities.refrigerator
+   - realEstate.filter.amenities.parking_motorcycle
+   - realEstate.filter.amenities.parking_car
+   - realEstate.filter.amenities.pool
+   - realEstate.filter.amenities.gym
+   - realEstate.filter.amenities.security_24h
+   - realEstate.filter.amenities.atm_center
+   - realEstate.filter.amenities.minimarket
+   - realEstate.filter.amenities.mall_access
+   - realEstate.filter.amenities.playground
+   - realEstate.filter.amenities.carport
+   - realEstate.filter.amenities.garden
+   - realEstate.filter.amenities.pam
+   - realEstate.filter.amenities.telephone
+   - realEstate.filter.amenities.water_heater
+   - realEstate.filter.amenities.parking_area
+   - realEstate.filter.amenities.electricity
+   - realEstate.filter.amenities.container_access
+   - realEstate.filter.amenities.kos_room.ac
+   - realEstate.filter.amenities.kos_room.bed
+   - realEstate.filter.amenities.kos_room.closet
+   - realEstate.filter.amenities.kos_room.desk
+   - realEstate.filter.amenities.kos_room.wifi
+   - realEstate.filter.amenities.kos_public.kitchen
+   - realEstate.filter.amenities.kos_public.living_room
+   - realEstate.filter.amenities.kos_public.refrigerator
+   - realEstate.filter.amenities.kos_public.parking_motorcycle
+   - realEstate.filter.amenities.kos_public.parking_car
+   - realEstate.filter.amenities.apartment.pool
+   - realEstate.filter.amenities.apartment.gym
+   - realEstate.filter.amenities.apartment.security_24h
+   - realEstate.filter.amenities.apartment.atm_center
+   - realEstate.filter.amenities.apartment.minimarket
+   - realEstate.filter.amenities.apartment.mall_access
+   - realEstate.filter.amenities.apartment.playground
+   - realEstate.filter.amenities.house.carport
+   - realEstate.filter.amenities.house.garden
+   - realEstate.filter.amenities.house.pam
+   - realEstate.filter.amenities.house.telephone
+   - realEstate.filter.amenities.house.water_heater
+   - realEstate.filter.amenities.commercial.parking_area
+   - realEstate.filter.amenities.commercial.security_24h
+   - realEstate.filter.amenities.commercial.telephone
+   - realEstate.filter.amenities.commercial.electricity
+   - realEstate.filter.amenities.commercial.container_access
+   - realEstate.filter.rentPeriods.daily
+   - realEstate.filter.rentPeriods.monthly
+   - realEstate.filter.rentPeriods.yearly
+   - realEstate.filter.kos.occupant
+   - realEstate.filter.propertyConditions.new
+   - realEstate.filter.propertyConditions.used
+   - realEstate.filter.furnishedTypes.furnished
+   - realEstate.filter.furnishedTypes.semi_furnished
+   - realEstate.filter.furnishedTypes.unfurnished
+   - realEstate.info.bed
+   - realEstate.info.bath
+   - lostAndFound.create
+   - lostAndFound.form.tagsHint
+   - lostAndFound.edit.save
+   - lostAndFound.detail.editTooltip
+   - lostAndFound.detail.deleteTooltip
+   - lostAndFound.detail.noUser
+   - community.title
+   - shared.tagInput.defaultHint
+   - address_neighborhood
+   - address_detail_hint
+   - localNewsTagResult.error
+   - localNewsTagResult.empty
+   - admin.aiApproval.rejectReasonRequired
+   - admin.reports.title
+   - admin.reports.empty
+   - admin.reports.error
+   - admin.reports.createdAt
+   - tags.local_news.kelurahan_notice.name
+   - tags.local_news.kelurahan_notice.desc
+   - tags.local_news.kecamatan_notice.name
+   - tags.local_news.kecamatan_notice.desc
+   - tags.local_news.public_campaign.name
+   - tags.local_news.public_campaign.desc
+   - tags.local_news.siskamling.name
+   - tags.local_news.siskamling.desc
+   - tags.local_news.power_outage.name
+   - tags.local_news.power_outage.desc
+   - tags.local_news.water_outage.name
+   - tags.local_news.water_outage.desc
+   - tags.local_news.waste_collection.name
+   - tags.local_news.waste_collection.desc
+   - tags.local_news.road_works.name
+   - tags.local_news.road_works.desc
+   - tags.local_news.public_facility.name
+   - tags.local_news.public_facility.desc
+   - tags.local_news.weather_warning.name
+   - tags.local_news.weather_warning.desc
+   - tags.local_news.flood_alert.name
+   - tags.local_news.flood_alert.desc
+   - tags.local_news.air_quality.name
+   - tags.local_news.air_quality.desc
+   - tags.local_news.disease_alert.name
+   - tags.local_news.disease_alert.desc
+   - tags.local_news.school_notice.name
+   - tags.local_news.school_notice.desc
+   - tags.local_news.posyandu.name
+   - tags.local_news.posyandu.desc
+   - tags.local_news.health_campaign.name
+   - tags.local_news.health_campaign.desc
+   - tags.local_news.traffic_control.name
+   - tags.local_news.traffic_control.desc
+   - tags.local_news.public_transport.name
+   - tags.local_news.public_transport.desc
+   - tags.local_news.parking_policy.name
+   - tags.local_news.parking_policy.desc
+   - tags.local_news.community_event.name
+   - tags.local_news.community_event.desc
+   - tags.local_news.worship_event.name
+   - tags.local_news.worship_event.desc
+   - tags.local_news.incident_report.name
+   - tags.local_news.incident_report.desc
+   - boards.chatRoomComingSoon
+   - search.prompt
+   - search.sheet.localNews
+   - search.sheet.localNewsDesc
+   - search.sheet.jobs
+   - search.sheet.jobsDesc
+   - search.sheet.lostAndFound
+   - search.sheet.lostAndFoundDesc
+   - search.sheet.marketplace
+   - search.sheet.marketplaceDesc
+   - search.sheet.localStores
+   - search.sheet.localStoresDesc
+   - search.sheet.clubs
+   - search.sheet.clubsDesc
+   - search.sheet.findFriends
+   - search.sheet.findFriendsDesc
+   - search.sheet.realEstate
+   - search.sheet.realEstateDesc
+   - search.sheet.auction
+   - search.sheet.auctionDesc
+   - search.sheet.pom
+   - search.sheet.pomDesc
+   - search.locationfilter.title
+   - search.locationfilter.reset
+   - search.locationfilter.apply
+   - search.locationfilter.provinsi
+   - search.locationfilter.kabupaten
+   - search.locationfilter.kota
+   - search.locationfilter.kecamatan
+   - search.locationfilter.kelurahan
+   - search.locationfilter.tab.admin
+   - search.locationfilter.tab.nearby
+   - search.locationfilter.tab.national
+   - search.locationfilter.nearby.radius
+   - search.locationfilter.nearby.desc
+   - search.locationfilter.national.title
+   - search.locationfilter.national.desc
+   - search.locationfilter.hint.selectParent
+   - search.locationfilter.hint.all
+   - locationfilter.kota
+   - language.id
+   - language.ko
+   - language.en
+   - location_setting_error
+   - signup_fail_required
+   - signup_fail_password_mismatch
+   - signup_fail_default
+   - signup_fail_weak_password
+   - signup_fail_email_in_use
+   - signup_fail_invalid_email
+   - signup_fail_unknown
+   - auth.verification.check
+   - auth.verification.success
+
+✅ Recommendation:
+1. Check "TOP DUPLICATED VALUES" and migrate to "common".
+2. Review "POTENTIAL UNUSED KEYS" and remove them from .json files if truly unused.
