@@ -118,11 +118,12 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
         imageUrls: imageUrls,
         createdAt: Timestamp.now(),
         tags: _tags, // ✅ 저장 시 태그 목록을 전달
-        // ✅ 현상금 정보 저장
+        // ✅ 현상금 정보 저장 (콤마 제거 후 파싱)
         isHunted: _isHunted,
         // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
-        bountyAmount:
-            _isHunted ? num.tryParse(_bountyAmountController.text) : null,
+        bountyAmount: _isHunted
+            ? num.tryParse(_bountyAmountController.text.replaceAll(',', ''))
+            : null,
       );
 
       // [수정] 주석을 해제하여 DB 저장 기능을 활성화합니다.

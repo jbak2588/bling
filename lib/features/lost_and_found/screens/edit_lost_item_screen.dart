@@ -139,12 +139,13 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         createdAt: widget.item.createdAt,
         geoPoint: userModel?.geoPoint ?? widget.item.geoPoint,
         locationParts: userModel?.locationParts ?? widget.item.locationParts,
-        // ✅ 현상금 정보 저장
+        // ✅ 현상금 정보 저장 (콤마 제거 후 파싱)
         isHunted: _isHunted,
         tags: _tags,
         // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
-        bountyAmount:
-            _isHunted ? num.tryParse(_bountyAmountController.text) : null,
+        bountyAmount: _isHunted
+            ? num.tryParse(_bountyAmountController.text.replaceAll(',', ''))
+            : null,
       );
 
       await _repository.updateItem(updatedItem);
