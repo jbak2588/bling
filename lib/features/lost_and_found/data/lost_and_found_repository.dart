@@ -76,4 +76,51 @@ class LostAndFoundRepository {
     // TODO: Storage에 업로드된 관련 이미지도 함께 삭제하는 로직 추가 필요
     await _lostAndFoundCollection.doc(itemId).delete();
   }
+
+  // ✅ [작업 3 - 미담화] 해결 처리 및 미담 점수 부여 트랜잭션
+  Future<void> resolveItemWithReview({
+    required String itemId,
+    required String? resolverId, // 도움을 준 유저 ID (없으면 null)
+    required String? reviewText, // 후기 텍스트
+  }) async {
+    final itemRef = _lostAndFoundCollection.doc(itemId);
+
+    await _firestore.runTransaction((transaction) async {
+      // 1. 게시물 업데이트 준비
+      final Map<String, dynamic> itemUpdateData = {
+        'isResolved': true,
+        'resolvedAt': FieldValue.serverTimestamp(),
+      };
+
+      if (resolverId != null) {
+        itemUpdateData['resolverId'] = resolverId;
+      }
+      if (reviewText != null && reviewText.isNotEmpty) {
+        itemUpdateData['reviewText'] = reviewText;
+      }
+
+      // 2. 만약 도움 준 이웃(Resolver)이 있다면 신뢰도 점수 업데이트
+      if (resolverId != null) {
+        final userRef = _firestore.collection('users').doc(resolverId);
+        // 유저 문서 읽기 (트랜잭션 내 필수)
+        final userSnapshot = await transaction.get(userRef);
+
+        if (userSnapshot.exists) {
+          // 점수 부여 정책: 미담 1회당 TrustScore +10, ThanksReceived +1
+          final int currentTrust =
+              (userSnapshot.data()?['trustScore'] ?? 0) as int;
+          final int currentThanks =
+              (userSnapshot.data()?['thanksReceived'] ?? 0) as int;
+
+          transaction.update(userRef, {
+            'trustScore': currentTrust + 10,
+            'thanksReceived': currentThanks + 1,
+          });
+        }
+      }
+
+      // 3. 게시물 최종 업데이트
+      transaction.update(itemRef, itemUpdateData);
+    });
+  }
 }
