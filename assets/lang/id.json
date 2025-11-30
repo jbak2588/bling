@@ -1791,9 +1791,15 @@
       "fail": "Gagal memperbarui: {error}"
     },
     "resolve": {
-      "confirmTitle": "Tandai sebagai selesai?",
-      "confirmBody": "Item ini akan ditandai selesai.",
-      "success": "Berhasil ditandai selesai.",
+      "whoHelped": "Siapa yang membantu Anda?",
+      "noCandidates": "Tidak ada tetangga dengan riwayat obrolan.",
+      "offlineResolved": "Diselesaikan di luar aplikasi",
+      "leaveReview": "Tinggalkan ucapan terima kasih (Opsional)",
+      "reviewHint": "Cth: Terima kasih sudah mengantar walau hujan!",
+      "systemMessage": "Terima kasih — poin kepercayaan telah diberikan!",
+      "success": "Ditandai sebagai selesai.",
+      "confirmTitle": "Tandai Selesai?",
+      "confirmBody": "Anda dapat memberi ulasan jika ada tetangga yang membantu.",
       "badgeLost": "Sudah ditemukan!",
       "badgeFound": "Sudah dikembalikan!"
     },

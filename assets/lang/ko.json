@@ -1789,9 +1789,15 @@
       "fail": "수정에 실패했습니다: {error}"
     },
     "resolve": {
-      "confirmTitle": "해결 완료로 표시할까요?",
-      "confirmBody": "이 게시물을 해결 완료로 표시합니다.",
-      "success": "해결 완료로 표시했습니다.",
+      "whoHelped": "누가 도움을 주었나요?",
+      "noCandidates": "채팅 기록이 있는 이웃이 없습니다.",
+      "offlineResolved": "앱 외부에서 해결함",
+      "leaveReview": "고마운 마음을 남겨보세요 (선택)",
+      "reviewHint": "예: 비오는데 직접 와주셔서 감사해요!",
+      "systemMessage": "도움을 주셔서 감사합니다! 신뢰 점수가 지급되었습니다.",
+      "success": "해결 완료 처리되었습니다.",
+      "confirmTitle": "해결 완료하시겠습니까?",
+      "confirmBody": "이웃에게 도움을 받았다면 후기를 남길 수 있습니다.",
       "badgeLost": "찾았어요!",
       "badgeFound": "찾아줬어요!"
     },

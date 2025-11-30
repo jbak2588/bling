@@ -175,6 +175,18 @@ class _ResolveBottomSheetState extends State<_ResolveBottomSheet> {
               child: Text('lostAndFound.detail.markAsResolved'.tr()),
             ),
           ),
+          const SizedBox(height: 8),
+          // 옵션: 앱 외부/오프라인에서 해결된 경우, resolverId 없이 후기만 남기고 해결 처리
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () {
+                widget.onConfirm(null, _reviewController.text.trim());
+                Navigator.of(context).pop();
+              },
+              child: Text('lostAndFound.resolve.offlineResolved'.tr()),
+            ),
+          ),
           const SizedBox(height: 16),
         ],
       ),
@@ -671,6 +683,29 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
                 resolverId: selectedUserId,
                 reviewText: review,
               );
+
+              // 선택된 이웃이 있다면 관련 채팅방에 시스템 감사 메시지 전송
+              if (selectedUserId != null) {
+                try {
+                  dynamic targetRoom;
+                  for (var room in relatedChats) {
+                    if (room.participants.contains(selectedUserId)) {
+                      targetRoom = room;
+                      break;
+                    }
+                  }
+                  if (targetRoom != null) {
+                    final systemMsg = 'lostAndFound.resolve.systemMessage'.tr();
+                    await _chatService.sendMessage(
+                      targetRoom.id,
+                      systemMsg,
+                      otherUserId: selectedUserId,
+                    );
+                  }
+                } catch (e) {
+                  debugPrint('Failed to send resolve system message: $e');
+                }
+              }
 
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(

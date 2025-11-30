@@ -1791,9 +1791,15 @@
       "fail": "Failed to update: {error}"
     },
     "resolve": {
-      "confirmTitle": "Mark as resolved?",
-      "confirmBody": "This will mark the item as resolved.",
+      "whoHelped": "Who helped you?",
+      "noCandidates": "No neighbors with chat history found.",
+      "offlineResolved": "Resolved outside the app",
+      "leaveReview": "Leave a thank you note (Optional)",
+      "reviewHint": "Ex: Thanks for bringing it to me in the rain!",
+      "systemMessage": "Thank you — trust points have been awarded!",
       "success": "Marked as resolved.",
+      "confirmTitle": "Mark as Resolved?",
+      "confirmBody": "You can leave a review if a neighbor helped you.",
       "badgeLost": "Found!",
       "badgeFound": "Returned!"
     },
