@@ -1,5 +1,25 @@
 // lib/features/shared/widgets/address_map_picker.dart
 
+/*
+  AddressMapPicker
+  - 주소 검색 + 지도 선택 UI 위젯
+  - Google Places Autocomplete + Place Details + Reverse Geocoding 기능 포함
+  - BlingLocation 모델을 사용하여 위치 정보를 표준화합니다.
+3. 공용 위젯: Address + Map + Pin
+
+파일 경로: lib/features/shared/widgets/address_map_picker.dart
+
+한 위젯 안에서
+“주소 검색 → 자동완성 리스트 → 선택 → 지도 이동 + 중앙 핀 → 드래그 후 Reverse Geocode”까지 처리하는 공용 위치 선택 위젯입니다.
+
+BlingLocation 을 입/출력 타입으로 사용
+
+Scroll 내부에서도 동작하도록 EagerGestureRecognizer 적용
+
+    “현재 위치로 이동” 버튼 포함
+*/
+
+
 import 'dart:async';
 
 import 'package:bling_app/core/models/bling_location.dart';

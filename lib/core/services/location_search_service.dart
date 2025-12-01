@@ -1,4 +1,18 @@
 // lib/core/services/location_search_service.dart
+/* 
+  LocationSearchService
+  - Google Places API 및 Geocoding API를 사용하여 주소 자동완성, 장소 상세 조회, 역지오코딩 기능을 제공합니다.
+  - BlingLocation 모델을 사용하여 위치 정보를 표준화합니다.
+2. 공용 서비스: Google Places / Geocoding
+
+파일 경로: lib/core/services/location_search_service.dart
+
+Google Places Autocomplete + Place Details + Reverse Geocoding 을 담당하는 서비스입니다.
+lib/api_keys.dart 안에  ApiKeys.serverKey; 같은 변수가 있다고 가정하고 사용합니다.
+  주요 기능:
+*/
+
+
 
 import 'dart:convert';
 

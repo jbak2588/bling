@@ -1,5 +1,13 @@
 // lib/core/models/bling_location.dart
 
+/*  
+1. 공용 모델: BlingLocation
+
+파일 경로: lib/core/models/bling_location.dart
+
+Firestore 저장용 GeoPoint + 사람이 읽는 주소 + Place ID + 짧은 라벨까지 한 번에 묶는 위치 모델입니다.
+*/
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Bling 전역에서 사용하는 표준 위치 모델.
@@ -7,6 +15,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// - mainAddress   : Google formatted_address 등, 사람이 읽는 전체 주소
 /// - placeId       : Google Place ID (선택)
 /// - shortLabel    : 사용자가 적는 짧은 라벨 (예: "SMS 스타벅스 앞")
+
 class BlingLocation {
   final GeoPoint geoPoint;
   final String mainAddress;
