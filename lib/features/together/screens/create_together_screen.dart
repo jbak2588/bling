@@ -10,9 +10,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart'; // ✅ 추가
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
@@ -33,16 +35,11 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
 
   File? _selectedImage;
   String? _uploadedImageUrl;
-  // GeoPoint? _selectedGeoPoint; // ❌ 기존 변수 미사용 (지도 좌표로 대체)
-
-  // ✅ 지도 관련 변수 추가
+  GeoPoint? _selectedGeoPoint;
   GoogleMapController? _mapController;
-  LatLng _currentMapPosition = const LatLng(-6.2088, 106.8456); // 기본값 (자카르타)
 
   bool _isSubmitting = false;
   bool _isLoadingLocation = false;
-  // ✅ [작업 29] 모집 인원 변수 추가 (기본 4명)
-  int _maxParticipants = 4;
 
   // upload state
   bool _isUploading = false;
@@ -56,7 +53,7 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
     _titleController.dispose();
     _descController.dispose();
     _locationDescController.dispose();
-    _mapController?.dispose(); // ✅ 맵 컨트롤러 해제
+    _mapController?.dispose();
     super.dispose();
   }
 
@@ -64,50 +61,73 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null) {
-      setState(() => _selectedImage = File(picked.path));
+      setState(() {
+        _selectedImage = File(picked.path);
+        _uploadedImageUrl = null;
+      });
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _initUserLocation(); // ✅ 진입 시 위치 초기화 실행
+  Future<void> _selectDate() async {
+    final now = DateTime.now();
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+    );
+
+    if (pickedDate != null) {
+      final pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(_selectedDate),
+      );
+
+      if (pickedTime != null) {
+        setState(() {
+          _selectedDate = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+        });
+      }
+    }
   }
 
-  // ✅ 지도 초기 위치 설정 함수 (기존 _getCurrentLocation 대체)
-  Future<void> _initUserLocation() async {
+  Future<void> _getCurrentLocation() async {
     setState(() => _isLoadingLocation = true);
     try {
-      // Deprecated 경고 해결된 최신 코드 사용
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings:
-            const LocationSettings(accuracy: LocationAccuracy.high),
-      );
-      if (mounted) {
-        setState(() {
-          _currentMapPosition = LatLng(position.latitude, position.longitude);
-          _isLoadingLocation = false;
-        });
-        // 지도가 로드된 상태라면 카메라 이동
-        _mapController?.animateCamera(
-          CameraUpdate.newLatLng(_currentMapPosition),
+      final locationSettings =
+          LocationSettings(accuracy: LocationAccuracy.high);
+      final pos = await Geolocator.getCurrentPosition(
+          locationSettings: locationSettings);
+      final newPoint = GeoPoint(pos.latitude, pos.longitude);
+      setState(() => _selectedGeoPoint = newPoint);
+      if (_mapController != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(newPoint.latitude, newPoint.longitude),
+          ),
         );
       }
     } catch (e) {
-      // 실패 시 기본 좌표 유지, 로딩만 해제
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('together.locationError'.tr())));
+      }
+    } finally {
       if (mounted) setState(() => _isLoadingLocation = false);
     }
   }
 
-  // Upload with exponential backoff retry.
-  // Returns download URL on success, or null on failure/cancel.
   Future<String?> _startImageUpload(File imageFile) async {
     final repo = TogetherRepository();
-    const int maxAttempts = 5;
     int attempt = 0;
-    const int baseDelayMs = 500;
+    const maxAttempts = 3;
 
-    if (!mounted) return null;
     setState(() {
       _isUploading = true;
       _uploadFailed = false;
@@ -139,73 +159,47 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
 
         // Wait for completion (success) or error
         final snapshot = await completer.future;
-        final url = await snapshot.ref.getDownloadURL();
 
+        final downloadUrl = await snapshot.ref.getDownloadURL();
         if (mounted) {
           setState(() {
             _isUploading = false;
-            _uploadTask = null;
             _uploadFailed = false;
             _uploadError = null;
-            _uploadProgress = 0.0;
-            _uploadedImageUrl = url;
+            _uploadTask = null;
           });
         }
-        await sub.cancel();
-        return url;
+        return downloadUrl;
       } catch (e) {
-        // mark failure
         debugPrint('Together upload attempt $attempt failed: $e');
-        if (mounted) {
-          setState(() {
-            _uploadFailed = true;
-            _uploadError = e.toString();
-          });
-        }
-
-        // Try a synchronous/awaiting upload (fallback) once to compare behavior
-        try {
-          debugPrint(
-              'Together upload: attempting synchronous fallback upload (putFile)');
-          final url = await repo.uploadImage(imageFile);
+        if (attempt >= maxAttempts) {
           if (mounted) {
             setState(() {
               _isUploading = false;
+              _uploadFailed = true;
+              _uploadError = e.toString();
               _uploadTask = null;
-              _uploadFailed = false;
-              _uploadError = null;
-              _uploadProgress = 0.0;
-              _uploadedImageUrl = url;
             });
           }
-          return url;
-        } catch (fallbackErr) {
-          debugPrint(
-              'Together synchronous fallback upload failed: $fallbackErr');
+          return null;
         }
-
-        // if reached max attempts, break
-        if (attempt >= maxAttempts) break;
-
-        // exponential backoff delay
-        final delayMs = (baseDelayMs * math.pow(2, attempt - 1)).toInt();
-        await Future.delayed(Duration(milliseconds: delayMs));
-        // continue loop to retry
+        await Future.delayed(
+            Duration(milliseconds: 400 * math.pow(2, attempt - 1).toInt()));
       } finally {
-        // clear and cancel subscription/task
-        try {
-          await sub?.cancel();
-        } catch (_) {}
-        if (mounted) setState(() => _uploadTask = null);
+        await sub?.cancel();
       }
     }
 
-    // all attempts failed
-    if (mounted) setState(() => _isUploading = false);
+    if (mounted) {
+      setState(() {
+        _isUploading = false;
+        _uploadFailed = true;
+        _uploadError = 'upload_failed';
+        _uploadTask = null;
+      });
+    }
     return null;
   }
-
-  // _cancelUpload removed: no UploadTask cancellation available
 
   Future<void> _submit() async {
     if (_titleController.text.isEmpty) {
@@ -223,12 +217,22 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
           SnackBar(content: Text('together.enterLocationDesc'.tr())));
       return;
     }
+    if (_selectedGeoPoint == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('together.locationError'.tr())));
+      return;
+    }
 
     setState(() => _isSubmitting = true);
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
 
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('together.loginRequired'.tr())));
+        return;
+      }
+
       final repo = TogetherRepository();
       String? imageUrl = _uploadedImageUrl;
       if (_selectedImage != null && imageUrl == null) {
@@ -242,11 +246,9 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
         description: _descController.text,
         meetTime: Timestamp.fromDate(_selectedDate),
         location: _locationDescController.text,
-        // ✅ 지도 핀 위치(중심점)를 GeoPoint로 변환하여 저장
-        geoPoint: GeoPoint(
-            _currentMapPosition.latitude, _currentMapPosition.longitude),
+        geoPoint: _selectedGeoPoint,
         imageUrl: imageUrl,
-        maxParticipants: _maxParticipants,
+        maxParticipants: 4,
         participants: [user.uid],
         qrCodeString: const Uuid().v4(),
         designTheme: _selectedTheme,
@@ -256,12 +258,12 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
       await repo.createPost(newPost);
 
       if (!mounted) return;
-      Navigator.pop(context);
+      Navigator.of(context).pop();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('together.createFail'.tr())));
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              'together.createFail'.tr(namedArgs: {'error': e.toString()}))));
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -286,66 +288,111 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
                 return GestureDetector(
                   onTap: () => setState(() => _selectedTheme = theme),
                   child: Container(
-                    width: 50,
-                    height: 50,
-                    margin: const EdgeInsets.only(right: 12),
+                    margin: const EdgeInsets.only(right: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: _getThemeColor(theme),
-                      border: _selectedTheme == theme
-                          ? Border.all(color: Colors.blue, width: 3)
-                          : Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                          color: _selectedTheme == theme
+                              ? Colors.blue
+                              : Colors.grey),
+                      color: _selectedTheme == theme
+                          ? Color.fromRGBO(33, 150, 243, 0.1)
+                          : Colors.transparent,
+                    ),
+                    child: Text(
+                      'together.theme.$theme'.tr(),
+                      style: TextStyle(
+                          color: _selectedTheme == theme
+                              ? Colors.blue
+                              : Colors.black),
                     ),
                   ),
                 );
               }).toList(),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                  labelText: 'together.whatLabel'.tr(),
-                  hintText: 'together.whatHint'.tr()),
-              maxLength: 100,
+                  labelText: 'together.titleLabel'.tr(),
+                  hintText: 'together.titleHint'.tr()),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             TextField(
               controller: _descController,
+              maxLines: 3,
               decoration: InputDecoration(
                   labelText: 'together.descLabel'.tr(),
-                  hintText: 'together.descHint'.tr(),
-                  border: const OutlineInputBorder(),
-                  alignLabelWithHint: true),
-              maxLines: 3,
+                  hintText: 'together.descHint'.tr()),
             ),
-            const SizedBox(height: 24),
-            Text('together.imageOptional'.tr(),
+            const SizedBox(height: 16),
+            Text('together.imageLabel'.tr(),
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             GestureDetector(
-              onTap: _pickImage,
+              onTap: _isUploading ? null : _pickImage,
               child: Container(
+                height: 180,
                 width: double.infinity,
-                height: 200,
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey),
-                  image: _selectedImage != null
-                      ? DecorationImage(
-                          image: FileImage(_selectedImage!), fit: BoxFit.cover)
-                      : null,
-                ),
-                child: _selectedImage == null
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                            const Icon(Icons.add_photo_alternate,
-                                size: 40, color: Colors.grey),
-                            Text('together.tapToAddPhoto'.tr(),
-                                style: const TextStyle(color: Colors.grey))
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey)),
+                child: _selectedImage != null
+                    ? Stack(children: [
+                        Positioned.fill(
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(_selectedImage!,
+                                    fit: BoxFit.cover))),
+                        if (_isUploading)
+                          Positioned.fill(
+                              child: Container(
+                                  color: Color.fromRGBO(0, 0, 0, 0.4),
+                                  child: Center(
+                                      child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircularProgressIndicator(
+                                          value: _uploadProgress),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                          '${(_uploadProgress * 100).toStringAsFixed(0)}%')
+                                    ],
+                                  ))))
+                      ])
+                    : (_uploadedImageUrl != null
+                        ? Stack(children: [
+                            Positioned.fill(
+                                child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.network(_uploadedImageUrl!,
+                                        fit: BoxFit.cover))),
+                            if (_isUploading)
+                              Positioned.fill(
+                                  child: Container(
+                                      color: Color.fromRGBO(0, 0, 0, 0.4),
+                                      child: Center(
+                                          child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          CircularProgressIndicator(
+                                              value: _uploadProgress),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                              '${(_uploadProgress * 100).toStringAsFixed(0)}%')
+                                        ],
+                                      ))))
                           ])
-                    : null,
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                                const Icon(Icons.add_photo_alternate,
+                                    size: 40, color: Colors.grey),
+                                Text('together.tapToAddPhoto'.tr(),
+                                    style: const TextStyle(color: Colors.grey))
+                              ])),
               ),
             ),
             const SizedBox(height: 8),
@@ -369,7 +416,7 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
                       } catch (_) {}
                     },
                     icon: const Icon(Icons.pause),
-                    label: Text('upload.pause'.tr())),
+                    label: const Text('일시중지')),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                     onPressed: () async {
@@ -378,110 +425,98 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
                       } catch (_) {}
                     },
                     icon: const Icon(Icons.play_arrow),
-                    label: Text('upload.resume'.tr())),
+                    label: const Text('재개')),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                     onPressed: () async {
                       try {
                         await _uploadTask?.cancel();
-                        if (mounted) {
-                          setState(() {
-                            _isUploading = false;
-                            _uploadProgress = 0.0;
-                            _uploadTask = null;
-                            _uploadFailed = true;
-                            _uploadError = 'upload.cancelled';
-                          });
-                        }
+                        setState(() {
+                          _isUploading = false;
+                          _uploadProgress = 0.0;
+                          _uploadTask = null;
+                          _uploadFailed = true;
+                          _uploadError = 'cancelled';
+                        });
                       } catch (_) {}
                     },
-                    icon: const Icon(Icons.cancel),
-                    label: Text('upload.cancel'.tr())),
+                    icon: const Icon(Icons.stop),
+                    label: const Text('취소')),
               ]),
-            if (!_isUploading && _uploadFailed)
+            if (_uploadFailed && _uploadError != null)
               Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _selectedImage == null
-                            ? null
-                            : () async {
-                                final url =
-                                    await _startImageUpload(_selectedImage!);
-                                if (url != null && mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content:
-                                              Text('upload.success'.tr())));
-                                }
-                              },
-                        icon: const Icon(Icons.refresh),
-                        label: Text('upload.retry'.tr()),
-                      ),
-                      if (_uploadError != null) const SizedBox(height: 8),
-                      if (_uploadError != null)
-                        Text(_uploadError!,
-                            style: const TextStyle(color: Colors.red)),
-                    ]),
-              ),
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text('업로드 실패: $_uploadError',
+                      style: const TextStyle(color: Colors.red))),
             const SizedBox(height: 24),
             Text('together.whereLabel'.tr(),
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            // 지도 피커 UI
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+            if (_selectedGeoPoint == null)
+              Container(
+                width: double.infinity,
+                height: 200,
+                color: Colors.grey[100],
+                child: Center(
+                    child: _isLoadingLocation
+                        ? const CircularProgressIndicator()
+                        : ElevatedButton.icon(
+                            onPressed: _getCurrentLocation,
+                            icon: const Icon(Icons.my_location),
+                            label: Text('together.setCurrentLocation'.tr()))),
+              )
+            else
+              SizedBox(
+                height: 200,
                 child: Stack(
-                  alignment: Alignment.center,
                   children: [
-                    _isLoadingLocation
-                        ? const Center(child: CircularProgressIndicator())
-                        : GoogleMap(
-                            initialCameraPosition: CameraPosition(
-                              target: _currentMapPosition,
-                              zoom: 15,
-                            ),
-                            onMapCreated: (controller) =>
-                                _mapController = controller,
-                            onCameraMove: (position) {
-                              // 지도를 움직이면 중심 좌표 변수에 저장
-                              _currentMapPosition = position.target;
-                            },
-                            myLocationEnabled: true,
-                            myLocationButtonEnabled: true,
-                            zoomControlsEnabled: false,
-                          ),
-                    // 화면 중앙 고정 핀 (이 위치가 저장됨)
-                    const Icon(Icons.location_on, size: 40, color: Colors.red),
-                    // 안내 문구
+                    GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(
+                          _selectedGeoPoint!.latitude,
+                          _selectedGeoPoint!.longitude,
+                        ),
+                        zoom: 16,
+                      ),
+                      onMapCreated: (controller) => _mapController = controller,
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
+                      zoomControlsEnabled: false,
+                      onCameraMove: (position) {
+                        _selectedGeoPoint = GeoPoint(
+                          position.target.latitude,
+                          position.target.longitude,
+                        );
+                      },
+                      gestureRecognizers: <Factory<
+                          OneSequenceGestureRecognizer>>{
+                        Factory<OneSequenceGestureRecognizer>(
+                          () => EagerGestureRecognizer(),
+                        ),
+                      },
+                    ),
+                    const Center(
+                      child: Icon(
+                        Icons.place,
+                        size: 40,
+                        color: Colors.red,
+                      ),
+                    ),
                     Positioned(
                       top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'together.mapHint'.tr(),
-                          style: const TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.bold),
+                      right: 8,
+                      child: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: IconButton(
+                          icon: const Icon(Icons.my_location,
+                              color: Colors.black),
+                          onPressed: _getCurrentLocation,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
             const SizedBox(height: 8),
             TextField(
                 controller: _locationDescController,
@@ -494,63 +529,30 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
               contentPadding: EdgeInsets.zero,
               title: Text('together.whenLabel'.tr()),
               subtitle: Text(
-                  '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day} ${_selectedDate.hour.toString().padLeft(2, '0')}:${_selectedDate.minute.toString().padLeft(2, '0')}'),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: () async {
-                final DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedDate,
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 30)));
-                if (pickedDate != null && mounted) {
-                  final TimeOfDay? pickedTime = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.fromDateTime(_selectedDate));
-                  if (pickedTime != null) {
-                    setState(() => _selectedDate = DateTime(
-                        pickedDate.year,
-                        pickedDate.month,
-                        pickedDate.day,
-                        pickedTime.hour,
-                        pickedTime.minute));
-                  }
-                }
-              },
+                  '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day} '
+                  '${_selectedDate.hour.toString().padLeft(2, '0')}:${_selectedDate.minute.toString().padLeft(2, '0')}'),
+              trailing: IconButton(
+                  onPressed: _selectDate,
+                  icon: const Icon(Icons.calendar_month_outlined)),
             ),
-            // ✅ [작업 29] 모집 인원 선택 (Slider)
-            const SizedBox(height: 16),
-            Text(
-              'together.maxParticipants'
-                  .tr(namedArgs: {'count': '$_maxParticipants'}),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Slider(
-              value: _maxParticipants.toDouble(),
-              min: 2,
-              max: 10,
-              divisions: 8,
-              label: "$_maxParticipants명",
-              onChanged: (val) {
-                setState(() {
-                  _maxParticipants = val.round();
-                });
-              },
-            ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
+                child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _submit,
-                    icon: const Icon(Icons.check),
-                    label: Text('together.submitBtn'.tr()),
                     style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16)))),
+                        padding: const EdgeInsets.symmetric(vertical: 16)),
+                    child: _isSubmitting
+                        ? const CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white)
+                        : Text('together.submitBtn'.tr()))),
           ],
         ),
       ),
     );
   }
 
+  // ignore: unused_element
   Color _getThemeColor(String theme) {
     if (theme == 'neon') return const Color(0xFFCCFF00);
     if (theme == 'paper') return const Color(0xFFF5F5DC);

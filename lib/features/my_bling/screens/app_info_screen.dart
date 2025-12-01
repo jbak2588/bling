@@ -24,7 +24,7 @@ class AppInfoScreen extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: theme.primaryColor.withOpacity(0.1),
+                    color: theme.primaryColor.withAlpha((0.1 * 255).toInt()),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Icon(Icons.info_outline,

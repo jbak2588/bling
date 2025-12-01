@@ -7,16 +7,20 @@
 // 전체 통일 작업은 별도 제안(리팩터)이 필요합니다.
 
 import 'dart:io';
+import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:bling_app/features/together/data/together_repository.dart';
 import 'package:bling_app/features/together/models/together_post_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart'; // ✅ 추가
-import 'package:image_picker/image_picker.dart'; // 이미지 선택
-import 'package:geolocator/geolocator.dart'; // 현재 위치
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart'; // 현재 위치
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart'; // 이미지 선택
 
 class EditTogetherScreen extends StatefulWidget {
   final TogetherPostModel post;
@@ -38,6 +42,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
   // 이미지 및 위치 선택 상태
   File? _selectedImage;
   GeoPoint? _selectedGeoPoint;
+  GoogleMapController? _mapController;
   bool _isLoadingLocation = false;
   // 업로드 상태
   bool _isUploading = false;
@@ -45,9 +50,6 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
   UploadTask? _uploadTask;
   bool _uploadFailed = false;
   String? _uploadError;
-  GoogleMapController? _mapController;
-  LatLng _currentMapPosition =
-      const LatLng(-6.2088, 106.8456); // default Jakarta
 
   @override
   void initState() {
@@ -58,12 +60,6 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
     _selectedDate = widget.post.meetTime.toDate();
     _selectedTheme = widget.post.designTheme;
     _selectedGeoPoint = widget.post.geoPoint;
-    if (_selectedGeoPoint != null) {
-      _currentMapPosition =
-          LatLng(_selectedGeoPoint!.latitude, _selectedGeoPoint!.longitude);
-    } else {
-      _initUserLocation();
-    }
   }
 
   @override
@@ -73,24 +69,6 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
     _locationController.dispose();
     _mapController?.dispose();
     super.dispose();
-  }
-
-  Future<void> _initUserLocation() async {
-    try {
-      final locationSettings =
-          LocationSettings(accuracy: LocationAccuracy.high);
-      Position position = await Geolocator.getCurrentPosition(
-          locationSettings: locationSettings);
-      setState(() {
-        _currentMapPosition = LatLng(position.latitude, position.longitude);
-      });
-      if (_mapController != null) {
-        _mapController!
-            .animateCamera(CameraUpdate.newLatLng(_currentMapPosition));
-      }
-    } catch (_) {
-      // ignore - keep default
-    }
   }
 
   void _submit() async {
@@ -117,10 +95,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
         description: _descController.text,
         meetTime: Timestamp.fromDate(_selectedDate),
         location: _locationController.text,
-        geoPoint: _selectedGeoPoint ??
-            widget.post.geoPoint ??
-            GeoPoint(
-                _currentMapPosition.latitude, _currentMapPosition.longitude),
+        geoPoint: _selectedGeoPoint ?? widget.post.geoPoint,
         imageUrl: imageUrl,
         maxParticipants: widget.post.maxParticipants,
         participants: widget.post.participants,
@@ -155,13 +130,16 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
           LocationSettings(accuracy: LocationAccuracy.high);
       Position position = await Geolocator.getCurrentPosition(
           locationSettings: locationSettings);
+      final newPoint = GeoPoint(position.latitude, position.longitude);
       setState(() {
-        _selectedGeoPoint = GeoPoint(position.latitude, position.longitude);
-        _currentMapPosition = LatLng(position.latitude, position.longitude);
+        _selectedGeoPoint = newPoint;
       });
       if (_mapController != null) {
-        _mapController!
-            .animateCamera(CameraUpdate.newLatLng(_currentMapPosition));
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(newPoint.latitude, newPoint.longitude),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -178,45 +156,116 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
   // 이미지 업로드 시작(재시도/재사용 가능)
   Future<String?> _startImageUpload(File imageFile) async {
     final repo = TogetherRepository();
+    int attempt = 0;
+    const maxAttempts = 3;
+
     setState(() {
       _isUploading = true;
-      _uploadProgress = 0.0;
       _uploadFailed = false;
       _uploadError = null;
+      _uploadProgress = 0.0;
     });
-    try {
-      _uploadTask = repo.uploadImageAsTask(imageFile);
-      _uploadTask!.snapshotEvents.listen((snapshot) {
-        final total = snapshot.totalBytes;
-        final transferred = snapshot.bytesTransferred;
-        if (total > 0 && mounted) {
-          setState(() => _uploadProgress = transferred / total);
-        }
-      }, onError: (e) {
+
+    while (attempt < maxAttempts) {
+      attempt += 1;
+      StreamSubscription<TaskSnapshot>? sub;
+      try {
+        _uploadTask = repo.uploadImageAsTask(imageFile);
+
+        final completer = Completer<TaskSnapshot>();
+
+        sub = _uploadTask!.snapshotEvents.listen((snapshot) {
+          final total = snapshot.totalBytes;
+          final transferred = snapshot.bytesTransferred;
+          if (total > 0 && mounted) {
+            setState(() => _uploadProgress = transferred / total);
+          }
+          if (snapshot.state == TaskState.success) {
+            if (!completer.isCompleted) completer.complete(snapshot);
+          }
+        }, onError: (e) {
+          debugPrint('Together upload snapshotEvents error: $e');
+          if (!completer.isCompleted) completer.completeError(e);
+        });
+
+        final snapshot = await completer.future;
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+
         if (mounted) {
           setState(() {
-            _uploadFailed = true;
-            _uploadError = e.toString();
+            _isUploading = false;
+            _uploadFailed = false;
+            _uploadError = null;
+            _uploadTask = null;
           });
         }
-      });
-
-      final snapshot = await _uploadTask!;
-      final url = await snapshot.ref.getDownloadURL();
-      return url;
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _uploadFailed = true;
-          _uploadError = e.toString();
-        });
+        return downloadUrl;
+      } catch (e) {
+        debugPrint('Together upload attempt $attempt failed: $e');
+        if (attempt >= maxAttempts) {
+          if (mounted) {
+            setState(() {
+              _isUploading = false;
+              _uploadFailed = true;
+              _uploadError = e.toString();
+              _uploadTask = null;
+            });
+          }
+          return null;
+        }
+        await Future.delayed(
+          Duration(milliseconds: (400 * math.pow(2, attempt - 1)).toInt()),
+        );
+      } finally {
+        await sub?.cancel();
       }
-      return null;
-    } finally {
-      if (mounted) {
+    }
+
+    if (mounted) {
+      setState(() {
+        _isUploading = false;
+        _uploadFailed = true;
+        _uploadError = 'upload_failed';
+        _uploadTask = null;
+      });
+    }
+    return null;
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() {
+        _selectedImage = File(picked.path);
+      });
+    }
+  }
+
+  Future<void> _selectDate() async {
+    final now = DateTime.now();
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+    );
+
+    if (pickedDate != null) {
+      final pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(_selectedDate),
+      );
+
+      if (pickedTime != null) {
         setState(() {
-          _isUploading = false;
-          _uploadTask = null;
+          _selectedDate = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
         });
       }
     }
@@ -239,47 +288,150 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                 return GestureDetector(
                   onTap: () => setState(() => _selectedTheme = theme),
                   child: Container(
-                    width: 50,
-                    height: 50,
-                    margin: const EdgeInsets.only(right: 12),
+                    margin: const EdgeInsets.only(right: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: _getThemeColor(theme),
-                      border: _selectedTheme == theme
-                          ? Border.all(color: Colors.blue, width: 3)
-                          : Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color:
+                            _selectedTheme == theme ? Colors.blue : Colors.grey,
+                      ),
+                      color: _selectedTheme == theme
+                          ? Color.fromRGBO(33, 150, 243, 0.1)
+                          : Colors.transparent,
+                    ),
+                    child: Text(
+                      "together.theme.$theme".tr(),
+                      style: TextStyle(
+                        color: _selectedTheme == theme
+                            ? Colors.blue
+                            : Colors.black,
+                      ),
                     ),
                   ),
                 );
               }).toList(),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             TextField(
               controller: _titleController,
-              decoration:
-                  InputDecoration(labelText: "together.whatLabel".tr()), // ✅ 수정
-              maxLength: 20,
+              decoration: InputDecoration(
+                labelText: "together.titleLabel".tr(),
+                hintText: "together.titleHint".tr(),
+              ),
             ),
-            const SizedBox(height: 16),
-
-            // 설명 입력 필드 (create 화면과 동일하게 노출)
+            const SizedBox(height: 8),
             TextField(
               controller: _descController,
+              maxLines: 3,
               decoration: InputDecoration(
                 labelText: "together.descLabel".tr(),
                 hintText: "together.descHint".tr(),
-                border: const OutlineInputBorder(),
-                alignLabelWithHint: true,
               ),
-              maxLines: 3,
             ),
-            const SizedBox(height: 24),
-
-            // 이미지 업로드 블록 (선택) - 기존 썸네일 아래 진행률 노출
+            const SizedBox(height: 16),
+            Text("together.imageLabel".tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _isUploading ? null : _pickImage,
+              child: Container(
+                height: 180,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey),
+                ),
+                child: _selectedImage != null
+                    ? Stack(
+                        children: [
+                          Positioned.fill(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                _selectedImage!,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          if (_isUploading)
+                            Positioned.fill(
+                              child: Container(
+                                color: Color.fromRGBO(0, 0, 0, 0.4),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircularProgressIndicator(
+                                        value: _uploadProgress,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        '${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      )
+                    : (widget.post.imageUrl != null
+                        ? Stack(
+                            children: [
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    widget.post.imageUrl!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              if (_isUploading)
+                                Positioned.fill(
+                                  child: Container(
+                                    color: Color.fromRGBO(0, 0, 0, 0.4),
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          CircularProgressIndicator(
+                                            value: _uploadProgress,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            '${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.add_photo_alternate,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                '사진을 추가하려면 탭하세요',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          )),
+              ),
+            ),
             const SizedBox(height: 8),
             if (_isUploading)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -289,7 +441,6 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                   ],
                 ),
               ),
-            // 업로드 컨트롤: 일시정지/재개/취소
             if (_isUploading)
               Row(
                 children: [
@@ -300,7 +451,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                       } catch (_) {}
                     },
                     icon: const Icon(Icons.pause),
-                    label: const Text('일시정지'),
+                    label: const Text('일시중지'),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
@@ -326,86 +477,110 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                         });
                       } catch (_) {}
                     },
-                    icon: const Icon(Icons.cancel),
+                    icon: const Icon(Icons.stop),
                     label: const Text('취소'),
                   ),
                 ],
               ),
-
-            // 업로드 실패 시 재시도 버튼
-            if (!_isUploading && _uploadFailed)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: ElevatedButton.icon(
-                  onPressed: _selectedImage == null
-                      ? null
-                      : () async {
-                          final url = await _startImageUpload(_selectedImage!);
-                          if (url != null) {
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text('upload.success'.tr())));
-                            }
-                          }
-                        },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('재시도'),
-                ),
-              ),
-            if (!_isUploading && _uploadFailed && _uploadError != null)
+            if (_uploadFailed && _uploadError != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
-                  _uploadError!,
+                  '업로드 실패: $_uploadError',
                   style: const TextStyle(color: Colors.red),
                 ),
               ),
-            const SizedBox(height: 16),
-
-            // 이미지 업로드 블록 (선택)
-            const Text("이미지 (선택)",
-                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () async {
-                final picker = ImagePicker();
-                final picked =
-                    await picker.pickImage(source: ImageSource.gallery);
-                if (picked != null && mounted) {
-                  setState(() => _selectedImage = File(picked.path));
-                }
-              },
-              child: Container(
+
+            // 위치 선택 / 현재 위치 버튼
+            if (_selectedGeoPoint == null)
+              Container(
                 width: double.infinity,
-                height: 160,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey),
-                  image: _selectedImage != null
-                      ? DecorationImage(
-                          image: FileImage(_selectedImage!),
-                          fit: BoxFit.cover,
-                        )
-                      : (widget.post.imageUrl != null
-                          ? DecorationImage(
-                              image: NetworkImage(widget.post.imageUrl!),
-                              fit: BoxFit.cover,
-                            )
-                          : null),
+                height: 200,
+                color: Colors.grey[100],
+                child: Center(
+                  child: _isLoadingLocation
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton.icon(
+                          onPressed: _getCurrentLocation,
+                          icon: const Icon(Icons.my_location),
+                          label: Text('together.setCurrentLocation'.tr()),
+                        ),
                 ),
-                child: _selectedImage == null && widget.post.imageUrl == null
-                    ? const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add_photo_alternate,
-                              size: 36, color: Colors.grey),
-                          Text("터치하여 사진 변경/추가",
-                              style: TextStyle(color: Colors.grey)),
-                        ],
-                      )
-                    : null,
+              )
+            else
+              SizedBox(
+                height: 200,
+                child: Stack(
+                  children: [
+                    GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(
+                          _selectedGeoPoint!.latitude,
+                          _selectedGeoPoint!.longitude,
+                        ),
+                        zoom: 16,
+                      ),
+                      onMapCreated: (controller) => _mapController = controller,
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
+                      zoomControlsEnabled: false,
+                      onCameraMove: (position) {
+                        _selectedGeoPoint = GeoPoint(
+                          position.target.latitude,
+                          position.target.longitude,
+                        );
+                      },
+                      gestureRecognizers: <Factory<
+                          OneSequenceGestureRecognizer>>{
+                        Factory<OneSequenceGestureRecognizer>(
+                          () => EagerGestureRecognizer(),
+                        ),
+                      },
+                    ),
+                    const Center(
+                      child: Icon(
+                        Icons.place,
+                        size: 40,
+                        color: Colors.red,
+                      ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: IconButton(
+                          icon: const Icon(Icons.my_location,
+                              color: Colors.black),
+                          onPressed: _getCurrentLocation,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 8),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text("선택된 위치"),
+              subtitle: Text(_locationController.text),
+              trailing: IconButton(
+                onPressed: _getCurrentLocation,
+                icon: const Icon(Icons.refresh),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text("together.whenLabel".tr()),
+              subtitle: Text(
+                "${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day} "
+                "${_selectedDate.hour.toString().padLeft(2, '0')}:${_selectedDate.minute.toString().padLeft(2, '0')}",
+              ),
+              trailing: IconButton(
+                onPressed: _selectDate,
+                icon: const Icon(Icons.calendar_month_outlined),
               ),
             ),
             const SizedBox(height: 16),
@@ -413,114 +588,21 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
             TextField(
               controller: _locationController,
               decoration: InputDecoration(
-                  labelText: "together.whereLabel".tr(),
-                  prefixIcon: const Icon(Icons.location_on_outlined)),
-            ),
-            const SizedBox(height: 8),
-
-            // 지도 선택기: 중심 핀으로 위치 선택
-            Container(
-              width: double.infinity,
-              height: 260,
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey),
-              ),
-              child: Stack(
-                children: [
-                  GoogleMap(
-                    myLocationEnabled: true,
-                    initialCameraPosition:
-                        CameraPosition(target: _currentMapPosition, zoom: 16),
-                    onMapCreated: (controller) => _mapController = controller,
-                    onCameraMove: (pos) => _currentMapPosition = pos.target,
-                    onCameraIdle: () {
-                      setState(() {});
-                    },
-                  ),
-                  const Center(
-                    child: Icon(Icons.location_pin,
-                        size: 48, color: Colors.redAccent),
-                  ),
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(230),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'together.mapHint'.tr(),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                  ),
-                ],
+                labelText: "together.whereLabel".tr(),
+                prefixIcon: const Icon(Icons.location_on_outlined),
               ),
             ),
-            const SizedBox(height: 8),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text("선택된 위치"),
-              subtitle: Text(
-                  "${(_selectedGeoPoint != null ? _selectedGeoPoint!.latitude : _currentMapPosition.latitude).toStringAsFixed(6)}, ${(_selectedGeoPoint != null ? _selectedGeoPoint!.longitude : _currentMapPosition.longitude).toStringAsFixed(6)}"),
-              trailing: _isLoadingLocation
-                  ? const SizedBox(
-                      width: 24, height: 24, child: CircularProgressIndicator())
-                  : ElevatedButton.icon(
-                      onPressed: _getCurrentLocation,
-                      icon: const Icon(Icons.my_location),
-                      label: const Text("현재 위치로 설정"),
-                    ),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text("together.whenLabel".tr()),
-              subtitle: Text(
-                  "${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day} ${_selectedDate.hour.toString().padLeft(2, '0')}:${_selectedDate.minute.toString().padLeft(2, '0')}"),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: () async {
-                final DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: _selectedDate,
-                  firstDate: DateTime.now().subtract(const Duration(days: 1)),
-                  lastDate: DateTime.now().add(const Duration(days: 30)),
-                );
-                if (pickedDate != null && mounted) {
-                  final TimeOfDay? pickedTime = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.fromDateTime(_selectedDate),
-                  );
-                  if (pickedTime != null) {
-                    setState(() {
-                      _selectedDate = DateTime(
-                        pickedDate.year,
-                        pickedDate.month,
-                        pickedDate.day,
-                        pickedTime.hour,
-                        pickedTime.minute,
-                      );
-                    });
-                  }
-                }
-              },
-            ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
+              child: ElevatedButton(
                 onPressed: _isSubmitting ? null : _submit,
-                icon: const Icon(Icons.save),
-                label: Text("together.updateBtn".tr()),
                 style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16)),
+                child: _isSubmitting
+                    ? const CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white)
+                    : Text("together.submitBtn".tr()),
               ),
             )
           ],
@@ -529,6 +611,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
     );
   }
 
+  // ignore: unused_element
   Color _getThemeColor(String theme) {
     if (theme == 'neon') return const Color(0xFFCCFF00);
     if (theme == 'paper') return const Color(0xFFF5F5DC);
