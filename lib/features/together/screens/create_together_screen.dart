@@ -514,8 +514,9 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
                                     .tr(namedArgs: {'error': e.toString()}))));
                           }
                         } finally {
-                          if (mounted)
+                          if (mounted) {
                             setState(() => _isLoadingLocation = false);
+                          }
                         }
                       },
                       icon: const Icon(Icons.my_location),
@@ -635,34 +636,39 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
                     icon: const Icon(Icons.cancel),
                     label: Text('upload.cancel'.tr())),
               ]),
-            if (!_isUploading && _uploadFailed)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _selectedImage == null
-                            ? null
-                            : () async {
-                                final url =
-                                    await _startImageUpload(_selectedImage!);
-                                if (url != null && mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+            (!_isUploading && _uploadFailed)
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _selectedImage == null
+                              ? null
+                              : () async {
+                                  final url =
+                                      await _startImageUpload(_selectedImage!);
+                                  if (url != null && mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                          content:
-                                              Text('upload.success'.tr())));
-                                }
-                              },
-                        icon: const Icon(Icons.refresh),
-                        label: Text('upload.retry'.tr()),
-                      ),
-                      if (_uploadError != null) const SizedBox(height: 8),
-                      if (_uploadError != null)
-                        Text(_uploadError!,
-                            style: const TextStyle(color: Colors.red)),
-                    ]),
-              ),
+                                        content: Text('upload.success'.tr()),
+                                      ),
+                                    );
+                                  }
+                                },
+                          icon: const Icon(Icons.refresh),
+                          label: Text('upload.retry'.tr()),
+                        ),
+                        if (_uploadError != null) const SizedBox(height: 8),
+                        if (_uploadError != null)
+                          Text(
+                            _uploadError!,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
 
             const SizedBox(height: 24),
             // ✅ 모집 인원 슬라이더

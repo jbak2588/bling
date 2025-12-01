@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 
-import 'package:bling_app/api_keys.dart'; // googlePlacesApiKey 등을 여기서 가져온다고 가정
+import 'package:bling_app/api_keys.dart'; // ApiKeys.serverKey 사용
 import 'package:bling_app/core/models/bling_location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
@@ -24,7 +24,7 @@ class LocationSearchService {
   LocationSearchService({
     String? apiKeyOverride,
     this.countryFilter = 'id', // 인도네시아 중심. 필요하면 null 로 열 수 있음.
-  }) : apiKey = apiKeyOverride ?? googlePlacesApiKey;
+  }) : apiKey = apiKeyOverride ?? ApiKeys.serverKey;
 
   final String apiKey;
   final String? countryFilter;
