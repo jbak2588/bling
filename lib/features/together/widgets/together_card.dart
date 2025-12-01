@@ -40,7 +40,7 @@ class TogetherCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 160,
-        height: 240, // 고정 높이 유지
+        // height: 240, // ✅ [Fix] 고정 높이 제거 (내용물에 따라 유동적, 또는 상위에서 제어)
         margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
         clipBehavior: Clip.hardEdge,
@@ -74,6 +74,11 @@ class TogetherCard extends StatelessWidget {
                         child: Image.network(
                           post.imageUrl!,
                           fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                                child: Icon(Icons.broken_image,
+                                    color: Colors.grey));
+                          },
                         ),
                       ),
                     ),
@@ -96,7 +101,7 @@ class TogetherCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
 
-                        const SizedBox(height: 6),
+                        const Spacer(), // ✅ [Fix] 고정 SizedBox 대신 Spacer 사용
 
                         // WHEN
                         Row(

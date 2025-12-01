@@ -111,10 +111,7 @@ import 'package:bling_app/features/main_feed/widgets/real_estate_thumb.dart';
 
 // ▼▼▼▼▼ [개편] 11단계: Together 썸네일 및 모델 import ▼▼▼▼▼
 import 'package:bling_app/features/together/screens/together_screen.dart';
-import 'package:bling_app/features/together/screens/together_detail_screen.dart';
-import 'package:bling_app/features/together/widgets/together_card.dart'; // Thumb 대용
-import 'package:bling_app/features/together/data/together_repository.dart';
-import 'package:bling_app/features/together/models/together_post_model.dart';
+import 'package:bling_app/features/together/widgets/together_section.dart'; // ✅ TogetherSection 사용
 
 // provider import removed: not needed after refactor
 
@@ -146,6 +143,7 @@ enum AppSection {
   auction,
   realEstate,
   pom,
+  // together, // ✅ [작업 19] 11번째 섹션 추가
 }
 
 // Global per-section Future cache to persist across rebuilds/navigation
@@ -763,50 +761,10 @@ class _HomeScreenState extends State<HomeScreen>
                         ],
                       ),
                     ),
-                    SizedBox(
-                      height: 220,
-                      child: StreamBuilder<List<TogetherPostModel>>(
-                        stream: TogetherRepository().fetchActivePosts(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
-                          final items = snapshot.data!;
-                          return ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            primary: false,
-                            shrinkWrap: true,
-                            clipBehavior: Clip.none,
-                            itemCount: (items.length < _previewLimit)
-                                ? items.length
-                                : items.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index == items.length) {
-                                return _buildViewMoreCard(
-                                    context,
-                                    TogetherScreen(
-                                        userModel: widget.userModel,
-                                        locationFilter:
-                                            widget.activeLocationFilter),
-                                    'main.tabs.together');
-                              }
-                              return TogetherCard(
-                                post: items[index],
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => TogetherDetailScreen(
-                                          post: items[index]),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          );
-                        },
-                      ),
+                    TogetherSection(
+                      userModel: widget.userModel,
+                      locationFilter: widget.activeLocationFilter,
+                      onIconTap: widget.onIconTap,
                     ),
                     const SizedBox(height: 12),
                   ],

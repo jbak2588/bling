@@ -4,7 +4,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 import 'package:bling_app/features/together/data/together_repository.dart';
 import 'package:bling_app/features/together/models/together_post_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,6 +12,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart'; // ✅ 추가
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
@@ -33,10 +33,16 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
 
   File? _selectedImage;
   String? _uploadedImageUrl;
-  GeoPoint? _selectedGeoPoint;
+  // GeoPoint? _selectedGeoPoint; // ❌ 기존 변수 미사용 (지도 좌표로 대체)
+
+  // ✅ 지도 관련 변수 추가
+  GoogleMapController? _mapController;
+  LatLng _currentMapPosition = const LatLng(-6.2088, 106.8456); // 기본값 (자카르타)
 
   bool _isSubmitting = false;
   bool _isLoadingLocation = false;
+  // ✅ [작업 29] 모집 인원 변수 추가 (기본 4명)
+  int _maxParticipants = 4;
 
   // upload state
   bool _isUploading = false;
@@ -50,6 +56,7 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
     _titleController.dispose();
     _descController.dispose();
     _locationDescController.dispose();
+    _mapController?.dispose(); // ✅ 맵 컨트롤러 해제
     super.dispose();
   }
 
@@ -61,20 +68,33 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
     }
   }
 
-  Future<void> _getCurrentLocation() async {
+  @override
+  void initState() {
+    super.initState();
+    _initUserLocation(); // ✅ 진입 시 위치 초기화 실행
+  }
+
+  // ✅ 지도 초기 위치 설정 함수 (기존 _getCurrentLocation 대체)
+  Future<void> _initUserLocation() async {
     setState(() => _isLoadingLocation = true);
     try {
-      final locationSettings =
-          LocationSettings(accuracy: LocationAccuracy.high);
-      final pos = await Geolocator.getCurrentPosition(
-          locationSettings: locationSettings);
-      setState(() => _selectedGeoPoint = GeoPoint(pos.latitude, pos.longitude));
-    } catch (e) {
+      // Deprecated 경고 해결된 최신 코드 사용
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings:
+            const LocationSettings(accuracy: LocationAccuracy.high),
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('together.locationError'.tr())));
+        setState(() {
+          _currentMapPosition = LatLng(position.latitude, position.longitude);
+          _isLoadingLocation = false;
+        });
+        // 지도가 로드된 상태라면 카메라 이동
+        _mapController?.animateCamera(
+          CameraUpdate.newLatLng(_currentMapPosition),
+        );
       }
-    } finally {
+    } catch (e) {
+      // 실패 시 기본 좌표 유지, 로딩만 해제
       if (mounted) setState(() => _isLoadingLocation = false);
     }
   }
@@ -222,9 +242,11 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
         description: _descController.text,
         meetTime: Timestamp.fromDate(_selectedDate),
         location: _locationDescController.text,
-        geoPoint: _selectedGeoPoint,
+        // ✅ 지도 핀 위치(중심점)를 GeoPoint로 변환하여 저장
+        geoPoint: GeoPoint(
+            _currentMapPosition.latitude, _currentMapPosition.longitude),
         imageUrl: imageUrl,
-        maxParticipants: 4,
+        maxParticipants: _maxParticipants,
         participants: [user.uid],
         qrCodeString: const Uuid().v4(),
         designTheme: _selectedTheme,
@@ -408,36 +430,58 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
             Text('together.whereLabel'.tr(),
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            if (_selectedGeoPoint == null)
-              Container(
-                width: double.infinity,
-                height: 150,
-                color: Colors.grey[100],
-                child: Center(
-                    child: _isLoadingLocation
-                        ? const CircularProgressIndicator()
-                        : ElevatedButton.icon(
-                            onPressed: _getCurrentLocation,
-                            icon: const Icon(Icons.my_location),
-                            label: Text('together.setCurrentLocation'.tr()))),
-              )
-            else
-              Stack(children: [
-                SizedBox(
-                    height: 150,
-                    child: MiniMapView(
-                        location: _selectedGeoPoint!,
-                        markerId: 'create_together')),
-                Positioned(
-                    top: 8,
-                    right: 8,
-                    child: CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: IconButton(
-                            icon:
-                                const Icon(Icons.refresh, color: Colors.black),
-                            onPressed: _getCurrentLocation))),
-              ]),
+            // 지도 피커 UI
+            Container(
+              height: 200,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    _isLoadingLocation
+                        ? const Center(child: CircularProgressIndicator())
+                        : GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: _currentMapPosition,
+                              zoom: 15,
+                            ),
+                            onMapCreated: (controller) =>
+                                _mapController = controller,
+                            onCameraMove: (position) {
+                              // 지도를 움직이면 중심 좌표 변수에 저장
+                              _currentMapPosition = position.target;
+                            },
+                            myLocationEnabled: true,
+                            myLocationButtonEnabled: true,
+                            zoomControlsEnabled: false,
+                          ),
+                    // 화면 중앙 고정 핀 (이 위치가 저장됨)
+                    const Icon(Icons.location_on, size: 40, color: Colors.red),
+                    // 안내 문구
+                    Positioned(
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          'together.mapHint'.tr(),
+                          style: const TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 8),
             TextField(
                 controller: _locationDescController,
@@ -471,6 +515,25 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
                         pickedTime.minute));
                   }
                 }
+              },
+            ),
+            // ✅ [작업 29] 모집 인원 선택 (Slider)
+            const SizedBox(height: 16),
+            Text(
+              'together.maxParticipants'
+                  .tr(namedArgs: {'count': '$_maxParticipants'}),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Slider(
+              value: _maxParticipants.toDouble(),
+              min: 2,
+              max: 10,
+              divisions: 8,
+              label: "$_maxParticipants명",
+              onChanged: (val) {
+                setState(() {
+                  _maxParticipants = val.round();
+                });
               },
             ),
             const SizedBox(height: 32),

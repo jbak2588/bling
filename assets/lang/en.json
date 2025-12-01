@@ -415,11 +415,13 @@
     "followers": "Followers",
     "neighbors": "Neighbors",
     "friends": "Friends",
+    "tickets": "My Tickets",
     "tabs": {
       "posts": "My Posts",
       "products": "My Products",
       "bookmarks": "Bookmarks",
-      "friends": "Friends"
+      "friends": "Friends",
+      "tickets": "My Tickets"
     },
     "stats": {
       "posts": "Posts",
@@ -656,7 +658,24 @@
     "imageOptional": "Image (optional)",
     "tapToAddPhoto": "Tap to add photo",
     "setCurrentLocation": "Set current location",
-    "whereHint": "e.g. Central Park, near the fountain"
+    "whereHint": "e.g. Central Park, near the fountain",
+    "mapHint": "Move the map to position the pin"
+    ,
+    "noTickets": "You haven't joined any gatherings yet.",
+    "qrPopup": {
+      "instruction": "Show this QR code to the host to verify your ticket.",
+      "tap": "TAP"
+    },
+    "scanBtn": "Scan QR (verify participants)",
+    "ticketScan": {
+      "title": "Ticket Check",
+      "invalidTitle": "Invalid Ticket",
+      "invalidMessage": "This ticket is not for this event.",
+      "successTitle": "Check Complete!",
+      "successMessage": "{nickname} has arrived. Enjoy!",
+      "errorTitle": "Error",
+      "errorMessage": "Could not read QR code. ({error})"
+    }
   },
   "categories": {
     "post": {
@@ -826,6 +845,7 @@
   },
   "common": {
     "cancel": "Cancel",
+    "close": "Close",
     "confirm": "Confirm",
     "delete": "Delete",
     "done": "Done",
@@ -867,9 +887,7 @@
     "retry": "Retry",
     "uploading": "Uploading...",
     "failed": "Upload failed"
-  },
-  "reportDialog": {
-    "title": "Report Post",
+    },
     "titleComment": "Report Comment",
     "titleReply": "Report Reply",
     "cannotReportSelfComment": "You cannot report your own comment.",

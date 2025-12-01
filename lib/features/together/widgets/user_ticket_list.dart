@@ -3,7 +3,6 @@
 import 'package:bling_app/features/together/data/together_repository.dart';
 import 'package:bling_app/features/together/models/together_ticket_model.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -30,7 +29,7 @@ class UserTicketList extends StatelessWidget {
                 const Icon(Icons.confirmation_number_outlined,
                     size: 64, color: Colors.grey),
                 const SizedBox(height: 16),
-                Text("아직 참여한 모임이 없어요.", // TODO: together.noTickets 키 추가 권장
+                Text('together.noTickets'.tr(),
                     style: TextStyle(color: Colors.grey[600])),
               ],
             ),
@@ -174,15 +173,15 @@ class UserTicketList extends StatelessWidget {
                 size: 200,
               ),
               const SizedBox(height: 24),
-              const Text("주최자에게 이 QR 코드를 보여주세요.",
+              Text('together.qrPopup.instruction'.tr(),
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey)),
+                  style: const TextStyle(color: Colors.grey)),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("닫기"),
+                  child: Text('common.close'.tr()),
                 ),
               ),
             ],

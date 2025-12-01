@@ -7,6 +7,11 @@ import 'package:bling_app/features/shared/widgets/app_bar_icon.dart'; // ✅ 추
 import 'package:easy_localization/easy_localization.dart'; // ✅ 추가 (다국어 지원)
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bling_app/core/models/user_model.dart';
+import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
+import 'package:bling_app/features/together/screens/ticket_scan_screen.dart'; // ✅ 추가
+import 'package:bling_app/features/shared/widgets/mini_map_view.dart'; // ✅ 미니맵 위젯 추가
 
 class TogetherDetailScreen extends StatefulWidget {
   final TogetherPostModel post;
@@ -70,8 +75,74 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
         _isJoined = true;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("together.joinSuccess".tr())), // ✅ 수정
+      // ✅ [작업 26] 참여 성공 시 팝업으로 안내 (UX 변경)
+      showDialog(
+        context: context,
+        barrierDismissible: false, // 확인 버튼을 눌러야만 닫힘
+        builder: (ctx) => AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.confirmation_number_outlined,
+                  color: Colors.green),
+              const SizedBox(width: 8),
+              Text(
+                'together.joinSuccess'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: Text(
+            'together.joinSuccess'.tr(),
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(ctx); // 팝업 닫기
+                // 사용자의 UserModel을 불러와서 MyBlingScreen으로 이동
+                final uid = FirebaseAuth.instance.currentUser?.uid;
+                if (uid == null) return;
+                try {
+                  final doc = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(uid)
+                      .get();
+                  if (!doc.exists) return;
+                  final userModel = UserModel.fromFirestore(doc);
+                  if (!mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MyBlingScreen(
+                        userModel: userModel,
+                        onIconTap: (page, title) {
+                          Navigator.push(
+                              context, MaterialPageRoute(builder: (_) => page));
+                        },
+                      ),
+                    ),
+                  );
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('together.joinFail'
+                            .tr(namedArgs: {'error': e.toString()})),
+                      ),
+                    );
+                  }
+                }
+              },
+              child: Text('myBling.tickets'.tr()),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx); // 팝업 닫기
+              },
+              child: Text('common.close'.tr()),
+            ),
+          ],
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -243,6 +314,28 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
                   _buildInfoRow(Icons.info_outline, "together.labelWhat".tr(),
                       widget.post.description, txtColor),
 
+                  // ✅ [작업 32] 상세 화면에서 지도 표시
+                  if (widget.post.geoPoint != null) ...[
+                    const SizedBox(height: 24),
+                    Container(
+                      height: 180,
+                      decoration: BoxDecoration(
+                        border:
+                            Border.all(color: txtColor.withValues(alpha: 0.5)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(11), // border inside
+                        child: MiniMapView(
+                          location: widget.post.geoPoint!,
+                          markerId: widget.post.id,
+                          height: 180,
+                        ),
+                      ),
+                    ),
+                  ],
+
                   const SizedBox(height: 40),
 
                   // Participants Count
@@ -279,8 +372,21 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed:
-                    (_isHost || _isJoined || _isJoining) ? null : _handleJoin,
+                // ✅ [수정] 주최자면 스캔 기능 활성화, 아니면 기존 로직
+                onPressed: _isHost
+                    ? () {
+                        // ✅ 주최자: QR 스캐너 실행
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                TicketScanScreen(eventId: widget.post.id),
+                          ),
+                        );
+                      }
+                    : (_isJoined || _isJoining)
+                        ? null // 참여자는 버튼 비활성 (티켓함에서 확인)
+                        : _handleJoin, // 미참여자는 참여 로직
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
@@ -289,14 +395,23 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
                 ),
                 child: _isJoining
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        _isHost
-                            ? "together.statusHost".tr()
-                            : _isJoined
-                                ? "together.statusJoined".tr()
-                                : "together.btnJoin".tr(),
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_isHost) ...[
+                            const Icon(Icons.qr_code_scanner, size: 24),
+                            const SizedBox(width: 8),
+                          ],
+                          Text(
+                            _isHost
+                                ? "together.scanBtn".tr()
+                                : _isJoined
+                                    ? "together.statusJoined".tr()
+                                    : "together.btnJoin".tr(),
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
               ),
             ),

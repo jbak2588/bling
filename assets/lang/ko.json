@@ -415,11 +415,13 @@
     "followers": "팔로워",
     "neighbors": "이웃",
     "friends": "친구",
+    "tickets": "내 티켓",
     "tabs": {
       "posts": "내 게시물",
       "products": "내 상품",
       "bookmarks": "즐겨찾기",
-      "friends": "친구"
+      "friends": "친구",
+      "tickets": "내 티켓"
     },
     "stats": {
       "posts": "게시물",
@@ -642,6 +644,7 @@
     "statusJoined": "참여 완료 (티켓 확인)",
     "btnJoin": "함께 하기 (Join)",
     "participants": "참여 현황: {current} / {max} 명",
+    "maxParticipants": "모집 인원: {count}명",
     "loginRequired": "로그인이 필요합니다.",
     "joinSuccess": "참여 완료! 나의 티켓함에서 QR을 확인하세요.",
     "joinConfirm": "참여하시겠습니까? (QR 입장권이 발급됩니다)",
@@ -656,7 +659,23 @@
     "imageOptional": "이미지 (선택)",
     "tapToAddPhoto": "사진을 추가하려면 탭하세요",
     "setCurrentLocation": "현재 위치 설정",
-    "whereHint": "예: 한강공원 잔디밭 근처"
+    "whereHint": "예: 한강공원 잔디밭 근처",
+    "mapHint": "지도를 움직여 핀을 위치시켜주세요",
+    "noTickets": "아직 참여한 모임이 없어요.",
+    "qrPopup": {
+      "instruction": "주최자에게 이 QR 코드를 제시하여 티켓을 확인하세요.",
+      "tap": "탭"
+    },
+    "scanBtn": "QR 스캔하기 (참여자 확인)",
+    "ticketScan": {
+      "title": "티켓 확인",
+      "invalidTitle": "잘못된 티켓",
+      "invalidMessage": "이 모임의 티켓이 아닙니다.",
+      "successTitle": "확인 완료!",
+      "successMessage": "{nickname}님이 도착했습니다. 즐거운 시간 되세요!",
+      "errorTitle": "오류",
+      "errorMessage": "QR 코드를 인식할 수 없습니다. ({error})"
+    }
   },
   "categories": {
     "post": {
@@ -824,6 +843,7 @@
   },
   "common": {
     "cancel": "취소",
+    "close": "닫기",
     "confirm": "확인",
     "delete": "삭제",
     "done": "완료",

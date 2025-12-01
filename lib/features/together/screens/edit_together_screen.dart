@@ -16,6 +16,7 @@ import 'package:easy_localization/easy_localization.dart'; // ✅ 추가
 import 'package:image_picker/image_picker.dart'; // 이미지 선택
 import 'package:geolocator/geolocator.dart'; // 현재 위치
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class EditTogetherScreen extends StatefulWidget {
   final TogetherPostModel post;
@@ -44,6 +45,9 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
   UploadTask? _uploadTask;
   bool _uploadFailed = false;
   String? _uploadError;
+  GoogleMapController? _mapController;
+  LatLng _currentMapPosition =
+      const LatLng(-6.2088, 106.8456); // default Jakarta
 
   @override
   void initState() {
@@ -54,6 +58,12 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
     _selectedDate = widget.post.meetTime.toDate();
     _selectedTheme = widget.post.designTheme;
     _selectedGeoPoint = widget.post.geoPoint;
+    if (_selectedGeoPoint != null) {
+      _currentMapPosition =
+          LatLng(_selectedGeoPoint!.latitude, _selectedGeoPoint!.longitude);
+    } else {
+      _initUserLocation();
+    }
   }
 
   @override
@@ -61,7 +71,26 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
     _titleController.dispose();
     _descController.dispose();
     _locationController.dispose();
+    _mapController?.dispose();
     super.dispose();
+  }
+
+  Future<void> _initUserLocation() async {
+    try {
+      final locationSettings =
+          LocationSettings(accuracy: LocationAccuracy.high);
+      Position position = await Geolocator.getCurrentPosition(
+          locationSettings: locationSettings);
+      setState(() {
+        _currentMapPosition = LatLng(position.latitude, position.longitude);
+      });
+      if (_mapController != null) {
+        _mapController!
+            .animateCamera(CameraUpdate.newLatLng(_currentMapPosition));
+      }
+    } catch (_) {
+      // ignore - keep default
+    }
   }
 
   void _submit() async {
@@ -88,7 +117,10 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
         description: _descController.text,
         meetTime: Timestamp.fromDate(_selectedDate),
         location: _locationController.text,
-        geoPoint: _selectedGeoPoint ?? widget.post.geoPoint,
+        geoPoint: _selectedGeoPoint ??
+            widget.post.geoPoint ??
+            GeoPoint(
+                _currentMapPosition.latitude, _currentMapPosition.longitude),
         imageUrl: imageUrl,
         maxParticipants: widget.post.maxParticipants,
         participants: widget.post.participants,
@@ -125,7 +157,12 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
           locationSettings: locationSettings);
       setState(() {
         _selectedGeoPoint = GeoPoint(position.latitude, position.longitude);
+        _currentMapPosition = LatLng(position.latitude, position.longitude);
       });
+      if (_mapController != null) {
+        _mapController!
+            .animateCamera(CameraUpdate.newLatLng(_currentMapPosition));
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -224,6 +261,19 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
               maxLength: 20,
             ),
             const SizedBox(height: 16),
+
+            // 설명 입력 필드 (create 화면과 동일하게 노출)
+            TextField(
+              controller: _descController,
+              decoration: InputDecoration(
+                labelText: "together.descLabel".tr(),
+                hintText: "together.descHint".tr(),
+                border: const OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 24),
 
             // 이미지 업로드 블록 (선택) - 기존 썸네일 아래 진행률 노출
             const SizedBox(height: 8),
@@ -368,32 +418,67 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
             ),
             const SizedBox(height: 8),
 
-            // 위치 선택 / 현재 위치 버튼
-            if (_selectedGeoPoint == null)
-              Container(
-                width: double.infinity,
-                height: 80,
+            // 지도 선택기: 중심 핀으로 위치 선택
+            Container(
+              width: double.infinity,
+              height: 260,
+              decoration: BoxDecoration(
                 color: Colors.grey[100],
-                child: Center(
-                  child: _isLoadingLocation
-                      ? const CircularProgressIndicator()
-                      : ElevatedButton.icon(
-                          onPressed: _getCurrentLocation,
-                          icon: const Icon(Icons.my_location),
-                          label: const Text("현재 위치로 설정"),
-                        ),
-                ),
-              )
-            else
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text("선택된 위치"),
-                subtitle: Text(
-                    "${_selectedGeoPoint!.latitude.toStringAsFixed(6)}, ${_selectedGeoPoint!.longitude.toStringAsFixed(6)}"),
-                trailing: IconButton(
-                    onPressed: _getCurrentLocation,
-                    icon: const Icon(Icons.refresh)),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey),
               ),
+              child: Stack(
+                children: [
+                  GoogleMap(
+                    myLocationEnabled: true,
+                    initialCameraPosition:
+                        CameraPosition(target: _currentMapPosition, zoom: 16),
+                    onMapCreated: (controller) => _mapController = controller,
+                    onCameraMove: (pos) => _currentMapPosition = pos.target,
+                    onCameraIdle: () {
+                      setState(() {});
+                    },
+                  ),
+                  const Center(
+                    child: Icon(Icons.location_pin,
+                        size: 48, color: Colors.redAccent),
+                  ),
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(230),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'together.mapHint'.tr(),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text("선택된 위치"),
+              subtitle: Text(
+                  "${(_selectedGeoPoint != null ? _selectedGeoPoint!.latitude : _currentMapPosition.latitude).toStringAsFixed(6)}, ${(_selectedGeoPoint != null ? _selectedGeoPoint!.longitude : _currentMapPosition.longitude).toStringAsFixed(6)}"),
+              trailing: _isLoadingLocation
+                  ? const SizedBox(
+                      width: 24, height: 24, child: CircularProgressIndicator())
+                  : ElevatedButton.icon(
+                      onPressed: _getCurrentLocation,
+                      icon: const Icon(Icons.my_location),
+                      label: const Text("현재 위치로 설정"),
+                    ),
+            ),
             const SizedBox(height: 16),
             ListTile(
               contentPadding: EdgeInsets.zero,

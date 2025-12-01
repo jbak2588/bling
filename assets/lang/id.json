@@ -415,11 +415,13 @@
     "followers": "Pengikut",
     "neighbors": "Tetangga",
     "friends": "Teman",
+    "tickets": "Tiket Saya",
     "tabs": {
       "posts": "Postingan Saya",
       "products": "Produk Saya",
       "bookmarks": "Markah",
-      "friends": "Teman"
+      "friends": "Teman",
+      "tickets": "Tiket Saya"
     },
     "stats": {
       "posts": "Postingan",
@@ -642,6 +644,7 @@
     "statusJoined": "Bergabung (Cek Tiket)",
     "btnJoin": "Ikutan (Join)",
     "participants": "Peserta: {current} / {max}",
+    "maxParticipants": "Jumlah peserta: {count} orang",
     "loginRequired": "Perlu login.",
     "joinSuccess": "Berhasil! Cek tiket QR Anda.",
     "joinConfirm": "Apakah Anda ingin bergabung? Tiket QR akan diterbitkan.",
@@ -656,7 +659,23 @@
     "imageOptional": "Gambar (opsional)",
     "tapToAddPhoto": "Ketuk untuk menambahkan foto",
     "setCurrentLocation": "Atur lokasi saat ini",
-    "whereHint": "contoh: Taman Kota, dekat air mancur"
+    "whereHint": "contoh: Taman Kota, dekat air mancur",
+    "mapHint": "Geser peta untuk menempatkan pin",
+    "noTickets": "Anda belum bergabung dengan acara apa pun.",
+    "qrPopup": {
+      "instruction": "Tunjukkan kode QR ini kepada penyelenggara untuk memverifikasi tiket Anda.",
+      "tap": "KETUK"
+    },
+    "scanBtn": "Pindai QR (verifikasi peserta)",
+    "ticketScan": {
+      "title": "Periksa Tiket",
+      "invalidTitle": "Tiket tidak valid",
+      "invalidMessage": "Tiket ini bukan untuk acara ini.",
+      "successTitle": "Berhasil!",
+      "successMessage": "{nickname} telah datang. Selamat bersenang-senang!",
+      "errorTitle": "Kesalahan",
+      "errorMessage": "Tidak dapat membaca QR. ({error})"
+    }
   },
   "categories": {
     "post": {
@@ -826,6 +845,7 @@
   },
   "common": {
     "cancel": "Batal",
+    "close": "Tutup",
     "confirm": "Konfirmasi",
     "delete": "Hapus",
     "done": "Selesai",

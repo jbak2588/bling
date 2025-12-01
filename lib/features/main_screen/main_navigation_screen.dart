@@ -1,5 +1,4 @@
 // 파일 경로: lib/features/main_screen/main_navigation_screen.dart
-/// [기획 문서: 00 Mainscreen & 런처 & Tab & Drawer QA.md]
 /// - 기획 요약: 메인 네비게이션 구조, AppBar/Drawer/BottomNavigationBar, 위치 필터, 사용자 흐름, 반응형 정책 등
 /// - 실제 코드 기능: MainNavigationScreen에서 AppBar, Drawer, BottomNavigationBar, 위치 필터, 사용자 정보, 알림 등 네비게이션 및 메인 화면 관리
 /// - 비교: 기획의 네비게이션/레이아웃 구조가 실제 코드에서 State 관리와 위젯 조합으로 구현됨. 반응형/접근성/애니메이션 등은 일부 적용됨
@@ -76,6 +75,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:bling_app/features/together/data/together_repository.dart'; // ✅ 추가
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -134,6 +134,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   StreamSubscription? _unreadNotificationsSubscription; // [Task 96]
   int _totalUnreadCount = 0;
   int _totalUnreadNotifications = 0; // [Task 96]
+  // ✅ [작업 26] 티켓 관련 변수 추가
+  StreamSubscription? _myTicketSubscription;
+  int _activeTicketCount = 0;
   // ✅ [게시판] 동네 게시판 활성화 상태
   bool _isKelurahanBoardActive = false;
   // 관리자 작업 로딩 상태
@@ -178,10 +181,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         _listenToUserData(user.uid);
         _listenToUnreadChats(user.uid);
         _listenToUnreadNotifications(user.uid); // [Task 96]
+        _listenToMyTickets(user.uid); // ✅ 티켓 리스너 연결
       } else {
         _userSubscription?.cancel();
         _unreadChatsSubscription?.cancel();
         _unreadNotificationsSubscription?.cancel(); // [Task 96]
+        _myTicketSubscription?.cancel(); // ✅ 해제
         if (mounted) {
           setState(() {
             _userModel = null;
@@ -199,6 +204,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _userSubscription?.cancel();
     _unreadChatsSubscription?.cancel();
     _unreadNotificationsSubscription?.cancel(); // [Task 96]
+    _myTicketSubscription?.cancel(); // ✅ 추가
     _homeScrollController.dispose();
     _searchActivationNotifier.dispose(); // ✅ Notifier 해제
     _searchTrigger.dispose();
@@ -329,6 +335,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         setState(() {
           _totalUnreadNotifications = snapshot.docs.length;
         });
+      }
+    });
+  }
+
+  // ✅ [작업 26] 내 유효 티켓 카운팅 리스너
+  void _listenToMyTickets(String myUid) {
+    _myTicketSubscription?.cancel();
+    final stream = TogetherRepository().fetchMyTickets(myUid);
+
+    _myTicketSubscription = stream.listen((tickets) {
+      if (mounted) {
+        final now = DateTime.now();
+        final count = tickets
+            .where(
+                (t) => (t.isUsed == false) && t.meetTime.toDate().isAfter(now))
+            .length;
+        setState(() => _activeTicketCount = count);
       }
     });
   }
@@ -1403,8 +1426,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 label: 'main.bottomNav.chat'.tr(),
               ),
               BottomNavigationBarItem(
-                icon: const Icon(Icons.person_outline),
-                activeIcon: const Icon(Icons.person),
+                // ✅ [작업 26] 활성 티켓이 있으면 배지 표시
+                icon: Badge(
+                  isLabelVisible: _activeTicketCount > 0,
+                  label: Text('$_activeTicketCount'),
+                  child: const Icon(Icons.person_outline),
+                ),
+                activeIcon: Badge(
+                  isLabelVisible: _activeTicketCount > 0,
+                  label: Text('$_activeTicketCount'),
+                  child: const Icon(Icons.person),
+                ),
                 label: 'main.bottomNav.myBling'.tr(),
               ),
             ],
