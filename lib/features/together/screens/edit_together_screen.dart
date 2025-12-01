@@ -21,6 +21,8 @@ import 'package:image_picker/image_picker.dart'; // 이미지 선택
 import 'package:geolocator/geolocator.dart'; // 현재 위치
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:bling_app/api_keys.dart';
+import 'package:flutter_google_maps_webservices/places.dart';
 
 class EditTogetherScreen extends StatefulWidget {
   final TogetherPostModel post;
@@ -55,10 +57,14 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
       const LatLng(-6.2088, 106.8456); // default Jakarta
   // 모집 인원
   int _maxParticipants = 4;
+  // Places API
+  late GoogleMapsPlaces _places;
 
   @override
   void initState() {
     super.initState();
+    // Places API 초기화
+    _places = GoogleMapsPlaces(apiKey: ApiKeys.serverKey);
     _titleController = TextEditingController(text: widget.post.title);
     _descController = TextEditingController(text: widget.post.description);
     _locationController = TextEditingController(text: widget.post.location);
@@ -81,6 +87,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
     _descController.dispose();
     _locationController.dispose();
     _mapController?.dispose();
+    _places.dispose();
     super.dispose();
   }
 
@@ -174,13 +181,36 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('위치를 가져올 수 없습니다: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('together.locationFetchError'
+                .tr(namedArgs: {'error': e.toString()}))));
       }
     } finally {
       if (mounted) {
         setState(() => _isLoadingLocation = false);
       }
+    }
+  }
+
+  // Places API 선택 핸들러
+  Future<void> _onPlaceSelected(Prediction prediction) async {
+    if (prediction.placeId == null) return;
+
+    try {
+      final detail = await _places.getDetailsByPlaceId(prediction.placeId!);
+      final lat = detail.result.geometry?.location.lat;
+      final lng = detail.result.geometry?.location.lng;
+
+      if (lat != null && lng != null) {
+        final newPos = LatLng(lat, lng);
+        _mapController?.animateCamera(CameraUpdate.newLatLngZoom(newPos, 17));
+        setState(() {
+          _currentMapPosition = newPos;
+          _locationController.text = detail.result.name;
+        });
+      }
+    } catch (e) {
+      debugPrint("Place detail error: $e");
     }
   }
 
@@ -360,7 +390,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                       } catch (_) {}
                     },
                     icon: const Icon(Icons.pause),
-                    label: const Text('일시정지'),
+                    label: Text('upload.pause'.tr()),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
@@ -370,7 +400,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                       } catch (_) {}
                     },
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text('재개'),
+                    label: Text('upload.resume'.tr()),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
@@ -388,7 +418,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                       } catch (_) {}
                     },
                     icon: const Icon(Icons.cancel),
-                    label: const Text('취소'),
+                    label: Text('upload.cancel'.tr()),
                   ),
                 ],
               ),
@@ -411,7 +441,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                           }
                         },
                   icon: const Icon(Icons.refresh),
-                  label: const Text('재시도'),
+                  label: Text('upload.retry'.tr()),
                 ),
               ),
             if (!_isUploading && _uploadFailed && _uploadError != null)
@@ -425,8 +455,8 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
             const SizedBox(height: 16),
 
             // 이미지 업로드 블록 (선택)
-            const Text("이미지 (선택)",
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('together.imageOptional'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             GestureDetector(
               onTap: () async {
@@ -462,13 +492,13 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                               : null)),
                 ),
                 child: _selectedImage == null && widget.post.imageUrl == null
-                    ? const Column(
+                    ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_photo_alternate,
+                          const Icon(Icons.add_photo_alternate,
                               size: 36, color: Colors.grey),
-                          Text("터치하여 사진 변경/추가",
-                              style: TextStyle(color: Colors.grey)),
+                          Text('together.tapToAddPhoto'.tr(),
+                              style: const TextStyle(color: Colors.grey)),
                         ],
                       )
                     : null,
@@ -476,12 +506,70 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
             ),
             const SizedBox(height: 16),
             const SizedBox(height: 16),
-            TextField(
-              controller: _locationController,
-              decoration: InputDecoration(
-                  labelText: "together.whereLabel".tr(),
-                  prefixIcon: const Icon(Icons.location_on_outlined)),
-            ),
+            // 주소 검색창 (Autocomplete)
+            LayoutBuilder(builder: (context, constraints) {
+              return Autocomplete<Prediction>(
+                optionsBuilder: (textEditingValue) async {
+                  if (textEditingValue.text.isEmpty) return [];
+                  try {
+                    final res =
+                        await _places.autocomplete(textEditingValue.text);
+                    debugPrint("Places API Status: ${res.status}");
+                    if (res.errorMessage != null) {
+                      debugPrint("Places API Error: ${res.errorMessage}");
+                    }
+                    if (res.isOkay) {
+                      return res.predictions;
+                    } else {
+                      return [];
+                    }
+                  } catch (e) {
+                    debugPrint("Places API Exception: $e");
+                    return [];
+                  }
+                },
+                displayStringForOption: (option) => option.description ?? '',
+                onSelected: _onPlaceSelected,
+                fieldViewBuilder:
+                    (context, controller, focusNode, onSubmitted) {
+                  return TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    onSubmitted: (_) => onSubmitted(),
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search),
+                      hintText: 'together.searchHint'.tr(),
+                      border: const OutlineInputBorder(),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                  );
+                },
+                optionsViewBuilder: (context, onSelected, options) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4,
+                      child: SizedBox(
+                        width: constraints.maxWidth,
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          itemCount: options.length,
+                          itemBuilder: (context, index) {
+                            final option = options.elementAt(index);
+                            return ListTile(
+                              title: Text(option.description ?? ''),
+                              onTap: () => onSelected(option),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
             const SizedBox(height: 8),
 
             // 지도 선택기: 중심 핀으로 위치 선택
@@ -542,7 +630,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
             const SizedBox(height: 8),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text("선택된 위치"),
+              title: Text('together.selectedLocation'.tr()),
               subtitle: Text(
                   "${(_selectedGeoPoint != null ? _selectedGeoPoint!.latitude : _currentMapPosition.latitude).toStringAsFixed(6)}, ${(_selectedGeoPoint != null ? _selectedGeoPoint!.longitude : _currentMapPosition.longitude).toStringAsFixed(6)}"),
               trailing: _isLoadingLocation
@@ -551,7 +639,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                   : ElevatedButton.icon(
                       onPressed: _getCurrentLocation,
                       icon: const Icon(Icons.my_location),
-                      label: const Text("현재 위치로 설정"),
+                      label: Text('together.setCurrentLocation'.tr()),
                     ),
             ),
             const SizedBox(height: 16),

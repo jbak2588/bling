@@ -250,7 +250,8 @@ lib
 │   │       ├── pom_thumb.dart
 │   │       ├── post_thumb.dart
 │   │       ├── product_thumb.dart
-│   │       └── real_estate_thumb.dart
+│   │       ├── real_estate_thumb.dart
+│   │       └── together_thumb.dart
 │   ├── main_screen
 │   │   ├── home_screen.dart
 │   │   └── main_navigation_screen.dart
@@ -259,11 +260,6 @@ lib
 │   │   │   ├── ai_case_repository.dart
 │   │   │   └── product_repository.dart
 │   │   ├── devlog_n_docs
-│   │   │   ├── 4. Pre-Loved Items _ 중고물품 거래 (V3.0) 11월16일버전.docx
-│   │   │   ├── 4. Pre-Loved Items _ 중고물품 거래 (V3.0) 11월16일버전.md
-│   │   │   ├── AI 검수 엔진 리팩토링 및 안정화 DevLog V3 11월 16일버전.docx
-│   │   │   ├── AI 검수 엔진 리팩토링 및 안정화 DevLog V3 11월 16일버전.md
-│   │   │   ├── Bling App  AI 검수 시스템 V2 초기 버전 개발 성공 DevLog.md
 │   │   │   └── Marketplace AI 기능 개발일지 (DevLog)-25년 11월 11일.docx
 │   │   ├── models
 │   │   │   └── product_model.dart
@@ -347,6 +343,23 @@ lib
 │   │       ├── inline_search_chip.dart
 │   │       ├── mini_map_view.dart
 │   │       └── trust_level_badge.dart
+│   ├── together
+│   │   ├── data
+│   │   │   └── together_repository.dart
+│   │   ├── models
+│   │   │   ├── together_post_model.dart
+│   │   │   └── together_ticket_model.dart
+│   │   ├── screens
+│   │   │   ├── create_together_screen.dart
+│   │   │   ├── edit_together_screen.dart
+│   │   │   ├── ticket_scan_screen.dart
+│   │   │   ├── together_detail_screen.dart
+│   │   │   └── together_screen.dart
+│   │   └── widgets
+│   │       ├── place_search.dart
+│   │       ├── together_card.dart
+│   │       ├── together_section.dart
+│   │       └── user_ticket_list.dart
 │   └── user_profile
 │       └── screens
 │           ├── profile_setup_screen.dart
@@ -356,7 +369,19 @@ lib
 assets
 ├── data
 ├── icons
-│   └── google_logo.png
+│   ├── google_logo.png
+│   ├── ico_auction.svg
+│   ├── ico_community.svg
+│   ├── ico_friend_3d_deep.svg
+│   ├── ico_job.svg
+│   ├── ico_lost_item.svg
+│   ├── ico_news.svg
+│   ├── ico_pom.svg
+│   ├── ico_real_estate.svg
+│   ├── ico_secondhand.svg
+│   ├── ico_store.svg
+│   ├── ico_together.svg
+│   └── ms
 ├── lang
 │   ├── en.json
 │   ├── id.json
@@ -372,52 +397,7 @@ functions-v2
 ├── package.json
 └── pglite-debug.log
 ├── pubspec.yaml
-├── README.md
-├── docs
-│   ├── index
-│   │   ├── 00  Mainscreen & 런처 & Tab & Drawer QA.md
-│   │   ├── 01  프로젝트 개요 & 폴더트리.md
-│   │   ├── 010  Feed(Post) 모듈.md
-│   │   ├── 011  Marketplace 모듈.md
-│   ├── 012  Find Friend & Club & Jobs & etc 모듈.md
-│   ├── 013 참조용 자료
-│   │   │   ├── 0. 작업 지침!.md
-│   │   │   ├── 1  디자인 UX 가이드 n i18n.md
-│   │   │   ├── 10  개발 로드맵 & 체크리스트.md
-│   │   │   ├── 12. 약관 & 법적 정책.md
-│   │   │   ├── 2  프로젝트 개요 & 메인 구조.md
-│   │   │   ├── 3  사용자 DB & 신뢰 등급.md
-│   │   │   ├── 4  사용자 화면 & 마이페이지.md
-│   │   │   ├── 5  지역-위치-개인정보.md
-│   │   │   ├── 6  피드 (Local News).md
-│   │   │   ├── 7  Marketplace.md
-│   │   │   ├── 8  Frind-Club-Jobs-Shops-Auciton-POM.md
-│   │   │   ├── 9  Notification - 신고 - 커뮤니티.md
-│   │   │   └── Pasted image 20250701221455.png
-│   │   ├── 02  Design Guide + i18n.md
-│   │   ├── 03  User 필드 & TrustLever & 프로필정책.md
-│   │   ├── 04  주소 DropDwon & Singkatan.md
-│   │   ├── 05  공통 Helper & Service & Validator.md
-│   │   ├── 06  MyProfile & 활동 히스토리 Scaffold.md
-│   │   ├── 07  Chat 모듈 Core.md
-│   │   ├── 08  Notification 모듈 Core.md
-│   │   ├── 09  신고 & 차단 & Privacy Guard.md
-│   │   ├── Bling App 개발 일지 (2025년 7월 4일).md
-│   │   ├── Bling_Location_GeoQuery_Structure.md
-│   │   ├── 전체_프로젝트_팀별_공통_공지문.md
-│   │   ├── 피드 관련 위치 검색 규칙과 예시.md
-│   │   └── 📌 Bling_Team_ToDo_QA_Index.md
-│   ├── team
-│   │   ├── TeamA__Auth_Trust_module_통합 작업문서.md
-│   │   ├── teamB_Feed_CRUD_Module_통합 작업문서.md
-│   │   ├── teamC_Chat & Notification 모듈_통합 작업문서.md
-│   │   ├── teamD_GeoQuery_Location_Module_통합_작업문서.md
-│   │   ├── teamF_Design_Privacy_Module_통합_작업문.md
-│   │   └── temE_AI_Moderation_Module_통합_작업문서.md
-│   └── templates 
-
-
-
+└── README.md
 
 
 ## ✅ 핵심 Firestore 컬렉션

@@ -658,9 +658,12 @@
     "descHint": "행사에 대해 자세히 설명하세요 (시간, 일정, 준비물 등).",
     "imageOptional": "이미지 (선택)",
     "tapToAddPhoto": "사진을 추가하려면 탭하세요",
+    "searchHint": "주소 또는 장소명 검색",
+    "selectedLocation": "선택된 위치",
+    "locationFetchError": "위치를 가져올 수 없습니다: {error}",
     "setCurrentLocation": "현재 위치 설정",
     "whereHint": "예: 한강공원 잔디밭 근처",
-    "mapHint": "지도를 움직여 핀을 위치시켜주세요",
+    "mapHint": "지도를 움직여 핀을 위치시켜 주세요",
     "noTickets": "아직 참여한 모임이 없어요.",
     "qrPopup": {
       "instruction": "주최자에게 이 QR 코드를 제시하여 티켓을 확인하세요.",

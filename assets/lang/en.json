@@ -657,6 +657,9 @@
     "descHint": "Describe the event in detail (time, agenda, requirements).",
     "imageOptional": "Image (optional)",
     "tapToAddPhoto": "Tap to add photo",
+    "searchHint": "Search address or place name",
+    "selectedLocation": "Selected location",
+    "locationFetchError": "Unable to get location: {error}",
     "setCurrentLocation": "Set current location",
     "whereHint": "e.g. Central Park, near the fountain",
     "mapHint": "Move the map to position the pin"
