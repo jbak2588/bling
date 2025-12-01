@@ -1738,8 +1738,8 @@ exports.onLocalNewsPostCreate = onDocumentCreated(
         await db.runTransaction(async (transaction) => {
           const boardDoc = await transaction.get(boardRef);
 
-          // ✅ 런칭 초기 임계값 10으로 설정
-          const ACTIVATION_THRESHOLD = 10;
+          // ✅ 런칭 초기 임계값 10으로 설정에서 2로 변경 (테스트 목적) => 원래는 10 ~ 50
+          const ACTIVATION_THRESHOLD = 2;
 
           let newPostCount = 1;
           let currentFeatures = {hasGroupChat: false};
