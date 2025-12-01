@@ -2273,13 +2273,11 @@
         "invalid_email": "The email address is invalid.",
         "unknown": "An unknown error occurred."
       }
-    }
-
-      ,
-      "home": {
-        "menu": {
-          "together": "Together"
-        }
+    },
+    "home": {
+      "menu": {
+        "together": "Together"
       }
+    }
   }
 }
