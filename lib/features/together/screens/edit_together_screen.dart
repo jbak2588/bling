@@ -6,11 +6,15 @@
 // `TogetherRepository.uploadImage(File)`(현재는 URL을 반환) 형태로 사용합니다.
 // 전체 통일 작업은 별도 제안(리팩터)이 필요합니다.
 
+import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:bling_app/features/together/data/together_repository.dart';
 import 'package:bling_app/features/together/models/together_post_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart'; // ✅ 추가
+import 'package:flutter/gestures.dart'; // ✅ 추가
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart'; // ✅ 추가
 import 'package:image_picker/image_picker.dart'; // 이미지 선택
@@ -45,9 +49,12 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
   UploadTask? _uploadTask;
   bool _uploadFailed = false;
   String? _uploadError;
+  String? _uploadedImageUrl;
   GoogleMapController? _mapController;
   LatLng _currentMapPosition =
       const LatLng(-6.2088, 106.8456); // default Jakarta
+  // 모집 인원
+  int _maxParticipants = 4;
 
   @override
   void initState() {
@@ -58,6 +65,8 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
     _selectedDate = widget.post.meetTime.toDate();
     _selectedTheme = widget.post.designTheme;
     _selectedGeoPoint = widget.post.geoPoint;
+    // 초기 모집 인원 값 설정
+    _maxParticipants = widget.post.maxParticipants;
     if (_selectedGeoPoint != null) {
       _currentMapPosition =
           LatLng(_selectedGeoPoint!.latitude, _selectedGeoPoint!.longitude);
@@ -122,7 +131,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
             GeoPoint(
                 _currentMapPosition.latitude, _currentMapPosition.longitude),
         imageUrl: imageUrl,
-        maxParticipants: widget.post.maxParticipants,
+        maxParticipants: _maxParticipants,
         participants: widget.post.participants,
         qrCodeString: widget.post.qrCodeString,
         designTheme: _selectedTheme,
@@ -178,48 +187,99 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
   // 이미지 업로드 시작(재시도/재사용 가능)
   Future<String?> _startImageUpload(File imageFile) async {
     final repo = TogetherRepository();
+    const int maxAttempts = 5;
+    int attempt = 0;
+    const int baseDelayMs = 500;
+
+    if (!mounted) return null;
     setState(() {
       _isUploading = true;
-      _uploadProgress = 0.0;
       _uploadFailed = false;
       _uploadError = null;
+      _uploadProgress = 0.0;
     });
-    try {
-      _uploadTask = repo.uploadImageAsTask(imageFile);
-      _uploadTask!.snapshotEvents.listen((snapshot) {
-        final total = snapshot.totalBytes;
-        final transferred = snapshot.bytesTransferred;
-        if (total > 0 && mounted) {
-          setState(() => _uploadProgress = transferred / total);
+
+    while (attempt < maxAttempts) {
+      attempt += 1;
+      StreamSubscription<TaskSnapshot>? sub;
+      try {
+        _uploadTask = repo.uploadImageAsTask(imageFile);
+
+        final completer = Completer<TaskSnapshot>();
+
+        sub = _uploadTask!.snapshotEvents.listen((snapshot) {
+          final total = snapshot.totalBytes;
+          final transferred = snapshot.bytesTransferred;
+          if (total > 0 && mounted) {
+            setState(() => _uploadProgress = transferred / total);
+          }
+          if (snapshot.state == TaskState.success) {
+            if (!completer.isCompleted) completer.complete(snapshot);
+          }
+        }, onError: (e) {
+          debugPrint('EditTogether upload snapshotEvents error: $e');
+          if (!completer.isCompleted) completer.completeError(e);
+        });
+
+        final snapshot = await completer.future;
+        final url = await snapshot.ref.getDownloadURL();
+
+        if (mounted) {
+          setState(() {
+            _isUploading = false;
+            _uploadTask = null;
+            _uploadFailed = false;
+            _uploadError = null;
+            _uploadProgress = 0.0;
+            _uploadedImageUrl = url;
+          });
         }
-      }, onError: (e) {
+        await sub.cancel();
+        return url;
+      } catch (e) {
+        debugPrint('EditTogether upload attempt $attempt failed: $e');
         if (mounted) {
           setState(() {
             _uploadFailed = true;
             _uploadError = e.toString();
           });
         }
-      });
 
-      final snapshot = await _uploadTask!;
-      final url = await snapshot.ref.getDownloadURL();
-      return url;
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _uploadFailed = true;
-          _uploadError = e.toString();
-        });
-      }
-      return null;
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isUploading = false;
-          _uploadTask = null;
-        });
+        // fallback synchronous upload attempt
+        try {
+          debugPrint(
+              'EditTogether upload: attempting synchronous fallback upload (putFile)');
+          final url = await repo.uploadImage(imageFile);
+          if (mounted) {
+            setState(() {
+              _isUploading = false;
+              _uploadTask = null;
+              _uploadFailed = false;
+              _uploadError = null;
+              _uploadProgress = 0.0;
+              _uploadedImageUrl = url;
+            });
+          }
+          return url;
+        } catch (fallbackErr) {
+          debugPrint(
+              'EditTogether synchronous fallback upload failed: $fallbackErr');
+        }
+
+        if (attempt >= maxAttempts) break;
+
+        final delayMs = (baseDelayMs * math.pow(2, attempt - 1)).toInt();
+        await Future.delayed(Duration(milliseconds: delayMs));
+      } finally {
+        try {
+          await sub?.cancel();
+        } catch (_) {}
+        if (mounted) setState(() => _uploadTask = null);
       }
     }
+
+    if (mounted) setState(() => _isUploading = false);
+    return null;
   }
 
   @override
@@ -323,6 +383,7 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                           _uploadTask = null;
                           _uploadFailed = true;
                           _uploadError = 'cancelled';
+                          _uploadedImageUrl = null;
                         });
                       } catch (_) {}
                     },
@@ -388,12 +449,17 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                           image: FileImage(_selectedImage!),
                           fit: BoxFit.cover,
                         )
-                      : (widget.post.imageUrl != null
+                      : (_uploadedImageUrl != null
                           ? DecorationImage(
-                              image: NetworkImage(widget.post.imageUrl!),
+                              image: NetworkImage(_uploadedImageUrl!),
                               fit: BoxFit.cover,
                             )
-                          : null),
+                          : (widget.post.imageUrl != null
+                              ? DecorationImage(
+                                  image: NetworkImage(widget.post.imageUrl!),
+                                  fit: BoxFit.cover,
+                                )
+                              : null)),
                 ),
                 child: _selectedImage == null && widget.post.imageUrl == null
                     ? const Column(
@@ -438,8 +504,17 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                     onCameraIdle: () {
                       setState(() {});
                     },
+                    // ✅ [Fix] 제스처 우선권 설정 (스크롤 뷰 간섭 해결)
+                    gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                      Factory<OneSequenceGestureRecognizer>(
+                        () => EagerGestureRecognizer(),
+                      ),
+                    },
                   ),
-                  const Center(
+                  // ✅ [Fix] 핀의 '끝'이 지도 중앙에 오도록 패딩으로 위치 보정
+                  // 아이콘 크기가 48이므로, 하단에 48만큼 패딩을 주어 아이콘 전체를 위로 올림
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 48.0),
                     child: Icon(Icons.location_pin,
                         size: 48, color: Colors.redAccent),
                   ),
@@ -510,6 +585,24 @@ class _EditTogetherScreenState extends State<EditTogetherScreen> {
                     });
                   }
                 }
+              },
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'together.maxParticipants'
+                  .tr(namedArgs: {'count': '$_maxParticipants'}),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Slider(
+              value: _maxParticipants.toDouble(),
+              min: 2,
+              max: 10,
+              divisions: 8,
+              label: "$_maxParticipants명",
+              onChanged: (val) {
+                setState(() {
+                  _maxParticipants = val.round();
+                });
               },
             ),
             const SizedBox(height: 32),

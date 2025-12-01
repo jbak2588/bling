@@ -10,6 +10,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart'; // ✅ 추가
+import 'package:flutter/gestures.dart'; // ✅ 추가
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // ✅ 추가
@@ -458,9 +460,21 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
                             myLocationEnabled: true,
                             myLocationButtonEnabled: true,
                             zoomControlsEnabled: false,
+                            // ✅ [Fix] 제스처 우선권 설정 (스크롤 뷰 간섭 해결)
+                            gestureRecognizers: <Factory<
+                                OneSequenceGestureRecognizer>>{
+                              Factory<OneSequenceGestureRecognizer>(
+                                () => EagerGestureRecognizer(),
+                              ),
+                            },
                           ),
-                    // 화면 중앙 고정 핀 (이 위치가 저장됨)
-                    const Icon(Icons.location_on, size: 40, color: Colors.red),
+                    // ✅ [Fix] 핀의 '끝'이 지도 중앙에 오도록 패딩으로 위치 보정
+                    // 아이콘 크기가 40이므로, 하단에 40만큼 패딩을 주어 아이콘 전체를 위로 올림
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 40.0),
+                      child:
+                          Icon(Icons.location_on, size: 40, color: Colors.red),
+                    ),
                     // 안내 문구
                     Positioned(
                       top: 8,
