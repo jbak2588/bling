@@ -111,14 +111,6 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
   @override
   void initState() {
     super.initState();
-    // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
-    if (widget.autoFocusSearch) {
-      _showSearchBar = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _chipOpenNotifier.value = true;
-      });
-    }
-
     if (widget.searchNotifier != null) {
       widget.searchNotifier!.addListener(_externalSearchListener);
     }
@@ -239,8 +231,7 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: ChoiceChip(
-                    label: Text('localStores.categories.$category'
-                        .tr()), // 'all' 번역도 필요
+                    label: Text('localStores.categories.$category'.tr()),
                     selected: isSelected,
                     onSelected: (selected) {
                       if (selected) {
@@ -339,7 +330,7 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.search_off,
+                            Icon(Icons.storefront_outlined,
                                 size: 64, color: Colors.grey[300]),
                             const SizedBox(height: 12),
                             Text('localStores.empty'.tr(),
@@ -352,7 +343,27 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(color: Colors.grey)),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 24),
+                            // [추가] 가게 등록 유도 버튼
+                            TextButton.icon(
+                              icon: const Icon(Icons.add_business),
+                              label: Text('localStores.create.title'.tr()),
+                              onPressed: () {
+                                if (widget.userModel != null) {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (_) => CreateShopScreen(
+                                        userModel: widget.userModel!),
+                                  ));
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'main.errors.loginRequired'
+                                                  .tr())));
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 8),
                             OutlinedButton.icon(
                               icon: const Icon(Icons.map_outlined),
                               label: Text('search.empty.expandToNational'.tr()),

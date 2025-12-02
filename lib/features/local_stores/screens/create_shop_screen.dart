@@ -37,6 +37,8 @@ import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/local_stores/data/shop_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bling_app/core/models/bling_location.dart';
+import 'package:bling_app/features/shared/widgets/address_map_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -85,6 +87,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   // ^ ^ ^ --- 여기까지 수정 --- ^ ^ ^
 
   bool _isSaving = false;
+  BlingLocation? _shopLocation;
 
   final ShopRepository _repository = ShopRepository();
   final ImagePicker _picker = ImagePicker();
@@ -121,6 +124,11 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     if (_images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('localStores.form.imageError'.tr())));
+      return;
+    }
+    if (_shopLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('localStores.form.shopLocationError'.tr())));
       return;
     }
 
@@ -170,6 +178,9 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         ..._tags,
       }.toList();
 
+      final shopLoc = _shopLocation;
+      final shopAddressText = shopLoc?.shortLabel ?? shopLoc?.mainAddress ?? '';
+
       final newShop = ShopModel(
         id: '',
         name: _nameController.text.trim(),
@@ -181,6 +192,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         locationParts:
             freshUserModel?.locationParts ?? widget.userModel.locationParts,
         geoPoint: freshUserModel?.geoPoint ?? widget.userModel.geoPoint,
+        shopLocation: shopLoc,
+        shopAddress: shopAddressText.isNotEmpty ? shopAddressText : null,
         category: _selectedCategory, // [추가]
         products: _productsController.text
             .trim()
@@ -304,7 +317,16 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                       : null,
                 ),
                 const SizedBox(height: 24),
-                const SizedBox(height: 72),
+                AddressMapPicker(
+                  initialValue: _shopLocation,
+                  userGeoPoint: widget.userModel.geoPoint,
+                  labelText: 'localStores.form.shopLocationLabel'.tr(),
+                  hintText: 'localStores.form.shopLocationHint'.tr(),
+                  onChanged: (loc) {
+                    setState(() => _shopLocation = loc);
+                  },
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(

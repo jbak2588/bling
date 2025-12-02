@@ -35,6 +35,8 @@ import 'dart:io';
 import 'package:bling_app/features/local_stores/models/shop_model.dart';
 import 'package:bling_app/features/local_stores/data/shop_repository.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:bling_app/core/models/bling_location.dart';
+import 'package:bling_app/features/shared/widgets/address_map_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -76,6 +78,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
   final List<dynamic> _images = [];
   bool _isSaving = false;
   bool _isPickingImages = false;
+  BlingLocation? _shopLocation;
 
   final ShopRepository _repository = ShopRepository();
   final ImagePicker _picker = ImagePicker();
@@ -93,6 +96,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
         TextEditingController(text: (widget.shop.products ?? []).join(', '));
     _images.addAll(widget.shop.imageUrls);
     _tags = List.from(widget.shop.tags);
+    _shopLocation = widget.shop.shopLocation;
   }
 
   @override
@@ -158,6 +162,10 @@ class _EditShopScreenState extends State<EditShopScreen> {
         locationName: widget.shop.locationName,
         locationParts: widget.shop.locationParts,
         geoPoint: widget.shop.geoPoint,
+        shopLocation: _shopLocation,
+        shopAddress: _shopLocation?.shortLabel ??
+            _shopLocation?.mainAddress ??
+            widget.shop.shopAddress,
         createdAt: widget.shop.createdAt,
         products: _productsController.text.trim().isEmpty
             ? []
@@ -284,6 +292,15 @@ class _EditShopScreenState extends State<EditShopScreen> {
                   validator: (value) => (value == null || value.trim().isEmpty)
                       ? 'localStores.form.nameError'.tr()
                       : null,
+                ),
+                AddressMapPicker(
+                  initialValue: _shopLocation,
+                  userGeoPoint: widget.shop.geoPoint,
+                  labelText: 'localStores.form.shopLocationLabel'.tr(),
+                  hintText: 'localStores.form.shopLocationHint'.tr(),
+                  onChanged: (loc) {
+                    setState(() => _shopLocation = loc);
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

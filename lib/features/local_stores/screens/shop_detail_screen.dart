@@ -1,3 +1,7 @@
+// [Bling] Location refactor Step 7 (Local Stores):
+// - Adds BlingLocation-based shopLocation
+// - Uses AddressMapPicker for shop place selection
+// - Preserves writer neighborhood and radius logic unchanged
 // ===================== DocHeader =====================
 // [기획 요약]
 // - 상점 상세 정보, 이미지 갤러리, 채팅 연동, 신뢰 등급, 연락처, 영업시간 등 다양한 필드 지원.
@@ -50,9 +54,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
-// [추가] 리뷰 작성을 위한 위젯 (예: flutter_rating_bar)
-// import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-// [추가] 날짜 포매팅을 위한 intl
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ShopDetailScreen extends StatefulWidget {
   final ShopModel shop;
@@ -92,6 +96,43 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
   void dispose() {
     _pageController.dispose(); // PageController 메모리 해제
     super.dispose();
+  }
+
+  // [추가] 전화 걸기
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not launch $phoneNumber')));
+      }
+    }
+  }
+
+  // [추가] 외부 지도 열기 (Step 7의 shopLocation 활용)
+  Future<void> _openMap(double lat, double lng) async {
+    // 구글 맵 쿼리 URL
+    final Uri googleMapsUrl =
+        Uri.parse("https://www.google.com/maps/search/?api=1&query=$lat,$lng");
+    if (await canLaunchUrl(googleMapsUrl)) {
+      await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Could not open map.')));
+      }
+    }
+  }
+
+  // [추가] 공유하기
+  void _shareShop() {
+    SharePlus.instance.share(ShareParams(
+      text:
+          '${widget.shop.name}\n${widget.shop.description}\n\nCheck out this store on Bling!',
+      subject: widget.shop.name,
+    ));
   }
 
   void _startChat(BuildContext context) async {
@@ -359,6 +400,14 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
             ),
             title: Text(shop.name),
             actions: [
+              // [추가] 공유 버튼
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: AppBarIcon(
+                  icon: Icons.share_outlined,
+                  onPressed: _shareShop,
+                ),
+              ),
               // [추가] 'Jobs' 연동 (알바 구하기 버튼)
               if (isOwner && widget.userModel != null)
                 Padding(
@@ -375,8 +424,12 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                             userModel: widget.userModel!,
                             // [자동 채우기] 가게 정보 전달
                             initialCompanyName: shop.name,
-                            initialLocation: shop.locationName,
-                            initialGeoPoint: shop.geoPoint,
+                            initialLocation: shop.shopAddress ??
+                                shop.shopLocation?.shortLabel ??
+                                shop.shopLocation?.mainAddress ??
+                                shop.locationName,
+                            initialGeoPoint:
+                                shop.shopLocation?.geoPoint ?? shop.geoPoint,
                             initialLocationParts: shop.locationParts,
                           ),
                         ),
@@ -441,14 +494,27 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    _buildInfoRow(context, Icons.location_on_outlined,
-                        shop.locationName ?? 'localStores.noLocation'.tr()),
+                    _buildInfoRowWithAction(
+                        context,
+                        Icons.location_on_outlined,
+                        shop.shopAddress ??
+                            shop.shopLocation?.shortLabel ??
+                            shop.shopLocation?.mainAddress ??
+                            shop.locationName ??
+                            'localStores.noLocation'.tr(), onTap: () {
+                      final lat = shop.shopLocation?.geoPoint.latitude ??
+                          shop.geoPoint?.latitude;
+                      final lng = shop.shopLocation?.geoPoint.longitude ??
+                          shop.geoPoint?.longitude;
+                      if (lat != null && lng != null) _openMap(lat, lng);
+                    }),
                     const SizedBox(height: 4),
                     _buildInfoRow(
                         context, Icons.watch_later_outlined, shop.openHours),
                     const SizedBox(height: 4),
-                    _buildInfoRow(
-                        context, Icons.phone_outlined, shop.contactNumber),
+                    _buildInfoRowWithAction(
+                        context, Icons.phone_outlined, shop.contactNumber,
+                        onTap: () => _makePhoneCall(shop.contactNumber)),
                     const Divider(height: 32),
                     // [추가] 대표 상품/서비스 칩
                     if (shop.products != null && shop.products!.isNotEmpty) ...[
@@ -511,6 +577,32 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
             child: Text(text,
                 style: TextStyle(fontSize: 15, color: Colors.grey[800]))),
       ],
+    );
+  }
+
+  // [추가] 탭 가능한 정보 행 (지도, 전화용)
+  Widget _buildInfoRowWithAction(
+      BuildContext context, IconData icon, String text,
+      {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          children: [
+            Icon(icon, color: Theme.of(context).primaryColor, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+                child: Text(text,
+                    style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.grey[800],
+                        decoration: TextDecoration.underline))),
+            if (onTap != null)
+              const Icon(Icons.arrow_outward, size: 14, color: Colors.grey),
+          ],
+        ),
+      ),
     );
   }
 
@@ -627,26 +719,89 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
 
   // [추가] 리뷰 작성 다이얼로그 (간단 예시)
   void _showWriteReviewDialog(String shopId) {
-    // (개선) 이 부분은 별도 Stateful 위젯으로 분리해야 함 (Rating, TextEditingController)
-    // 아래는 단순화된 예시
-    showDialog(
+    double rating = 5.0;
+    final TextEditingController reviewController = TextEditingController();
+    bool isSubmitting = false;
+
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('localStores.detail.writeReview'.tr()),
-        content: Text('localStores.detail.reviewDialogContent'
-            .tr()), // 실제로는 별점 선택 + 텍스트 입력 필드
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('common.cancel'.tr())),
-          TextButton(
-              onPressed: () {
-                /* (개선) _repository.addReview(...) 호출 */ Navigator.of(context)
-                    .pop();
-              },
-              child: Text('common.submit'.tr())),
-        ],
-      ),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setModalState) {
+          return Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                top: 24,
+                left: 20,
+                right: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('localStores.detail.writeReview'.tr(),
+                    style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 16),
+                RatingBar.builder(
+                  initialRating: 5,
+                  minRating: 1,
+                  direction: Axis.horizontal,
+                  allowHalfRating: true,
+                  itemCount: 5,
+                  itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  itemBuilder: (context, _) =>
+                      const Icon(Icons.star, color: Colors.amber),
+                  onRatingUpdate: (value) => rating = value,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: reviewController,
+                  decoration: InputDecoration(
+                      hintText: 'localStores.detail.reviewDialogContent'.tr(),
+                      border: const OutlineInputBorder()),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isSubmitting
+                        ? null
+                        : () async {
+                            if (reviewController.text.trim().isEmpty) return;
+                            setModalState(() => isSubmitting = true);
+                            try {
+                              final newReview = ShopReviewModel(
+                                id: '',
+                                shopId: shopId,
+                                userId: _currentUserId ?? 'unknown',
+                                rating: rating.toInt(),
+                                comment: reviewController.text.trim(),
+                                createdAt: Timestamp.now(),
+                              );
+                              await _repository.addReview(shopId, newReview);
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'localStores.detail.reviewSuccess'
+                                                .tr())));
+                              }
+                            } catch (e) {
+                              setModalState(() => isSubmitting = false);
+                            }
+                          },
+                    child: isSubmitting
+                        ? const CircularProgressIndicator()
+                        : Text('common.submit'.tr()),
+                  ),
+                )
+              ],
+            ),
+          );
+        });
+      },
     );
   }
 }

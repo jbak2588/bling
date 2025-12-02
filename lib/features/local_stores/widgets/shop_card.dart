@@ -42,14 +42,15 @@ class ShopCard extends StatelessWidget {
 
     // 사용자 위치 (연동되면 거리 계산에 사용)
     final GeoPoint? userGeoPoint = userModel?.geoPoint;
+    final GeoPoint? shopGeoPoint = shop.shopLocation?.geoPoint ?? shop.geoPoint;
 
     String distanceText = '';
-    if (userGeoPoint != null && shop.geoPoint != null) {
+    if (userGeoPoint != null && shopGeoPoint != null) {
       final double distanceInMeters = Geolocator.distanceBetween(
         userGeoPoint.latitude,
         userGeoPoint.longitude,
-        shop.geoPoint!.latitude,
-        shop.geoPoint!.longitude,
+        shopGeoPoint.latitude,
+        shopGeoPoint.longitude,
       );
       if (distanceInMeters < 1000) {
         distanceText = '${distanceInMeters.toStringAsFixed(0)}m';
@@ -188,7 +189,11 @@ class ShopCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      shop.locationName ?? 'localStores.noLocation'.tr(),
+                      shop.shopAddress ??
+                          shop.shopLocation?.shortLabel ??
+                          shop.shopLocation?.mainAddress ??
+                          shop.locationName ??
+                          'localStores.noLocation'.tr(),
                       overflow: TextOverflow.ellipsis, // 긴 주소는 ... 처리
                       maxLines: 1,
                     ),

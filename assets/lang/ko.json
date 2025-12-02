@@ -1503,6 +1503,10 @@
       "productsLabel": "대표 상품/서비스",
       "productsHint": "쉼표로 구분, 예: 커트, 염색, 펌",
       "imageError": "사진을 최소 한 장 이상 추가해주세요."
+      ,
+      "shopLocationLabel": "상점 위치",
+      "shopLocationHint": "지도에서 위치를 선택하거나 검색하세요",
+      "shopLocationError": "상점 위치를 선택해 주세요."
     },
     "categories": {
       "all": "전체",

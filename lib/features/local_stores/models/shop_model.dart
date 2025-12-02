@@ -30,6 +30,7 @@
 // 5. 'isSponsored', 'adExpiryDate': 광고(수익화) 모델 연동 필드 추가.
 // =====================================================
 
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// 지역 상점 정보를 담는 데이터 모델입니다.
@@ -42,6 +43,8 @@ class ShopModel {
   final String? locationName;
   final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
+  final BlingLocation? shopLocation; // physical location of the store
+  final String? shopAddress;
   final String category; // [추가] 업종 카테고리
   final List<String>? products; // 간단한 대표 상품/서비스 이름 목록
   final List<String> tags; // 사용자 정의 태그/검색 보조 태그
@@ -70,6 +73,8 @@ class ShopModel {
     this.locationName,
     this.locationParts,
     this.geoPoint,
+    this.shopLocation,
+    this.shopAddress,
     required this.category,
     this.products,
     required this.contactNumber,
@@ -90,6 +95,7 @@ class ShopModel {
 
   factory ShopModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
+    final shopLocMap = data['shopLocation'];
     return ShopModel(
       id: doc.id,
       name: data['name'] ?? '',
@@ -99,6 +105,13 @@ class ShopModel {
       locationParts: data['locationParts'] != null
           ? Map<String, dynamic>.from(data['locationParts'])
           : null,
+      shopLocation: (shopLocMap is Map<String, dynamic>)
+          ? BlingLocation.fromJson(Map<String, dynamic>.from(shopLocMap))
+          : _fallbackShopLocationFromLegacy(data),
+      shopAddress: data['shopAddress'] ??
+          data['address'] ??
+          data['fullAddress'] ??
+          data['locationDescription'],
       category: data['category'] ?? 'etc', // [추가]
       geoPoint: data['geoPoint'],
       products:
@@ -131,6 +144,9 @@ class ShopModel {
       'locationName': locationName,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
+      'shopLocation': shopLocation?.toJson(),
+      'shopAddress':
+          shopAddress ?? shopLocation?.shortLabel ?? shopLocation?.mainAddress,
       'category': category, // [추가]
       'products': products,
       'contactNumber': contactNumber,
@@ -148,5 +164,19 @@ class ShopModel {
       'tags': tags,
       'searchIndex': searchIndex,
     };
+  }
+
+  static BlingLocation? _fallbackShopLocationFromLegacy(
+      Map<String, dynamic> data) {
+    final gp = data['shopGeoPoint'] ?? data['geoPoint'];
+    final desc = data['shopAddress'] ?? data['address'] ?? data['fullAddress'];
+    if (gp is GeoPoint && desc is String && desc.isNotEmpty) {
+      return BlingLocation(
+        geoPoint: gp,
+        mainAddress: desc,
+        shortLabel: desc,
+      );
+    }
+    return null;
   }
 }

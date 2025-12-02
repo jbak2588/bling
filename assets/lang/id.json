@@ -1503,6 +1503,10 @@
       "productsLabel": "Produk/Layanan Utama",
       "productsHint": "Pisahkan dengan koma, mis. Potong rambut, Pewarnaan, Perm",
       "imageError": "Harap unggah minimal satu foto."
+      ,
+      "shopLocationLabel": "Lokasi Toko",
+      "shopLocationHint": "Cari atau pilih lokasi pada peta",
+      "shopLocationError": "Silakan pilih lokasi toko."
     },
     "categories": {
       "all": "Semua",

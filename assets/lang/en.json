@@ -1496,6 +1496,10 @@
       "productsLabel": "Representative Products/Services",
       "productsHint": "Comma-separated, e.g. Haircut, Coloring, Perm",
       "imageError": "imageError"
+      ,
+      "shopLocationLabel": "Shop location",
+      "shopLocationHint": "Search or pick the place on the map",
+      "shopLocationError": "Please select the shop location."
     },
     "categories": {
       "all": "All",
