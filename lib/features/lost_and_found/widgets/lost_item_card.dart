@@ -33,7 +33,13 @@ import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 // ✅ StatelessWidget을 StatefulWidget으로 변경
 class LostItemCard extends StatefulWidget {
   final LostItemModel item;
-  const LostItemCard({super.key, required this.item});
+  final bool showTypeTag; // ✅ [추가] 탭에 따른 태그 표시 제어 플래그
+
+  const LostItemCard({
+    super.key,
+    required this.item,
+    this.showTypeTag = true, // ✅ [추가] 기본값 true (전체 탭용)
+  });
 
   @override
   State<LostItemCard> createState() => _LostItemCardState();
@@ -76,16 +82,7 @@ class _LostItemCardState extends State<LostItemCard>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Chip(
-                    label: Text(item.type == 'lost'
-                        ? 'lostAndFound.lost'.tr()
-                        : 'lostAndFound.found'.tr()),
-                    backgroundColor: typeColor.withValues(alpha: 0.1),
-                    labelStyle: TextStyle(
-                        color: typeColor, fontWeight: FontWeight.bold),
-                    side: BorderSide(color: typeColor),
-                  ),
-                  const SizedBox(height: 12),
+                  // ✅ [수정] 상단 Chip 중복 제거 (하단 Badge로 통일)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -164,17 +161,20 @@ class _LostItemCardState extends State<LostItemCard>
                                     text: 'lostAndFound.detail.resolved'.tr(),
                                     color: Colors.grey,
                                   )
-                                else
-                                  // ✅ [작업 6] 상태 배지: Hunted(현상금) 우선, 아니면 타입 표시
+                                else if (item.isHunted)
+                                  // ✅ [수정] 현상금(Hunted)인 경우 항상 표시
                                   _ResolvedBadge(
-                                    text: item.isHunted
-                                        ? 'lostAndFound.card.hunted'.tr()
-                                        : (isLost
-                                            ? 'lostAndFound.card.lost'.tr()
-                                            : 'lostAndFound.card.found'.tr()),
-                                    color: item.isHunted
-                                        ? Colors.orange
-                                        : typeColor,
+                                    text: 'lostAndFound.card.hunted'.tr(),
+                                    color: Colors.orange,
+                                  )
+                                else if (widget.showTypeTag)
+                                  // ✅ [수정] 해결 안됨 + 현상금 없음 + 전체 탭인 경우에만 LOST/FOUND 배지 표시
+                                  // (개별 탭에서는 이미 분실/습득임을 알므로 숨김)
+                                  _ResolvedBadge(
+                                    text: isLost
+                                        ? 'lostAndFound.card.lost'.tr()
+                                        : 'lostAndFound.card.found'.tr(),
+                                    color: typeColor,
                                   ),
                               ],
                             ),
@@ -220,7 +220,6 @@ class _LostItemCardState extends State<LostItemCard>
               ),
             ),
           ),
-          // (오버레이 스크림 제거) - 스택은 유지하되, 배지를 제목 옆으로 이동하여 더 자연스러운 UX 제공
         ],
       ),
     );

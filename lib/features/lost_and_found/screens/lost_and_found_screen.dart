@@ -299,7 +299,11 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                   itemCount: data.length,
                   itemBuilder: (context, index) {
                     final item = data[index];
-                    return LostItemCard(item: item);
+                    // ✅ [수정] 전체 탭(index 0)일 때만 태그 표시, 나머지는 숨김
+                    return LostItemCard(
+                      item: item,
+                      showTypeTag: _tabController.index == 0,
+                    );
                   },
                 );
               },

@@ -137,6 +137,10 @@ class LostItemThumb extends StatelessWidget {
         .bodySmall
         ?.copyWith(color: Colors.grey[600]);
 
+    // 상태별 색상 및 배지 설정
+    final bool isLost = item.type == 'lost';
+    final Color typeColor = isLost ? Colors.redAccent : Colors.green;
+
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
@@ -144,24 +148,91 @@ class LostItemThumb extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // MD: "제목" (itemDescription)
-            //
             Text(
               item.itemDescription,
               style: titleStyle,
-              maxLines: 2, // MD: 오버플로우 방지
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
+
+            // ✅ [작업 7] 제목 바로 밑에 상태 배지 추가
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                if (item.isResolved)
+                  _ThumbBadge(
+                    text: 'lostAndFound.detail.resolved'.tr(),
+                    color: Colors.grey,
+                    icon: Icons.check_circle,
+                  )
+                else if (item.isHunted)
+                  _ThumbBadge(
+                    text: 'lostAndFound.card.hunted'.tr(),
+                    color: Colors.orange,
+                    icon: Icons.monetization_on,
+                  )
+                else
+                  _ThumbBadge(
+                    text: isLost
+                        ? 'lostAndFound.card.lost'.tr()
+                        : 'lostAndFound.card.found'.tr(),
+                    color: typeColor,
+                    // 분실: 돋보기 / 습득: 선물(또는 체크) 아이콘
+                    icon: isLost ? Icons.search : Icons.card_giftcard,
+                  ),
+              ],
+            ),
+
             const Spacer(), // 내용이 짧을 경우 아래로 밀기
             // MD: "보조=장소" (locationDescription)
-            //
             Text(
               item.locationDescription,
               style: subtitleStyle,
-              maxLines: 2, // 장소 설명도 최대 2줄
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ✅ [작업 7] 썸네일용 소형 배지 위젯
+class _ThumbBadge extends StatelessWidget {
+  final String text;
+  final Color color;
+  final IconData icon;
+
+  const _ThumbBadge({
+    required this.text,
+    required this.color,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 10, color: color),
+          const SizedBox(width: 3),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }
