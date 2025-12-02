@@ -63,145 +63,141 @@ class _MyBlingScreenState extends State<MyBlingScreen>
     final user = widget.userModel;
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('myBling.title'.tr()),
-        actions: [
-          // ✅ [설정 아이콘] SettingsScreen 연결
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsScreen(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.grey[300],
-                          backgroundImage: (user.photoUrl != null &&
-                                  user.photoUrl!.isNotEmpty)
-                              ? CachedNetworkImageProvider(user.photoUrl!)
-                              : null,
-                          child:
-                              (user.photoUrl == null || user.photoUrl!.isEmpty)
-                                  ? const Icon(Icons.person,
-                                      size: 40, color: Colors.grey)
-                                  : null,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user.nickname,
-                                style: theme.textTheme.titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 4),
-                              TrustLevelBadge(
-                                  // [v2.1] 뱃지 파라미터 수정 (int -> String Label)
-                                  trustLevelLabel: user.trustLevelLabel),
-                              if (user.bio != null && user.bio!.isNotEmpty) ...[
-                                const SizedBox(height: 6),
-                                Text(user.bio!,
-                                    style: GoogleFonts.inter(
-                                        color: Colors.grey[700])),
-                              ],
-                              if (user.locationName != null) ...[
-                                const SizedBox(height: 6),
-                                Row(
-                                  children: [
-                                    Icon(Icons.location_on_outlined,
-                                        size: 16, color: Colors.grey[600]),
-                                    const SizedBox(width: 4),
-                                    // Constrain the location text to avoid Row overflow
-                                    Expanded(
-                                      child: Text(
-                                        user.locationName!,
-                                        style: GoogleFonts.inter(
-                                            color: Colors.grey[600]),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+    return NestedScrollView(
+      headerSliverBuilder: (context, innerBoxIsScrolled) {
+        return [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start, // 상단 정렬
+                    children: [
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.grey[300],
+                        backgroundImage:
+                            (user.photoUrl != null && user.photoUrl!.isNotEmpty)
+                                ? CachedNetworkImageProvider(user.photoUrl!)
+                                : null,
+                        child: (user.photoUrl == null || user.photoUrl!.isEmpty)
+                            ? const Icon(Icons.person,
+                                size: 40, color: Colors.grey)
+                            : null,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              user.nickname,
+                              style: theme.textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            TrustLevelBadge(
+                                // [v2.1] 뱃지 파라미터 수정 (int -> String Label)
+                                trustLevelLabel: user.trustLevelLabel),
+                            if (user.bio != null && user.bio!.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Text(user.bio!,
+                                  style: GoogleFonts.inter(
+                                      color: Colors.grey[700])),
                             ],
-                          ),
+                            if (user.locationName != null) ...[
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on_outlined,
+                                      size: 16, color: Colors.grey[600]),
+                                  const SizedBox(width: 4),
+                                  // Constrain the location text to avoid Row overflow
+                                  Expanded(
+                                    child: Text(
+                                      user.locationName!,
+                                      style: GoogleFonts.inter(
+                                          color: Colors.grey[600]),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildStatColumn(
-                            _getPostsCount(user.uid), 'myBling.posts'),
-                        _buildStatColumn(
-                            _getFollowersCount(user.uid), 'myBling.followers'),
-                        _buildStatColumn(
-                            _getNeighborsCount(user.uid), 'myBling.neighbors'),
-                        _buildStatColumn(
-                            _getFriendsCount(user.uid), 'myBling.friends'),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.edit_outlined, size: 20),
-                        label: Text('myBling.editProfile'.tr()),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              theme.colorScheme.surfaceContainerHighest,
-                          foregroundColor: theme.colorScheme.onSurfaceVariant,
-                          elevation: 0,
-                        ),
+                      ),
+                      // ✅ [위치 이동] 설정 아이콘을 닉네임 우측으로 이동
+                      IconButton(
+                        icon: const Icon(Icons.settings_outlined),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ProfileEditScreen(),
+                              builder: (context) => const SettingsScreen(),
                             ),
                           );
                         },
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatColumn(
+                          _getPostsCount(user.uid), 'myBling.posts'),
+                      _buildStatColumn(
+                          _getFollowersCount(user.uid), 'myBling.followers'),
+                      _buildStatColumn(
+                          _getNeighborsCount(user.uid), 'myBling.neighbors'),
+                      _buildStatColumn(
+                          _getFriendsCount(user.uid), 'myBling.friends'),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.edit_outlined, size: 20),
+                      label: Text('myBling.editProfile'.tr()),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            theme.colorScheme.surfaceContainerHighest,
+                        foregroundColor: theme.colorScheme.onSurfaceVariant,
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ProfileEditScreen(),
+                          ),
+                        );
+                      },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            _buildProfileTabs(),
-          ];
-        },
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            const UserFriendList(),
-            const UserPostList(),
-            const UserProductList(),
-            const UserBookmarkList(),
-            UserTicketList(userId: widget.userModel.uid),
-          ],
-        ),
+          ),
+          _buildProfileTabs(),
+        ];
+      },
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          const UserFriendList(),
+          const UserPostList(),
+          const UserProductList(),
+          const UserBookmarkList(),
+          UserTicketList(userId: widget.userModel.uid),
+        ],
       ),
     );
   }

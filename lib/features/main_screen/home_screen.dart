@@ -529,7 +529,7 @@ class _HomeScreenState extends State<HomeScreen>
         // SVG가 없다면 기본 아이콘 사용 (회색 톤 권장)
         svg: '$_iconsPath/ico_info.svg',
         labelKey: 'settings.appInfo', // 다국어 키 (없으면 '앱 정보'로 표시됨)
-        screen: const AppInfoScreen(),
+        screen: const AppInfoScreen(embedded: true),
         section: null),
   ];
 

@@ -64,113 +64,109 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('main.bottomNav.chat'.tr())),
-      body: StreamBuilder<List<ChatRoomModel>>(
-        stream: _chatService.getChatRoomsStream(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final chatRooms = snapshot.data ?? [];
-          if (chatRooms.isEmpty) {
-            return Center(child: Text('chat_list.empty'.tr()));
-          }
+    return StreamBuilder<List<ChatRoomModel>>(
+      stream: _chatService.getChatRoomsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final chatRooms = snapshot.data ?? [];
+        if (chatRooms.isEmpty) {
+          return Center(child: Text('chat_list.empty'.tr()));
+        }
 
-          return ListView.separated(
-            itemCount: chatRooms.length,
-            separatorBuilder: (context, index) =>
-                const Divider(height: 1, indent: 82),
-            itemBuilder: (context, index) {
-              final chatRoom = chatRooms[index];
+        return ListView.separated(
+          itemCount: chatRooms.length,
+          separatorBuilder: (context, index) =>
+              const Divider(height: 1, indent: 82),
+          itemBuilder: (context, index) {
+            final chatRoom = chatRooms[index];
 
-              final otherUid = !chatRoom.isGroupChat
-                  ? chatRoom.participants
-                      .firstWhere((uid) => uid != _myUid, orElse: () => '')
-                  : '';
+            final otherUid = !chatRoom.isGroupChat
+                ? chatRoom.participants
+                    .firstWhere((uid) => uid != _myUid, orElse: () => '')
+                : '';
 
-              if (!chatRoom.isGroupChat && otherUid.isEmpty) {
-                return const SizedBox.shrink();
-              }
+            if (!chatRoom.isGroupChat && otherUid.isEmpty) {
+              return const SizedBox.shrink();
+            }
 
-              return FutureBuilder<UserModel?>(
-                future: !chatRoom.isGroupChat
-                    ? _chatService.getOtherUserInfo(otherUid)
-                    : Future.value(null),
-                builder: (context, userSnapshot) {
-                  if (userSnapshot.connectionState == ConnectionState.waiting &&
-                      !chatRoom.isGroupChat) {
-                    return const ListTile(title: Text("..."));
-                  }
+            return FutureBuilder<UserModel?>(
+              future: !chatRoom.isGroupChat
+                  ? _chatService.getOtherUserInfo(otherUid)
+                  : Future.value(null),
+              builder: (context, userSnapshot) {
+                if (userSnapshot.connectionState == ConnectionState.waiting &&
+                    !chatRoom.isGroupChat) {
+                  return const ListTile(title: Text("..."));
+                }
 
-                  final otherUser = userSnapshot.data;
+                final otherUser = userSnapshot.data;
 
-                  // determine the child item widget based on chat type
-                  Widget item;
-                  if (chatRoom.isGroupChat) {
-                    item = _buildGroupChatItem(context, chatRoom);
-                  } else if (chatRoom.roomId != null &&
-                      chatRoom.roomId!.isNotEmpty) {
-                    item =
-                        _buildRealEstateChatItem(context, chatRoom, otherUser);
-                  } else if (chatRoom.lostItemId != null &&
-                      chatRoom.lostItemId!.isNotEmpty) {
-                    item = _buildLostAndFoundChatItem(
-                        context, chatRoom, otherUser);
-                  } else if (chatRoom.shopId != null &&
-                      chatRoom.shopId!.isNotEmpty) {
-                    item = _buildShopChatItem(context, chatRoom, otherUser);
-                  } else if (chatRoom.jobId != null &&
-                      chatRoom.jobId!.isNotEmpty) {
-                    item = _buildJobChatItem(context, chatRoom, otherUser);
-                  } else if (chatRoom.productId != null &&
-                      chatRoom.productId!.isNotEmpty) {
-                    item = _buildProductChatItem(context, chatRoom, otherUser);
-                  } else {
-                    item = _buildDirectChatItem(context, chatRoom, otherUser);
-                  }
+                // determine the child item widget based on chat type
+                Widget item;
+                if (chatRoom.isGroupChat) {
+                  item = _buildGroupChatItem(context, chatRoom);
+                } else if (chatRoom.roomId != null &&
+                    chatRoom.roomId!.isNotEmpty) {
+                  item = _buildRealEstateChatItem(context, chatRoom, otherUser);
+                } else if (chatRoom.lostItemId != null &&
+                    chatRoom.lostItemId!.isNotEmpty) {
+                  item =
+                      _buildLostAndFoundChatItem(context, chatRoom, otherUser);
+                } else if (chatRoom.shopId != null &&
+                    chatRoom.shopId!.isNotEmpty) {
+                  item = _buildShopChatItem(context, chatRoom, otherUser);
+                } else if (chatRoom.jobId != null &&
+                    chatRoom.jobId!.isNotEmpty) {
+                  item = _buildJobChatItem(context, chatRoom, otherUser);
+                } else if (chatRoom.productId != null &&
+                    chatRoom.productId!.isNotEmpty) {
+                  item = _buildProductChatItem(context, chatRoom, otherUser);
+                } else {
+                  item = _buildDirectChatItem(context, chatRoom, otherUser);
+                }
 
-                  // Wrap in Dismissible to allow leaving the chat room
-                  return Dismissible(
-                    key: Key(chatRoom.id),
-                    direction: DismissDirection.endToStart,
-                    background: Container(
-                      color: Colors.red,
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 20),
-                      child: const Icon(Icons.delete, color: Colors.white),
-                    ),
-                    confirmDismiss: (direction) async {
-                      return await showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: Text('common.delete'.tr()),
-                          content: Text('chat_list.leave_confirm'.tr()),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(ctx).pop(false),
-                              child: Text('common.cancel'.tr()),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.of(ctx).pop(true),
-                              child: Text('common.delete'.tr(),
-                                  style: const TextStyle(color: Colors.red)),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    onDismissed: (direction) async {
-                      await _leaveChatRoom(chatRoom.id);
-                    },
-                    child: item,
-                  );
-                },
-              );
-            },
-          );
-        },
-      ),
+                // Wrap in Dismissible to allow leaving the chat room
+                return Dismissible(
+                  key: Key(chatRoom.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  confirmDismiss: (direction) async {
+                    return await showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text('common.delete'.tr()),
+                        content: Text('chat_list.leave_confirm'.tr()),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: Text('common.cancel'.tr()),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            child: Text('common.delete'.tr(),
+                                style: const TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  onDismissed: (direction) async {
+                    await _leaveChatRoom(chatRoom.id);
+                  },
+                  child: item,
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 

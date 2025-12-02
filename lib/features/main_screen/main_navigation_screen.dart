@@ -369,11 +369,25 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     setState(() {
       _bottomNavIndex = index;
 
-      // 홈 탭 선택 시 초기화 로직
+      // 탭 전환 시 상단 앱바 타이틀 변경 로직
       if (index == 0) {
+        // 홈
         _currentHomePageContent = null;
         _appBarTitleKey = 'main.myTown';
         _currentSection = AppSection.home;
+      } else if (index == 1) {
+        // 동네생활 (게시판)
+        _appBarTitleKey = 'main.bottomNav.board';
+        _currentSection = AppSection.board;
+        // (참고: _isKelurahanBoardActive 체크는 build 메서드에서 처리됨)
+      } else if (index == 3) {
+        // 채팅 (Obrolan)
+        _appBarTitleKey = 'main.bottomNav.chat';
+        _currentHomePageContent = null;
+      } else if (index == 4) {
+        // 마이블링 (Bling Saya)
+        _appBarTitleKey = 'main.bottomNav.myBling';
+        _currentHomePageContent = null;
       }
     });
   }
