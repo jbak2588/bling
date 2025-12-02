@@ -569,7 +569,10 @@
     "rtRwInfo": "입력하신 RT/RW 정보는 공개되지 않습니다. 신뢰도 및 동네 맞춤 기능 향상에만 사용됩니다.",
     "saveThisLocation": "이 위치 저장",
     "manualSelect": "직접 선택",
-    "refreshFromGps": "GPS로 새로고침"
+    "refreshFromGps": "GPS로 새로고침",
+    "shortLabelLabel": "간단 라벨",
+    "shortLabelHint": "이 장소에 대한 간단한 라벨 (선택)",
+    "updatingAddress": "주소를 업데이트 중..."
   },
   "profileEdit": {
     "title": "프로필 설정",
@@ -1867,6 +1870,9 @@
       "success": "등록되었습니다.",
       "fail": "등록에 실패했습니다: {error}",
       "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다."
+      ,
+      "placeLabel": "분실 또는 발견 장소",
+      "placeHint": "주소를 검색하거나 지도를 선택하세요"
     },
     "edit": {
       "title": "분실/습득물 수정",

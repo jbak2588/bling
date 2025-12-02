@@ -19,11 +19,11 @@ Scroll 내부에서도 동작하도록 EagerGestureRecognizer 적용
     “현재 위치로 이동” 버튼 포함
 */
 
-
 import 'dart:async';
 
 import 'package:bling_app/core/models/bling_location.dart';
 import 'package:bling_app/core/services/location_search_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -46,6 +46,7 @@ class AddressMapPicker extends StatefulWidget {
     this.hintText,
     this.enableMyLocationButton = true,
     this.initialCameraPosition,
+    this.userGeoPoint,
   });
 
   /// 초기 위치 (예: 기존 게시물 수정 시)
@@ -61,8 +62,14 @@ class AddressMapPicker extends StatefulWidget {
   /// "현재 위치로 이동" 버튼 표시 여부
   final bool enableMyLocationButton;
 
-  /// 초기 카메라 위치 (초기값 / fallback용)
+  /// 초기 카메라 위치 (초기값 / fallback용).
+  /// - 일반적으로는 사용자 프로필의 geoPoint 를 LatLng 로 변환해 전달합니다.
   final LatLng? initialCameraPosition;
+
+  /// 사용자의 Firestore GeoPoint (선택 사항).
+  /// initialValue 와 initialCameraPosition 이 모두 없을 때,
+  /// 지도의 시작 위치를 이 좌표 근처로 맞추는 용도로만 사용됩니다.
+  final GeoPoint? userGeoPoint;
 
   @override
   State<AddressMapPicker> createState() => _AddressMapPickerState();
@@ -85,6 +92,8 @@ class _AddressMapPickerState extends State<AddressMapPicker> {
   List<LocationSuggestion> _suggestions = [];
   bool _isSearching = false;
   bool _isReverseGeocoding = false;
+  // Suppress one reverse-geocode cycle after programmatic camera moves
+  bool _suppressReverseGeocode = false;
 
   @override
   void initState() {
@@ -233,13 +242,27 @@ class _AddressMapPickerState extends State<AddressMapPicker> {
 
     setState(() {});
 
-    _mapController?.animateCamera(
-      CameraUpdate.newLatLng(_currentLatLng!),
-    );
+    // fromUserSelection == true 인 경우에만 카메라를 프로그래매틱하게 이동시킵니다.
+    // (검색/현재 위치 버튼 등)에서 호출될 때 onCameraIdle 이 한 번 더 호출되지만,
+    // 아래 플래그로 reverse geocode 를 1회만 건너뜁니다.
+    if (fromUserSelection) {
+      _suppressReverseGeocode = true;
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLng(_currentLatLng!),
+      );
+    }
   }
 
   Future<void> _onCameraIdle() async {
     if (_currentLatLng == null) return;
+
+    // If a programmatic camera move just happened due to a user selection,
+    // skip exactly one reverse-geocode cycle to avoid reloading the same
+    // address and causing an animateCamera -> idle -> reverse loop.
+    if (_suppressReverseGeocode) {
+      _suppressReverseGeocode = false;
+      return;
+    }
 
     // 검색 → placeId 기반 선택 후 바로 드래그할 경우 reverse geocode 남발 방지용
     if (_isReverseGeocoding) return;
@@ -269,9 +292,24 @@ class _AddressMapPickerState extends State<AddressMapPicker> {
     final labelText = widget.labelText ?? 'location.addressSearchLabel'.tr();
     final hintText = widget.hintText ?? 'location.addressSearchHint'.tr();
 
-    final LatLng initialCamera = _currentLatLng ??
-        widget.initialCameraPosition ??
-        const LatLng(-6.200000, 106.816666); // Jakarta fallback
+    // 초기 카메라 위치 결정 순서:
+    // 1) 사용자가 이미 선택한 _currentLatLng
+    // 2) 화면 쪽에서 명시적으로 넘겨준 initialCameraPosition (주로 user.geoPoint 기반)
+    // 3) userGeoPoint (Firestore 프로필 위치)
+    // 4) 최종 fallback: Jakarta 중심
+    late final LatLng initialCamera;
+    if (_currentLatLng != null) {
+      initialCamera = _currentLatLng!;
+    } else if (widget.initialCameraPosition != null) {
+      initialCamera = widget.initialCameraPosition!;
+    } else if (widget.userGeoPoint != null) {
+      initialCamera = LatLng(
+        widget.userGeoPoint!.latitude,
+        widget.userGeoPoint!.longitude,
+      );
+    } else {
+      initialCamera = const LatLng(-6.200000, 106.816666); // Jakarta fallback
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

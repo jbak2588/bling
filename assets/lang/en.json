@@ -21,13 +21,6 @@
       "unknownError": "unknownError"
     }
   },
-  "notifications": {
-    "title": "Notifications",
-    "error": "Failed to load notifications.",
-    "empty": "You have no notifications.",
-    "seller_pending_title": "Product under review",
-    "seller_pending_body": "Your listing '{title}' has been submitted for admin review."
-  },
   "signup": {
     "title": "Sign Up",
     "emailHint": "Email Address",
@@ -569,7 +562,10 @@
     "rtRwInfo": "Your RT/RW won’t be public. It’s only used to improve trust and local features.",
     "saveThisLocation": "Save this location",
     "manualSelect": "Select manually",
-    "refreshFromGps": "Refresh from GPS"
+    "refreshFromGps": "Refresh from GPS",
+    "shortLabelLabel": "Short label",
+    "shortLabelHint": "Optional short label for this place",
+    "updatingAddress": "Updating address..."
   },
   "profileEdit": {
     "title": "Profile Settings",
@@ -1867,6 +1863,9 @@
       "success": "Registered.",
       "fail": "Failed to register: {error}",
       "tagsHint": "You can register tags using comma (,) or Enter."
+      ,
+      "placeLabel": "Place (lost or found)",
+      "placeHint": "Search address or pick on map"
     },
     "edit": {
       "title": "Edit Lost/Found Item",

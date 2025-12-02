@@ -221,6 +221,11 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
   // 댓글 입력 위치로 스크롤하기 위한 컨트롤러
   final ScrollController _scrollController = ScrollController();
 
+  GeoPoint? get _displayGeoPoint {
+    final loc = _currentItem.lostLocation ?? _currentItem.foundLocation;
+    return loc?.geoPoint ?? _currentItem.geoPoint;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -539,10 +544,9 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
             color: Colors.orange,
           ),
         ],
-        if (widget.item.geoPoint != null) ...[
+        if (_displayGeoPoint != null) ...[
           const SizedBox(height: 16),
-          MiniMapView(
-              location: widget.item.geoPoint!, markerId: widget.item.id),
+          MiniMapView(location: _displayGeoPoint!, markerId: _currentItem.id),
         ],
         const Divider(height: 32),
         _buildLostItemStats(),
@@ -805,10 +809,9 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
               color: Colors.orange,
             ),
           ],
-          if (widget.item.geoPoint != null) ...[
+          if (_displayGeoPoint != null) ...[
             const SizedBox(height: 16),
-            MiniMapView(
-                location: widget.item.geoPoint!, markerId: widget.item.id),
+            MiniMapView(location: _displayGeoPoint!, markerId: _currentItem.id),
           ],
           const Divider(height: 32),
           _buildLostItemStats(),

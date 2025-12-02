@@ -569,7 +569,10 @@
     "rtRwInfo": "RT/RW Anda tidak akan dipublikasikan. Data ini membantu meningkatkan kepercayaan dan fitur lokal.",
     "saveThisLocation": "Simpan lokasi ini",
     "manualSelect": "Pilih secara manual",
-    "refreshFromGps": "Perbarui dari GPS"
+    "refreshFromGps": "Perbarui dari GPS",
+    "shortLabelLabel": "Label singkat",
+    "shortLabelHint": "Label singkat opsional untuk tempat ini",
+    "updatingAddress": "Memperbarui alamat..."
   },
   "profileEdit": {
     "title": "Pengaturan Profil",
@@ -1867,6 +1870,9 @@
       "success": "Berhasil didaftarkan.",
       "fail": "Gagal mendaftarkan barang: {error}",
       "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter."
+      ,
+      "placeLabel": "Tempat hilang atau ditemukan",
+      "placeHint": "Cari alamat atau pilih di peta"
     },
     "edit": {
       "title": "Ubah Barang Hilang/Temuan",

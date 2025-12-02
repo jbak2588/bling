@@ -13,8 +13,10 @@
 // lib/features/lost_and_found/screens/edit_lost_item_screen.dart
 
 import 'dart:io';
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/features/lost_and_found/data/lost_and_found_repository.dart';
+import 'package:bling_app/features/shared/widgets/address_map_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -43,6 +45,8 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
   late String _type;
   final List<dynamic> _images = [];
   List<String> _tags = []; // 태그 상태 변수 추가
+  BlingLocation? _lostLocation;
+  BlingLocation? _foundLocation;
   bool _isSaving = false;
 
   // ✅ 현상금(Bounty)
@@ -51,6 +55,20 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
 
   final LostAndFoundRepository _repository = LostAndFoundRepository();
   final ImagePicker _picker = ImagePicker();
+
+  // Active location getter and unified onChanged handler
+  BlingLocation? get _activeLocation =>
+      _type == 'lost' ? _lostLocation : _foundLocation;
+
+  void _onLocationChanged(BlingLocation loc) {
+    setState(() {
+      if (_type == 'lost') {
+        _lostLocation = loc;
+      } else {
+        _foundLocation = loc;
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -61,6 +79,8 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         TextEditingController(text: widget.item.locationDescription);
     _type = widget.item.type;
     _images.addAll(widget.item.imageUrls);
+    _lostLocation = widget.item.lostLocation;
+    _foundLocation = widget.item.foundLocation;
 
     // 기존 태그 로드
     _tags = widget.item.tags;
@@ -102,6 +122,18 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
       return;
     }
 
+    // Validation: require appropriate location depending on selected mode
+    if (_type == 'lost' && _lostLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('lostAndFound.form.lostPlaceError'.tr())));
+      return;
+    }
+    if (_type == 'found' && _foundLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('lostAndFound.form.foundPlaceError'.tr())));
+      return;
+    }
+
     setState(() => _isSaving = true);
 
     try {
@@ -139,6 +171,8 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
         createdAt: widget.item.createdAt,
         geoPoint: userModel?.geoPoint ?? widget.item.geoPoint,
         locationParts: userModel?.locationParts ?? widget.item.locationParts,
+        lostLocation: _lostLocation,
+        foundLocation: _foundLocation,
         // ✅ 현상금 정보 저장 (콤마 제거 후 파싱)
         isHunted: _isHunted,
         tags: _tags,
@@ -204,6 +238,20 @@ class _EditLostItemScreenState extends State<EditLostItemScreen> {
 
                 // ✅ 현상금(Bounty) 섹션 UI
                 _buildBountySection(),
+                const SizedBox(height: 16),
+                AddressMapPicker(
+                  key: Key('address_picker_$_type'),
+                  initialValue: _activeLocation,
+                  // Provide the saved item GeoPoint as a fallback for initial camera
+                  // so edit shows the stored map location instead of Jakarta.
+                  userGeoPoint: widget.item.geoPoint,
+                  // Use generic label/hint; add locale keys `lostAndFound.form.placeLabel`/`placeHint` if missing
+                  labelText: 'lostAndFound.form.placeLabel'.tr(),
+                  hintText: 'lostAndFound.form.placeHint'.tr(),
+                  onChanged: _onLocationChanged,
+                ),
+                const SizedBox(height: 16),
+                const SizedBox(height: 16),
                 // V V V --- [복원] 누락되었던 이미지 선택/수정 UI --- V V V
                 SizedBox(
                   height: 100,

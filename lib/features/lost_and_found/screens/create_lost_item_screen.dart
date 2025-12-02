@@ -13,9 +13,11 @@
 // lib/features/lost_and_found/screens/create_lost_item_screen.dart
 
 import 'dart:io';
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/lost_and_found/data/lost_and_found_repository.dart';
+import 'package:bling_app/features/shared/widgets/address_map_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -40,6 +42,8 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
   final _itemDescriptionController = TextEditingController();
   final _locationDescriptionController = TextEditingController();
   List<String> _tags = []; // ✅ 태그 상태 변수 추가
+  BlingLocation? _lostLocation;
+  BlingLocation? _foundLocation;
 
   String _type = 'lost';
   final List<XFile> _images = [];
@@ -51,6 +55,20 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
 
   final LostAndFoundRepository _repository = LostAndFoundRepository();
   final ImagePicker _picker = ImagePicker();
+
+  // Active location getter and unified onChanged handler
+  BlingLocation? get _activeLocation =>
+      _type == 'lost' ? _lostLocation : _foundLocation;
+
+  void _onLocationChanged(BlingLocation loc) {
+    setState(() {
+      if (_type == 'lost') {
+        _lostLocation = loc;
+      } else {
+        _foundLocation = loc;
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -79,6 +97,18 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('lostAndFound.form.imageRequired'.tr())));
 
+      return;
+    }
+
+    // Validation: require appropriate location depending on selected mode
+    if (_type == 'lost' && _lostLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('lostAndFound.form.lostPlaceError'.tr())));
+      return;
+    }
+    if (_type == 'found' && _foundLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('lostAndFound.form.foundPlaceError'.tr())));
       return;
     }
 
@@ -115,6 +145,8 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
         locationDescription: _locationDescriptionController.text.trim(),
         locationParts: userModel.locationParts, // ✅ 저장
         geoPoint: userModel.geoPoint, // ✅ 저장
+        lostLocation: _lostLocation,
+        foundLocation: _foundLocation,
         imageUrls: imageUrls,
         createdAt: Timestamp.now(),
         tags: _tags, // ✅ 저장 시 태그 목록을 전달
@@ -254,6 +286,20 @@ class _CreateLostItemScreenState extends State<CreateLostItemScreen> {
                 const SizedBox(height: 16),
                 // ✅ 현상금(Bounty) 섹션
                 _buildBountySection(),
+                const SizedBox(height: 16),
+                AddressMapPicker(
+                  key: Key('address_picker_$_type'),
+                  initialValue: _activeLocation,
+                  // Provide the user's saved GeoPoint as a fallback for the initial camera
+                  // position if no initialValue or initialCameraPosition is provided.
+                  userGeoPoint: widget.userModel.geoPoint,
+                  // Use generic label/hint; add locale keys `lostAndFound.form.placeLabel`/`placeHint` if missing
+                  labelText: 'lostAndFound.form.placeLabel'.tr(),
+                  hintText: 'lostAndFound.form.placeHint'.tr(),
+                  onChanged: _onLocationChanged,
+                ),
+                const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
                 TextFormField(
                   controller: _locationDescriptionController,

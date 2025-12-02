@@ -11,6 +11,7 @@
 // =====================================================
 // lib/core/models/lost_item_model.dart
 
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// 분실/습득물 정보를 담는 데이터 모델입니다.
@@ -23,6 +24,8 @@ class LostItemModel {
   final String locationDescription; // 분실/습득 장소 설명
   final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
+  final BlingLocation? lostLocation; // where item was lost
+  final BlingLocation? foundLocation; // where item was found
   final List<String> imageUrls;
   final Timestamp createdAt;
   final bool isHunted; // 현상금(Hunted) 여부
@@ -52,6 +55,8 @@ class LostItemModel {
     required this.locationDescription,
     this.locationParts,
     this.geoPoint,
+    this.lostLocation,
+    this.foundLocation,
     required this.imageUrls,
     required this.createdAt,
     this.isHunted = false,
@@ -75,6 +80,8 @@ class LostItemModel {
   factory LostItemModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
+    final lostLocationMap = data['lostLocation'];
+    final foundLocationMap = data['foundLocation'];
     return LostItemModel(
       id: doc.id,
       userId: data['userId'] ?? '',
@@ -85,6 +92,12 @@ class LostItemModel {
           ? Map<String, dynamic>.from(data['locationParts'])
           : null,
       geoPoint: data['geoPoint'],
+      lostLocation: (lostLocationMap is Map<String, dynamic>)
+          ? BlingLocation.fromJson(lostLocationMap)
+          : _fallbackLostLocationFromLegacy(data),
+      foundLocation: (foundLocationMap is Map<String, dynamic>)
+          ? BlingLocation.fromJson(foundLocationMap)
+          : _fallbackFoundLocationFromLegacy(data),
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
       createdAt: data['createdAt'] ?? Timestamp.now(),
       isHunted: data['isHunted'] ?? false,
@@ -116,10 +129,18 @@ class LostItemModel {
       'locationDescription': locationDescription,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
+      'lostLocation': lostLocation?.toJson(),
+      'foundLocation': foundLocation?.toJson(),
       'imageUrls': imageUrls,
       'createdAt': createdAt,
       'bountyAmount': bountyAmount,
       'tags': tags, // ✅ Firestore에 저장
+
+      // Legacy compatibility
+      'lostPlace': locationDescription.isNotEmpty
+          ? locationDescription
+          : lostLocation?.shortLabel ?? lostLocation?.mainAddress,
+      'foundPlace': foundLocation?.shortLabel ?? foundLocation?.mainAddress,
 
       // ✅ [작업 41]
       'isResolved': isResolved,
@@ -136,5 +157,33 @@ class LostItemModel {
       'isHunted': isHunted,
       'searchIndex': searchIndex,
     };
+  }
+
+  static BlingLocation? _fallbackLostLocationFromLegacy(
+      Map<String, dynamic> data) {
+    final geo = data['geoPoint'];
+    final lostPlace = data['lostPlace'] ?? data['locationDescription'];
+    if (geo is GeoPoint && lostPlace is String && lostPlace.isNotEmpty) {
+      return BlingLocation(
+        geoPoint: geo,
+        mainAddress: lostPlace,
+        shortLabel: lostPlace,
+      );
+    }
+    return null;
+  }
+
+  static BlingLocation? _fallbackFoundLocationFromLegacy(
+      Map<String, dynamic> data) {
+    final foundPlace = data['foundPlace'];
+    final foundGeo = data['foundGeoPoint'] ?? data['geoPoint'];
+    if (foundGeo is GeoPoint && foundPlace is String && foundPlace.isNotEmpty) {
+      return BlingLocation(
+        geoPoint: foundGeo,
+        mainAddress: foundPlace,
+        shortLabel: foundPlace,
+      );
+    }
+    return null;
   }
 }
