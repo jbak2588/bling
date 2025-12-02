@@ -1,42 +1,41 @@
 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- 그림자 확대 -->
-  <ellipse cx="20" cy="35" rx="19" ry="3" fill="#6B7184" opacity="0.18"></ellipse>
+  <!-- 바닥 그림자 -->
+  <ellipse cx="20" cy="35" rx="18" ry="3" fill="#6B7184" opacity="0.18"></ellipse>
 
-  <!-- 확대된 전단지 그룹 (전체 스케일 1.22x 적용) -->
-  <g transform="translate(4 2) scale(1.22) rotate(-5 12 15)">
-    
+  <!-- 전단지 그룹 (살짝 기울어진 포스터) -->
+  <g transform="translate(4 3) scale(1.18) rotate(-5 12 15)">
     <!-- 전단지 배경 -->
-    <rect x="0" y="0" width="24" height="30" rx="4" fill="#FFF7D8" stroke="#E8E2CC" stroke-width="0.8"></rect>
+    <rect x="0" y="0" width="24" height="30" rx="4" fill="#FFF9E8" stroke="#E7DFC7" stroke-width="0.8"></rect>
 
     <!-- 접힌 모서리 -->
-    <path d="M24 26 L20 30 H24 V26Z" fill="#E6DFC7"></path>
+    <path d="M24 26 L20 30 H24 V26Z" fill="#E1D7BC"></path>
 
-    <!-- 테이프 -->
-    <rect x="6" y="-2" width="12" height="4" rx="1" fill="#FFFFFF" opacity="0.55"></rect>
+    <!-- 상단 투명 테이프 -->
+    <rect x="6" y="-2.2" width="12" height="4.2" rx="1" fill="#FFFFFF" opacity="0.55"></rect>
 
-    <!-- 중앙 사람 -->
-    <circle cx="12" cy="12.5" r="3.5" fill="#4B70F2"></circle>
-    <path d="M8.5 19C8.5 17.1 10 15.6 12 15.6H13.9C15.9 15.6 17.4 17.1 17.4 19V21.3H8.5V19Z" fill="#6F8CFF"></path>
+    <!-- 중앙 사람 (리더 / 중심) -->
+    <circle cx="12" cy="12.3" r="3.4" fill="#8B5CF6"></circle>
+    <path d="M8.6 18.9C8.6 17.0 10.1 15.5 12 15.5H13.9C15.8 15.5 17.3 17.0 17.3 18.9V21.4H8.6V18.9Z" fill="#A78BFA"></path>
 
     <!-- 왼쪽 사람 -->
-    <circle cx="6" cy="14" r="2.8" fill="#FFB851"></circle>
-    <path d="M3.6 20C3.6 18.5 4.8 17.4 6.1 17.4H7.4C8.7 17.4 9.9 18.5 9.9 20V21.5H3.6V20Z" fill="#FFDCA3"></path>
+    <circle cx="6.1" cy="14" r="2.7" fill="#22C6B8"></circle>
+    <path d="M3.7 20C3.7 18.5 4.9 17.3 6.2 17.3H7.5C8.8 17.3 10.0 18.5 10.0 20V21.6H3.7V20Z" fill="#5FE3D4"></path>
 
     <!-- 오른쪽 사람 -->
-    <circle cx="18" cy="14" r="2.8" fill="#4FD4FF"></circle>
-    <path d="M15.6 20C15.6 18.5 16.8 17.4 18.1 17.4H19.4C20.7 17.4 21.9 18.5 21.9 20V21.5H15.6V20Z" fill="#A9ECFF"></path>
+    <circle cx="17.9" cy="14" r="2.7" fill="#34D399"></circle>
+    <path d="M15.5 20C15.5 18.5 16.7 17.3 18.0 17.3H19.3C20.6 17.3 21.8 18.5 21.8 20V21.6H15.5V20Z" fill="#6EE7B7"></path>
 
-    <!-- 텍스트 라인 -->
-    <rect x="4" y="24" width="12" height="1.7" rx="0.8" fill="#C7BBA0"></rect>
-    <rect x="4" y="27" width="8" height="1.4" rx="0.7" fill="#DDD2B8"></rect>
+    <!-- 내용 텍스트 라인 -->
+    <rect x="4" y="24" width="12" height="1.7" rx="0.85" fill="#CEC3A6"></rect>
+    <rect x="4" y="27" width="8" height="1.4" rx="0.7" fill="#E2D7BD"></rect>
 
-    <!-- QR -->
+    <!-- QR 코드 (상징) -->
     <g transform="translate(15 23)">
       <rect x="0" y="0" width="6.5" height="6.5" rx="1" fill="white" stroke="#C4C4C4" stroke-width="0.6"></rect>
-      <rect x="1" y="1" width="1.7" height="1.7" fill="#1F2933"></rect>
-      <rect x="3.6" y="1" width="1.7" height="1.7" fill="#1F2933"></rect>
-      <rect x="1" y="3.6" width="1.7" height="1.7" fill="#1F2933"></rect>
-      <rect x="3.4" y="3.6" width="1" height="1" fill="#1F2933"></rect>
+      <rect x="1" y="1" width="1.7" height="1.7" fill="#111827"></rect>
+      <rect x="3.6" y="1" width="1.7" height="1.7" fill="#111827"></rect>
+      <rect x="1" y="3.6" width="1.7" height="1.7" fill="#111827"></rect>
+      <rect x="3.4" y="3.6" width="1" height="1" fill="#111827"></rect>
     </g>
   </g>
 </svg>

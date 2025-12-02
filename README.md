@@ -27,7 +27,7 @@ Gojek 스타일 런처 UX를 결합한 **하이브리드 로컬 앱**입니다.
 
 These rules are intended to reduce accidental exposure of precise location data in public-facing lists and cards. Developers should follow `LocationHelper.cleanName` to normalize admin names before display or indexing.
 
-## ✅ 폴더 구조    2025년 8월 19일 Ver 0.4.5 기준
+## ✅ 폴더 구조    2025년 12월 1일 Ver 2.0 기준
 
 lib
 ├── api_keys.dart

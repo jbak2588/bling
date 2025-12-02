@@ -644,6 +644,7 @@
     "statusJoined": "Joined (Check Ticket)",
     "btnJoin": "Join Together",
     "participants": "Participants: {current} / {max}",
+    "maxParticipants": "Max Participants : {max} people",
     "loginRequired": "Login required.",
     "joinSuccess": "Joined! Check your ticket for QR.",
     "joinConfirm": "Do you want to join? A QR ticket will be issued.",
@@ -662,8 +663,7 @@
     "locationFetchError": "Unable to get location: {error}",
     "setCurrentLocation": "Set current location",
     "whereHint": "e.g. Central Park, near the fountain",
-    "mapHint": "Move the map to position the pin"
-    ,
+    "mapHint": "Move the map to position the pin",
     "noTickets": "You haven't joined any gatherings yet.",
     "qrPopup": {
       "instruction": "Show this QR code to the host to verify your ticket.",
@@ -890,7 +890,9 @@
     "retry": "Retry",
     "uploading": "Uploading...",
     "failed": "Upload failed"
-    },
+  },
+  "reportDialog": {
+    "title": "Report Post",
     "titleComment": "Report Comment",
     "titleReply": "Report Reply",
     "cannotReportSelfComment": "You cannot report your own comment.",
@@ -942,40 +944,40 @@
   "jobs": {
     "setLocationPrompt": "Set your neighborhood to see job posts around you!",
     "screen": {
-     "empty": "There are no job posts yet.",
-  "createTooltip": "Create new job post"
+      "empty": "There are no job posts yet.",
+      "createTooltip": "Create new job post"
     },
     "tabs": {
       "all": "All",
       "quickGig": "Quick Gig",
-     "regular": "Regular / Part-time",
+      "regular": "Regular / Part-time",
       "talents": "Find Experts"
     },
     "selectType": {
-       "title": "Choose job post type",
+      "title": "Choose job post type",
       "subtitle": "What kind of post would you like to create?",
       "regular": {
-  "title": "Regular / part-time job",
-      "desc": "Hire staff for your shop or long-term part-time positions."
+        "title": "Regular / part-time job",
+        "desc": "Hire staff for your shop or long-term part-time positions."
       },
-  "quick": {
-      "title": "Urgent help / one-time gig",
-      "desc": "Need one-time help like carrying boxes, waiting in line, and more."
+      "quick": {
+        "title": "Urgent help / one-time gig",
+        "desc": "Need one-time help like carrying boxes, waiting in line, and more."
       },
       "talent": {
-      "title": "Register as a freelancer",
-      "desc": "Offer your skills and talents to neighbors nearby.",
-      "badge": "NEW"
+        "title": "Register as a freelancer",
+        "desc": "Offer your skills and talents to neighbors nearby.",
+        "badge": "NEW"
       }
     },
     "talent": {
       "create": {
-       "title": "Register your talent",
+        "title": "Register your talent",
         "labels": {
           "category": "Category",
-            "title": "Title (e.g. Detailed move-in cleaning service)",
+          "title": "Title (e.g. Detailed move-in cleaning service)",
           "price": "Price",
-             "description": "Detailed description",
+          "description": "Detailed description",
           "descriptionHint": "Describe your experience, work style, available time, and other details.",
           "portfolio": "Portfolio",
           "location": "Service Area"
@@ -991,12 +993,11 @@
           "priceRequired": "Price is required.",
           "descriptionRequired": "Description is required.",
           "portfolioRequired": "Please upload at least 1 portfolio photo.",
-        "maxImages": "You can upload up to 10 images."
+          "maxImages": "You can upload up to 10 images."
         },
         "submit": "Register Talent",
-      "success": "Your talent has been registered successfully."
-      }
-      ,
+        "success": "Your talent has been registered successfully."
+      },
       "detail": {
         "title": "Talent Detail",
         "descriptionTitle": "Detailed description",
@@ -1921,6 +1922,63 @@
     "errorBody": "Please check the link or try again later."
   },
   "selectCategory": "Select category",
+  "appInfo": {
+    "appName": "Bling",
+    "version": "Version 2.1.0 (Field Test Build)",
+    "serviceIntroTitle": "About the Service",
+    "serviceIntroBody": "Bling is a hyper-local super app that brings your neighborhood closer and more trustworthy. News, trading, meetups, and instant gatherings — everything for local life in one place.",
+    "keyFeaturesTitle": "Key Features",
+    "features": {
+      "together": {
+        "title": "Together",
+        "desc": "[NEW] Instant local meetups & QR ticketing"
+      },
+      "localNews": {
+        "title": "Local News",
+        "desc": "Real, local stories and community updates"
+      },
+      "marketplace": {
+        "title": "Marketplace",
+        "desc": "Safe and smart secondhand trading with AI checks"
+      },
+      "jobs": {
+        "title": "Jobs",
+        "desc": "Local part-time and professional opportunities nearby"
+      },
+      "lostAndFound": {
+        "title": "Lost & Found",
+        "desc": "Map-assisted listings and reward-enabled reunions"
+      },
+      "localStores": {
+        "title": "Local Stores",
+        "desc": "Discover neighborhood shops and hidden gems"
+      },
+      "findFriends": {
+        "title": "Find Friends",
+        "desc": "Connect with nearby people who share your interests"
+      },
+      "clubs": {
+        "title": "Clubs",
+        "desc": "Local hobby groups and community circles"
+      },
+      "realEstate": {
+        "title": "Real Estate",
+        "desc": "More transparent local listings and direct deals"
+      },
+      "auction": {
+        "title": "Auction",
+        "desc": "Engaging live-style secondhand auctions"
+      },
+      "pom": {
+        "title": "POM",
+        "desc": "Short videos showcasing local lifestyle"
+      }
+    },
+    "developmentTitle": "Development & Operations",
+    "developmentBody": "Powered by Flutter & Firebase",
+    "developerLabel": "Developer",
+    "developerNames": "Chief Technology Officer (CTO): Jae Hyun Park"
+  },
   "address_neighborhood": "Neighborhood",
   "address_detail_hint": "Address details",
   "localNewsTagResult": {

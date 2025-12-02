@@ -951,7 +951,7 @@
       "all": "Semua",
       "quickGig": "Bantua Cepat",
       "regular": "Paruh/Penuh Waktu",
-    "talents": "Cari ahli"
+      "talents": "Cari ahli"
     },
     "selectType": {
       "title": "Pilih jenis iklan kerja",
@@ -997,8 +997,7 @@
         },
         "submit": "Daftarkan Jasa",
         "success": "Jasamu berhasil didaftarkan."
-      }
-      ,
+      },
       "detail": {
         "title": "Detail Jasa",
         "descriptionTitle": "Deskripsi detail",
@@ -1581,10 +1580,10 @@
       "form": {
         "titleLabel": "Judul",
         "descriptionLabel": "Deskripsi"
-      },
-      "edit": {
-        "title": "Sunting POM"
       }
+    },
+    "edit": {
+      "title": "Sunting POM"
     }
   },
   "realEstate": {
@@ -1889,13 +1888,13 @@
     },
     "detail": {
       "title": "Barang Hilang/Temuan",
-      "bounty": "Bounty",
       "location": "Lokasi",
-      "registrant": "Pendaftar",
-      "contact": "Hubungi",
       "reviewTitle": "Ulasan Terima Kasih",
       "reviewBy": "Dibantu oleh {name}",
       "helpedBy": "Dibantu oleh {name}",
+      "bounty": "Bounty",
+      "registrant": "Pendaftar",
+      "contact": "Hubungi",
       "resolved": "Selesai",
       "markAsResolved": "Tandai Selesai",
       "deleteTitle": "Hapus Postingan",
@@ -1923,6 +1922,63 @@
     "errorBody": "Periksa tautannya atau coba lagi nanti."
   },
   "selectCategory": "Pilih kategori",
+  "appInfo": {
+    "appName": "Bling",
+    "version": "Versi 2.1.0 (Field Test Build)",
+    "serviceIntroTitle": "Tentang Layanan",
+    "serviceIntroBody": "Bling adalah super app hiper-lokal yang menghubungkan lingkungan Anda dengan lebih dekat dan dapat dipercaya. Berita, jual-beli, pertemuan, dan acara instan — semua kebutuhan kehidupan lokal terintegrasi di satu tempat.",
+    "keyFeaturesTitle": "Fitur Utama",
+    "features": {
+      "together": {
+        "title": "Berkumpul (Together)",
+        "desc": "[NEW] Pertemuan lokal instan & tiket QR"
+      },
+      "localNews": {
+        "title": "Berita Lokal",
+        "desc": "Kisah dan informasi nyata dari lingkungan Anda"
+      },
+      "marketplace": {
+        "title": "Marketplace",
+        "desc": "Jual-beli bekas yang aman dan cerdas dengan pemeriksaan AI"
+      },
+      "jobs": {
+        "title": "Pekerjaan",
+        "desc": "Lowongan dekat rumah, dari paruh waktu hingga profesional"
+      },
+      "lostAndFound": {
+        "title": "Hilang & Ditemukan",
+        "desc": "Pencarian berbasis peta dan hadiah untuk penemuan"
+      },
+      "localStores": {
+        "title": "Toko Lokal",
+        "desc": "Temukan toko dan tempat populer di lingkungan"
+      },
+      "findFriends": {
+        "title": "Cari Teman",
+        "desc": "Temukan tetangga dengan minat yang sama"
+      },
+      "clubs": {
+        "title": "Komunitas",
+        "desc": "Kelompok minat lokal untuk berkumpul"
+      },
+      "realEstate": {
+        "title": "Properti",
+        "desc": "Daftar lokal yang lebih transparan dan transaksi langsung"
+      },
+      "auction": {
+        "title": "Lelang",
+        "desc": "Lelang barang bekas dengan partisipasi waktu nyata"
+      },
+      "pom": {
+        "title": "POM",
+        "desc": "Video singkat yang menampilkan gaya hidup lokal"
+      }
+    },
+    "developmentTitle": "Pengembangan & Operasi",
+    "developmentBody": "Didukung oleh Flutter & Firebase",
+    "developerLabel": "Developer",
+    "developerNames": "Chief Technology Officer (CTO): Jae Hyun Park"
+  },
   "address_neighborhood": "Lingkungan",
   "address_detail_hint": "Alamat detail",
   "localNewsTagResult": {
@@ -2278,13 +2334,11 @@
         "invalid_email": "Alamat email tidak valid.",
         "unknown": "Terjadi kesalahan yang tidak diketahui."
       }
-    }
-
-      ,
-      "home": {
-        "menu": {
-          "together": "Ayo Bareng"
-        }
+    },
+    "home": {
+      "menu": {
+        "together": "Ayo Bareng"
       }
+    }
   }
 }

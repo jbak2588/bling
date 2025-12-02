@@ -39,8 +39,8 @@ node_modules/
 serviceAccountKey.json
 *.key.json
 scripts/serviceAccountKey.json
+api_key.json
 
-
-
+    
 # Android Manifest was previously ignored to prevent API key leaks.
 # It is now tracked with placeholder values.\n# Ignore build debug logs\nandroid/grad_debug.txt

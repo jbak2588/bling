@@ -794,8 +794,10 @@
   },
   "localNewsEdit": {
     "appBarTitle": "게시물 수정",
+    "title": "게시물 수정",
     "buttons": {
-      "submit": "수정하기"
+      "submit": "수정하기",
+      "save": "변경사항 저장"
     },
     "alerts": {
       "success": "게시물이 수정되었습니다.",
@@ -968,7 +970,7 @@
         "badge": "NEW"
       }
     },
-     "talent": {
+    "talent": {
       "create": {
         "title": "재능 등록",
         "labels": {
@@ -995,8 +997,7 @@
         },
         "submit": "재능 등록하기",
         "success": "재능이 성공적으로 등록되었습니다."
-      }
-      ,
+      },
       "detail": {
         "title": "재능 상세",
         "descriptionTitle": "상세 설명",
@@ -1921,6 +1922,63 @@
     "errorBody": "링크를 확인하거나 나중에 다시 시도하세요."
   },
   "selectCategory": "카테고리 선택",
+  "appInfo": {
+    "appName": "Bling (블링)",
+    "version": "Version 2.1.0 (Field Test Build)",
+    "serviceIntroTitle": "서비스 소개",
+    "serviceIntroBody": "블링은 우리 동네를 더 가깝고 신뢰 있게 연결하는 하이퍼로컬 슈퍼 앱입니다. 뉴스, 거래, 모임, 그리고 가벼운 번개까지, 당신의 동네 생활에 필요한 모든 것을 하나로 담았습니다.",
+    "keyFeaturesTitle": "주요 기능 (Key Features)",
+    "features": {
+      "together": {
+        "title": "함께 해요 (Together)",
+        "desc": "[NEW] 지금 당장, 가볍게 모이는 동네 번개 & QR 티켓"
+      },
+      "localNews": {
+        "title": "동네 소식 (Local News)",
+        "desc": "우리 동네의 생생한 이야기와 정보 공유"
+      },
+      "marketplace": {
+        "title": "중고 거래 (Marketplace)",
+        "desc": "AI가 검수해주는 안전하고 스마트한 거래"
+      },
+      "jobs": {
+        "title": "구인 구직 (Jobs)",
+        "desc": "동네 알바부터 전문직까지, 내 집 근처 일자리"
+      },
+      "lostAndFound": {
+        "title": "분실물 찾기 (Lost & Found)",
+        "desc": "지도와 사례금으로 연결하는 분실/습득물 센터"
+      },
+      "localStores": {
+        "title": "동네 업체 (Local Stores)",
+        "desc": "우리 동네 숨은 가게와 핫플레이스 정보"
+      },
+      "findFriends": {
+        "title": "동네 친구 (Find Friends)",
+        "desc": "취향이 맞는 가까운 이웃 찾기"
+      },
+      "clubs": {
+        "title": "소모임 (Clubs)",
+        "desc": "공통의 관심사로 뭉치는 지역 동호회"
+      },
+      "realEstate": {
+        "title": "부동산 (Real Estate)",
+        "desc": "직거래로 더 투명한 우리 동네 매물"
+      },
+      "auction": {
+        "title": "경매 (Auction)",
+        "desc": "실시간으로 참여하는 즐거운 중고 경매"
+      },
+      "pom": {
+        "title": "뽐 (POM)",
+        "desc": "짧은 영상으로 만나는 우리 동네 라이프스타일"
+      }
+    },
+    "developmentTitle": "개발 및 운영",
+    "developmentBody": "Powered by Flutter & Firebase",
+    "developerLabel": "Developer",
+    "developerNames": "Chief Technology Officer (CTO): Jae Hyun Park"
+  },
   "address_neighborhood": "동네",
   "address_detail_hint": "상세 주소",
   "localNewsTagResult": {
@@ -2276,13 +2334,11 @@
         "invalid_email": "유효하지 않은 이메일 주소입니다.",
         "unknown": "알 수 없는 오류가 발생했습니다."
       }
-    }
-
-      ,
-      "home": {
-        "menu": {
-          "together": "함께 해요"
-        }
+    },
+    "home": {
+      "menu": {
+        "together": "함께 해요"
       }
+    }
   }
 }

@@ -131,6 +131,8 @@ import 'package:flutter_svg/flutter_svg.dart'; // 2차 버전 UI(SVG) 렌더링�
 import 'dart:math' as math;
 import 'package:visibility_detector/visibility_detector.dart'; // ✅ Lazy Loading
 
+import '../my_bling/screens/app_info_screen.dart'; // 경로 확인 필요
+
 // Sections enum used by SectionLoader
 enum AppSection {
   posts,
@@ -521,6 +523,14 @@ class _HomeScreenState extends State<HomeScreen>
         labelKey: 'main.tabs.together',
         screen: TogetherScreen(),
         section: null),
+
+    // ✅ [신규 추가] 12. 앱 정보 (UI 밸런스 + 정보 팝업용)
+    MenuItem(
+        // SVG가 없다면 기본 아이콘 사용 (회색 톤 권장)
+        svg: '$_iconsPath/ico_info.svg',
+        labelKey: 'settings.appInfo', // 다국어 키 (없으면 '앱 정보'로 표시됨)
+        screen: const AppInfoScreen(),
+        section: null),
   ];
 
   @override
@@ -534,9 +544,18 @@ class _HomeScreenState extends State<HomeScreen>
     final String lang = context.locale.languageCode; // 'id' | 'ko' | 'en'
     final bool longLabelLang = (lang == 'id');
 
-    // 5열 사용 조건: 화면폭 충분 + 텍스트가 너무 크지 않음(언어별 임계값)
-    final bool force4 = width < 360 || tsFactor > (longLabelLang ? 1.10 : 1.15);
-    final int gridCount = force4 ? 4 : 5;
+    // // 5열 사용 조건: 화면폭 충분 + 텍스트가 너무 크지 않음(언어별 임계값)
+    // final bool force4 = width < 360 || tsFactor > (longLabelLang ? 1.10 : 1.15);
+    // final int gridCount = force4 ? 4 : 5;
+
+    // [수정 전] 기존 반응형 로직 (화면이 좁거나 텍스트가 클 때만 4열)
+    // final bool force4 = width < 360 || tsFactor > (longLabelLang ? 1.10 : 1.15);
+
+    // [수정 후] 아이템 11개(소수)일 때의 UI 밸런스(4-4-3)를 위해 강제로 4열 적용
+    // 나중에 아이템이 12개 이상이 되거나 10개로 줄면 위 주석을 해제하여 복구하면 됩니다.
+
+    final int gridCount = 4;
+    // final int gridCount = force4 ? 4 : 5;
 
     // SliverPadding/간격 기준으로 셀 폭 계산
     const double outerPad = 16; // 좌우 패딩
