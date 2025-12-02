@@ -1847,6 +1847,11 @@
         "lost": "I lost it",
         "found": "I found it"
       },
+      "lostPlaceLabel": "Where did you lose it?",
+      "lostPlaceHint": "Search address or select on map",
+      "foundPlaceLabel": "Where was it found?",
+      "foundPlaceHint": "Search address or select on map",
+      "lostPlaceError": "Please select where you lost it.",
       "photoSectionTitle": "Add photos (max 5)",
       "imageRequired": "Please attach at least one photo.",
       "itemLabel": "What is the item?",

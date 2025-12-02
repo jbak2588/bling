@@ -1847,6 +1847,11 @@
         "lost": "Saya kehilangan",
         "found": "Saya menemukan"
       },
+      "lostPlaceLabel": "Tempat hilang",
+      "lostPlaceHint": "Cari alamat atau pilih di peta",
+      "foundPlaceLabel": "Tempat ditemukan",
+      "foundPlaceHint": "Cari alamat atau pilih di peta",
+      "lostPlaceError": "Silakan pilih tempat barang hilang.",
       "photoSectionTitle": "Tambah foto (maks 5)",
       "imageRequired": "Harap lampirkan minimal satu foto.",
       "itemLabel": "Barang apa itu?",

@@ -1847,6 +1847,11 @@
         "lost": "분실했어요",
         "found": "주웠어요"
       },
+      "lostPlaceLabel": "분실 장소",
+      "lostPlaceHint": "주소 검색 또는 지도에서 선택하세요",
+      "foundPlaceLabel": "습득 장소",
+      "foundPlaceHint": "주소 검색 또는 지도에서 선택하세요",
+      "lostPlaceError": "분실 장소를 선택해 주세요.",
       "photoSectionTitle": "사진 등록 (최대 5장)",
       "imageRequired": "사진을 1장 이상 첨부해주세요.",
       "itemLabel": "어떤 물건인가요?",
