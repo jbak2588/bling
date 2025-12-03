@@ -5,7 +5,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:bling_app/features/together/data/together_repository.dart';
 import 'package:bling_app/features/together/models/together_post_model.dart';
-import 'package:bling_app/features/together/screens/edit_together_screen.dart'; // ✅ 추가
+import 'package:bling_app/features/together/screens/edit_together_screen.dart'
+    as edit_screen; // import with prefix to avoid symbol collisions
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart'; // ✅ 추가 (공용 위젯 사용)
 import 'package:easy_localization/easy_localization.dart'; // ✅ 추가 (다국어 지원)
 import 'package:share_plus/share_plus.dart';
@@ -214,6 +216,14 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
     final txtColor = _getTextColor(widget.post.designTheme);
     final dateStr =
         DateFormat('yyyy.MM.dd HH:mm').format(widget.post.meetTime.toDate());
+    final meetLoc = widget.post.meetLocation ??
+        (widget.post.geoPoint != null
+            ? BlingLocation(
+                geoPoint: widget.post.geoPoint!,
+                mainAddress: widget.post.location)
+            : null);
+
+    final locationText = meetLoc?.mainAddress ?? widget.post.location;
 
     return Scaffold(
       backgroundColor: Colors.grey[100], // 배경은 깔끔하게
@@ -233,7 +243,8 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
                   Navigator.of(context)
                       .push(
                     MaterialPageRoute(
-                      builder: (_) => EditTogetherScreen(post: widget.post),
+                      builder: (_) =>
+                          edit_screen.EditTogetherScreen(post: widget.post),
                     ),
                   )
                       .then((_) {
@@ -334,7 +345,7 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
                       dateStr, txtColor),
                   const SizedBox(height: 20),
                   _buildInfoRow(Icons.location_on, "together.labelWhere".tr(),
-                      widget.post.location, txtColor),
+                      locationText, txtColor),
                   const SizedBox(height: 20),
                   _buildInfoRow(Icons.info_outline, "together.labelWhat".tr(),
                       widget.post.description, txtColor),

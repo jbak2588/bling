@@ -1,9 +1,14 @@
+// [Bling] Location refactor Step 1 (Together):
+// - Introduced BlingLocation-based `meetLocation`
+// - Uses AddressMapPicker to choose event place
+// - Preserves writer location for trust/radius.
 // lib/features/together/models/together_post_model.dart
 
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// '함께 해요(Together)' 게시글 데이터 모델
-/// Firestore Collection: together_posts
+// '함께 해요(Together)' 게시글 데이터 모델
+// Firestore Collection: together_posts
 class TogetherPostModel {
   final String id;
   final String hostId; // 주최자 UID
@@ -13,6 +18,7 @@ class TogetherPostModel {
   final String location; // 모임 장소 (텍스트 or 좌표 정보)
   // ✅ [추가] 지도 좌표 및 이미지
   final GeoPoint? geoPoint;
+  final BlingLocation? meetLocation; // BlingLocation 기반 모임 장소
   final String? imageUrl;
 
   final int maxParticipants; // 최대 모집 인원
@@ -33,6 +39,7 @@ class TogetherPostModel {
     required this.meetTime,
     required this.location,
     this.geoPoint,
+    this.meetLocation,
     this.imageUrl,
     required this.maxParticipants,
     required this.participants,
@@ -45,6 +52,21 @@ class TogetherPostModel {
   factory TogetherPostModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
+    BlingLocation? parsedMeetLocation;
+    final rawMeetLocation = data['meetLocation'];
+    if (rawMeetLocation is Map<String, dynamic>) {
+      try {
+        parsedMeetLocation = BlingLocation.fromJson(rawMeetLocation);
+      } catch (_) {
+        parsedMeetLocation = null;
+      }
+    }
+
+    final geoPoint = data['geoPoint'] as GeoPoint?;
+    final fallbackLocation = geoPoint != null
+        ? BlingLocation(geoPoint: geoPoint, mainAddress: data['location'] ?? '')
+        : null;
+
     return TogetherPostModel(
       id: doc.id,
       hostId: data['hostId'] ?? '',
@@ -52,7 +74,8 @@ class TogetherPostModel {
       description: data['description'] ?? '',
       meetTime: data['meetTime'] ?? Timestamp.now(),
       location: data['location'] ?? '',
-      geoPoint: data['geoPoint'] as GeoPoint?,
+      geoPoint: geoPoint,
+      meetLocation: parsedMeetLocation ?? fallbackLocation,
       imageUrl: data['imageUrl'] as String?,
       maxParticipants: data['maxParticipants'] ?? 4,
       participants: List<String>.from(data['participants'] ?? []),
@@ -71,6 +94,7 @@ class TogetherPostModel {
       'meetTime': meetTime,
       'location': location,
       'geoPoint': geoPoint,
+      'meetLocation': meetLocation?.toJson(),
       'imageUrl': imageUrl,
       'maxParticipants': maxParticipants,
       'participants': participants,

@@ -1,22 +1,23 @@
+// [Bling] Location refactor Step 1 (Together):
+// - Introduced BlingLocation-based `meetLocation`
+// - Uses AddressMapPicker to choose event place
+// - Preserves writer location for trust/radius.
 // lib/features/together/screens/create_together_screen.dart
 
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:bling_app/api_keys.dart'; // ✅ API Key 추가
+import 'package:bling_app/core/models/bling_location.dart';
+import 'package:bling_app/features/shared/widgets/address_map_picker.dart';
 import 'package:bling_app/features/together/data/together_repository.dart';
 import 'package:bling_app/features/together/models/together_post_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bling_app/core/models/user_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart'; // ✅ 추가
-import 'package:flutter/gestures.dart'; // ✅ 추가
 import 'package:flutter/material.dart';
-import 'package:flutter_google_maps_webservices/places.dart'; // ✅ Places API 추가
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart'; // ✅ 지도 추가
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
@@ -30,21 +31,16 @@ class CreateTogetherScreen extends StatefulWidget {
 class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
-  final _locationDescController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now().add(const Duration(hours: 1));
   String _selectedTheme = 'neon';
 
   File? _selectedImage;
   String? _uploadedImageUrl;
-
-  // ✅ 지도 및 검색 관련 상태
-  GoogleMapController? _mapController;
-  LatLng _currentMapPosition = const LatLng(-6.2088, 106.8456); // 자카르타 기본값
-  late GoogleMapsPlaces _places; // Places API 객체
+  BlingLocation? _meetLocation;
+  GeoPoint? _userGeoPoint;
 
   bool _isSubmitting = false;
-  bool _isLoadingLocation = false;
   int _maxParticipants = 4;
 
   // upload state
@@ -57,65 +53,30 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
   @override
   void initState() {
     super.initState();
-    // ✅ Places API 초기화
-    _places = GoogleMapsPlaces(apiKey: ApiKeys.serverKey);
-    _initUserLocation(); // ✅ 지도 초기 위치 설정
+    _loadUserGeoPoint();
+  }
+
+  Future<void> _loadUserGeoPoint() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (!doc.exists) return;
+      final userModel = UserModel.fromFirestore(doc);
+      if (mounted) setState(() => _userGeoPoint = userModel.geoPoint);
+    } catch (e) {
+      debugPrint('Failed to load user geoPoint: $e');
+    }
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _descController.dispose();
-    _locationDescController.dispose();
-    _mapController?.dispose(); // ✅ 맵 컨트롤러 해제
-    _places.dispose(); // ✅ Places 해제
     super.dispose();
-  }
-
-  // ✅ 초기 지도 위치 설정 (Geolocator 사용)
-  Future<void> _initUserLocation() async {
-    setState(() => _isLoadingLocation = true);
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings:
-            const LocationSettings(accuracy: LocationAccuracy.high),
-      );
-      if (mounted) {
-        setState(() {
-          _currentMapPosition = LatLng(position.latitude, position.longitude);
-          _isLoadingLocation = false;
-        });
-        // 지도가 로드된 상태라면 카메라 이동
-        _mapController?.animateCamera(
-          CameraUpdate.newLatLng(_currentMapPosition),
-        );
-      }
-    } catch (e) {
-      if (mounted) setState(() => _isLoadingLocation = false);
-    }
-  }
-
-  // ✅ 주소 검색 선택 핸들러
-  Future<void> _onPlaceSelected(Prediction prediction) async {
-    if (prediction.placeId == null) return;
-
-    try {
-      final detail = await _places.getDetailsByPlaceId(prediction.placeId!);
-      final lat = detail.result.geometry?.location.lat;
-      final lng = detail.result.geometry?.location.lng;
-
-      if (lat != null && lng != null) {
-        final newPos = LatLng(lat, lng);
-        _mapController?.animateCamera(CameraUpdate.newLatLngZoom(newPos, 17));
-        setState(() {
-          _currentMapPosition = newPos;
-          // 장소 설명 자동 입력 (사용자가 수정 가능)
-          _locationDescController.text = detail.result.name;
-        });
-      }
-    } catch (e) {
-      debugPrint("Place detail error: $e");
-    }
   }
 
   Future<void> _pickImage() async {
@@ -233,7 +194,7 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
           .showSnackBar(SnackBar(content: Text('together.enterDesc'.tr())));
       return;
     }
-    if (_locationDescController.text.isEmpty) {
+    if (_meetLocation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('together.enterLocationDesc'.tr())));
       return;
@@ -256,10 +217,10 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
         title: _titleController.text,
         description: _descController.text,
         meetTime: Timestamp.fromDate(_selectedDate),
-        location: _locationDescController.text,
+        location: _meetLocation!.mainAddress,
         // ✅ 최종 선택된 핀 위치(중심점)를 GeoPoint로 저장
-        geoPoint: GeoPoint(
-            _currentMapPosition.latitude, _currentMapPosition.longitude),
+        geoPoint: _meetLocation!.geoPoint,
+        meetLocation: _meetLocation,
         imageUrl: imageUrl,
         maxParticipants: _maxParticipants,
         participants: [user.uid],
@@ -340,190 +301,25 @@ class _CreateTogetherScreenState extends State<CreateTogetherScreen> {
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
 
-            // 1. 주소 검색창 (Autocomplete)
-            LayoutBuilder(builder: (context, constraints) {
-              return Autocomplete<Prediction>(
-                optionsBuilder: (textEditingValue) async {
-                  if (textEditingValue.text.isEmpty) return [];
-                  try {
-                    final res =
-                        await _places.autocomplete(textEditingValue.text);
-
-                    // ✅ [Debug] 로그 출력 (이 로그를 확인해야 함)
-                    debugPrint("Places API Status: ${res.status}");
-                    if (res.errorMessage != null) {
-                      debugPrint("Places API Error: ${res.errorMessage}");
-                    }
-
-                    if (res.isOkay) {
-                      return res.predictions;
-                    } else {
-                      return [];
-                    }
-                  } catch (e) {
-                    debugPrint("Places API Exception: $e");
-                    return [];
-                  }
-                },
-                displayStringForOption: (option) => option.description ?? '',
-                onSelected: _onPlaceSelected,
-                fieldViewBuilder:
-                    (context, controller, focusNode, onSubmitted) {
-                  return TextField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    onSubmitted: (_) => onSubmitted(),
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
-                      hintText: 'together.searchHint'.tr(),
-                      border: const OutlineInputBorder(),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16),
-                    ),
-                  );
-                },
-                optionsViewBuilder: (context, onSelected, options) {
-                  return Align(
-                    alignment: Alignment.topLeft,
-                    child: Material(
-                      elevation: 4,
-                      child: SizedBox(
-                        width: constraints.maxWidth,
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: options.length,
-                          itemBuilder: (context, index) {
-                            final option = options.elementAt(index);
-                            return ListTile(
-                              title: Text(option.description ?? ''),
-                              onTap: () => onSelected(option),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            }),
-            const SizedBox(height: 12),
-
-            // 2. 지도 위젯 (핀 이동 및 제스처 처리)
-            Container(
-              height: 240,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    _isLoadingLocation
-                        ? const Center(child: CircularProgressIndicator())
-                        : GoogleMap(
-                            initialCameraPosition: CameraPosition(
-                              target: _currentMapPosition,
-                              zoom: 15,
-                            ),
-                            onMapCreated: (controller) =>
-                                _mapController = controller,
-                            onCameraMove: (position) {
-                              // 지도를 움직이면 중심 좌표 변수에 저장
-                              _currentMapPosition = position.target;
-                            },
-                            myLocationEnabled: true,
-                            myLocationButtonEnabled: true,
-                            zoomControlsEnabled: false,
-                            // ✅ [Fix] 제스처 우선권 설정 (스크롤 뷰 간섭 해결)
-                            gestureRecognizers: <Factory<
-                                OneSequenceGestureRecognizer>>{
-                              Factory<OneSequenceGestureRecognizer>(
-                                () => EagerGestureRecognizer(),
-                              ),
-                            },
-                          ),
-                    // ✅ [Fix] 핀 위치 보정 (Padding으로 핀 끝을 중앙에 맞춤)
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 40.0),
-                      child:
-                          Icon(Icons.location_on, size: 40, color: Colors.red),
-                    ),
-                    // 안내 문구
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(230),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'together.mapHint'.tr(),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            AddressMapPicker(
+              initialValue: _meetLocation,
+              // Prefer the user's saved geoPoint for initial camera when available
+              userGeoPoint: _userGeoPoint,
+              onChanged: (loc) {
+                setState(() => _meetLocation = loc);
+              },
+              labelText: 'together.selectedLocation'.tr(),
+              hintText: 'together.mapHint'.tr(),
             ),
             const SizedBox(height: 8),
-            TextField(
-              controller: _locationDescController,
-              decoration: InputDecoration(
-                  labelText: 'together.whereHint'.tr(),
-                  prefixIcon: const Icon(Icons.location_on_outlined)),
-            ),
-            const SizedBox(height: 8),
-            // 선택된 위치 표시 및 현재 위치 버튼
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text('together.selectedLocation'.tr()),
-              subtitle: Text(
-                  "${_currentMapPosition.latitude.toStringAsFixed(6)}, ${_currentMapPosition.longitude.toStringAsFixed(6)}"),
-              trailing: _isLoadingLocation
-                  ? const SizedBox(
-                      width: 24, height: 24, child: CircularProgressIndicator())
-                  : ElevatedButton.icon(
-                      onPressed: () async {
-                        // 현재 위치로 설정
-                        setState(() => _isLoadingLocation = true);
-                        try {
-                          final pos = await Geolocator.getCurrentPosition(
-                              locationSettings: const LocationSettings(
-                                  accuracy: LocationAccuracy.high));
-                          setState(() {
-                            _currentMapPosition =
-                                LatLng(pos.latitude, pos.longitude);
-                          });
-                          if (_mapController != null) {
-                            _mapController!.animateCamera(
-                                CameraUpdate.newLatLng(_currentMapPosition));
-                          }
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text('together.locationFetchError'
-                                    .tr(namedArgs: {'error': e.toString()}))));
-                          }
-                        } finally {
-                          if (mounted) {
-                            setState(() => _isLoadingLocation = false);
-                          }
-                        }
-                      },
-                      icon: const Icon(Icons.my_location),
-                      label: Text('together.setCurrentLocation'.tr()),
-                    ),
-            ),
-            // ✅ [지도 섹션 끝]
+            if (_meetLocation != null)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text('together.selectedLocation'.tr()),
+                subtitle: Text(_meetLocation!.shortLabel?.isNotEmpty == true
+                    ? '${_meetLocation!.mainAddress}\n(${_meetLocation!.shortLabel})'
+                    : _meetLocation!.mainAddress),
+              ),
 
             const SizedBox(height: 16),
 

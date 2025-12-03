@@ -43,6 +43,7 @@ class SharedMapBrowser<T> extends StatefulWidget {
 class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
   final Completer<GoogleMapController> _controller = Completer();
   Set<Marker> _markers = {};
+  int _lastMarkerCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +81,7 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
 
               final markerId = widget.idExtractor(item);
 
-              return Marker(
+              final marker = Marker(
                 markerId: MarkerId(markerId),
                 position: LatLng(geoPoint.latitude, geoPoint.longitude),
                 icon: widget.customMarkerIcon ?? BitmapDescriptor.defaultMarker,
@@ -102,9 +103,68 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
                   );
                 },
               );
+
+              if (kDebugMode) {
+                debugPrint('[SharedMapBrowser] created marker id=$markerId'
+                    ' pos=(${geoPoint.latitude}, ${geoPoint.longitude})');
+              }
+
+              return marker;
             })
             .whereType<Marker>()
             .toSet();
+
+        // 디버그 모드에서만 마커가 갱신될 때 카메라를 마커 범위로 이동
+        if (kDebugMode && _markers.length != _lastMarkerCount) {
+          _lastMarkerCount = _markers.length;
+          if (_markers.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              try {
+                if (_controller.isCompleted) {
+                  final controller = await _controller.future;
+                  if (_markers.length == 1) {
+                    final only = _markers.first.position;
+                    await controller.animateCamera(
+                      CameraUpdate.newLatLngZoom(only, 15),
+                    );
+                  } else {
+                    // 여러 마커의 bounds 계산
+                    double? minLat, maxLat, minLng, maxLng;
+                    for (final m in _markers) {
+                      final lat = m.position.latitude;
+                      final lng = m.position.longitude;
+                      minLat = (minLat == null)
+                          ? lat
+                          : (lat < minLat ? lat : minLat);
+                      maxLat = (maxLat == null)
+                          ? lat
+                          : (lat > maxLat ? lat : maxLat);
+                      minLng = (minLng == null)
+                          ? lng
+                          : (lng < minLng ? lng : minLng);
+                      maxLng = (maxLng == null)
+                          ? lng
+                          : (lng > maxLng ? lng : maxLng);
+                    }
+                    if (minLat != null &&
+                        minLng != null &&
+                        maxLat != null &&
+                        maxLng != null) {
+                      final southWest = LatLng(minLat, minLng);
+                      final northEast = LatLng(maxLat, maxLng);
+                      final bounds = LatLngBounds(
+                          southwest: southWest, northeast: northEast);
+                      await controller.animateCamera(
+                          CameraUpdate.newLatLngBounds(bounds, 64));
+                    }
+                  }
+                }
+              } catch (e, st) {
+                debugPrint('[SharedMapBrowser] fit-bounds failed: $e\n$st');
+              }
+            });
+          }
+        }
 
         return GoogleMap(
           initialCameraPosition: widget.initialCameraPosition ??
