@@ -16,6 +16,7 @@
 
 import 'dart:math' as math;
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
+import 'package:bling_app/features/lost_and_found/data/lost_and_found_repository.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart'; // ✅ Provider Import
 import 'package:provider/provider.dart'; // ✅ Provider Import
@@ -25,6 +26,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 // provider and location_provider already imported above
 
 class LostAndFoundScreen extends StatefulWidget {
@@ -53,6 +56,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
+  bool _isMapMode = false;
 
   @override
   void initState() {
@@ -116,200 +120,292 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
 
     // ✅ LocationProvider 구독
     final locationProvider = context.watch<LocationProvider>();
+    final repository = LostAndFoundRepository();
 
-    return Scaffold(
-      body: Column(
-        children: [
-          if (_showSearchBar)
-            InlineSearchChip(
-              hintText: 'main.search.hint.lostAndFound'.tr(),
-              openNotifier: _chipOpenNotifier,
-              onSubmitted: (kw) {
-                _searchKeywordNotifier.value = kw.trim().toLowerCase();
-              },
-              onClose: () {
-                setState(() => _showSearchBar = false);
-                _searchKeywordNotifier.value = '';
-              },
+    return PopScope(
+      canPop: !_isMapMode,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        setState(() => _isMapMode = false);
+      },
+      child: Scaffold(
+        // Render search bar and TabBar+toggle regardless of map mode so
+        // users can switch tabs or close the map while it's expanded.
+        body: Column(
+          children: [
+            if (_showSearchBar)
+              InlineSearchChip(
+                hintText: 'main.search.hint.lostAndFound'.tr(),
+                openNotifier: _chipOpenNotifier,
+                onSubmitted: (kw) {
+                  _searchKeywordNotifier.value = kw.trim().toLowerCase();
+                },
+                onClose: () {
+                  setState(() => _showSearchBar = false);
+                  _searchKeywordNotifier.value = '';
+                },
+              ),
+            // TabBar + map toggle always visible per UI rule
+            Row(
+              children: [
+                Expanded(
+                  child: TabBar(
+                    controller: _tabController,
+                    labelColor: Theme.of(context).primaryColor,
+                    unselectedLabelColor: Colors.grey[600],
+                    indicatorColor: Theme.of(context).primaryColor,
+                    tabs: [
+                      Tab(text: 'lostAndFound.tabs.all'.tr()),
+                      Tab(text: 'lostAndFound.tabs.lost'.tr()),
+                      Tab(text: 'lostAndFound.tabs.found'.tr()),
+                    ],
+                    onTap: (index) => setState(() {}),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: IconButton(
+                    icon: Icon(_isMapMode ? Icons.close : Icons.map_outlined),
+                    tooltip: _isMapMode
+                        ? 'common.closeMap'.tr()
+                        : 'common.viewMap'.tr(),
+                    onPressed: () => setState(() => _isMapMode = !_isMapMode),
+                  ),
+                ),
+              ],
             ),
-          TabBar(
-            controller: _tabController,
-            labelColor: Theme.of(context).primaryColor,
-            unselectedLabelColor: Colors.grey[600],
-            indicatorColor: Theme.of(context).primaryColor,
-            tabs: [
-              Tab(text: 'lostAndFound.tabs.all'.tr()),
-              Tab(text: 'lostAndFound.tabs.lost'.tr()),
-              Tab(text: 'lostAndFound.tabs.found'.tr()),
-            ],
-            onTap: (index) => setState(() {}),
-          ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: (() {
-                Query<Map<String, dynamic>> query =
-                    FirebaseFirestore.instance.collection('lost_and_found');
+            // Main content: map or list
+            Expanded(
+              child: _isMapMode
+                  ? (() {
+                      // 초기 지도 중심 좌표 결정: LocationProvider 우선순위 사용
+                      final LatLng initialMapCenter = (() {
+                        try {
+                          if (locationProvider.mode ==
+                                  LocationSearchMode.nearby &&
+                              locationProvider.user?.geoPoint != null) {
+                            final gp = locationProvider.user!.geoPoint!;
+                            return LatLng(gp.latitude, gp.longitude);
+                          }
+                          if (locationProvider.user?.geoPoint != null) {
+                            final gp = locationProvider.user!.geoPoint!;
+                            return LatLng(gp.latitude, gp.longitude);
+                          }
+                          if (widget.userModel?.geoPoint != null) {
+                            final gp = widget.userModel!.geoPoint!;
+                            return LatLng(gp.latitude, gp.longitude);
+                          }
+                        } catch (_) {}
+                        return const LatLng(-6.200000, 106.816666);
+                      })();
 
-                // ✅ 1. 위치 필터 적용 (Provider 기준)
-                if (locationProvider.mode ==
-                    LocationSearchMode.administrative) {
-                  final filterEntry = locationProvider.activeQueryFilter;
-                  if (filterEntry != null) {
-                    query = query.where(filterEntry.key,
-                        isEqualTo: filterEntry.value);
-                  }
-                } else if (locationProvider.mode == LocationSearchMode.nearby) {
-                  // 거리 검색 최적화: 같은 Kab(시/군) 내에서만 1차 필터링
-                  final userKab = locationProvider.user?.locationParts?['kab'];
-                  if (userKab != null && userKab.isNotEmpty) {
-                    query =
-                        query.where('locationParts.kab', isEqualTo: userKab);
-                  }
-                }
-
-                // Apply item type filter (lost/found)
-                final itemType = _tabFilters[_tabController.index];
-                if (itemType != null) {
-                  query = query.where('type', isEqualTo: itemType);
-                }
-
-                // DB-side search token filtering
-                if (searchToken != null && searchToken.isNotEmpty) {
-                  query =
-                      query.where('searchIndex', arrayContains: searchToken);
-                }
-
-                // 3. 정렬 (정석 복구: 서버 사이드 정렬)
-                // [주의] 이 쿼리를 실행하면 콘솔에 인덱스 생성 링크가 뜹니다. 반드시 클릭하여 생성해야 합니다.
-                return query.orderBy('createdAt', descending: true).snapshots();
-              })(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                      child: Text('lostAndFound.error'.tr(
-                          namedArgs: {'error': snapshot.error.toString()})));
-                }
-
-                var docs = snapshot.data?.docs ?? [];
-
-                List<LostItemModel> data;
-
-                // ✅ 2. 거리순 정렬 및 필터링 (Nearby 모드일 때)
-                if (locationProvider.mode == LocationSearchMode.nearby &&
-                    locationProvider.user?.geoPoint != null) {
-                  final userGeo = locationProvider.user!.geoPoint!;
-                  final radiusKm = locationProvider.radiusKm;
-
-                  docs = docs.where((doc) {
-                    final pGeo = (doc.data()['geoPoint'] as GeoPoint?);
-                    if (pGeo == null) return false;
-                    final dist = _calculateDistance(userGeo.latitude,
-                        userGeo.longitude, pGeo.latitude, pGeo.longitude);
-                    return dist <= radiusKm;
-                  }).toList();
-
-                  docs.sort((a, b) {
-                    final geoA = (a.data()['geoPoint'] as GeoPoint);
-                    final geoB = (b.data()['geoPoint'] as GeoPoint);
-                    final distA = _calculateDistance(userGeo.latitude,
-                        userGeo.longitude, geoA.latitude, geoA.longitude);
-                    final distB = _calculateDistance(userGeo.latitude,
-                        userGeo.longitude, geoB.latitude, geoB.longitude);
-                    return distA.compareTo(distB);
-                  });
-
-                  // Map to models after applying distance filtering/sorting
-                  data = docs.map(LostItemModel.fromFirestore).toList();
-                } else {
-                  // Non-nearby modes: map (server already ordered by createdAt)
-                  data = docs.map(LostItemModel.fromFirestore).toList();
-                }
-                if (data.isEmpty) {
-                  final isNational =
-                      locationProvider.mode == LocationSearchMode.national;
-                  if (!isNational) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.search_off,
-                                size: 64, color: Colors.grey[300]),
-                            const SizedBox(height: 12),
-                            Text('lostAndFound.emptyLocation'.tr(),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.bodyMedium),
-                            const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(color: Colors.grey)),
-                            const SizedBox(height: 16),
-                            OutlinedButton.icon(
-                              icon: const Icon(Icons.map_outlined),
-                              label: Text('search.empty.expandToNational'.tr()),
-                              onPressed: () => context
-                                  .read<LocationProvider>()
-                                  .setMode(LocationSearchMode.national),
-                            ),
-                            // If an administrative location filter is active, offer quick reset to view all
-                            if (locationProvider.activeQueryFilter != null) ...[
-                              const SizedBox(height: 12),
-                              OutlinedButton.icon(
-                                icon: const Icon(Icons.refresh),
-                                label: Text('common.viewAll'.tr()),
-                                onPressed: () => context
-                                    .read<LocationProvider>()
-                                    .setMode(LocationSearchMode.national),
-                              ),
-                            ],
-                          ],
+                      return SharedMapBrowser<LostItemModel>(
+                        dataStream: repository.fetchItems(
+                          locationFilter: null,
+                          // tab-aware filter
+                          itemType: _tabFilters[_tabController.index],
                         ),
-                      ),
-                    );
-                  }
+                        initialCameraPosition: CameraPosition(
+                          target: initialMapCenter,
+                          zoom: 14,
+                        ),
+                        locationExtractor: (item) => item.geoPoint,
+                        idExtractor: (item) => item.id,
+                        cardBuilder: (context, item) =>
+                            LostItemCard(item: item),
+                      );
+                    })()
+                  : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      stream: (() {
+                        Query<Map<String, dynamic>> query = FirebaseFirestore
+                            .instance
+                            .collection('lost_and_found');
 
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.search_off,
-                              size: 64, color: Colors.grey[300]),
-                          const SizedBox(height: 12),
-                          Text('lostAndFound.empty'.tr(),
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyMedium),
-                        ],
-                      ),
+                        // ✅ 1. 위치 필터 적용 (Provider 기준)
+                        if (locationProvider.mode ==
+                            LocationSearchMode.administrative) {
+                          final filterEntry =
+                              locationProvider.activeQueryFilter;
+                          if (filterEntry != null) {
+                            query = query.where(filterEntry.key,
+                                isEqualTo: filterEntry.value);
+                          }
+                        } else if (locationProvider.mode ==
+                            LocationSearchMode.nearby) {
+                          // 거리 검색 최적화: 같은 Kab(시/군) 내에서만 1차 필터링
+                          final userKab =
+                              locationProvider.user?.locationParts?['kab'];
+                          if (userKab != null && userKab.isNotEmpty) {
+                            query = query.where('locationParts.kab',
+                                isEqualTo: userKab);
+                          }
+                        }
+
+                        // Apply item type filter (lost/found)
+                        final itemType = _tabFilters[_tabController.index];
+                        if (itemType != null) {
+                          query = query.where('type', isEqualTo: itemType);
+                        }
+
+                        // DB-side search token filtering
+                        if (searchToken != null && searchToken.isNotEmpty) {
+                          query = query.where('searchIndex',
+                              arrayContains: searchToken);
+                        }
+
+                        // 3. 정렬 (서버 사이드 정렬)
+                        return query
+                            .orderBy('createdAt', descending: true)
+                            .snapshots();
+                      })(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('lostAndFound.error'.tr(namedArgs: {
+                            'error': snapshot.error.toString()
+                          })));
+                        }
+
+                        var docs = snapshot.data?.docs ?? [];
+
+                        List<LostItemModel> data;
+
+                        // ✅ 2. 거리순 정렬 및 필터링 (Nearby 모드일 때)
+                        if (locationProvider.mode ==
+                                LocationSearchMode.nearby &&
+                            locationProvider.user?.geoPoint != null) {
+                          final userGeo = locationProvider.user!.geoPoint!;
+                          final radiusKm = locationProvider.radiusKm;
+
+                          docs = docs.where((doc) {
+                            final pGeo = (doc.data()['geoPoint'] as GeoPoint?);
+                            if (pGeo == null) return false;
+                            final dist = _calculateDistance(
+                                userGeo.latitude,
+                                userGeo.longitude,
+                                pGeo.latitude,
+                                pGeo.longitude);
+                            return dist <= radiusKm;
+                          }).toList();
+
+                          docs.sort((a, b) {
+                            final geoA = (a.data()['geoPoint'] as GeoPoint);
+                            final geoB = (b.data()['geoPoint'] as GeoPoint);
+                            final distA = _calculateDistance(
+                                userGeo.latitude,
+                                userGeo.longitude,
+                                geoA.latitude,
+                                geoA.longitude);
+                            final distB = _calculateDistance(
+                                userGeo.latitude,
+                                userGeo.longitude,
+                                geoB.latitude,
+                                geoB.longitude);
+                            return distA.compareTo(distB);
+                          });
+
+                          // Map to models after applying distance filtering/sorting
+                          data = docs.map(LostItemModel.fromFirestore).toList();
+                        } else {
+                          // Non-nearby modes: map (server already ordered by createdAt)
+                          data = docs.map(LostItemModel.fromFirestore).toList();
+                        }
+                        if (data.isEmpty) {
+                          final isNational = locationProvider.mode ==
+                              LocationSearchMode.national;
+                          if (!isNational) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.search_off,
+                                        size: 64, color: Colors.grey[300]),
+                                    const SizedBox(height: 12),
+                                    Text('lostAndFound.emptyLocation'.tr(),
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium),
+                                    const SizedBox(height: 8),
+                                    Text('search.empty.checkSpelling'.tr(),
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(color: Colors.grey)),
+                                    const SizedBox(height: 16),
+                                    OutlinedButton.icon(
+                                      icon: const Icon(Icons.map_outlined),
+                                      label: Text(
+                                          'search.empty.expandToNational'.tr()),
+                                      onPressed: () => context
+                                          .read<LocationProvider>()
+                                          .setMode(LocationSearchMode.national),
+                                    ),
+                                    // If an administrative location filter is active, offer quick reset to view all
+                                    if (locationProvider.activeQueryFilter !=
+                                        null) ...[
+                                      const SizedBox(height: 12),
+                                      OutlinedButton.icon(
+                                        icon: const Icon(Icons.refresh),
+                                        label: Text('common.viewAll'.tr()),
+                                        onPressed: () => context
+                                            .read<LocationProvider>()
+                                            .setMode(
+                                                LocationSearchMode.national),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.search_off,
+                                      size: 64, color: Colors.grey[300]),
+                                  const SizedBox(height: 12),
+                                  Text('lostAndFound.empty'.tr(),
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
+                        // Client-side filtering removed; DB query uses `searchIndex`.
+
+                        return ListView.builder(
+                          itemCount: data.length,
+                          itemBuilder: (context, index) {
+                            final item = data[index];
+                            // ✅ [수정] 전체 탭(index 0)일 때만 태그 표시, 나머지는 숨김
+                            return LostItemCard(
+                              item: item,
+                              showTypeTag: _tabController.index == 0,
+                            );
+                          },
+                        );
+                      },
                     ),
-                  );
-                }
-
-                // Client-side filtering removed; DB query uses `searchIndex`.
-
-                return ListView.builder(
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    final item = data[index];
-                    // ✅ [수정] 전체 탭(index 0)일 때만 태그 표시, 나머지는 숨김
-                    return LostItemCard(
-                      item: item,
-                      showTypeTag: _tabController.index == 0,
-                    );
-                  },
-                );
-              },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

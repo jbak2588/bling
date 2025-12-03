@@ -667,6 +667,7 @@
     "setCurrentLocation": "현재 위치 설정",
     "whereHint": "예: 한강공원 잔디밭 근처",
     "mapHint": "지도를 움직여 핀을 위치시켜 주세요",
+    "viewMapHint": "지도로 함께해요 모임보기",
     "noTickets": "아직 참여한 모임이 없어요.",
     "qrPopup": {
       "instruction": "주최자에게 이 QR 코드를 제시하여 티켓을 확인하세요.",
@@ -850,6 +851,8 @@
     "secret": "작성자와 게시물 주인만 볼 수 있는 비밀 댓글입니다."
   },
   "common": {
+    "viewMap": "지도 보기",
+    "closeMap": "지도 닫기",
     "cancel": "취소",
     "close": "닫기",
     "confirm": "확인",

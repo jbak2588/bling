@@ -266,7 +266,7 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
                     },
                     tooltip: _isMapView
                         ? 'common.closeMap'.tr()
-                        : 'localNews.viewMap'.tr(),
+                        : 'common.viewMap'.tr(),
                   ),
                 ],
               ),

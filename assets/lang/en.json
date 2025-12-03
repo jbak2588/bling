@@ -660,6 +660,7 @@
     "setCurrentLocation": "Set current location",
     "whereHint": "e.g. Central Park, near the fountain",
     "mapHint": "Move the map to position the pin",
+    "viewMapHint": "View meetups on the map",
     "noTickets": "You haven't joined any gatherings yet.",
     "qrPopup": {
       "instruction": "Show this QR code to the host to verify your ticket.",
@@ -843,6 +844,8 @@
     "secret": "This is a secret comment only visible to the author and post owner."
   },
   "common": {
+    "viewMap": "View map",
+    "closeMap": "Close map",
     "cancel": "Cancel",
     "close": "Close",
     "confirm": "Confirm",

@@ -112,9 +112,16 @@ class RoomRepository {
       }
     }
 
-    // 4) Sorting (Server). Requires composite indexes in Firestore.
-    // [수정] '작업 11/12': price가 범위 필터일 수 있어 첫 번째 정렬로 고정
-    query = query.orderBy('price').orderBy('createdAt', descending: true);
+    // 4) Sorting (Server)
+    // [수정] 지도 보기(filters == null)일 때는 'price' 정렬을 건너뛰고 'createdAt'만 사용하여
+    // 복합 인덱스 문제 없이 데이터를 확실하게 가져오도록 함.
+    if (filters != null) {
+      // 리스트 뷰: 가격 필터/정렬이 중요하므로 price 우선
+      query = query.orderBy('price').orderBy('createdAt', descending: true);
+    } else {
+      // 지도 뷰: 전체 매물을 최신순으로 조회 (인덱스 의존성 최소화)
+      query = query.orderBy('createdAt', descending: true);
+    }
 
     return query;
   }

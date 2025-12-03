@@ -59,6 +59,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class ClubsScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -88,6 +90,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
+  bool _isMapMode = false;
 
   // 저장소 인스턴스 (탭별 StreamBuilder에서 재사용)
   final ClubRepository _repository = ClubRepository();
@@ -137,58 +140,124 @@ class _ClubsScreenState extends State<ClubsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // LocationProvider 우선값으로 초기 지도 중심 좌표 결정
+    final locationProvider = context.watch<LocationProvider>();
+    final LatLng initialMapCenter = (() {
+      try {
+        if (locationProvider.mode == LocationSearchMode.nearby &&
+            locationProvider.user?.geoPoint != null) {
+          final gp = locationProvider.user!.geoPoint!;
+          return LatLng(gp.latitude, gp.longitude);
+        }
+        if (locationProvider.user?.geoPoint != null) {
+          final gp = locationProvider.user!.geoPoint!;
+          return LatLng(gp.latitude, gp.longitude);
+        }
+        if (widget.userModel?.geoPoint != null) {
+          final gp = widget.userModel!.geoPoint!;
+          return LatLng(gp.latitude, gp.longitude);
+        }
+      } catch (_) {}
+      return const LatLng(-6.200000, 106.816666);
+    })();
+
     // Dual-mode:
     // - showInnerAppBar == true: self-contained (Scaffold + TabBar까지 내부 포함)
     // - showInnerAppBar == false: parent manages TabBar; requires external controller
     if (widget.showInnerAppBar) {
-      return DefaultTabController(
-        length: 2,
-        child: Builder(
-          builder: (ctx) {
-            final controller =
-                widget.tabController ?? DefaultTabController.of(ctx);
-            return Scaffold(
-              appBar: AppBar(
-                automaticallyImplyLeading: false,
-                // TabBar는 body로 이동하므로 AppBar는 상단 bar 역할만 수행
-                toolbarHeight: 0,
-              ),
-              body: Column(
-                children: [
-                  // ✅ 검색바가 활성화되면 탭보다 위에서 노출
-                  if (_showSearchBar)
-                    InlineSearchChip(
-                      hintText: 'main.search.hint.clubs'.tr(),
-                      openNotifier: _chipOpenNotifier,
-                      onSubmitted: (kw) => _searchKeywordNotifier.value =
-                          kw.trim().toLowerCase(),
-                      onClose: () {
-                        setState(() => _showSearchBar = false);
-                        _searchKeywordNotifier.value = '';
-                      },
-                    ),
-                  // ✅ 모임 제안 / 활동 중인 모임 탭
-                  TabBar(
-                    controller: controller,
-                    tabs: [
-                      Tab(text: 'clubs.tabs.proposals'.tr()),
-                      Tab(text: 'clubs.tabs.activeClubs'.tr()),
-                    ],
-                  ),
-                  // 탭 컨텐츠
-                  Expanded(
-                    child: TabBarView(
-                      controller: controller,
-                      children: [
-                        _buildProposalList(),
-                        _buildActiveClubList(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+      return PopScope(
+        canPop: !_isMapMode,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          setState(() => _isMapMode = false);
+        },
+        child: DefaultTabController(
+          length: 2,
+          child: Builder(
+            builder: (ctx) {
+              final controller =
+                  widget.tabController ?? DefaultTabController.of(ctx);
+              return Scaffold(
+                // [수정] 중복 AppBar 제거
+                body: _isMapMode
+                    ? SharedMapBrowser<ClubModel>(
+                        dataStream:
+                            _repository.fetchClubs(locationFilter: null),
+                        // [수정] 초기 위치: userModel 사용 (null 안전 처리)
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(
+                            widget.userModel!.geoPoint!.latitude,
+                            widget.userModel!.geoPoint!.longitude,
+                          ),
+                          zoom: 14,
+                        ),
+                        locationExtractor: (club) => club.geoPoint,
+                        idExtractor: (club) => club.id,
+                        cardBuilder: (context, club) =>
+                            ClubCard(key: ValueKey(club.id), club: club),
+                      )
+                    : Column(
+                        children: [
+                          // ✅ 검색바가 활성화되면 탭보다 위에서 노출
+                          if (_showSearchBar)
+                            InlineSearchChip(
+                              hintText: 'main.search.hint.clubs'.tr(),
+                              openNotifier: _chipOpenNotifier,
+                              onSubmitted: (kw) => _searchKeywordNotifier
+                                  .value = kw.trim().toLowerCase(),
+                              onClose: () {
+                                setState(() => _showSearchBar = false);
+                                _searchKeywordNotifier.value = '';
+                              },
+                            ),
+                          // [수정] 탭바와 지도 버튼을 한 줄에 배치
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TabBar(
+                                  controller: controller,
+                                  labelColor: Theme.of(context).primaryColor,
+                                  unselectedLabelColor: Colors.grey[600],
+                                  indicatorColor:
+                                      Theme.of(context).primaryColor,
+                                  tabs: [
+                                    Tab(text: 'clubs.tabs.proposals'.tr()),
+                                    Tab(text: 'clubs.tabs.activeClubs'.tr()),
+                                  ],
+                                ),
+                              ),
+                              // [추가] 지도/닫기 토글 버튼 (탭바 우측)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: IconButton(
+                                  icon: Icon(_isMapMode
+                                      ? Icons.close
+                                      : Icons.map_outlined),
+                                  tooltip: _isMapMode
+                                      ? 'common.closeMap'.tr()
+                                      : 'common.viewMap'.tr(),
+                                  onPressed: () =>
+                                      setState(() => _isMapMode = !_isMapMode),
+                                ),
+                              ),
+                            ],
+                          ),
+                          // 탭 컨텐츠
+                          Expanded(
+                            child: TabBarView(
+                              controller: controller,
+                              children: [
+                                _buildProposalList(),
+                                _buildActiveClubList(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+              );
+            },
+          ),
         ),
       );
     } else {
@@ -199,29 +268,62 @@ class _ClubsScreenState extends State<ClubsScreen> {
       );
       // 이 모드는 상위 위젯에서 TabBar를 관리하므로,
       // 여기서는 기존대로 탭 내용만 렌더링합니다.
-      return Column(
-        children: [
-          if (_showSearchBar)
-            InlineSearchChip(
-              hintText: 'main.search.hint.clubs'.tr(),
-              openNotifier: _chipOpenNotifier,
-              onSubmitted: (kw) =>
-                  _searchKeywordNotifier.value = kw.trim().toLowerCase(),
-              onClose: () {
-                setState(() => _showSearchBar = false);
-                _searchKeywordNotifier.value = '';
-              },
-            ),
-          Expanded(
-            child: TabBarView(
-              controller: controller,
-              children: [
-                _buildProposalList(),
-                _buildActiveClubList(),
-              ],
-            ),
+      return PopScope(
+        canPop: !_isMapMode,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          setState(() => _isMapMode = false);
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: Text('main.tabs.clubs'.tr()),
+            actions: [
+              IconButton(
+                icon: Icon(_isMapMode ? Icons.close : Icons.map_outlined),
+                tooltip:
+                    _isMapMode ? 'common.closeMap'.tr() : 'common.viewMap'.tr(),
+                onPressed: () => setState(() => _isMapMode = !_isMapMode),
+              ),
+            ],
           ),
-        ],
+          body: _isMapMode
+              ? SharedMapBrowser<ClubModel>(
+                  dataStream: _repository.fetchClubs(locationFilter: null),
+                  initialCameraPosition: CameraPosition(
+                    target: initialMapCenter,
+                    zoom: 14,
+                  ),
+                  locationExtractor: (club) => club.geoPoint,
+                  idExtractor: (club) => club.id,
+                  cardBuilder: (context, club) =>
+                      ClubCard(key: ValueKey(club.id), club: club),
+                )
+              : Column(
+                  children: [
+                    if (_showSearchBar)
+                      InlineSearchChip(
+                        hintText: 'main.search.hint.clubs'.tr(),
+                        openNotifier: _chipOpenNotifier,
+                        onSubmitted: (kw) => _searchKeywordNotifier.value =
+                            kw.trim().toLowerCase(),
+                        onClose: () {
+                          setState(() => _showSearchBar = false);
+                          _searchKeywordNotifier.value = '';
+                        },
+                      ),
+                    Expanded(
+                      child: TabBarView(
+                        controller: controller,
+                        children: [
+                          _buildProposalList(),
+                          _buildActiveClubList(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       );
     }
   }

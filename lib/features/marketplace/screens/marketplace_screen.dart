@@ -43,6 +43,8 @@ import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart'; // ✅ Provider
 import 'package:provider/provider.dart'; // ✅ Provider
 import 'dart:math' as math; // 거리 계산용
+import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../models/product_model.dart';
 import '../widgets/product_card.dart';
@@ -107,6 +109,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
       ValueNotifier<String>('');
   bool _showSearchBar = false;
   VoidCallback? _externalSearchListener;
+  bool _isMapMode = false;
 
   // '전체' 탭을 위한 가상의 Category 객체
   final Category _allCategory = const Category(
@@ -187,6 +190,31 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     final langCode = context.locale.languageCode;
     // ✅ LocationProvider 구독
     final locationProvider = context.watch<LocationProvider>();
+
+    // 초기 지도 중심 좌표 결정: 우선순위
+    // 1) LocationProvider.mode == nearby && provider.user.geoPoint
+    // 2) provider.user.geoPoint
+    // 3) widget.userModel.geoPoint
+    // 4) fallback Jakarta
+    final LatLng initialMapCenter = (() {
+      try {
+        if (locationProvider.mode == LocationSearchMode.nearby &&
+            locationProvider.user?.geoPoint != null) {
+          final gp = locationProvider.user!.geoPoint!;
+          return LatLng(gp.latitude, gp.longitude);
+        }
+        if (locationProvider.user?.geoPoint != null) {
+          final gp = locationProvider.user!.geoPoint!;
+          return LatLng(gp.latitude, gp.longitude);
+        }
+        if (widget.userModel?.geoPoint != null) {
+          final gp = widget.userModel!.geoPoint!;
+          return LatLng(gp.latitude, gp.longitude);
+        }
+      } catch (_) {}
+      // Jakarta fallback
+      return const LatLng(-6.200000, 106.816666);
+    })();
 
     Query<Map<String, dynamic>> buildQuery() {
       Query<Map<String, dynamic>> query =
@@ -269,6 +297,17 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     backgroundColor: Colors.white,
                     elevation: 0,
                     // 높이를 내용물(탭)에 맞춤.
+                    actions: [
+                      IconButton(
+                        icon:
+                            Icon(_isMapMode ? Icons.close : Icons.map_outlined),
+                        tooltip: _isMapMode
+                            ? 'common.closeMap'.tr()
+                            : 'common.viewMap'.tr(),
+                        onPressed: () =>
+                            setState(() => _isMapMode = !_isMapMode),
+                      ),
+                    ],
                     toolbarHeight: 100,
                     flexibleSpace: FlexibleSpaceBar(
                       background: _buildParentCategoryTabs(langCode),
@@ -293,144 +332,196 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                   // 검색바는 NestedScrollView 밖으로 이동했으므로 제거
                 ];
               },
-              body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: buildQuery().snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    if (snapshot.error
-                        .toString()
-                        .contains('failed-precondition')) {
-                      return Center(
-                          child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child:
-                            Text("인덱스 생성 필요: 콘솔 링크를 확인하세요.\n${snapshot.error}"),
-                      ));
-                    }
-                    return Center(
-                        child: Text('marketplace.error'.tr(
-                            namedArgs: {'error': snapshot.error.toString()})));
-                  }
+              body: _isMapMode
+                  ? SharedMapBrowser<ProductModel>(
+                      dataStream: (() {
+                        Query<Map<String, dynamic>> q =
+                            FirebaseFirestore.instance.collection('products');
 
-                  var allDocs = snapshot.data?.docs ?? [];
+                        // 기본 상태 필터
+                        q = q.where('status',
+                            whereIn: ['selling', 'reserved', 'sold']);
 
-                  // ✅ [거리순 정렬 로직 추가]
-                  if (locationProvider.mode == LocationSearchMode.nearby &&
-                      locationProvider.user?.geoPoint != null) {
-                    final userGeo = locationProvider.user!.geoPoint!;
-                    final radiusKm = locationProvider.radiusKm;
+                        // 카테고리 필터(리스트와 동일하게 적용)
+                        if (_selectedParent.id != 'all') {
+                          if (_selectedSub != null &&
+                              _selectedSub!.id != 'all') {
+                            q = q.where('categoryId',
+                                isEqualTo: _selectedSub!.id);
+                          } else {
+                            q = q.where('categoryParentId',
+                                isEqualTo: _selectedParent.id);
+                          }
+                        }
 
-                    // 1. 거리 필터링 & 정렬을 위해 리스트 변환
-                    // (ProductModel로 변환 비용이 들지만 정확한 거리 계산을 위해 필요)
-                    allDocs = allDocs.where((doc) {
-                      final pGeo = (doc.data()['geoPoint'] as GeoPoint?);
-                      if (pGeo == null) return false;
-                      final dist = _calculateDistance(userGeo.latitude,
-                          userGeo.longitude, pGeo.latitude, pGeo.longitude);
-                      return dist <= radiusKm;
-                    }).toList();
+                        // 정렬
+                        q = q.orderBy('createdAt', descending: true);
 
-                    // 2. 거리순 정렬
-                    allDocs.sort((a, b) {
-                      final geoA = (a.data()['geoPoint'] as GeoPoint);
-                      final geoB = (b.data()['geoPoint'] as GeoPoint);
-                      final distA = _calculateDistance(userGeo.latitude,
-                          userGeo.longitude, geoA.latitude, geoA.longitude);
-                      final distB = _calculateDistance(userGeo.latitude,
-                          userGeo.longitude, geoB.latitude, geoB.longitude);
-                      return distA.compareTo(distB);
-                    });
-                  }
-
-                  allDocs = _applyStatusRules(allDocs);
-
-                  // 검색은 DB 기반(정렬/필터링)으로 처리하므로 클라이언트 사이드 키워드 필터는 제거.
-
-                  if (allDocs.isEmpty) {
-                    final isNational =
-                        locationProvider.mode == LocationSearchMode.national;
-                    if (!isNational) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.search_off,
-                                  size: 64, color: Colors.grey[300]),
-                              const SizedBox(height: 12),
-                              Text('marketplace.empty'.tr(),
-                                  textAlign: TextAlign.center,
-                                  style:
-                                      Theme.of(context).textTheme.bodyMedium),
-                              const SizedBox(height: 8),
-                              Text('search.empty.checkSpelling'.tr(),
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(color: Colors.grey)),
-                              const SizedBox(height: 16),
-                              OutlinedButton.icon(
-                                icon: const Icon(Icons.map_outlined),
-                                label:
-                                    Text('search.empty.expandToNational'.tr()),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 12.0, horizontal: 16.0),
-                                ),
-                                onPressed: () => context
-                                    .read<LocationProvider>()
-                                    .setMode(LocationSearchMode.national),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-
-                    return Center(
-                        child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.search_off,
-                              size: 64, color: Colors.grey[300]),
-                          const SizedBox(height: 12),
-                          Text('marketplace.empty'.tr(),
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyMedium),
-                        ],
+                        return q.snapshots().map((snapshot) => snapshot.docs
+                            .map((doc) => ProductModel.fromFirestore(doc))
+                            .toList());
+                      })(),
+                      initialCameraPosition: CameraPosition(
+                        target: initialMapCenter,
+                        zoom: 14,
                       ),
-                    ));
-                  }
-
-                  return ListView.separated(
-                    // NestedScrollView 내부 리스트는 padding top 0 권장
-                    padding: EdgeInsets.zero,
-                    itemCount: allDocs.length,
-                    separatorBuilder: (context, index) => const Divider(
-                      height: 1,
-                      thickness: 1,
-                      indent: 16,
-                      endIndent: 16,
-                      color: Color(0xFFEEEEEE),
-                    ),
-                    itemBuilder: (context, index) {
-                      final product =
-                          ProductModel.fromFirestore(allDocs[index]);
-                      return ProductCard(
+                      locationExtractor: (product) => product.geoPoint,
+                      idExtractor: (product) => product.id,
+                      cardBuilder: (context, product) => ProductCard(
                         key: ValueKey(product.id),
                         product: product,
-                      );
-                    },
-                  );
-                },
-              ), // StreamBuilder
+                      ),
+                    )
+                  : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      stream: buildQuery().snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          if (snapshot.error
+                              .toString()
+                              .contains('failed-precondition')) {
+                            return Center(
+                                child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                  "인덱스 생성 필요: 콘솔 링크를 확인하세요.\n${snapshot.error}"),
+                            ));
+                          }
+                          return Center(
+                              child: Text('marketplace.error'.tr(namedArgs: {
+                            'error': snapshot.error.toString()
+                          })));
+                        }
+
+                        var allDocs = snapshot.data?.docs ?? [];
+
+                        // ✅ [거리순 정렬 로직 추가]
+                        if (locationProvider.mode ==
+                                LocationSearchMode.nearby &&
+                            locationProvider.user?.geoPoint != null) {
+                          final userGeo = locationProvider.user!.geoPoint!;
+                          final radiusKm = locationProvider.radiusKm;
+
+                          // 1. 거리 필터링 & 정렬을 위해 리스트 변환
+                          allDocs = allDocs.where((doc) {
+                            final pGeo = (doc.data()['geoPoint'] as GeoPoint?);
+                            if (pGeo == null) return false;
+                            final dist = _calculateDistance(
+                                userGeo.latitude,
+                                userGeo.longitude,
+                                pGeo.latitude,
+                                pGeo.longitude);
+                            return dist <= radiusKm;
+                          }).toList();
+
+                          // 2. 거리순 정렬
+                          allDocs.sort((a, b) {
+                            final geoA = (a.data()['geoPoint'] as GeoPoint);
+                            final geoB = (b.data()['geoPoint'] as GeoPoint);
+                            final distA = _calculateDistance(
+                                userGeo.latitude,
+                                userGeo.longitude,
+                                geoA.latitude,
+                                geoA.longitude);
+                            final distB = _calculateDistance(
+                                userGeo.latitude,
+                                userGeo.longitude,
+                                geoB.latitude,
+                                geoB.longitude);
+                            return distA.compareTo(distB);
+                          });
+                        }
+
+                        allDocs = _applyStatusRules(allDocs);
+
+                        if (allDocs.isEmpty) {
+                          final isNational = locationProvider.mode ==
+                              LocationSearchMode.national;
+                          if (!isNational) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.search_off,
+                                        size: 64, color: Colors.grey[300]),
+                                    const SizedBox(height: 12),
+                                    Text('marketplace.empty'.tr(),
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium),
+                                    const SizedBox(height: 8),
+                                    Text('search.empty.checkSpelling'.tr(),
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(color: Colors.grey)),
+                                    const SizedBox(height: 16),
+                                    OutlinedButton.icon(
+                                      icon: const Icon(Icons.map_outlined),
+                                      label: Text(
+                                          'search.empty.expandToNational'.tr()),
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12.0, horizontal: 16.0),
+                                      ),
+                                      onPressed: () => context
+                                          .read<LocationProvider>()
+                                          .setMode(LocationSearchMode.national),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          return Center(
+                              child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.search_off,
+                                    size: 64, color: Colors.grey[300]),
+                                const SizedBox(height: 12),
+                                Text('marketplace.empty'.tr(),
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium),
+                              ],
+                            ),
+                          ));
+                        }
+
+                        return ListView.separated(
+                          // NestedScrollView 내부 리스트는 padding top 0 권장
+                          padding: EdgeInsets.zero,
+                          itemCount: allDocs.length,
+                          separatorBuilder: (context, index) => const Divider(
+                            height: 1,
+                            thickness: 1,
+                            indent: 16,
+                            endIndent: 16,
+                            color: Color(0xFFEEEEEE),
+                          ),
+                          itemBuilder: (context, index) {
+                            final product =
+                                ProductModel.fromFirestore(allDocs[index]);
+                            return ProductCard(
+                              key: ValueKey(product.id),
+                              product: product,
+                            );
+                          },
+                        );
+                      },
+                    ),
             ), // NestedScrollView
           ), // Expanded
         ],

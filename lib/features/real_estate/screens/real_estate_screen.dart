@@ -159,7 +159,7 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
             icon: Icon(_isMapMode ? Icons.close : Icons.map_outlined),
             onPressed: () => setState(() => _isMapMode = !_isMapMode),
             tooltip:
-                _isMapMode ? 'common.closeMap'.tr() : 'realEstate.viewMap'.tr(),
+                _isMapMode ? 'common.closeMap'.tr() : 'common.viewMap'.tr(),
           ),
         ],
       ),

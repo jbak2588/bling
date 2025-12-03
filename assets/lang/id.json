@@ -667,6 +667,7 @@
     "setCurrentLocation": "Atur lokasi saat ini",
     "whereHint": "contoh: Taman Kota, dekat air mancur",
     "mapHint": "Geser peta untuk menempatkan pin",
+    "viewMapHint": "Lihat acara di peta",
     "noTickets": "Anda belum bergabung dengan acara apa pun.",
     "qrPopup": {
       "instruction": "Tunjukkan kode QR ini kepada penyelenggara untuk memverifikasi tiket Anda.",
@@ -850,6 +851,8 @@
     "secret": "Ini adalah komentar rahasia yang hanya dapat dilihat oleh penulis dan pemilik postingan."
   },
   "common": {
+    "viewMap": "Lihat peta",
+    "closeMap": "Tutup peta",
     "cancel": "Batal",
     "close": "Tutup",
     "confirm": "Konfirmasi",

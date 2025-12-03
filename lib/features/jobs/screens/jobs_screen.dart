@@ -47,6 +47,9 @@ import 'package:bling_app/features/jobs/widgets/talent_card.dart'; // [추가]
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 // ✅ [작업 31] 1. 일자리 유형 선택 화면 import
@@ -87,6 +90,7 @@ class _JobsScreenState extends State<JobsScreen>
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
+  bool _isMapMode = false;
 
   List<JobModel> _applyLocationFilter(List<JobModel> allJobs) {
     final filter = widget.locationFilter;
@@ -317,6 +321,10 @@ class _JobsScreenState extends State<JobsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
+    // Ensure UI updates when the user swipes between tabs (so map updates too)
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
 
     // 전역 검색 시트에서 진입한 경우 자동 표시 + 포커스
     if (widget.autoFocusSearch) {
@@ -419,32 +427,46 @@ class _JobsScreenState extends State<JobsScreen>
           //   ),
           // ),
 
-          TabBar(
-            controller: _tabController,
-            labelColor: Theme.of(context).primaryColor,
-            unselectedLabelColor: Colors.grey[600],
-            indicatorColor: Theme.of(context).primaryColor,
-            tabs: [
-              Tab(text: 'jobs.tabs.all'.tr()), // 전체 (통합)
-              Tab(text: 'jobs.tabs.regular'.tr()), // 구인
-              Tab(text: 'jobs.tabs.talents'.tr()), // 재능
+          Row(
+            children: [
+              Expanded(
+                child: TabBar(
+                  controller: _tabController,
+                  labelColor: Theme.of(context).primaryColor,
+                  unselectedLabelColor: Colors.grey[600],
+                  indicatorColor: Theme.of(context).primaryColor,
+                  tabs: [
+                    Tab(text: 'jobs.tabs.all'.tr()), // 전체 (통합)
+                    Tab(text: 'jobs.tabs.regular'.tr()), // 구인
+                    Tab(text: 'jobs.tabs.talents'.tr()), // 재능
+                  ],
+                  onTap: (index) => setState(() {}),
+                ),
+              ),
+              IconButton(
+                icon: Icon(_isMapMode ? Icons.close : Icons.map_outlined),
+                tooltip:
+                    _isMapMode ? 'common.closeMap'.tr() : 'common.viewMap'.tr(),
+                onPressed: () => setState(() => _isMapMode = !_isMapMode),
+              ),
             ],
-            onTap: (index) => setState(() {}),
           ),
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Tab 0: 통합 대시보드 (전문가/구인 통합)
-                _buildAllFeed(widget.locationFilter),
+            child: _isMapMode
+                ? _buildTabAwareMap(jobRepository)
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // Tab 0: 통합 대시보드 (전문가/구인 통합)
+                      _buildAllFeed(widget.locationFilter),
 
-                // Tab 1: 구인 피드 (기존 로직 유지)
-                _buildJobFeed(jobRepository),
+                      // Tab 1: 구인 피드 (기존 로직 유지)
+                      _buildJobFeed(jobRepository),
 
-                // Tab 2: 재능 피드 (신규)
-                _buildTalentFeed(),
-              ],
-            ),
+                      // Tab 2: 재능 피드 (신규)
+                      _buildTalentFeed(),
+                    ],
+                  ),
           ),
         ],
       ),
@@ -500,6 +522,65 @@ class _JobsScreenState extends State<JobsScreen>
               TalentCard(talent: snapshot.data![index]),
         );
       },
+    );
+  }
+
+  // Build a tab-aware map view: show Jobs or Talents depending on active tab.
+  Widget _buildTabAwareMap(JobRepository jobRepository) {
+    final locationProvider = context.watch<LocationProvider>();
+
+    // 초기 지도 중심 좌표 결정: LocationProvider 우선순위 사용
+    final LatLng initialMapCenter = (() {
+      try {
+        if (locationProvider.mode == LocationSearchMode.nearby &&
+            locationProvider.user?.geoPoint != null) {
+          final gp = locationProvider.user!.geoPoint!;
+          return LatLng(gp.latitude, gp.longitude);
+        }
+        if (locationProvider.user?.geoPoint != null) {
+          final gp = locationProvider.user!.geoPoint!;
+          return LatLng(gp.latitude, gp.longitude);
+        }
+        if (widget.userModel?.geoPoint != null) {
+          final gp = widget.userModel!.geoPoint!;
+          return LatLng(gp.latitude, gp.longitude);
+        }
+      } catch (_) {}
+      return const LatLng(-6.200000, 106.816666);
+    })();
+
+    final initialCamera = CameraPosition(target: initialMapCenter, zoom: 14);
+
+    if (_tabController.index == 2) {
+      // Talents: build a stream from Firestore and show Talent markers
+      final Stream<List<TalentModel>> talentStream = FirebaseFirestore.instance
+          .collection('talents')
+          .where('isVisible', isEqualTo: true)
+          .snapshots()
+          .map((s) => s.docs.map((d) => TalentModel.fromFirestore(d)).toList());
+
+      return SharedMapBrowser<TalentModel>(
+        dataStream: talentStream,
+        initialCameraPosition: initialCamera,
+        locationExtractor: (t) => t.geoPoint,
+        idExtractor: (t) => t.id,
+        cardBuilder: (context, talent) => TalentCard(talent: talent),
+      );
+    }
+
+    // Default: Jobs (tabs 0 and 1)
+    final Stream<List<JobModel>> jobStream = jobRepository.fetchJobs(
+      locationFilter: null,
+      jobType: null,
+      searchToken: null,
+    );
+
+    return SharedMapBrowser<JobModel>(
+      dataStream: jobStream,
+      initialCameraPosition: initialCamera,
+      locationExtractor: (job) => job.geoPoint,
+      idExtractor: (job) => job.id,
+      cardBuilder: (context, job) => JobCard(job: job),
     );
   }
 }

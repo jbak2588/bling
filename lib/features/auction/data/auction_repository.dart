@@ -32,14 +32,16 @@ class AuctionRepository {
     return AuctionModel.fromFirestore(doc);
   }
 
-  // V V V --- [수정] locationFilter를 적용하고, 정렬 기준을 'endAt'으로 되돌립니다 --- V V V
+  // V V V --- [수정] locationFilter를 적용합니다 --- V V V
+  // 기본 정렬: 'startAt'으로 설정합니다. (경매의 의미상 시작일 기준 정렬)
+  // 참고: 모델에 없는 필드(createdAt 등)로 정렬하면 쿼리에서 문서가 누락될 수 있습니다.
   // ✅ [탐색 기능] 1. categoryId 파라미터 추가
   Stream<List<AuctionModel>> fetchAuctions({
     Map<String, String?>? locationFilter,
     String? categoryId,
   }) {
-    Query query = _auctionsCollection.orderBy('endAt',
-        descending: false); // [핵심] 마감 임박 순으로 정렬
+    // 정렬: 경매의 시작일(startAt) 기준 최신순
+    Query query = _auctionsCollection.orderBy('startAt', descending: true);
 
     // locationFilter가 null이 아닐 경우, 필터링 쿼리를 동적으로 추가합니다.
     if (locationFilter != null) {
