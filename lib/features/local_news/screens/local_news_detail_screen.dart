@@ -312,9 +312,19 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                 Text('postCard.location'.tr(),
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
-                MiniMapView(
-                  location: _currentPost.geoPoint!,
-                  markerId: _currentPost.id,
+                GestureDetector(
+                  onTap: () => _openMap(
+                      context,
+                      _currentPost.geoPoint!.latitude,
+                      _currentPost.geoPoint!.longitude),
+                  child: AbsorbPointer(
+                    child: MiniMapView(
+                      location: _currentPost.geoPoint!,
+                      markerId: _currentPost.id,
+                      height: 140,
+                      myLocationEnabled: false,
+                    ),
+                  ),
                 ),
               ],
               const Divider(height: 32),
@@ -415,9 +425,17 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               // ✅ [수정] 잘못된 _buildGoogleMap/_buildMiniMap 호출을 MiniMapView (공통 위젯)으로 교체
-              MiniMapView(
-                location: _currentPost.geoPoint!,
-                markerId: _currentPost.id,
+              GestureDetector(
+                onTap: () => _openMap(context, _currentPost.geoPoint!.latitude,
+                    _currentPost.geoPoint!.longitude),
+                child: AbsorbPointer(
+                  child: MiniMapView(
+                    location: _currentPost.geoPoint!,
+                    markerId: _currentPost.id,
+                    height: 140,
+                    myLocationEnabled: false,
+                  ),
+                ),
               ),
             ],
             const Divider(height: 32),
@@ -464,6 +482,24 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
       }
     } finally {
       // 상태 업데이트 없음
+    }
+  }
+
+  Future<void> _openMap(BuildContext context, double lat, double lng) async {
+    final uri =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('maps.openFailed'.tr())));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('maps.openFailed'.tr())));
+      }
     }
   }
 

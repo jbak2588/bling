@@ -34,6 +34,7 @@ import 'package:async/async.dart'; // [신규] '작업 12': StreamZip 사용
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:bling_app/features/real_estate/models/room_filters_model.dart'; // [수정] 순환 참조 해결
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class RoomRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -52,6 +53,11 @@ class RoomRepository {
     Query<Map<String, dynamic>> query =
         _roomsCollection.where('isAvailable', isEqualTo: true);
 
+    // Always separate sponsored vs. normal queries to avoid returning
+    // duplicate results when `filters` is null. This ensures `queryA`
+    // and `queryB` differ by `isSponsored` regardless of filters.
+    query = query.where('isSponsored', isEqualTo: isSponsoredQuery);
+
     // 1) Location (Server)
     final String? kab = locationFilter?['kab'];
     if (kab != null) {
@@ -60,8 +66,6 @@ class RoomRepository {
 
     if (filters != null) {
       // 2) Equality filters (Server)
-      // [신규] '작업 12': 'isSponsored'로 쿼리 분리
-      query = query.where('isSponsored', isEqualTo: isSponsoredQuery);
       if (filters.listingType != null) {
         query = query.where('listingType', isEqualTo: filters.listingType);
       }
@@ -254,15 +258,31 @@ class RoomRepository {
     final queryB =
         _buildFilteredQuery(locationFilter, filters, isSponsoredQuery: false);
 
-    final streamA = queryA.snapshots().map(_mapSnapshots);
-    final streamB = queryB.snapshots().map(_mapSnapshots);
+    // Attach error handlers to streams so Firestore errors (e.g. missing
+    // composite index) are logged to console for debugging while
+    // investigating zero-marker map issues.
+    final streamA = queryA.snapshots().map(_mapSnapshots).handleError((e, st) {
+      // Use debugPrint to avoid large blocking prints on Flutter
+      debugPrint('RoomRepository.getRoomsStream - sponsored stream error: $e');
+      debugPrint('$st');
+    });
 
+    final streamB = queryB.snapshots().map(_mapSnapshots).handleError((e, st) {
+      debugPrint('RoomRepository.getRoomsStream - normal stream error: $e');
+      debugPrint('$st');
+    });
+
+    // Merge and apply client filters, also log any errors occurring during
+    // the merge/processing stage.
     return StreamZip([streamA, streamB]).map((pair) {
       final sponsored = pair[0];
       final normal = pair[1];
       final filteredA = _applyClientFilters(sponsored, filters);
       final filteredB = _applyClientFilters(normal, filters);
       return [...filteredA, ...filteredB];
+    }).handleError((e, st) {
+      debugPrint('RoomRepository.getRoomsStream - merged stream error: $e');
+      debugPrint('$st');
     });
   }
 

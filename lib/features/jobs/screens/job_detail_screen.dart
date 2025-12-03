@@ -42,6 +42,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // ✅ [공용 위젯 Import]
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
@@ -237,10 +238,17 @@ class JobDetailScreen extends StatelessWidget {
           Text('jobs.detail.locationTitle'.tr(),
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
-          MiniMapView(
-            location: job.geoPoint!,
-            markerId: job.id,
-            myLocationEnabled: false,
+          GestureDetector(
+            onTap: () => _openMap(
+                context, job.geoPoint!.latitude, job.geoPoint!.longitude),
+            child: AbsorbPointer(
+              child: MiniMapView(
+                location: job.geoPoint!,
+                markerId: job.id,
+                height: 140,
+                myLocationEnabled: false,
+              ),
+            ),
           ),
           const Divider(height: 32),
         ],
@@ -319,5 +327,23 @@ class JobDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Future<void> _openMap(BuildContext context, double lat, double lng) async {
+  final uri =
+      Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+  try {
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('maps.openFailed'.tr())));
+      }
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('maps.openFailed'.tr())));
+    }
   }
 }

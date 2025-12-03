@@ -48,6 +48,8 @@ import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'create_shop_screen.dart'; // [추가]
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class LocalStoresScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -73,6 +75,7 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
+  bool _isMapMode = false; // [추가] 지도 모드 상태
 
   List<ShopModel> _applyLocationFilter(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
@@ -205,6 +208,9 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
     }
 
     return Scaffold(
+      // [추가] AppBar에 지도 토글 버튼 추가 (SliverAppBar가 아니라면 body 상단이나 부모에서 처리 필요)
+      // 현재 구조상 LocalStoresScreen은 탭의 body로 쓰이므로, 상단 필터 영역 우측에 버튼 배치
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Column(
         children: [
           if (_showSearchBar)
@@ -218,30 +224,45 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                 _searchKeywordNotifier.value = '';
               },
             ),
-          // [추가] 카테고리 필터 칩 리스트
-          SizedBox(
-            height: 50,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: _categories.length,
-              itemBuilder: (context, index) {
-                final category = _categories[index];
-                final bool isSelected = category == _selectedCategory;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: ChoiceChip(
-                    label: Text('localStores.categories.$category'.tr()),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() => _selectedCategory = category);
-                      }
+          // [수정] 카테고리 필터 + 지도 토글 버튼 행
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 50,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemCount: _categories.length,
+                    itemBuilder: (context, index) {
+                      final category = _categories[index];
+                      final bool isSelected = category == _selectedCategory;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: ChoiceChip(
+                          label: Text('localStores.categories.$category'.tr()),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setState(() => _selectedCategory = category);
+                            }
+                          },
+                        ),
+                      );
                     },
                   ),
-                );
-              },
-            ),
+                ),
+              ),
+              // [수정] 지도/닫기 토글 버튼 (항상 노출)
+              IconButton(
+                icon: Icon(_isMapMode ? Icons.close : Icons.map_outlined),
+                onPressed: () => setState(() => _isMapMode = !_isMapMode),
+                tooltip: _isMapMode
+                    ? 'common.closeMap'.tr()
+                    : 'localStores.viewMap'.tr(),
+              ),
+              const SizedBox(width: 8),
+            ],
           ),
           // [추가] 정렬 옵션 UI
           Padding(
@@ -269,141 +290,176 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
             ),
           ),
           Expanded(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: shopRepository.fetchShops(
-                  locationFilter: widget.locationFilter,
-                  searchToken: searchToken),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                      child: Text('localStores.error'.tr(
-                          namedArgs: {'error': snapshot.error.toString()})));
-                }
+            child: _isMapMode
+                ? SharedMapBrowser<ShopModel>(
+                    dataStream: shopRepository
+                        .fetchShops(
+                            locationFilter: widget.locationFilter,
+                            searchToken: searchToken)
+                        .map((snapshot) => snapshot.docs
+                            .map((doc) => ShopModel.fromFirestore(doc))
+                            // 간단한 필터링 (카테고리 등)은 스트림 내부나 여기서 처리 필요
+                            .where((s) =>
+                                _selectedCategory == 'all' ||
+                                s.category == _selectedCategory)
+                            .toList()),
+                    locationExtractor: (shop) =>
+                        shop.shopLocation?.geoPoint ?? shop.geoPoint,
+                    idExtractor: (shop) => shop.id,
+                    cardBuilder: (context, shop) =>
+                        ShopCard(shop: shop, userModel: widget.userModel),
+                    initialCameraPosition: widget.userModel?.geoPoint != null
+                        ? CameraPosition(
+                            target: LatLng(widget.userModel!.geoPoint!.latitude,
+                                widget.userModel!.geoPoint!.longitude),
+                            zoom: 14)
+                        : null,
+                  )
+                : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: shopRepository.fetchShops(
+                        locationFilter: widget.locationFilter,
+                        searchToken: searchToken),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return Center(
+                            child: Text('localStores.error'.tr(namedArgs: {
+                          'error': snapshot.error.toString()
+                        })));
+                      }
 
-                final allDocs = snapshot.data?.docs ?? [];
-                var shops = _applyLocationFilter(allDocs);
+                      final allDocs = snapshot.data?.docs ?? [];
+                      var shops = _applyLocationFilter(allDocs);
 
-                // [추가] 카테고리 필터 적용
-                if (_selectedCategory != 'all') {
-                  shops = shops
-                      .where((s) => s.category == _selectedCategory)
-                      .toList();
-                }
+                      // [추가] 카테고리 필터 적용
+                      if (_selectedCategory != 'all') {
+                        shops = shops
+                            .where((s) => s.category == _selectedCategory)
+                            .toList();
+                      }
 
-                // DB-side keyword filtering applied in the repository using
-                // the first token of the search input. Client-side full text
-                // filtering has been removed to rely on Firestore query.
+                      // DB-side keyword filtering applied in the repository using
+                      // the first token of the search input. Client-side full text
+                      // filtering has been removed to rely on Firestore query.
 
-                // [수정] 정렬 로직
-                // [추가] 거리순 정렬
-                if (_sortOption == 'distance') {
-                  shops.sort((a, b) => _calculateDistance(a.geoPoint)
-                      .compareTo(_calculateDistance(b.geoPoint)));
-                } else if (_sortOption == 'popular') {
-                  // (개선) 인기순 정렬 (예: 리뷰수 * 별점 + 조회수)
-                  shops.sort((a, b) {
-                    final double scoreA =
-                        (a.reviewCount * a.averageRating) + a.viewsCount;
-                    final double scoreB =
-                        (b.reviewCount * b.averageRating) + b.viewsCount;
-                    return scoreB.compareTo(scoreA);
-                  });
-                }
-                // 'default'는 기본값 (createdAt 내림차순 - Repository에서 이미 처리됨)
+                      // [수정] 정렬 로직
+                      // [추가] 거리순 정렬
+                      if (_sortOption == 'distance') {
+                        shops.sort((a, b) => _calculateDistance(a.geoPoint)
+                            .compareTo(_calculateDistance(b.geoPoint)));
+                      } else if (_sortOption == 'popular') {
+                        // (개선) 인기순 정렬 (예: 리뷰수 * 별점 + 조회수)
+                        shops.sort((a, b) {
+                          final double scoreA =
+                              (a.reviewCount * a.averageRating) + a.viewsCount;
+                          final double scoreB =
+                              (b.reviewCount * b.averageRating) + b.viewsCount;
+                          return scoreB.compareTo(scoreA);
+                        });
+                      }
 
-                // [추가] 스폰서 상품(광고) 을 항상 최상단으로 (정렬과 무관하게)
-                final sponsoredShops =
-                    shops.where((s) => s.isSponsored).toList();
-                final normalShops = shops.where((s) => !s.isSponsored).toList();
-                shops = sponsoredShops + normalShops;
+                      // 'default'는 기본값 (createdAt 내림차순 - Repository에서 이미 처리됨)
 
-                if (shops.isEmpty) {
-                  final isNational = context.watch<LocationProvider>().mode ==
-                      LocationSearchMode.national;
-                  if (!isNational) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.storefront_outlined,
-                                size: 64, color: Colors.grey[300]),
-                            const SizedBox(height: 12),
-                            Text('localStores.empty'.tr(),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.bodyMedium),
-                            const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(color: Colors.grey)),
-                            const SizedBox(height: 24),
-                            // [추가] 가게 등록 유도 버튼
-                            TextButton.icon(
-                              icon: const Icon(Icons.add_business),
-                              label: Text('localStores.create.title'.tr()),
-                              onPressed: () {
-                                if (widget.userModel != null) {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (_) => CreateShopScreen(
-                                        userModel: widget.userModel!),
-                                  ));
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(
-                                              'main.errors.loginRequired'
-                                                  .tr())));
-                                }
-                              },
+                      // [추가] 스폰서 상품(광고) 을 항상 최상단으로 (정렬과 무관하게)
+                      final sponsoredShops =
+                          shops.where((s) => s.isSponsored).toList();
+                      final normalShops =
+                          shops.where((s) => !s.isSponsored).toList();
+                      shops = sponsoredShops + normalShops;
+
+                      if (shops.isEmpty) {
+                        final isNational =
+                            context.watch<LocationProvider>().mode ==
+                                LocationSearchMode.national;
+                        if (!isNational) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.storefront_outlined,
+                                      size: 64, color: Colors.grey[300]),
+                                  const SizedBox(height: 12),
+                                  Text('localStores.empty'.tr(),
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium),
+                                  const SizedBox(height: 8),
+                                  Text('search.empty.checkSpelling'.tr(),
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: Colors.grey)),
+                                  const SizedBox(height: 24),
+                                  // [추가] 가게 등록 유도 버튼
+                                  TextButton.icon(
+                                    icon: const Icon(Icons.add_business),
+                                    label:
+                                        Text('localStores.create.title'.tr()),
+                                    onPressed: () {
+                                      if (widget.userModel != null) {
+                                        Navigator.of(context)
+                                            .push(MaterialPageRoute(
+                                          builder: (_) => CreateShopScreen(
+                                              userModel: widget.userModel!),
+                                        ));
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'main.errors.loginRequired'
+                                                        .tr())));
+                                      }
+                                    },
+                                  ),
+                                  const SizedBox(height: 8),
+                                  OutlinedButton.icon(
+                                    icon: const Icon(Icons.map_outlined),
+                                    label: Text(
+                                        'search.empty.expandToNational'.tr()),
+                                    onPressed: () => context
+                                        .read<LocationProvider>()
+                                        .setMode(LocationSearchMode.national),
+                                  ),
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 8),
-                            OutlinedButton.icon(
-                              icon: const Icon(Icons.map_outlined),
-                              label: Text('search.empty.expandToNational'.tr()),
-                              onPressed: () => context
-                                  .read<LocationProvider>()
-                                  .setMode(LocationSearchMode.national),
+                          );
+                        }
+
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.search_off,
+                                    size: 64, color: Colors.grey[300]),
+                                const SizedBox(height: 12),
+                                Text('localStores.empty'.tr(),
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
+                          ),
+                        );
+                      }
 
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.search_off,
-                              size: 64, color: Colors.grey[300]),
-                          const SizedBox(height: 12),
-                          Text('localStores.empty'.tr(),
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyMedium),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  itemCount: shops.length,
-                  itemBuilder: (context, index) {
-                    return ShopCard(
-                        shop: shops[index], userModel: widget.userModel);
-                  },
-                );
-              },
-            ),
+                      return ListView.builder(
+                        itemCount: shops.length,
+                        itemBuilder: (context, index) {
+                          return ShopCard(
+                              shop: shops[index], userModel: widget.userModel);
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),

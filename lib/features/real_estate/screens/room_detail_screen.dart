@@ -48,11 +48,21 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
 import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
+
+// Helper: open external map for a given lat/lng
+Future<void> _openMap(double lat, double lng) async {
+  final Uri googleMapsUrl =
+      Uri.parse("https://www.google.com/maps/search/?api=1&query=$lat,$lng");
+  if (await canLaunchUrl(googleMapsUrl)) {
+    await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+  }
+}
 
 class RoomDetailScreen extends StatefulWidget {
   final RoomListingModel room;
@@ -247,7 +257,17 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                     Text('realEstate.detail.location'.tr(),
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 12),
-                    MiniMapView(location: room.geoPoint!, markerId: room.id),
+                    GestureDetector(
+                      onTap: () => _openMap(
+                          room.geoPoint!.latitude, room.geoPoint!.longitude),
+                      child: AbsorbPointer(
+                        child: MiniMapView(
+                          location: room.geoPoint!,
+                          markerId: room.id,
+                          height: 140,
+                        ),
+                      ),
+                    ),
                   ],
                   const Divider(height: 32),
 
@@ -417,7 +437,17 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                       Text('realEstate.detail.location'.tr(),
                           style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 12),
-                      MiniMapView(location: room.geoPoint!, markerId: room.id),
+                      GestureDetector(
+                        onTap: () => _openMap(
+                            room.geoPoint!.latitude, room.geoPoint!.longitude),
+                        child: AbsorbPointer(
+                          child: MiniMapView(
+                            location: room.geoPoint!,
+                            markerId: room.id,
+                            height: 140,
+                          ),
+                        ),
+                      ),
                     ],
                     const Divider(height: 32),
 

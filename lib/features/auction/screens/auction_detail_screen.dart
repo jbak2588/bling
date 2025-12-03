@@ -28,6 +28,7 @@ import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AuctionDetailScreen extends StatefulWidget {
   final AuctionModel auction;
@@ -60,6 +61,24 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
   void dispose() {
     _bidAmountController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openMap(BuildContext context, double lat, double lng) async {
+    final uri =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('maps.openFailed'.tr())));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('maps.openFailed'.tr())));
+      }
+    }
   }
 
   // V V V --- [수정] 입찰하기 로직 구현 --- V V V
@@ -287,9 +306,19 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                           Text('auctions.detail.location'.tr(),
                               style: Theme.of(context).textTheme.titleLarge),
                           const SizedBox(height: 12),
-                          MiniMapView(
-                              location: auction.geoPoint!,
-                              markerId: auction.id),
+                          GestureDetector(
+                            onTap: () => _openMap(
+                                context,
+                                auction.geoPoint!.latitude,
+                                auction.geoPoint!.longitude),
+                            child: AbsorbPointer(
+                              child: MiniMapView(
+                                  location: auction.geoPoint!,
+                                  markerId: auction.id,
+                                  height: 140,
+                                  myLocationEnabled: false),
+                            ),
+                          ),
                         ],
                         const Divider(height: 32),
                         Text('auctions.detail.seller'.tr(),

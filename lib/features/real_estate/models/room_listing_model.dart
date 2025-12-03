@@ -32,6 +32,7 @@
 // lib/features/real_estate/models/room_listing_model.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class RoomListingModel {
   final String id;
@@ -159,7 +160,8 @@ class RoomListingModel {
       locationParts: data['locationParts'] != null
           ? Map<String, dynamic>.from(data['locationParts'])
           : null,
-      geoPoint: data['geoPoint'],
+      // geoPoint: support multiple legacy shapes: GeoPoint, Map {latitude, longitude}, or null
+      geoPoint: _parseGeoPoint(data['geoPoint']),
       price: data['price'] ?? 0,
       priceUnit: data['priceUnit'] ?? 'monthly',
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
@@ -249,5 +251,25 @@ class RoomListingModel {
       'tags': tags, // ✅ JSON 변환 시 tags 필드를 포함합니다.
       'searchIndex': searchIndex,
     };
+  }
+
+  // Helper: normalize various geoPoint representations
+  static GeoPoint? _parseGeoPoint(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is GeoPoint) return raw;
+    if (raw is Map) {
+      // common firestore export shapes: {'latitude': x, 'longitude': y}
+      final lat = raw['latitude'] ?? raw['lat'] ?? raw['latLng']?['latitude'];
+      final lng = raw['longitude'] ??
+          raw['lng'] ??
+          raw['lon'] ??
+          raw['latLng']?['longitude'];
+      if (lat is num && lng is num) {
+        return GeoPoint(lat.toDouble(), lng.toDouble());
+      }
+    }
+    // In debug builds, log unexpected shapes to help diagnose data issues.
+    if (kDebugMode) debugPrint('[RoomListingModel] unexpected geoPoint: $raw');
+    return null;
   }
 }

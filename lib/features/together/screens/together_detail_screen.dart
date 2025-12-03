@@ -1,3 +1,4 @@
+import 'package:url_launcher/url_launcher.dart';
 // lib/features/together/screens/together_detail_screen.dart
 // 공용 링크 상수 사용 안내: 공유 및 딥링크 생성 시 `lib/core/constants/app_links.dart`의
 // `kHostingBaseUrl` 상수를 사용하세요.
@@ -16,6 +17,15 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
 import 'package:bling_app/features/together/screens/ticket_scan_screen.dart'; // ✅ 추가
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart'; // ✅ 미니맵 위젯 추가
+
+// Helper: open external map for a given lat/lng
+Future<void> _openMap(double lat, double lng) async {
+  final Uri googleMapsUrl =
+      Uri.parse("https://www.google.com/maps/search/?api=1&query=$lat,$lng");
+  if (await canLaunchUrl(googleMapsUrl)) {
+    await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+  }
+}
 
 class TogetherDetailScreen extends StatefulWidget {
   final TogetherPostModel post;
@@ -333,7 +343,7 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
                   if (widget.post.geoPoint != null) ...[
                     const SizedBox(height: 24),
                     Container(
-                      height: 180,
+                      height: 140,
                       decoration: BoxDecoration(
                         border:
                             Border.all(color: txtColor.withValues(alpha: 0.5)),
@@ -342,10 +352,16 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
                       child: ClipRRect(
                         borderRadius:
                             BorderRadius.circular(11), // border inside
-                        child: MiniMapView(
-                          location: widget.post.geoPoint!,
-                          markerId: widget.post.id,
-                          height: 180,
+                        child: GestureDetector(
+                          onTap: () => _openMap(widget.post.geoPoint!.latitude,
+                              widget.post.geoPoint!.longitude),
+                          child: AbsorbPointer(
+                            child: MiniMapView(
+                              location: widget.post.geoPoint!,
+                              markerId: widget.post.id,
+                              height: 140,
+                            ),
+                          ),
                         ),
                       ),
                     ),

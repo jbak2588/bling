@@ -22,6 +22,8 @@ import 'package:bling_app/features/real_estate/constants/real_estate_facilities.
 import 'package:bling_app/features/real_estate/models/room_filters_model.dart';
 import 'package:bling_app/features/real_estate/widgets/room_card.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
@@ -56,6 +58,9 @@ class _RoomListScreenState extends State<RoomListScreen> {
   final ValueNotifier<bool> _chipOpenNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
+
+  bool _isMapMode = false;
+  bool _showSearchBar = false;
 
   // '직방' 상세 필터 상태
   late RoomFilters _activeFilters;
@@ -92,6 +97,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
   void _externalSearchListener() {
     if (widget.searchNotifier?.value == true) {
       if (!mounted) return;
+      setState(() => _showSearchBar = true);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _chipOpenNotifier.value = true;
       });
@@ -303,17 +309,29 @@ class _RoomListScreenState extends State<RoomListScreen> {
       appBar: AppBar(
         // 'Kos', 'Apartment' 등 카테고리 이름 표시
         title: Text('realEstate.form.roomTypes.${widget.roomType}'.tr()),
+        actions: [
+          IconButton(
+            icon: Icon(_isMapMode ? Icons.close : Icons.map_outlined),
+            onPressed: () => setState(() => _isMapMode = !_isMapMode),
+            tooltip:
+                _isMapMode ? 'common.closeMap'.tr() : 'realEstate.viewMap'.tr(),
+          ),
+        ],
       ),
       body: Column(
         children: [
           // InlineSearchChip (기존 real_estate_screen.dart와 동일)
-          InlineSearchChip(
-            hintText: 'main.search.hint.realEstate'.tr(),
-            openNotifier: _chipOpenNotifier,
-            onSubmitted: (kw) =>
-                _searchKeywordNotifier.value = kw.trim().toLowerCase(),
-            onClose: () {},
-          ),
+          if (_showSearchBar)
+            InlineSearchChip(
+              hintText: 'main.search.hint.realEstate'.tr(),
+              openNotifier: _chipOpenNotifier,
+              onSubmitted: (kw) =>
+                  _searchKeywordNotifier.value = kw.trim().toLowerCase(),
+              onClose: () => setState(() {
+                _showSearchBar = false;
+                _searchKeywordNotifier.value = '';
+              }),
+            ),
 
           // '직방' 상세 필터 버튼 (기존 real_estate_screen.dart와 동일)
           Padding(
@@ -335,155 +353,182 @@ class _RoomListScreenState extends State<RoomListScreen> {
             ),
           ),
 
-          // 매물 목록 (기존 real_estate_screen.dart와 동일)
+          // 매물 목록: 지도 모드일 때는 SharedMapBrowser 사용
           Expanded(
-            child: StreamBuilder<List<RoomListingModel>>(
-              stream: _repository.fetchRooms(
-                locationFilter: widget.locationFilter,
-                filters: _activeFilters,
-              ),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'realEstate.error'
-                          .tr(namedArgs: {'error': snapshot.error.toString()}),
+            child: _isMapMode
+                ? SharedMapBrowser<RoomListingModel>(
+                    dataStream: _repository.getRoomsStream(
+                      locationFilter: widget.locationFilter,
+                      filters: _activeFilters,
                     ),
-                  );
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  final isNational = context.watch<LocationProvider>().mode ==
-                      LocationSearchMode.national;
-                  if (!isNational) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.search_off,
-                                size: 64, color: Colors.grey[300]),
-                            const SizedBox(height: 12),
-                            Text('realEstate.empty'.tr(),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.bodyMedium),
-                            const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(color: Colors.grey)),
-                            const SizedBox(height: 16),
-                            OutlinedButton.icon(
-                                icon: const Icon(Icons.map_outlined),
-                                label:
-                                    Text('search.empty.expandToNational'.tr()),
-                                onPressed: () => context
-                                    .read<LocationProvider>()
-                                    .setMode(LocationSearchMode.national)),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.search_off,
-                              size: 64, color: Colors.grey[300]),
-                          const SizedBox(height: 12),
-                          Text('realEstate.empty'.tr(),
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyMedium),
-                        ],
-                      ),
+                    locationExtractor: (room) => room.geoPoint,
+                    idExtractor: (room) => room.id,
+                    cardBuilder: (context, room) => RoomCard(room: room),
+                    initialCameraPosition: widget.userModel?.geoPoint != null
+                        ? CameraPosition(
+                            target: LatLng(widget.userModel!.geoPoint!.latitude,
+                                widget.userModel!.geoPoint!.longitude),
+                            zoom: 14)
+                        : null,
+                  )
+                : StreamBuilder<List<RoomListingModel>>(
+                    stream: _repository.fetchRooms(
+                      locationFilter: widget.locationFilter,
+                      filters: _activeFilters,
                     ),
-                  );
-                }
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'realEstate.error'.tr(namedArgs: {
+                              'error': snapshot.error.toString()
+                            }),
+                          ),
+                        );
+                      }
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        final isNational =
+                            context.watch<LocationProvider>().mode ==
+                                LocationSearchMode.national;
+                        if (!isNational) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.search_off,
+                                      size: 64, color: Colors.grey[300]),
+                                  const SizedBox(height: 12),
+                                  Text('realEstate.empty'.tr(),
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium),
+                                  const SizedBox(height: 8),
+                                  Text('search.empty.checkSpelling'.tr(),
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: Colors.grey)),
+                                  const SizedBox(height: 16),
+                                  OutlinedButton.icon(
+                                      icon: const Icon(Icons.map_outlined),
+                                      label: Text(
+                                          'search.empty.expandToNational'.tr()),
+                                      onPressed: () => context
+                                          .read<LocationProvider>()
+                                          .setMode(
+                                              LocationSearchMode.national)),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
 
-                var rooms = snapshot.data!;
-                final kw = _searchKeywordNotifier.value;
-                if (kw.isNotEmpty) {
-                  rooms = rooms
-                      .where((r) =>
-                          (("${r.title} ${r.description} ${r.tags.join(' ')}")
-                              .toLowerCase()
-                              .contains(kw)))
-                      .toList();
-                }
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.search_off,
+                                    size: 64, color: Colors.grey[300]),
+                                const SizedBox(height: 12),
+                                Text('realEstate.empty'.tr(),
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
 
-                if (rooms.isEmpty) {
-                  final isNational = context.watch<LocationProvider>().mode ==
-                      LocationSearchMode.national;
-                  if (!isNational) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.search_off,
-                                size: 64, color: Colors.grey[300]),
-                            const SizedBox(height: 12),
-                            Text('realEstate.empty'.tr(),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.bodyMedium),
-                            const SizedBox(height: 8),
-                            Text('search.empty.checkSpelling'.tr(),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(color: Colors.grey)),
-                            const SizedBox(height: 16),
-                            OutlinedButton.icon(
-                                icon: const Icon(Icons.map_outlined),
-                                label:
-                                    Text('search.empty.expandToNational'.tr()),
-                                onPressed: () => context
-                                    .read<LocationProvider>()
-                                    .setMode(LocationSearchMode.national)),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
+                      var rooms = snapshot.data!;
+                      final kw = _searchKeywordNotifier.value;
+                      if (kw.isNotEmpty) {
+                        rooms = rooms
+                            .where((r) =>
+                                (("${r.title} ${r.description} ${r.tags.join(' ')}")
+                                    .toLowerCase()
+                                    .contains(kw)))
+                            .toList();
+                      }
 
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.search_off,
-                              size: 64, color: Colors.grey[300]),
-                          const SizedBox(height: 12),
-                          Text('realEstate.empty'.tr(),
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyMedium),
-                        ],
-                      ),
-                    ),
-                  );
-                }
+                      if (rooms.isEmpty) {
+                        final isNational =
+                            context.watch<LocationProvider>().mode ==
+                                LocationSearchMode.national;
+                        if (!isNational) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.search_off,
+                                      size: 64, color: Colors.grey[300]),
+                                  const SizedBox(height: 12),
+                                  Text('realEstate.empty'.tr(),
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium),
+                                  const SizedBox(height: 8),
+                                  Text('search.empty.checkSpelling'.tr(),
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: Colors.grey)),
+                                  const SizedBox(height: 16),
+                                  OutlinedButton.icon(
+                                      icon: const Icon(Icons.map_outlined),
+                                      label: Text(
+                                          'search.empty.expandToNational'.tr()),
+                                      onPressed: () => context
+                                          .read<LocationProvider>()
+                                          .setMode(
+                                              LocationSearchMode.national)),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
 
-                return ListView.builder(
-                  itemCount: rooms.length,
-                  itemBuilder: (context, index) {
-                    final room = rooms[index];
-                    return RoomCard(room: room);
-                  },
-                );
-              },
-            ),
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.search_off,
+                                    size: 64, color: Colors.grey[300]),
+                                const SizedBox(height: 12),
+                                Text('realEstate.empty'.tr(),
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        itemCount: rooms.length,
+                        itemBuilder: (context, index) {
+                          final room = rooms[index];
+                          return RoomCard(room: room);
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),

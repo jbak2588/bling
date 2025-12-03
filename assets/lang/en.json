@@ -1591,6 +1591,7 @@
     "error": "An error occurred: {error}",
     "create": "Add listing",
     "locationUnknown": "No location info",
+    "viewMapHint": "View all listings on the map",
     "priceUnits": {
       "monthly": "month",
       "yearly": "year"
@@ -1601,6 +1602,7 @@
     "form": {
       "title": "Register Listing",
       "submit": "Register",
+      "locationRequired": "Location is required",
       "imageRequired": "Please attach at least one photo.",
       "success": "Listing created.",
       "fail": "Failed to create listing: {error}",

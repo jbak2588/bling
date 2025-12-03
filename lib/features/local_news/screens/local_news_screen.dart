@@ -221,54 +221,67 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
       }),
     ];
 
-    return Scaffold(
-      body: Column(
-        children: [
-          // 검색칩은 요청될 때만 보이고, X(취소) 시 완전히 사라집니다.
-          if (_showSearchBar)
-            InlineSearchChip(
-              hintText: 'main.search.hint.localNews'.tr(),
-              openNotifier: _chipOpenNotifier,
-              onSubmitted: _onSearchSubmitted,
-              onClose: _onSearchClosed,
-            ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TabBar(
-                    controller: _tabController,
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    labelColor: const Color(0xFF00A66C),
-                    unselectedLabelColor: const Color(0xFF616161),
-                    indicatorColor: const Color(0xFF00A66C),
-                    tabs: tabs, // ✅ 수정된 탭 리스트
+    // [수정] PopScope 추가 (지도 모드일 때 뒤로가기 제어)
+    return PopScope(
+      canPop: !_isMapView,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        setState(() => _isMapView = false);
+      },
+      child: Scaffold(
+        // [수정] appBar 속성 삭제 (타이틀 바 제거)
+        body: Column(
+          children: [
+            // 검색칩은 요청될 때만 보이고, X(취소) 시 완전히 사라집니다.
+            if (_showSearchBar)
+              InlineSearchChip(
+                hintText: 'main.search.hint.localNews'.tr(),
+                openNotifier: _chipOpenNotifier,
+                onSubmitted: _onSearchSubmitted,
+                onClose: _onSearchClosed,
+              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TabBar(
+                      controller: _tabController,
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
+                      labelColor: const Color(0xFF00A66C),
+                      unselectedLabelColor: const Color(0xFF616161),
+                      indicatorColor: const Color(0xFF00A66C),
+                      tabs: tabs, // ✅ 수정된 탭 리스트
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(_isMapView ? Icons.list : Icons.map_outlined,
-                      color: Colors.grey.shade700),
-                  onPressed: () {
-                    setState(() {
-                      _isMapView = !_isMapView;
-                    });
-                  },
-                ),
-              ],
+                  // [수정] 탭 옆의 버튼을 지도/닫기 토글 버튼으로 변경
+                  IconButton(
+                    icon: Icon(_isMapView ? Icons.close : Icons.map_outlined,
+                        color: Colors.grey.shade700),
+                    onPressed: () {
+                      setState(() {
+                        _isMapView = !_isMapView;
+                      });
+                    },
+                    tooltip: _isMapView
+                        ? 'common.closeMap'.tr()
+                        : 'localNews.viewMap'.tr(),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              // ✅ 3. 매번 새로 생성하는 대신, initState에서 만들어 둔 _tabViews 변수를 사용합니다.
-              children: _isMapView ? _mapTabViews : _listTabViews,
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                // ✅ 3. 매번 새로 생성하는 대신, initState에서 만들어 둔 _tabViews 변수를 사용합니다.
+                children: _isMapView ? _mapTabViews : _listTabViews,
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ), // end Column
+      ), // end Scaffold
+    ); // end PopScope
   }
 }
 

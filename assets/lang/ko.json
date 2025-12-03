@@ -1598,6 +1598,7 @@
     "error": "오류가 발생했습니다: {error}",
     "create": "매물 등록",
     "locationUnknown": "위치 정보 없음",
+    "viewMapHint": "지도에서 모든 매물을 확인하세요",
     "priceUnits": {
       "monthly": "월",
       "yearly": "년"
@@ -1608,6 +1609,7 @@
     "form": {
       "title": "새 매물 등록",
       "submit": "등록",
+      "locationRequired": "위치 정보가 필요합니다",
       "imageRequired": "사진을 1장 이상 첨부해주세요.",
       "success": "매물이 등록되었습니다.",
       "fail": "등록에 실패했습니다: {error}",

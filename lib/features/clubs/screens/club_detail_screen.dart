@@ -49,6 +49,7 @@ import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ClubDetailScreen extends StatefulWidget {
   final ClubModel club;
@@ -79,6 +80,24 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openMap(BuildContext context, double lat, double lng) async {
+    final uri =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('maps.openFailed'.tr())));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('maps.openFailed'.tr())));
+      }
+    }
   }
 
   Future<void> _joinClub() async {
@@ -391,10 +410,17 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
               style:
                   const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
-          MiniMapView(
-            location: club.geoPoint!,
-            markerId: club.id,
-            height: 150,
+          GestureDetector(
+            onTap: () => _openMap(
+                context, club.geoPoint!.latitude, club.geoPoint!.longitude),
+            child: AbsorbPointer(
+              child: MiniMapView(
+                location: club.geoPoint!,
+                markerId: club.id,
+                height: 140,
+                myLocationEnabled: false,
+              ),
+            ),
           ),
           const Divider(height: 32),
         ],

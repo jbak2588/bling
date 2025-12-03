@@ -1598,6 +1598,7 @@
     "error": "Terjadi kesalahan: {error}",
     "create": "Tambah listing",
     "locationUnknown": "Tidak ada info lokasi",
+    "viewMapHint": "Lihat semua listing di peta",
     "priceUnits": {
       "monthly": "bulan",
       "yearly": "tahun"
@@ -1608,6 +1609,7 @@
     "form": {
       "title": "Daftarkan Listing",
       "submit": "Daftar",
+      "locationRequired": "Lokasi wajib diisi",
       "imageRequired": "Harap lampirkan minimal satu foto.",
       "success": "Listing berhasil dibuat.",
       "fail": "Gagal membuat listing: {error}",

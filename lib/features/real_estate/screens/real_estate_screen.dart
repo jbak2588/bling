@@ -22,6 +22,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/real_estate/screens/room_list_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
+import 'package:bling_app/features/real_estate/data/room_repository.dart';
+import 'package:bling_app/features/real_estate/widgets/room_card.dart';
+import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RealEstateScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -46,6 +51,7 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
+  bool _isMapMode = false; // [추가] 지도 모드 토글
 
   @override
   void initState() {
@@ -135,6 +141,28 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
     ];
 
     return Scaffold(
+      appBar: AppBar(
+        // [수정] 메인 타이틀('Ibu Kost') 중복 방지
+        // 대신 지도 보기 기능을 안내하는 힌트 텍스트를 표시
+        title: Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            'realEstate.viewMapHint'.tr(), // "지도에서 전체 매물 확인하기"
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+        ),
+        centerTitle: false,
+        elevation: 0,
+        actions: [
+          // [수정] 지도 아이콘이 X(닫기) 버튼으로 토글됨
+          IconButton(
+            icon: Icon(_isMapMode ? Icons.close : Icons.map_outlined),
+            onPressed: () => setState(() => _isMapMode = !_isMapMode),
+            tooltip:
+                _isMapMode ? 'common.closeMap'.tr() : 'realEstate.viewMap'.tr(),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           if (_showSearchBar)
@@ -149,36 +177,57 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
               },
             ),
           Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.5,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                return _buildCategoryCard(
-                  context,
-                  icon: category['icon'] as IconData,
-                  label: (category['labelKey'] as String).tr(),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => RoomListScreen(
-                          userModel: widget.userModel,
-                          locationFilter: widget.locationFilter,
-                          roomType: category['type'] as String,
-                          searchNotifier: widget.searchNotifier,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+            child: _isMapMode
+                ? SharedMapBrowser<RoomListingModel>(
+                    // When opening the full-map view from the launcher, pass
+                    // explicit nulls so the map shows ALL available listings
+                    // independent of the launcher context's filters.
+                    dataStream: RoomRepository().getRoomsStream(
+                      locationFilter: null,
+                      // [중요] 필터 간섭 방지를 위해 명시적으로 null 전달
+                      filters: null,
+                    ),
+                    locationExtractor: (room) => room.geoPoint,
+                    idExtractor: (room) => room.id,
+                    cardBuilder: (context, room) => RoomCard(room: room),
+                    initialCameraPosition: widget.userModel?.geoPoint != null
+                        ? CameraPosition(
+                            target: LatLng(widget.userModel!.geoPoint!.latitude,
+                                widget.userModel!.geoPoint!.longitude),
+                            zoom: 14)
+                        : null,
+                  )
+                : GridView.builder(
+                    padding: const EdgeInsets.all(16.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 1.5,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      return _buildCategoryCard(
+                        context,
+                        icon: category['icon'] as IconData,
+                        label: (category['labelKey'] as String).tr(),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => RoomListScreen(
+                                userModel: widget.userModel,
+                                locationFilter: widget.locationFilter,
+                                roomType: category['type'] as String,
+                                searchNotifier: widget.searchNotifier,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),

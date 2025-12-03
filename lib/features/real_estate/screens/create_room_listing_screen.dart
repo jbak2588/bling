@@ -133,12 +133,34 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
       return;
     }
 
-    setState(() => _isSaving = true);
+    // Prefer freshest user location data before doing heavy work (image upload)
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      setState(() => _isSaving = false);
+    if (user == null) return;
+
+    // Fetch latest user doc to prefer freshest geoPoint if available
+    final userDocSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    UserModel? freshUserModel;
+    if (userDocSnapshot.exists) {
+      try {
+        freshUserModel = UserModel.fromFirestore(userDocSnapshot);
+      } catch (_) {
+        freshUserModel = null;
+      }
+    }
+
+    // [추가] 위치 정보(GeoPoint) 필수 검증 — freshUserModel 우선, 없으면 widget.userModel 사용
+    final GeoPoint? effectiveGeoPoint =
+        freshUserModel?.geoPoint ?? widget.userModel.geoPoint;
+    if (effectiveGeoPoint == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('realEstate.form.locationRequired'.tr())));
       return;
     }
+
+    setState(() => _isSaving = true);
 
     try {
       List<String> imageUrls = [];
@@ -151,20 +173,6 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         imageUrls.add(await ref.getDownloadURL());
       }
 
-      // Prefer freshest user location data at submit time: fetch users/{uid}
-      final userDocSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      UserModel? freshUserModel;
-      if (userDocSnapshot.exists) {
-        try {
-          freshUserModel = UserModel.fromFirestore(userDocSnapshot);
-        } catch (_) {
-          freshUserModel = null;
-        }
-      }
-
       final newListing = RoomListingModel(
         id: '',
         userId: user.uid,
@@ -175,6 +183,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
             freshUserModel?.locationName ?? widget.userModel.locationName,
         locationParts:
             freshUserModel?.locationParts ?? widget.userModel.locationParts,
+        // 이미 위에서 freshUserModel을 조회했음
         geoPoint: freshUserModel?.geoPoint ?? widget.userModel.geoPoint,
         price: int.tryParse(_priceController.text) ?? 0,
         // [수정] '작업 27': 'sale'일 경우 'priceUnit'을 기본값('monthly')으로 강제

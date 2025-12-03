@@ -51,6 +51,7 @@ import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart'; // ✅ [작업 9] 프로필 이동을 위해 추가
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class LostItemDetailScreen extends StatefulWidget {
@@ -550,7 +551,18 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
         ],
         if (_displayGeoPoint != null) ...[
           const SizedBox(height: 16),
-          MiniMapView(location: _displayGeoPoint!, markerId: _currentItem.id),
+          GestureDetector(
+            onTap: () => _openMap(
+                _displayGeoPoint!.latitude, _displayGeoPoint!.longitude),
+            child: AbsorbPointer(
+              child: MiniMapView(
+                location: _displayGeoPoint!,
+                markerId: _currentItem.id,
+                height: 140,
+                myLocationEnabled: false,
+              ),
+            ),
+          ),
         ],
         const Divider(height: 32),
         _buildLostItemStats(),
@@ -826,7 +838,18 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
           ],
           if (_displayGeoPoint != null) ...[
             const SizedBox(height: 16),
-            MiniMapView(location: _displayGeoPoint!, markerId: _currentItem.id),
+            GestureDetector(
+              onTap: () => _openMap(
+                  _displayGeoPoint!.latitude, _displayGeoPoint!.longitude),
+              child: AbsorbPointer(
+                child: MiniMapView(
+                  location: _displayGeoPoint!,
+                  markerId: _currentItem.id,
+                  height: 140,
+                  myLocationEnabled: false,
+                ),
+              ),
+            ),
           ],
           const Divider(height: 32),
           _buildLostItemStats(),
@@ -994,6 +1017,25 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
     } catch (e) {
       if (mounted) Navigator.of(context).pop(); // 에러 시 로딩 닫기
       debugPrint('Error in resolve dialog: $e');
+    }
+  }
+
+  Future<void> _openMap(double lat, double lng) async {
+    final uri =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('maps.openFailed'.tr())),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('maps.openFailed'.tr())));
+      }
     }
   }
 

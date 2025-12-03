@@ -67,6 +67,8 @@ import '../../shared/widgets/clickable_tag_list.dart';
 import '../../shared/widgets/mini_map_view.dart';
 import '../../shared/screens/image_gallery_screen.dart';
 import '../../shared/widgets/app_bar_icon.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 
 // 카테고리 이름 표시를 위한 별도 위젯
 class CategoryNameWidget extends StatelessWidget {
@@ -588,7 +590,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     icon: Icons.share,
                     onPressed: () => SharePlus.instance.share(
                       ShareParams(
-                          text: 'Check out this product: ${product.title}'),
+                        text:
+                            'Check out this product: ${product.title} - $kHostingBaseUrl/product/${product.id}',
+                      ),
                     ),
                   ),
                 ),
@@ -667,9 +671,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 12),
-                        MiniMapView(
-                          location: product.geoPoint!,
-                          markerId: product.id,
+                        GestureDetector(
+                          onTap: () => _openMap(product.geoPoint!.latitude,
+                              product.geoPoint!.longitude),
+                          child: AbsorbPointer(
+                            child: MiniMapView(
+                              location: product.geoPoint!,
+                              markerId: product.id,
+                              height: 140,
+                              myLocationEnabled: false,
+                            ),
+                          ),
                         ),
                       ],
                     ],
@@ -854,5 +866,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
 
     return null; // 그 외 (판매 완료, AI 미검증 등)
+  }
+
+  Future<void> _openMap(double lat, double lng) async {
+    final uri =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('maps.openFailed'.tr())),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('maps.openFailed'.tr())));
+      }
+    }
   }
 }

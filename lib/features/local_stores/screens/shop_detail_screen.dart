@@ -60,6 +60,7 @@ import 'package:bling_app/core/constants/app_links.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 
 class ShopDetailScreen extends StatefulWidget {
   final ShopModel shop;
@@ -498,22 +499,53 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                         ]
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    _buildInfoRowWithAction(
-                        context,
-                        Icons.location_on_outlined,
-                        shop.shopAddress ??
-                            shop.shopLocation?.shortLabel ??
-                            shop.shopLocation?.mainAddress ??
-                            shop.locationName ??
-                            'localStores.noLocation'.tr(), onTap: () {
-                      final lat = shop.shopLocation?.geoPoint.latitude ??
-                          shop.geoPoint?.latitude;
-                      final lng = shop.shopLocation?.geoPoint.longitude ??
-                          shop.geoPoint?.longitude;
-                      if (lat != null && lng != null) _openMap(lat, lng);
+                    // [로직 정리] 지도/주소에 사용할 좌표 추출
+                    Builder(builder: (context) {
+                      final double? displayLat =
+                          shop.shopLocation?.geoPoint.latitude ??
+                              shop.geoPoint?.latitude;
+                      final double? displayLng =
+                          shop.shopLocation?.geoPoint.longitude ??
+                              shop.geoPoint?.longitude;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          _buildInfoRowWithAction(
+                              context,
+                              Icons.location_on_outlined,
+                              shop.shopAddress ??
+                                  shop.shopLocation?.shortLabel ??
+                                  shop.shopLocation?.mainAddress ??
+                                  shop.locationName ??
+                                  'localStores.noLocation'.tr(), onTap: () {
+                            if (displayLat != null && displayLng != null) {
+                              _openMap(displayLat, displayLng);
+                            }
+                          }),
+
+                          // [추가] 미니맵 뷰 (주소 아래 삽입)
+                          if (displayLat != null && displayLng != null) ...[
+                            const SizedBox(height: 12),
+                            GestureDetector(
+                              onTap: () => _openMap(displayLat, displayLng),
+                              child: AbsorbPointer(
+                                // 지도 내부 조작 막기 (버튼처럼 사용)
+                                child: MiniMapView(
+                                  location: GeoPoint(displayLat, displayLng),
+                                  markerId: shop.id,
+                                  height:
+                                      140, // [UX 개선] 미니맵 높이 축소 (기본 180 -> 140)
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ] else
+                            const SizedBox(height: 4),
+                        ],
+                      );
                     }),
-                    const SizedBox(height: 4),
                     _buildInfoRow(
                         context, Icons.watch_later_outlined, shop.openHours),
                     const SizedBox(height: 4),
