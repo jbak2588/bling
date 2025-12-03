@@ -29,6 +29,7 @@
 library;
 // (파일 내용...)
 
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// 지역 구인구직 게시글 정보를 담는 데이터 모델입니다.
@@ -42,6 +43,8 @@ class JobModel {
   final String? locationName;
   final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
+  final BlingLocation? gigLocation;
+  final BlingLocation? workLocation;
   final Timestamp createdAt;
   final String trustLevelRequired;
   final int viewsCount;
@@ -71,6 +74,8 @@ class JobModel {
     this.locationName,
     this.locationParts,
     this.geoPoint,
+    this.gigLocation,
+    this.workLocation,
     required this.createdAt,
     this.trustLevelRequired = 'normal',
     required this.jobType, // ✅ [작업 31]
@@ -91,6 +96,8 @@ class JobModel {
 
   factory JobModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
+    final gigLocationMap = data['gigLocation'];
+    final workLocationMap = data['workLocation'];
     return JobModel(
       id: doc.id,
       userId: data['userId'] ?? '',
@@ -102,6 +109,12 @@ class JobModel {
           ? Map<String, dynamic>.from(data['locationParts'])
           : null,
       geoPoint: data['geoPoint'],
+      gigLocation: (gigLocationMap is Map<String, dynamic>)
+          ? BlingLocation.fromJson(Map<String, dynamic>.from(gigLocationMap))
+          : _fallbackGigLocationFromLegacy(data),
+      workLocation: (workLocationMap is Map<String, dynamic>)
+          ? BlingLocation.fromJson(Map<String, dynamic>.from(workLocationMap))
+          : _fallbackWorkLocationFromLegacy(data),
       createdAt: data['createdAt'] ?? Timestamp.now(),
       // ✅ [작업 31] 'jobType' 필드 로드 (없을 시 'regular'로 기본값 처리하여 호환성 유지)
       jobType: data['jobType'] as String? ?? 'regular',
@@ -130,9 +143,15 @@ class JobModel {
       'title': title,
       'description': description,
       'category': category,
-      'locationName': locationName,
+      'locationName': locationName ??
+          gigLocation?.shortLabel ??
+          gigLocation?.mainAddress ??
+          workLocation?.shortLabel ??
+          workLocation?.mainAddress,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
+      'gigLocation': gigLocation?.toJson(),
+      'workLocation': workLocation?.toJson(),
       'createdAt': createdAt,
       'jobType': jobType, // ✅ [작업 31]
       'trustLevelRequired': trustLevelRequired,
@@ -150,4 +169,30 @@ class JobModel {
       'searchIndex': searchIndex,
     };
   }
+}
+
+BlingLocation? _fallbackGigLocationFromLegacy(Map<String, dynamic> data) {
+  final geo = data['geoPoint'];
+  final desc = data['locationName'] ?? data['gigLocationText'];
+  if (geo is GeoPoint && desc is String && desc.isNotEmpty) {
+    return BlingLocation(
+      geoPoint: geo,
+      mainAddress: desc,
+      shortLabel: desc,
+    );
+  }
+  return null;
+}
+
+BlingLocation? _fallbackWorkLocationFromLegacy(Map<String, dynamic> data) {
+  final geo = data['geoPoint'];
+  final desc = data['locationName'] ?? data['workPlace'];
+  if (geo is GeoPoint && desc is String && desc.isNotEmpty) {
+    return BlingLocation(
+      geoPoint: geo,
+      mainAddress: desc,
+      shortLabel: desc,
+    );
+  }
+  return null;
 }

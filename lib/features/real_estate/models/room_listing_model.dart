@@ -1,3 +1,7 @@
+// [Bling] Location refactor Step 5 (Real Estate):
+// - Adds BlingLocation-based propertyLocation
+// - Uses AddressMapPicker for property location selection
+// - Preserves writer neighborhood and radius logic unchanged
 // ===================== DocHeader =====================
 // [기획 요약]
 // - 부동산(월세/하숙) 매물 데이터 모델. Firestore room_listings 컬렉션 구조와 1:1 매칭, 위치/이미지/가격/편의시설 등 다양한 필드 지원.
@@ -32,6 +36,7 @@
 // lib/features/real_estate/models/room_listing_model.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:flutter/foundation.dart';
 
 class RoomListingModel {
@@ -44,6 +49,7 @@ class RoomListingModel {
   final String? locationName;
   final Map<String, dynamic>? locationParts;
   final GeoPoint? geoPoint;
+  final BlingLocation? propertyLocation; // 실제 매물 위치
 
   final int price;
   final String priceUnit; // 'monthly', 'yearly' (월세/연세)
@@ -111,6 +117,7 @@ class RoomListingModel {
     this.locationName,
     this.locationParts,
     this.geoPoint,
+    this.propertyLocation,
     required this.price,
     required this.priceUnit,
     required this.imageUrls,
@@ -162,6 +169,14 @@ class RoomListingModel {
           : null,
       // geoPoint: support multiple legacy shapes: GeoPoint, Map {latitude, longitude}, or null
       geoPoint: _parseGeoPoint(data['geoPoint']),
+      propertyLocation: () {
+        final propLocationMap = data['propertyLocation'];
+        if (propLocationMap is Map<String, dynamic>) {
+          return BlingLocation.fromJson(
+              Map<String, dynamic>.from(propLocationMap));
+        }
+        return _fallbackPropertyLocationFromLegacy(data);
+      }(),
       price: data['price'] ?? 0,
       priceUnit: data['priceUnit'] ?? 'monthly',
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
@@ -213,6 +228,7 @@ class RoomListingModel {
       'locationName': locationName,
       'locationParts': locationParts,
       'geoPoint': geoPoint,
+      'propertyLocation': propertyLocation?.toJson(),
       'price': price,
       'priceUnit': priceUnit,
       'imageUrls': imageUrls,
@@ -250,7 +266,24 @@ class RoomListingModel {
 
       'tags': tags, // ✅ JSON 변환 시 tags 필드를 포함합니다.
       'searchIndex': searchIndex,
+
+      // Legacy-friendly auxiliary address text (best-effort)
+      'address': propertyLocation?.shortLabel ?? propertyLocation?.mainAddress,
     };
+  }
+
+  static BlingLocation? _fallbackPropertyLocationFromLegacy(
+      Map<String, dynamic> data) {
+    final gp = data['propertyGeoPoint'];
+    final desc = data['propertyAddress'];
+    if (gp is GeoPoint && desc is String && desc.isNotEmpty) {
+      return BlingLocation(
+        geoPoint: gp,
+        mainAddress: desc,
+        shortLabel: desc,
+      );
+    }
+    return null;
   }
 
   // Helper: normalize various geoPoint representations

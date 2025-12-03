@@ -1,3 +1,7 @@
+// [Bling] Location refactor Step 5 (Real Estate):
+// - Adds BlingLocation-based propertyLocation
+// - Uses AddressMapPicker for property location selection
+// - Preserves writer neighborhood and radius logic unchanged
 // ===================== DocHeader =====================
 // [기획 요약]
 // - 부동산(월세/하숙) 매물 정보 수정, 이미지 업로드, 가격/편의시설 등 다양한 필드 편집 지원.
@@ -34,6 +38,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // [추가] Timestamp 클래스
 // search index generation removed to reduce background indexing
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+import 'package:bling_app/core/models/bling_location.dart';
+import 'package:bling_app/features/shared/widgets/address_map_picker.dart';
 
 class EditRoomListingScreen extends StatefulWidget {
   final RoomListingModel room;
@@ -60,6 +66,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
   late Set<String> _commercialFacilities;
   bool _isSaving = false;
   List<String> _tags = [];
+  BlingLocation? _propertyLocation;
 
   // [추가] 새 필드: 매물 유형, 게시자 유형, 면적, 방 수, 욕실 수, 입주 가능일
   late String _selectedListingType;
@@ -116,6 +123,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
     _bathroomCountController =
         TextEditingController(text: widget.room.bathroomCount.toString());
     _selectedMoveInDate = widget.room.moveInDate?.toDate();
+    _propertyLocation = widget.room.propertyLocation;
 
     // [추가] Task 40: 카테고리별 필드 로드
     _selectedFurnishedStatus = widget.room.furnishedStatus;
@@ -173,6 +181,12 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
 
   Future<void> _updateListing() async {
     if (!_formKey.currentState!.validate() || _isSaving || _images.isEmpty) {
+      return;
+    }
+    if (_propertyLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('realEstate.form.propertyLocationRequired'
+              .tr()))); 
       return;
     }
 
@@ -238,6 +252,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
         locationName: widget.room.locationName,
         locationParts: widget.room.locationParts,
         geoPoint: widget.room.geoPoint,
+        propertyLocation: _propertyLocation,
         createdAt: widget.room.createdAt,
         isAvailable: widget.room.isAvailable,
       );
@@ -435,6 +450,18 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                       labelText: 'realEstate.form.descriptionLabel'.tr(),
                       border: const OutlineInputBorder()),
                   maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                AddressMapPicker(
+                  initialValue: _propertyLocation,
+                  userGeoPoint: widget.room.geoPoint,
+                  labelText: 'realEstate.form.propertyLocationLabel'
+                      .tr(), 
+                  hintText: 'realEstate.form.propertyLocationHint'
+                      .tr(), 
+                  onChanged: (loc) {
+                    setState(() => _propertyLocation = loc);
+                  },
                 ),
                 // [신규] 타입별 시설 입력 UI
                 _buildDynamicFacilityInputs(),

@@ -1,3 +1,7 @@
+// [Bling] Location refactor Step 5 (Real Estate):
+// - Adds BlingLocation-based propertyLocation
+// - Uses AddressMapPicker for property location selection
+// - Preserves writer neighborhood and radius logic unchanged
 // ===================== DocHeader =====================
 // [작업 이력 (2025-11-02)]
 // 1. (Task 23) '직방' 모델 도입 (Gap 3, 5).

@@ -956,6 +956,11 @@
       "regular": "Paruh/Penuh Waktu",
       "talents": "Cari ahli"
     },
+    "quickGig": {
+      "locationLabel": "Lokasi",
+      "locationHint": "Cari alamat atau pilih di peta",
+      "locationDescriptionHint": "Opsional: tambahkan detail untuk titik pertemuan"
+    },
     "selectType": {
       "title": "Pilih jenis iklan kerja",
       "subtitle": "Jenis postingan apa yang Anda inginkan?",
@@ -1065,6 +1070,9 @@
       "workHoursHint": "contoh: Sen-Jum, 09:00-18:00",
       "imageSectionTitle": "Lampirkan Foto (opsional, maks 5)",
       "descriptionLabel": "Deskripsi",
+      "propertyLocationLabel": "Lokasi properti",
+      "propertyLocationHint": "Cari alamat atau pilih di peta",
+      "propertyLocationRequired": "Harap pilih lokasi properti.",
       "descriptionHint": "contoh: Paruh waktu 3 hari seminggu pukul 5-10 sore. Gaji bisa nego.",
       "descriptionValidator": "Harap isi deskripsi.",
       "submitSuccess": "Lowongan berhasil dipasang.",

@@ -36,6 +36,7 @@ library;
 
 import 'dart:io';
 import 'package:bling_app/features/jobs/models/job_model.dart';
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/jobs/data/job_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -51,6 +52,7 @@ import '../constants/job_categories.dart';
 
 // ✅ [추가] 공용 태그 위젯 import
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+import 'package:bling_app/features/shared/widgets/address_map_picker.dart';
 
 class CreateJobScreen extends StatefulWidget {
   final UserModel userModel;
@@ -92,6 +94,8 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
   List<JobCategory> _categories = [];
   JobCategory? _selectedCategory;
 
+  BlingLocation? _workLocation;
+
   final List<XFile> _newImages = [];
   List<String> _existingImageUrls = [];
 
@@ -118,6 +122,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
       _selectedWorkPeriod = job.workPeriod;
       _selectedSalaryType = job.salaryType;
       _isSalaryNegotiable = job.isSalaryNegotiable;
+      _workLocation = job.workLocation;
 
       try {
         _selectedCategory = _categories.firstWhere((c) => c.id == job.category);
@@ -145,6 +150,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
       _workHoursController = TextEditingController();
       _salaryAmountController = TextEditingController();
       _selectedCategory = _categories.isNotEmpty ? _categories.first : null;
+      _workLocation = null;
     }
   }
 
@@ -220,6 +226,8 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         }
       }
 
+      final workLoc = _workLocation;
+
       final jobData = JobModel(
         id: _isEditMode ? widget.jobToEdit!.id : '',
         userId: user.uid,
@@ -228,10 +236,14 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         category: _selectedCategory!.id,
         // For edit mode keep existing stored values. For new posts prefer freshly-read user profile, fallback to initial/widget values.
         locationName: _isEditMode
-            ? widget.jobToEdit!.locationName
-            : (freshUserModel?.locationName ??
-                widget.initialLocation ??
-                widget.userModel.locationName),
+            ? (workLoc?.shortLabel ??
+                workLoc?.mainAddress ??
+                widget.jobToEdit!.locationName)
+            : (workLoc?.shortLabel ??
+                workLoc?.mainAddress ??
+                (freshUserModel?.locationName ??
+                    widget.initialLocation ??
+                    widget.userModel.locationName)),
         locationParts: _isEditMode
             ? widget.jobToEdit!.locationParts
             : (freshUserModel?.locationParts ??
@@ -251,6 +263,7 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
         workHours: _workHoursController.text.trim(),
         imageUrls: finalImageUrls,
         jobType: widget.jobType.name,
+        workLocation: workLoc,
 
         // ✅ [추가] 태그 저장 — 'searchIndex' intentionally omitted; client-side token generation disabled; use server-side/background indexing.
         tags: _tags,
@@ -427,6 +440,17 @@ class _CreateJobScreenState extends State<CreateJobScreen> {
                     hintText: 'jobs.form.workHoursHint'.tr(),
                     border: const OutlineInputBorder(),
                   ),
+                ),
+                const SizedBox(height: 16),
+                AddressMapPicker(
+                  initialValue: _workLocation,
+                  labelText: 'jobs.regular.workLocationLabel'.tr(),
+                  hintText: 'jobs.regular.workLocationHint'.tr(),
+                  onChanged: (loc) {
+                    setState(() {
+                      _workLocation = loc;
+                    });
+                  },
                 ),
                 const SizedBox(height: 24),
 

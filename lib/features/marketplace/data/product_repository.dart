@@ -1,3 +1,7 @@
+/// [Bling] Location refactor Step 2 (Marketplace):
+/// - Introduces BlingLocation-based `transactionLocation`
+/// - Uses AddressMapPicker for buyer/seller meet-up place
+/// - Preserves seller profile location for radius/trust logic
 // lib/features/marketplace/data/product_repository.dart
 
 /// [V3.1 Update] Admin 기능을 위한 단일 상품 조회 메서드(fetchProductById) 추가.

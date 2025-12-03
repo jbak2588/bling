@@ -1,3 +1,7 @@
+// [Bling] Location refactor Step 5 (Real Estate):
+// - Adds BlingLocation-based propertyLocation
+// - Uses AddressMapPicker for property location selection
+// - Preserves writer neighborhood and radius logic unchanged
 // ===================== DocHeader =====================
 // [기획 요약]
 // - 부동산(월세/하숙) 매물 등록, 이미지 업로드, 가격/편의시설 등 다양한 필드 입력 지원.
@@ -38,6 +42,8 @@ import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
+import 'package:bling_app/core/models/bling_location.dart';
+import 'package:bling_app/features/shared/widgets/address_map_picker.dart';
 // search index generation removed to reduce background indexing
 
 class CreateRoomListingScreen extends StatefulWidget {
@@ -66,6 +72,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
   final Set<String> _commercialFacilities = <String>{};
   bool _isSaving = false;
   List<String> _tags = []; // ✅ 태그 상태 변수 추가
+  BlingLocation? _propertyLocation;
 
   // [신규] '작업 13': 상세 필드 상태
   String? _furnishedStatus;
@@ -151,13 +158,10 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
       }
     }
 
-    // [추가] 위치 정보(GeoPoint) 필수 검증 — freshUserModel 우선, 없으면 widget.userModel 사용
-    final GeoPoint? effectiveGeoPoint =
-        freshUserModel?.geoPoint ?? widget.userModel.geoPoint;
-    if (effectiveGeoPoint == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('realEstate.form.locationRequired'.tr())));
-      return;
+    if (_propertyLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('realEstate.form.propertyLocationRequired'
+              .tr())));       return;
     }
 
     setState(() => _isSaving = true);
@@ -185,6 +189,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
             freshUserModel?.locationParts ?? widget.userModel.locationParts,
         // 이미 위에서 freshUserModel을 조회했음
         geoPoint: freshUserModel?.geoPoint ?? widget.userModel.geoPoint,
+        propertyLocation: _propertyLocation,
         price: int.tryParse(_priceController.text) ?? 0,
         // [수정] '작업 27': 'sale'일 경우 'priceUnit'을 기본값('monthly')으로 강제
         priceUnit: _selectedListingType == 'rent' ? _priceUnit : 'monthly',
@@ -426,6 +431,18 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                       labelText: 'realEstate.form.descriptionLabel'.tr(),
                       border: const OutlineInputBorder()),
                   maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                AddressMapPicker(
+                  initialValue: _propertyLocation,
+                  userGeoPoint: widget.userModel.geoPoint,
+                  labelText: 'realEstate.form.propertyLocationLabel'
+                      .tr(), 
+                  hintText: 'realEstate.form.propertyLocationHint'
+                      .tr(), 
+                  onChanged: (loc) {
+                    setState(() => _propertyLocation = loc);
+                  },
                 ),
 
                 // [수정] 게시자 유형 (listingType은 위로 이동)

@@ -949,6 +949,11 @@
       "regular": "Regular / Part-time",
       "talents": "Find Experts"
     },
+    "quickGig": {
+      "locationLabel": "Location",
+      "locationHint": "Search address or pick on map",
+      "locationDescriptionHint": "Extra details / meeting point (optional)"
+    },
     "selectType": {
       "title": "Choose job post type",
       "subtitle": "What kind of post would you like to create?",
@@ -1058,6 +1063,9 @@
       "workHoursHint": "e.g. Mon-Fri, 09:00-18:00",
       "imageSectionTitle": "Attach Photos (optional, max 5)",
       "descriptionLabel": "Description",
+      "propertyLocationLabel": "Property location",
+      "propertyLocationHint": "Search address or pick on map",
+      "propertyLocationRequired": "Property location is required",
       "descriptionHint": "e.g. Part-time, 3 days a week, 5-10pm. Salary negotiable.",
       "descriptionValidator": "Please enter a description.",
       "submitSuccess": "Job post created.",

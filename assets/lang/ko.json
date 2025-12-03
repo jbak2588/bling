@@ -956,6 +956,11 @@
       "regular": "정규직",
       "talents": "전문가 찾기"
     },
+    "quickGig": {
+      "locationLabel": "위치",
+      "locationHint": "주소 검색 또는 지도에서 선택",
+      "locationDescriptionHint": "선택 사항: 약속 장소/상세 설명"
+    },
     "selectType": {
       "title": "구인(구직) 유형 선택",
       "subtitle": "어떤 게시글을 등록하시겠습니까?",
@@ -1065,6 +1070,9 @@
       "workHoursHint": "예: 월-금, 09:00-18:00",
       "imageSectionTitle": "사진 첨부 (선택, 최대 5장)",
       "descriptionLabel": "상세 설명",
+      "propertyLocationLabel": "매물 위치",
+      "propertyLocationHint": "주소 검색 또는 지도에서 선택",
+      "propertyLocationRequired": "매물 위치를 선택하세요",
       "descriptionHint": "예) 주 3회, 오후 5시-10시 파트타임 구합니다. 시급은 협의 가능합니다.",
       "descriptionValidator": "상세 설명을 입력해주세요.",
       "submitSuccess": "구인글이 등록되었습니다.",

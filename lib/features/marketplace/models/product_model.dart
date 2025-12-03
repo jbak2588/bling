@@ -54,6 +54,7 @@ library;
 // 아래부터 실제 코드
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bling_app/core/models/bling_location.dart';
 
 class ProductModel {
   final String id;
@@ -78,6 +79,7 @@ class ProductModel {
   final String? buyerId; // [AI 인수] 'reserved', 'sold' 상태일 때 구매자 ID
   // ✅ [추가] 거래 희망 장소 필드를 추가합니다.
   final String? transactionPlace;
+  final BlingLocation? transactionLocation;
 
   // [개편안 1] AI 검수 취소/재사용을 위한 신규 필드
   final int aiCancelCount; // AI 검수 취소 횟수
@@ -135,6 +137,7 @@ class ProductModel {
     this.aiReportSourceDescription,
     this.aiReportSourceImages,
     this.transactionPlace,
+    this.transactionLocation,
     this.likesCount = 0,
     this.chatsCount = 0,
     this.viewsCount = 0,
@@ -179,6 +182,16 @@ class ProductModel {
       buyerId: data['buyerId'], // [AI 인수] buyerId 로드
       condition: data['condition'] ?? 'used',
       transactionPlace: data['transactionPlace'],
+      transactionLocation: data['transactionLocation'] != null
+          ? BlingLocation.fromJson(
+              Map<String, dynamic>.from(data['transactionLocation']))
+          : data['transactionPlace'] != null
+              ? BlingLocation(
+                  geoPoint: data['geoPoint'] ?? const GeoPoint(0, 0),
+                  mainAddress: data['transactionPlace'],
+                  shortLabel: data['transactionPlace'],
+                )
+              : null,
 
       // [개편안 1] 신규 필드 로드
       aiCancelCount: data['aiCancelCount'] ?? 0,
@@ -241,7 +254,10 @@ class ProductModel {
       'aiReportSourceDescription': aiReportSourceDescription,
       'aiReportSourceImages': aiReportSourceImages,
 
-      'transactionPlace': transactionPlace,
+      'transactionPlace': transactionPlace ??
+          transactionLocation?.shortLabel ??
+          transactionLocation?.mainAddress,
+      'transactionLocation': transactionLocation?.toJson(),
       'likesCount': likesCount,
       'chatsCount': chatsCount,
       'viewsCount': viewsCount,
@@ -285,6 +301,7 @@ class ProductModel {
     String? aiReportSourceDescription,
     List<String>? aiReportSourceImages,
     String? transactionPlace,
+    BlingLocation? transactionLocation,
     int? likesCount,
     int? chatsCount,
     int? viewsCount,
@@ -325,6 +342,7 @@ class ProductModel {
           aiReportSourceDescription ?? this.aiReportSourceDescription,
       aiReportSourceImages: aiReportSourceImages ?? this.aiReportSourceImages,
       transactionPlace: transactionPlace ?? this.transactionPlace,
+      transactionLocation: transactionLocation ?? this.transactionLocation,
       likesCount: likesCount ?? this.likesCount,
       chatsCount: chatsCount ?? this.chatsCount,
       viewsCount: viewsCount ?? this.viewsCount,
@@ -344,4 +362,9 @@ class ProductModel {
       isNew: isNew,
     );
   }
+
+  Map<String, dynamic>? get transactionLocationMap =>
+      transactionLocation?.toJson();
+  String? get legacyTransactionPlace => transactionPlace;
+  GeoPoint? get legacyGeoPoint => geoPoint;
 }

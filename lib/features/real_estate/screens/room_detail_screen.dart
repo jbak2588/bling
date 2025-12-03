@@ -1,3 +1,7 @@
+// [Bling] Location refactor Step 5 (Real Estate):
+// - Adds BlingLocation-based propertyLocation
+// - Uses AddressMapPicker for property location selection
+// - Preserves writer neighborhood and radius logic unchanged
 // lib/features/real_estate/screens/room_detail_screen.dart
 // 주의: 공유/딥링크를 만들 때 호스트를 직접 하드코딩하지 마세요.
 // 대신 `lib/core/constants/app_links.dart`의 `kHostingBaseUrl`을 사용하세요.
@@ -187,6 +191,8 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
         }
         final room = snapshot.data!;
         final isOwner = room.userId == currentUserId;
+        final locationGeo =
+            room.propertyLocation?.geoPoint ?? room.geoPoint; // legacy fallback
 
         final body = ListView(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 100.0),
@@ -252,17 +258,17 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
 
                   // ✅ 태그, 지도, 작성자 정보 공용 위젯 추가
                   ClickableTagList(tags: room.tags),
-                  if (room.geoPoint != null) ...[
+                  if (locationGeo != null) ...[
                     const Divider(height: 32),
                     Text('realEstate.detail.location'.tr(),
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 12),
                     GestureDetector(
-                      onTap: () => _openMap(
-                          room.geoPoint!.latitude, room.geoPoint!.longitude),
+                      onTap: () =>
+                          _openMap(locationGeo.latitude, locationGeo.longitude),
                       child: AbsorbPointer(
                         child: MiniMapView(
-                          location: room.geoPoint!,
+                          location: locationGeo,
                           markerId: room.id,
                           height: 140,
                         ),

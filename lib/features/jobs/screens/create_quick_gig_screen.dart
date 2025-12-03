@@ -21,6 +21,7 @@ library;
 
 import 'dart:io';
 
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/jobs/data/job_repository.dart';
 import 'package:bling_app/features/jobs/models/job_model.dart';
@@ -32,6 +33,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:bling_app/features/shared/widgets/address_map_picker.dart';
 
 import '../constants/job_categories.dart';
 // search index generation removed to reduce background indexing
@@ -57,6 +59,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
   late TextEditingController _descriptionController;
   late TextEditingController _salaryAmountController;
   late TextEditingController _locationController;
+  BlingLocation? _gigLocation;
 
   List<JobCategory> _categories = [];
   JobCategory? _selectedCategory;
@@ -88,6 +91,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
       _salaryAmountController =
           TextEditingController(text: job.salaryAmount?.toString() ?? '');
       _locationController = TextEditingController(text: job.locationName ?? '');
+      _gigLocation = job.gigLocation;
       _isSalaryNegotiable = job.isSalaryNegotiable;
 
       try {
@@ -112,6 +116,7 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
       _salaryAmountController = TextEditingController();
       _locationController =
           TextEditingController(text: widget.userModel.locationName ?? '');
+      _gigLocation = null;
       _selectedCategory = _categories.isNotEmpty ? _categories.first : null;
     }
   }
@@ -171,6 +176,12 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
       );
       return;
     }
+    if (_gigLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('jobs.form.locationValidator'.tr())),
+      );
+      return;
+    }
     setState(() => _isSaving = true);
 
     try {
@@ -203,6 +214,8 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
       final newUrls = await _uploadNewImages(currentUser.uid);
       finalImageUrls.addAll(newUrls);
 
+      final gigLoc = _gigLocation;
+
       final jobData = JobModel(
         id: _isEditMode ? widget.jobToEdit!.id : '',
         userId: currentUser.uid,
@@ -216,13 +229,16 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
         workPeriod: 'one_time',
         workHours: null,
         imageUrls: finalImageUrls,
-        locationName: _locationController.text.trim(),
+        locationName: _locationController.text.trim().isNotEmpty
+            ? _locationController.text.trim()
+            : gigLoc?.shortLabel ?? gigLoc?.mainAddress,
         locationParts: _isEditMode
             ? widget.jobToEdit!.locationParts
             : effectiveUserModel.locationParts,
         geoPoint: _isEditMode
             ? widget.jobToEdit!.geoPoint
             : effectiveUserModel.geoPoint,
+        gigLocation: gigLoc,
         createdAt: _isEditMode ? widget.jobToEdit!.createdAt : Timestamp.now(),
         trustLevelRequired:
             _isEditMode ? widget.jobToEdit!.trustLevelRequired : 'normal',
@@ -429,19 +445,44 @@ class _CreateQuickGigScreenState extends State<CreateQuickGigScreen> {
   }
 
   Widget _buildLocationInput() {
-    return TextFormField(
-      controller: _locationController,
-      decoration: InputDecoration(
-        labelText: 'jobs.form.locationLabel'.tr(),
-        hintText: 'jobs.form.locationHint'.tr(),
-        border: const OutlineInputBorder(),
-      ),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'jobs.form.locationValidator'.tr();
-        }
-        return null;
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AddressMapPicker(
+          initialValue: _gigLocation,
+          labelText: 'jobs.quickGig.locationLabel'.tr(),
+          hintText: 'jobs.quickGig.locationHint'.tr(),
+          onChanged: (loc) {
+            setState(() {
+              _gigLocation = loc;
+              if ((_locationController.text).trim().isEmpty) {
+                final label =
+                    (loc.shortLabel != null && loc.shortLabel!.isNotEmpty)
+                        ? loc.shortLabel!
+                        : loc.mainAddress;
+                _locationController.text = label;
+              }
+            });
+          },
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: _locationController,
+          decoration: InputDecoration(
+            labelText: 'jobs.form.locationLabel'.tr(),
+            hintText: 'jobs.form.locationHint'.tr(),
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'jobs.quickGig.locationDescriptionHint'.tr(),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: Colors.grey[700]),
+        ),
+      ],
     );
   }
 

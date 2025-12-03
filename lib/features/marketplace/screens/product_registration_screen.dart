@@ -44,6 +44,8 @@ import '../../../../core/models/user_model.dart';
 // ✅ 공용 태그 위젯 import
 import '../../shared/widgets/custom_tag_input_field.dart'; // 2025년 8월 30일
 import 'package:bling_app/core/utils/upload_helpers.dart';
+import 'package:bling_app/core/models/bling_location.dart';
+import 'package:bling_app/features/shared/widgets/address_map_picker.dart';
 // Search index generation removed to reduce background indexing work
 
 class ProductRegistrationScreen extends StatefulWidget {
@@ -61,7 +63,7 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _addressController = TextEditingController();
-  final _transactionPlaceController = TextEditingController();
+  BlingLocation? _transactionLocation;
 
   List<XFile> _images = [];
   bool _isNegotiable = false;
@@ -97,7 +99,6 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
     _priceController.dispose();
     _descriptionController.dispose();
     _addressController.dispose();
-    _transactionPlaceController.dispose();
     super.dispose();
   }
 
@@ -212,7 +213,9 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
         locationName: userModel.locationName,
         locationParts: userModel.locationParts,
         geoPoint: userModel.geoPoint,
-        transactionPlace: _transactionPlaceController.text,
+        transactionPlace: _transactionLocation?.shortLabel ??
+            _transactionLocation?.mainAddress,
+        transactionLocation: _transactionLocation,
         condition: _condition,
         status: 'selling',
         isAiVerified: false,
@@ -415,11 +418,13 @@ class _ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                 // validator 제거 (자동으로 가져오므로)
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _transactionPlaceController,
-                decoration: InputDecoration(
-                    labelText:
-                        'marketplace.registration.addressDetailHint'.tr()),
+              AddressMapPicker(
+                initialValue: _transactionLocation,
+                labelText: 'marketplace.registration.addressDetailHint'.tr(),
+                hintText: 'location.searchHint'.tr(),
+                onChanged: (loc) {
+                  setState(() => _transactionLocation = loc);
+                },
               ),
               const SizedBox(height: 16),
               TextFormField(

@@ -32,6 +32,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/core/utils/upload_helpers.dart';
+import 'package:bling_app/core/models/bling_location.dart';
+import 'package:bling_app/features/shared/widgets/address_map_picker.dart';
 
 import '../models/product_model.dart';
 // import '../../../core/models/user_model.dart';
@@ -62,7 +64,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _addressController = TextEditingController();
-  final _transactionPlaceController = TextEditingController();
+  BlingLocation? _transactionLocation;
 
   bool _isNegotiable = false;
   List<String> _existingImageUrls = [];
@@ -100,7 +102,14 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     _addressController.text = widget.product.locationName ?? '';
     _locationParts = widget.product.locationParts; // 초기화
     _geoPoint = widget.product.geoPoint; // 초기화
-    _transactionPlaceController.text = widget.product.transactionPlace ?? '';
+    _transactionLocation = widget.product.transactionLocation ??
+        (widget.product.transactionPlace != null
+            ? BlingLocation(
+                geoPoint: widget.product.geoPoint ?? const GeoPoint(0, 0),
+                mainAddress: widget.product.transactionPlace!,
+                shortLabel: widget.product.transactionPlace,
+              )
+            : null);
     _isNegotiable = widget.product.negotiable;
     _existingImageUrls = List<String>.from(widget.product.imageUrls);
 
@@ -390,7 +399,9 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
         'title': _titleController.text,
         'price': int.tryParse(_priceController.text) ?? 0,
         'description': _descriptionController.text,
-        'transactionPlace': _transactionPlaceController.text,
+        'transactionPlace': _transactionLocation?.shortLabel ??
+            _transactionLocation?.mainAddress,
+        'transactionLocation': _transactionLocation?.toJson(),
         'negotiable': _isNegotiable,
         'imageUrls': allImageUrls,
         'categoryId': _selectedCategory?.id ?? widget.product.categoryId,
@@ -824,12 +835,13 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _transactionPlaceController,
-                  decoration: InputDecoration(
-                    labelText:
-                        'marketplace.registration.addressDetailHint'.tr(),
-                  ),
+                AddressMapPicker(
+                  initialValue: _transactionLocation,
+                  labelText: 'marketplace.registration.addressDetailHint'.tr(),
+                  hintText: 'location.searchHint'.tr(),
+                  onChanged: (loc) {
+                    setState(() => _transactionLocation = loc);
+                  },
                 ),
                 const SizedBox(height: 16),
                 Row(
