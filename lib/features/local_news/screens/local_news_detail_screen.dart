@@ -273,7 +273,9 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     final hasImages =
         _currentPost.mediaUrl != null && _currentPost.mediaUrl!.isNotEmpty;
-    final hasLocation = _currentPost.geoPoint != null;
+    final GeoPoint? eventGeo =
+        _currentPost.eventLocation?.geoPoint ?? _currentPost.geoPoint;
+    final hasLocation = eventGeo != null;
 
     // If embedded into the app shell, do not render an inner AppBar.
     // The parent `MainNavigationScreen` will show the AppBar and provide
@@ -313,13 +315,11 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: () => _openMap(
-                      context,
-                      _currentPost.geoPoint!.latitude,
-                      _currentPost.geoPoint!.longitude),
+                  onTap: () =>
+                      _openMap(context, eventGeo.latitude, eventGeo.longitude),
                   child: AbsorbPointer(
                     child: MiniMapView(
-                      location: _currentPost.geoPoint!,
+                      location: eventGeo,
                       markerId: _currentPost.id,
                       height: 140,
                       myLocationEnabled: false,
@@ -426,11 +426,11 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
               const SizedBox(height: 8),
               // ✅ [수정] 잘못된 _buildGoogleMap/_buildMiniMap 호출을 MiniMapView (공통 위젯)으로 교체
               GestureDetector(
-                onTap: () => _openMap(context, _currentPost.geoPoint!.latitude,
-                    _currentPost.geoPoint!.longitude),
+                onTap: () =>
+                    _openMap(context, eventGeo.latitude, eventGeo.longitude),
                 child: AbsorbPointer(
                   child: MiniMapView(
-                    location: _currentPost.geoPoint!,
+                    location: eventGeo,
                     markerId: _currentPost.id,
                     height: 140,
                     myLocationEnabled: false,

@@ -14,6 +14,8 @@ import '../../local_news/utils/tag_recommender.dart';
 import '../../../core/utils/popups/snackbars.dart';
 import '../data/local_news_repository.dart';
 import '../../../core/models/user_model.dart';
+import '../../../core/models/bling_location.dart';
+import '../../shared/widgets/address_map_picker.dart';
 // note: PostModel conversion is handled in repository/json path; no direct PostModel use here
 
 class CreateLocalNewsScreen extends StatefulWidget {
@@ -39,7 +41,7 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
   var _selectedCategoryIndex = 0;
 
   DateTime? _eventDate;
-  final _eventAddressController = TextEditingController();
+  BlingLocation? _eventLocation;
   bool _eventExpanded = false;
 
   bool _isSaving = false;
@@ -77,7 +79,6 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
     _debounce?.cancel();
     _titleController.dispose();
     _bodyController.dispose();
-    _eventAddressController.dispose();
     super.dispose();
   }
 
@@ -181,8 +182,10 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
         'viewsCount': 0,
         'thanksCount': 0,
         if (_eventDate != null) 'eventDate': Timestamp.fromDate(_eventDate!),
-        if (_eventAddressController.text.trim().isNotEmpty)
-          'eventAddress': _eventAddressController.text.trim(),
+        if (_eventLocation != null) 'eventLocation': _eventLocation!.toJson(),
+        if (_eventLocation != null)
+          'eventAddress':
+              _eventLocation!.shortLabel ?? _eventLocation!.mainAddress,
       };
 
       await newPostRef.set(postData);
@@ -410,12 +413,12 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 8),
-                    child: TextFormField(
-                      controller: _eventAddressController,
-                      decoration: InputDecoration(
-                        labelText: 'localNewsCreate.labels.eventAddress'.tr(),
-                        border: const OutlineInputBorder(),
-                      ),
+                    child: AddressMapPicker(
+                      initialValue: _eventLocation,
+                      userGeoPoint: _currentUserModel?.geoPoint,
+                      labelText: 'localNewsCreate.labels.eventAddress'.tr(),
+                      hintText: 'localNewsCreate.hints.eventAddress'.tr(),
+                      onChanged: (loc) => setState(() => _eventLocation = loc),
                     ),
                   ),
                 ],

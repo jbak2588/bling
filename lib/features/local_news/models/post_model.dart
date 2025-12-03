@@ -3,11 +3,13 @@
 library;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bling_app/core/models/bling_location.dart';
 
 /// PostModel represents a post in the local news feed.
 /// Refactor notes:
 /// - Removed legacy fields: `searchIndex`, `eventTime`, `eventLocation` (String), `eventLocationGeo`.
 /// - Standardized event fields to: `eventDate` (DateTime?) and `eventAddress` (String?).
+
 class PostModel {
   final String id;
   final String userId;
@@ -33,6 +35,7 @@ class PostModel {
   // Event-related standardized fields
   final DateTime? eventDate; // 행사 날짜/시간
   final String? eventAddress; // 행사 장소명 (예: 마을회관)
+  final BlingLocation? eventLocation; // structured location (nullable)
 
   PostModel({
     required this.id,
@@ -54,6 +57,7 @@ class PostModel {
     this.thanksCount = 0,
     this.eventDate,
     this.eventAddress,
+    this.eventLocation,
   });
 
   /// Create PostModel from Firestore document
@@ -122,6 +126,10 @@ class PostModel {
               : 0),
       eventDate: parsedEventDate,
       eventAddress: data['eventAddress'] as String?,
+      eventLocation: (data['eventLocation'] is Map)
+          ? BlingLocation.fromJson(Map<String, dynamic>.from(
+              data['eventLocation'] as Map<String, dynamic>))
+          : _parseEventLocation(data),
     );
   }
 
@@ -149,7 +157,14 @@ class PostModel {
     if (eventDate != null) {
       map['eventDate'] = Timestamp.fromDate(eventDate!);
     }
-    if (eventAddress != null && eventAddress!.isNotEmpty) {
+    // Prefer storing structured eventLocation for new clients while keeping
+    // legacy `eventAddress` string for older clients/queries.
+    if (eventLocation != null) {
+      map['eventLocation'] = eventLocation!.toJson();
+      map['eventAddress'] = eventAddress?.isNotEmpty == true
+          ? eventAddress
+          : (eventLocation!.shortLabel ?? eventLocation!.mainAddress);
+    } else if (eventAddress != null && eventAddress!.isNotEmpty) {
       map['eventAddress'] = eventAddress;
     }
 
@@ -177,6 +192,7 @@ class PostModel {
     int? thanksCount,
     DateTime? eventDate,
     String? eventAddress,
+    BlingLocation? eventLocation,
   }) {
     return PostModel(
       id: id ?? this.id,
@@ -198,6 +214,32 @@ class PostModel {
       thanksCount: thanksCount ?? this.thanksCount,
       eventDate: eventDate ?? this.eventDate,
       eventAddress: eventAddress ?? this.eventAddress,
+      eventLocation: eventLocation ?? this.eventLocation,
     );
   }
+}
+
+BlingLocation? _parseEventLocation(Map<String, dynamic> data) {
+  final raw = data['eventLocation'];
+  if (raw is Map<String, dynamic>) {
+    try {
+      return BlingLocation.fromJson(Map<String, dynamic>.from(raw));
+    } catch (_) {
+      // fallthrough to legacy fallback
+    }
+  }
+  return _fallbackLocationFromLegacy(data);
+}
+
+BlingLocation? _fallbackLocationFromLegacy(Map<String, dynamic> data) {
+  final geo = data['geoPoint'];
+  final desc = data['eventAddress'] ?? data['locationName'] ?? data['address'];
+  if (geo is GeoPoint && desc is String && desc.isNotEmpty) {
+    return BlingLocation(
+      geoPoint: geo,
+      mainAddress: desc,
+      shortLabel: desc,
+    );
+  }
+  return null;
 }

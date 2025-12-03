@@ -14,6 +14,8 @@ import 'package:bling_app/features/local_news/models/post_model.dart';
 import '../../local_news/utils/tag_recommender.dart';
 import '../../../core/utils/popups/snackbars.dart';
 import '../data/local_news_repository.dart';
+import '../../../core/models/bling_location.dart';
+import '../../shared/widgets/address_map_picker.dart';
 
 class EditLocalNewsScreen extends StatefulWidget {
   final PostModel post;
@@ -40,7 +42,7 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
   int _selectedCategoryIndex = 0;
 
   DateTime? _eventDate;
-  final _eventAddressController = TextEditingController();
+  BlingLocation? _eventLocation;
   bool _eventExpanded = false;
 
   bool _isLoading = false;
@@ -66,9 +68,11 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
     _selectedCategoryIndex = idx >= 0 ? idx : 0;
 
     _eventDate = widget.post.eventDate;
-    _eventAddressController.text = widget.post.eventAddress ?? '';
-    _eventExpanded =
-        (_eventDate != null) || (_eventAddressController.text.isNotEmpty);
+    _eventLocation = widget.post.eventLocation;
+    _eventExpanded = (_eventDate != null) ||
+        (_eventLocation != null) ||
+        (widget.post.eventAddress != null &&
+            widget.post.eventAddress!.isNotEmpty);
 
     _titleController.addListener(_onTextChangedForRecommend);
     _bodyController.addListener(_onTextChangedForRecommend);
@@ -79,7 +83,6 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
     _debounce?.cancel();
     _titleController.dispose();
     _bodyController.dispose();
-    _eventAddressController.dispose();
     super.dispose();
   }
 
@@ -152,13 +155,21 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
         'tags': tagsToSave,
         'mediaUrl': finalImageList,
         'mediaType': finalImageList.isNotEmpty ? 'image' : null,
-        'eventAddress': _eventAddressController.text.trim().isNotEmpty
-            ? _eventAddressController.text.trim()
-            : null,
       };
 
       if (_eventDate != null) {
         data['eventDate'] = Timestamp.fromDate(_eventDate!);
+      }
+
+      // Persist structured eventLocation when available; keep legacy
+      // `eventAddress` for backward compatibility.
+      if (_eventLocation != null) {
+        data['eventLocation'] = _eventLocation!.toJson();
+        data['eventAddress'] =
+            _eventLocation!.shortLabel ?? _eventLocation!.mainAddress;
+      } else if (widget.post.eventAddress != null &&
+          widget.post.eventAddress!.trim().isNotEmpty) {
+        data['eventAddress'] = widget.post.eventAddress!.trim();
       }
 
       await _repository.updatePost(widget.post.id, data);
@@ -419,11 +430,12 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 8),
-                    child: TextFormField(
-                      controller: _eventAddressController,
-                      decoration: InputDecoration(
-                          labelText: 'localNewsCreate.labels.eventAddress'.tr(),
-                          border: const OutlineInputBorder()),
+                    child: AddressMapPicker(
+                      initialValue: _eventLocation,
+                      userGeoPoint: null,
+                      labelText: 'localNewsCreate.labels.eventAddress'.tr(),
+                      hintText: 'localNewsCreate.hints.eventAddress'.tr(),
+                      onChanged: (loc) => setState(() => _eventLocation = loc),
                     ),
                   ),
                 ],
