@@ -31,6 +31,8 @@
 // - (Job 15, 17) 'isNewChat: true' 플래그를 'ChatRoomScreen'으로 전달.
 // - (Job 29-31) 'startFriendChat' Cloud Function을 호출하는 스팸 방지 로직(일일 한도) 적용.
 
+// 주의: 공유/딥링크를 만들 때 호스트를 직접 하드코딩하지 마세요.
+// 대신 `lib/core/constants/app_links.dart`의 `kHostingBaseUrl`을 사용하세요.
 library;
 
 import 'package:flutter/material.dart';

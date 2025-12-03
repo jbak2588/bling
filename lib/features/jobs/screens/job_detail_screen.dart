@@ -11,6 +11,8 @@
 // - 신고/차단/신뢰 등급 UI 노출 및 기능 강화, 알림/지원 UX 개선.
 // =====================================================
 // lib/features/jobs/screens/job_detail_screen.dart
+// 주의: 공유/딥링크를 만들 때 호스트를 직접 하드코딩하지 마세요.
+// 대신 `lib/core/constants/app_links.dart`의 `kHostingBaseUrl`을 사용하세요.
 // ===================== DocHeader =====================
 // [기획 요약]
 // - 구인/구직 게시글 상세 정보, 채팅 연동, 신뢰 등급, 급여/근무기간/이미지 등 다양한 필드 지원.
@@ -38,6 +40,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 
 // ✅ [공용 위젯 Import]
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
@@ -272,6 +276,16 @@ class JobDetailScreen extends StatelessWidget {
         ),
         title: Text(job.title),
         actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: AppBarIcon(
+              icon: Icons.share,
+              onPressed: () => SharePlus.instance.share(
+                ShareParams(
+                    text: '${job.title}\n$kHostingBaseUrl/jobs/${job.id}'),
+              ),
+            ),
+          ),
           if (isMyJob) ...[
             Padding(
               padding: const EdgeInsets.only(right: 8.0),

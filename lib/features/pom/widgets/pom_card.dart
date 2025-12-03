@@ -25,6 +25,7 @@ import 'package:video_player/video_player.dart'; // [V2]
 import 'package:bling_app/features/pom/screens/pom_pager_screen.dart';
 import 'package:bling_app/features/pom/screens/pom_edit_screen.dart'; // [추가]
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart'; // [Added]
+import 'package:bling_app/core/constants/app_links.dart';
 
 /// 기획서(백서) Page 28의 '콘텐츠 카드 구성(피드 UI 기본 단위)'
 /// PomModel을 받아 이미지, 작성자, 내용, 반응(좋아요/댓글)을 표시하는 카드 위젯.
@@ -106,8 +107,6 @@ class _PomCardState extends State<PomCard> {
 
   // [V2] 공유 버튼 로직
   void _onShareButtonPressed() {
-    const String kHostingBaseUrl =
-        'https://blingbling-app.web.app'; // Assumption: Firebase Hosting URL
     final String title =
         (widget.pom.title.isNotEmpty) ? widget.pom.title : 'POM';
     final String link = '$kHostingBaseUrl/pom/${widget.pom.id}';

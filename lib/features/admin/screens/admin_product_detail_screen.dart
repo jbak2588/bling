@@ -1,4 +1,6 @@
 // lib/features/admin/screens/admin_product_detail_screen.dart
+// 주의: 공유/딥링크를 만들 때 호스트를 직접 하드코딩하지 마세요.
+// 대신 `lib/core/constants/app_links.dart`의 `kHostingBaseUrl`을 사용하세요.
 // lib/features/admin/screens/admin_product_detail_screen.dart
 
 import 'package:bling_app/features/marketplace/models/product_model.dart';

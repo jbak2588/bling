@@ -1,4 +1,6 @@
 // lib/features/local_news/screens/local_news_detail_screen.dart
+// 공용 링크 상수 사용 안내: 공유 및 딥링크 생성 시 `lib/core/constants/app_links.dart`의
+// `kHostingBaseUrl` 상수를 사용하세요.
 
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart'; // ✅ [수정] 공통 미니맵 위젯 import
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,6 +20,7 @@ import 'package:any_link_preview/any_link_preview.dart'; // ✅ 링크 미리보
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart'; // ✅ SharePlus import 확인
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 // ❌ [태그 시스템] 기존 카테고리 import 제거
 // import '../../../core/constants/app_categories.dart';
 // ✅ [태그 시스템] 태그 사전 import 추가
@@ -444,7 +447,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
       // 1. 공유할 웹 URL 생성 (Firebase Hosting 기본 도메인 사용)
       //    URL 형식: https://<your-project-id>.web.app/post/<postId>
       final String postUrl =
-          'https://blingbling-app.web.app/post/${widget.post.id}'; // 👈 Firebase Hosting 도메인 및 경로
+          '$kHostingBaseUrl/post/${widget.post.id}'; // Firebase Hosting 도메인 및 경로
 
       // 2. 생성된 URL과 함께 공유 메시지 전달 (✅ 수정: 인스턴스 API 및 ShareParams 사용)
       await SharePlus.instance.share(

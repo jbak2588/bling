@@ -1,4 +1,6 @@
 // lib/features/clubs/screens/club_post_detail_screen.dart
+// 주의: 공유/딥링크를 만들 때 호스트를 직접 하드코딩하지 마세요.
+// 대신 `lib/core/constants/app_links.dart`의 `kHostingBaseUrl`을 사용하세요.
 
 import 'package:bling_app/features/clubs/models/club_comment_model.dart';
 import 'package:bling_app/features/clubs/models/club_model.dart';
@@ -10,6 +12,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class ClubPostDetailScreen extends StatefulWidget {
@@ -281,6 +285,19 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
         ),
         title: Text('clubs.postDetail.appBarTitle'
             .tr(namedArgs: {'title': widget.club.title})),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: AppBarIcon(
+              icon: Icons.share,
+              onPressed: () => SharePlus.instance.share(
+                ShareParams(
+                    text:
+                        '${widget.post.body}\n$kHostingBaseUrl/clubs/${widget.club.id}/posts/${widget.post.id}'),
+              ),
+            ),
+          ),
+        ],
       ),
       body: inner,
     );

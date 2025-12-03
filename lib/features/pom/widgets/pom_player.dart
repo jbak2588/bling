@@ -25,6 +25,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'pom_comments_sheet.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/features/pom/screens/pom_edit_screen.dart'; // [추가]
+import 'package:bling_app/core/constants/app_links.dart';
 
 class PomPlayer extends StatefulWidget {
   final PomModel pom;
@@ -416,8 +417,6 @@ class _PomPlayerState extends State<PomPlayer> {
   }
 
   void _onShare() {
-    const String kHostingBaseUrl =
-        'https://blingbling-app.web.app'; // Assumption: Firebase Hosting URL
     final String title =
         (widget.pom.title.isNotEmpty) ? widget.pom.title : 'POM';
     final String link = '$kHostingBaseUrl/pom/${widget.pom.id}';

@@ -8,6 +8,8 @@ import 'package:bling_app/features/jobs/screens/edit_talent_screen.dart';
 import 'package:bling_app/core/utils/popups/snackbars.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart'; // [추가]
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart'; // [추가]
+import 'package:share_plus/share_plus.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 
 class TalentDetailScreen extends StatefulWidget {
   // [수정] StatelessWidget -> StatefulWidget (로딩 상태 관리)
@@ -117,6 +119,14 @@ class _TalentDetailScreenState extends State<TalentDetailScreen> {
       appBar: AppBar(
         title: Text('jobs.talent.detail.title'.tr()),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () => SharePlus.instance.share(
+              ShareParams(
+                  text:
+                      '${widget.talent.title}\n$kHostingBaseUrl/talent/${widget.talent.id}'),
+            ),
+          ),
           if (isOwner) ...[
             IconButton(
               icon: const Icon(Icons.edit),

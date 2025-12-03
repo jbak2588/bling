@@ -1,4 +1,6 @@
 // lib/features/auction/screens/auction_detail_screen.dart
+// 주의: 공유/딥링크를 만들 때 호스트를 직접 하드코딩하지 마세요.
+// 대신 `lib/core/constants/app_links.dart`의 `kHostingBaseUrl`을 사용하세요.
 
 import 'package:bling_app/features/auction/models/auction_model.dart';
 import 'package:bling_app/features/auction/models/bid_model.dart';
@@ -24,6 +26,8 @@ import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 
 class AuctionDetailScreen extends StatefulWidget {
   final AuctionModel auction;
@@ -420,6 +424,17 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
             ),
             title: Text(auction.title),
             actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: AppBarIcon(
+                  icon: Icons.share,
+                  onPressed: () => SharePlus.instance.share(
+                    ShareParams(
+                        text:
+                            '${auction.title}\n$kHostingBaseUrl/auctions/${auction.id}'),
+                  ),
+                ),
+              ),
               if (isOwner)
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),

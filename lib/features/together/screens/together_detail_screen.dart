@@ -1,10 +1,14 @@
 // lib/features/together/screens/together_detail_screen.dart
+// 공용 링크 상수 사용 안내: 공유 및 딥링크 생성 시 `lib/core/constants/app_links.dart`의
+// `kHostingBaseUrl` 상수를 사용하세요.
 
 import 'package:bling_app/features/together/data/together_repository.dart';
 import 'package:bling_app/features/together/models/together_post_model.dart';
 import 'package:bling_app/features/together/screens/edit_together_screen.dart'; // ✅ 추가
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart'; // ✅ 추가 (공용 위젯 사용)
 import 'package:easy_localization/easy_localization.dart'; // ✅ 추가 (다국어 지원)
+import 'package:share_plus/share_plus.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -236,6 +240,17 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
               ),
             ),
           ],
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: AppBarIcon(
+              icon: Icons.share,
+              onPressed: () => SharePlus.instance.share(
+                ShareParams(
+                    text:
+                        '${widget.post.title}\n$kHostingBaseUrl/together/${widget.post.id}'),
+              ),
+            ),
+          ),
         ],
       ),
       body: SingleChildScrollView(

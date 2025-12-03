@@ -15,6 +15,8 @@
 // - 신고/차단/신뢰 등급 UI 노출 및 기능 강화, 알림/리뷰 UX 개선.
 // =====================================================
 // lib/features/local_stores/screens/shop_detail_screen.dart
+// 공용 링크 상수 사용 안내: 공유 및 딥링크 생성 시 `lib/core/constants/app_links.dart`의
+// `kHostingBaseUrl` 상수를 사용하세요.
 // ===================== DocHeader =====================
 // [기획 요약]
 // - 상점 상세 정보, 이미지 갤러리, 채팅 연동, 신뢰 등급, 연락처, 영업시간 등 다양한 필드 지원.
@@ -54,6 +56,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
@@ -128,9 +131,11 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
 
   // [추가] 공유하기
   void _shareShop() {
+    // 앱 미설치 시 Firebase Hosting 웹페이지로 연결되도록 도메인 통일
+    final String shareUrl = '$kHostingBaseUrl/shops/${widget.shop.id}';
     SharePlus.instance.share(ShareParams(
       text:
-          '${widget.shop.name}\n${widget.shop.description}\n\nCheck out this store on Bling!',
+          '[${widget.shop.name}]\n${widget.shop.description}\n\n$shareUrl\n\nCheck out this store on Bling!',
       subject: widget.shop.name,
     ));
   }

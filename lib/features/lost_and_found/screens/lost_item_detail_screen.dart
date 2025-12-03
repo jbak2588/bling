@@ -11,6 +11,8 @@
 // - 신고/차단/신뢰 등급 UI 노출 및 기능 강화, 알림/현상금 UX 개선.
 // =====================================================
 // lib/features/lost_and_found/screens/lost_item_detail_screen.dart
+// 공용 링크 상수 사용 안내: 공유 및 딥링크 생성 시 `lib/core/constants/app_links.dart`의
+// `kHostingBaseUrl` 상수를 사용하세요.
 // ===================== DocHeader =====================
 // [기획 요약]
 // - 분실/습득물 상세 정보, 이미지, 채팅 연동, 현상금, 위치 등 다양한 필드 지원.
@@ -47,6 +49,8 @@ import 'package:bling_app/features/local_news/widgets/comment_input_field.dart';
 import 'package:bling_app/features/local_news/widgets/comment_list_view.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart'; // ✅ [작업 9] 프로필 이동을 위해 추가
+import 'package:share_plus/share_plus.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경
 class LostItemDetailScreen extends StatefulWidget {
@@ -629,6 +633,17 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
                 onPressed: _deleteItem,
               ),
             ),
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: AppBarIcon(
+              icon: Icons.share,
+              onPressed: () => SharePlus.instance.share(
+                ShareParams(
+                    text:
+                        '${widget.item.itemDescription}\n$kHostingBaseUrl/lost/${widget.item.id}'),
+              ),
+            ),
+          ),
         ],
         // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
       ),

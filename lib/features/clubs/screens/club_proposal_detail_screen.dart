@@ -1,4 +1,6 @@
 // lib/features/clubs/screens/club_proposal_detail_screen.dart
+// 주의: 공유/딥링크를 만들 때 호스트를 직접 하드코딩하지 마세요.
+// 대신 `lib/core/constants/app_links.dart`의 `kHostingBaseUrl`을 사용하세요.
 
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:bling_app/features/clubs/models/club_proposal_model.dart';
@@ -7,6 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 
 class ClubProposalDetailScreen extends StatefulWidget {
   final ClubProposalModel proposal;
@@ -205,7 +209,19 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(_proposal.title)),
+      appBar: AppBar(
+        title: Text(_proposal.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () => SharePlus.instance.share(
+              ShareParams(
+                  text:
+                      '${_proposal.title}\n$kHostingBaseUrl/clubs/proposal/${_proposal.id}'),
+            ),
+          ),
+        ],
+      ),
       body: inner,
     );
   }

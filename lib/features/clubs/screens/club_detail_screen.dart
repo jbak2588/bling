@@ -1,4 +1,6 @@
 // lib/features/clubs/screens/club_detail_screen.dart
+// 주의: 공유/딥링크를 만들 때 호스트를 직접 하드코딩하지 마세요.
+// 대신 `lib/core/constants/app_links.dart`의 `kHostingBaseUrl`을 사용하세요.
 // ===================== DocHeader =====================
 // [기획 요약]
 // - 동호회는 Firestore에 제목, 설명, 운영자, 위치, 관심사, 비공개 여부, 신뢰 등급, 멤버 관리 등의 필드로 구성됩니다.
@@ -45,6 +47,8 @@ import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 
 class ClubDetailScreen extends StatefulWidget {
   final ClubModel club;
@@ -243,6 +247,13 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           appBar: AppBar(
             title: Text(club.title), // [수정] 실시간 club.title 사용
             actions: [
+              IconButton(
+                icon: const Icon(Icons.share),
+                onPressed: () => SharePlus.instance.share(
+                  ShareParams(
+                      text: '${club.title}\n$kHostingBaseUrl/clubs/${club.id}'),
+                ),
+              ),
               if (club.ownerId == _currentUserId)
                 IconButton(
                   icon: const Icon(Icons.edit_note_outlined),
