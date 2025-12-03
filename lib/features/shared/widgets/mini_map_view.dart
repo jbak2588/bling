@@ -9,13 +9,15 @@ class MiniMapView extends StatelessWidget {
   final bool myLocationEnabled;
   final double height;
 
-  const MiniMapView({
+  MiniMapView({
     super.key,
-    required this.location,
+    GeoPoint? geoPoint,
+    GeoPoint? location,
     required this.markerId,
     this.height = 180.0,
     this.myLocationEnabled = false, // 기본값은 false
-  });
+  })  : assert(geoPoint != null || location != null),
+        location = geoPoint ?? location!;
 
   @override
   Widget build(BuildContext context) {

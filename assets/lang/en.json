@@ -1292,6 +1292,7 @@
     "detail": {
       "joined": "Joined club '{title}'!",
       "pendingApproval": "Waiting for owner approval. You can participate after approval.",
+      "eventLocationTitle": "Event location",
       "joinFail": "Failed to request join: {error}",
       "tabs": {
         "info": "Info",
@@ -1337,6 +1338,10 @@
       "privateClub": "Private Club",
       "privateDescription": "Invitation only.",
       "locationLabel": "locationLabel"
+    },
+    "form": {
+      "eventLocationLabel": "Event location",
+      "eventLocationHint": "Select event location"
     },
     "editClub": {
       "title": "Edit Club Info",

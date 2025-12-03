@@ -6,12 +6,14 @@ import 'package:bling_app/features/clubs/models/club_comment_model.dart';
 import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/features/clubs/models/club_post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
+import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
 
@@ -147,6 +149,7 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final BlingLocation? eventLocation = widget.post.eventLocation;
     final inner = Column(
       children: [
         Expanded(
@@ -182,6 +185,29 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
                                 ),
                               ),
                             )),
+                      if (eventLocation != null) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          'clubs.detail.eventLocationTitle'.tr(),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        MiniMapView(
+                          geoPoint: eventLocation.geoPoint,
+                          markerId: 'club_event_${widget.post.id}',
+                        ),
+                        if (eventLocation.shortLabel != null &&
+                            eventLocation.shortLabel!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(eventLocation.shortLabel!),
+                          )
+                        else if (eventLocation.mainAddress.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(eventLocation.mainAddress),
+                          ),
+                      ],
                       const Divider(height: 32),
                       _buildActionRow(),
                       const Divider(height: 32),

@@ -1299,6 +1299,7 @@
     "detail": {
       "joined": "Bergabung dengan Grup '{title}'!",
       "pendingApproval": "Menunggu persetujuan pemilik. Anda dapat berpartisipasi setelah disetujui.",
+      "eventLocationTitle": "Lokasi acara",
       "joinFail": "Gagal meminta bergabung: {error}",
       "tabs": {
         "info": "Info",
@@ -1344,6 +1345,10 @@
       "privateClub": "Grup Privat",
       "privateDescription": "Hanya bisa bergabung lewat undangan.",
       "locationLabel": "Lokasi Grup"
+    },
+    "form": {
+      "eventLocationLabel": "Lokasi acara",
+      "eventLocationHint": "Pilih lokasi acara"
     },
     "editClub": {
       "title": "Edit Informasi Grup",

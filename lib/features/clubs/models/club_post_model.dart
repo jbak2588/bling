@@ -14,6 +14,7 @@
 // - Add fields for moderation status, analytics, and post visibility options.
 // =====================================================
 
+import 'package:bling_app/core/models/bling_location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// 동호회 전용 게시판의 게시글 정보를 담는 데이터 모델입니다.
@@ -28,6 +29,7 @@ class ClubPostModel {
   final int likesCount;
   final int commentsCount;
   final String parentType; // 저장 시 상위 타입 구분 (기본값: 'club')
+  final BlingLocation? eventLocation;
 
   ClubPostModel({
     required this.id,
@@ -39,6 +41,7 @@ class ClubPostModel {
     this.likesCount = 0,
     this.commentsCount = 0,
     this.parentType = 'club',
+    this.eventLocation,
   });
 
   factory ClubPostModel.fromFirestore(
@@ -56,6 +59,10 @@ class ClubPostModel {
       likesCount: data['likesCount'] ?? 0,
       commentsCount: data['commentsCount'] ?? 0,
       parentType: data['parentType'] ?? 'club',
+      eventLocation: data['eventLocation'] != null
+          ? BlingLocation.fromJson(
+              Map<String, dynamic>.from(data['eventLocation']))
+          : null,
     );
   }
 
@@ -69,6 +76,7 @@ class ClubPostModel {
       'likesCount': likesCount,
       'commentsCount': commentsCount,
       'parentType': parentType,
+      'eventLocation': eventLocation?.toJson(),
     };
   }
 }
