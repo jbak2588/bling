@@ -50,13 +50,15 @@ import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
+import 'package:bling_app/features/shared/widgets/shared_map_browser.dart'; // [추가] 공용 지도 위젯
 
 // ✅ [롤백] 카테고리 상수 import 복구
 import '../../../core/constants/app_categories.dart';
 // ✅ [태그 시스템] 신규 태그 사전 import (필요시 유지)
 // AppTags import removed: currently unused after category rollback
 import '../widgets/post_card.dart';
-import 'local_news_detail_screen.dart';
+// 'local_news_detail_screen.dart' import removed: detail screen is navigated
+// to from PostCard; keep import minimal to avoid unused import lint.
 
 class LocalNewsScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -522,7 +524,6 @@ class _FeedMapView extends StatefulWidget {
 }
 
 class _FeedMapViewState extends State<_FeedMapView> {
-  final Completer<GoogleMapController> _controller = Completer();
   VoidCallback? _kwListener;
   ValueListenable<String>? _currentKeywordListenable;
 
@@ -639,35 +640,7 @@ class _FeedMapViewState extends State<_FeedMapView> {
     return query.orderBy('createdAt', descending: true);
   }
 
-  Set<Marker> _createMarkers(
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
-    debugPrint('[지도 디버그] 마커 생성을 위해 ${docs.length}개의 문서를 받았습니다.');
-    final Set<Marker> markers = {};
-    for (var doc in docs) {
-      final post = PostModel.fromFirestore(doc);
-      if (post.geoPoint != null) {
-        debugPrint(
-            '[지도 디버그] 핀 생성: ${post.id} at ${post.geoPoint!.latitude}, ${post.geoPoint!.longitude}');
-        markers.add(Marker(
-          markerId: MarkerId(post.id),
-          position: LatLng(post.geoPoint!.latitude, post.geoPoint!.longitude),
-          infoWindow: InfoWindow(
-            title: post.title ?? post.body,
-            snippet: post.locationName,
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => LocalNewsDetailScreen(post: post),
-              ));
-            },
-          ),
-        ));
-      } else {
-        debugPrint('[지도 디버그] 핀 생성 실패 (geoPoint 없음): ${post.id}');
-      }
-    }
-    debugPrint('[지도 디버그] 총 ${markers.length}개의 마커를 생성했습니다.');
-    return markers;
-  }
+  // 마커 생성 로직은 이제 SharedMapBrowser 내부에서 처리되므로 로컬 함수는 제거했습니다.
 
   @override
   Widget build(BuildContext context) {
@@ -677,39 +650,21 @@ class _FeedMapViewState extends State<_FeedMapView> {
         if (cameraSnapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (!cameraSnapshot.hasData) {
-          return GoogleMap(
-              initialCameraPosition: const CameraPosition(
-                  target: LatLng(-6.2088, 106.8456), zoom: 11));
-        }
-        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: _buildAllMarkersQuery().snapshots(),
-          builder: (context, postSnapshot) {
-            if (postSnapshot.connectionState == ConnectionState.waiting) {
-              debugPrint('[지도 디버그] 게시물 데이터 로딩 중...');
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (postSnapshot.hasError) {
-              debugPrint('[지도 디버그] 게시물 데이터 로딩 에러: ${postSnapshot.error}');
-              return Center(child: Text('Error: ${postSnapshot.error}'));
-            }
-            if (!postSnapshot.hasData) {
-              debugPrint('[지도 디버그] 게시물 데이터 없음.');
-              return Center(child: Text('No posts found.'));
-            }
 
-            final markers = _createMarkers(postSnapshot.data!.docs);
-
-            return GoogleMap(
-              initialCameraPosition: cameraSnapshot.data!,
-              onMapCreated: (GoogleMapController controller) {
-                if (!_controller.isCompleted) {
-                  _controller.complete(controller);
-                }
-              },
-              markers: markers,
-            );
-          },
+        // [수정] GoogleMap 직접 사용 -> SharedMapBrowser 사용으로 변경
+        // 이로써 핀치 줌, 제스처, 줌 버튼 숨김 등의 공통 기능이 자동 적용됨
+        return SharedMapBrowser<PostModel>(
+          dataStream: _buildAllMarkersQuery().snapshots().map((snapshot) =>
+              snapshot.docs
+                  .map((doc) => PostModel.fromFirestore(doc))
+                  .toList()),
+          initialCameraPosition: cameraSnapshot.data ??
+              const CameraPosition(target: LatLng(-6.2088, 106.8456), zoom: 11),
+          locationExtractor: (post) => post.geoPoint,
+          idExtractor: (post) => post.id,
+          // 마커 클릭 시 바텀시트에 뜰 카드 (PostCard 재사용)
+          cardBuilder: (context, post) =>
+              PostCard(key: ValueKey(post.id), post: post),
         );
       },
     );
