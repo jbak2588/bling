@@ -142,6 +142,10 @@ class ChatService {
     String? roomId,
     String? roomTitle,
     String? roomImage,
+    // [추가] 클럽(동호회) 관련 파라미터
+    String? clubId,
+    String? clubTitle,
+    String? clubImage,
   }) async {
     final myUid = _auth.currentUser?.uid;
     if (myUid == null) throw Exception('User not logged in');
@@ -156,6 +160,7 @@ class ChatService {
         shopId ??
         lostItemId ??
         roomId ??
+        clubId ?? // [추가] clubId도 컨텍스트 ID 후보에 포함
         'direct';
     String chatId = '${contextId}_${participants.join('_')}';
 
@@ -199,6 +204,10 @@ class ChatService {
         if (roomId != null) 'roomId': roomId,
         if (roomTitle != null) 'roomTitle': roomTitle,
         if (roomImage != null) 'roomImage': roomImage,
+        // [추가] 클럽 정보 저장
+        if (clubId != null) 'clubId': clubId,
+        if (clubTitle != null) 'clubTitle': clubTitle,
+        if (clubImage != null) 'clubImage': clubImage,
       };
       // Batch 처리로 채팅방 생성 + 첫 메시지 동시 기록
       final batch = _firestore.batch();
@@ -217,6 +226,21 @@ class ChatService {
     }
     return chatId;
   }
+
+  // V V V --- [추가] 채팅방 컨텍스트 정보(제목, 이미지 등) 업데이트 함수 (Self-healing) --- V V V
+  Future<void> updateChatContextInfo(
+      String chatId, Map<String, dynamic> data) async {
+    // null 값은 제외하고 업데이트
+    data.removeWhere((key, value) => value == null);
+    if (data.isEmpty) return;
+
+    try {
+      await _chats.doc(chatId).set(data, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Failed to update chat context info: $e');
+    }
+  }
+  // ^ ^ ^ --------------------------------------------------------------------- ^ ^ ^
 
   // ✅ [게시판] '하이브리드 방식...md' 기획안 4) 동네 게시판 그룹 채팅방 생성/참여
   /// Kelurahan(동네) 키를 기반으로 그룹 채팅방을 가져오거나 생성합니다.

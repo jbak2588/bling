@@ -161,7 +161,9 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         builder: (_) => ChatRoomScreen(
           chatId: chatRoom.id,
           isGroupChat: true,
-          groupName: chatRoom.groupName,
+          groupName: widget.club.title,
+          clubId: widget.club.id,
+          clubImage: widget.club.imageUrl,
           participants: chatRoom.participants,
         ),
       ),

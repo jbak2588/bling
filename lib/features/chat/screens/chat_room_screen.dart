@@ -95,12 +95,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+// Club context imports
+import 'package:bling_app/features/clubs/data/club_repository.dart';
+import 'package:bling_app/features/clubs/models/club_model.dart';
+import 'package:bling_app/features/clubs/screens/club_detail_screen.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final String chatId;
   // [수정] 그룹/1:1 채팅을 구분하기 위한 파라미터 추가 및 변경
   final bool isGroupChat;
   final String? groupName;
+  final String? clubId;
+  final String? clubImage;
+  final String? clubTitle; // [추가] 클럽 타이틀
   final String? otherUserName;
   final String? otherUserId;
   final String? productTitle; // 구인글 제목 등 컨텍스트 제목으로 재활용
@@ -113,6 +120,9 @@ class ChatRoomScreen extends StatefulWidget {
     required this.chatId,
     this.isGroupChat = false,
     this.groupName,
+    this.clubId,
+    this.clubImage,
+    this.clubTitle,
     this.otherUserName,
     this.otherUserId,
     this.productTitle,
@@ -145,6 +155,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   dynamic _contextItem; // JobModel 또는 ProductModel을 저장
   bool _isContextLoading = true;
   ChatRoomModel? _chatRoomModel;
+  String? _appBarTitle; // mutable app bar title that updates when context loads
   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
   bool get isNewChat => widget.isNewChat;
@@ -156,6 +167,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     // [수정] 그룹/1:1 채팅 모두에서 '읽음'으로 표시하는 함수를 호출합니다.
     _chatService.markMessagesAsRead(widget.chatId);
     // 보호 모드는 채팅 컨텍스트를 확인한 뒤(친구 채팅인지) 결정합니다.
+    // Initialize app bar title from explicit widget params first
+    _appBarTitle = widget.isGroupChat
+        ? (widget.clubTitle ?? widget.groupName)
+        : (widget.productTitle ?? widget.otherUserName);
+
     _loadChatContext(); // [추가] 컨텍스트 정보 로딩 함수 호출
   }
 
@@ -191,8 +207,54 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   Future<void> _loadChatContext() async {
     try {
+      // Prefer clubId passed via widget parameter
+      if (widget.clubId != null) {
+        try {
+          final club = await ClubRepository().fetchClub(widget.clubId!);
+          if (mounted) {
+            setState(() {
+              _contextItem = club;
+              _isContextLoading = false;
+              _appBarTitle = club.title;
+            });
+            return;
+          }
+        } catch (e) {
+          debugPrint('Failed to load club from widget.clubId: $e');
+        }
+      }
       final chatRoom = await _chatService.getChatRoom(widget.chatId);
       if (chatRoom == null || !mounted) return;
+
+      // If chatRoom explicitly references a club, load it
+      if (chatRoom.clubId != null) {
+        try {
+          final club = await ClubRepository().fetchClub(chatRoom.clubId!);
+          if (mounted) {
+            setState(() {
+              _contextItem = club;
+              _appBarTitle = club.title;
+            });
+            // we keep going to set _chatRoomModel and protection flags below
+          }
+        } catch (e) {
+          debugPrint('Failed to fetch club from chatRoom.clubId: $e');
+        }
+      } else if (chatRoom.isGroupChat &&
+          (chatRoom.contextType == null || chatRoom.contextType == 'club')) {
+        // heuristic: try chatId as clubId
+        try {
+          final club = await ClubRepository().fetchClub(widget.chatId);
+          if (mounted) {
+            setState(() {
+              _contextItem = club;
+              _appBarTitle = club.title;
+            });
+          }
+        } catch (_) {
+          // ignore
+        }
+      }
 
       // Determine whether this is a plain 1:1 friend chat (no product/job/context)
       final bool isFriend = (chatRoom.isGroupChat == false) &&
@@ -213,17 +275,30 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
       if (chatRoom.jobId != null) {
         final job = await JobRepository().fetchJob(chatRoom.jobId!);
-        if (job != null && mounted) setState(() => _contextItem = job);
+        if (job != null && mounted) {
+          setState(() {
+            _contextItem = job;
+            _appBarTitle = job.title;
+          });
+        }
       } else if (chatRoom.talentId != null) {
         // Load talent context when present
         final talent =
             await TalentRepository().getTalentById(chatRoom.talentId!);
-        if (talent != null && mounted) setState(() => _contextItem = talent);
+        if (talent != null && mounted) {
+          setState(() {
+            _contextItem = talent;
+            _appBarTitle = talent.title;
+          });
+        }
       } else if (chatRoom.shopId != null) {
         // Load shop context when present
         final shop = await ShopRepository().fetchShop(chatRoom.shopId!);
         if (mounted) {
-          setState(() => _contextItem = shop);
+          setState(() {
+            _contextItem = shop;
+            _appBarTitle = shop.name;
+          });
         }
       } else if (chatRoom.roomId != null) {
         // Load room/listing context when present
@@ -231,7 +306,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           final room =
               await RoomRepository().getRoomStream(chatRoom.roomId!).first;
           if (mounted) {
-            setState(() => _contextItem = room);
+            setState(() {
+              _contextItem = room;
+              _appBarTitle = room.title;
+            });
           }
         } catch (e) {
           debugPrint('Failed to fetch room listing: $e');
@@ -240,7 +318,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         // Load product context when present
         final product =
             await ProductRepository().fetchProductById(chatRoom.productId!);
-        if (product != null && mounted) setState(() => _contextItem = product);
+        if (product != null && mounted) {
+          setState(() {
+            _contextItem = product;
+            _appBarTitle = product.title;
+          });
+        }
       } else if (chatRoom.lostItemId != null) {
         // Load lost & found item when present
         try {
@@ -251,7 +334,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           if (doc.exists && mounted) {
             final lostItem = LostItemModel.fromFirestore(doc);
             if (mounted) {
-              setState(() => _contextItem = lostItem);
+              setState(() {
+                _contextItem = lostItem;
+                _appBarTitle = lostItem.itemDescription;
+              });
             }
           }
         } catch (e) {
@@ -344,9 +430,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final appBarTitle = widget.isGroupChat
-        ? widget.groupName ?? 'Group Chat'
-        : widget.productTitle ?? widget.otherUserName ?? 'Chat';
+    final appBarTitle = _appBarTitle ??
+        (widget.isGroupChat
+            ? (widget.clubTitle ?? widget.groupName ?? 'Group Chat')
+            : (widget.productTitle ?? widget.otherUserName ?? 'Chat'));
 
     return Scaffold(
       // ✅ [수정] 키보드가 올라올 때 입력창이 가려지지 않도록 설정합니다.
@@ -555,7 +642,18 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     String locationText = '';
     String priceText = '';
 
-    if (_contextItem is JobModel) {
+    // Club context handling
+    if (_contextItem is ClubModel) {
+      final club = _contextItem as ClubModel;
+      title = club.title;
+      descriptionText = club.description;
+      locationText = club.location;
+      if (club.imageUrl != null && club.imageUrl!.isNotEmpty) {
+        image = NetworkImage(club.imageUrl!);
+      } else if (widget.clubImage != null) {
+        image = NetworkImage(widget.clubImage!);
+      }
+    } else if (_contextItem is JobModel) {
       final job = _contextItem as JobModel;
       title = job.title;
       descriptionText = job.description;
@@ -677,7 +775,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       color: Colors.grey.shade50,
       child: InkWell(
         onTap: () {
-          if (_contextItem is JobModel) {
+          // [추가] 배너 클릭 시 ClubDetailScreen으로 이동 (embedded가 아닌 전체 화면으로)
+          if (_contextItem is ClubModel) {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) =>
+                    ClubDetailScreen(club: _contextItem as ClubModel)));
+          } else if (_contextItem is JobModel) {
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => JobDetailScreen(job: _contextItem)));
           } else if (_contextItem is TalentModel) {

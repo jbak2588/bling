@@ -9,7 +9,6 @@ class ChatRoomModel {
   final Timestamp lastTimestamp;
   final Map<String, int> unreadCounts;
 
-  // --- 채팅 유형을 구분하기 위한 필드들 ---
   final bool isGroupChat;
   final String? groupName;
   final String? groupImage;
@@ -22,7 +21,6 @@ class ChatRoomModel {
   final String? jobTitle;
   final String? jobImage;
 
-// V V V --- [추가] 지역 상점 관련 필드 --- V V V
   final String? shopId;
   final String? shopName;
   final String? shopImage;
@@ -30,15 +28,18 @@ class ChatRoomModel {
   final String? lostItemId;
   final String? contextType;
 
-  // V V V --- [추가] 부동산 매물 관련 필드 --- V V V
   final String? roomId;
   final String? roomTitle;
   final String? roomImage;
 
-  // [추가] 재능 마켓 관련 필드
   final String? talentId;
   final String? talentTitle;
   final String? talentImage;
+
+  // [추가됨] 클럽(동호회) 관련 필드
+  final String? clubId;
+  final String? clubTitle;
+  final String? clubImage;
 
   ChatRoomModel({
     required this.id,
@@ -55,19 +56,20 @@ class ChatRoomModel {
     this.jobId,
     this.jobTitle,
     this.jobImage,
-    this.shopId, // [추가]
-    this.shopName, // [추가]
-    this.shopImage, // [추가]
-
+    this.shopId,
+    this.shopName,
+    this.shopImage,
     this.lostItemId,
-    this.contextType, // [추가]
-
-    this.roomId, // [추가]
-    this.roomTitle, // [추가]
-    this.roomImage, // [추가]
-    this.talentId, // [추가]
-    this.talentTitle, // [추가]
-    this.talentImage, // [추가]
+    this.contextType,
+    this.roomId,
+    this.roomTitle,
+    this.roomImage,
+    this.talentId,
+    this.talentTitle,
+    this.talentImage,
+    this.clubId,
+    this.clubTitle,
+    this.clubImage,
   });
 
   factory ChatRoomModel.fromFirestore(
@@ -92,15 +94,17 @@ class ChatRoomModel {
       shopName: data['shopName'],
       shopImage: data['shopImage'],
       lostItemId: data['lostItemId'],
-      contextType: data['contextType'], // [추가]
-      // [추가] Firestore에서 부동산 정보 불러오기
+      contextType: data['contextType'],
       roomId: data['roomId'],
       roomTitle: data['roomTitle'],
       roomImage: data['roomImage'],
-      // [추가] Firestore에서 재능 마켓 관련 정보 불러오기
       talentId: data['talentId'],
       talentTitle: data['talentTitle'],
       talentImage: data['talentImage'],
+      // [중요] 필드 매핑 확인
+      clubId: data['clubId'],
+      clubTitle: data['clubTitle'],
+      clubImage: data['clubImage'],
     );
   }
 
@@ -130,6 +134,9 @@ class ChatRoomModel {
       'talentId': talentId,
       'talentTitle': talentTitle,
       'talentImage': talentImage,
+      'clubId': clubId,
+      'clubTitle': clubTitle,
+      'clubImage': clubImage,
     };
   }
 }

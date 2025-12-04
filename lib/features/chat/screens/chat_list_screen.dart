@@ -106,7 +106,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 // determine the child item widget based on chat type
                 Widget item;
                 if (chatRoom.isGroupChat) {
-                  item = _buildGroupChatItem(context, chatRoom);
+                  // [수정] contextType 체크 추가로 조건 강화
+                  if ((chatRoom.clubId != null &&
+                          chatRoom.clubId!.isNotEmpty) ||
+                      chatRoom.contextType == 'club') {
+                    item = _buildClubChatItem(context, chatRoom);
+                  } else {
+                    item = _buildGroupChatItem(context, chatRoom);
+                  }
                 } else if (chatRoom.roomId != null &&
                     chatRoom.roomId!.isNotEmpty) {
                   item = _buildRealEstateChatItem(context, chatRoom, otherUser);
@@ -226,6 +233,22 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }
 
   // 각 채팅 유형별 ListTile을 만드는 헬퍼 함수들
+
+  // [추가] 클럽 채팅 아이템 빌더
+  ListTile _buildClubChatItem(BuildContext context, ChatRoomModel chatRoom) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: _buildAvatar(
+          imageUrl: chatRoom.clubImage ?? chatRoom.groupImage,
+          icon: Icons.groups),
+      title: Text(chatRoom.clubTitle ?? chatRoom.groupName ?? 'Club Chat',
+          style: const TextStyle(fontWeight: FontWeight.bold)),
+      subtitle: Text(chatRoom.lastMessage,
+          maxLines: 1, overflow: TextOverflow.ellipsis),
+      trailing: _buildTrailing(chatRoom),
+      onTap: () => _navigateToChat(context, chatRoom: chatRoom, type: 'Club'),
+    );
+  }
 
   ListTile _buildGroupChatItem(BuildContext context, ChatRoomModel chatRoom) {
     return ListTile(
@@ -372,6 +395,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
         chatId: chatRoom.id,
         isGroupChat: chatRoom.isGroupChat,
         groupName: chatRoom.groupName,
+        // [수정] 클럽 정보 전달 (AppBar 타이틀 및 배너용)
+        clubId: chatRoom.clubId,
+        clubImage: chatRoom.clubImage,
+        clubTitle: chatRoom.clubTitle,
         participants: chatRoom.participants,
         otherUserId: otherUid,
         otherUserName: otherUser?.nickname ?? 'User',

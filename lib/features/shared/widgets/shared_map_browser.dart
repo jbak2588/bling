@@ -222,33 +222,38 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
                   final pos = _markerScreenPositions[m.markerId];
                   if (pos == null) return const SizedBox.shrink();
                   // 오버레이 위젯을 마커 핀 위쪽에 표시 (조정값은 필요 시 튜닝)
+                  // 오버레이 위젯을 마커 핀의 "정중앙 바로 위"에 표시합니다.
+                  // - FractionalTranslation(-0.5, -1.2)
+                  //   → 가로: 자신의 폭의 절반만큼 왼쪽으로 이동(가운데 정렬)
+                  //   → 세로: 자신의 높이보다 조금 더 위(-1.2)로 올려서 핀과 겹치지 않게 함
                   return Positioned(
-                    left: pos.dx - 60,
-                    top: pos.dy - 70,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor.withAlpha(243),
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 4,
-                                offset: Offset(0, 2)),
-                          ],
-                        ),
-                        // [추가] 텍스트 오버플로우 처리: 길면 1줄로 줄이고 말줄임표 표시
-                        child: Text(
-                          m.infoWindow.title ?? '',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 12, // 폰트 살짝 줄여서 공간 확보
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87),
+                    left: pos.dx,
+                    top: pos.dy,
+                    child: FractionalTranslation(
+                      translation: const Offset(-0.5, -1.2),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor.withAlpha(243),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            m.infoWindow.title!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(fontWeight: FontWeight.w500),
+                          ),
                         ),
                       ),
                     ),
@@ -268,10 +273,16 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
       if (!_controller.isCompleted) return;
       final ctrl = await _controller.future;
       final Map<MarkerId, Offset> next = {};
+      // google_maps_flutter 의 ScreenCoordinate 는 "screen pixels" 기준이므로
+      // Flutter 위젯 트리에서 사용하는 논리 픽셀로 환산이 필요합니다.
+      final dpr = MediaQuery.of(context).devicePixelRatio;
       for (final m in _markers) {
         try {
           final sc = await ctrl.getScreenCoordinate(m.position);
-          next[m.markerId] = Offset(sc.x.toDouble(), sc.y.toDouble());
+          // 물리 픽셀 -> 논리 픽 변환
+          final logicalX = sc.x.toDouble() / dpr;
+          final logicalY = sc.y.toDouble() / dpr;
+          next[m.markerId] = Offset(logicalX, logicalY);
         } catch (_) {
           // ignore individual failures
         }
