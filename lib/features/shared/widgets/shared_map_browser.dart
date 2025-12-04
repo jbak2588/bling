@@ -112,9 +112,14 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
             .whereType<Marker>()
             .toSet();
 
-        // 초기 렌더 때는 모든 마커의 툴팁을 자동으로 표시합니다.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _showAllInfoWindows();
+        // 초기 렌더 시점에 모든 마커의 화면 좌표를 계산해서,
+        // 커스텀 오버레이 툴팁이 바로 보이도록 합니다.
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          try {
+            await _updateMarkerScreenPositions();
+          } catch (_) {
+            // 화면 좌표 계산 실패는 UX에만 영향, 크래시는 방지
+          }
         });
 
         // 디버그 모드에서만 마커가 갱신될 때 카메라를 마커 범위로 이동
@@ -289,23 +294,27 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
   // Try to show InfoWindow for all markers (best-effort). Safe to call
   // repeatedly; errors are caught and ignored. Useful for initial UX where
   // tooltips should be visible without extra taps.
-  Future<void> _showAllInfoWindows() async {
-    try {
-      if (!_controller.isCompleted) return;
-      final ctrl = await _controller.future;
-      for (final m in _markers) {
-        try {
-          await ctrl.showMarkerInfoWindow(m.markerId);
-        } catch (_) {
-          // ignore individual failures
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('[SharedMapBrowser] showInfo error: $e');
-      }
-    }
-  }
+  // Note: showing native InfoWindows programmatically was previously used
+  // but we now render custom overlay tooltips based on calculated screen
+  // positions. The old _showAllInfoWindows implementation was removed to
+  // avoid redundant native calls and race conditions with overlay layout.
+  // Future<void> _showAllInfoWindows() async {
+  //   try {
+  //     if (!_controller.isCompleted) return;
+  //     final ctrl = await _controller.future;
+  //     for (final m in _markers) {
+  //       try {
+  //         await ctrl.showMarkerInfoWindow(m.markerId);
+  //       } catch (_) {
+  //         // ignore individual failures
+  //       }
+  //     }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       debugPrint('[SharedMapBrowser] showInfo error: $e');
+  //     }
+  //   }
+  // }
 
   // 바텀시트 표시 로직 분리
   void _showBottomSheet(T item) {
