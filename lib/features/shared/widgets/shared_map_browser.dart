@@ -92,14 +92,12 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
                 markerId: MarkerId(markerId),
                 position: LatLng(geoPoint.latitude, geoPoint.longitude),
                 icon: widget.customMarkerIcon ?? BitmapDescriptor.defaultMarker,
-                // titleExtractor가 제공되면 InfoWindow를 사용하고,
-                // InfoWindow의 onTap에서 바텀시트를 연다. title이 없으면
-                // Marker의 onTap에서 바로 바텀시트를 연다.
+                // InfoWindow은 제목만 표시하도록 하고,
+                // 마커 탭(onTap)에서 바로 바텀시트를 엽니다.
                 infoWindow: title != null
-                    ? InfoWindow(
-                        title: title, onTap: () => _showBottomSheet(item))
+                    ? InfoWindow(title: title)
                     : InfoWindow.noText,
-                onTap: title != null ? null : () => _showBottomSheet(item),
+                onTap: () => _showBottomSheet(item),
               );
 
               if (kDebugMode) {
@@ -193,29 +191,96 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
 
   // [추가] 바텀시트 표시 로직 분리
   void _showBottomSheet(T item) {
+    // Create a controller to allow programmatic resizing of the draggable sheet.
+    final draggableController = DraggableScrollableController();
+    // Key to measure the rendered card height.
+    final contentKey = GlobalKey();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => DraggableScrollableSheet(
+        controller: draggableController,
         initialChildSize: 0.4,
         minChildSize: 0.2,
-        maxChildSize: 0.8,
-        builder: (_, controller) => SingleChildScrollView(
-          controller: controller,
+        maxChildSize: 0.95,
+        builder: (_, scrollController) => SingleChildScrollView(
+          controller: scrollController,
           child: Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
-              child: Container(
-                color: Theme.of(context).cardColor,
-                child: widget.cardBuilder(context, item),
+              child: Stack(
+                children: [
+                  // Wrap card in a Container with a GlobalKey so we can measure its height
+                  Container(
+                    key: contentKey,
+                    color: Theme.of(context).cardColor,
+                    child: widget.cardBuilder(context, item),
+                  ),
+                  Positioned(
+                    right: 6,
+                    top: 6,
+                    child: SafeArea(
+                      child: Material(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.black45
+                            : Colors.black26,
+                        shape: CircleBorder(
+                          side: BorderSide(
+                            color: Colors.blue.shade800,
+                            width: 0.8,
+                          ),
+                        ),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => Navigator.of(context).pop(),
+                          child: const Padding(
+                            padding: EdgeInsets.all(5.0),
+                            child: Icon(Icons.close,
+                                size: 18, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ),
     );
+
+    // After the bottom sheet renders, measure the content and expand the sheet
+    // so that the card fits (or up to maxChildSize). We delay slightly to allow
+    // asynchronous inner loads (images/streambuilders) to settle.
+    Future.delayed(const Duration(milliseconds: 120), () {
+      try {
+        final ctx = contentKey.currentContext;
+        if (ctx == null) return;
+        final renderBox = ctx.findRenderObject() as RenderBox?;
+        if (renderBox == null) return;
+        final contentHeight = renderBox.size.height + 32.0; // include paddings
+        final screenHeight = MediaQuery.of(context).size.height;
+        var targetFraction = (contentHeight / screenHeight).clamp(0.2, 0.85);
+
+        // If content is small, ensure at least initialChildSize
+        if (targetFraction < 0.4) targetFraction = 0.4;
+
+        // Animate sheet to the computed fraction (best-effort)
+        try {
+          draggableController.animateTo(targetFraction,
+              duration: const Duration(milliseconds: 300), curve: Curves.ease);
+        } catch (_) {
+          // if controller is not attached yet, ignore — sheet stays at initial size
+        }
+      } catch (e) {
+        // ignore measurement errors — sheet will remain at initial size
+        if (kDebugMode) debugPrint('[SharedMapBrowser] measure error: $e');
+      }
+    });
   }
 }

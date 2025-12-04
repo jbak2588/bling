@@ -662,6 +662,8 @@ class _FeedMapViewState extends State<_FeedMapView> {
               const CameraPosition(target: LatLng(-6.2088, 106.8456), zoom: 11),
           locationExtractor: (post) => post.geoPoint,
           idExtractor: (post) => post.id,
+          // [추가] 핀 제목(툴팁) 설정: 제목이 있으면 제목, 없으면 본문 앞부분 표시
+          titleExtractor: (post) => post.title ?? post.body,
           // 마커 클릭 시 바텀시트에 뜰 카드 (PostCard 재사용)
           cardBuilder: (context, post) =>
               PostCard(key: ValueKey(post.id), post: post),
