@@ -43,7 +43,11 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
 
   DateTime? _eventDate;
   BlingLocation? _eventLocation;
-  bool _eventExpanded = false;
+  // [UX] 생성/수정 화면 모두 행사 정보 섹션을 기본으로 펼쳐 둔다.
+  bool _eventExpanded = true;
+  // [UX] 지도/행사 정보는 항상 펼쳐두되,
+  // 실제 지도 위젯 생성은 첫 프레임 이후로 지연합니다.
+  bool _showEventLocationPicker = false;
 
   bool _isLoading = false;
   Timer? _debounce;
@@ -69,10 +73,18 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
 
     _eventDate = widget.post.eventDate;
     _eventLocation = widget.post.eventLocation;
-    _eventExpanded = (_eventDate != null) ||
-        (_eventLocation != null) ||
-        (widget.post.eventAddress != null &&
-            widget.post.eventAddress!.isNotEmpty);
+    // [UX] 행사 정보 섹션은 항상 펼쳐두고,
+    // 지도 위젯 생성만 첫 프레임 이후로 지연합니다.
+    _eventExpanded = true;
+
+    // 첫 프레임 렌더가 끝난 후에만 실제 지도 위젯을 생성해서
+    // 초기 진입 시 프레임 드랍을 완화합니다.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _showEventLocationPicker = true;
+      });
+    });
 
     _titleController.addListener(_onTextChangedForRecommend);
     _bodyController.addListener(_onTextChangedForRecommend);
@@ -413,11 +425,14 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
                 const SizedBox(height: 16),
               ],
 
-              // 6. event info
+              // 6. event info (optional, always expanded by default)
               ExpansionTile(
                 initiallyExpanded: _eventExpanded,
                 onExpansionChanged: (v) => setState(() => _eventExpanded = v),
-                title: Text('localNewsCreate.labels.eventInfo'.tr()),
+                // 생성/수정 모두 동일하게 “행사 정보 (옵션)”으로 표시
+                title: Text(
+                  '${'localNewsCreate.labels.eventInfo'.tr()} ${'common.optionalSuffix'.tr()}',
+                ),
                 children: [
                   ListTile(
                     title: Text(_eventDate == null
@@ -430,13 +445,26 @@ class _EditLocalNewsScreenState extends State<EditLocalNewsScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 8),
-                    child: AddressMapPicker(
-                      initialValue: _eventLocation,
-                      userGeoPoint: null,
-                      labelText: 'localNewsCreate.labels.eventAddress'.tr(),
-                      hintText: 'localNewsCreate.hints.eventAddress'.tr(),
-                      onChanged: (loc) => setState(() => _eventLocation = loc),
-                    ),
+                    child: _showEventLocationPicker
+                        ? AddressMapPicker(
+                            initialValue: _eventLocation,
+                            // 편집 시에는 기존 이벤트 위치 또는 글의 geoPoint를 활용해서
+                            // AddressMapPicker가 불필요한 현재 위치 조회를 하지 않도록 함.
+                            userGeoPoint: _eventLocation?.geoPoint ??
+                                widget.post.eventLocation?.geoPoint ??
+                                widget.post.geoPoint,
+                            labelText:
+                                'localNewsCreate.labels.eventAddress'.tr(),
+                            hintText: 'localNewsCreate.hints.eventAddress'.tr(),
+                            onChanged: (loc) =>
+                                setState(() => _eventLocation = loc),
+                          )
+                        : const SizedBox(
+                            height: 180,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
                   ),
                 ],
               ),

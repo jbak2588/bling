@@ -649,11 +649,12 @@ class _LostItemDetailScreenState extends State<LostItemDetailScreen> {
             padding: const EdgeInsets.only(right: 8.0),
             child: AppBarIcon(
               icon: Icons.share,
-              onPressed: () => SharePlus.instance.share(
-                ShareParams(
-                    text:
-                        '${widget.item.itemDescription}\n$kHostingBaseUrl/lost/${widget.item.id}'),
-              ),
+              onPressed: () => SharePlus.instance.share(ShareParams(
+                text: 'share.lost'.tr(namedArgs: {
+                  'description': widget.item.itemDescription,
+                  'url': '$kHostingBaseUrl/lost/${widget.item.id}'
+                }),
+              )),
             ),
           ),
         ],

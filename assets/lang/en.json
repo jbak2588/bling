@@ -749,7 +749,7 @@
       "contentLabel": "Enter content",
       "tagsLabel": "Tags",
       "tagsHint": "You can register tags using comma (,) or Enter.",
-      "recommendedTags": "recommendedTags",
+      "recommendedTags": "Recommended tags",
       "photoSectionTitle": "Attach Photos (optional, max 5)"
     },
     "labels": {
@@ -764,7 +764,8 @@
     "hints": {
       "body": "Share your neighborhood news or ask questions...",
       "tagSelection": "(Select 1-3 tags)",
-      "eventLocation": "e.g., Jl. Sudirman 123",
+      "eventLocation": "e.g., 123 Main St",
+      "eventAddress": "e.g., 123 Main St, Your Neighborhood",
       "eventDate": "Select date"
     },
     "validation": {
@@ -772,7 +773,7 @@
       "tagRequired": "Please select at least one tag.",
       "tagMaxLimit": "You can select up to 3 tags.",
       "imageMaxLimit": "You can attach up to 5 images.",
-      "titleRequired": "titleRequired"
+      "titleRequired": "Please enter the title."
     },
     "buttons": {
       "addImage": "Add Image",
@@ -881,6 +882,7 @@
     "copiedTitle": "Copied!",
     "copiedMessage": "{title} copied to clipboard.",
     "select": "Select"
+    ,"optionalSuffix": "(optional — enter or use if needed)"
   },
   "upload": {
     "pause": "Pause",
@@ -1257,6 +1259,19 @@
       "active": "Official clubs",
       "proposals": "Club proposals"
     },
+    "categories": {
+      "sports": "Sports",
+      "hobbies": "Hobbies",
+      "social": "Social",
+      "study": "Study",
+      "reading": "Reading",
+      "culture": "Culture",
+      "travel": "Travel",
+      "volunteer": "Volunteer",
+      "pets": "Pets",
+      "food": "Food",
+      "etc": "Other"
+    },
     "screen": {
       "error": "Error: {error}",
       "empty": "No clubs yet."
@@ -1281,7 +1296,12 @@
       "deleteTooltip": "Delete post",
       "loadingUser": "Loading user info..."
     },
+    "post": {
+      "loadingUser": "Loading user info...",
+      "optionDelete": "Delete"
+    },
     "card": {
+      "private": "Private club",
       "membersCount": "{count} members"
     },
     "postDetail": {
@@ -1332,6 +1352,7 @@
       "success": "Club created!",
       "fail": "Failed to create club: {error}",
       "title": "Create Club",
+      "categoryLabel": "Category",
       "nameLabel": "Club Name",
       "nameError": "Please enter a club name.",
       "descriptionLabel": "Club Description",
@@ -1360,6 +1381,7 @@
     },
     "proposal": {
       "createTitle": "Propose a Club",
+      "editTitle": "Edit Proposal",
       "imageError": "Please select a cover image.",
       "createSuccess": "Your club proposal has been created.",
       "createFail": "Failed to create proposal: {error}",
@@ -2366,5 +2388,16 @@
         "together": "Together"
       }
     }
+  },
+  "share": {
+    "lost": "{description}\n{url}",
+    "post": "Check out this post on Bling!\n{title}\n{url}",
+    "postSubject": "Bling Post: {title}",
+    "club": "{title}\n{url}",
+    "club_proposal": "{title}\n{url}",
+    "product": "{title}\n{url}",
+    "pom": "{title}\n{url}",
+    "together": "{title}\n{url}",
+    "room": "{title}\n{url}"
   }
 }

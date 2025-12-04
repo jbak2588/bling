@@ -53,6 +53,21 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   String _mainCategory = 'sports'; // [추가]
   List<String> _interestTags = []; // [추가]
 
+  // [추가] 카테고리 목록
+  final List<String> _categories = [
+    'sports',
+    'hobbies',
+    'social',
+    'study',
+    'reading',
+    'culture',
+    'travel',
+    'volunteer',
+    'pets',
+    'food',
+    'etc'
+  ];
+
   // [추가] 목표 인원 설정
   // ignore: prefer_final_fields
   double _targetMemberCount = 5.0; // Slider의 기본값
@@ -65,38 +80,6 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   final ImagePicker _picker = ImagePicker();
 
   final ClubRepository _repository = ClubRepository();
-
-  // [수정] find_friend와 동일한 전체 관심사 목록을 사용합니다.
-  // final Map<String, List<String>> _interestCategories = {
-  //   'category_creative': [
-  //     'drawing',
-  //     'instrument',
-  //     'photography',
-  //     'writing',
-  //     'crafting',
-  //     'gardening'
-  //   ],
-  //   'category_sports': [
-  //     'soccer',
-  //     'hiking',
-  //     'camping',
-  //     'running',
-  //     'biking',
-  //     'golf',
-  //     'workout'
-  //   ],
-  //   'category_food_drink': [
-  //     'foodie',
-  //     'cooking',
-  //     'baking',
-  //     'coffee',
-  //     'wine',
-  //     'tea'
-  //   ],
-  //   'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
-  //   'category_growth': ['reading', 'investing', 'language', 'coding'],
-  //   'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
-  // };
 
   @override
   void dispose() {
@@ -182,9 +165,11 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
       // [수정] 이미지가 선택되었으면 Storage에 업로드
       if (_image != null) {
         final fileName = const Uuid().v4();
+        final currentUid = FirebaseAuth.instance.currentUser?.uid;
+        final storageUid = currentUid ?? widget.userModel.uid;
         final ref = FirebaseStorage.instance
             .ref()
-            .child('club_images/${widget.userModel.uid}/$fileName');
+            .child('club_images/$storageUid/$fileName');
         await ref.putFile(File(_image!.path));
         imageUrl = await ref.getDownloadURL();
       }
@@ -211,6 +196,7 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
         interestTags: _interestTags,
         imageUrl: imageUrl ?? '',
         createdAt: Timestamp.now(),
+        isPrivate: _isPrivate, // [수정] 비공개 설정 값 전달
         targetMemberCount: _targetMemberCount.toInt(), // 목표 인원
         currentMemberCount: 1,
         memberIds: [currentUser?.uid ?? widget.userModel.uid],
@@ -339,63 +325,27 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                   onTap: _selectLocation,
                 ),
                 const SizedBox(height: 24),
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //   children: [
-                //     Text("interests.title".tr(),
-                //         style: const TextStyle(
-                //             fontWeight: FontWeight.bold, fontSize: 16)),
-                //     Text('${_selectedInterests.length}/3',
-                //         style: const TextStyle(
-                //             fontWeight: FontWeight.bold,
-                //             color: Colors.teal)), // 동호회는 최대 3개로 제한
-                //   ],
-                // ),
-                // const SizedBox(height: 8),
-                // ..._interestCategories.entries.map((entry) {
-                //   final interestKeys = entry.value;
-                //   return ExpansionTile(
-                //     title: Text("interests.$categoryKey".tr(),
-                //         style: const TextStyle(fontWeight: FontWeight.w500)),
-                //     children: [
-                //       Padding(
-                //         padding: const EdgeInsets.all(8.0),
-                //         child: Wrap(
-                //           spacing: 8.0,
-                //           runSpacing: 4.0,
-                //           children: interestKeys.map((interestKey) {
-                //             final isSelected =
-                //                 _selectedInterests.contains(interestKey);
-                //             return FilterChip(
-                //               label: Text("interests.items.$interestKey".tr()),
-                //               selected: isSelected,
-                //               onSelected: (selected) {
-                //                 setState(() {
-                //                   if (selected) {
-                //                     if (_selectedInterests.length < 3) {
-                //                       // 최대 3개 제한
-                //                       _selectedInterests.add(interestKey);
-                //                     } else {
-                //                       ScaffoldMessenger.of(context)
-                //                           .showSnackBar(
-                //                         SnackBar(
-                //                             content: Text(
-                //                                 'clubs.createClub.maxInterests'
-                //                                     .tr())),
-                //                       );
-                //                     }
-                //                   } else {
-                //                     _selectedInterests.remove(interestKey);
-                //                   }
-                //                 });
-                //               },
-                //             );
-                //           }).toList(),
-                //         ),
-                //       )
-                //     ],
-                //   );
-                // }),
+
+                // [추가] 카테고리 선택 드롭다운 (사라졌던 기능 복원)
+                DropdownButtonFormField<String>(
+                  initialValue: _mainCategory,
+                  decoration: InputDecoration(
+                    labelText: 'clubs.createClub.categoryLabel'.tr(), // "카테고리"
+                    border: const OutlineInputBorder(),
+                  ),
+                  items: _categories.map((cat) {
+                    return DropdownMenuItem(
+                      value: cat,
+                      child: Text('clubs.categories.$cat'.tr()),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() => _mainCategory = val);
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
 
                 // ✅ 기존의 복잡한 관심사 선택 UI를 공용 태그 위젯으로 교체합니다.
                 Text("interests.title".tr(),

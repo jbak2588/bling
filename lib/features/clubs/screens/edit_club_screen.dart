@@ -5,27 +5,32 @@
 // - '모임 제안' V2.0 로직 개편으로 인해 이 파일은 현재 직접 수정 사항 없음.
 // - (참고) 이 화면은 '모임 제안' 단계가 아닌, 생성된 '정식 클럽'의 정보 수정용임.
 // =====================================================
+// lib/features/clubs/screens/edit_club_screen.dart
 
 import 'dart:io';
 import 'package:bling_app/features/clubs/models/club_model.dart';
+import 'package:bling_app/features/clubs/models/club_proposal_model.dart'; // [추가]
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
-
-// ✅ 1. GeoPoint 클래스 사용을 위해 cloud_firestore를 import 합니다.
 import 'package:cloud_firestore/cloud_firestore.dart';
-// search index generation intentionally omitted to avoid client-side resource usage
-// ✅ 공용 태그 입력 위젯을 import 합니다.
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
-// ✅ 위치 설정을 위해 LocationFilterScreen을 import 합니다.
 import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 
 class EditClubScreen extends StatefulWidget {
-  final ClubModel club;
-  const EditClubScreen({super.key, required this.club});
+  final ClubModel? club;
+  final ClubProposalModel? proposal; // [추가] 제안 모델 지원
+
+  const EditClubScreen({
+    super.key,
+    this.club,
+    this.proposal,
+  }) : assert(club != null || proposal != null,
+            'Either club or proposal must be provided');
 
   @override
   State<EditClubScreen> createState() => _EditClubScreenState();
@@ -36,9 +41,26 @@ class _EditClubScreenState extends State<EditClubScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
 
-  // late List<String> _selectedInterests;
+  // [추가] 카테고리 관리 변수
+  late String _mainCategory;
+  final List<String> _categories = [
+    'sports',
+    'hobbies',
+    'social',
+    'study',
+    'reading',
+    'culture',
+    'travel',
+    'volunteer',
+    'pets',
+    'food',
+    'etc'
+  ];
+
   late List<String> _interestTags;
   late bool _isPrivate;
+  double _targetMemberCount = 5.0; // [추가] 제안용 목표 인원
+
   bool _isSaving = false;
 
   XFile? _selectedImage;
@@ -46,59 +68,41 @@ class _EditClubScreenState extends State<EditClubScreen> {
   final ImagePicker _picker = ImagePicker();
 
   final ClubRepository _repository = ClubRepository();
-// ✅ 위치 정보를 관리할 상태 변수들을 추가합니다.
   late String _locationName;
   late Map<String, dynamic>? _locationParts;
   late GeoPoint? _geoPoint;
 
-  // final Map<String, List<String>> _interestCategories = {
-  //   'category_creative': [
-  //     'drawing',
-  //     'instrument',
-  //     'photography',
-  //     'writing',
-  //     'crafting',
-  //     'gardening'
-  //   ],
-  //   'category_sports': [
-  //     'soccer',
-  //     'hiking',
-  //     'camping',
-  //     'running',
-  //     'biking',
-  //     'golf',
-  //     'workout'
-  //   ],
-  //   'category_food_drink': [
-  //     'foodie',
-  //     'cooking',
-  //     'baking',
-  //     'coffee',
-  //     'wine',
-  //     'tea'
-  //   ],
-  //   'category_entertainment': ['movies', 'music', 'concerts', 'gaming'],
-  //   'category_growth': ['reading', 'investing', 'language', 'coding'],
-  //   'category_lifestyle': ['travel', 'pets', 'volunteering', 'minimalism'],
-  // };
+  bool get _isProposal => widget.proposal != null; // [추가] 제안 여부 확인 헬퍼
 
   @override
   void initState() {
     super.initState();
-    // 기존 동호회 정보로 UI 상태를 초기화합니다.
-    _titleController = TextEditingController(text: widget.club.title);
-    _descriptionController =
-        TextEditingController(text: widget.club.description);
-    // _selectedInterests = List<String>.from(widget.club.interestTags);
-    // ✅ interestTags를 사용하도록 초기화
-    _interestTags = List<String>.from(widget.club.interestTags);
-    _isPrivate = widget.club.isPrivate;
-    _existingImageUrl = widget.club.imageUrl;
+    // [수정] club 또는 proposal 데이터로 초기화
+    final title = widget.club?.title ?? widget.proposal!.title;
+    final description =
+        widget.club?.description ?? widget.proposal!.description;
+    final tags = widget.club?.interestTags ?? widget.proposal!.interestTags;
+    final imageUrl = widget.club?.imageUrl ?? widget.proposal!.imageUrl;
+    final location = widget.club?.location ?? widget.proposal!.location;
+    final locParts =
+        widget.club?.locationParts ?? widget.proposal!.locationParts;
+    final geo = widget.club?.geoPoint ?? widget.proposal!.geoPoint;
+    final category = widget.club?.mainCategory ?? widget.proposal!.mainCategory;
 
-    // ✅ 기존 클럽의 위치 정보로 상태를 초기화합니다.
-    _locationName = widget.club.location;
-    _locationParts = widget.club.locationParts;
-    _geoPoint = widget.club.geoPoint;
+    _titleController = TextEditingController(text: title);
+    _descriptionController = TextEditingController(text: description);
+    _interestTags = List<String>.from(tags);
+    _existingImageUrl = imageUrl;
+    _locationName = location;
+    _locationParts = locParts;
+    _geoPoint = geo;
+    _mainCategory = category; // 초기 카테고리 설정
+
+    // [수정] 모임과 제안 모두 비공개 설정 값을 가져옴
+    _isPrivate = widget.club?.isPrivate ?? widget.proposal?.isPrivate ?? false;
+    if (_isProposal) {
+      _targetMemberCount = widget.proposal!.targetMemberCount.toDouble();
+    }
   }
 
   @override
@@ -114,14 +118,12 @@ class _EditClubScreenState extends State<EditClubScreen> {
     if (pickedFile != null) {
       setState(() {
         _selectedImage = pickedFile;
-        _existingImageUrl = null; // 새 이미지를 선택하면 기존 이미지는 무시
+        _existingImageUrl = null;
       });
     }
   }
 
-  // ✅ 위치를 새로 선택하는 함수를 추가합니다.
   Future<void> _selectLocation() async {
-    // [작업 8] LocationFilterScreen 사용 (0번 탭: 행정구역)
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
           builder: (_) => const LocationFilterScreen(initialTabIndex: 0)),
@@ -129,7 +131,6 @@ class _EditClubScreenState extends State<EditClubScreen> {
 
     if (result != null && result is Map<String, dynamic>) {
       setState(() {
-        // 주소 문자열 생성
         final kKel = result['kel'] != null ? "Kel. ${result['kel']}" : "";
         final kKec = result['kec'] != null ? "Kec. ${result['kec']}" : "";
         final kKab = result['kab'] ?? "";
@@ -137,15 +138,15 @@ class _EditClubScreenState extends State<EditClubScreen> {
         _locationName =
             [kKel, kKec, kKab].where((s) => s.toString().isNotEmpty).join(', ');
         _locationParts = result;
-        _geoPoint = null; // 좌표 정보 없음
+        _geoPoint = null;
       });
     }
   }
 
-  Future<void> _updateClub() async {
+  // [수정] 통합 저장 로직 (Club vs Proposal 분기)
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || _isSaving) return;
-    // if (_selectedInterests.isEmpty) {
-    // ✅ _interestTags로 유효성 검사
+
     if (_interestTags.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -158,47 +159,70 @@ class _EditClubScreenState extends State<EditClubScreen> {
 
     try {
       String? imageUrl = _existingImageUrl;
-      // 새 이미지가 선택되었으면 Storage에 업로드
       if (_selectedImage != null) {
         final fileName = const Uuid().v4();
-        final ref =
-            FirebaseStorage.instance.ref().child('club_images/$fileName');
+        final currentUid = FirebaseAuth.instance.currentUser?.uid;
+        final storageUserId =
+            currentUid ?? widget.club?.ownerId ?? widget.proposal?.ownerId;
+        if (storageUserId == null) {
+          throw Exception('No authenticated user or owner id for storage path');
+        }
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('club_images/$storageUserId/$fileName');
         await ref.putFile(File(_selectedImage!.path));
         imageUrl = await ref.getDownloadURL();
       }
 
-      // ClubModel 객체를 업데이트된 정보로 새로 만듭니다.
-
-      final updatedClub = ClubModel(
-        id: widget.club.id,
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim(),
-        imageUrl: imageUrl,
-        interestTags: _interestTags,
-        isPrivate: _isPrivate,
-        ownerId: widget.club.ownerId,
-        // 새로 선택된 위치 정보로 업데이트
-        location: _locationName,
-        locationParts: _locationParts,
-        geoPoint: _geoPoint,
-        // 수정되지 않는 나머지 필드들은 기존 값을 그대로 사용
-        mainCategory: _interestTags.isNotEmpty
-            ? _interestTags.first
-            : widget.club.mainCategory,
-        membersCount: widget.club.membersCount,
-        createdAt: widget.club.createdAt,
-        kickedMembers: widget.club.kickedMembers,
-        pendingMembers: widget.club.pendingMembers,
-        // 'searchIndex' intentionally omitted — client-side token generation disabled; use server-side/background indexing.
-      );
-
-      await _repository.updateClub(updatedClub);
+      if (_isProposal) {
+        // 제안 업데이트
+        final updatedProposal = ClubProposalModel(
+          id: widget.proposal!.id,
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          ownerId: widget.proposal!.ownerId,
+          location: _locationName,
+          locationParts: _locationParts,
+          geoPoint: _geoPoint,
+          mainCategory: _mainCategory,
+          interestTags: _interestTags,
+          imageUrl: imageUrl ?? '',
+          createdAt: widget.proposal!.createdAt,
+          isPrivate: _isPrivate,
+          targetMemberCount: _targetMemberCount.toInt(),
+          currentMemberCount: widget.proposal!.currentMemberCount,
+          memberIds: widget.proposal!.memberIds,
+        );
+        await _repository.updateClubProposal(updatedProposal);
+      } else {
+        // 정식 모임 업데이트
+        final updatedClub = ClubModel(
+          id: widget.club!.id,
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          imageUrl: imageUrl,
+          interestTags: _interestTags,
+          isPrivate: _isPrivate,
+          ownerId: widget.club!.ownerId,
+          location: _locationName,
+          locationParts: _locationParts,
+          geoPoint: _geoPoint,
+          mainCategory: _mainCategory,
+          membersCount: widget.club!.membersCount,
+          createdAt: widget.club!.createdAt,
+          kickedMembers: widget.club!.kickedMembers,
+          pendingMembers: widget.club!.pendingMembers,
+          isSponsored: widget.club!.isSponsored,
+          adExpiryDate: widget.club!.adExpiryDate,
+        );
+        await _repository.updateClub(updatedClub);
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('clubs.editClub.success'.tr()),
             backgroundColor: Colors.green));
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
@@ -216,10 +240,12 @@ class _EditClubScreenState extends State<EditClubScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('clubs.editClub.title'.tr()),
+        title: Text(_isProposal
+            ? 'clubs.proposal.editTitle'.tr() // "제안 수정" (키 필요)
+            : 'clubs.editClub.title'.tr()),
         actions: [
           IconButton(
-            onPressed: _isSaving ? null : _updateClub,
+            onPressed: _isSaving ? null : _submit,
             icon: const Icon(Icons.save),
           )
         ],
@@ -231,7 +257,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                // 대표 이미지 선택 UI
+                // --- 이미지 선택 (공통) ---
                 Center(
                   child: Stack(
                     children: [
@@ -272,7 +298,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
                   controller: _titleController,
                   decoration: InputDecoration(
                     labelText: 'clubs.createClub.nameLabel'.tr(),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -286,7 +312,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
                   controller: _descriptionController,
                   decoration: InputDecoration(
                     labelText: 'clubs.createClub.descriptionLabel'.tr(),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   maxLines: 5,
                   validator: (value) {
@@ -298,7 +324,6 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 ),
 
                 const SizedBox(height: 24),
-                // ✅ 위치 선택 UI를 추가합니다.
                 ListTile(
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -314,9 +339,32 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                Text(
-                  "interests.title".tr(), /* ... */
+                // 카테고리 선택 (수정 시에도 변경 가능)
+                DropdownButtonFormField<String>(
+                  // 안전성: 저장된 `_mainCategory`가 현재 `_categories` 목록에
+                  // 없으면 `initialValue`를 `null`로 설정하여 Dropdown이
+                  // 빌드 시 assert를 던지지 않도록 합니다.
+                  initialValue: _categories.contains(_mainCategory)
+                      ? _mainCategory
+                      : null,
+                  decoration: InputDecoration(
+                    labelText: 'clubs.createClub.categoryLabel'.tr(),
+                    border: const OutlineInputBorder(),
+                  ),
+                  items: _categories.map((cat) {
+                    return DropdownMenuItem(
+                      value: cat,
+                      child: Text('clubs.categories.$cat'.tr()),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _mainCategory = val);
+                  },
                 ),
+
+                const SizedBox(height: 24),
+
+                Text("interests.title".tr()),
                 const SizedBox(height: 8),
                 CustomTagInputField(
                   initialTags: _interestTags,
@@ -327,17 +375,63 @@ class _EditClubScreenState extends State<EditClubScreen> {
                     });
                   },
                 ),
+
+                // V V V --- [분기] 제안일 경우 '목표 인원', 정식 모임일 경우 '비공개 설정' --- V V V
+                if (_isProposal) ...[
+                  const SizedBox(height: 24),
+                  Text(
+                    'clubs.proposal.targetMembers'.tr(), // "목표 인원"
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Slider(
+                          value: _targetMemberCount,
+                          min: 3,
+                          max: 50,
+                          divisions: 47,
+                          label: _targetMemberCount.toInt().toString(),
+                          onChanged: (value) {
+                            setState(() {
+                              _targetMemberCount = value;
+                            });
+                          },
+                        ),
+                      ),
+                      Text(
+                        '${_targetMemberCount.toInt()}명',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // 제안에서도 비공개 설정을 동일한 위치에 표시합니다.
+                  SwitchListTile(
+                    title: Text('clubs.createClub.privateClub'.tr()),
+                    subtitle: Text('clubs.createClub.privateDescription'.tr()),
+                    value: _isPrivate,
+                    onChanged: (value) {
+                      setState(() {
+                        _isPrivate = value;
+                      });
+                    },
+                  ),
+                ] else ...[
+                  const SizedBox(height: 24),
+                  SwitchListTile(
+                    title: Text('clubs.createClub.privateClub'.tr()),
+                    subtitle: Text('clubs.createClub.privateDescription'.tr()),
+                    value: _isPrivate,
+                    onChanged: (value) {
+                      setState(() {
+                        _isPrivate = value;
+                      });
+                    },
+                  ),
+                ],
+
                 const SizedBox(height: 88),
-                SwitchListTile(
-                  title: Text('clubs.createClub.privateClub'.tr()),
-                  subtitle: Text('clubs.createClub.privateDescription'.tr()),
-                  value: _isPrivate,
-                  onChanged: (value) {
-                    setState(() {
-                      _isPrivate = value;
-                    });
-                  },
-                ),
               ],
             ),
           ),
@@ -351,7 +445,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: FilledButton(
-            onPressed: _isSaving ? null : _updateClub,
+            onPressed: _isSaving ? null : _submit,
             style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14)),
             child: _isSaving

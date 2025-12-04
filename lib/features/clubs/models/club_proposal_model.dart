@@ -24,6 +24,7 @@ class ClubProposalModel {
   final List<String> interestTags;
   final String imageUrl;
   final Timestamp createdAt;
+  final bool isPrivate; // [추가] 비공개 여부
 
   final int targetMemberCount; // [핵심] 목표 인원
   final int currentMemberCount; // [핵심] 현재 참여 인원
@@ -43,6 +44,7 @@ class ClubProposalModel {
     required this.interestTags,
     required this.imageUrl,
     required this.createdAt,
+    this.isPrivate = false, // [추가]
     required this.targetMemberCount,
     this.currentMemberCount = 1, // 제안자 1명 포함 시작
     required this.memberIds,
@@ -68,6 +70,7 @@ class ClubProposalModel {
           : [],
       imageUrl: data['imageUrl'] ?? '',
       createdAt: data['createdAt'] ?? Timestamp.now(),
+      isPrivate: data['isPrivate'] ?? false, // [추가] Firestore에서 읽기
       targetMemberCount: data['targetMemberCount'] ?? 5, // 기본 목표 5명
       currentMemberCount: data['currentMemberCount'] ?? 1,
       memberIds: data['memberIds'] != null
@@ -91,6 +94,7 @@ class ClubProposalModel {
       'interestTags': interestTags,
       'imageUrl': imageUrl,
       'createdAt': createdAt,
+      'isPrivate': isPrivate, // [추가] Firestore에 저장
       'targetMemberCount': targetMemberCount,
       'currentMemberCount': currentMemberCount,
       'memberIds': memberIds,

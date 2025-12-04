@@ -214,6 +214,45 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     }
   }
 
+  // 삭제 확인 및 처리
+  Future<void> _showDeleteClubConfirmation(
+      BuildContext context, String clubId, String title) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('common.deleteConfirmTitle'.tr()),
+        content: Text('clubs.detail.deleteConfirmContent'
+            .tr(namedArgs: {'title': title})),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text('common.cancel'.tr())),
+          TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text('common.delete'.tr(),
+                  style: const TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await _repository.deleteClub(clubId);
+        if (mounted) {
+          showSnackbar(
+              'clubs.detail.deleteSuccess'.tr(namedArgs: {'title': title}));
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          showSnackbar(
+              'clubs.detail.deleteFail'.tr(namedArgs: {'error': e.toString()}),
+              isError: true);
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<ClubModel>(
@@ -270,7 +309,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                 icon: const Icon(Icons.share),
                 onPressed: () => SharePlus.instance.share(
                   ShareParams(
-                      text: '${club.title}\n$kHostingBaseUrl/clubs/${club.id}'),
+                      text: 'share.club'.tr(namedArgs: {
+                    'title': club.title,
+                    'url': '$kHostingBaseUrl/clubs/${club.id}'
+                  })),
                 ),
               ),
               if (club.ownerId == _currentUserId)
@@ -287,25 +329,24 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                     );
                   },
                 ),
+              // 소유자에게는 삭제(휴지통) 아이콘 표시
+              if (club.ownerId == _currentUserId)
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  tooltip: '동호회 삭제',
+                  onPressed: () =>
+                      _showDeleteClubConfirmation(context, club.id, club.title),
+                ),
               StreamBuilder<bool>(
                   stream: _repository.isCurrentUserMember(club.id),
                   builder: (context, memberSnapshot) {
                     final isMember = memberSnapshot.data ?? false;
-                    // 멤버이지만, 방장이 아닐 경우에만 메뉴를 보여줍니다.
+                    // 멤버이지만, 방장이 아닐 경우에만 떠있던 팝업 대신 직접 아이콘으로 노출
                     if (isMember && club.ownerId != _currentUserId) {
-                      return PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'leave') {
-                            _leaveClub();
-                          }
-                        },
-                        itemBuilder: (BuildContext context) =>
-                            <PopupMenuEntry<String>>[
-                          PopupMenuItem<String>(
-                            value: 'leave',
-                            child: Text('clubs.detail.leave'.tr()),
-                          ),
-                        ],
+                      return IconButton(
+                        icon: const Icon(Icons.exit_to_app),
+                        tooltip: 'clubs.detail.leave'.tr(),
+                        onPressed: _leaveClub,
                       );
                     }
                     return const SizedBox.shrink(); // 그 외에는 아무것도 표시하지 않음
@@ -364,13 +405,17 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                 builder: (_) => ImageGalleryScreen(imageUrls: [club.imageUrl!]),
               ));
             },
-            child: Image.network(
-              club.imageUrl!,
+            // [수정] 이미지 잘림 방지 (BoxFit.contain) 및 배경색 추가
+            child: Container(
               height: 220,
               width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (c, e, s) =>
-                  const SizedBox(height: 220, child: Icon(Icons.error)),
+              color: Colors.black12,
+              child: Image.network(
+                club.imageUrl!,
+                fit: BoxFit.contain,
+                errorBuilder: (c, e, s) =>
+                    const SizedBox(height: 220, child: Icon(Icons.error)),
+              ),
             ),
           )
         else
@@ -385,6 +430,23 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                 .textTheme
                 .headlineSmall
                 ?.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        // [추가] 비공개 클럽 배지
+        if (club.isPrivate)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              children: [
+                const Icon(Icons.lock_outline, size: 16, color: Colors.orange),
+                const SizedBox(width: 6),
+                Text('clubs.card.private'.tr(),
+                    style: const TextStyle(
+                        color: Colors.orange,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
         const SizedBox(height: 16),
         Text(club.description,
             style:
@@ -393,10 +455,17 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildInfoColumn(
-                icon: Icons.group_outlined,
-                label: 'clubs.detail.info.members'.tr(),
-                value: club.membersCount.toString()),
+            // [수정] 회원 수 클릭 시 '회원' 탭(인덱스 2)으로 이동
+            GestureDetector(
+              onTap: () {
+                _tabController.animateTo(2); // 0: 정보, 1: 게시판, 2: 회원
+              },
+              behavior: HitTestBehavior.opaque,
+              child: _buildInfoColumn(
+                  icon: Icons.group_outlined,
+                  label: 'clubs.detail.info.members'.tr(),
+                  value: club.membersCount.toString()),
+            ),
             _buildInfoColumn(
                 icon: Icons.location_on_outlined,
                 label: 'clubs.detail.info.location'.tr(),

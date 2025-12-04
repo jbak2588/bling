@@ -267,8 +267,10 @@ class _TogetherDetailScreenState extends State<TogetherDetailScreen> {
               icon: Icons.share,
               onPressed: () => SharePlus.instance.share(
                 ShareParams(
-                    text:
-                        '${widget.post.title}\n$kHostingBaseUrl/together/${widget.post.id}'),
+                    text: 'share.together'.tr(namedArgs: {
+                  'title': widget.post.title,
+                  'url': '$kHostingBaseUrl/together/${widget.post.id}'
+                })),
               ),
             ),
           ),

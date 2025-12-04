@@ -148,7 +148,7 @@ class ClubRepository {
       mainCategory: proposal.mainCategory,
       interestTags: proposal.interestTags,
       membersCount: proposal.currentMemberCount + 1,
-      isPrivate: false,
+      isPrivate: proposal.isPrivate, // [수정] 제안의 공개/비공개 설정을 그대로 승계
       trustLevelRequired: 'normal',
       createdAt: Timestamp.now(),
       kickedMembers: const [],
@@ -403,7 +403,7 @@ class ClubRepository {
   }
   // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
-  // V V V --- [수정] 가입 신청 시, 강퇴 이력을 확인하는 로직으로 변경 --- V V V
+  // V V V --- [수정] 가입 신청 시, 강퇴 이력 및 비공개 여부를 확인하는 로직으로 변경 --- V V V
   Future<String> addMember(String clubId, ClubMemberModel member) async {
     final clubRef = _clubs.doc(clubId);
     final clubSnapshot = await clubRef.get();
@@ -415,15 +415,19 @@ class ClubRepository {
     final clubData = ClubModel.fromFirestore(clubSnapshot);
     final kickedMembers = clubData.kickedMembers ?? [];
 
-    // 1. 강퇴 이력이 있는지 확인합니다.
-    if (kickedMembers.contains(member.userId)) {
-      // 2. 강퇴 이력이 있으면, '가입 대기' 목록에 추가하고 'pending' 상태를 반환합니다.
+    // [수정] 비공개 모임이거나, 강퇴 이력이 있는 경우 '가입 대기'로 처리
+    bool requireApproval =
+        clubData.isPrivate || kickedMembers.contains(member.userId);
+
+    // 1. 승인 필요 여부 확인 (비공개 모임 OR 강퇴자)
+    if (requireApproval) {
+      // 2. 가입 대기 목록에 추가하고 'pending' 상태를 반환합니다.
       await clubRef.update({
         'pendingMembers': FieldValue.arrayUnion([member.userId])
       });
       return 'pending'; // '가입 대기 중'임을 알리는 상태
     } else {
-      // 3. 강퇴 이력이 없으면, 즉시 멤버로 추가하고 'joined' 상태를 반환합니다.
+      // 3. 공개 모임이고 강퇴자가 아니면, 즉시 멤버로 추가하고 'joined' 상태를 반환합니다.
       final memberRef = clubRef.collection('members').doc(member.userId);
       final userRef = _users.doc(member.userId);
       final chatRoomRef = _chats.doc(clubId);
@@ -678,5 +682,15 @@ class ClubRepository {
     }
 
     await batch.commit();
+  }
+
+  // V V V --- [추가] 모임 제안 정보 수정 --- V V V
+  Future<void> updateClubProposal(ClubProposalModel proposal) async {
+    await _clubProposals.doc(proposal.id).update(proposal.toJson());
+  }
+
+  // V V V --- [추가] 모임 제안 삭제 --- V V V
+  Future<void> deleteClubProposal(String proposalId) async {
+    await _clubProposals.doc(proposalId).delete();
   }
 }

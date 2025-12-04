@@ -47,6 +47,23 @@ class ClubProposalCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // [추가] 비공개 제안 배지
+                        if (proposal.isPrivate)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 4.0),
+                            child: Row(
+                              children: [
+                                Icon(Icons.lock_outline,
+                                    size: 14, color: Colors.orange[800]),
+                                const SizedBox(width: 4),
+                                Text('clubs.card.private'.tr(),
+                                    style: TextStyle(
+                                        color: Colors.orange[800],
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
                         Text(
                           proposal.title,
                           style: const TextStyle(

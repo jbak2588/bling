@@ -34,8 +34,10 @@ lib
 ├── core
 │   ├── constants
 │   │   ├── app_categories.dart
+│   │   ├── app_links.dart
 │   │   └── app_tags.dart
 │   ├── models
+│   │   ├── bling_location.dart
 │   │   ├── chat_message_model.dart
 │   │   ├── chat_room_model.dart
 │   │   ├── comment_model.dart
@@ -44,6 +46,7 @@ lib
 │   │   ├── reply_model.dart
 │   │   └── user_model.dart
 │   ├── services
+│   │   ├── location_search_service.dart
 │   │   └── notification_service.dart
 │   ├── theme
 │   │   └── grab_theme.dart
@@ -260,6 +263,14 @@ lib
 │   │   │   ├── ai_case_repository.dart
 │   │   │   └── product_repository.dart
 │   │   ├── devlog_n_docs
+│   │   │   ├── 2025년 10월 19일 일요일 블링 AI 검수 시스템 V2.0 개발 계획.md
+│   │   │   ├── 2025년 10월 21일 화요일 AI 검수 V2.1 동적 증거 보강 시스템 개발 계획 리스트.md
+│   │   │   ├── 4. Pre-Loved Items _ 중고물품 거래 (V3.0) 11월16일버전.docx
+│   │   │   ├── 4. Pre-Loved Items _ 중고물품 거래 (V3.0) 11월16일버전.md
+│   │   │   ├── 4. Pre-Loved Items _ 중고물품 거래 기획서 11월 11일버전.docx
+│   │   │   ├── AI 검수 엔진 리팩토링 및 안정화 DevLog V3 11월 16일버전.docx
+│   │   │   ├── AI 검수 엔진 리팩토링 및 안정화 DevLog V3 11월 16일버전.md
+│   │   │   ├── Bling App  AI 검수 시스템 V2 초기 버전 개발 성공 DevLog.md
 │   │   │   └── Marketplace AI 기능 개발일지 (DevLog)-25년 11월 11일.docx
 │   │   ├── models
 │   │   │   └── product_model.dart
@@ -334,6 +345,7 @@ lib
 │   │   ├── screens
 │   │   │   └── image_gallery_screen.dart
 │   │   └── widgets
+│   │       ├── address_map_picker.dart
 │   │       ├── app_bar_icon.dart
 │   │       ├── author_profile_tile.dart
 │   │       ├── bling_icon.dart
@@ -342,6 +354,7 @@ lib
 │   │       ├── image_carousel_card.dart
 │   │       ├── inline_search_chip.dart
 │   │       ├── mini_map_view.dart
+│   │       ├── shared_map_browser.dart
 │   │       └── trust_level_badge.dart
 │   ├── together
 │   │   ├── data

@@ -110,11 +110,9 @@ class _PomCardState extends State<PomCard> {
     final String title =
         (widget.pom.title.isNotEmpty) ? widget.pom.title : 'POM';
     final String link = '$kHostingBaseUrl/pom/${widget.pom.id}';
-    final String message = 'Check out this POM on Bling!';
-
     SharePlus.instance.share(
       ShareParams(
-        text: '$title\n\n$message\n$link',
+        text: 'share.pom'.tr(namedArgs: {'title': title, 'url': link}),
         subject: title,
       ),
     );

@@ -4,6 +4,7 @@
 
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:bling_app/features/clubs/models/club_proposal_model.dart';
+import 'package:bling_app/features/clubs/screens/edit_club_screen.dart'; // [추가]
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -11,6 +12,7 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
+import 'package:bling_app/features/shared/widgets/app_bar_icon.dart'; // [추가]
 
 class ClubProposalDetailScreen extends StatefulWidget {
   final ClubProposalModel proposal;
@@ -44,6 +46,43 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
   double get _progress {
     final p = _proposal.currentMemberCount / _proposal.targetMemberCount;
     return p > 1.0 ? 1.0 : p;
+  }
+
+  // [추가] 제안 삭제 함수
+  Future<void> _deleteProposal() async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('common.delete'.tr()),
+        content: Text('clubs.proposal.deleteConfirm'.tr()),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('common.cancel'.tr())),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('common.delete'.tr(),
+                  style: const TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await _repo.deleteClubProposal(_proposal.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('clubs.proposal.deleteSuccess'.tr())));
+          Navigator.of(context).pop(); // 화면 닫기
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('clubs.proposal.deleteFail'
+                  .tr(namedArgs: {'error': e.toString()}))));
+        }
+      }
+    }
   }
 
   Future<void> _onJoinPressed() async {
@@ -123,6 +162,10 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final bool isOwner =
+        currentUser != null && currentUser.uid == _proposal.ownerId;
+
     final inner = SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -136,6 +179,23 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
                     width: double.infinity, height: 200, fit: BoxFit.cover),
               ),
             const SizedBox(height: 12),
+            // [추가] 비공개 제안 배지
+            if (_proposal.isPrivate)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lock_outline,
+                        size: 16, color: Colors.orange),
+                    const SizedBox(width: 6),
+                    Text('clubs.card.private'.tr(),
+                        style: const TextStyle(
+                            color: Colors.orange,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
             Text(_proposal.description, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 12),
             Row(
@@ -212,12 +272,44 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
       appBar: AppBar(
         title: Text(_proposal.title),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () => SharePlus.instance.share(
-              ShareParams(
-                  text:
-                      '${_proposal.title}\n$kHostingBaseUrl/clubs/proposal/${_proposal.id}'),
+          // V V V --- [수정] 제안자일 경우 수정/삭제 버튼 노출 --- V V V
+          if (isOwner)
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: AppBarIcon(
+                icon: Icons.edit_outlined,
+                onPressed: () async {
+                  final result = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => EditClubScreen(proposal: _proposal),
+                    ),
+                  );
+                  if (result == true && mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ),
+
+          if (isOwner)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'common.delete'.tr(),
+              onPressed: _deleteProposal,
+            ),
+
+          // 공유 버튼 (항상 표시)
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: AppBarIcon(
+              icon: Icons.share,
+              onPressed: () => SharePlus.instance.share(
+                ShareParams(
+                    text: 'share.club_proposal'.tr(namedArgs: {
+                  'title': _proposal.title,
+                  'url': '$kHostingBaseUrl/clubs/proposal/${_proposal.id}'
+                })),
+              ),
             ),
           ),
         ],

@@ -772,6 +772,7 @@
       "body": "Bagikan kabar lingkungan atau ajukan pertanyaan...",
       "tagSelection": "(Pilih 1-3 tag)",
       "eventLocation": "mis., Jl. Sudirman 123",
+      "eventAddress": "mis., Jl. Sudirman 123",
       "eventDate": "Pilih tanggal"
     },
     "validation": {
@@ -888,7 +889,9 @@
     "copiedTitle": "Disalin!",
     "copiedMessage": "{title} disalin ke clipboard.",
     "select": "Pilih"
+    ,"optionalSuffix": "(opsional — isi jika perlu)"
   },
+  
   "upload": {
     "pause": "Jeda",
     "resume": "Lanjutkan",
@@ -1264,6 +1267,19 @@
       "active": "Klub resmi",
       "proposals": "Usulan Grup"
     },
+    "categories": {
+      "sports": "Olahraga",
+      "hobbies": "Hobi",
+      "social": "Sosial",
+      "study": "Belajar",
+      "reading": "Membaca",
+      "culture": "Budaya",
+      "travel": "Perjalanan",
+      "volunteer": "Sukarelawan",
+      "pets": "Hewan Peliharaan",
+      "food": "Makanan",
+      "etc": "Lainnya"
+    },
     "screen": {
       "error": "Kesalahan: {error}",
       "empty": "Belum ada Grup."
@@ -1289,6 +1305,7 @@
       "loadingUser": "Memuat info pengguna..."
     },
     "card": {
+      "private": "Grup privat",
       "membersCount": "{count} anggota"
     },
     "postDetail": {
@@ -1339,6 +1356,7 @@
       "success": "Grup berhasil dibuat!",
       "fail": "Gagal membuat Grup: {error}",
       "title": "Buat Grup",
+      "categoryLabel": "Kategori",
       "nameLabel": "Nama Grup",
       "nameError": "Silakan masukkan nama Grup.",
       "descriptionLabel": "Deskripsi Grup",
@@ -1367,6 +1385,7 @@
     },
     "proposal": {
       "createTitle": "Ajukan Grup",
+      "editTitle": "Sunting Usulan",
       "imageError": "Silakan pilih gambar sampul.",
       "createSuccess": "Usulan Grup Anda berhasil dibuat.",
       "createFail": "Gagal membuat usulan: {error}",
@@ -2373,5 +2392,16 @@
         "together": "Ayo Bareng"
       }
     }
+  },
+  "share": {
+    "lost": "{description}\n{url}",
+    "post": "Lihat postingan ini di Bling!\n{title}\n{url}",
+    "postSubject": "Postingan Bling: {title}",
+    "club": "{title}\n{url}",
+    "club_proposal": "{title}\n{url}",
+    "product": "{title}\n{url}",
+    "pom": "{title}\n{url}",
+    "together": "{title}\n{url}",
+    "room": "{title}\n{url}"
   }
 }

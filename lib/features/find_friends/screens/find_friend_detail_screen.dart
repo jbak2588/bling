@@ -42,6 +42,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_functions/cloud_functions.dart'; // [v2.1] 스팸 방지 함수 호출
+import 'package:share_plus/share_plus.dart';
+import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart';
+import 'package:bling_app/core/constants/app_links.dart';
 // [v2.1] ChatService/ChatRoomModel은 더 이상 직접 필요하지 않습니다.
 // import 'package:bling_app/features/chat/data/chat_service.dart';
 // import 'package:bling_app/core/models/chat_room_model.dart';
@@ -154,15 +157,32 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
         ),
         title: Text(user.nickname),
         actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) async {
-              if (value == 'block') {
+          // 공유 아이콘
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () => SharePlus.instance.share(ShareParams(
+                text:
+                    '${user.nickname}님 프로필 보기: $kHostingBaseUrl/user/${user.uid}')),
+          ),
+          // 본인 프로필이면 편집 아이콘 노출
+          if (currentUser.uid == user.uid)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ProfileEditScreen())),
+            )
+          else ...[
+            // 비소유자에게는 차단/신고 아이콘을 직접 노출
+            IconButton(
+              icon: Icon(isBlockedByMe ? Icons.block_flipped : Icons.block),
+              tooltip: isBlockedByMe
+                  ? 'friendDetail.unblock'.tr()
+                  : 'friendDetail.block'.tr(),
+              onPressed: () async {
                 final firestore = FirebaseFirestore.instance;
                 final userRef =
                     firestore.collection('users').doc(currentUser.uid);
-
                 if (isBlockedByMe) {
-                  // Unblock
                   await userRef.update({
                     'blockedUsers': FieldValue.arrayRemove([user.uid])
                   });
@@ -174,7 +194,6 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                     );
                   }
                 } else {
-                  // Block
                   await userRef.update({
                     'blockedUsers': FieldValue.arrayUnion([user.uid])
                   });
@@ -186,7 +205,6 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                     );
                   }
                 }
-                // Update local state
                 setState(() {
                   isBlockedByMe = !isBlockedByMe;
                   if (isBlockedByMe) {
@@ -195,9 +213,12 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                     currentUser.blockedUsers?.remove(user.uid);
                   }
                 });
-              } else if (value == 'report') {
-                // [App Review] 신고 기능 Mock-up 구현 (TODO 해결)
-                // TODO : 실제 신고 로직은 추후 구현 필요 (예: 'reports' 컬렉션에 문서 추가)
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.flag),
+              tooltip: 'common.report'.tr(),
+              onPressed: () {
                 showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(
@@ -220,24 +241,9 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                     ],
                   ),
                 );
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              PopupMenuItem<String>(
-                value: 'block',
-                child: Text(isBlockedByMe
-                    ? 'friendDetail.unblock'
-                        .tr(namedArgs: {'nickname': user.nickname})
-                    : 'friendDetail.block'
-                        .tr(namedArgs: {'nickname': user.nickname})),
-              ),
-              PopupMenuItem<String>(
-                value: 'report',
-                child: Text('friendDetail.report'
-                    .tr(namedArgs: {'nickname': user.nickname})),
-              ),
-            ],
-          ),
+              },
+            ),
+          ]
         ],
       ),
       body: ListView(

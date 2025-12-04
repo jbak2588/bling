@@ -42,7 +42,9 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
 
   DateTime? _eventDate;
   BlingLocation? _eventLocation;
-  bool _eventExpanded = false;
+  // [UX] Info acara(행사 정보)는 기본으로 펼쳐 두고,
+  // 사용자가 필요하면 그대로 입력하거나 접을 수 있게 한다.
+  bool _eventExpanded = true;
 
   bool _isSaving = false;
   Timer? _debounce;
@@ -400,7 +402,10 @@ class _CreateLocalNewsScreenState extends State<CreateLocalNewsScreen> {
               ExpansionTile(
                 initiallyExpanded: _eventExpanded,
                 onExpansionChanged: (v) => setState(() => _eventExpanded = v),
-                title: Text('localNewsCreate.labels.eventInfo'.tr()),
+                // 행사 정보는 선택 입력(옵션)이라는 안내를 제목에 함께 표시
+                title: Text(
+                  '${'localNewsCreate.labels.eventInfo'.tr()} ${'common.optionalSuffix'.tr()}',
+                ),
                 children: [
                   ListTile(
                     title: Text(_eventDate == null

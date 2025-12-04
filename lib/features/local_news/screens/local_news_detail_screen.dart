@@ -381,10 +381,21 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                 },
               ),
             ),
-          PopupMenuButton<String>(
-            itemBuilder: (context) => _buildPopupMenuItems(context),
-            onSelected: (value) => _handleMenuSelection(context, value),
-          ),
+          // Replace three-dot menu with a single contextual icon:
+          // - owners/admins: delete (trash) button
+          // - others: report (flag) button
+          if (currentUserId != null && currentUserId == _currentPost.userId)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'common.delete'.tr(),
+              onPressed: () => _showDeleteConfirmation(context),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.flag_outlined),
+              tooltip: 'common.report'.tr(),
+              onPressed: () => _showReportDialog(context),
+            ),
           // 공유 버튼 추가
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
@@ -470,9 +481,10 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
       // 2. 생성된 URL과 함께 공유 메시지 전달 (✅ 수정: 인스턴스 API 및 ShareParams 사용)
       await SharePlus.instance.share(
         ShareParams(
-          text:
-              'Check out this post on Bling!\n${widget.post.title ?? ''}\n\n$postUrl', // ✅ URL 포함
-          subject: 'Bling Post: ${widget.post.title ?? ''}',
+          text: 'share.post'.tr(
+              namedArgs: {'title': widget.post.title ?? '', 'url': postUrl}),
+          subject: 'share.postSubject'
+              .tr(namedArgs: {'title': widget.post.title ?? ''}),
         ),
       );
     } catch (e) {
@@ -503,46 +515,7 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
     }
   }
 
-  List<PopupMenuEntry<String>> _buildPopupMenuItems(BuildContext context) {
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-    final isOwner =
-        currentUserId != null && currentUserId == _currentPost.userId;
-
-    if (isOwner) {
-      return <PopupMenuEntry<String>>[
-        PopupMenuItem(value: 'edit', child: Text('common.edit'.tr())),
-        PopupMenuItem(value: 'delete', child: Text('common.delete'.tr())),
-      ];
-    } else {
-      return <PopupMenuEntry<String>>[
-        PopupMenuItem(value: 'report', child: Text('common.report'.tr())),
-      ];
-    }
-  }
-
-  void _handleMenuSelection(BuildContext context, String value) {
-    switch (value) {
-      case 'edit':
-        Navigator.of(context)
-            .push<bool>(
-          MaterialPageRoute(
-            builder: (_) => EditLocalNewsScreen(post: _currentPost),
-          ),
-        )
-            .then((result) {
-          if (result == true) {
-            _refreshPostData();
-          }
-        });
-        break;
-      case 'delete':
-        _showDeleteConfirmation(context);
-        break;
-      case 'report':
-        _showReportDialog(context);
-        break;
-    }
-  }
+  // NOTE: popup menu helpers removed — replaced with contextual icons in AppBar.
 
   void _showDeleteConfirmation(BuildContext context) {
     showDialog(

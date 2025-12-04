@@ -764,14 +764,15 @@
       "body": "내용",
       "tags": "태그",
       "guidedTitle": "추가 정보 (선택)",
-      "eventLocation": "이벤트/발생 장소",
+      "eventLocation": "행사/사건 위치",
       "eventInfo": "행사 정보",
       "eventAddress": "행사 장소"
     },
     "hints": {
       "body": "동네 소식이나 질문을 자유롭게 공유해보세요...",
       "tagSelection": "(태그 1~3개 선택)",
-      "eventLocation": "예: Jl. Sudirman 123",
+      "eventLocation": "예: 서울시 강남구 테헤란로 123",
+      "eventAddress": "예: 서울시 강남구 테헤란로 123",
       "eventDate": "날짜 선택"
     },
     "validation": {
@@ -888,7 +889,9 @@
     "copiedTitle": "복사됨!",
     "copiedMessage": "{title}이(가) 클립보드에 복사되었습니다.",
     "select": "선택"
+    ,"optionalSuffix": "(필요 시 입력 또는 사용)"
   },
+  
   "upload": {
     "pause": "일시정지",
     "resume": "다시 시작",
@@ -1264,6 +1267,19 @@
       "active": "정식 모임",
       "proposals": "모임 제안"
     },
+    "categories": {
+      "sports": "스포츠",
+      "hobbies": "취미",
+      "social": "친목",
+      "study": "스터디",
+      "reading": "독서",
+      "culture": "문화",
+      "travel": "여행",
+      "volunteer": "봉사",
+      "pets": "반려동물",
+      "food": "음식",
+      "etc": "기타"
+    },
     "screen": {
       "error": "오류: {error}",
       "empty": "아직 동호회가 없습니다."
@@ -1288,8 +1304,13 @@
       "deleteTooltip": "게시글 삭제",
       "loadingUser": "사용자 정보 로딩중..."
     },
+    "post": {
+      "loadingUser": "사용자 정보 로딩중...",
+      "optionDelete": "삭제"
+    },
     "card": {
-      "membersCount": "{count}명"
+      "private": "비공개 모임",
+      "membersCount": "{count} 명"
     },
     "postDetail": {
       "commentFail": "댓글 등록에 실패했습니다: {error}",
@@ -1339,6 +1360,7 @@
       "success": "동호회가 성공적으로 만들어졌습니다!",
       "fail": "동호회 생성에 실패했습니다: {error}",
       "title": "새 동호회 만들기",
+      "categoryLabel": "카테고리",
       "nameLabel": "동호회 이름",
       "nameError": "동호회 이름을 입력해주세요.",
       "descriptionLabel": "동호회 소개",
@@ -1367,6 +1389,7 @@
     },
     "proposal": {
       "createTitle": "모임 제안하기",
+      "editTitle": "모임 제안 수정",
       "imageError": "대표 이미지를 선택해주세요.",
       "createSuccess": "모임 제안이 생성되었습니다.",
       "createFail": "모임 제안 생성에 실패했습니다: {error}",
@@ -2345,6 +2368,7 @@
       "raw_json": "Raw JSON"
     }
   },
+  
   "auth": {
     "verification": {
       "title": "이메일 인증",
@@ -2373,5 +2397,16 @@
         "together": "함께 해요"
       }
     }
+  },
+  "share": {
+    "lost": "{description}\n{url}",
+    "post": "Bling의 게시물을 확인해보세요!\n{title}\n{url}",
+    "postSubject": "Bling 게시물: {title}",
+    "club": "{title}\n{url}",
+    "club_proposal": "{title}\n{url}",
+    "product": "{title}\n{url}",
+    "pom": "{title}\n{url}",
+    "together": "{title}\n{url}",
+    "room": "{title}\n{url}"
   }
 }

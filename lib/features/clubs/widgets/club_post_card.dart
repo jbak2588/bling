@@ -15,6 +15,8 @@
 // - 작성자 및 운영자를 위한 빠른 관리 액션 지원.
 // =====================================================
 
+// lib/features/clubs/widgets/club_post_card.dart
+
 import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/features/clubs/models/club_post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
@@ -30,6 +32,7 @@ class ClubPostCard extends StatelessWidget {
   final ClubModel club;
   const ClubPostCard({super.key, required this.post, required this.club});
 
+  // ... (_formatTimestamp, _deletePost 함수는 기존과 동일)
   String _formatTimestamp(BuildContext context, Timestamp timestamp) {
     final now = DateTime.now();
     final dt = timestamp.toDate();
@@ -47,6 +50,7 @@ class ClubPostCard extends StatelessWidget {
   }
 
   Future<void> _deletePost(BuildContext context) async {
+    // ... (기존 코드와 동일)
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -59,7 +63,7 @@ class ClubPostCard extends StatelessWidget {
           TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: Text('clubs.post.deleteConfirm'.tr(),
-                  style: TextStyle(color: Colors.red))),
+                  style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -83,12 +87,10 @@ class ClubPostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     final clubOwnerId = club.ownerId;
-
-    // StreamBuilder를 사용하기 전에 강퇴 여부를 먼저 확인합니다.
     final isKicked = club.kickedMembers?.contains(post.userId) ?? false;
 
     if (isKicked) {
-      // V V V --- [수정] '탈퇴한 멤버' 카드에 InkWell을 추가하여 탭 가능하게 만듭니다 --- V V V
+      // ... (탈퇴한 멤버 처리 로직 기존과 동일)
       return Card(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         elevation: 1,
@@ -97,7 +99,6 @@ class ClubPostCard extends StatelessWidget {
         color: Colors.grey.shade50,
         child: InkWell(
           onTap: () {
-            // 탭하면 상세 화면으로 이동합니다.
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => ClubPostDetailScreen(post: post, club: club),
@@ -110,8 +111,8 @@ class ClubPostCard extends StatelessWidget {
               child: Icon(Icons.person_off_outlined, color: Colors.grey),
             ),
             title: Text('clubs.post.withdrawnMember'.tr(),
-                style:
-                    TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+                style: const TextStyle(
+                    color: Colors.grey, fontStyle: FontStyle.italic)),
             subtitle:
                 Text(post.body, maxLines: 2, overflow: TextOverflow.ellipsis),
             trailing: (currentUserId == clubOwnerId)
@@ -126,7 +127,7 @@ class ClubPostCard extends StatelessWidget {
       );
     }
 
-    // 강퇴되지 않은 멤버일 경우에만, 기존처럼 작성자 정보를 불러옵니다.
+    // [작성자 정보 스트림]
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('users')
@@ -161,6 +162,7 @@ class ClubPostCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // ... (작성자 프로필 Row 기존과 동일)
                   Row(
                     children: [
                       CircleAvatar(
@@ -218,22 +220,70 @@ class ClubPostCard extends StatelessWidget {
                       ),
                     ),
                   const Divider(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      TextButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.favorite_border, size: 18),
-                        label: Text(post.likesCount.toString()),
-                      ),
-                      const SizedBox(width: 16),
-                      TextButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                        label: Text(post.commentsCount.toString()),
-                      ),
-                    ],
-                  )
+
+                  // [수정] 버튼 Row 기능 연결
+                  // 내(CurrentUser) 정보를 가져와서 좋아요 여부 확인
+                  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                      stream: (currentUserId != null)
+                          ? FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(currentUserId)
+                              .snapshots()
+                          : null,
+                      builder: (context, userSnapshot) {
+                        bool isLikedByMe = false;
+                        if (userSnapshot.hasData && userSnapshot.data!.exists) {
+                          final myData = userSnapshot.data!.data();
+                          final List<dynamic> bookmarked =
+                              myData?['bookmarkedClubPostIds'] ?? [];
+                          isLikedByMe = bookmarked.contains(post.id);
+                        }
+
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            // 좋아요 버튼
+                            TextButton.icon(
+                              onPressed: () {
+                                if (currentUserId == null) return;
+                                ClubRepository().toggleClubPostLike(
+                                    club.id, post.id, isLikedByMe);
+                              },
+                              icon: Icon(
+                                isLikedByMe
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                size: 18,
+                                color: isLikedByMe ? Colors.red : null,
+                              ),
+                              label: Text(post.likesCount.toString()),
+                              style: TextButton.styleFrom(
+                                foregroundColor:
+                                    isLikedByMe ? Colors.red : Colors.grey[700],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // 댓글 버튼
+                            TextButton.icon(
+                              onPressed: () {
+                                // 댓글 상세 화면으로 이동
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => ClubPostDetailScreen(
+                                        post: post, club: club),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.chat_bubble_outline,
+                                  size: 18),
+                              label: Text(post.commentsCount.toString()),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.grey[700],
+                              ),
+                            ),
+                          ],
+                        );
+                      })
                 ],
               ),
             ),

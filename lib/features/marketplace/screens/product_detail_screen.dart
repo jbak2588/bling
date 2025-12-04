@@ -590,8 +590,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     icon: Icons.share,
                     onPressed: () => SharePlus.instance.share(
                       ShareParams(
-                        text:
-                            'Check out this product: ${product.title} - $kHostingBaseUrl/product/${product.id}',
+                        text: 'share.product'.tr(namedArgs: {
+                          'title': product.title,
+                          'url': '$kHostingBaseUrl/product/${product.id}'
+                        }),
                       ),
                     ),
                   ),

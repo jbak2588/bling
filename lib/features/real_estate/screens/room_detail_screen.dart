@@ -369,8 +369,10 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                   icon: Icons.share,
                   onPressed: () => SharePlus.instance.share(
                     ShareParams(
-                        text:
-                            '${room.title}\n$kHostingBaseUrl/rooms/${room.id}'),
+                        text: 'share.room'.tr(namedArgs: {
+                      'title': room.title,
+                      'url': '$kHostingBaseUrl/rooms/${room.id}'
+                    })),
                   ),
                 ),
               ),
