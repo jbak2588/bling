@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart'; // [추가] 제스처 인식을 위해 필요
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -182,6 +183,12 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
           myLocationButtonEnabled: true,
           mapToolbarEnabled: false,
           zoomControlsEnabled: false,
+          // [추가] 스크롤 뷰 내부에서도 지도가 제스처를 우선적으로 처리하도록 설정
+          gestureRecognizers: {
+            Factory<OneSequenceGestureRecognizer>(
+              () => EagerGestureRecognizer(),
+            ),
+          },
         );
       },
     );
