@@ -211,6 +211,8 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                         ),
                         locationExtractor: (item) => item.geoPoint,
                         idExtractor: (item) => item.id,
+                        titleExtractor: (item) =>
+                            (item as dynamic).title ?? (item as dynamic).body,
                         cardBuilder: (context, item) =>
                             LostItemCard(item: item),
                       );

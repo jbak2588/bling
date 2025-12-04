@@ -193,6 +193,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                         ),
                         locationExtractor: (club) => club.geoPoint,
                         idExtractor: (club) => club.id,
+                        titleExtractor: (club) =>
+                            (club as dynamic).title ?? (club as dynamic).name,
                         cardBuilder: (context, club) =>
                             ClubCard(key: ValueKey(club.id), club: club),
                       )
@@ -296,6 +298,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   ),
                   locationExtractor: (club) => club.geoPoint,
                   idExtractor: (club) => club.id,
+                  titleExtractor: (club) =>
+                      (club as dynamic).title ?? (club as dynamic).name,
                   cardBuilder: (context, club) =>
                       ClubCard(key: ValueKey(club.id), club: club),
                 )

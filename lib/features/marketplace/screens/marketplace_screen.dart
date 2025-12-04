@@ -359,6 +359,11 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       ),
                       locationExtractor: (product) => product.geoPoint,
                       idExtractor: (product) => product.id,
+                      titleExtractor: (product) =>
+                          (product as dynamic).title ??
+                          (product as dynamic).body ??
+                          (product as dynamic).name ??
+                          (product as dynamic).productName,
                       cardBuilder: (context, product) => Container(
                         margin: const EdgeInsets.symmetric(
                             horizontal: 16.0, vertical: 12.0),

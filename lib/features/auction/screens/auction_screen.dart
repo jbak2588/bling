@@ -221,6 +221,8 @@ class _AuctionScreenState extends State<AuctionScreen> {
                       ),
                       locationExtractor: (a) => a.geoPoint,
                       idExtractor: (a) => a.id,
+                      titleExtractor: (a) =>
+                          (a as dynamic).title ?? (a as dynamic).headline,
                       cardBuilder: (ctx, a) =>
                           AuctionCard(auction: a, userModel: widget.userModel),
                     );

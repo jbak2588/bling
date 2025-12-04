@@ -50,6 +50,8 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
   final Completer<GoogleMapController> _controller = Completer();
   Set<Marker> _markers = {};
   int _lastMarkerCount = 0;
+  // 마커의 화면 좌표(픽셀) 캐시: MarkerId -> Offset
+  final Map<MarkerId, Offset> _markerScreenPositions = {};
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +112,11 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
             .whereType<Marker>()
             .toSet();
 
+        // 초기 렌더 때는 모든 마커의 툴팁을 자동으로 표시합니다.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showAllInfoWindows();
+        });
+
         // 디버그 모드에서만 마커가 갱신될 때 카메라를 마커 범위로 이동
         if (kDebugMode && _markers.length != _lastMarkerCount) {
           _lastMarkerCount = _markers.length;
@@ -162,34 +169,145 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
           }
         }
 
-        return GoogleMap(
-          initialCameraPosition: widget.initialCameraPosition ??
-              const CameraPosition(
-                target: LatLng(-6.2088, 106.8456), // 자카르타 기본값
-                zoom: 13,
-              ),
-          onMapCreated: (GoogleMapController controller) {
-            if (!_controller.isCompleted) {
-              _controller.complete(controller);
-            }
-          },
-          markers: _markers,
-          myLocationEnabled: true,
-          myLocationButtonEnabled: true,
-          mapToolbarEnabled: false,
-          zoomControlsEnabled: false,
-          // [추가] 스크롤 뷰 내부에서도 지도가 제스처를 우선적으로 처리하도록 설정
-          gestureRecognizers: {
-            Factory<OneSequenceGestureRecognizer>(
-              () => EagerGestureRecognizer(),
+        return Stack(
+          children: [
+            GoogleMap(
+              initialCameraPosition: widget.initialCameraPosition ??
+                  const CameraPosition(
+                    target: LatLng(-6.2088, 106.8456), // 자카르타 기본값
+                    zoom: 13,
+                  ),
+              onMapCreated: (GoogleMapController controller) {
+                if (!_controller.isCompleted) {
+                  _controller.complete(controller);
+                }
+              },
+              // 카메라 이동이 멈추면 마커의 화면 좌표를 갱신합니다 (오버레이 툴팁 위치).
+              onCameraIdle: () async {
+                // best-effort: 업데이트 실패해도 무시
+                try {
+                  await _updateMarkerScreenPositions();
+                } catch (_) {}
+              },
+              // (참고) 이전에 onCameraIdle로 보이는 마커만 필터하던 로직이 있었음.
+              // 현재는 모든 마커의 InfoWindow를 자동으로 보이게 유지합니다.
+              markers: _markers,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+              mapToolbarEnabled: false,
+              zoomControlsEnabled: false,
+              // [추가] 스크롤 뷰 내부에서도 지도가 제스처를 우선적으로 처리하도록 설정
+              gestureRecognizers: {
+                Factory<OneSequenceGestureRecognizer>(
+                  () => EagerGestureRecognizer(),
+                ),
+              },
             ),
-          },
+
+            // [수정] 오버레이: 모든 마커의 제목(툴팁)을 항상 표시
+            // 터치 차단을 피하기 위해 IgnorePointer로 래핑합니다.
+            IgnorePointer(
+              child: Stack(
+                children: _markers
+                    .where((m) =>
+                        // [수정] infoWindow.title이 있기만 하면 무조건 표시 (클릭 여부 무관)
+                        m.infoWindow.title != null &&
+                        m.infoWindow.title!.isNotEmpty)
+                    .map((m) {
+                  final pos = _markerScreenPositions[m.markerId];
+                  if (pos == null) return const SizedBox.shrink();
+                  // 오버레이 위젯을 마커 핀 위쪽에 표시 (조정값은 필요 시 튜닝)
+                  return Positioned(
+                    left: pos.dx - 60,
+                    top: pos.dy - 70,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor.withAlpha(243),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4,
+                                offset: Offset(0, 2)),
+                          ],
+                        ),
+                        // [추가] 텍스트 오버플로우 처리: 길면 1줄로 줄이고 말줄임표 표시
+                        child: Text(
+                          m.infoWindow.title ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 12, // 폰트 살짝 줄여서 공간 확보
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
         );
       },
     );
   }
 
-  // [추가] 바텀시트 표시 로직 분리
+  // 마커의 LatLng를 화면 좌표로 변환하여 캐시에 저장합니다.
+  Future<void> _updateMarkerScreenPositions() async {
+    try {
+      if (!_controller.isCompleted) return;
+      final ctrl = await _controller.future;
+      final Map<MarkerId, Offset> next = {};
+      for (final m in _markers) {
+        try {
+          final sc = await ctrl.getScreenCoordinate(m.position);
+          next[m.markerId] = Offset(sc.x.toDouble(), sc.y.toDouble());
+        } catch (_) {
+          // ignore individual failures
+        }
+      }
+      // 상태 업데이트
+      if (mounted) {
+        setState(() {
+          _markerScreenPositions
+            ..clear()
+            ..addAll(next);
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[SharedMapBrowser] updateScreenPos error: $e');
+      }
+    }
+  }
+
+  // Try to show InfoWindow for all markers (best-effort). Safe to call
+  // repeatedly; errors are caught and ignored. Useful for initial UX where
+  // tooltips should be visible without extra taps.
+  Future<void> _showAllInfoWindows() async {
+    try {
+      if (!_controller.isCompleted) return;
+      final ctrl = await _controller.future;
+      for (final m in _markers) {
+        try {
+          await ctrl.showMarkerInfoWindow(m.markerId);
+        } catch (_) {
+          // ignore individual failures
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[SharedMapBrowser] showInfo error: $e');
+      }
+    }
+  }
+
+  // 바텀시트 표시 로직 분리
   void _showBottomSheet(T item) {
     // Create a controller to allow programmatic resizing of the draggable sheet.
     final draggableController = DraggableScrollableController();

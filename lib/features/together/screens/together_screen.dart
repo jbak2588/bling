@@ -71,6 +71,8 @@ class _TogetherScreenState extends State<TogetherScreen> {
                     ),
                     locationExtractor: (post) => post.geoPoint,
                     idExtractor: (post) => post.id,
+                    titleExtractor: (post) =>
+                        (post as dynamic).title ?? (post as dynamic).body,
                     cardBuilder: (context, post) => TogetherCard(
                       post: post,
                       onTap: () => Navigator.push(

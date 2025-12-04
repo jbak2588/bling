@@ -564,6 +564,7 @@ class _JobsScreenState extends State<JobsScreen>
         initialCameraPosition: initialCamera,
         locationExtractor: (t) => t.geoPoint,
         idExtractor: (t) => t.id,
+        titleExtractor: (t) => (t as dynamic).title ?? (t as dynamic).name,
         cardBuilder: (context, talent) => TalentCard(talent: talent),
       );
     }
@@ -580,6 +581,10 @@ class _JobsScreenState extends State<JobsScreen>
       initialCameraPosition: initialCamera,
       locationExtractor: (job) => job.geoPoint,
       idExtractor: (job) => job.id,
+      titleExtractor: (job) =>
+          (job as dynamic).title ??
+          (job as dynamic).companyName ??
+          (job as dynamic).name,
       cardBuilder: (context, job) => JobCard(job: job),
     );
   }

@@ -189,6 +189,8 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
                     ),
                     locationExtractor: (room) => room.geoPoint,
                     idExtractor: (room) => room.id,
+                    titleExtractor: (room) =>
+                        (room as dynamic).title ?? (room as dynamic).name,
                     cardBuilder: (context, room) => RoomCard(room: room),
                     initialCameraPosition: widget.userModel?.geoPoint != null
                         ? CameraPosition(
