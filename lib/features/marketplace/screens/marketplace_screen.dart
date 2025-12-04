@@ -220,18 +220,10 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
       Query<Map<String, dynamic>> query =
           FirebaseFirestore.instance.collection('products');
 
-      // 1. 위치 필터 (Provider 기준)
-      if (locationProvider.mode == LocationSearchMode.administrative) {
-        final filterEntry = locationProvider.activeQueryFilter;
-        if (filterEntry != null) {
-          query = query.where(filterEntry.key, isEqualTo: filterEntry.value);
-        }
-      } else if (locationProvider.mode == LocationSearchMode.nearby) {
-        // 거리 검색일 때는 DB 부하를 낮추기 위해 Kab(혹은 prov) 레벨에서 1차 필터
-        final userKab = locationProvider.user?.locationParts?['kab'];
-        if (userKab != null && userKab.isNotEmpty) {
-          query = query.where('locationParts.kab', isEqualTo: userKab);
-        }
+      // 거리 검색일 때는 DB 부하를 낮추기 위해 Kab(혹은 prov) 레벨에서 1차 필터
+      final userKab = locationProvider.user?.locationParts?['kab'];
+      if (userKab != null && userKab.isNotEmpty) {
+        query = query.where('locationParts.kab', isEqualTo: userKab);
       }
 
       // 2. 상태 필터
@@ -367,9 +359,24 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       ),
                       locationExtractor: (product) => product.geoPoint,
                       idExtractor: (product) => product.id,
-                      cardBuilder: (context, product) => ProductCard(
-                        key: ValueKey(product.id),
-                        product: product,
+                      cardBuilder: (context, product) => Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color.fromRGBO(0, 0, 0, 0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ProductCard(
+                          key: ValueKey(product.id),
+                          product: product,
+                        ),
                       ),
                     )
                   : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -514,9 +521,16 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                           itemBuilder: (context, index) {
                             final product =
                                 ProductModel.fromFirestore(allDocs[index]);
-                            return ProductCard(
-                              key: ValueKey(product.id),
-                              product: product,
+                            return Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(16.0)),
+                              ),
+                              child: ProductCard(
+                                key: ValueKey(product.id),
+                                product: product,
+                              ),
                             );
                           },
                         );

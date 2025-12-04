@@ -18,6 +18,10 @@ class SharedMapBrowser<T> extends StatefulWidget {
   /// 각 아이템(T)의 고유 ID를 추출하는 함수 (마커 ID용)
   final String Function(T) idExtractor;
 
+  /// [추가] (선택) 핀 위에 표시할 제목(툴팁) 추출 함수.
+  /// 이 값이 제공되면 핀 클릭 시 툴팁이 먼저 뜨고, 툴팁 클릭 시 카드가 뜹니다.
+  final String? Function(T)? titleExtractor;
+
   /// 마커 클릭 시 보여줄 상세 정보 카드 빌더
   final Widget Function(BuildContext, T) cardBuilder;
 
@@ -32,6 +36,7 @@ class SharedMapBrowser<T> extends StatefulWidget {
     required this.dataStream,
     required this.locationExtractor,
     required this.idExtractor,
+    this.titleExtractor, // [추가]
     required this.cardBuilder,
     this.initialCameraPosition,
     this.customMarkerIcon,
@@ -81,28 +86,20 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
               if (geoPoint == null) return null;
 
               final markerId = widget.idExtractor(item);
+              final title = widget.titleExtractor?.call(item);
 
               final marker = Marker(
                 markerId: MarkerId(markerId),
                 position: LatLng(geoPoint.latitude, geoPoint.longitude),
                 icon: widget.customMarkerIcon ?? BitmapDescriptor.defaultMarker,
-                onTap: () {
-                  // 마커 클릭 시 BottomSheet 표시
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => DraggableScrollableSheet(
-                      initialChildSize: 0.4,
-                      minChildSize: 0.2,
-                      maxChildSize: 0.8,
-                      builder: (_, controller) => SingleChildScrollView(
-                        controller: controller,
-                        child: widget.cardBuilder(context, item),
-                      ),
-                    ),
-                  );
-                },
+                // titleExtractor가 제공되면 InfoWindow를 사용하고,
+                // InfoWindow의 onTap에서 바텀시트를 연다. title이 없으면
+                // Marker의 onTap에서 바로 바텀시트를 연다.
+                infoWindow: title != null
+                    ? InfoWindow(
+                        title: title, onTap: () => _showBottomSheet(item))
+                    : InfoWindow.noText,
+                onTap: title != null ? null : () => _showBottomSheet(item),
               );
 
               if (kDebugMode) {
@@ -191,6 +188,34 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
           },
         );
       },
+    );
+  }
+
+  // [추가] 바텀시트 표시 로직 분리
+  void _showBottomSheet(T item) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.4,
+        minChildSize: 0.2,
+        maxChildSize: 0.8,
+        builder: (_, controller) => SingleChildScrollView(
+          controller: controller,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12.0),
+              child: Container(
+                color: Theme.of(context).cardColor,
+                child: widget.cardBuilder(context, item),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
