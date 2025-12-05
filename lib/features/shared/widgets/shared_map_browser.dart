@@ -1,34 +1,27 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart'; // [추가] 제스처 인식을 위해 필요
+import 'package:flutter/gestures.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-/// [공용 위젯] 데이터 스트림을 받아 지도 위에 마커를 표시하고,
-/// 클릭 시 상세 정보를 BottomSheet로 보여주는 지도 브라우저입니다.
+import 'package:bling_app/features/shared/widgets/shared_map_post_list_bottom_sheet.dart';
+
+/// 지도에 마커를 표시하고, 동일 좌표의 마커들을 그룹으로 묶어
+/// 그룹 클릭 시 리스트 바텀시트를 보여주는 재사용 가능한 위젯입니다.
 class SharedMapBrowser<T> extends StatefulWidget {
-  /// 표시할 데이터 리스트 스트림 (예: 상점 목록, 매물 목록)
   final Stream<List<T>> dataStream;
-
-  /// 각 아이템(T)에서 좌표(GeoPoint)를 추출하는 함수
   final GeoPoint? Function(T) locationExtractor;
-
-  /// 각 아이템(T)의 고유 ID를 추출하는 함수 (마커 ID용)
   final String Function(T) idExtractor;
-
-  /// [추가] (선택) 핀 위에 표시할 제목(툴팁) 추출 함수.
-  /// 이 값이 제공되면 핀 클릭 시 툴팁이 먼저 뜨고, 툴팁 클릭 시 카드가 뜹니다.
   final String? Function(T)? titleExtractor;
-
-  /// 마커 클릭 시 보여줄 상세 정보 카드 빌더
+  final String? Function(T)? subtitleExtractor;
+  final String? Function(T)? locationLabelExtractor;
+  final int Function(T)? replyCountExtractor;
+  final DateTime? Function(T)? createdAtExtractor;
+  final void Function(String id)? onPostSelected;
   final Widget Function(BuildContext, T) cardBuilder;
-
-  /// (선택) 초기 카메라 위치 (없으면 기본값 사용)
   final CameraPosition? initialCameraPosition;
-
-  /// (선택) 커스텀 마커 아이콘 (없으면 기본 핀 사용)
   final BitmapDescriptor? customMarkerIcon;
 
   const SharedMapBrowser({
@@ -36,7 +29,12 @@ class SharedMapBrowser<T> extends StatefulWidget {
     required this.dataStream,
     required this.locationExtractor,
     required this.idExtractor,
-    this.titleExtractor, // [추가]
+    this.titleExtractor,
+    this.subtitleExtractor,
+    this.locationLabelExtractor,
+    this.replyCountExtractor,
+    this.createdAtExtractor,
+    this.onPostSelected,
     required this.cardBuilder,
     this.initialCameraPosition,
     this.customMarkerIcon,
@@ -50,13 +48,12 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
   final Completer<GoogleMapController> _controller = Completer();
   Set<Marker> _markers = {};
   int _lastMarkerCount = 0;
-  // 마커의 화면 좌표(픽셀) 캐시: MarkerId -> Offset
   final Map<MarkerId, Offset> _markerScreenPositions = {};
-  // 마지막으로 렌더링한 아이템 ID 집합 (마커 재생성 최소화용)
   Set<String> _lastItemIds = <String>{};
-
-  // 디버그 로그가 이미 찍힌 마커 ID 집합 (중복 로그 억제용)
   final Set<String> _loggedMarkerIds = <String>{};
+
+  final Map<String, T> _itemsById = <String, T>{};
+  final Map<String, T> _markerItemMap = {};
 
   @override
   Widget build(BuildContext context) {
@@ -71,30 +68,20 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
         }
 
         final items = snapshot.data ?? [];
-        // Debug: log how many items arrived and first few geoPoints to help
-        // diagnose maps-without-pins issues (non-invasive, no behavior change).
-        if (kDebugMode) {
-          debugPrint('[SharedMapBrowser] received ${items.length} items');
-          for (var i = 0; i < items.length && i < 5; i++) {
-            final gp = widget.locationExtractor(items[i]);
-            debugPrint('[SharedMapBrowser] item[$i] geoPoint=$gp');
-          }
+
+        _itemsById.clear();
+        for (final item in items) {
+          _itemsById[widget.idExtractor(item)] = item;
         }
 
-        if (items.isEmpty) {
-          // 데이터가 없을 때도 지도는 보여주되 마커만 없음
-          // (혹은 빈 화면 메시지를 보여줄 수도 있음)
-        }
-
-        // 마커 생성 (아이템 ID 세트가 바뀐 경우에만 재생성)
         final newIds = items.map(widget.idExtractor).toSet();
         final shouldRebuildMarkers = !setEquals(newIds, _lastItemIds);
 
         if (shouldRebuildMarkers) {
           _lastItemIds = newIds;
-          // 더 이상 존재하지 않는 아이템에 대한 로그 캐시 정리
           _loggedMarkerIds.removeWhere((id) => !newIds.contains(id));
 
+          _markerItemMap.clear();
           _markers = items
               .map((item) {
                 final geoPoint = widget.locationExtractor(item);
@@ -108,46 +95,32 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
                   position: LatLng(geoPoint.latitude, geoPoint.longitude),
                   icon:
                       widget.customMarkerIcon ?? BitmapDescriptor.defaultMarker,
-                  // InfoWindow은 제목만 표시하도록 하고,
-                  // 마커 탭(onTap)에서 바로 바텀시트를 엽니다.
                   infoWindow: title != null
                       ? InfoWindow(title: title)
                       : InfoWindow.noText,
                   onTap: () => _showBottomSheet(item),
                 );
 
-                // 디버그 모드에서는 동일 마커 ID에 대해 한 번만 로그를 찍습니다.
-                if (kDebugMode && _loggedMarkerIds.add(markerId)) {
-                  debugPrint('[SharedMapBrowser] created marker id=$markerId'
-                      ' pos=(${geoPoint.latitude}, ${geoPoint.longitude})');
-                }
+                _markerItemMap[markerId] = item;
 
                 return marker;
               })
               .whereType<Marker>()
               .toSet();
 
-          // 초기 렌더 또는 데이터가 바뀐 경우에만 툴팁 위치를 강제로 갱신
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             try {
               await _updateMarkerScreenPositions();
-            } catch (_) {
-              // ignore – 카메라가 아직 준비 안 된 경우 등
-            }
+            } catch (_) {}
           });
         }
 
-        // 초기 렌더 시점에 모든 마커의 화면 좌표를 계산해서,
-        // 커스텀 오버레이 툴팁이 바로 보이도록 합니다.
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           try {
             await _updateMarkerScreenPositions();
-          } catch (_) {
-            // 화면 좌표 계산 실패는 UX에만 영향, 크래시는 방지
-          }
+          } catch (_) {}
         });
 
-        // 디버그 모드에서만 마커가 갱신될 때 카메라를 마커 범위로 이동
         if (kDebugMode && _markers.length != _lastMarkerCount) {
           _lastMarkerCount = _markers.length;
           if (_markers.isNotEmpty) {
@@ -161,7 +134,6 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
                       CameraUpdate.newLatLngZoom(only, 15),
                     );
                   } else {
-                    // 여러 마커의 bounds 계산
                     double? minLat, maxLat, minLng, maxLng;
                     for (final m in _markers) {
                       final lat = m.position.latitude;
@@ -192,9 +164,7 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
                     }
                   }
                 }
-              } catch (e, st) {
-                debugPrint('[SharedMapBrowser] fit-bounds failed: $e\n$st');
-              }
+              } catch (_) {}
             });
           }
         }
@@ -204,7 +174,7 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
             GoogleMap(
               initialCameraPosition: widget.initialCameraPosition ??
                   const CameraPosition(
-                    target: LatLng(-6.2088, 106.8456), // 자카르타 기본값
+                    target: LatLng(-6.2088, 106.8456),
                     zoom: 13,
                   ),
               onMapCreated: (GoogleMapController controller) {
@@ -212,97 +182,109 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
                   _controller.complete(controller);
                 }
               },
-              // 카메라 이동이 멈추면 마커의 화면 좌표를 갱신합니다 (오버레이 툴팁 위치).
               onCameraIdle: () async {
-                // best-effort: 업데이트 실패해도 무시
                 try {
                   await _updateMarkerScreenPositions();
                 } catch (_) {}
               },
-              // (참고) 이전에 onCameraIdle로 보이는 마커만 필터하던 로직이 있었음.
-              // 현재는 모든 마커의 InfoWindow를 자동으로 보이게 유지합니다.
               markers: _markers,
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
               mapToolbarEnabled: false,
               zoomControlsEnabled: false,
-              // [추가] 스크롤 뷰 내부에서도 지도가 제스처를 우선적으로 처리하도록 설정
               gestureRecognizers: {
                 Factory<OneSequenceGestureRecognizer>(
                   () => EagerGestureRecognizer(),
                 ),
               },
             ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final Map<String, List<T>> groups = {};
 
-            // [수정] 오버레이: 동일 좌표 마커를 그룹으로 묶어
-            // "첫 번째 제목 +9" 형태로 표시하고, 위치는 핀 위쪽 중앙으로 보정.
-            IgnorePointer(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // 동일 좌표(위도/경도)가 여러 개 있을 경우 하나의 그룹으로 묶습니다.
-                  final Map<String, List<Marker>> groups = {};
+                for (final item in items) {
+                  final title = widget.titleExtractor?.call(item);
+                  final gp = widget.locationExtractor(item);
+                  if (gp == null) continue;
+                  if (title == null || title.isEmpty) continue;
+                  final key =
+                      '${gp.latitude.toStringAsFixed(6)},${gp.longitude.toStringAsFixed(6)}';
+                  groups.putIfAbsent(key, () => <T>[]).add(item);
+                }
 
-                  for (final m in _markers.where((m) =>
-                      m.infoWindow.title != null &&
-                      m.infoWindow.title!.isNotEmpty)) {
-                    final key =
-                        '${m.position.latitude.toStringAsFixed(6)},${m.position.longitude.toStringAsFixed(6)}';
-                    groups.putIfAbsent(key, () => <Marker>[]).add(m);
-                  }
+                return FutureBuilder<void>(
+                  future: _updateMarkerScreenPositions(),
+                  builder: (_, __) {
+                    return Stack(
+                      children: groups.values.map((groupItems) {
+                        final primaryItem = groupItems.first;
+                        final primaryId = widget.idExtractor(primaryItem);
+                        final pos = _markerScreenPositions[MarkerId(primaryId)];
+                        if (pos == null) return const SizedBox.shrink();
 
-                  return Stack(
-                    children: groups.values.map((group) {
-                      final primary = group.first;
-                      final pos = _markerScreenPositions[primary.markerId];
-                      if (pos == null) return const SizedBox.shrink();
+                        final count = groupItems.length;
+                        final baseTitle =
+                            widget.titleExtractor?.call(primaryItem) ?? '';
+                        final displayTitle =
+                            count > 1 ? '$baseTitle +${count - 1}' : baseTitle;
 
-                      final count = group.length;
-                      final baseTitle = primary.infoWindow.title ?? '';
-                      final displayTitle =
-                          count > 1 ? '$baseTitle +${count - 1}' : baseTitle;
+                        final groupDataItems = groupItems
+                            .map((it) => _itemsById[widget.idExtractor(it)])
+                            .whereType<T>()
+                            .toList();
+                        if (groupDataItems.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
 
-                      // 마커 기준으로 살짝 위쪽/가운데에 떠 있도록 위치 보정
-                      return Positioned(
-                        left: pos.dx,
-                        top: pos.dy,
-                        child: FractionalTranslation(
-                          translation: const Offset(-0.5, -1.4),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 6),
-                              decoration: BoxDecoration(
-                                color:
-                                    Theme.of(context).cardColor.withAlpha(243),
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 4,
-                                    offset: Offset(0, 2),
+                        return Positioned(
+                          left: pos.dx,
+                          top: pos.dy,
+                          child: FractionalTranslation(
+                            translation: const Offset(-0.5, -1.4),
+                            child: GestureDetector(
+                              onTap: () {
+                                _showGroupListBottomSheet(groupDataItems,
+                                    baseTitle.isEmpty ? '...' : baseTitle);
+                              },
+                              child: Material(
+                                color: Colors.transparent,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .cardColor
+                                        .withValues(alpha: 0.92),
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withValues(alpha: 0.08),
+                                        blurRadius: 2,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              // 텍스트 오버플로우 처리: 길면 1줄로 줄이고 말줄임표 표시
-                              child: Text(
-                                displayTitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                  child: Text(
+                                    displayTitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                );
+              },
             ),
           ],
         );
@@ -310,27 +292,68 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
     );
   }
 
-  // 마커의 LatLng를 화면 좌표로 변환하여 캐시에 저장합니다.
+  void _showGroupListBottomSheet(List<T> items, String baseTitle) {
+    if (items.isEmpty) return;
+
+    final headerTitle =
+        items.length > 1 ? '$baseTitle · ${items.length}' : baseTitle;
+
+    final posts = items.map((it) {
+      final id = widget.idExtractor(it);
+      final title = widget.titleExtractor?.call(it) ?? '';
+      final subtitle = widget.subtitleExtractor?.call(it) ?? '';
+      final locationLabel = widget.locationLabelExtractor?.call(it) ?? '';
+      final replyCount = widget.replyCountExtractor?.call(it) ?? 0;
+      final createdAt = widget.createdAtExtractor?.call(it) ?? DateTime.now();
+      return SharedMapPostSummary(
+        id: id,
+        title: title,
+        subtitle: subtitle,
+        locationLabel: locationLabel,
+        replyCount: replyCount,
+        createdAt: createdAt,
+      );
+    }).toList();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return FractionallySizedBox(
+          heightFactor: 0.6,
+          child: SharedMapPostListBottomSheet(
+            headerTitle: headerTitle,
+            posts: posts,
+            onPostTap: (summary) {
+              Navigator.of(ctx).pop();
+              final selected = _itemsById[summary.id];
+              if (selected != null) {
+                _showBottomSheet(selected);
+              } else {
+                widget.onPostSelected?.call(summary.id);
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _updateMarkerScreenPositions() async {
     try {
       if (!_controller.isCompleted) return;
       final ctrl = await _controller.future;
       final Map<MarkerId, Offset> next = {};
-      // google_maps_flutter 의 ScreenCoordinate 는 "screen pixels" 기준이므로
-      // Flutter 위젯 트리에서 사용하는 논리 픽셀로 환산이 필요합니다.
       final dpr = MediaQuery.of(context).devicePixelRatio;
       for (final m in _markers) {
         try {
           final sc = await ctrl.getScreenCoordinate(m.position);
-          // 물리 픽셀 -> 논리 픽 변환
           final logicalX = sc.x.toDouble() / dpr;
           final logicalY = sc.y.toDouble() / dpr;
           next[m.markerId] = Offset(logicalX, logicalY);
-        } catch (_) {
-          // ignore individual failures
-        }
+        } catch (_) {}
       }
-      // 상태 업데이트
       if (mounted) {
         setState(() {
           _markerScreenPositions
@@ -338,43 +361,11 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
             ..addAll(next);
         });
       }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('[SharedMapBrowser] updateScreenPos error: $e');
-      }
-    }
+    } catch (_) {}
   }
 
-  // Try to show InfoWindow for all markers (best-effort). Safe to call
-  // repeatedly; errors are caught and ignored. Useful for initial UX where
-  // tooltips should be visible without extra taps.
-  // Note: showing native InfoWindows programmatically was previously used
-  // but we now render custom overlay tooltips based on calculated screen
-  // positions. The old _showAllInfoWindows implementation was removed to
-  // avoid redundant native calls and race conditions with overlay layout.
-  // Future<void> _showAllInfoWindows() async {
-  //   try {
-  //     if (!_controller.isCompleted) return;
-  //     final ctrl = await _controller.future;
-  //     for (final m in _markers) {
-  //       try {
-  //         await ctrl.showMarkerInfoWindow(m.markerId);
-  //       } catch (_) {
-  //         // ignore individual failures
-  //       }
-  //     }
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       debugPrint('[SharedMapBrowser] showInfo error: $e');
-  //     }
-  //   }
-  // }
-
-  // 바텀시트 표시 로직 분리
   void _showBottomSheet(T item) {
-    // Create a controller to allow programmatic resizing of the draggable sheet.
     final draggableController = DraggableScrollableController();
-    // Key to measure the rendered card height.
     final contentKey = GlobalKey();
 
     showModalBottomSheet(
@@ -395,7 +386,6 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
               borderRadius: BorderRadius.circular(12.0),
               child: Stack(
                 children: [
-                  // Wrap card in a Container with a GlobalKey so we can measure its height
                   Container(
                     key: contentKey,
                     color: Theme.of(context).cardColor,
@@ -435,31 +425,21 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
       ),
     );
 
-    // After the bottom sheet renders, measure the content and expand the sheet
-    // so that the card fits (or up to maxChildSize). We delay slightly to allow
-    // asynchronous inner loads (images/streambuilders) to settle.
     Future.delayed(const Duration(milliseconds: 120), () {
       try {
         final ctx = contentKey.currentContext;
         if (ctx == null) return;
         final renderBox = ctx.findRenderObject() as RenderBox?;
         if (renderBox == null) return;
-        final contentHeight = renderBox.size.height + 32.0; // include paddings
+        final contentHeight = renderBox.size.height + 32.0;
         final screenHeight = MediaQuery.of(context).size.height;
         var targetFraction = (contentHeight / screenHeight).clamp(0.2, 0.85);
-
-        // If content is small, ensure at least initialChildSize
         if (targetFraction < 0.4) targetFraction = 0.4;
-
-        // Animate sheet to the computed fraction (best-effort)
         try {
           draggableController.animateTo(targetFraction,
               duration: const Duration(milliseconds: 300), curve: Curves.ease);
-        } catch (_) {
-          // if controller is not attached yet, ignore — sheet stays at initial size
-        }
+        } catch (_) {}
       } catch (e) {
-        // ignore measurement errors — sheet will remain at initial size
         if (kDebugMode) debugPrint('[SharedMapBrowser] measure error: $e');
       }
     });

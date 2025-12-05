@@ -14,6 +14,7 @@
 // - (참고) 이 화면은 '모임 제안' 단계가 아닌, 생성된 '정식 클럽'의 정보 수정용임.
 // [작업 이력 (2025-12-05)]
 // - (Task 12) initState 초기화 로직 버그 수정 (Null check operator crash 해결)
+// - (Task 14) 개선 사항 적용: 스토리지 고아 이미지 삭제 로직 및 키보드 UX 개선
 // =====================================================
 // lib/features/clubs/screens/edit_club_screen.dart
 
@@ -74,6 +75,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
 
   XFile? _selectedImage;
   String? _existingImageUrl;
+  String? _originalImageUrl; // [추가] 삭제 대상 확인을 위한 원본 URL 보관
   final ImagePicker _picker = ImagePicker();
 
   final ClubRepository _repository = ClubRepository();
@@ -130,6 +132,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
     _descriptionController = TextEditingController(text: description);
     _interestTags = List<String>.from(tags);
     _existingImageUrl = imageUrl;
+    _originalImageUrl = imageUrl; // [추가] 초기 이미지 URL 백업
     _locationName = location;
     _locationParts = locParts;
     _geoPoint = geo;
@@ -248,6 +251,18 @@ class _EditClubScreenState extends State<EditClubScreen> {
         await _repository.updateClub(updatedClub);
       }
 
+      // [추가] 새 이미지가 업로드되었다면, 기존 이미지 삭제 (스토리지 최적화)
+      if (_selectedImage != null &&
+          _originalImageUrl != null &&
+          _originalImageUrl!.isNotEmpty) {
+        try {
+          await FirebaseStorage.instance
+              .refFromURL(_originalImageUrl!)
+              .delete();
+        } catch (_) {
+          // 삭제 실패 시 흐름을 막지 않음 (로그만 남기거나 무시)
+        }
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('clubs.editClub.success'.tr()),
@@ -280,192 +295,197 @@ class _EditClubScreenState extends State<EditClubScreen> {
           )
         ],
       ),
-      body: Stack(
-        children: [
-          Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: [
-                // --- 이미지 선택 ---
-                Center(
-                  child: Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage: _selectedImage != null
-                            ? FileImage(File(_selectedImage!.path))
-                            : (_existingImageUrl != null &&
-                                    _existingImageUrl!.isNotEmpty
-                                ? NetworkImage(_existingImageUrl!)
-                                : null) as ImageProvider?,
-                        child: (_selectedImage == null &&
-                                _existingImageUrl == null)
-                            ? Icon(Icons.groups,
-                                size: 40, color: Colors.grey[600])
-                            : null,
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: InkWell(
-                          onTap: _pickImage,
-                          child: CircleAvatar(
-                            radius: 18,
-                            backgroundColor: Theme.of(context).primaryColor,
-                            child: const Icon(Icons.camera_alt,
-                                size: 20, color: Colors.white),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(), // [추가] 빈 곳 터치 시 키보드 숨김
+        child: Stack(
+          children: [
+            Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16.0),
+                children: [
+                  // --- 이미지 선택 ---
+                  Center(
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.grey[200],
+                          backgroundImage: _selectedImage != null
+                              ? FileImage(File(_selectedImage!.path))
+                              : (_existingImageUrl != null &&
+                                      _existingImageUrl!.isNotEmpty
+                                  ? NetworkImage(_existingImageUrl!)
+                                  : null) as ImageProvider?,
+                          child: (_selectedImage == null &&
+                                  _existingImageUrl == null)
+                              ? Icon(Icons.groups,
+                                  size: 40, color: Colors.grey[600])
+                              : null,
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: InkWell(
+                            onTap: _pickImage,
+                            child: CircleAvatar(
+                              radius: 18,
+                              backgroundColor: Theme.of(context).primaryColor,
+                              child: const Icon(Icons.camera_alt,
+                                  size: 20, color: Colors.white),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    labelText: 'clubs.createClub.nameLabel'.tr(),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'clubs.createClub.nameError'.tr();
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'clubs.createClub.descriptionLabel'.tr(),
-                    border: const OutlineInputBorder(),
-                  ),
-                  maxLines: 5,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'clubs.createClub.descriptionError'.tr();
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 24),
-                ListTile(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.grey.shade400),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  leading: const Icon(Icons.location_on_outlined),
-                  title: Text('clubs.createClub.locationLabel'.tr()),
-                  subtitle: Text(_locationName),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: _selectLocation,
-                ),
-                const SizedBox(height: 24),
-
-                // 카테고리 선택
-                DropdownButtonFormField<String>(
-                  initialValue: _categories.contains(_mainCategory)
-                      ? _mainCategory
-                      : null,
-                  decoration: InputDecoration(
-                    labelText: 'clubs.createClub.categoryLabel'.tr(),
-                    border: const OutlineInputBorder(),
-                  ),
-                  items: _categories.map((cat) {
-                    return DropdownMenuItem(
-                      value: cat,
-                      child: Text('clubs.categories.$cat'.tr()),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) setState(() => _mainCategory = val);
-                  },
-                ),
-
-                const SizedBox(height: 24),
-
-                Text("interests.title".tr()),
-                const SizedBox(height: 8),
-                CustomTagInputField(
-                  initialTags: _interestTags,
-                  hintText: 'tag_input.addHint'.tr(),
-                  onTagsChanged: (tags) {
-                    setState(() {
-                      _interestTags = tags;
-                    });
-                  },
-                ),
-
-                // V V V --- [분기] 제안일 경우 '목표 인원', 정식 모임일 경우 '비공개 설정' --- V V V
-                if (_isProposal) ...[
                   const SizedBox(height: 24),
-                  Text(
-                    'clubs.proposal.targetMembers'.tr(),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Slider(
-                          value: _targetMemberCount,
-                          min: 3,
-                          max: 50,
-                          divisions: 47,
-                          label: _targetMemberCount.toInt().toString(),
-                          onChanged: (value) {
-                            setState(() {
-                              _targetMemberCount = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Text(
-                        '${_targetMemberCount.toInt()}명',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
+
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: 'clubs.createClub.nameLabel'.tr(),
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'clubs.createClub.nameError'.tr();
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
-                  SwitchListTile(
-                    title: Text('clubs.createClub.privateClub'.tr()),
-                    subtitle: Text('clubs.createClub.privateDescription'.tr()),
-                    value: _isPrivate,
-                    onChanged: (value) {
-                      setState(() {
-                        _isPrivate = value;
-                      });
+                  TextFormField(
+                    controller: _descriptionController,
+                    decoration: InputDecoration(
+                      labelText: 'clubs.createClub.descriptionLabel'.tr(),
+                      border: const OutlineInputBorder(),
+                    ),
+                    maxLines: 5,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'clubs.createClub.descriptionError'.tr();
+                      }
+                      return null;
                     },
                   ),
-                ] else ...[
-                  const SizedBox(height: 24),
-                  SwitchListTile(
-                    title: Text('clubs.createClub.privateClub'.tr()),
-                    subtitle: Text('clubs.createClub.privateDescription'.tr()),
-                    value: _isPrivate,
-                    onChanged: (value) {
-                      setState(() {
-                        _isPrivate = value;
-                      });
-                    },
-                  ),
-                ],
 
-                const SizedBox(height: 88),
-              ],
+                  const SizedBox(height: 24),
+                  ListTile(
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    leading: const Icon(Icons.location_on_outlined),
+                    title: Text('clubs.createClub.locationLabel'.tr()),
+                    subtitle: Text(_locationName),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: _selectLocation,
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 카테고리 선택
+                  DropdownButtonFormField<String>(
+                    initialValue: _categories.contains(_mainCategory)
+                        ? _mainCategory
+                        : null,
+                    decoration: InputDecoration(
+                      labelText: 'clubs.createClub.categoryLabel'.tr(),
+                      border: const OutlineInputBorder(),
+                    ),
+                    items: _categories.map((cat) {
+                      return DropdownMenuItem(
+                        value: cat,
+                        child: Text('clubs.categories.$cat'.tr()),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) setState(() => _mainCategory = val);
+                    },
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  Text("interests.title".tr()),
+                  const SizedBox(height: 8),
+                  CustomTagInputField(
+                    initialTags: _interestTags,
+                    hintText: 'tag_input.addHint'.tr(),
+                    onTagsChanged: (tags) {
+                      setState(() {
+                        _interestTags = tags;
+                      });
+                    },
+                  ),
+
+                  // V V V --- [분기] 제안일 경우 '목표 인원', 정식 모임일 경우 '비공개 설정' --- V V V
+                  if (_isProposal) ...[
+                    const SizedBox(height: 24),
+                    Text(
+                      'clubs.proposal.targetMembers'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Slider(
+                            value: _targetMemberCount,
+                            min: 3,
+                            max: 50,
+                            divisions: 47,
+                            label: _targetMemberCount.toInt().toString(),
+                            onChanged: (value) {
+                              setState(() {
+                                _targetMemberCount = value;
+                              });
+                            },
+                          ),
+                        ),
+                        Text(
+                          '${_targetMemberCount.toInt()}명',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SwitchListTile(
+                      title: Text('clubs.createClub.privateClub'.tr()),
+                      subtitle:
+                          Text('clubs.createClub.privateDescription'.tr()),
+                      value: _isPrivate,
+                      onChanged: (value) {
+                        setState(() {
+                          _isPrivate = value;
+                        });
+                      },
+                    ),
+                  ] else ...[
+                    const SizedBox(height: 24),
+                    SwitchListTile(
+                      title: Text('clubs.createClub.privateClub'.tr()),
+                      subtitle:
+                          Text('clubs.createClub.privateDescription'.tr()),
+                      value: _isPrivate,
+                      onChanged: (value) {
+                        setState(() {
+                          _isPrivate = value;
+                        });
+                      },
+                    ),
+                  ],
+
+                  const SizedBox(height: 88),
+                ],
+              ),
             ),
-          ),
-          if (_isSaving)
-            Container(
-                color: Colors.black54,
-                child: const Center(child: CircularProgressIndicator())),
-        ],
+            if (_isSaving)
+              Container(
+                  color: Colors.black54,
+                  child: const Center(child: CircularProgressIndicator())),
+          ],
+        ),
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
