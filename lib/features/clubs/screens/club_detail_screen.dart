@@ -203,6 +203,47 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
     );
   }
 
+  // V V V --- [추가] 방장(Admin)용 채팅방 정보 수동 동기화 함수 --- V V V
+  Future<void> _manualSyncChatInfo(ClubModel club) async {
+    try {
+      // 1. DB에서 채팅방 조회
+      final chatRoom = await _chatService.getChatRoom(club.id);
+
+      if (chatRoom == null) {
+        // 채팅방이 없으면 재생성 (Task 10 로직 재활용)
+        if (_currentUserId == null) return;
+
+        await FirebaseFirestore.instance.collection('chats').doc(club.id).set({
+          'isGroupChat': true,
+          'groupName': club.title,
+          'groupImage': club.imageUrl ?? '',
+          'clubId': club.id,
+          'clubTitle': club.title,
+          'clubImage': club.imageUrl,
+          'participants': [_currentUserId], // 방장 우선 참여
+          'lastMessage': 'system.chatRestored'.tr(),
+          'lastTimestamp': FieldValue.serverTimestamp(),
+          'unreadCounts': {_currentUserId: 0},
+          'contextType': 'club',
+        });
+        showSnackbar('chat.system.chatRestored'.tr());
+      } else {
+        // 채팅방이 있으면 타이틀과 이미지만 갱신 (기존 메시지/참여자 유지)
+        await _chatService.updateChatContextInfo(club.id, {
+          'groupName': club.title,
+          'groupImage': club.imageUrl,
+          'clubTitle': club.title,
+          'clubImage': club.imageUrl,
+        });
+        showSnackbar('chat.system.chatInfoSynced'.tr());
+      }
+    } catch (e) {
+      showSnackbar(
+          'chat.system.syncFailed'.tr(namedArgs: {'error': e.toString()}),
+          isError: true);
+    }
+  }
+
 // [추가] 동호회 탈퇴 로직
   void showSnackbar(String message, {bool isError = false}) {
     if (mounted) {
@@ -350,6 +391,12 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
                   })),
                 ),
               ),
+              if (club.ownerId == _currentUserId)
+                IconButton(
+                  icon: const Icon(Icons.sync),
+                  tooltip: '채팅방 정보 갱신',
+                  onPressed: () => _manualSyncChatInfo(club),
+                ),
               if (club.ownerId == _currentUserId)
                 IconButton(
                   icon: const Icon(Icons.edit_note_outlined),

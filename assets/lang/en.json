@@ -113,6 +113,10 @@
     "system": {
       "roomCreated": "Conversation started.",
       "userJoined": "{nickname} joined the chat."
+      ,
+      "chatRestored": "Chat room was created and restored.",
+      "chatInfoSynced": "Chat room name and cover image have been updated.",
+      "syncFailed": "Sync failed: {error}"
     }
   },
   "category": {

@@ -6,10 +6,20 @@
 // - (참고) 이 화면은 '모임 제안' 단계가 아닌, 생성된 '정식 클럽'의 정보 수정용임.
 // =====================================================
 // lib/features/clubs/screens/edit_club_screen.dart
+// lib/features/clubs/screens/edit_club_screen.dart
+// ===================== DocHeader =====================
+// [작업 이력 (2025-11-02)]
+// - (Task 9) 기획서 검토 완료.
+// - '모임 제안' V2.0 로직 개편으로 인해 이 파일은 현재 직접 수정 사항 없음.
+// - (참고) 이 화면은 '모임 제안' 단계가 아닌, 생성된 '정식 클럽'의 정보 수정용임.
+// [작업 이력 (2025-12-05)]
+// - (Task 12) initState 초기화 로직 버그 수정 (Null check operator crash 해결)
+// =====================================================
+// lib/features/clubs/screens/edit_club_screen.dart
 
 import 'dart:io';
 import 'package:bling_app/features/clubs/models/club_model.dart';
-import 'package:bling_app/features/clubs/models/club_proposal_model.dart'; // [추가]
+import 'package:bling_app/features/clubs/models/club_proposal_model.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +33,7 @@ import 'package:bling_app/features/location/screens/location_filter_screen.dart'
 
 class EditClubScreen extends StatefulWidget {
   final ClubModel? club;
-  final ClubProposalModel? proposal; // [추가] 제안 모델 지원
+  final ClubProposalModel? proposal;
 
   const EditClubScreen({
     super.key,
@@ -41,7 +51,6 @@ class _EditClubScreenState extends State<EditClubScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
 
-  // [추가] 카테고리 관리 변수
   late String _mainCategory;
   final List<String> _categories = [
     'sports',
@@ -59,7 +68,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
 
   late List<String> _interestTags;
   late bool _isPrivate;
-  double _targetMemberCount = 5.0; // [추가] 제안용 목표 인원
+  double _targetMemberCount = 5.0;
 
   bool _isSaving = false;
 
@@ -72,22 +81,50 @@ class _EditClubScreenState extends State<EditClubScreen> {
   late Map<String, dynamic>? _locationParts;
   late GeoPoint? _geoPoint;
 
-  bool get _isProposal => widget.proposal != null; // [추가] 제안 여부 확인 헬퍼
+  bool get _isProposal => widget.proposal != null;
 
   @override
   void initState() {
     super.initState();
-    // [수정] club 또는 proposal 데이터로 초기화
-    final title = widget.club?.title ?? widget.proposal!.title;
-    final description =
-        widget.club?.description ?? widget.proposal!.description;
-    final tags = widget.club?.interestTags ?? widget.proposal!.interestTags;
-    final imageUrl = widget.club?.imageUrl ?? widget.proposal!.imageUrl;
-    final location = widget.club?.location ?? widget.proposal!.location;
-    final locParts =
-        widget.club?.locationParts ?? widget.proposal!.locationParts;
-    final geo = widget.club?.geoPoint ?? widget.proposal!.geoPoint;
-    final category = widget.club?.mainCategory ?? widget.proposal!.mainCategory;
+    // [수정] Task 12: 데이터 원천을 명확히 분리하여 Null Check Error 방지
+
+    String title;
+    String description;
+    List<String> tags;
+    String? imageUrl;
+    String location;
+    Map<String, dynamic>? locParts;
+    GeoPoint? geo;
+    String category;
+
+    if (_isProposal) {
+      // 제안(Proposal) 수정 시
+      final p = widget.proposal!;
+      title = p.title;
+      description = p.description;
+      tags = p.interestTags;
+      imageUrl = p.imageUrl;
+      location = p.location;
+      locParts = p.locationParts;
+      geo = p.geoPoint;
+      category = p.mainCategory;
+
+      _targetMemberCount = p.targetMemberCount.toDouble();
+      _isPrivate = p.isPrivate;
+    } else {
+      // 정식 모임(Club) 수정 시
+      final c = widget.club!;
+      title = c.title;
+      description = c.description;
+      tags = c.interestTags;
+      imageUrl = c.imageUrl;
+      location = c.location;
+      locParts = c.locationParts;
+      geo = c.geoPoint;
+      category = c.mainCategory;
+
+      _isPrivate = c.isPrivate;
+    }
 
     _titleController = TextEditingController(text: title);
     _descriptionController = TextEditingController(text: description);
@@ -96,13 +133,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
     _locationName = location;
     _locationParts = locParts;
     _geoPoint = geo;
-    _mainCategory = category; // 초기 카테고리 설정
-
-    // [수정] 모임과 제안 모두 비공개 설정 값을 가져옴
-    _isPrivate = widget.club?.isPrivate ?? widget.proposal?.isPrivate ?? false;
-    if (_isProposal) {
-      _targetMemberCount = widget.proposal!.targetMemberCount.toDouble();
-    }
+    _mainCategory = category;
   }
 
   @override
@@ -143,7 +174,6 @@ class _EditClubScreenState extends State<EditClubScreen> {
     }
   }
 
-  // [수정] 통합 저장 로직 (Club vs Proposal 분기)
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || _isSaving) return;
 
@@ -241,7 +271,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isProposal
-            ? 'clubs.proposal.editTitle'.tr() // "제안 수정" (키 필요)
+            ? 'clubs.proposal.editTitle'.tr()
             : 'clubs.editClub.title'.tr()),
         actions: [
           IconButton(
@@ -257,7 +287,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                // --- 이미지 선택 (공통) ---
+                // --- 이미지 선택 ---
                 Center(
                   child: Stack(
                     children: [
@@ -339,11 +369,8 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // 카테고리 선택 (수정 시에도 변경 가능)
+                // 카테고리 선택
                 DropdownButtonFormField<String>(
-                  // 안전성: 저장된 `_mainCategory`가 현재 `_categories` 목록에
-                  // 없으면 `initialValue`를 `null`로 설정하여 Dropdown이
-                  // 빌드 시 assert를 던지지 않도록 합니다.
                   initialValue: _categories.contains(_mainCategory)
                       ? _mainCategory
                       : null,
@@ -380,7 +407,7 @@ class _EditClubScreenState extends State<EditClubScreen> {
                 if (_isProposal) ...[
                   const SizedBox(height: 24),
                   Text(
-                    'clubs.proposal.targetMembers'.tr(), // "목표 인원"
+                    'clubs.proposal.targetMembers'.tr(),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Row(
@@ -406,7 +433,6 @@ class _EditClubScreenState extends State<EditClubScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // 제안에서도 비공개 설정을 동일한 위치에 표시합니다.
                   SwitchListTile(
                     title: Text('clubs.createClub.privateClub'.tr()),
                     subtitle: Text('clubs.createClub.privateDescription'.tr()),

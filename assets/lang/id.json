@@ -120,6 +120,10 @@
     "system": {
       "roomCreated": "Percakapan dimulai.",
       "userJoined": "{nickname} telah bergabung ke obrolan."
+      ,
+      "chatRestored": "Ruang obrolan dibuat dan dipulihkan.",
+      "chatInfoSynced": "Nama ruang obrolan dan gambar sampul telah diperbarui.",
+      "syncFailed": "Sinkronisasi gagal: {error}"
     }
   },
   "category": {

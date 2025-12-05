@@ -120,6 +120,10 @@
     "system": {
       "roomCreated": "대화가 시작되었습니다.",
       "userJoined": "{nickname}님이 채팅에 참여했습니다."
+      ,
+      "chatRestored": "채팅방이 생성 및 복구되었습니다.",
+      "chatInfoSynced": "채팅방 이름과 대표 이미지가 갱신되었습니다.",
+      "syncFailed": "동기화 실패: {error}"
     }
   },
   "category": {
