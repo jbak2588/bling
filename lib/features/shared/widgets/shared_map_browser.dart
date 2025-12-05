@@ -17,6 +17,12 @@ class SharedMapBrowser<T> extends StatefulWidget {
   final String? Function(T)? titleExtractor;
   final String? Function(T)? subtitleExtractor;
   final String? Function(T)? locationLabelExtractor;
+
+  /// [옵션] 리스트 바텀시트에 표시할 썸네일 이미지 URL 추출 함수.
+  final String? Function(T)? thumbnailUrlExtractor;
+
+  /// [옵션] 리스트 바텀시트/리스트 아이템에 사용할 카테고리 아이콘 추출 함수.
+  final IconData? Function(T)? categoryIconExtractor;
   final int Function(T)? replyCountExtractor;
   final DateTime? Function(T)? createdAtExtractor;
   final void Function(String id)? onPostSelected;
@@ -32,6 +38,8 @@ class SharedMapBrowser<T> extends StatefulWidget {
     this.titleExtractor,
     this.subtitleExtractor,
     this.locationLabelExtractor,
+    this.thumbnailUrlExtractor,
+    this.categoryIconExtractor,
     this.replyCountExtractor,
     this.createdAtExtractor,
     this.onPostSelected,
@@ -198,91 +206,102 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
                 ),
               },
             ),
+            // [수정] 동일 좌표의 마커를 하나의 그룹으로 묶어
+            // "첫 번째 제목 +9" 형식의 툴팁을 지도 위에 보여주고,
+            // 툴팁을 탭하면 리스트 바텀시트를 띄웁니다.
             LayoutBuilder(
               builder: (context, constraints) {
-                final Map<String, List<T>> groups = {};
+                // key: "lat,lng" (소수점 6자리 기준) -> 해당 좌표의 마커 목록
+                final Map<String, List<Marker>> groups =
+                    <String, List<Marker>>{};
 
-                for (final item in items) {
-                  final title = widget.titleExtractor?.call(item);
-                  final gp = widget.locationExtractor(item);
-                  if (gp == null) continue;
-                  if (title == null || title.isEmpty) continue;
+                for (final m in _markers.where(
+                  (m) =>
+                      m.infoWindow.title != null &&
+                      m.infoWindow.title!.isNotEmpty,
+                )) {
                   final key =
-                      '${gp.latitude.toStringAsFixed(6)},${gp.longitude.toStringAsFixed(6)}';
-                  groups.putIfAbsent(key, () => <T>[]).add(item);
+                      '${m.position.latitude.toStringAsFixed(6)},${m.position.longitude.toStringAsFixed(6)}';
+                  groups.putIfAbsent(key, () => <Marker>[]).add(m);
                 }
 
-                return FutureBuilder<void>(
-                  future: _updateMarkerScreenPositions(),
-                  builder: (_, __) {
-                    return Stack(
-                      children: groups.values.map((groupItems) {
-                        final primaryItem = groupItems.first;
-                        final primaryId = widget.idExtractor(primaryItem);
-                        final pos = _markerScreenPositions[MarkerId(primaryId)];
-                        if (pos == null) return const SizedBox.shrink();
+                if (groups.isEmpty) {
+                  return const SizedBox.shrink();
+                }
 
-                        final count = groupItems.length;
-                        final baseTitle =
-                            widget.titleExtractor?.call(primaryItem) ?? '';
-                        final displayTitle =
-                            count > 1 ? '$baseTitle +${count - 1}' : baseTitle;
+                return Stack(
+                  children: groups.values.map((group) {
+                    final primary = group.first;
+                    final screenPos = _markerScreenPositions[primary.markerId];
+                    if (screenPos == null) {
+                      return const SizedBox.shrink();
+                    }
 
-                        final groupDataItems = groupItems
-                            .map((it) => _itemsById[widget.idExtractor(it)])
-                            .whereType<T>()
-                            .toList();
-                        if (groupDataItems.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
+                    final count = group.length;
+                    final baseTitle = primary.infoWindow.title ?? '';
+                    final displayTitle =
+                        count > 1 ? '$baseTitle +${count - 1}' : baseTitle;
 
-                        return Positioned(
-                          left: pos.dx,
-                          top: pos.dy,
-                          child: FractionalTranslation(
-                            translation: const Offset(-0.5, -1.4),
-                            child: GestureDetector(
-                              onTap: () {
-                                _showGroupListBottomSheet(groupDataItems,
-                                    baseTitle.isEmpty ? '...' : baseTitle);
-                              },
-                              child: Material(
-                                color: Colors.transparent,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .cardColor
-                                        .withValues(alpha: 0.92),
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black
-                                            .withValues(alpha: 0.08),
-                                        blurRadius: 2,
-                                        offset: const Offset(0, 1),
-                                      ),
-                                    ],
+                    // 마커 ID에서 실제 아이템 리스트 복구
+                    final List<T> groupItems = group
+                        .map((m) => _itemsById[m.markerId.value])
+                        .whereType<T>()
+                        .toList();
+                    if (groupItems.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    // 마커 기준으로 살짝 위쪽/가운데에 떠 있도록 위치 보정
+                    return Positioned(
+                      left: screenPos.dx,
+                      top: screenPos.dy,
+                      child: FractionalTranslation(
+                        translation: const Offset(-0.5, -1.4),
+                        child: GestureDetector(
+                          onTap: () {
+                            _showGroupListBottomSheet(
+                              groupItems,
+                              baseTitle.isEmpty ? '...' : baseTitle,
+                            );
+                          },
+                          child: Material(
+                            color: Colors.transparent,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                // 살짝 투명한 카드 배경 + 매우 약한 그림자만 적용
+                                color: Theme.of(context)
+                                    .cardColor
+                                    .withAlpha((0.92 * 255).round()),
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black
+                                        .withAlpha((0.08 * 255).round()),
+                                    blurRadius: 2,
+                                    offset: const Offset(0, 1),
                                   ),
-                                  child: Text(
-                                    displayTitle,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                displayTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
                                 ),
                               ),
                             ),
                           ),
-                        );
-                      }).toList(),
+                        ),
+                      ),
                     );
-                  },
+                  }).toList(),
                 );
               },
             ),
@@ -292,28 +311,12 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
     );
   }
 
+  /// 동일 좌표 그룹을 리스트 바텀시트로 보여주는 헬퍼
   void _showGroupListBottomSheet(List<T> items, String baseTitle) {
     if (items.isEmpty) return;
 
     final headerTitle =
         items.length > 1 ? '$baseTitle · ${items.length}' : baseTitle;
-
-    final posts = items.map((it) {
-      final id = widget.idExtractor(it);
-      final title = widget.titleExtractor?.call(it) ?? '';
-      final subtitle = widget.subtitleExtractor?.call(it) ?? '';
-      final locationLabel = widget.locationLabelExtractor?.call(it) ?? '';
-      final replyCount = widget.replyCountExtractor?.call(it) ?? 0;
-      final createdAt = widget.createdAtExtractor?.call(it) ?? DateTime.now();
-      return SharedMapPostSummary(
-        id: id,
-        title: title,
-        subtitle: subtitle,
-        locationLabel: locationLabel,
-        replyCount: replyCount,
-        createdAt: createdAt,
-      );
-    }).toList();
 
     showModalBottomSheet(
       context: context,
@@ -322,17 +325,17 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
       builder: (ctx) {
         return FractionallySizedBox(
           heightFactor: 0.6,
-          child: SharedMapPostListBottomSheet(
+          child: SharedMapPostListBottomSheet<T>(
             headerTitle: headerTitle,
-            posts: posts,
-            onPostTap: (summary) {
+            items: items,
+            titleBuilder: (item) => widget.titleExtractor?.call(item) ?? '',
+            subtitleBuilder: widget.subtitleExtractor,
+            locationLabelBuilder: widget.locationLabelExtractor,
+            thumbnailUrlBuilder: widget.thumbnailUrlExtractor,
+            categoryIconBuilder: widget.categoryIconExtractor,
+            onItemTap: (item) {
               Navigator.of(ctx).pop();
-              final selected = _itemsById[summary.id];
-              if (selected != null) {
-                _showBottomSheet(selected);
-              } else {
-                widget.onPostSelected?.call(summary.id);
-              }
+              _showBottomSheet(item);
             },
           ),
         );

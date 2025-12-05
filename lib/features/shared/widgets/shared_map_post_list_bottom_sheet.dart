@@ -1,56 +1,36 @@
-// lib/features/shared/widgets/shared_map_post_list_bottom_sheet.dart
-//
-// [기획 요약]
-// - 지도에서 특정 위치(툴팁 그룹)를 탭하면 해당 위치에 모여 있는
-//   포스트 리스트를 바텀시트로 표시합니다.
-// - Local News / Marketplace / Lost&Found 등 모든 모듈에서 재사용 가능.
-//
-// [구현 요약]
-// - showModalBottomSheet 로 열리며 스크롤 가능
-// - 각 포스트는 제목, 요약, 위치 라벨 등을 표시
-// - onPostTap 콜백으로 상세 화면 이동을 외부에 위임
-
+// SharedMapPostListBottomSheet
+// 단일, 깨끗한 제네릭 구현입니다.
 import 'package:flutter/material.dart';
 
-class SharedMapPostSummary {
-  final String id;
-  final String title;
-  final String subtitle;
-  final String locationLabel;
-  final int replyCount;
-  final DateTime createdAt;
-
-  const SharedMapPostSummary({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.locationLabel,
-    required this.replyCount,
-    required this.createdAt,
-  });
-}
-
-class SharedMapPostListBottomSheet extends StatelessWidget {
+class SharedMapPostListBottomSheet<T> extends StatelessWidget {
   final String headerTitle;
-  final List<SharedMapPostSummary> posts;
-  final void Function(SharedMapPostSummary summary)? onPostTap;
+  final List<T> items;
+  final String Function(T) titleBuilder;
+  final String? Function(T)? subtitleBuilder;
+  final String? Function(T)? locationLabelBuilder;
+  final String? Function(T)? thumbnailUrlBuilder;
+  final IconData? Function(T)? categoryIconBuilder;
+  final void Function(T)? onItemTap;
 
   const SharedMapPostListBottomSheet({
     super.key,
     required this.headerTitle,
-    required this.posts,
-    this.onPostTap,
+    required this.items,
+    required this.titleBuilder,
+    this.subtitleBuilder,
+    this.locationLabelBuilder,
+    this.thumbnailUrlBuilder,
+    this.categoryIconBuilder,
+    this.onItemTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final sorted = [...posts]
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // 최신순
-
+    final theme = Theme.of(context);
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       child: Container(
-        color: Theme.of(context).colorScheme.surface,
+        color: theme.colorScheme.surface,
         child: SafeArea(
           top: false,
           child: Column(
@@ -73,30 +53,33 @@ class SharedMapPostListBottomSheet extends StatelessWidget {
                     Expanded(
                       child: Text(
                         headerTitle,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     Text(
-                      '${sorted.length}',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      '${items.length}',
+                      style: theme.textTheme.bodyMedium,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
               const Divider(height: 1),
               Expanded(
                 child: ListView.separated(
-                  itemCount: sorted.length,
+                  itemCount: items.length,
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (context, index) {
-                    final post = sorted[index];
-                    return _SharedMapListTile(
-                      summary: post,
-                      onTap: () => onPostTap?.call(post),
+                    final item = items[index];
+                    return _SharedMapListTile<T>(
+                      item: item,
+                      titleBuilder: titleBuilder,
+                      subtitleBuilder: subtitleBuilder,
+                      locationLabelBuilder: locationLabelBuilder,
+                      thumbnailUrlBuilder: thumbnailUrlBuilder,
+                      categoryIconBuilder: categoryIconBuilder,
+                      onTap: () => onItemTap?.call(item),
                     );
                   },
                 ),
@@ -109,86 +92,155 @@ class SharedMapPostListBottomSheet extends StatelessWidget {
   }
 }
 
-class _SharedMapListTile extends StatelessWidget {
-  final SharedMapPostSummary summary;
+class _SharedMapListTile<T> extends StatelessWidget {
+  final T item;
+  final String Function(T) titleBuilder;
+  final String? Function(T)? subtitleBuilder;
+  final String? Function(T)? locationLabelBuilder;
+  final String? Function(T)? thumbnailUrlBuilder;
+  final IconData? Function(T)? categoryIconBuilder;
   final VoidCallback? onTap;
 
   const _SharedMapListTile({
-    required this.summary,
+    required this.item,
+    required this.titleBuilder,
+    this.subtitleBuilder,
+    this.locationLabelBuilder,
+    this.thumbnailUrlBuilder,
+    this.categoryIconBuilder,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final title = titleBuilder(item);
+    final subtitle = subtitleBuilder?.call(item) ?? '';
+    final loc = locationLabelBuilder?.call(item) ?? '';
+    final thumbUrl = thumbnailUrlBuilder?.call(item);
+    final categoryIcon = categoryIconBuilder?.call(item);
+
+    Widget buildLeading() {
+      const double size = 44;
+      if (thumbUrl != null && thumbUrl.isNotEmpty) {
+        return SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Image.network(
+                    thumbUrl,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              if (categoryIcon != null)
+                Positioned(
+                  right: 2,
+                  bottom: 2,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface
+                          .withAlpha((0.9 * 255).round()),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha((0.15 * 255).round()),
+                          blurRadius: 3,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      categoryIcon,
+                      size: 14,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      }
+
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: theme.colorScheme.primary.withAlpha((0.1 * 255).round()),
+        ),
+        alignment: Alignment.center,
+        child: Icon(
+          categoryIcon ?? Icons.location_on_outlined,
+          size: 20,
+          color: theme.colorScheme.primary,
+        ),
+      );
+    }
 
     return InkWell(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              ),
-              alignment: Alignment.center,
-              child: Icon(Icons.location_on_outlined,
-                  color: theme.colorScheme.primary, size: 18),
-            ),
+            buildLeading(),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    summary.title,
+                    title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    summary.subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.textTheme.bodyMedium?.color
-                          ?.withValues(alpha: .75),
+                  if (subtitle.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.black.withAlpha((0.7 * 255).round()),
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Icon(Icons.place, size: 14, color: Colors.grey.shade600),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          summary.locationLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey.shade700,
+                  if (loc.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.place,
+                            size: 14,
+                            color: Colors.grey.shade600,
                           ),
-                        ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              loc,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Icon(Icons.forum_outlined,
-                          size: 14, color: Colors.grey.shade600),
-                      const SizedBox(width: 2),
-                      Text(
-                        '${summary.replyCount}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
                 ],
               ),
             ),
