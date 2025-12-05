@@ -32,6 +32,7 @@
 import 'package:bling_app/features/clubs/models/club_member_model.dart';
 import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
+import 'package:bling_app/core/models/chat_room_model.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:bling_app/features/clubs/screens/edit_club_screen.dart';
@@ -151,20 +152,52 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
   }
 
   Future<void> _navigateToGroupChat() async {
-    final chatRoom = await _chatService.getChatRoom(widget.club.id);
+    ChatRoomModel? chatRoom = await _chatService.getChatRoom(widget.club.id);
+
+    // [수정] 채팅방 문서가 소실된 경우(null), 즉시 복구(재생성)하는 로직 추가
+    if (chatRoom == null && _currentUserId != null) {
+      debugPrint(
+          '[ClubDetail] 채팅방이 존재하지 않아 복구를 시도합니다. Club ID: ${widget.club.id}');
+      try {
+        // 'chats' 컬렉션에 직접 접근하여 문서 재생성 (Self-healing)
+        // 주의: 문서가 삭제되었으므로 기존 참여자 목록은 소실되었습니다. 현재 사용자를 기준으로 다시 시작합니다.
+        await FirebaseFirestore.instance
+            .collection('chats')
+            .doc(widget.club.id)
+            .set({
+          'isGroupChat': true,
+          'groupName': widget.club.title,
+          'groupImage': widget.club.imageUrl ?? '',
+          'clubId': widget.club.id,
+          'clubTitle': widget.club.title,
+          'clubImage': widget.club.imageUrl,
+          'participants': [_currentUserId], // 현재 사용자만 우선 참여
+          'lastMessage': 'system.chatRestored'.tr(), // "채팅방이 복구되었습니다."
+          'lastTimestamp': FieldValue.serverTimestamp(),
+          'unreadCounts': {_currentUserId: 0},
+          'contextType': 'club',
+        });
+        // 생성 후 다시 가져오기
+        chatRoom = await _chatService.getChatRoom(widget.club.id);
+      } catch (e) {
+        debugPrint('[ClubDetail] 채팅방 복구 실패: $e');
+      }
+    }
+
     if (chatRoom == null || !mounted) return;
+    final cr = chatRoom;
     if (widget.embedded && widget.onClose != null) {
       widget.onClose!();
     }
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ChatRoomScreen(
-          chatId: chatRoom.id,
+          chatId: cr.id,
           isGroupChat: true,
           groupName: widget.club.title,
           clubId: widget.club.id,
           clubImage: widget.club.imageUrl,
-          participants: chatRoom.participants,
+          participants: cr.participants,
         ),
       ),
     );

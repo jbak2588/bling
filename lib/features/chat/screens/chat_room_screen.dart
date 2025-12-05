@@ -136,7 +136,8 @@ class ChatRoomScreen extends StatefulWidget {
 
 class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final _messageController = TextEditingController();
-  final _myUid = FirebaseAuth.instance.currentUser!.uid;
+  // Allow nullable UID: currentUser may be null during startup or sign-out flows
+  final String? _myUid = FirebaseAuth.instance.currentUser?.uid;
   final _audioPlayer = AudioPlayer();
   final ChatService _chatService = ChatService();
 
@@ -187,7 +188,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     if (widget.isGroupChat) {
       idsToFetch = widget.participants ?? [];
     } else if (widget.otherUserId != null) {
-      idsToFetch = [_myUid, widget.otherUserId!];
+      // If local auth hasn't resolved yet, avoid inserting null into ids list
+      if (_myUid != null) {
+        idsToFetch = [_myUid!, widget.otherUserId!];
+      } else {
+        idsToFetch = [widget.otherUserId!];
+      }
     }
 
     if (idsToFetch.isNotEmpty) {

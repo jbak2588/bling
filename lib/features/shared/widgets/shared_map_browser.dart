@@ -52,6 +52,11 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
   int _lastMarkerCount = 0;
   // 마커의 화면 좌표(픽셀) 캐시: MarkerId -> Offset
   final Map<MarkerId, Offset> _markerScreenPositions = {};
+  // 마지막으로 렌더링한 아이템 ID 집합 (마커 재생성 최소화용)
+  Set<String> _lastItemIds = <String>{};
+
+  // 디버그 로그가 이미 찍힌 마커 ID 집합 (중복 로그 억제용)
+  final Set<String> _loggedMarkerIds = <String>{};
 
   @override
   Widget build(BuildContext context) {
@@ -81,36 +86,56 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
           // (혹은 빈 화면 메시지를 보여줄 수도 있음)
         }
 
-        // 마커 생성
-        _markers = items
-            .map((item) {
-              final geoPoint = widget.locationExtractor(item);
-              if (geoPoint == null) return null;
+        // 마커 생성 (아이템 ID 세트가 바뀐 경우에만 재생성)
+        final newIds = items.map(widget.idExtractor).toSet();
+        final shouldRebuildMarkers = !setEquals(newIds, _lastItemIds);
 
-              final markerId = widget.idExtractor(item);
-              final title = widget.titleExtractor?.call(item);
+        if (shouldRebuildMarkers) {
+          _lastItemIds = newIds;
+          // 더 이상 존재하지 않는 아이템에 대한 로그 캐시 정리
+          _loggedMarkerIds.removeWhere((id) => !newIds.contains(id));
 
-              final marker = Marker(
-                markerId: MarkerId(markerId),
-                position: LatLng(geoPoint.latitude, geoPoint.longitude),
-                icon: widget.customMarkerIcon ?? BitmapDescriptor.defaultMarker,
-                // InfoWindow은 제목만 표시하도록 하고,
-                // 마커 탭(onTap)에서 바로 바텀시트를 엽니다.
-                infoWindow: title != null
-                    ? InfoWindow(title: title)
-                    : InfoWindow.noText,
-                onTap: () => _showBottomSheet(item),
-              );
+          _markers = items
+              .map((item) {
+                final geoPoint = widget.locationExtractor(item);
+                if (geoPoint == null) return null;
 
-              if (kDebugMode) {
-                debugPrint('[SharedMapBrowser] created marker id=$markerId'
-                    ' pos=(${geoPoint.latitude}, ${geoPoint.longitude})');
-              }
+                final markerId = widget.idExtractor(item);
+                final title = widget.titleExtractor?.call(item);
 
-              return marker;
-            })
-            .whereType<Marker>()
-            .toSet();
+                final marker = Marker(
+                  markerId: MarkerId(markerId),
+                  position: LatLng(geoPoint.latitude, geoPoint.longitude),
+                  icon:
+                      widget.customMarkerIcon ?? BitmapDescriptor.defaultMarker,
+                  // InfoWindow은 제목만 표시하도록 하고,
+                  // 마커 탭(onTap)에서 바로 바텀시트를 엽니다.
+                  infoWindow: title != null
+                      ? InfoWindow(title: title)
+                      : InfoWindow.noText,
+                  onTap: () => _showBottomSheet(item),
+                );
+
+                // 디버그 모드에서는 동일 마커 ID에 대해 한 번만 로그를 찍습니다.
+                if (kDebugMode && _loggedMarkerIds.add(markerId)) {
+                  debugPrint('[SharedMapBrowser] created marker id=$markerId'
+                      ' pos=(${geoPoint.latitude}, ${geoPoint.longitude})');
+                }
+
+                return marker;
+              })
+              .whereType<Marker>()
+              .toSet();
+
+          // 초기 렌더 또는 데이터가 바뀐 경우에만 툴팁 위치를 강제로 갱신
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            try {
+              await _updateMarkerScreenPositions();
+            } catch (_) {
+              // ignore – 카메라가 아직 준비 안 된 경우 등
+            }
+          });
+        }
 
         // 초기 렌더 시점에 모든 마커의 화면 좌표를 계산해서,
         // 커스텀 오버레이 툴팁이 바로 보이도록 합니다.
@@ -209,56 +234,74 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
               },
             ),
 
-            // [수정] 오버레이: 모든 마커의 제목(툴팁)을 항상 표시
-            // 터치 차단을 피하기 위해 IgnorePointer로 래핑합니다.
+            // [수정] 오버레이: 동일 좌표 마커를 그룹으로 묶어
+            // "첫 번째 제목 +9" 형태로 표시하고, 위치는 핀 위쪽 중앙으로 보정.
             IgnorePointer(
-              child: Stack(
-                children: _markers
-                    .where((m) =>
-                        // [수정] infoWindow.title이 있기만 하면 무조건 표시 (클릭 여부 무관)
-                        m.infoWindow.title != null &&
-                        m.infoWindow.title!.isNotEmpty)
-                    .map((m) {
-                  final pos = _markerScreenPositions[m.markerId];
-                  if (pos == null) return const SizedBox.shrink();
-                  // 오버레이 위젯을 마커 핀 위쪽에 표시 (조정값은 필요 시 튜닝)
-                  // 오버레이 위젯을 마커 핀의 "정중앙 바로 위"에 표시합니다.
-                  // - FractionalTranslation(-0.5, -1.2)
-                  //   → 가로: 자신의 폭의 절반만큼 왼쪽으로 이동(가운데 정렬)
-                  //   → 세로: 자신의 높이보다 조금 더 위(-1.2)로 올려서 핀과 겹치지 않게 함
-                  return Positioned(
-                    left: pos.dx,
-                    top: pos.dy,
-                    child: FractionalTranslation(
-                      translation: const Offset(-0.5, -1.2),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor.withAlpha(243),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 6,
-                                offset: const Offset(0, 3),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // 동일 좌표(위도/경도)가 여러 개 있을 경우 하나의 그룹으로 묶습니다.
+                  final Map<String, List<Marker>> groups = {};
+
+                  for (final m in _markers.where((m) =>
+                      m.infoWindow.title != null &&
+                      m.infoWindow.title!.isNotEmpty)) {
+                    final key =
+                        '${m.position.latitude.toStringAsFixed(6)},${m.position.longitude.toStringAsFixed(6)}';
+                    groups.putIfAbsent(key, () => <Marker>[]).add(m);
+                  }
+
+                  return Stack(
+                    children: groups.values.map((group) {
+                      final primary = group.first;
+                      final pos = _markerScreenPositions[primary.markerId];
+                      if (pos == null) return const SizedBox.shrink();
+
+                      final count = group.length;
+                      final baseTitle = primary.infoWindow.title ?? '';
+                      final displayTitle =
+                          count > 1 ? '$baseTitle +${count - 1}' : baseTitle;
+
+                      // 마커 기준으로 살짝 위쪽/가운데에 떠 있도록 위치 보정
+                      return Positioned(
+                        left: pos.dx,
+                        top: pos.dy,
+                        child: FractionalTranslation(
+                          translation: const Offset(-0.5, -1.4),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 6),
+                              decoration: BoxDecoration(
+                                color:
+                                    Theme.of(context).cardColor.withAlpha(243),
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: Text(
-                            m.infoWindow.title!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(fontWeight: FontWeight.w500),
+                              // 텍스트 오버플로우 처리: 길면 1줄로 줄이고 말줄임표 표시
+                              child: Text(
+                                displayTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
+                      );
+                    }).toList(),
                   );
-                }).toList(),
+                },
               ),
             ),
           ],

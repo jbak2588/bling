@@ -238,10 +238,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
   ListTile _buildClubChatItem(BuildContext context, ChatRoomModel chatRoom) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      // [수정] 클럽 이미지는 groupImage 필드를 우선 사용 (표준화)
       leading: _buildAvatar(
-          imageUrl: chatRoom.clubImage ?? chatRoom.groupImage,
+          imageUrl: chatRoom.groupImage ?? chatRoom.clubImage,
           icon: Icons.groups),
-      title: Text(chatRoom.clubTitle ?? chatRoom.groupName ?? 'Club Chat',
+      // [수정] 클럽 타이틀은 groupName 필드를 우선 사용 (표준화)
+      title: Text(chatRoom.groupName ?? chatRoom.clubTitle ?? 'Club Chat',
           style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(chatRoom.lastMessage,
           maxLines: 1, overflow: TextOverflow.ellipsis),
