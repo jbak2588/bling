@@ -209,44 +209,37 @@ class _EditClubScreenState extends State<EditClubScreen> {
 
       if (_isProposal) {
         // 제안 업데이트
-        final updatedProposal = ClubProposalModel(
-          id: widget.proposal!.id,
+        // [수정] copyWith 사용으로 코드가 간결해지고 데이터 누락 위험 제거
+        final updatedProposal = widget.proposal!.copyWith(
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
-          ownerId: widget.proposal!.ownerId,
           location: _locationName,
           locationParts: _locationParts,
+          clearLocationParts: _locationParts == null,
           geoPoint: _geoPoint,
+          clearGeoPoint: _geoPoint == null, // null인 경우 명시적으로 지움
           mainCategory: _mainCategory,
           interestTags: _interestTags,
           imageUrl: imageUrl ?? '',
-          createdAt: widget.proposal!.createdAt,
           isPrivate: _isPrivate,
           targetMemberCount: _targetMemberCount.toInt(),
-          currentMemberCount: widget.proposal!.currentMemberCount,
-          memberIds: widget.proposal!.memberIds,
         );
         await _repository.updateClubProposal(updatedProposal);
       } else {
         // 정식 모임 업데이트
-        final updatedClub = ClubModel(
-          id: widget.club!.id,
+        final updatedClub = widget.club!.copyWith(
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           imageUrl: imageUrl,
+          clearImageUrl: imageUrl == null || imageUrl.isEmpty,
           interestTags: _interestTags,
           isPrivate: _isPrivate,
-          ownerId: widget.club!.ownerId,
           location: _locationName,
           locationParts: _locationParts,
+          clearLocationParts: _locationParts == null,
           geoPoint: _geoPoint,
+          clearGeoPoint: _geoPoint == null,
           mainCategory: _mainCategory,
-          membersCount: widget.club!.membersCount,
-          createdAt: widget.club!.createdAt,
-          kickedMembers: widget.club!.kickedMembers,
-          pendingMembers: widget.club!.pendingMembers,
-          isSponsored: widget.club!.isSponsored,
-          adExpiryDate: widget.club!.adExpiryDate,
         );
         await _repository.updateClub(updatedClub);
       }
