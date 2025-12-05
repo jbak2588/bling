@@ -208,15 +208,16 @@ class _EditClubScreenState extends State<EditClubScreen> {
       }
 
       if (_isProposal) {
-        // 제안 업데이트
-        final updatedProposal = ClubProposalModel(
-          id: widget.proposal!.id,
+        // 제안 업데이트 (copyWith 사용)
+        final updatedProposal = widget.proposal!.copyWith(
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           ownerId: widget.proposal!.ownerId,
           location: _locationName,
           locationParts: _locationParts,
+          clearLocationParts: _locationParts == null,
           geoPoint: _geoPoint,
+          clearGeoPoint: _geoPoint == null,
           mainCategory: _mainCategory,
           interestTags: _interestTags,
           imageUrl: imageUrl ?? '',
@@ -228,18 +229,20 @@ class _EditClubScreenState extends State<EditClubScreen> {
         );
         await _repository.updateClubProposal(updatedProposal);
       } else {
-        // 정식 모임 업데이트
-        final updatedClub = ClubModel(
-          id: widget.club!.id,
+        // 정식 모임 업데이트 (copyWith 사용)
+        final updatedClub = widget.club!.copyWith(
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           imageUrl: imageUrl,
+          clearImageUrl: imageUrl == null || imageUrl.isEmpty,
           interestTags: _interestTags,
           isPrivate: _isPrivate,
           ownerId: widget.club!.ownerId,
           location: _locationName,
           locationParts: _locationParts,
+          clearLocationParts: _locationParts == null,
           geoPoint: _geoPoint,
+          clearGeoPoint: _geoPoint == null,
           mainCategory: _mainCategory,
           membersCount: widget.club!.membersCount,
           createdAt: widget.club!.createdAt,

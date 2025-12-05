@@ -101,4 +101,45 @@ class ClubProposalModel {
       'searchIndex': searchIndex,
     };
   }
+
+  // [추가] 객체 불변성을 유지하며 데이터 수정을 돕는 copyWith
+  ClubProposalModel copyWith({
+    String? title,
+    String? description,
+    String? ownerId,
+    String? location,
+    Map<String, dynamic>? locationParts,
+    bool clearLocationParts = false,
+    GeoPoint? geoPoint,
+    bool clearGeoPoint = false,
+    String? mainCategory,
+    List<String>? interestTags,
+    String? imageUrl,
+    Timestamp? createdAt,
+    bool? isPrivate,
+    int? targetMemberCount,
+    int? currentMemberCount,
+    List<String>? memberIds,
+    List<String>? searchIndex,
+  }) {
+    return ClubProposalModel(
+      id: id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      ownerId: ownerId ?? this.ownerId,
+      location: location ?? this.location,
+      locationParts:
+          clearLocationParts ? null : (locationParts ?? this.locationParts),
+      geoPoint: clearGeoPoint ? null : (geoPoint ?? this.geoPoint),
+      mainCategory: mainCategory ?? this.mainCategory,
+      interestTags: interestTags ?? this.interestTags,
+      imageUrl: imageUrl ?? this.imageUrl,
+      createdAt: createdAt ?? this.createdAt,
+      isPrivate: isPrivate ?? this.isPrivate,
+      targetMemberCount: targetMemberCount ?? this.targetMemberCount,
+      currentMemberCount: currentMemberCount ?? this.currentMemberCount,
+      memberIds: memberIds ?? this.memberIds,
+      searchIndex: searchIndex ?? this.searchIndex,
+    );
+  }
 }

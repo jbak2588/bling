@@ -125,4 +125,52 @@ class ClubModel {
       'searchIndex': searchIndex,
     };
   }
+
+  // [추가] 객체 불변성을 유지하며 데이터 수정을 돕는 copyWith
+  ClubModel copyWith({
+    String? title,
+    String? description,
+    String? ownerId,
+    String? location,
+    Map<String, dynamic>? locationParts,
+    bool clearLocationParts = false,
+    GeoPoint? geoPoint,
+    bool clearGeoPoint = false,
+    String? mainCategory,
+    List<String>? interestTags,
+    int? membersCount,
+    bool? isPrivate,
+    String? trustLevelRequired,
+    Timestamp? createdAt,
+    List<String>? kickedMembers,
+    List<String>? pendingMembers,
+    String? imageUrl,
+    bool clearImageUrl = false,
+    bool? isSponsored,
+    Timestamp? adExpiryDate,
+    List<String>? searchIndex,
+  }) {
+    return ClubModel(
+      id: id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      ownerId: ownerId ?? this.ownerId,
+      location: location ?? this.location,
+      locationParts:
+          clearLocationParts ? null : (locationParts ?? this.locationParts),
+      geoPoint: clearGeoPoint ? null : (geoPoint ?? this.geoPoint),
+      mainCategory: mainCategory ?? this.mainCategory,
+      interestTags: interestTags ?? this.interestTags,
+      membersCount: membersCount ?? this.membersCount,
+      isPrivate: isPrivate ?? this.isPrivate,
+      trustLevelRequired: trustLevelRequired ?? this.trustLevelRequired,
+      createdAt: createdAt ?? this.createdAt,
+      kickedMembers: kickedMembers ?? this.kickedMembers,
+      pendingMembers: pendingMembers ?? this.pendingMembers,
+      imageUrl: clearImageUrl ? null : (imageUrl ?? this.imageUrl),
+      isSponsored: isSponsored ?? this.isSponsored,
+      adExpiryDate: adExpiryDate ?? this.adExpiryDate,
+      searchIndex: searchIndex ?? this.searchIndex,
+    );
+  }
 }
