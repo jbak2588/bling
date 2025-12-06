@@ -38,6 +38,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -160,8 +161,8 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
 
     if (_propertyLocation == null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('realEstate.form.propertyLocationRequired'
-              .tr())));       return;
+          content: Text('realEstate.form.propertyLocationRequired'.tr())));
+      return;
     }
 
     setState(() => _isSaving = true);
@@ -352,20 +353,12 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                     labelText: 'realEstate.form.typeLabel'.tr(),
                     border: const OutlineInputBorder(),
                   ),
-                  // 'kos', 'apartment', 'kontrakan', 'house', 'gudang', 'ruko', 'kantor', 'etc'
-                  items: const [
-                    'kos',
-                    'apartment',
-                    'kontrakan',
-                    'house',
-                    'gudang', // [추가] '작업 5'
-                    'ruko',
-                    'kantor',
-                    'etc'
-                  ].map<DropdownMenuItem<String>>((type) {
+                  // items generated from AppCategories.realEstateCategories
+                  items: AppCategories.realEstateCategories
+                      .map<DropdownMenuItem<String>>((cat) {
                     return DropdownMenuItem(
-                      value: type,
-                      child: Text('realEstate.form.roomTypes.$type'.tr()),
+                      value: cat.categoryId,
+                      child: Text(cat.nameKey.tr()),
                     );
                   }).toList(),
                   onChanged: (value) => setState(() => _type = value!),
@@ -436,10 +429,8 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
                 AddressMapPicker(
                   initialValue: _propertyLocation,
                   userGeoPoint: widget.userModel.geoPoint,
-                  labelText: 'realEstate.form.propertyLocationLabel'
-                      .tr(), 
-                  hintText: 'realEstate.form.propertyLocationHint'
-                      .tr(), 
+                  labelText: 'realEstate.form.propertyLocationLabel'.tr(),
+                  hintText: 'realEstate.form.propertyLocationHint'.tr(),
                   onChanged: (loc) {
                     setState(() => _propertyLocation = loc);
                   },

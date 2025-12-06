@@ -59,6 +59,11 @@ class BoardModel {
       'updatedAt': updatedAt,
     };
   }
+
+  /// Compatibility getter: provide a readable label for components that
+  /// expect `.title`. Prefer localized 'ko' label when present.
+  String get title =>
+      label['ko'] ?? (label.values.isNotEmpty ? label.values.first : key);
 }
 
 /// 게시판 통계 (metrics 필드)

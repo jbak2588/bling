@@ -199,6 +199,15 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                         return const LatLng(-6.200000, 106.816666);
                       })();
 
+                      // SharedMapBrowser 사용 주석 (분실물):
+                      // - dataStream: `repository.fetchItems(...)` -> itemType(tab)에 따라 스트림 분기.
+                      // - initialCameraPosition: `initialMapCenter` (locationProvider/userModel 기반 계산 로직이 위에 존재).
+                      // - locationExtractor: `item.geoPoint`.
+                      // - idExtractor: `item.id`.
+                      // - titleExtractor: 현재는 `item.itemDescription` 을 직접 사용하고 있음.
+                      //   -> 안정성을 위해 `legacyExtractTitle(item)` 사용 고려(일부 항목에 title 필드가 없음).
+                      // - cardBuilder: `LostItemCard(item)`.
+                      // - thumbnailUrlExtractor: item.imageUrls.first 등.
                       return SharedMapBrowser<LostItemModel>(
                         dataStream: repository.fetchItems(
                           locationFilter: null,
@@ -212,9 +221,24 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                         locationExtractor: (item) => item.geoPoint,
                         idExtractor: (item) => item.id,
                         titleExtractor: (item) =>
-                            (item as dynamic).title ?? (item as dynamic).body,
+                            item.itemDescription.isNotEmpty
+                                ? item.itemDescription
+                                : null,
                         cardBuilder: (context, item) =>
                             LostItemCard(item: item),
+                        thumbnailUrlExtractor: (item) =>
+                            (item.imageUrls.isNotEmpty)
+                                ? item.imageUrls.first
+                                : null,
+                        categoryIconExtractor: (item) {
+                          try {
+                            final emoji = (item.type == 'lost') ? '❗' : '✅';
+                            return Text(emoji,
+                                style: const TextStyle(fontSize: 14));
+                          } catch (_) {
+                            return null;
+                          }
+                        },
                       );
                     })()
                   : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(

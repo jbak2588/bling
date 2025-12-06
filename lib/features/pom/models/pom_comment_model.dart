@@ -41,4 +41,7 @@ class PomCommentModel {
       'createdAt': createdAt,
     };
   }
+
+  /// Compatibility getter: use the comment body as title.
+  String get title => body;
 }

@@ -72,6 +72,21 @@ class ChatRoomModel {
     this.clubImage,
   });
 
+  /// Compatibility getter: provide a single `title` field for UIs that
+  /// expect `.title` on various item-like models. Falls back through
+  /// groupName, roomTitle, productTitle, jobTitle, shopName, talentTitle,
+  /// clubTitle, or empty string.
+  String get title {
+    return groupName ??
+        roomTitle ??
+        productTitle ??
+        jobTitle ??
+        shopName ??
+        talentTitle ??
+        clubTitle ??
+        '';
+  }
+
   factory ChatRoomModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};

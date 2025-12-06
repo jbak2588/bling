@@ -29,6 +29,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
+import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
 
 /// [수정] 'rumah123' 모델에 따라 타입별 상세 필터를 제공하는 화면입니다.
 /// 실제 매물 목록을 보여주고 상세 필터링하는 화면입니다.
@@ -203,18 +205,10 @@ class _RoomListScreenState extends State<RoomListScreen> {
                           style: Theme.of(context).textTheme.titleMedium),
                       Wrap(
                         spacing: 8.0,
-                        children: [
-                          'kos',
-                          'apartment',
-                          'kontrakan',
-                          'house', // [추가]
-                          'ruko',
-                          'kantor',
-                          'etc'
-                        ].map((type) {
+                        children: AppCategories.realEstateCategories.map((cat) {
                           return ChoiceChip(
-                            label: Text('realEstate.form.roomTypes.$type'.tr()),
-                            selected: tempFilters.roomType == type,
+                            label: Text(cat.nameKey.tr()),
+                            selected: tempFilters.roomType == cat.categoryId,
                             // 이미 선택된 카테고리는 변경 불가 (선택 효과 없음)
                             onSelected: (selected) {},
                           );
@@ -307,8 +301,16 @@ class _RoomListScreenState extends State<RoomListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // 'Kos', 'Apartment' 등 카테고리 이름 표시
-        title: Text('realEstate.form.roomTypes.${widget.roomType}'.tr()),
+        // 'Kos', 'Apartment' 등 카테고리 이름 표시 (AppCategories 사용)
+        title: Text(
+          AppCategories.realEstateCategories
+              .firstWhere(
+                (c) => c.categoryId == widget.roomType,
+                orElse: () => AppCategories.realEstateCategories.first,
+              )
+              .nameKey
+              .tr(),
+        ),
         actions: [
           IconButton(
             icon: Icon(_isMapMode ? Icons.close : Icons.map_outlined),
@@ -356,16 +358,39 @@ class _RoomListScreenState extends State<RoomListScreen> {
           // 매물 목록: 지도 모드일 때는 SharedMapBrowser 사용
           Expanded(
             child: _isMapMode
-                ? SharedMapBrowser<RoomListingModel>(
+                ? // SharedMapBrowser 사용 주석:
+                // - dataStream: `_repository.getRoomsStream(...)` -> 필터/위치 적용된 room 스트림.
+                // - locationExtractor: `room.geoPoint` -> 좌표 기반 마커 생성.
+                // - idExtractor: `room.id` -> 마커/아이템 매핑에 사용.
+                // - titleExtractor: `legacyExtractTitle(room)` -> 레거시 title/body 호환 처리.
+                // - cardBuilder: `RoomCard(room)` -> 마커 선택 시 표시되는 카드 빌더.
+                // - thumbnailUrlExtractor: room.imageUrls.first (있을 때) -> 카드/마커 썸네일.
+                // - categoryIconExtractor: 실거래 카테고리 이모지 반환(예외 처리 포함).
+                // - initialCameraPosition: widget.userModel?.geoPoint 를 사용하여 초기 포커스 지정.
+                SharedMapBrowser<RoomListingModel>(
                     dataStream: _repository.getRoomsStream(
                       locationFilter: widget.locationFilter,
                       filters: _activeFilters,
                     ),
                     locationExtractor: (room) => room.geoPoint,
                     idExtractor: (room) => room.id,
-                    titleExtractor: (room) =>
-                        (room as dynamic).title ?? (room as dynamic).name,
+                    titleExtractor: (room) => legacyExtractTitle(room),
                     cardBuilder: (context, room) => RoomCard(room: room),
+                    thumbnailUrlExtractor: (room) => (room.imageUrls.isNotEmpty)
+                        ? room.imageUrls.first
+                        : null,
+                    categoryIconExtractor: (room) {
+                      try {
+                        final cat = AppCategories.realEstateCategories
+                            .firstWhere((c) => c.categoryId == room.type,
+                                orElse: () =>
+                                    AppCategories.realEstateCategories.first);
+                        return Text(cat.emoji,
+                            style: const TextStyle(fontSize: 14));
+                      } catch (_) {
+                        return null;
+                      }
+                    },
                     initialCameraPosition: widget.userModel?.geoPoint != null
                         ? CameraPosition(
                             target: LatLng(widget.userModel!.geoPoint!.latitude,

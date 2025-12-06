@@ -42,4 +42,7 @@ class ChatMessageModel {
       'readBy': readBy,
     };
   }
+
+  /// Present a compact label for UIs expecting `.title` on generic items.
+  String get title => text.isNotEmpty ? text : (imageUrl ?? '');
 }

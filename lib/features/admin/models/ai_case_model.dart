@@ -56,4 +56,8 @@ class AiCaseModel {
       createdAt: data['createdAt'] ?? Timestamp.now(),
     );
   }
+
+  /// Compatibility getter: reasonable short label for admin UIs.
+  String get title =>
+      caseId.isNotEmpty ? caseId : (productId.isNotEmpty ? productId : caseId);
 }

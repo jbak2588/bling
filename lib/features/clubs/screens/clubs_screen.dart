@@ -58,9 +58,11 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
+import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
 
 class ClubsScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -180,7 +182,15 @@ class _ClubsScreenState extends State<ClubsScreen> {
               return Scaffold(
                 // [수정] 중복 AppBar 제거
                 body: _isMapMode
-                    ? SharedMapBrowser<ClubModel>(
+                    ? // SharedMapBrowser 사용 주석 (Clubs - 상단 탭):
+                    // - dataStream: `_repository.fetchClubs(locationFilter: null)` -> 전체/필터된 동호회 스트림.
+                    // - initialCameraPosition: CameraPosition(target: widget.userModel!.geoPoint!) -> userModel 필드가 null일 경우 주의.
+                    // - locationExtractor: `club.geoPoint`.
+                    // - idExtractor: `club.id`.
+                    // - titleExtractor: `legacyExtractTitle(club)` -> club.title 사용 권장.
+                    // - cardBuilder: `ClubCard(club)`.
+                    // - thumbnailUrlExtractor: club.imageUrl.
+                    SharedMapBrowser<ClubModel>(
                         dataStream:
                             _repository.fetchClubs(locationFilter: null),
                         // [수정] 초기 위치: userModel 사용 (null 안전 처리)
@@ -193,10 +203,22 @@ class _ClubsScreenState extends State<ClubsScreen> {
                         ),
                         locationExtractor: (club) => club.geoPoint,
                         idExtractor: (club) => club.id,
-                        titleExtractor: (club) =>
-                            (club as dynamic).title ?? (club as dynamic).name,
+                        titleExtractor: (club) => legacyExtractTitle(club),
                         cardBuilder: (context, club) =>
                             ClubCard(key: ValueKey(club.id), club: club),
+                        thumbnailUrlExtractor: (club) => club.imageUrl,
+                        categoryIconExtractor: (club) {
+                          try {
+                            final cat = AppCategories.clubCategories.firstWhere(
+                                (c) => c.categoryId == club.mainCategory,
+                                orElse: () =>
+                                    AppCategories.clubCategories.first);
+                            return Text(cat.emoji,
+                                style: const TextStyle(fontSize: 14));
+                          } catch (_) {
+                            return null;
+                          }
+                        },
                       )
                     : Column(
                         children: [
@@ -290,7 +312,15 @@ class _ClubsScreenState extends State<ClubsScreen> {
             ],
           ),
           body: _isMapMode
-              ? SharedMapBrowser<ClubModel>(
+              ? // SharedMapBrowser 사용 주석 (Clubs - 본문):
+              // - dataStream: `_repository.fetchClubs(locationFilter: null)`
+              // - initialCameraPosition: `initialMapCenter` (상단에서 계산됨).
+              // - locationExtractor: `club.geoPoint`.
+              // - idExtractor: `club.id`.
+              // - titleExtractor: `legacyExtractTitle(club)`.
+              // - cardBuilder: `ClubCard(club)`.
+              // - thumbnailUrlExtractor: club.imageUrl.
+              SharedMapBrowser<ClubModel>(
                   dataStream: _repository.fetchClubs(locationFilter: null),
                   initialCameraPosition: CameraPosition(
                     target: initialMapCenter,
@@ -298,10 +328,21 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   ),
                   locationExtractor: (club) => club.geoPoint,
                   idExtractor: (club) => club.id,
-                  titleExtractor: (club) =>
-                      (club as dynamic).title ?? (club as dynamic).name,
+                  titleExtractor: (club) => legacyExtractTitle(club),
                   cardBuilder: (context, club) =>
                       ClubCard(key: ValueKey(club.id), club: club),
+                  thumbnailUrlExtractor: (club) => club.imageUrl,
+                  categoryIconExtractor: (club) {
+                    try {
+                      final cat = AppCategories.clubCategories.firstWhere(
+                          (c) => c.categoryId == club.mainCategory,
+                          orElse: () => AppCategories.clubCategories.first);
+                      return Text(cat.emoji,
+                          style: const TextStyle(fontSize: 14));
+                    } catch (_) {
+                      return null;
+                    }
+                  },
                 )
               : Column(
                   children: [

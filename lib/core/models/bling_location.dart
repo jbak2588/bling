@@ -52,6 +52,10 @@ class BlingLocation {
     };
   }
 
+  /// Compatibility getter for UI components that expect a `title`.
+  /// Returns the short label when available, otherwise the main address.
+  String get title => shortLabel ?? mainAddress;
+
   factory BlingLocation.fromJson(Map<String, dynamic> json) {
     final geo = json['geoPoint'];
     if (geo is! GeoPoint) {

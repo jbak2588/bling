@@ -74,6 +74,9 @@ class PushPrefsModel {
     };
   }
 
+  /// Compatibility getter: provide a short label (scope) as `title`.
+  String get title => scope;
+
   factory PushPrefsModel.fromMap(Map<String, dynamic> map) {
     // ✅ [경고 수정] '_asStringList' -> 'asStringList'
     List<String> asStringList(dynamic v) {

@@ -9,6 +9,7 @@ import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
+import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
 
 class TogetherScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -63,6 +64,14 @@ class _TogetherScreenState extends State<TogetherScreen> {
         body: _isMapMode
             ? Stack(
                 children: [
+                  // SharedMapBrowser 사용 주석 (Together):
+                  // - dataStream: `repository.fetchActivePosts()` -> 활성화된 TogetherPost 스트림.
+                  // - initialCameraPosition: `initialMapCenter` 사용(상단에 계산 로직 있음).
+                  // - locationExtractor: `post.geoPoint`.
+                  // - idExtractor: `post.id`.
+                  // - titleExtractor: `legacyExtractTitle(post)` -> title 필드가 존재하지만 레거시 안전 추출 사용 중.
+                  // - cardBuilder: `TogetherCard(post)` (내부 onTap에서 상세 화면으로 이동).
+                  // - thumbnailUrlExtractor: post.imageUrl (nullable).
                   SharedMapBrowser<TogetherPostModel>(
                     dataStream: repository.fetchActivePosts(),
                     initialCameraPosition: CameraPosition(
@@ -71,8 +80,7 @@ class _TogetherScreenState extends State<TogetherScreen> {
                     ),
                     locationExtractor: (post) => post.geoPoint,
                     idExtractor: (post) => post.id,
-                    titleExtractor: (post) =>
-                        (post as dynamic).title ?? (post as dynamic).body,
+                    titleExtractor: (post) => legacyExtractTitle(post),
                     cardBuilder: (context, post) => TogetherCard(
                       post: post,
                       onTap: () => Navigator.push(
@@ -82,6 +90,22 @@ class _TogetherScreenState extends State<TogetherScreen> {
                         ),
                       ),
                     ),
+                    thumbnailUrlExtractor: (post) => post.imageUrl,
+                    categoryIconExtractor: (post) {
+                      try {
+                        final statusEmoji = post.status == 'open'
+                            ? '🟢'
+                            : post.status == 'closed'
+                                ? '🔒'
+                                : post.status == 'completed'
+                                    ? '✅'
+                                    : '⌛';
+                        return Text(statusEmoji,
+                            style: const TextStyle(fontSize: 14));
+                      } catch (_) {
+                        return null;
+                      }
+                    },
                   ),
                   // [추가] 지도 닫기 오버레이 버튼
                   Positioned(

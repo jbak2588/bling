@@ -28,4 +28,7 @@ class ReplyModel {
           : DateTime.now(),
     );
   }
+
+  /// Compatibility getter: provide a `title` alias for UIs expecting it.
+  String get title => content;
 }

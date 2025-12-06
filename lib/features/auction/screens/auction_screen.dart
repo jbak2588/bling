@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:bling_app/core/constants/app_categories.dart';
+import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
 import 'package:bling_app/core/models/user_model.dart';
 // import 'package:bling_app/core/utils/location_helper.dart'; // unused, keep commented until needed
 import 'package:bling_app/features/auction/models/auction_category_model.dart';
@@ -211,6 +212,14 @@ class _AuctionScreenState extends State<AuctionScreen> {
                     // [수정] StreamBuilder 데이터를 그대로 재사용하거나, Repository 호출 시 null 필터 전달
                     // 위에서 이미 스트림을 분기했으므로, 여기서는 단순히 데이터를 넘겨주는 방식보다는
                     // SharedMapBrowser의 dataStream 인터페이스에 맞춰 Repository를 호출하는 것이 깔끔함.
+                    // SharedMapBrowser 사용 주석 (Auction 지도뷰):
+                    // - dataStream: `_repository.fetchAuctions(locationFilter: null, categoryId: null)` -> 전체 경매 스트림을 넘깁니다.
+                    // - initialCameraPosition: `initialMapCenter` 사용.
+                    // - locationExtractor: `a.geoPoint`.
+                    // - idExtractor: `a.id`.
+                    // - titleExtractor: `legacyExtractTitle(a)` -> AuctionModel.title 사용 권장.
+                    // - cardBuilder: `AuctionCard(auction)`.
+                    // - thumbnailUrlExtractor: a.images.first 등의 이미지 필드 사용.
                     return SharedMapBrowser<AuctionModel>(
                       dataStream: _repository.fetchAuctions(
                           locationFilter: null, // [중요] 전체 매물 지도 표시를 위해 null 전달
@@ -221,10 +230,24 @@ class _AuctionScreenState extends State<AuctionScreen> {
                       ),
                       locationExtractor: (a) => a.geoPoint,
                       idExtractor: (a) => a.id,
-                      titleExtractor: (a) =>
-                          (a as dynamic).title ?? (a as dynamic).headline,
+                      titleExtractor: (a) => legacyExtractTitle(a),
                       cardBuilder: (ctx, a) =>
                           AuctionCard(auction: a, userModel: widget.userModel),
+                      thumbnailUrlExtractor: (a) =>
+                          (a.images.isNotEmpty) ? a.images.first : null,
+                      categoryIconExtractor: (a) {
+                        try {
+                          final cat = AppCategories.auctionCategories
+                              .firstWhere(
+                                  (c) => c.categoryId == (a.category ?? 'etc'),
+                                  orElse: () =>
+                                      AppCategories.auctionCategories.first);
+                          return Text(cat.emoji,
+                              style: const TextStyle(fontSize: 14));
+                        } catch (_) {
+                          return null;
+                        }
+                      },
                     );
                   }
 

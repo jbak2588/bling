@@ -27,6 +27,8 @@ import 'package:bling_app/features/real_estate/data/room_repository.dart';
 import 'package:bling_app/features/real_estate/widgets/room_card.dart';
 import 'package:bling_app/features/real_estate/models/room_listing_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
+import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
 
 class RealEstateScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -51,7 +53,7 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
   final ValueNotifier<String> _searchKeywordNotifier =
       ValueNotifier<String>('');
   bool _showSearchBar = false;
-  bool _isMapMode = false; // [추가] 지도 모드 토글
+  final bool _isMapMode = false; // [추가] 지도 모드 토글
 
   @override
   void initState() {
@@ -141,28 +143,6 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        // [수정] 메인 타이틀('Ibu Kost') 중복 방지
-        // 대신 지도 보기 기능을 안내하는 힌트 텍스트를 표시
-        title: Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            'realEstate.viewMapHint'.tr(), // "지도에서 전체 매물 확인하기"
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-        ),
-        centerTitle: false,
-        elevation: 0,
-        actions: [
-          // [수정] 지도 아이콘이 X(닫기) 버튼으로 토글됨
-          IconButton(
-            icon: Icon(_isMapMode ? Icons.close : Icons.map_outlined),
-            onPressed: () => setState(() => _isMapMode = !_isMapMode),
-            tooltip:
-                _isMapMode ? 'common.closeMap'.tr() : 'common.viewMap'.tr(),
-          ),
-        ],
-      ),
       body: Column(
         children: [
           if (_showSearchBar)
@@ -178,7 +158,16 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
             ),
           Expanded(
             child: _isMapMode
-                ? SharedMapBrowser<RoomListingModel>(
+                ? // SharedMapBrowser 사용 주석:
+                // - dataStream: `RoomRepository().getRoomsStream(...)` -> 전체/필터된 매물 스트림을 전달합니다.
+                // - locationExtractor: `room.geoPoint` -> 매물의 좌표 필드 사용(legacy 폴백 필요 여부 확인).
+                // - idExtractor: `room.id` -> Marker 식별자.
+                // - titleExtractor: `legacyExtractTitle(room)` -> 레거시 필드 호환성용 안전 추출기.
+                // - cardBuilder: `RoomCard(room)` -> 마커 클릭 시 표시되는 카드.
+                // - thumbnailUrlExtractor: room.imageUrls.first 사용(있을 때).
+                // - categoryIconExtractor: AppCategories 기반 이모지 반환, 예외시 null.
+                // - initialCameraPosition: widget.userModel?.geoPoint (없으면 null). 카메라 초기화/권한 로직 검토 필요.
+                SharedMapBrowser<RoomListingModel>(
                     // When opening the full-map view from the launcher, pass
                     // explicit nulls so the map shows ALL available listings
                     // independent of the launcher context's filters.
@@ -189,9 +178,23 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
                     ),
                     locationExtractor: (room) => room.geoPoint,
                     idExtractor: (room) => room.id,
-                    titleExtractor: (room) =>
-                        (room as dynamic).title ?? (room as dynamic).name,
+                    titleExtractor: (room) => legacyExtractTitle(room),
                     cardBuilder: (context, room) => RoomCard(room: room),
+                    thumbnailUrlExtractor: (room) => (room.imageUrls.isNotEmpty)
+                        ? room.imageUrls.first
+                        : null,
+                    categoryIconExtractor: (room) {
+                      try {
+                        final cat = AppCategories.realEstateCategories
+                            .firstWhere((c) => c.categoryId == room.type,
+                                orElse: () =>
+                                    AppCategories.realEstateCategories.first);
+                        return Text(cat.emoji,
+                            style: const TextStyle(fontSize: 14));
+                      } catch (_) {
+                        return null;
+                      }
+                    },
                     initialCameraPosition: widget.userModel?.geoPoint != null
                         ? CameraPosition(
                             target: LatLng(widget.userModel!.geoPoint!.latitude,
@@ -210,18 +213,23 @@ class _RealEstateScreenState extends State<RealEstateScreen> {
                     ),
                     itemCount: categories.length,
                     itemBuilder: (context, index) {
-                      final category = categories[index];
+                      final cat = categories[index];
+                      final type = cat['type'] as String? ?? 'etc';
+                      final model = AppCategories.realEstateCategories
+                          .firstWhere((c) => c.categoryId == type,
+                              orElse: () =>
+                                  AppCategories.realEstateCategories.first);
                       return _buildCategoryCard(
                         context,
-                        icon: category['icon'] as IconData,
-                        label: (category['labelKey'] as String).tr(),
+                        icon: cat['icon'] as IconData,
+                        label: model.nameKey.tr(),
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => RoomListScreen(
                                 userModel: widget.userModel,
                                 locationFilter: widget.locationFilter,
-                                roomType: category['type'] as String,
+                                roomType: type,
                                 searchNotifier: widget.searchNotifier,
                               ),
                             ),

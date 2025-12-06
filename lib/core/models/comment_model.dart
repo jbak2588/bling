@@ -35,4 +35,7 @@ class CommentModel {
       parentCommentId: data['parentCommentId'],
     );
   }
+
+  /// Compatibility getter: use comment content as `title` for lists.
+  String get title => content;
 }

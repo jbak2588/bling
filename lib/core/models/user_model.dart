@@ -173,6 +173,9 @@ class UserModel {
     this.deletionRequestedAt,
   });
 
+  // Compatibility: provide a common `title` getter for UI components.
+  String get title => nickname;
+
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return UserModel(

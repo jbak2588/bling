@@ -45,6 +45,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
 // search index generation removed to avoid extra background work
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
@@ -63,19 +64,12 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   final _contactController = TextEditingController();
   final _hoursController = TextEditingController();
 
-  // [추가] 상점 카테고리 목록 (기획서 기반 [cite: 1102])
-  final List<String> _shopCategories = [
-    'food',
-    'cafe',
-    'massage',
-    'beauty',
-    'nail',
-    'auto',
-    'kids',
-    'hospital',
-    'etc'
-  ];
-  String _selectedCategory = 'food'; // 기본값
+  // 상점 카테고리는 중앙화된 `AppCategories.shopCategories`를 사용합니다.
+  final List<String> _shopCategories =
+      AppCategories.shopCategories.map((c) => c.categoryId).toList();
+  String _selectedCategory = AppCategories.shopCategories.isNotEmpty
+      ? AppCategories.shopCategories.first.categoryId
+      : 'food'; // 기본값(백업)
 
   // [추가] 기획서의 '대표 상품/서비스'  입력을 위한 컨트롤러
   final _productsController = TextEditingController();
@@ -345,10 +339,12 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                       labelText: 'localStores.form.categoryLabel'.tr(),
                       border: const OutlineInputBorder()),
                   items: _shopCategories.map((category) {
+                    final cat = AppCategories.shopCategories.firstWhere(
+                        (c) => c.categoryId == category,
+                        orElse: () => AppCategories.shopCategories.first);
                     return DropdownMenuItem(
                       value: category,
-                      child: Text(
-                          'localStores.categories.$category'.tr()), // 번역 키 사용
+                      child: Text(cat.nameKey.tr()),
                     );
                   }).toList(),
                   onChanged: (value) =>

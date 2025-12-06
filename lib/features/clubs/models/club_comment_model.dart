@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ClubCommentModel {
   final String id;
   final String userId; // 댓글 작성자 ID
-  final String body;   // 댓글 내용
+  final String body; // 댓글 내용
   final Timestamp createdAt;
   final int likesCount;
 
@@ -19,7 +19,8 @@ class ClubCommentModel {
     this.likesCount = 0,
   });
 
-  factory ClubCommentModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory ClubCommentModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return ClubCommentModel(
       id: doc.id,
@@ -38,4 +39,7 @@ class ClubCommentModel {
       'likesCount': likesCount,
     };
   }
+
+  /// Compatibility getter: expose comment body as `title`.
+  String get title => body;
 }

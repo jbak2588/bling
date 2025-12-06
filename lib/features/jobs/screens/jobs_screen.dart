@@ -50,11 +50,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
+import 'package:bling_app/features/jobs/constants/job_categories.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 // ✅ [작업 31] 1. 일자리 유형 선택 화면 import
 // import 'package:bling_app/features/jobs/constants/job_categories.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
 
 class JobsScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -559,12 +561,31 @@ class _JobsScreenState extends State<JobsScreen>
           .snapshots()
           .map((s) => s.docs.map((d) => TalentModel.fromFirestore(d)).toList());
 
+      // SharedMapBrowser 사용 주석 (Talent 탭):
+      // - dataStream: Firestore `talents` 컬렉션을 직접 구독하는 스트림.
+      // - initialCameraPosition: `initialCamera` 변수를 사용(초기 중심은 locationProvider/userModel 기반).
+      // - locationExtractor: `t.geoPoint`.
+      // - idExtractor: `t.id`.
+      // - titleExtractor: `legacyExtractTitle(t)` -> 재능(title) 필드 안전 추출.
+      // - thumbnailUrlExtractor: portfolioUrls.first 사용(있을 때).
+      // - categoryIconExtractor: AppJobCategories.findById 처리(예외 핸들링 필요).
+      // - cardBuilder: `TalentCard(talent)`.
       return SharedMapBrowser<TalentModel>(
         dataStream: talentStream,
         initialCameraPosition: initialCamera,
         locationExtractor: (t) => t.geoPoint,
         idExtractor: (t) => t.id,
-        titleExtractor: (t) => (t as dynamic).title ?? (t as dynamic).name,
+        titleExtractor: (t) => legacyExtractTitle(t),
+        thumbnailUrlExtractor: (t) =>
+            (t.portfolioUrls.isNotEmpty) ? t.portfolioUrls.first : null,
+        categoryIconExtractor: (t) {
+          try {
+            final jc = AppJobCategories.findById(t.category);
+            return Text(jc.icon, style: const TextStyle(fontSize: 14));
+          } catch (_) {
+            return null;
+          }
+        },
         cardBuilder: (context, talent) => TalentCard(talent: talent),
       );
     }
@@ -576,15 +597,33 @@ class _JobsScreenState extends State<JobsScreen>
       searchToken: null,
     );
 
+    // SharedMapBrowser 사용 주석 (Jobs 기본 탭):
+    // - dataStream: `jobRepository.fetchJobs(...)` -> 위치 필터/타입/검색어 전달.
+    // - initialCameraPosition: `initialCamera` 사용.
+    // - locationExtractor: `job.geoPoint`.
+    // - idExtractor: `job.id`.
+    // - titleExtractor: `legacyExtractTitle(job)` -> job.title 또는 설명에서 추출.
+    // - thumbnailUrlExtractor: job.imageUrls.first.
+    // - categoryIconExtractor: AppJobCategories.findById 처리(예외 핸들링 필요).
+    // - cardBuilder: `JobCard(job)`.
     return SharedMapBrowser<JobModel>(
       dataStream: jobStream,
       initialCameraPosition: initialCamera,
       locationExtractor: (job) => job.geoPoint,
       idExtractor: (job) => job.id,
-      titleExtractor: (job) =>
-          (job as dynamic).title ??
-          (job as dynamic).companyName ??
-          (job as dynamic).name,
+      titleExtractor: (job) => legacyExtractTitle(job),
+      thumbnailUrlExtractor: (job) =>
+          (job.imageUrls != null && job.imageUrls!.isNotEmpty)
+              ? job.imageUrls!.first
+              : null,
+      categoryIconExtractor: (job) {
+        try {
+          final jc = AppJobCategories.findById(job.category);
+          return Text(jc.icon, style: const TextStyle(fontSize: 14));
+        } catch (_) {
+          return null;
+        }
+      },
       cardBuilder: (context, job) => JobCard(job: job),
     );
   }

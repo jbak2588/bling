@@ -13,4 +13,7 @@ class PostCategoryModel {
     required this.nameKey,
     required this.descriptionKey,
   });
+
+  // Compatibility: provide a common `title` getter used by UI helpers.
+  String get title => nameKey;
 }

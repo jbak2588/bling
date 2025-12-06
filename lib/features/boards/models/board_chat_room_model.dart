@@ -59,6 +59,9 @@ class BoardChatRoomModel {
       'pinnedPosts': pinnedPosts,
     };
   }
+
+  /// Compatibility getter for UIs expecting `.title` on a room-like model.
+  String get title => id;
 }
 
 /// 채팅방 운영 설정 (moderation 필드)

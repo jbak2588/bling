@@ -70,4 +70,7 @@ class ShopReviewModel {
       'createdAt': createdAt,
     };
   }
+
+  /// Compatibility getter for UI pieces that expect `.title`.
+  String get title => comment;
 }

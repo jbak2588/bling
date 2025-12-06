@@ -41,6 +41,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
 // search index generation removed to avoid background indexing costs
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
 
@@ -58,18 +59,9 @@ class _EditShopScreenState extends State<EditShopScreen> {
   late final TextEditingController _descriptionController;
   late final TextEditingController _contactController;
   late final TextEditingController _hoursController;
-  // [추가] 카테고리/상품 편집을 위한 상태와 컨트롤러
-  final List<String> _shopCategories = [
-    'food',
-    'cafe',
-    'massage',
-    'beauty',
-    'nail',
-    'auto',
-    'kids',
-    'hospital',
-    'etc'
-  ];
+  // 카테고리는 중앙화된 AppCategories를 사용합니다.
+  final List<String> _shopCategories =
+      AppCategories.shopCategories.map((c) => c.categoryId).toList();
   late String _selectedCategory;
   late final TextEditingController _productsController;
   late List<String> _tags;
@@ -321,9 +313,12 @@ class _EditShopScreenState extends State<EditShopScreen> {
                       labelText: 'localStores.form.categoryLabel'.tr(),
                       border: const OutlineInputBorder()),
                   items: _shopCategories.map((category) {
+                    final cat = AppCategories.shopCategories.firstWhere(
+                        (c) => c.categoryId == category,
+                        orElse: () => AppCategories.shopCategories.first);
                     return DropdownMenuItem(
                       value: category,
-                      child: Text('localStores.categories.$category'.tr()),
+                      child: Text(cat.nameKey.tr()),
                     );
                   }).toList(),
                   onChanged: (value) =>

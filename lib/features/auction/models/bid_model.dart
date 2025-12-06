@@ -16,8 +16,7 @@ class BidModel {
     required this.bidTime,
   });
 
-  factory BidModel.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory BidModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     return BidModel(
       id: doc.id,
@@ -34,4 +33,7 @@ class BidModel {
       'bidTime': bidTime,
     };
   }
+
+  /// Compatibility: present a short label for UIs that expect `.title`.
+  String get title => userId;
 }

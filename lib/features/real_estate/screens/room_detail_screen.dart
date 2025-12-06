@@ -58,6 +58,7 @@ import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
 
 // Helper: open external map for a given lat/lng
 Future<void> _openMap(double lat, double lng) async {
@@ -228,7 +229,12 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                   const SizedBox(height: 8),
                   // [추가] Gap 1: '직방' 스타일 핵심 정보
                   Text(
-                    '${'realEstate.form.roomTypes.${room.type}'.tr()} · ${'realEstate.form.listingTypes.${room.listingType}'.tr()}',
+                    '${AppCategories.realEstateCategories
+                            .firstWhere((c) => c.categoryId == room.type,
+                                orElse: () =>
+                                    AppCategories.realEstateCategories.first)
+                            .nameKey
+                            .tr()} · ${'realEstate.form.listingTypes.${room.listingType}'.tr()}',
                     style: TextStyle(
                         fontSize: 15,
                         color: Theme.of(context).primaryColor,
@@ -407,7 +413,13 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                     const SizedBox(height: 8),
                     // [추가] Gap 1: '직방' 스타일 핵심 정보
                     Text(
-                      '${'realEstate.form.roomTypes.${room.type}'.tr()} · ${'realEstate.form.listingTypes.${room.listingType}'.tr()}',
+                      '${AppCategories.realEstateCategories
+                              .firstWhere((c) => c.categoryId == room.type,
+                                  orElse: () =>
+                                      AppCategories.realEstateCategories.first)
+                              .nameKey
+                              .tr()} · ${'realEstate.form.listingTypes.${room.listingType}'
+                              .tr()}',
                       style: TextStyle(
                           fontSize: 15,
                           color: Theme.of(context).primaryColor,

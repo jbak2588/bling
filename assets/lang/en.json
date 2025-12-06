@@ -20,6 +20,13 @@
       "wrongPassword": "Wrong password.",
       "unknownError": "unknownError"
     }
+},
+"notifications": {
+    "title": "Notifications",
+    "error": "Failed to retrieve notifications.",
+    "empty": "There are no notifications to display.",
+    "seller_pending_title": "Reviewing the product.",
+    "seller_pending_body": "The product you have registered, '{title}', has been submitted for administrator review."
   },
   "signup": {
     "title": "Sign Up",

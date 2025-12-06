@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
@@ -53,19 +54,8 @@ class _EditClubScreenState extends State<EditClubScreen> {
   late final TextEditingController _descriptionController;
 
   late String _mainCategory;
-  final List<String> _categories = [
-    'sports',
-    'hobbies',
-    'social',
-    'study',
-    'reading',
-    'culture',
-    'travel',
-    'volunteer',
-    'pets',
-    'food',
-    'etc'
-  ];
+  final List<String> _categories =
+      AppCategories.clubCategories.map((c) => c.categoryId).toList();
 
   late List<String> _interestTags;
   late bool _isPrivate;
@@ -389,9 +379,12 @@ class _EditClubScreenState extends State<EditClubScreen> {
                       border: const OutlineInputBorder(),
                     ),
                     items: _categories.map((cat) {
+                      final model = AppCategories.clubCategories.firstWhere(
+                          (c) => c.categoryId == cat,
+                          orElse: () => AppCategories.clubCategories.first);
                       return DropdownMenuItem(
                         value: cat,
-                        child: Text('clubs.categories.$cat'.tr()),
+                        child: Text(model.nameKey.tr()),
                       );
                     }).toList(),
                     onChanged: (val) {

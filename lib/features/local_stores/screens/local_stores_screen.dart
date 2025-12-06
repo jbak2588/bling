@@ -44,12 +44,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart'; // [추가]
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'create_shop_screen.dart'; // [추가]
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
 
 class LocalStoresScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -154,18 +156,9 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
     if (mounted) setState(() {});
   }
 
-  // [추가] 카테고리 필터 로직
-  final List<String> _categories = [
-    'food',
-    'cafe',
-    'massage',
-    'beauty',
-    'nail',
-    'auto',
-    'kids',
-    'hospital',
-    'etc'
-  ];
+  // 카테고리 필터 로직: 중앙화된 AppCategories.shopCategories에서 가져옵니다.
+  final List<String> _categories =
+      AppCategories.shopCategories.map((c) => c.categoryId).toList();
   String _selectedCategory = 'all';
 
   // [추가] 정렬 옵션
@@ -237,10 +230,13 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                     itemBuilder: (context, index) {
                       final category = _categories[index];
                       final bool isSelected = category == _selectedCategory;
+                      final cat = AppCategories.shopCategories.firstWhere(
+                          (c) => c.categoryId == category,
+                          orElse: () => AppCategories.shopCategories.first);
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
                         child: ChoiceChip(
-                          label: Text('localStores.categories.$category'.tr()),
+                          label: Text(cat.nameKey.tr()),
                           selected: isSelected,
                           onSelected: (selected) {
                             if (selected) {
@@ -290,7 +286,16 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
           ),
           Expanded(
             child: _isMapMode
-                ? SharedMapBrowser<ShopModel>(
+                ? // SharedMapBrowser 사용 주석:
+                // - dataStream: `shopRepository.fetchShops(...)` -> Firestore 쿼리 스트림을 모델 리스트로 매핑하여 전달합니다.
+                // - locationExtractor: `shop.shopLocation?.geoPoint ?? shop.geoPoint` -> 우선 `shopLocation`(BlingLocation) 좌표를 사용하고, 없으면 `geoPoint`를 폴백합니다.
+                // - titleExtractor: `legacyExtractTitle(shop)` -> 레거시 호환성을 위한 안전 추출기(여러 필드 시도).
+                // - idExtractor: `shop.id` -> Marker id/매핑에 사용됩니다.
+                // - cardBuilder: `ShopCard(shop, userModel)` -> 마커 클릭 시 표시되는 카드 위젯입니다.
+                // - thumbnailUrlExtractor: shop.imageUrls.first (있을 때) -> 마커/카드 썸네일에 사용.
+                // - categoryIconExtractor: AppCategories 기반 이모지 반환(예외시 null).
+                // - initialCameraPosition: widget.userModel?.geoPoint 를 사용(없으면 null). Map 초기화/초점 로직을 검토하세요.
+                SharedMapBrowser<ShopModel>(
                     dataStream: shopRepository
                         .fetchShops(
                             locationFilter: widget.locationFilter,
@@ -304,9 +309,24 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                             .toList()),
                     locationExtractor: (shop) =>
                         shop.shopLocation?.geoPoint ?? shop.geoPoint,
+                    titleExtractor: (shop) => legacyExtractTitle(shop),
                     idExtractor: (shop) => shop.id,
                     cardBuilder: (context, shop) =>
                         ShopCard(shop: shop, userModel: widget.userModel),
+                    thumbnailUrlExtractor: (shop) => (shop.imageUrls.isNotEmpty)
+                        ? shop.imageUrls.first
+                        : null,
+                    categoryIconExtractor: (shop) {
+                      try {
+                        final cat = AppCategories.shopCategories.firstWhere(
+                            (c) => c.categoryId == shop.category,
+                            orElse: () => AppCategories.shopCategories.first);
+                        return Text(cat.emoji,
+                            style: const TextStyle(fontSize: 14));
+                      } catch (_) {
+                        return null;
+                      }
+                    },
                     initialCameraPosition: widget.userModel?.geoPoint != null
                         ? CameraPosition(
                             target: LatLng(widget.userModel!.geoPoint!.latitude,

@@ -44,6 +44,11 @@ class ClubPostModel {
     this.eventLocation,
   });
 
+  /// Compatibility getter: some list/map UIs expect `.title`.
+  /// For club posts there is no separate title field, so expose the
+  /// `body` as `title` for compatibility.
+  String get title => body;
+
   factory ClubPostModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};

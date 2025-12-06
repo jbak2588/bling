@@ -45,6 +45,7 @@ import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -693,8 +694,8 @@ class _FeedMapViewState extends State<_FeedMapView> {
               const CameraPosition(target: LatLng(-6.2088, 106.8456), zoom: 11),
           locationExtractor: (post) => post.geoPoint,
           idExtractor: (post) => post.id,
-          // [추가] 핀 제목(툴팁) 설정: 제목이 있으면 제목, 없으면 본문 앞부분 표시
-          titleExtractor: (post) => post.title ?? post.body,
+          // [추가] 핀 제목(툴팁) 설정: 안전한 레거시 제목 추출기 사용
+          titleExtractor: (post) => legacyExtractTitle(post),
           thumbnailUrlExtractor: (post) =>
               (post.mediaUrl != null && post.mediaUrl!.isNotEmpty)
                   ? post.mediaUrl!.first

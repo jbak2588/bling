@@ -10,4 +10,7 @@ class AuctionCategoryModel {
     required this.emoji,
     required this.nameKey,
   });
+
+  /// Compatibility getter: use `nameKey` as a human-readable title.
+  String get title => nameKey;
 }

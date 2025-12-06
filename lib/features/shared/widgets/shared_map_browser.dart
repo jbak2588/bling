@@ -188,6 +188,16 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
               onMapCreated: (GoogleMapController controller) {
                 if (!_controller.isCompleted) {
                   _controller.complete(controller);
+                  // Ensure we attempt to compute marker screen positions once
+                  // the map controller becomes available. This fixes a race
+                  // where markers are created before the controller is
+                  // ready (e.g. when opening a sub-category tab first),
+                  // causing overlay tooltips to never be shown.
+                  WidgetsBinding.instance.addPostFrameCallback((_) async {
+                    try {
+                      await _updateMarkerScreenPositions();
+                    } catch (_) {}
+                  });
                 }
               },
               onCameraIdle: () async {
@@ -315,6 +325,13 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
   void _showGroupListBottomSheet(List<T> items, String baseTitle) {
     if (items.isEmpty) return;
 
+    // If the group only contains a single item, skip the list bottom sheet
+    // and open the detail directly for smoother UX.
+    if (items.length == 1) {
+      _showBottomSheet(items.first);
+      return;
+    }
+
     final headerTitle =
         items.length > 1 ? '$baseTitle · ${items.length}' : baseTitle;
 
@@ -358,11 +375,20 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
         } catch (_) {}
       }
       if (mounted) {
-        setState(() {
-          _markerScreenPositions
-            ..clear()
-            ..addAll(next);
-        });
+        // Don't immediately clear existing positions when the newly
+        // computed `next` map is empty. This can happen transiently
+        // during stream/tab changes or when the map controller cannot
+        // provide coordinates yet. Preserving previous positions avoids
+        // a brief disappearance of overlay tooltips/labels.
+        if (next.isNotEmpty || _markerScreenPositions.isEmpty) {
+          setState(() {
+            _markerScreenPositions
+              ..clear()
+              ..addAll(next);
+          });
+        }
+        // If `next` is empty but we already have positions, keep them
+        // until a real update with positions occurs.
       }
     } catch (_) {}
   }

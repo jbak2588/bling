@@ -25,6 +25,9 @@ class ClubMemberModel {
     );
   }
 
+  /// Compatibility getter: use userId as a short title/label.
+  String get title => userId;
+
   Map<String, dynamic> toJson() {
     return {
       'userId': userId,

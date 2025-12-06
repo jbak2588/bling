@@ -62,6 +62,20 @@ class SharedMapPostListBottomSheet<T> extends StatelessWidget {
                       '${items.length}',
                       style: theme.textTheme.bodyMedium,
                     ),
+                    const SizedBox(width: 8),
+                    // Close button
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Icon(Icons.close,
+                              size: 20, color: theme.iconTheme.color),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

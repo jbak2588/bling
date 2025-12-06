@@ -93,6 +93,10 @@ class ShopModel {
     this.tags = const [],
   });
 
+  /// Compatibility getter: some UI/helpers expect a `title` property.
+  /// Map `title` to `name` for ShopModel to provide a consistent API.
+  String get title => name;
+
   factory ShopModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};
     final shopLocMap = data['shopLocation'];

@@ -45,6 +45,8 @@ import 'package:provider/provider.dart'; // ✅ Provider
 import 'dart:math' as math; // 거리 계산용
 import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
+import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
 
 import '../models/product_model.dart';
 import '../widgets/product_card.dart';
@@ -325,7 +327,17 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                 ];
               },
               body: _isMapMode
-                  ? SharedMapBrowser<ProductModel>(
+                  ? // SharedMapBrowser 사용 주석:
+                  // - dataStream: `buildQuery().snapshots().map(...)` 내부에서 products 컬렉션 쿼리를 구성하여 반환합니다.
+                  //   주의: 여기서는 쿼리 빌더(카테고리 필터, 상태 필터, 정렬 등)를 직접 구성하므로 인덱스/where절 변경 시 일관성 검토 필요.
+                  // - initialCameraPosition: `initialMapCenter` (위치 우선순위 로직 확인 필요).
+                  // - locationExtractor: `product.geoPoint` -> 제품 문서의 geoPoint 사용.
+                  // - idExtractor: `product.id`.
+                  // - titleExtractor: `legacyExtractTitle(product)` -> 레거시 필드 호환성.
+                  // - cardBuilder: ProductCard 래핑 컨테이너 사용(카드 렌더링 및 디자인 주의).
+                  // - thumbnailUrlExtractor: product.imageUrls.first (있을 때).
+                  // - categoryIconExtractor: AppCategories.shopCategories 기반 이모지 반환.
+                  SharedMapBrowser<ProductModel>(
                       dataStream: (() {
                         Query<Map<String, dynamic>> q =
                             FirebaseFirestore.instance.collection('products');
@@ -359,11 +371,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       ),
                       locationExtractor: (product) => product.geoPoint,
                       idExtractor: (product) => product.id,
-                      titleExtractor: (product) =>
-                          (product as dynamic).title ??
-                          (product as dynamic).body ??
-                          (product as dynamic).name ??
-                          (product as dynamic).productName,
+                      titleExtractor: (product) => legacyExtractTitle(product),
                       cardBuilder: (context, product) => Container(
                         margin: const EdgeInsets.symmetric(
                             horizontal: 16.0, vertical: 12.0),
@@ -383,6 +391,21 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                           product: product,
                         ),
                       ),
+                      thumbnailUrlExtractor: (product) =>
+                          (product.imageUrls.isNotEmpty)
+                              ? product.imageUrls.first
+                              : null,
+                      categoryIconExtractor: (product) {
+                        try {
+                          final cat = AppCategories.shopCategories.firstWhere(
+                              (c) => c.categoryId == product.categoryId,
+                              orElse: () => AppCategories.shopCategories.first);
+                          return Text(cat.emoji,
+                              style: const TextStyle(fontSize: 14));
+                        } catch (_) {
+                          return null;
+                        }
+                      },
                     )
                   : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                       stream: buildQuery().snapshots(),

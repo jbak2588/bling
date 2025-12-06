@@ -77,6 +77,12 @@ class LostItemModel {
     this.searchIndex = const [],
   });
 
+  // Compatibility getters: some UI code expects `.title` or `.body`.
+  // Provide these as aliases to `itemDescription` to avoid NoSuchMethodError
+  // when older call sites still reference those properties.
+  String get title => itemDescription;
+  String get body => itemDescription;
+
   factory LostItemModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? {};

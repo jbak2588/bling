@@ -21,6 +21,7 @@ import 'package:image_picker/image_picker.dart'; // [추가] image_picker
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart'; // [추가] 고유 파일명 생성
 import 'package:easy_localization/easy_localization.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
 
 // ✅ 공용 태그 입력 위젯을 import 합니다.
 import 'package:bling_app/features/shared/widgets/custom_tag_input_field.dart';
@@ -50,23 +51,14 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
   GeoPoint? _geoPoint;
 
   // ignore: prefer_final_fields
-  String _mainCategory = 'sports'; // [추가]
+  String _mainCategory = AppCategories.clubCategories.isNotEmpty
+      ? AppCategories.clubCategories.first.categoryId
+      : 'sports'; // [추가]
   List<String> _interestTags = []; // [추가]
 
-  // [추가] 카테고리 목록
-  final List<String> _categories = [
-    'sports',
-    'hobbies',
-    'social',
-    'study',
-    'reading',
-    'culture',
-    'travel',
-    'volunteer',
-    'pets',
-    'food',
-    'etc'
-  ];
+  // 카테고리 목록은 중앙화된 AppCategories.clubCategories를 사용합니다.
+  final List<String> _categories =
+      AppCategories.clubCategories.map((c) => c.categoryId).toList();
 
   // [추가] 목표 인원 설정
   // ignore: prefer_final_fields
@@ -334,9 +326,12 @@ class _CreateClubScreenState extends State<CreateClubScreen> {
                     border: const OutlineInputBorder(),
                   ),
                   items: _categories.map((cat) {
+                    final model = AppCategories.clubCategories.firstWhere(
+                        (c) => c.categoryId == cat,
+                        orElse: () => AppCategories.clubCategories.first);
                     return DropdownMenuItem(
                       value: cat,
-                      child: Text('clubs.categories.$cat'.tr()),
+                      child: Text(model.nameKey.tr()),
                     );
                   }).toList(),
                   onChanged: (val) {
