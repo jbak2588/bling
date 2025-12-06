@@ -119,8 +119,7 @@
   "chat": {
     "system": {
       "roomCreated": "대화가 시작되었습니다.",
-      "userJoined": "{nickname}님이 채팅에 참여했습니다."
-      ,
+      "userJoined": "{nickname}님이 채팅에 참여했습니다.",
       "chatRestored": "채팅방이 생성 및 복구되었습니다.",
       "chatInfoSynced": "채팅방 이름과 대표 이미지가 갱신되었습니다.",
       "syncFailed": "동기화 실패: {error}"
@@ -234,6 +233,7 @@
       "noCategory": "카테고리를 선택해주세요.",
       "loginRequired": "로그인이 필요합니다.",
       "userNotFound": "사용자 정보를 찾을 수 없습니다.",
+      "unknown": "알 수 없는 오류가 발생했습니다. 다시 시도해 주세요.",
       "aiReserved": "AI 안심 예약으로 잠긴 상품입니다. 구매자가 인수를 완료/취소해야 상태가 변경됩니다."
     },
     "condition": {
@@ -427,6 +427,10 @@
       "friends": "친구",
       "tickets": "내 티켓"
     },
+    "friendsTabs": {
+      "myFriends": "내 친구",
+      "starred": "관심 이웃"
+    },
     "stats": {
       "posts": "게시물",
       "followers": "팔로워",
@@ -437,6 +441,7 @@
     "sentFriendRequests": "보낸 친구 요청",
     "products": {
       "empty": "등록한 상품이 없습니다.",
+      "bookmarkeded": "찜되었습니다",
       "detailsTitle": "상품 상세 정보",
       "editButton": "상품 수정",
       "loadErrorWithMsg": "상품을 불러오는 중 오류가 발생했습니다: {error}",
@@ -635,6 +640,9 @@
     "emptyList": "지금 진행 중인 모임이 없어요.\n첫 번째 모임을 주최해보세요!",
     "createFirst": "첫 번째 모임 만들기",
     "createTitle": "전단지 만들기",
+    "create": {
+      "subtitle": "함께 할 이웃 찾기"
+    },
     "editTitle": "전단지 수정하기",
     "theme": "디자인 테마",
     "whatLabel": "무엇을 함께 할까요? (제목)",
@@ -878,6 +886,8 @@
     "apply": "적용",
     "verified": "인증",
     "bookmark": "찜하기",
+    "chat": "채팅",
+    "block": "차단",
     "viewMore": "더 보기",
     "sort": {
       "default": "기본",
@@ -892,10 +902,10 @@
     "unknownUser": "알 수 없는 사용자",
     "copiedTitle": "복사됨!",
     "copiedMessage": "{title}이(가) 클립보드에 복사되었습니다.",
-    "select": "선택"
-    ,"optionalSuffix": "(필요 시 입력 또는 사용)"
+    "select": "선택",
+    "optionalSuffix": "(필요 시 입력 또는 사용)",
+    "addFriend": "친구 추가"
   },
-  
   "upload": {
     "pause": "일시정지",
     "resume": "다시 시작",
@@ -1247,7 +1257,11 @@
     "loginRequired": "로그인이 필요합니다.",
     "unblocked": "차단 해제됨",
     "blocked": "차단됨",
-    "unblock": "차단 해제"
+    "unblock": "차단 해제",
+    "bookmark": "찜하기",
+    "bookmarkeded": "찜되었습니다",
+    "bookmarked": "찜되었습니다",
+    "unbookmarked": "찜 해제됨"
   },
   "locationFilter": {
     "title": "지역 필터",
@@ -1545,8 +1559,7 @@
       "categoryError": "카테고리를 선택해주세요.",
       "productsLabel": "대표 상품/서비스",
       "productsHint": "쉼표로 구분, 예: 커트, 염색, 펌",
-      "imageError": "사진을 최소 한 장 이상 추가해주세요."
-      ,
+      "imageError": "사진을 최소 한 장 이상 추가해주세요.",
       "shopLocationLabel": "상점 위치",
       "shopLocationHint": "지도에서 위치를 선택하거나 검색하세요",
       "shopLocationError": "상점 위치를 선택해 주세요."
@@ -1918,8 +1931,7 @@
       "bountyAmountMax": "최대 금액은 100,000,000원입니다.",
       "success": "등록되었습니다.",
       "fail": "등록에 실패했습니다: {error}",
-      "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다."
-      ,
+      "tagsHint": "쉼표(,) 또는 엔터로 태그를 등록할 수 있습니다.",
       "placeLabel": "분실 또는 발견 장소",
       "placeHint": "주소를 검색하거나 지도를 선택하세요"
     },
@@ -1988,56 +2000,69 @@
     "serviceIntroTitle": "서비스 소개",
     "serviceIntroBody": "블링은 우리 동네를 더 가깝고 신뢰 있게 연결하는 하이퍼로컬 슈퍼 앱입니다. 뉴스, 거래, 모임, 그리고 가벼운 번개까지, 당신의 동네 생활에 필요한 모든 것을 하나로 담았습니다.",
     "keyFeaturesTitle": "주요 기능 (Key Features)",
+    "manualTitle": "사용자 매뉴얼 및 안내",
+    "manualIntro": "아래 기능을 탭하면 사용 방법을 확인할 수 있습니다.",
     "features": {
       "together": {
         "title": "함께 해요 (Together)",
-        "desc": "[NEW] 지금 당장, 가볍게 모이는 동네 번개 & QR 티켓"
+        "desc": "[NEW] 지금 당장, 가볍게 모이는 동네 번개 & QR 티켓",
+        "guide": "1. 모임(예: 러닝, 커피)을 위한 '전단지'를 만드세요.\n2. 이웃이 참여하면 QR 티켓을 받습니다.\n3. 주최자가 QR 코드를 스캔해 참가자를 확인합니다."
       },
       "localNews": {
         "title": "동네 소식 (Local News)",
-        "desc": "우리 동네의 생생한 이야기와 정보 공유"
+        "desc": "우리 동네의 생생한 이야기와 정보 공유",
+        "guide": "1. 동네(RT/RW/읍·면·동)의 소식을 공유하세요.\n2. #교통, #행사 같은 태그로 분류하세요.\n3. 신뢰받는 이웃(인증된 사용자)은 노출도가 높아집니다."
       },
       "marketplace": {
         "title": "중고 거래 (Marketplace)",
-        "desc": "AI가 검수해주는 안전하고 스마트한 거래"
+        "desc": "AI가 검수해주는 안전하고 스마트한 거래",
+        "guide": "1. 사진을 업로드하면 AI가 상품을 분석합니다.\n2. 신뢰를 위한 'AI 검증' 뱃지를 획득하세요.\n3. 구매자는 안전 예약을 위해 10% 보증금을 낼 수 있습니다."
       },
       "jobs": {
         "title": "구인 구직 (Jobs)",
-        "desc": "동네 알바부터 전문직까지, 내 집 근처 일자리"
+        "desc": "동네 알바부터 전문직까지, 내 집 근처 일자리",
+        "guide": "1. '정규 일자리' 또는 '단기 작업(Quick Gigs)'을 게시하세요(예: 이사 도우미).\n2. 자신의 '재능(Talent)' 프로필을 등록할 수도 있습니다.\n3. 채팅으로 바로 고용하거나 구직할 수 있습니다."
       },
       "lostAndFound": {
         "title": "분실물 찾기 (Lost & Found)",
-        "desc": "지도와 사례금으로 연결하는 분실/습득물 센터"
+        "desc": "지도와 사례금으로 연결하는 분실/습득물 센터",
+        "guide": "1. 분실 위치를 지도에 표시하세요.\n2. 이웃의 참여를 유도하기 위해 '보상'을 설정하세요.\n3. 찾았을 경우 해결 처리하여 신뢰 점수를 부여하세요."
       },
       "localStores": {
         "title": "동네 업체 (Local Stores)",
-        "desc": "우리 동네 숨은 가게와 핫플레이스 정보"
+        "desc": "우리 동네 숨은 가게와 핫플레이스 정보",
+        "guide": "1. 가게 주인은 무료로 매장을 등록할 수 있습니다.\n2. 이웃은 후기 작성 및 문의 채팅을 할 수 있습니다.\n3. '인증(Verified)' 뱃치를 확인하세요."
       },
       "findFriends": {
         "title": "동네 친구 (Find Friends)",
-        "desc": "취향이 맞는 가까운 이웃 찾기"
+        "desc": "취향이 맞는 가까운 이웃 찾기",
+        "guide": "1. 관심사와 신뢰 수준에 따라 프로필을 찾아보세요.\n2. 즉시 채팅을 시작하세요(제한: 신규 채팅 5건/일).\n3. 마음에 드는 이웃은 '별표'로 북마크하세요."
       },
       "clubs": {
         "title": "소모임 (Clubs)",
-        "desc": "공통의 관심사로 뭉치는 지역 동호회"
+        "desc": "공통의 관심사로 뭉치는 지역 동호회",
+        "guide": "1. 먼저 동호회 아이디어를 제안(Propose)하세요.\n2. 충분한 이웃이 가입하면 '활성 동호회'가 됩니다.\n3. 그룹 채팅과 이벤트 게시판을 즐기세요."
       },
       "realEstate": {
         "title": "부동산 (Real Estate)",
-        "desc": "직거래로 더 투명한 우리 동네 매물"
+        "desc": "직거래로 더 투명한 우리 동네 매물",
+        "guide": "1. 고시원(Kos), 아파트 또는 주택으로 필터링하세요.\n2. 고시원 정보(예: 내부 화장실, 전기 포함)를 확인하세요.\n3. 집주인 또는 중개인과 직접 채팅하세요."
       },
       "auction": {
         "title": "경매 (Auction)",
-        "desc": "실시간으로 참여하는 즐거운 중고 경매"
+        "desc": "실시간으로 참여하는 즐거운 중고 경매",
+        "guide": "1. 희귀 아이템을 경매에 등록하세요.\n2. 구매자는 실시간으로 입찰합니다.\n3. 시간이 끝나면 최고 입찰자가 낙찰됩니다."
       },
       "pom": {
         "title": "뽐 (POM)",
-        "desc": "짧은 영상으로 만나는 우리 동네 라이프스타일"
+        "desc": "짧은 영상으로 만나는 우리 동네 라이프스타일",
+        "guide": "1. 일상 짧은 동영상을 업로드하세요.\n2. 위치나 좋아하는 가게를 태그하세요.\n3. 좋아요와 댓글로 소통하세요."
       }
     },
     "developmentTitle": "개발 및 운영",
     "developmentBody": "Powered by Flutter & Firebase",
     "developerLabel": "Developer",
-    "developerNames": "Chief Technology Officer (CTO): Jae Hyun Park"
+    "developerNames": "Developer : Jae Hyun Park(CTO)"
   },
   "address_neighborhood": "동네",
   "address_detail_hint": "상세 주소",
@@ -2372,7 +2397,6 @@
       "raw_json": "Raw JSON"
     }
   },
-  
   "auth": {
     "verification": {
       "title": "이메일 인증",

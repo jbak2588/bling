@@ -30,6 +30,8 @@
 // - (Job 10) 'ChatRoomScreen'의 생성자 변경에 따라 'chatId'를 생성하여 전달하도록 수정.
 // - (Job 15, 17) 'isNewChat: true' 플래그를 'ChatRoomScreen'으로 전달.
 // - (Job 29-31) 'startFriendChat' Cloud Function을 호출하는 스팸 방지 로직(일일 한도) 적용.
+// - [Task 16] 상세 화면 위치 정보 프라이버시 포맷 적용
+// - [Task 18] 관심 이웃(즐겨찾기) 기능 추가 및 Firestore 연동
 
 // 주의: 공유/딥링크를 만들 때 호스트를 직접 하드코딩하지 마세요.
 // 대신 `lib/core/constants/app_links.dart`의 `kHostingBaseUrl`을 사용하세요.
@@ -73,12 +75,76 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
   late UserModel user;
   late UserModel currentUser;
   bool _isStartingChat = false; // [v2.1] 스팸 방지 로딩 상태
+  bool _isBookmarked = false; // [Task 18] 관심 이웃 상태
+
+  // [Task 16] 위치 정보 프라이버시 보호 헬퍼 (카드와 동일 로직 적용)
+  String _getSafeLocationText(UserModel user) {
+    if (user.locationParts != null) {
+      final parts = user.locationParts!;
+      final List<String> displayParts = [];
+
+      if (parts['kel'] != null) {
+        displayParts.add("Kel. ${parts['kel']}");
+      }
+      if (parts['kec'] != null) {
+        displayParts.add("Kec. ${parts['kec']}");
+      }
+      if (parts['kab'] != null) {
+        displayParts.add("${parts['kab']}"); // 상세에서는 Kab까지 표시
+      }
+
+      if (displayParts.isNotEmpty) return displayParts.join(', ');
+    }
+    return user.locationName ?? '';
+  }
 
   @override
   void initState() {
     super.initState();
     user = widget.user;
     currentUser = widget.currentUserModel;
+    // [Task 18] 초기 즐겨찾기 상태 확인
+    _isBookmarked = currentUser.bookmarkedUserIds?.contains(user.uid) ?? false;
+  }
+
+  // [Task 18] 관심 이웃 토글 로직
+  Future<void> _toggleBookmark() async {
+    final firestore = FirebaseFirestore.instance;
+    final userRef = firestore.collection('users').doc(currentUser.uid);
+    final targetId = user.uid;
+
+    setState(() {
+      _isBookmarked = !_isBookmarked;
+    });
+
+    try {
+      if (_isBookmarked) {
+        await userRef.update({
+          'bookmarkedUserIds': FieldValue.arrayUnion([targetId])
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('friendDetail.bookmarkeded'
+                  .tr(namedArgs: {'nickname': user.nickname}))));
+        }
+      } else {
+        await userRef.update({
+          'bookmarkedUserIds': FieldValue.arrayRemove([targetId])
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('friendDetail.unbookmarked'
+                  .tr(namedArgs: {'nickname': user.nickname}))));
+        }
+      }
+    } catch (e) {
+      // 실패 시 롤백
+      if (mounted) {
+        setState(() => _isBookmarked = !_isBookmarked);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('common.error'.tr())));
+      }
+    }
   }
 
   @override
@@ -121,10 +187,11 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                   TrustLevelBadge(trustLevelLabel: user.trustLevelLabel),
                 ],
               ),
-              if (user.locationName != null && user.locationName!.isNotEmpty)
+              // [Task 16] 상세 화면에서도 정제된 위치 표시
+              if (user.locationName != null || user.locationParts != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(user.locationName!,
+                  child: Text(_getSafeLocationText(user),
                       style: Theme.of(context).textTheme.titleMedium),
                 ),
               if (user.bio != null && user.bio!.isNotEmpty) ...[
@@ -164,6 +231,18 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                 text:
                     '${user.nickname}님 프로필 보기: $kHostingBaseUrl/user/${user.uid}')),
           ),
+          // [Task 18] 관심 이웃(즐겨찾기) 버튼 추가
+          if (currentUser.uid != user.uid) // 본인은 즐겨찾기 불가
+            IconButton(
+              icon: Icon(
+                _isBookmarked ? Icons.star : Icons.star_border,
+                color: _isBookmarked ? Colors.amber : null,
+              ),
+              tooltip: _isBookmarked
+                  ? 'friendDetail.unbookmarked'.tr()
+                  : 'friendDetail.bookmark'.tr(),
+              onPressed: _toggleBookmark,
+            ),
           // 본인 프로필이면 편집 아이콘 노출
           if (currentUser.uid == user.uid)
             IconButton(
@@ -282,10 +361,11 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                     TrustLevelBadge(trustLevelLabel: user.trustLevelLabel),
                   ],
                 ),
-                if (user.locationName != null && user.locationName!.isNotEmpty)
+                // [Task 16] 리스트 뷰 내부 위치 텍스트도 수정
+                if (user.locationName != null || user.locationParts != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(user.locationName!,
+                    child: Text(_getSafeLocationText(user),
                         style: Theme.of(context).textTheme.titleMedium),
                   ),
                 if (user.bio != null && user.bio!.isNotEmpty) ...[
@@ -341,7 +421,8 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                               List<String> ids = [currentUser.uid, user.uid];
                               ids.sort();
                               String chatRoomId = ids.join('_');
-
+                              // [Task 23] 자동 친구 추가 로직 제거 (사용자 선택권 존중)
+                              // 친구 추가는 '관심 이웃(Star)' 또는 추후 '친구 맺기' 액션을 통해서만 이루어짐.
                               if (mounted) {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(

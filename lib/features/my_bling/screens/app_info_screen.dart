@@ -1,9 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart'; // flutter_svg 패키지 필요
 import 'package:easy_localization/easy_localization.dart';
 
 class AppInfoScreen extends StatelessWidget {
   final bool embedded;
   const AppInfoScreen({super.key, this.embedded = false});
+
+  // [Task 29] SVG 경로 및 다국어 키 매핑 데이터
+  // home_screen.dart의 순서와 리소스를 참조함
+  final List<Map<String, String>> _features = const [
+    {
+      'key': 'together',
+      'icon': 'assets/icons/ico_together.svg', // 경로 확인 필요
+    },
+    {
+      'key': 'localNews',
+      'icon': 'assets/icons/ico_news.svg',
+    },
+    {
+      'key': 'marketplace',
+      'icon': 'assets/icons/ico_secondhand.svg',
+    },
+    {
+      'key': 'jobs',
+      'icon': 'assets/icons/ico_job.svg',
+    },
+    {
+      'key': 'lostAndFound',
+      'icon': 'assets/icons/ico_lost_item.svg',
+    },
+    {
+      'key': 'localStores',
+      'icon': 'assets/icons/ico_store.svg',
+    },
+    {
+      'key': 'findFriends',
+      'icon': 'assets/icons/ico_friend_3d_deep.svg',
+    },
+    {
+      'key': 'clubs',
+      'icon': 'assets/icons/ico_community.svg',
+    },
+    {
+      'key': 'realEstate',
+      'icon': 'assets/icons/ico_real_estate.svg',
+    },
+    {
+      'key': 'auction',
+      'icon': 'assets/icons/ico_auction.svg',
+    },
+    {
+      'key': 'pom',
+      'icon': 'assets/icons/ico_pom.svg',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -22,12 +72,14 @@ class AppInfoScreen extends StatelessWidget {
               Container(
                 width: 80,
                 height: 80,
+                padding: const EdgeInsets.all(16), // SVG 패딩
                 decoration: BoxDecoration(
                   color: theme.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
+                // [Task 29] 메인 로고 SVG 사용 권장 (없으면 기존 아이콘 유지)
                 child: Icon(Icons.info_outline,
-                    size: 48, color: theme.primaryColor),
+                    size: 40, color: theme.primaryColor),
               ),
               const SizedBox(height: 16),
               Text('appInfo.appName'.tr(),
@@ -46,75 +98,44 @@ class AppInfoScreen extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           'appInfo.serviceIntroBody'.tr(),
-          style: bodyStyle,
+          style: bodyStyle?.copyWith(height: 1.5),
         ),
         const Divider(height: 40),
 
-        // 3. 주요 기능 (11개 섹션)
-        Text('appInfo.keyFeaturesTitle'.tr(), style: titleStyle),
+        // 3. 주요 기능 매뉴얼 (제목과 서브타이틀을 세로 배치)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('appInfo.manualTitle'.tr(), style: titleStyle), // "사용자 매뉴얼"
+            Text(
+              'appInfo.manualIntro'.tr(), // "탭하여 상세 사용법 확인"
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
-        _buildFeatureRow(
+
+        // [Task 29] SVG 아이콘과 확장형 매뉴얼 생성
+        ..._features.map((item) {
+          final key = item['key']!;
+          final iconPath = item['icon']!;
+
+          return _buildFeatureManualItem(
             context,
-            Icons.volunteer_activism,
-            'appInfo.features.together.title'.tr(),
-            'appInfo.features.together.desc'.tr()),
-        _buildFeatureRow(
-            context,
-            Icons.article,
-            'appInfo.features.localNews.title'.tr(),
-            'appInfo.features.localNews.desc'.tr()),
-        _buildFeatureRow(
-            context,
-            Icons.store_mall_directory,
-            'appInfo.features.marketplace.title'.tr(),
-            'appInfo.features.marketplace.desc'.tr()),
-        _buildFeatureRow(
-            context,
-            Icons.work,
-            'appInfo.features.jobs.title'.tr(),
-            'appInfo.features.jobs.desc'.tr()),
-        _buildFeatureRow(
-            context,
-            Icons.report_problem,
-            'appInfo.features.lostAndFound.title'.tr(),
-            'appInfo.features.lostAndFound.desc'.tr()),
-        _buildFeatureRow(
-            context,
-            Icons.store,
-            'appInfo.features.localStores.title'.tr(),
-            'appInfo.features.localStores.desc'.tr()),
-        _buildFeatureRow(
-            context,
-            Icons.people,
-            'appInfo.features.findFriends.title'.tr(),
-            'appInfo.features.findFriends.desc'.tr()),
-        _buildFeatureRow(
-            context,
-            Icons.groups,
-            'appInfo.features.clubs.title'.tr(),
-            'appInfo.features.clubs.desc'.tr()),
-        _buildFeatureRow(
-            context,
-            Icons.home,
-            'appInfo.features.realEstate.title'.tr(),
-            'appInfo.features.realEstate.desc'.tr()),
-        _buildFeatureRow(
-            context,
-            Icons.gavel,
-            'appInfo.features.auction.title'.tr(),
-            'appInfo.features.auction.desc'.tr()),
-        _buildFeatureRow(
-            context,
-            Icons.video_library,
-            'appInfo.features.pom.title'.tr(),
-            'appInfo.features.pom.desc'.tr()),
+            iconPath,
+            'appInfo.features.$key.title'.tr(),
+            'appInfo.features.$key.desc'.tr(),
+            'appInfo.features.$key.guide'.tr(), // 상세 가이드 텍스트
+          );
+        }),
+
         const Divider(height: 40),
 
         // 4. 개발 정보
         Text('appInfo.developmentTitle'.tr(), style: titleStyle),
         const SizedBox(height: 8),
-        Text('appInfo.developmentBody'.tr(), style: bodyStyle),
-        const SizedBox(height: 4),
+        // Text('appInfo.developmentBody'.tr(), style: bodyStyle),
+        // const SizedBox(height: 4),
         Text('appInfo.developerNames'.tr(), style: bodyStyle),
         const SizedBox(height: 40),
       ],
@@ -128,25 +149,69 @@ class AppInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatureRow(
-      BuildContext context, IconData icon, String title, String desc) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  // [Task 29] 확장형 매뉴얼 아이템 빌더
+  Widget _buildFeatureManualItem(BuildContext context, String svgPath,
+      String title, String desc, String guide) {
+    final theme = Theme.of(context);
+
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        backgroundColor: Colors.grey.shade50, // 펼쳤을 때 배경색
+        collapsedBackgroundColor: Colors.white,
+        leading: Container(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: theme.primaryColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          // [Task 29] SVG 아이콘 적용
+          child: SvgPicture.asset(
+            svgPath,
+            fit: BoxFit.contain,
+          ),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        subtitle: Text(
+          desc,
+          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         children: [
-          Icon(icon, size: 20, color: Theme.of(context).primaryColor),
-          const SizedBox(width: 12),
-          Expanded(
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 2),
-                Text(desc,
-                    style: TextStyle(
-                        fontSize: 12, color: Colors.grey[700], height: 1.3)),
+                const Divider(height: 1),
+                const SizedBox(height: 12),
+                Text(
+                  "How to use:",
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: theme.primaryColor),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  guide,
+                  style: TextStyle(
+                      fontSize: 13, color: Colors.grey[800], height: 1.6),
+                ),
               ],
             ),
           ),

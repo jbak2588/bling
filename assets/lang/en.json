@@ -20,8 +20,8 @@
       "wrongPassword": "Wrong password.",
       "unknownError": "unknownError"
     }
-},
-"notifications": {
+  },
+  "notifications": {
     "title": "Notifications",
     "error": "Failed to retrieve notifications.",
     "empty": "There are no notifications to display.",
@@ -119,8 +119,7 @@
   "chat": {
     "system": {
       "roomCreated": "Conversation started.",
-      "userJoined": "{nickname} joined the chat."
-      ,
+      "userJoined": "{nickname} joined the chat.",
       "chatRestored": "Chat room was created and restored.",
       "chatInfoSynced": "Chat room name and cover image have been updated.",
       "syncFailed": "Sync failed: {error}"
@@ -234,6 +233,7 @@
       "noCategory": "Please select a category.",
       "loginRequired": "Login is required.",
       "userNotFound": "User information could not be found.",
+      "unknown": "An unknown error has occurred. Please try again.",
       "aiReserved": "This product is locked by an AI Safe Reservation. The buyer must complete or cancel the takeover before the status can be changed."
     },
     "condition": {
@@ -426,6 +426,10 @@
       "bookmarks": "Bookmarks",
       "friends": "Friends",
       "tickets": "My Tickets"
+    },
+    "friendsTabs": {
+      "myFriends": "Friends",
+      "starred": "Starred"
     },
     "stats": {
       "posts": "Posts",
@@ -635,6 +639,9 @@
     "emptyList": "No active gatherings yet.\nBe the first host!",
     "createFirst": "Create First Gathering",
     "createTitle": "Create Flyer",
+    "create": {
+      "subtitle": "Find neighbors to join"
+    },
     "editTitle": "Edit Flyer",
     "theme": "Design Theme",
     "whatLabel": "What to do together? (Title)",
@@ -878,6 +885,8 @@
     "apply": "Apply",
     "verified": "Verified",
     "bookmark": "Bookmark",
+    "chat": "Chat",
+    "block": "Block",
     "viewMore": "View more",
     "sort": {
       "default": "Default",
@@ -889,11 +898,13 @@
     "edit": "Edit",
     "submit": "Submit",
     "loginRequired": "Login is required.",
+    "userNotFound": "User not found.",
     "unknownUser": "Unknown user",
     "copiedTitle": "Copied!",
     "copiedMessage": "{title} copied to clipboard.",
-    "select": "Select"
-    ,"optionalSuffix": "(optional — enter or use if needed)"
+    "select": "Select",
+    "optionalSuffix": "(optional — enter or use if needed)",
+    "addFriend": "Add friend"
   },
   "upload": {
     "pause": "Pause",
@@ -1246,7 +1257,10 @@
     "loginRequired": "Login is required.",
     "unblocked": "unblocked",
     "blocked": "blocked",
-    "unblock": "unblock"
+    "unblock": "unblock",
+    "bookmark": "Bookmark",
+    "bookmarkeded": "Added to bookmarks",
+    "unbookmarked": "Removed from bookmarks"
   },
   "locationFilter": {
     "title": "Location Filter",
@@ -1544,8 +1558,7 @@
       "categoryError": "Please select a category.",
       "productsLabel": "Representative Products/Services",
       "productsHint": "Comma-separated, e.g. Haircut, Coloring, Perm",
-      "imageError": "imageError"
-      ,
+      "imageError": "imageError",
       "shopLocationLabel": "Shop location",
       "shopLocationHint": "Search or pick the place on the map",
       "shopLocationError": "Please select the shop location."
@@ -1917,8 +1930,7 @@
       "bountyAmountMax": "Maximum amount is 100,000,000.",
       "success": "Registered.",
       "fail": "Failed to register: {error}",
-      "tagsHint": "You can register tags using comma (,) or Enter."
-      ,
+      "tagsHint": "You can register tags using comma (,) or Enter.",
       "placeLabel": "Place (lost or found)",
       "placeHint": "Search address or pick on map"
     },
@@ -1987,56 +1999,69 @@
     "serviceIntroTitle": "About the Service",
     "serviceIntroBody": "Bling is a hyper-local super app that brings your neighborhood closer and more trustworthy. News, trading, meetups, and instant gatherings — everything for local life in one place.",
     "keyFeaturesTitle": "Key Features",
+    "manualTitle": "User Manual & Guide",
+    "manualIntro": "Tap on each feature below to learn how to use it.",
     "features": {
       "together": {
         "title": "Together",
-        "desc": "[NEW] Instant local meetups & QR ticketing"
+        "desc": "[NEW] Instant local meetups & QR ticketing",
+        "guide": "1. Create a 'Flyer' for a meetup (Jogging, Coffee).\n2. Neighbors join and receive a QR Ticket.\n3. Host scans the QR code to verify attendees."
       },
       "localNews": {
         "title": "Local News",
-        "desc": "Real, local stories and community updates"
+        "desc": "Real, local stories and community updates",
+        "guide": "1. Share happenings in your neighborhood (RT/RW/Kelurahan).\n2. Use tags like #Traffic, #Event to categorize.\n3. Trusted neighbors (Verified) get higher visibility."
       },
       "marketplace": {
         "title": "Marketplace",
-        "desc": "Safe and smart secondhand trading with AI checks"
+        "desc": "Safe and smart secondhand trading with AI checks",
+        "guide": "1. Upload photos and let AI analyze the item.\n2. Get an 'AI Verified' badge for trust.\n3. Buyers can pay a 10% deposit to reserve safely."
       },
       "jobs": {
         "title": "Jobs",
-        "desc": "Local part-time and professional opportunities nearby"
+        "desc": "Local part-time and professional opportunities nearby",
+        "guide": "1. Post 'Regular Jobs' or 'Quick Gigs' (e.g., Moving help).\n2. You can also register your own 'Talent' profile.\n3. Chat directly to hire or get hired."
       },
       "lostAndFound": {
         "title": "Lost & Found",
-        "desc": "Map-assisted listings and reward-enabled reunions"
+        "desc": "Map-assisted listings and reward-enabled reunions",
+        "guide": "1. Mark the lost location on the map.\n2. Set a 'Bounty' to motivate neighbors.\n3. When found, mark as resolved to give trust points."
       },
       "localStores": {
         "title": "Local Stores",
-        "desc": "Discover neighborhood shops and hidden gems"
+        "desc": "Discover neighborhood shops and hidden gems",
+        "guide": "1. Store owners can register their shop for free.\n2. Neighbors can write reviews and chat for inquiries.\n3. Check 'Verified' badges for official businesses."
       },
       "findFriends": {
         "title": "Find Friends",
-        "desc": "Connect with nearby people who share your interests"
+        "desc": "Connect with nearby people who share your interests",
+        "guide": "1. Browse profiles based on interests and trust level.\n2. Start a chat instantly (Limit: 5 new chats/day).\n3. Use the 'Star' button to bookmark neighbors you like."
       },
       "clubs": {
         "title": "Clubs",
-        "desc": "Local hobby groups and community circles"
+        "desc": "Local hobby groups and community circles",
+        "guide": "1. 'Propose' a club idea first.\n2. If enough neighbors join, it becomes an 'Active Club'.\n3. Enjoy group chats and event boards."
       },
       "realEstate": {
         "title": "Real Estate",
-        "desc": "More transparent local listings and direct deals"
+        "desc": "More transparent local listings and direct deals",
+        "guide": "1. Filter by Kos, Apartment, or House.\n2. Check 'Kos' details like 'Bathroom inside' or 'Electricity included'.\n3. Chat directly with the landlord or agent."
       },
       "auction": {
         "title": "Auction",
-        "desc": "Engaging live-style secondhand auctions"
+        "desc": "Engaging live-style secondhand auctions",
+        "guide": "1. List rare items for auction.\n2. Buyers place bids in real-time.\n3. The highest bidder wins when time runs out."
       },
       "pom": {
         "title": "POM",
-        "desc": "Short videos showcasing local lifestyle"
+        "desc": "Short videos showcasing local lifestyle",
+        "guide": "1. Upload short videos (Shorts) of your daily life.\n2. Tag your location or favorite store.\n3. Engage with likes and comments."
       }
     },
     "developmentTitle": "Development & Operations",
     "developmentBody": "Powered by Flutter & Firebase",
     "developerLabel": "Developer",
-    "developerNames": "Chief Technology Officer (CTO): Jae Hyun Park"
+    "developerNames": "Developer : Jae Hyun Park(CTO)"
   },
   "address_neighborhood": "Neighborhood",
   "address_detail_hint": "Address details",

@@ -65,6 +65,10 @@ class UserModel {
   final List<String>? bookmarkedPostIds; // 북마크한 피드 ID 목록
   final List<String>? bookmarkedProductIds; // 북마크한 마켓 상품 ID 목록
 
+  // [Task 21] 누락된 북마크 필드 추가
+  final List<String>? bookmarkedRoomIds; // [신규] 북마크한 부동산 ID 목록
+  final List<String>? bookmarkedUserIds; // [신규] 관심 이웃(찜한 유저) ID 목록
+
   // V V V --- [추가] 동호회 게시글 좋아요 목록 --- V V V
   final List<String>? bookmarkedClubPostIds;
   final List<String>? likedPomIds;
@@ -136,6 +140,8 @@ class UserModel {
     this.jobIds,
     this.bookmarkedPostIds,
     this.bookmarkedProductIds,
+    this.bookmarkedRoomIds, // [Task 21]
+    this.bookmarkedUserIds, // [Task 21]
     this.bookmarkedClubPostIds, // [추가]
     // this.rt,
     // this.rw,
@@ -211,6 +217,12 @@ class UserModel {
       bookmarkedProductIds: data['bookmarkedProductIds'] != null
           ? List<String>.from(data['bookmarkedProductIds'])
           : null,
+      bookmarkedRoomIds: data['bookmarkedRoomIds'] != null
+          ? List<String>.from(data['bookmarkedRoomIds'])
+          : null, // [Task 21]
+      bookmarkedUserIds: data['bookmarkedUserIds'] != null
+          ? List<String>.from(data['bookmarkedUserIds'])
+          : null, // [Task 21]
       bookmarkedClubPostIds: data['bookmarkedClubPostIds'] != null
           ? List<String>.from(data['bookmarkedClubPostIds'])
           : null, // [추가]
@@ -294,6 +306,8 @@ class UserModel {
       'jobIds': jobIds, // [추가]
       'bookmarkedPostIds': bookmarkedPostIds,
       'bookmarkedProductIds': bookmarkedProductIds,
+      'bookmarkedRoomIds': bookmarkedRoomIds, // [Task 21]
+      'bookmarkedUserIds': bookmarkedUserIds, // [Task 21]
       'bookmarkedClubPostIds': bookmarkedClubPostIds, // [추가]
       // 'rt': rt,
       // 'rw': rw,

@@ -370,6 +370,16 @@ class ChatService {
       'lastTimestamp': messageData.timestamp,
     };
 
+    // [Task 28 Fix] 채팅방이 존재하지 않을 경우를 대비해 participants 필드 필수 저장
+    // merge: true이므로 기존 데이터가 있어도 안전함.
+    if (allParticipantIds != null && allParticipantIds.isNotEmpty) {
+      updateData['participants'] = allParticipantIds;
+    } else if (otherUserId != null) {
+      final parts = [myUid, otherUserId];
+      parts.sort(); // ID 정렬 규칙 준수
+      updateData['participants'] = parts;
+    }
+
     // 3. 그룹/1:1 채팅에 따라 unreadCounts 업데이트
     if (allParticipantIds != null && allParticipantIds.isNotEmpty) {
       for (var userId in allParticipantIds) {
@@ -393,6 +403,11 @@ class ChatService {
     if (myUid == null) return;
 
     final chatRoomRef = _firestore.collection('chats').doc(chatId);
+
+    // [Fix] Task 27: 신규 채팅방인 경우 문서가 아직 없을 수 있으므로 존재 여부 확인
+    // 문서가 없으면 읽음 처리할 대상도 없으므로 바로 리턴하여 예외 방지
+    final docSnapshot = await chatRoomRef.get();
+    if (!docSnapshot.exists) return;
 
     // 1. 나의 '안 읽은 메시지 수'를 0으로 초기화합니다. (이 부분은 동일)
     await chatRoomRef.update({'unreadCounts.$myUid': 0});

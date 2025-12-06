@@ -79,6 +79,8 @@ import 'package:bling_app/features/together/data/together_repository.dart'; // �
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import 'package:flutter_svg/flutter_svg.dart'; // SVG support for menu icons
+
 import 'package:provider/provider.dart'; // ✅ Provider Import
 import 'package:bling_app/features/admin/screens/deletion_requests_screen.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
@@ -98,6 +100,9 @@ import 'package:bling_app/features/categories/screens/category_admin_screen.dart
 import 'package:bling_app/core/services/notification_service.dart';
 // [V3 NOTIFICATION] Task 95/96: 알림 목록 화면을 임포트합니다.
 import 'package:bling_app/features/notifications/screens/notification_list_screen.dart';
+
+// Shared icons directory for global create sheet
+const String _iconsPath = 'assets/icons';
 
 /// 현재 보고 있는 섹션을 타입 세이프하게 관리하기 위한 enum
 enum AppSection {
@@ -634,71 +639,71 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               // ✅ [작업 19] 전략적 순서로 재배열
               // 1) 동네소식
               _sheetItem(
-                  Icons.article_rounded, // 1. localNews
+                  '$_iconsPath/ico_news.svg', // 1. localNews
                   'main.tabs.localNews'.tr(),
                   'localNewsCreate.appBarTitle'.tr(),
                   builder: () => CreateLocalNewsScreen(user: userModel)),
               // 2) 동네 일자리
               _sheetItem(
-                  Icons.work_outline_rounded, // 2. jobs
+                  '$_iconsPath/ico_job.svg', // 2. jobs
                   'main.tabs.jobs'.tr(),
                   'jobs.form.title'.tr(),
                   builder: () =>
                       SelectJobTypeScreen(userModel: userModel)), // ✅ [작업 31]
               // 3) 분실물센터
               _sheetItem(
-                  Icons.report_gmailerrorred_rounded, // 3. lostAndFound
+                  '$_iconsPath/ico_lost_item.svg', // 3. lostAndFound
                   'main.tabs.lostAndFound'.tr(),
                   'lostAndFound.form.title'.tr(),
                   builder: () => CreateLostItemScreen(userModel: userModel)),
               // 4) 중고거래
               _sheetItem(
-                  Icons.store_mall_directory_rounded, // 4. marketplace
+                  '$_iconsPath/ico_secondhand.svg', // 4. marketplace
                   'main.tabs.marketplace'.tr(),
                   'marketplace.registration.title'.tr(),
                   builder: () => const ProductRegistrationScreen()),
               // 5) 동네업체
               _sheetItem(
-                  Icons.storefront_rounded, // 5. localStores
+                  '$_iconsPath/ico_store.svg', // 5. localStores
                   'main.tabs.localStores'.tr(),
                   'localStores.create.title'.tr(),
                   builder: () => CreateShopScreen(userModel: userModel)),
               // 6) 모임
               _sheetItem(
-                  Icons.groups_rounded, // 6. clubs
+                  '$_iconsPath/ico_community.svg', // 6. clubs
                   'main.tabs.clubs'.tr(),
                   'clubs.create.title'.tr(),
                   builder: () => CreateClubScreen(userModel: userModel)),
               // 7) 친구찾기
               _sheetItem(
-                  Icons.sentiment_satisfied_alt_rounded, // 7. findFriends
+                  '$_iconsPath/ico_friend_3d_deep.svg', // 7. findFriends
                   'main.tabs.findFriends'.tr(),
                   'myBling.editProfile'.tr(), // [v2.1] 툴팁 변경
                   builder: () =>
                       const ProfileEditScreen()), // [v2.1] ProfileEditScreen으로 변경
               // 8) 부동산
               _sheetItem(
-                  Icons.house_rounded, // 8. realEstate
+                  '$_iconsPath/ico_real_estate.svg', // 8. realEstate
                   'main.tabs.realEstate'.tr(),
                   'realEstate.form.title'.tr(),
                   builder: () => CreateRoomListingScreen(userModel: userModel)),
               // 9) 경매
               _sheetItem(
-                  Icons.gavel_rounded, // 9. auction
+                  '$_iconsPath/ico_auction.svg', // 9. auction
                   'main.tabs.auction'.tr(),
                   'auctions.create.title'.tr(),
                   builder: () => CreateAuctionScreen(userModel: userModel)),
               // 10) 숏폼
               _sheetItem(
-                  Icons.video_camera_back_rounded, // 10. pom
+                  '$_iconsPath/ico_pom.svg', // 10. pom
                   'main.tabs.pom'.tr(),
                   'pom.create.title'.tr(),
                   builder: () => CreatePomScreen(userModel: userModel)),
               // ✅ [작업 19] 11. Together (함께 해요)
               _sheetItem(
-                  Icons.volunteer_activism_rounded, // 11. together
+                  '$_iconsPath/ico_together.svg', // 11. together
                   'main.tabs.together'.tr(),
-                  '함께 할 이웃 찾기', // 다국어 키 권장: 'together.create.subtitle'.tr()
+                  'together.create.subtitle'.tr(),
                   builder: () => const CreateTogetherScreen()),
               const SizedBox(height: 12),
             ],
@@ -744,10 +749,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  Widget _sheetItem(IconData icon, String title, String sub,
+  Widget _sheetItem(dynamic leading, String title, String sub,
       {Widget Function()? builder, VoidCallback? onTap}) {
+    Widget leadingWidget;
+    if (leading is String) {
+      leadingWidget = SvgPicture.asset(
+        leading,
+        width: 28,
+        height: 28,
+      );
+    } else if (leading is IconData) {
+      leadingWidget = Icon(leading);
+    } else {
+      leadingWidget = const SizedBox.shrink();
+    }
+
     return ListTile(
-      leading: Icon(icon),
+      leading: leadingWidget,
       title: Text(title),
       subtitle: Text(sub),
       trailing: const Icon(Icons.chevron_right_rounded),

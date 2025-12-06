@@ -23,6 +23,8 @@
 /// Changelog     : 2025-08-26 DocHeader 최초 삽입(자동)
 /// Source Docs   : docs/index/012 Find Friend & Club & Jobs & etc 모듈.md
 /// ============================================================================
+// [작업 27] TrustLevelBadge 텍스트 표시 옵션 추가
+// [Task 16] 프라이버시 정책 적용: 위치 정보 약어 표기(Safe Location) 로직 추가
 library;
 // 아래부터 실제 코드
 
@@ -35,6 +37,23 @@ import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 class FindFriendCard extends StatelessWidget {
   final UserModel user;
   const FindFriendCard({super.key, required this.user});
+
+  // [Task 16] 위치 정보 프라이버시 보호 헬퍼
+  // locationParts를 사용하여 "Kel. OO, Kec. OO" 형태로 변환
+  String _getSafeLocationText(UserModel user) {
+    if (user.locationParts != null) {
+      final parts = user.locationParts!;
+      final List<String> displayParts = [];
+
+      if (parts['kel'] != null) displayParts.add("Kel. ${parts['kel']}");
+      if (parts['kec'] != null) displayParts.add("Kec. ${parts['kec']}");
+      // Kab/Kota 정보는 너무 넓으므로 필요 시 추가, 여기서는 동네 중심
+
+      if (displayParts.isNotEmpty) return displayParts.join(', ');
+    }
+    // parts가 없으면 locationName을 쓰되, 너무 길면 잘라내거나 그대로 표시 (차선책)
+    return user.locationName ?? '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,8 +116,9 @@ class FindFriendCard extends StatelessWidget {
                             .toList(),
                       ),
                     ),
-                  if (user.locationName != null)
-                    Text(user.locationName!,
+                  // [Task 16] 안전한 위치 표기 적용
+                  if (user.locationName != null || user.locationParts != null)
+                    Text(_getSafeLocationText(user),
                         style:
                             const TextStyle(fontSize: 12, color: Colors.grey)),
                 ],

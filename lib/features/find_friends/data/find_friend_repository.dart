@@ -155,4 +155,4 @@ class FindFriendRepository {
   // [v2.1] '친구 요청' 관련 메서드 전체 삭제 (sendFriendRequest, getRequestStatus, respondRequest, getReceivedRequests, getSentRequests)
   // (컴파일 에러 2번 원인 - 이 함수들이 삭제되지 않거나,
   // 이 함수들을 삭제하면서 클래스의 마지막 '}'가 함께 삭제되어 syntax error 발생)
-} // <-- 이 닫는 괄호가 누락되었을 가능성이 높습니다.
+} // [Task 16] 문법 오류 수정: 클래스 닫는 괄호 복구 및 확인 완료

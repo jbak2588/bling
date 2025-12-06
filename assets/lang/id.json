@@ -88,7 +88,7 @@
       "chat": "Obrolan",
       "myBling": "Bling Saya"
     },
-    "errors": {
+     "errors": {
       "loginRequired": "Diperlukan login.",
       "userNotFound": "Pengguna tidak ditemukan.",
       "unknown": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
@@ -119,8 +119,7 @@
   "chat": {
     "system": {
       "roomCreated": "Percakapan dimulai.",
-      "userJoined": "{nickname} telah bergabung ke obrolan."
-      ,
+      "userJoined": "{nickname} telah bergabung ke obrolan.",
       "chatRestored": "Ruang obrolan dibuat dan dipulihkan.",
       "chatInfoSynced": "Nama ruang obrolan dan gambar sampul telah diperbarui.",
       "syncFailed": "Sinkronisasi gagal: {error}"
@@ -232,8 +231,9 @@
       "requiredField": "Kolom ini wajib diisi.",
       "noPhoto": "Silakan tambahkan minimal 1 foto.",
       "noCategory": "Silakan pilih kategori.",
-      "loginRequired": "Anda harus masuk.",
-      "userNotFound": "Informasi pengguna tidak ditemukan.",
+      "loginRequired": "Diperlukan login.",
+      "userNotFound": "Pengguna tidak ditemukan.",
+      "unknown": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi.",
       "aiReserved": "Produk ini dikunci oleh Reservasi Aman AI. Pembeli harus menyelesaikan atau membatalkan pengambilan sebelum status dapat diubah."
     },
     "condition": {
@@ -427,6 +427,10 @@
       "friends": "Teman",
       "tickets": "Tiket Saya"
     },
+    "friendsTabs": {
+      "myFriends": "Teman",
+      "starred": "Favorit"
+    },
     "stats": {
       "posts": "Postingan",
       "followers": "Pengikut",
@@ -437,6 +441,7 @@
     "sentFriendRequests": "Permintaan Terkirim",
     "products": {
       "empty": "Belum ada produk yang terdaftar.",
+      "bookmarkeded": "Ditandai sebagai favorit",
       "detailsTitle": "Rincian produk",
       "editButton": "Sunting produk",
       "loadErrorWithMsg": "Gagal memuat produk: {error}",
@@ -635,6 +640,9 @@
     "emptyList": "Belum ada acara aktif.\nJadilah host pertama!",
     "createFirst": "Buat Acara Pertama",
     "createTitle": "Buat Flyer",
+    "create": {
+      "subtitle": "Cari tetangga untuk bergabung"
+    },
     "editTitle": "Edit Flyer",
     "theme": "Tema Desain",
     "whatLabel": "Mau ngapain bareng? (Judul)",
@@ -889,13 +897,14 @@
     "edit": "edit",
     "submit": "Simpan",
     "loginRequired": "Diperlukan login.",
+    "userNotFound": "Pengguna tidak ditemukan.",
     "unknownUser": "Pengguna tidak diketahui",
     "copiedTitle": "Disalin!",
     "copiedMessage": "{title} disalin ke clipboard.",
-    "select": "Pilih"
-    ,"optionalSuffix": "(opsional — isi jika perlu)"
+    "select": "Pilih",
+    "optionalSuffix": "(optional — enter or use if needed)",
+    "addFriend": "Tambahkan teman"
   },
-  
   "upload": {
     "pause": "Jeda",
     "resume": "Lanjutkan",
@@ -1247,7 +1256,10 @@
     "loginRequired": "Diperlukan login.",
     "unblocked": "Dibuka Blokir",
     "blocked": "Diblokir",
-    "unblock": "Buka Blokir"
+    "unblock": "Buka Blokir",
+    "bookmark": "Favoritkan",
+    "bookmarked": "Ditandai sebagai favorit",
+    "unbookmarked": "Dihapus dari favorit"
   },
   "locationFilter": {
     "title": "Filter Lokasi",
@@ -1541,8 +1553,7 @@
       "categoryError": "Silakan pilih kategori.",
       "productsLabel": "Produk/Layanan Utama",
       "productsHint": "Pisahkan dengan koma, mis. Potong rambut, Pewarnaan, Perm",
-      "imageError": "Harap unggah minimal satu foto."
-      ,
+      "imageError": "Harap unggah minimal satu foto.",
       "shopLocationLabel": "Lokasi Toko",
       "shopLocationHint": "Cari atau pilih lokasi pada peta",
       "shopLocationError": "Silakan pilih lokasi toko."
@@ -1914,8 +1925,7 @@
       "bountyAmountMax": "Jumlah maksimal adalah 100,000,000.",
       "success": "Berhasil didaftarkan.",
       "fail": "Gagal mendaftarkan barang: {error}",
-      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter."
-      ,
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "placeLabel": "Tempat hilang atau ditemukan",
       "placeHint": "Cari alamat atau pilih di peta"
     },
@@ -1984,56 +1994,69 @@
     "serviceIntroTitle": "Tentang Layanan",
     "serviceIntroBody": "Bling adalah super app hiper-lokal yang menghubungkan lingkungan Anda dengan lebih dekat dan dapat dipercaya. Berita, jual-beli, pertemuan, dan acara instan — semua kebutuhan kehidupan lokal terintegrasi di satu tempat.",
     "keyFeaturesTitle": "Fitur Utama",
+    "manualTitle": "Manual Pengguna & Panduan",
+    "manualIntro": "Ketuk setiap fitur di bawah untuk mempelajari cara menggunakannya.",
     "features": {
       "together": {
         "title": "Berkumpul (Together)",
-        "desc": "[NEW] Pertemuan lokal instan & tiket QR"
+        "desc": "[NEW] Pertemuan lokal instan & tiket QR",
+        "guide": "1. Buat 'Flyer' untuk pertemuan (Lari, Ngopi).\n2. Tetangga bergabung dan menerima Tiket QR.\n3. Tuan rumah memindai kode QR untuk memverifikasi peserta."
       },
       "localNews": {
         "title": "Berita Lokal",
-        "desc": "Kisah dan informasi nyata dari lingkungan Anda"
+        "desc": "Kisah dan informasi nyata dari lingkungan Anda",
+        "guide": "1. Bagikan kejadian di lingkungan Anda (RT/RW/Kelurahan).\n2. Gunakan tag seperti #LaluLintas, #Event untuk mengkategorikan.\n3. Tetangga terpercaya (Terverifikasi) mendapatkan visibilitas lebih tinggi."
       },
       "marketplace": {
         "title": "Marketplace",
-        "desc": "Jual-beli bekas yang aman dan cerdas dengan pemeriksaan AI"
+        "desc": "Jual-beli bekas yang aman dan cerdas dengan pemeriksaan AI",
+        "guide": "1. Unggah foto dan biarkan AI menganalisis barang.\n2. Dapatkan lencana 'AI Verified' untuk kepercayaan.\n3. Pembeli dapat membayar deposit 10% untuk memesan dengan aman."
       },
       "jobs": {
         "title": "Pekerjaan",
-        "desc": "Lowongan dekat rumah, dari paruh waktu hingga profesional"
+        "desc": "Lowongan paruh waktu dan profesional lokal di sekitar Anda",
+        "guide": "1. Posting 'Pekerjaan Reguler' atau 'Quick Gigs' (mis. Bantuan pindahan).\n2. Anda juga dapat mendaftarkan profil 'Talent' sendiri.\n3. Chat langsung untuk merekrut atau dicari kerja."
       },
       "lostAndFound": {
-        "title": "Hilang & Ditemukan",
-        "desc": "Pencarian berbasis peta dan hadiah untuk penemuan"
+        "title": "Hilang & Ketemu",
+        "desc": "Daftar berbasis peta dan reunifikasi dengan hadiah",
+        "guide": "1. Tandai lokasi kehilangan di peta.\n2. Tetapkan 'Hadiah' untuk memotivasi tetangga.\n3. Saat ditemukan, tandai sebagai terselesaikan untuk memberi poin kepercayaan."
       },
       "localStores": {
         "title": "Toko Lokal",
-        "desc": "Temukan toko dan tempat populer di lingkungan"
+        "desc": "Temukan toko-toko lingkungan dan tempat tersembunyi",
+        "guide": "1. Pemilik toko dapat mendaftarkan tokonya secara gratis.\n2. Tetangga dapat menulis ulasan dan chat untuk penawaran.\n3. Periksa lencana 'Terverifikasi' untuk bisnis resmi."
       },
       "findFriends": {
         "title": "Cari Teman",
-        "desc": "Temukan tetangga dengan minat yang sama"
+        "desc": "Temukan tetangga dengan minat yang sama",
+        "guide": "1. Telusuri profil berdasarkan minat dan tingkat kepercayaan.\n2. Mulai chat instan (Batas: 5 chat baru/hari).\n3. Gunakan tombol 'Bintang' untuk menandai tetangga yang Anda suka."
       },
       "clubs": {
         "title": "Komunitas",
-        "desc": "Kelompok minat lokal untuk berkumpul"
+        "desc": "Kelompok minat lokal untuk berkumpul",
+        "guide": "1. 'Propose' ide klub terlebih dahulu.\n2. Jika cukup tetangga bergabung, itu menjadi 'Klub Aktif'.\n3. Nikmati chat grup dan papan acara."
       },
       "realEstate": {
         "title": "Properti",
-        "desc": "Daftar lokal yang lebih transparan dan transaksi langsung"
+        "desc": "Daftar lokal yang lebih transparan dan transaksi langsung",
+        "guide": "1. Saring berdasarkan Kos, Apartemen, atau Rumah.\n2. Periksa detail 'Kos' seperti 'Kamar mandi di dalam' atau 'Listrik termasuk'.\n3. Chat langsung dengan pemilik atau agen."
       },
       "auction": {
         "title": "Lelang",
-        "desc": "Lelang barang bekas dengan partisipasi waktu nyata"
+        "desc": "Lelang barang bekas dengan partisipasi waktu nyata",
+        "guide": "1. Daftarkan barang langka untuk dilelang.\n2. Pembeli memasang tawaran secara real-time.\n3. Penawar tertinggi menang ketika waktu habis."
       },
       "pom": {
         "title": "POM",
-        "desc": "Video singkat yang menampilkan gaya hidup lokal"
+        "desc": "Video singkat yang menampilkan gaya hidup lokal",
+        "guide": "1. Unggah video pendek (Shorts) tentang kehidupan sehari-hari Anda.\n2. Tandai lokasi atau toko favorit Anda.\n3. Terlibat dengan like dan komentar."
       }
     },
     "developmentTitle": "Pengembangan & Operasi",
     "developmentBody": "Didukung oleh Flutter & Firebase",
     "developerLabel": "Developer",
-    "developerNames": "Chief Technology Officer (CTO): Jae Hyun Park"
+    "developerNames": "Developer : Jae Hyun Park(CTO)"
   },
   "address_neighborhood": "Lingkungan",
   "address_detail_hint": "Alamat detail",

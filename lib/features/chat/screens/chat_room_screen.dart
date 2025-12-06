@@ -99,6 +99,8 @@ import 'package:flutter/material.dart';
 import 'package:bling_app/features/clubs/data/club_repository.dart';
 import 'package:bling_app/features/clubs/models/club_model.dart';
 import 'package:bling_app/features/clubs/screens/club_detail_screen.dart';
+// [Task 25] 프로필 상세 이동을 위해 추가
+import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final String chatId;
@@ -176,6 +178,33 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     _loadChatContext(); // [추가] 컨텍스트 정보 로딩 함수 호출
   }
 
+  // [Task 25] 사용자 프로필 상세 화면으로 이동하는 헬퍼 함수
+  void _navigateToUserProfile(String targetUserId) {
+    // 참여자 정보가 로드되지 않았으면 중단
+    if (_isLoadingParticipants || _myUid == null) return;
+
+    final targetUser = _participantsInfo[targetUserId];
+    final currentUser = _participantsInfo[_myUid!];
+
+    if (targetUser != null && currentUser != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => FindFriendDetailScreen(
+            user: targetUser,
+            currentUserModel: currentUser,
+          ),
+        ),
+      );
+    } else {
+      // 정보가 없을 경우 (예: 탈퇴한 회원)
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('common.userNotFound'.tr())),
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
     _audioPlayer.dispose();
@@ -230,7 +259,22 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         }
       }
       final chatRoom = await _chatService.getChatRoom(widget.chatId);
-      if (chatRoom == null || !mounted) return;
+      if (!mounted) return;
+
+      // If no chatRoom exists yet but this is a direct 1:1 chat with otherUserId provided,
+      // treat it as a friend chat for header/protection purposes so the UI can show
+      // a privacy-safe header even before the chat document is created.
+      if (chatRoom == null) {
+        if (!widget.isGroupChat && widget.otherUserId != null) {
+          if (mounted) {
+            setState(() {
+              _isFriendChat = true;
+              _isProtectionActive = widget.isNewChat && _isFriendChat;
+            });
+          }
+        }
+        return;
+      }
 
       // If chatRoom explicitly references a club, load it
       if (chatRoom.clubId != null) {
@@ -373,7 +417,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     await _chatService.sendMessage(
       widget.chatId,
       messageText,
-      otherUserId: widget.isGroupChat ? null : widget.otherUserId,
+      // Always pass otherUserId for 1:1 flows. For group chats this will be null.
+      otherUserId: widget.otherUserId,
       allParticipantIds: widget.isGroupChat ? widget.participants : null,
     );
   }
@@ -434,6 +479,21 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     );
   }
 
+  // [Task 26] 헤더 카드용 위치 정보 프라이버시 보호 헬퍼
+  String _getSafeLocationText(UserModel user) {
+    if (user.locationParts != null) {
+      final parts = user.locationParts!;
+      final List<String> displayParts = [];
+      if (parts['kel'] != null) displayParts.add("Kel. ${parts['kel']}");
+      if (parts['kec'] != null) displayParts.add("Kec. ${parts['kec']}");
+      // 공간 제약상 동네까지만 표시
+      if (displayParts.isNotEmpty) return displayParts.join(', ');
+    }
+    // locationParts가 없으면 locationName 사용 (단, 너무 길면 카드 UI 깨짐 주의)
+    // 여기서도 간단히 줄여서 보여주는 것이 좋음
+    return user.locationName ?? '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final appBarTitle = _appBarTitle ??
@@ -447,13 +507,36 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       appBar: AppBar(
         elevation: 1,
         backgroundColor: Colors.white,
-        title: Text(appBarTitle),
+        // [Task 25] 1:1 채팅인 경우 앱바 타이틀 터치 시 프로필 이동
+        title: widget.isGroupChat
+            ? Text(appBarTitle) // 그룹 채팅은 타이틀 터치 동작 없음 (추후 클럽 정보 등으로 확장 가능)
+            : InkWell(
+                onTap: () {
+                  if (widget.otherUserId != null) {
+                    _navigateToUserProfile(widget.otherUserId!);
+                  }
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(child: Text(appBarTitle)),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.chevron_right,
+                        size: 20, color: Colors.grey),
+                  ],
+                ),
+              ),
       ),
       body: _isLoadingParticipants
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                if (!_isContextLoading && _contextItem != null)
+                // [Task 26] 컨텍스트 아이템이 있거나, 친구 채팅(상대방 정보 로드됨)인 경우 헤더 표시
+                if (!_isContextLoading &&
+                    (_contextItem != null ||
+                        (_isFriendChat &&
+                            widget.otherUserId != null &&
+                            _participantsInfo.containsKey(widget.otherUserId))))
                   _buildContextHeader(),
                 Expanded(
                   child: StreamBuilder<List<ChatMessageModel>>(
@@ -659,6 +742,20 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       } else if (widget.clubImage != null) {
         image = NetworkImage(widget.clubImage!);
       }
+    }
+    // [Task 26] 친구 채팅(User Context) 처리 추가
+    // _contextItem이 null이어도 _isFriendChat이 true이면 실행됨
+    if (_contextItem == null && _isFriendChat && widget.otherUserId != null) {
+      final user = _participantsInfo[widget.otherUserId];
+      if (user != null) {
+        title = user.nickname;
+        // 소개글이 있으면 보여주고, 없으면 빈 문자열
+        descriptionText = user.bio ?? '';
+        locationText = _getSafeLocationText(user); // 안전한 위치 표기
+        if (user.photoUrl != null && user.photoUrl!.isNotEmpty) {
+          image = NetworkImage(user.photoUrl!);
+        }
+      }
     } else if (_contextItem is JobModel) {
       final job = _contextItem as JobModel;
       title = job.title;
@@ -781,26 +878,33 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       color: Colors.grey.shade50,
       child: InkWell(
         onTap: () {
-          // [추가] 배너 클릭 시 ClubDetailScreen으로 이동 (embedded가 아닌 전체 화면으로)
-          if (_contextItem is ClubModel) {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) =>
-                    ClubDetailScreen(club: _contextItem as ClubModel)));
-          } else if (_contextItem is JobModel) {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => JobDetailScreen(job: _contextItem)));
-          } else if (_contextItem is TalentModel) {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => TalentDetailScreen(talent: _contextItem)));
-          } else if (_contextItem is ProductModel) {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => ProductDetailScreen(product: _contextItem)));
-          } else if (_contextItem is ShopModel) {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => ShopDetailScreen(shop: _contextItem)));
-          } else if (_contextItem is RoomListingModel) {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => RoomDetailScreen(room: _contextItem)));
+          // [Task 26] 친구 채팅 헤더 클릭 시 프로필 상세 이동
+          if (_contextItem == null &&
+              _isFriendChat &&
+              widget.otherUserId != null) {
+            _navigateToUserProfile(widget.otherUserId!);
+          } else {
+            // [추가] 배너 클릭 시 ClubDetailScreen으로 이동 (embedded가 아닌 전체 화면으로)
+            if (_contextItem is ClubModel) {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) =>
+                      ClubDetailScreen(club: _contextItem as ClubModel)));
+            } else if (_contextItem is JobModel) {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => JobDetailScreen(job: _contextItem)));
+            } else if (_contextItem is TalentModel) {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => TalentDetailScreen(talent: _contextItem)));
+            } else if (_contextItem is ProductModel) {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => ProductDetailScreen(product: _contextItem)));
+            } else if (_contextItem is ShopModel) {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => ShopDetailScreen(shop: _contextItem)));
+            } else if (_contextItem is RoomListingModel) {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => RoomDetailScreen(room: _contextItem)));
+            }
           }
         },
         child: Container(
@@ -818,7 +922,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   color: image == null ? Colors.grey.shade200 : null,
                 ),
                 child: image == null
-                    ? Icon(Icons.work_outline,
+                    ? Icon(_isFriendChat ? Icons.person : Icons.work_outline,
                         color: Colors.grey.shade600, size: 20)
                     : null,
               ),
@@ -884,16 +988,24 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
+          // [Task 25] 상대방 프로필 사진 터치 시 프로필 이동
           if (!isMe)
-            CircleAvatar(
-              radius: 18,
-              backgroundImage:
-                  (sender?.photoUrl != null && sender!.photoUrl!.isNotEmpty)
-                      ? NetworkImage(sender.photoUrl!)
-                      : null,
-              child: (sender?.photoUrl == null || sender!.photoUrl!.isEmpty)
-                  ? const Icon(Icons.person, size: 18)
-                  : null,
+            GestureDetector(
+              onTap: () {
+                if (message.senderId.isNotEmpty) {
+                  _navigateToUserProfile(message.senderId);
+                }
+              },
+              child: CircleAvatar(
+                radius: 18,
+                backgroundImage:
+                    (sender?.photoUrl != null && sender!.photoUrl!.isNotEmpty)
+                        ? NetworkImage(sender.photoUrl!)
+                        : null,
+                child: (sender?.photoUrl == null || sender!.photoUrl!.isEmpty)
+                    ? const Icon(Icons.person, size: 18)
+                    : null,
+              ),
             ),
           const SizedBox(width: 8),
           Flexible(
