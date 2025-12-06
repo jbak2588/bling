@@ -642,6 +642,22 @@ class _FeedMapViewState extends State<_FeedMapView> {
 
   // 마커 생성 로직은 이제 SharedMapBrowser 내부에서 처리되므로 로컬 함수는 제거했습니다.
 
+  IconData _iconForCategory(String category) {
+    switch (category) {
+      case 'event':
+      case 'news.event':
+        return Icons.event;
+      case 'alert':
+      case 'news.alert':
+        return Icons.warning_amber_rounded;
+      case 'store':
+      case 'news.store':
+        return Icons.storefront;
+      default:
+        return Icons.article_outlined;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<CameraPosition>(
@@ -664,6 +680,11 @@ class _FeedMapViewState extends State<_FeedMapView> {
           idExtractor: (post) => post.id,
           // [추가] 핀 제목(툴팁) 설정: 제목이 있으면 제목, 없으면 본문 앞부분 표시
           titleExtractor: (post) => post.title ?? post.body,
+          thumbnailUrlExtractor: (post) =>
+              (post.mediaUrl != null && post.mediaUrl!.isNotEmpty)
+                  ? post.mediaUrl!.first
+                  : null,
+          categoryIconExtractor: (post) => _iconForCategory(post.category),
           // 마커 클릭 시 바텀시트에 뜰 카드 (PostCard 재사용)
           cardBuilder: (context, post) =>
               PostCard(key: ValueKey(post.id), post: post),
