@@ -22,7 +22,7 @@ class SharedMapBrowser<T> extends StatefulWidget {
   final String? Function(T)? thumbnailUrlExtractor;
 
   /// [옵션] 리스트 바텀시트/리스트 아이템에 사용할 카테고리 아이콘 추출 함수.
-  final IconData? Function(T)? categoryIconExtractor;
+  final Widget? Function(T)? categoryIconExtractor;
   final int Function(T)? replyCountExtractor;
   final DateTime? Function(T)? createdAtExtractor;
   final void Function(String id)? onPostSelected;

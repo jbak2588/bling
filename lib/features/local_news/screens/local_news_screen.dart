@@ -202,7 +202,14 @@ class _LocalNewsScreenState extends State<LocalNewsScreen>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('📰', style: TextStyle(fontSize: 18)),
+            Text(
+              // use AppCategories' emoji for the 'all' tab (fallback safe)
+              AppCategories.postCategories
+                  .firstWhere((c) => c.categoryId == 'local_news',
+                      orElse: () => AppCategories.postCategories.first)
+                  .emoji,
+              style: const TextStyle(fontSize: 18),
+            ),
             const SizedBox(width: 8),
             Text('localNewsFeed.allCategory'.tr()), // '전체'
           ],
@@ -325,6 +332,7 @@ class _FeedListViewState extends State<_FeedListView>
     };
     _currentKeywordListenable = widget.searchKeywordListenable;
     _currentKeywordListenable?.addListener(_kwListener!);
+    // (카테고리 아이콘 맵 초기화는 지도 뷰 상태에서 담당합니다.)
   }
 
   @override
@@ -526,6 +534,7 @@ class _FeedMapView extends StatefulWidget {
 class _FeedMapViewState extends State<_FeedMapView> {
   VoidCallback? _kwListener;
   ValueListenable<String>? _currentKeywordListenable;
+  // (카테고리 아이콘 맵은 현재 사용되지 않음)
 
   @override
   void initState() {
@@ -535,6 +544,7 @@ class _FeedMapViewState extends State<_FeedMapView> {
     };
     _currentKeywordListenable = widget.searchKeywordListenable;
     _currentKeywordListenable?.addListener(_kwListener!);
+    // (카테고리 아이콘 맵 초기화 생략)
   }
 
   @override
@@ -642,20 +652,25 @@ class _FeedMapViewState extends State<_FeedMapView> {
 
   // 마커 생성 로직은 이제 SharedMapBrowser 내부에서 처리되므로 로컬 함수는 제거했습니다.
 
-  IconData _iconForCategory(String category) {
-    switch (category) {
-      case 'event':
-      case 'news.event':
-        return Icons.event;
-      case 'alert':
-      case 'news.alert':
-        return Icons.warning_amber_rounded;
-      case 'store':
-      case 'news.store':
-        return Icons.storefront;
-      default:
-        return Icons.article_outlined;
-    }
+  /// local_news 카테고리(categoryId)를 지도/리스트용 아이콘으로 변환
+  ///
+  /// 카테고리 ID는 `AppCategories.postCategories`에서 정의된 값과 동일:
+  /// - daily_life, help_share, incident_report, local_news,
+  ///   daily_question, store_promo, etc
+  // (기본 아이콘 휴리스틱은 삭제됨 — 이 파일은 이모지 위젯을 사용합니다.)
+
+  // (기존 IconData 기반 헬퍼는 사용하지 않음)
+
+  // 카테고리 ID에서 이모지 텍스트 위젯을 반환합니다.
+  Widget _emojiWidgetForCategory(String categoryId) {
+    final cat = AppCategories.postCategories.firstWhere(
+        (c) => c.categoryId == categoryId,
+        orElse: () => AppCategories.postCategories.first);
+    return Text(
+      cat.emoji,
+      style: const TextStyle(fontSize: 14),
+      textAlign: TextAlign.center,
+    );
   }
 
   @override
@@ -684,7 +699,8 @@ class _FeedMapViewState extends State<_FeedMapView> {
               (post.mediaUrl != null && post.mediaUrl!.isNotEmpty)
                   ? post.mediaUrl!.first
                   : null,
-          categoryIconExtractor: (post) => _iconForCategory(post.category),
+          categoryIconExtractor: (post) =>
+              _emojiWidgetForCategory(post.category),
           // 마커 클릭 시 바텀시트에 뜰 카드 (PostCard 재사용)
           cardBuilder: (context, post) =>
               PostCard(key: ValueKey(post.id), post: post),

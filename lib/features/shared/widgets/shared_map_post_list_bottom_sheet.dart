@@ -9,7 +9,7 @@ class SharedMapPostListBottomSheet<T> extends StatelessWidget {
   final String? Function(T)? subtitleBuilder;
   final String? Function(T)? locationLabelBuilder;
   final String? Function(T)? thumbnailUrlBuilder;
-  final IconData? Function(T)? categoryIconBuilder;
+  final Widget? Function(T)? categoryIconBuilder;
   final void Function(T)? onItemTap;
 
   const SharedMapPostListBottomSheet({
@@ -98,7 +98,7 @@ class _SharedMapListTile<T> extends StatelessWidget {
   final String? Function(T)? subtitleBuilder;
   final String? Function(T)? locationLabelBuilder;
   final String? Function(T)? thumbnailUrlBuilder;
-  final IconData? Function(T)? categoryIconBuilder;
+  final Widget? Function(T)? categoryIconBuilder;
   final VoidCallback? onTap;
 
   const _SharedMapListTile({
@@ -118,7 +118,7 @@ class _SharedMapListTile<T> extends StatelessWidget {
     final subtitle = subtitleBuilder?.call(item) ?? '';
     final loc = locationLabelBuilder?.call(item) ?? '';
     final thumbUrl = thumbnailUrlBuilder?.call(item);
-    final categoryIcon = categoryIconBuilder?.call(item);
+    final categoryWidget = categoryIconBuilder?.call(item);
 
     Widget buildLeading() {
       const double size = 44;
@@ -138,7 +138,7 @@ class _SharedMapListTile<T> extends StatelessWidget {
                   ),
                 ),
               ),
-              if (categoryIcon != null)
+              if (categoryWidget != null)
                 Positioned(
                   right: 2,
                   bottom: 2,
@@ -156,10 +156,10 @@ class _SharedMapListTile<T> extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Icon(
-                      categoryIcon,
-                      size: 14,
-                      color: theme.colorScheme.primary,
+                    child: ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(minWidth: 14, minHeight: 14),
+                      child: Center(child: categoryWidget),
                     ),
                   ),
                 ),
@@ -176,11 +176,13 @@ class _SharedMapListTile<T> extends StatelessWidget {
           color: theme.colorScheme.primary.withAlpha((0.1 * 255).round()),
         ),
         alignment: Alignment.center,
-        child: Icon(
-          categoryIcon ?? Icons.location_on_outlined,
-          size: 20,
-          color: theme.colorScheme.primary,
-        ),
+        child: categoryWidget != null
+            ? Center(child: categoryWidget)
+            : Icon(
+                Icons.location_on_outlined,
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
       );
     }
 
