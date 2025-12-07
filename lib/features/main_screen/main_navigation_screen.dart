@@ -288,9 +288,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           .get();
       if (!mounted) return;
       if (boardDoc.exists) {
-        final features =
-            (boardDoc.data()?['features'] as Map<String, dynamic>?) ?? {};
-        final bool isActive = features['hasGroupChat'] == true;
+        // [FIX] 게시판 문서가 존재하면 무조건 탭 활성화 (채팅 기능 유무와 무관하게 피드는 볼 수 있어야 함)
+        // 기존: final bool isActive = features['hasGroupChat'] == true;
+        final bool isActive = true;
         if (isActive != _isKelurahanBoardActive) {
           setState(() => _isKelurahanBoardActive = isActive);
         }
