@@ -160,7 +160,27 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           '[ClubDetail] 채팅방이 존재하지 않아 복구를 시도합니다. Club ID: ${widget.club.id}');
       try {
         // 'chats' 컬렉션에 직접 접근하여 문서 재생성 (Self-healing)
-        // 주의: 문서가 삭제되었으므로 기존 참여자 목록은 소실되었습니다. 현재 사용자를 기준으로 다시 시작합니다.
+        // 기존 구현은 현재 사용자만 participants에 넣었으나, 복구 시 클럽의 모든 멤버를 포함시키도록 개선합니다.
+
+        // 우선 현재 사용자 포함 기본값
+        List<String> allMemberIds = [_currentUserId!];
+        try {
+          final membersSnapshot = await FirebaseFirestore.instance
+              .collection('clubs')
+              .doc(widget.club.id)
+              .collection('members')
+              .get();
+          allMemberIds = membersSnapshot.docs.map((d) => d.id).toList();
+          if (!allMemberIds.contains(_currentUserId)) {
+            allMemberIds.add(_currentUserId!);
+          }
+        } catch (e) {
+          debugPrint(
+              '[ClubDetail] Failed to fetch club members for chat sync: $e');
+        }
+
+        final unreadCounts = {for (var id in allMemberIds) id: 0};
+
         await FirebaseFirestore.instance
             .collection('chats')
             .doc(widget.club.id)
@@ -171,10 +191,10 @@ class _ClubDetailScreenState extends State<ClubDetailScreen>
           'clubId': widget.club.id,
           'clubTitle': widget.club.title,
           'clubImage': widget.club.imageUrl,
-          'participants': [_currentUserId], // 현재 사용자만 우선 참여
-          'lastMessage': 'system.chatRestored'.tr(), // "채팅방이 복구되었습니다."
+          'participants': allMemberIds,
+          'lastMessage': 'system.chatRestored'.tr(),
           'lastTimestamp': FieldValue.serverTimestamp(),
-          'unreadCounts': {_currentUserId: 0},
+          'unreadCounts': unreadCounts,
           'contextType': 'club',
         });
         // 생성 후 다시 가져오기

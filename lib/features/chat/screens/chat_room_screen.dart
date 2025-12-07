@@ -307,8 +307,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       }
 
       // Determine whether this is a plain 1:1 friend chat (no product/job/context)
+      // Treat explicit 'friend' or legacy 'direct' contextType as friend chat as well.
       final bool isFriend = (chatRoom.isGroupChat == false) &&
-          (chatRoom.contextType == null || chatRoom.contextType!.isEmpty) &&
+          (chatRoom.contextType == null ||
+              chatRoom.contextType!.isEmpty ||
+              chatRoom.contextType == 'friend' ||
+              chatRoom.contextType == 'direct') &&
           (chatRoom.participants.length == 2);
       if (mounted) {
         setState(() {

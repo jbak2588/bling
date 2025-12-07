@@ -127,6 +127,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 } else if (chatRoom.jobId != null &&
                     chatRoom.jobId!.isNotEmpty) {
                   item = _buildJobChatItem(context, chatRoom, otherUser);
+                  // [FIX] Talent(재능) 타입 체크 추가 -> Job UI 재사용
+                } else if (chatRoom.talentId != null &&
+                    chatRoom.talentId!.isNotEmpty) {
+                  item = _buildJobChatItem(context, chatRoom, otherUser);
                 } else if (chatRoom.productId != null &&
                     chatRoom.productId!.isNotEmpty) {
                   item = _buildProductChatItem(context, chatRoom, otherUser);

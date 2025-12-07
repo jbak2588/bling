@@ -183,7 +183,28 @@ class ChatService {
 
       // [FIX] contextType이 null이면 기본값 'direct'를 사용하고
       //       1:1 채팅임을 명시적으로 표시합니다.
-      final String finalContextType = contextType ?? 'direct';
+      // [FIX] contextType 자동 추론 로직 (Admin 관리를 위해 필수)
+      // 호출 시 명시된 contextType이 있으면 최우선, 없으면 ID 파라미터를 보고 추론, 그래도 없으면 'direct'
+      String? inferredType;
+      if (contextType != null) {
+        inferredType = contextType;
+      } else if (talentId != null) {
+        inferredType = 'talent';
+      } else if (jobId != null) {
+        inferredType = 'job';
+      } else if (productId != null) {
+        inferredType = 'product';
+      } else if (shopId != null) {
+        inferredType = 'shop'; // [보강] 동네 업체(local_store) 체크 추가
+      } else if (lostItemId != null) {
+        inferredType = 'lost_item';
+      } else if (roomId != null) {
+        inferredType = 'room';
+      } else if (clubId != null) {
+        inferredType = 'club';
+      }
+
+      final String finalContextType = inferredType ?? 'direct';
 
       final chatRoomData = {
         'participants': participants,
@@ -191,7 +212,7 @@ class ChatService {
         'lastTimestamp': now,
         'unreadCounts': {myUid: 0, otherUserId: 0},
         'contextType': finalContextType,
-        'isGroupChat': false,  // [FIX] 명시적으로 1:1 채팅임을 표시
+        'isGroupChat': false, // [FIX] 명시적으로 1:1 채팅임을 표시
         if (productId != null) 'productId': productId,
         if (productTitle != null) 'productTitle': productTitle,
         if (productImage != null) 'productImage': productImage,
@@ -422,8 +443,9 @@ class ChatService {
         updateData['unreadCounts.$otherUserId'] = FieldValue.increment(1);
       }
 
-      // 기존 문서 갱신은 merge 옵션으로 안전하게 적용
-      batch.set(chatRoomRef, updateData, SetOptions(merge: true));
+      // [FIX] 기존 문서 갱신은 update를 사용해야 점(.) 표기법이 중첩 필드 업데이트로 동작함
+      // set(merge: true)는 'unreadCounts.uid'라는 이름의 새 필드를 만들어버림
+      batch.update(chatRoomRef, updateData);
     }
 
     await batch.commit();
@@ -526,7 +548,8 @@ class ChatService {
       updateData['unreadCounts.$otherUserId'] = FieldValue.increment(1);
     }
 
-    batch.set(chatRoomRef, updateData, SetOptions(merge: true));
+    // [FIX] set -> update로 변경하여 중첩 필드 정상 업데이트
+    batch.update(chatRoomRef, updateData);
 
     await batch.commit();
   }
