@@ -408,21 +408,21 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                           // [v2.1] '대화 시작하기' 로직 (스팸 방지 적용)
                           setState(() => _isStartingChat = true);
                           try {
-                            // 1. Cloud Function 호출
-                            final result = await FirebaseFunctions.instanceFor(
-                                    region: 'asia-southeast2')
-                                .httpsCallable("startFriendChat")
-                                .call({"otherUserId": user.uid});
+                            // [Task 12] 친구 또는 관심 이웃(찜) 관계인지 확인
+                            // 친구 관계라면 일일 제한(Cloud Function)을 우회하고 바로 진입합니다.
+                            final bool isAlreadyFriend =
+                                (currentUser.friends?.contains(user.uid) ??
+                                        false) ||
+                                    (currentUser.bookmarkedUserIds
+                                            ?.contains(user.uid) ??
+                                        false);
 
-                            final bool allow = result.data['allow'] ?? false;
-
-                            if (allow) {
-                              // 2. 허용됨 (신규 또는 기존)
+                            if (isAlreadyFriend) {
+                              // 0. 친구 관계: 제한 없이 즉시 입장 + 보호 모드 해제
                               final chatService = ChatService();
                               final String chatRoomId = await chatService
                                   .createOrGetChatRoom(otherUserId: user.uid);
-                              // [Task 23] 자동 친구 추가 로직 제거 (사용자 선택권 존중)
-                              // 친구 추가는 '관심 이웃(Star)' 또는 추후 '친구 맺기' 액션을 통해서만 이루어짐.
+
                               if (mounted) {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
@@ -430,26 +430,58 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
                                       chatId: chatRoomId,
                                       otherUserId: user.uid,
                                       otherUserName: user.nickname,
-                                      // [v2.1] 기존 채팅이 아닐 때만 보호 모드 활성화
-                                      isNewChat:
-                                          !(result.data['isExisting'] ?? false),
+                                      isNewChat: false, // 친구이므로 보호 모드 해제
                                     ),
                                   ),
                                 );
                               }
                             } else {
-                              // 3. 한도 도달로 거부됨
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('findFriend.chatLimitReached'
-                                        .tr(namedArgs: {
-                                      'limit':
-                                          result.data['limit']?.toString() ??
-                                              '5'
-                                    })),
-                                  ),
-                                );
+                              // 1. Cloud Function 호출
+                              final result =
+                                  await FirebaseFunctions.instanceFor(
+                                          region: 'asia-southeast2')
+                                      .httpsCallable("startFriendChat")
+                                      .call({"otherUserId": user.uid});
+
+                              final bool allow = result.data['allow'] ?? false;
+
+                              if (allow) {
+                                // 2. 허용됨 (신규 또는 기존)
+                                final chatService = ChatService();
+                                final String chatRoomId = await chatService
+                                    .createOrGetChatRoom(otherUserId: user.uid);
+                                // [Task 23] 자동 친구 추가 로직 제거 (사용자 선택권 존중)
+                                // 친구 추가는 '관심 이웃(Star)' 또는 추후 '친구 맺기' 액션을 통해서만 이루어짐.
+                                if (mounted) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatRoomScreen(
+                                        chatId: chatRoomId,
+                                        otherUserId: user.uid,
+                                        otherUserName: user.nickname,
+                                        // [v2.1] 기존 채팅이 아닐 때만 보호 모드 활성화
+                                        isNewChat:
+                                            !(result.data['isExisting'] ??
+                                                false),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } else {
+                                // 3. 한도 도달로 거부됨
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'findFriend.chatLimitReached'
+                                              .tr(namedArgs: {
+                                        'limit':
+                                            result.data['limit']?.toString() ??
+                                                '5'
+                                      })),
+                                    ),
+                                  );
+                                }
                               }
                             }
                           } catch (e) {
