@@ -319,14 +319,51 @@ class ChatService {
       }
       return room;
     } else {
-      // --- 2. 채팅방이 없는 경우 (첫 사용자 입장) ---
+      // --- 2. 채팅방이 없는 경우 (첫 사용자 입장 -> 방 생성) ---
+
+      // [FIX] 작업 15: 같은 동네(Kelurahan) 이웃들을 검색하여 초기 참여자로 등록
+      List<String> initialParticipants = [currentUser.uid];
+
+      try {
+        final parts = currentUser.locationParts;
+        if (parts != null && parts['kel'] != null) {
+          // 같은 Kelurahan에 사는 유저 검색 (최대 50명 제한으로 성능/문서크기 보호)
+          // *주의: 이 쿼리를 위해서는 Firestore 복합 인덱스가 필요할 수 있습니다.
+          final neighborSnapshot = await _firestore
+              .collection('users')
+              .where('locationParts.prov', isEqualTo: parts['prov'])
+              .where('locationParts.kab', isEqualTo: parts['kab'])
+              .where('locationParts.kec', isEqualTo: parts['kec'])
+              .where('locationParts.kel', isEqualTo: parts['kel'])
+              .limit(50)
+              .get();
+
+          for (var doc in neighborSnapshot.docs) {
+            if (doc.id != currentUser.uid) {
+              initialParticipants.add(doc.id);
+            }
+          }
+          debugPrint(
+              '--- [BoardChat] Auto-added ${initialParticipants.length - 1} neighbors. ---');
+        }
+      } catch (e) {
+        debugPrint('--- [BoardChat] Failed to fetch neighbors: $e ---');
+        // 실패해도 방 생성은 진행 (나 혼자라도)
+      }
+
       final now = Timestamp.now();
       final initialMsg = 'boards.chatRoomCreated'.tr();
+
+      // 참여자 전원 안읽음 카운트 0 초기화
+      final Map<String, int> initialUnreadCounts = {
+        for (var uid in initialParticipants) uid: 0
+      };
+
       final newRoomData = <String, dynamic>{
-        'participants': [currentUser.uid],
+        'participants': initialParticipants, // [FIX] 이웃 포함 리스트
         'lastMessage': initialMsg,
         'lastTimestamp': now,
-        'unreadCounts': {currentUser.uid: 0},
+        'unreadCounts': initialUnreadCounts, // [FIX] 이웃 포함 카운트
 
         // --- 그룹 채팅 및 컨텍스트 설정 ---
         'isGroupChat': true,
@@ -348,7 +385,7 @@ class ChatService {
           'senderId': 'system',
           'text': initialMsg,
           'timestamp': now,
-          'readBy': [currentUser.uid],
+          'readBy': initialParticipants,
           'type': 'system',
         });
 

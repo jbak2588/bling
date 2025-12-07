@@ -137,6 +137,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   StreamSubscription? _userSubscription;
   StreamSubscription? _unreadChatsSubscription;
   StreamSubscription? _unreadNotificationsSubscription; // [Task 96]
+  StreamSubscription? _boardSubscription; // [FIX] 게시판 실시간 감지용 구독 추가
   int _totalUnreadCount = 0;
   int _totalUnreadNotifications = 0; // [Task 96]
   // ✅ [작업 26] 티켓 관련 변수 추가
@@ -192,6 +193,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         _unreadChatsSubscription?.cancel();
         _unreadNotificationsSubscription?.cancel(); // [Task 96]
         _myTicketSubscription?.cancel(); // ✅ 해제
+        _boardSubscription?.cancel(); // [FIX] 게시판 구독 해제
         if (mounted) {
           setState(() {
             _userModel = null;
@@ -210,6 +212,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _unreadChatsSubscription?.cancel();
     _unreadNotificationsSubscription?.cancel(); // [Task 96]
     _myTicketSubscription?.cancel(); // ✅ 추가
+    _boardSubscription?.cancel(); // [FIX] 게시판 구독 해제
     _homeScrollController.dispose();
     _searchActivationNotifier.dispose(); // ✅ Notifier 해제
     _searchTrigger.dispose();
@@ -281,30 +284,33 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       }
       return;
     }
-    try {
-      final boardDoc = await FirebaseFirestore.instance
-          .collection('boards')
-          .doc(kelKey)
-          .get();
+    // [FIX] 단발성 get() -> 실시간 snapshots() 리스너로 변경
+    // 서버에서 문서가 생성되는 즉시 앱을 재실행하지 않아도 탭이 활성화됩니다.
+    _boardSubscription?.cancel();
+
+    debugPrint(
+        "--- [Board Check] Client Target Key: '$kelKey' ---"); // [Debug] 키 확인용 로그
+
+    _boardSubscription = FirebaseFirestore.instance
+        .collection('boards')
+        .doc(kelKey)
+        .snapshots()
+        .listen((boardDoc) {
       if (!mounted) return;
-      if (boardDoc.exists) {
-        // [FIX] 게시판 문서가 존재하면 무조건 탭 활성화 (채팅 기능 유무와 무관하게 피드는 볼 수 있어야 함)
-        // 기존: final bool isActive = features['hasGroupChat'] == true;
-        final bool isActive = true;
-        if (isActive != _isKelurahanBoardActive) {
-          setState(() => _isKelurahanBoardActive = isActive);
-        }
-      } else if (_isKelurahanBoardActive) {
+
+      final bool exists = boardDoc.exists;
+      // 문서가 존재하면 무조건 활성화
+      if (exists != _isKelurahanBoardActive) {
+        debugPrint(
+            "--- [Board Check] Status changed: $exists (Key: $kelKey) ---");
+        setState(() => _isKelurahanBoardActive = exists);
+      }
+    }, onError: (e) {
+      debugPrint('Error listening to Kelurahan board status: $e');
+      if (mounted && _isKelurahanBoardActive) {
         setState(() => _isKelurahanBoardActive = false);
       }
-    } catch (e) {
-      debugPrint('Error checking Kelurahan board status: $e');
-      // 에러 발생 시에도 비활성화로 복원
-      if (_isKelurahanBoardActive) {
-        if (!mounted) return;
-        setState(() => _isKelurahanBoardActive = false);
-      }
-    }
+    });
   }
 
   void _listenToUnreadChats(String myUid) {

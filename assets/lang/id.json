@@ -2260,6 +2260,8 @@
       "writePost": "Tulis Cerita Lokal"
     },
     "defaultTitle": "Papan Komunitas",
+    "chatActionLabel": "Ngobrol Warga",
+    "boardHeader": "Papan Komunitas",
     "chatRoomComingSoon": "Fitur ruang obrolan segera hadir!",
     "chatRoomTitle": "Ruang Obrolan Komunitas",
     "emptyFeed": "Belum ada cerita lokal di papan ini.",

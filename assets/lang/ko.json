@@ -2263,6 +2263,8 @@
       "writePost": "동네 소식 쓰기"
     },
     "defaultTitle": "우리 동네 게시판",
+    "chatActionLabel": "이웃과 대화하기",
+    "boardHeader": "우리 동네 소식통",
     "chatRoomComingSoon": "채팅방 기능은 곧 제공됩니다.",
     "chatRoomTitle": "{boardTitle} 채팅방",
     "emptyFeed": "아직 게시물이 없습니다. 첫 번째 게시물을 작성해보세요!",

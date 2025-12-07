@@ -131,11 +131,26 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
       appBar: AppBar(
         title: Text(_kelurahanName),
         actions: [
-          // 기획안 4) 그룹 채팅 연동 버튼
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline_rounded),
-            onPressed: _onChatPressed,
-            tooltip: 'boards.chatRoomTitle'.tr(), // '동네 채팅방'
+          // [FIX] 작업 16: 아이콘 + 텍스트 버튼 형태로 변경
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).primaryColor,
+                backgroundColor:
+                    Theme.of(context).primaryColor.withValues(alpha : 0.1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              onPressed: _onChatPressed,
+              icon: const Icon(Icons.chat_bubble_outline_rounded, size: 20),
+              label: Text(
+                'boards.chatActionLabel'.tr(),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+            ),
           ),
         ],
       ),

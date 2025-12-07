@@ -2262,6 +2262,8 @@
       "writePost": "Write Local News"
     },
     "defaultTitle": "defaultTitle",
+    "chatActionLabel": "Chat with Neighbors",
+    "boardHeader": "Community Board",
     "chatRoomComingSoon": "chatRoomComingSoon",
     "chatRoomTitle": "chatRoomTitle",
     "emptyFeed": "emptyFeed",
