@@ -47,8 +47,8 @@ import 'package:cloud_functions/cloud_functions.dart'; // [v2.1] 스팸 방지 �
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart';
 import 'package:bling_app/core/constants/app_links.dart';
-// [v2.1] ChatService/ChatRoomModel은 더 이상 직접 필요하지 않습니다.
-// import 'package:bling_app/features/chat/data/chat_service.dart';
+// ChatService: 채팅방 생성/조회 일원화
+import 'package:bling_app/features/chat/data/chat_service.dart';
 // import 'package:bling_app/core/models/chat_room_model.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
@@ -418,9 +418,9 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
 
                             if (allow) {
                               // 2. 허용됨 (신규 또는 기존)
-                              List<String> ids = [currentUser.uid, user.uid];
-                              ids.sort();
-                              String chatRoomId = ids.join('_');
+                              final chatService = ChatService();
+                              final String chatRoomId = await chatService
+                                  .createOrGetChatRoom(otherUserId: user.uid);
                               // [Task 23] 자동 친구 추가 로직 제거 (사용자 선택권 존중)
                               // 친구 추가는 '관심 이웃(Star)' 또는 추후 '친구 맺기' 액션을 통해서만 이루어짐.
                               if (mounted) {

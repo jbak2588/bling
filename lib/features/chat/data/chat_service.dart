@@ -58,8 +58,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
+// import 'dart:async';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
+// [Fix] StreamZip 제거 (단순화)
+// import 'package:async/async.dart';
 
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -75,6 +78,11 @@ class ChatService {
     if (myUid == null) {
       return Stream.value([]);
     }
+    // Merge two possible storage shapes for participants:
+    // - participants as an array (arrayContains query)
+    // - participants stored as a map/object (participants.<uid> == true)
+    // We listen to both queries and merge document snapshots by id.
+    // [Fix] 단순하고 명확한 스트림으로 복원
     return _firestore
         .collection('chats')
         .where('participants', arrayContains: myUid)
@@ -364,35 +372,54 @@ class ChatService {
     // 1. 메시지 추가
     batch.set(messagesColRef.doc(), messageData.toJson());
 
-    // 2. 채팅방 요약 정보 업데이트
-    final updateData = <String, dynamic>{
-      'lastMessage': text.trim(),
-      'lastTimestamp': messageData.timestamp,
-    };
+    // 2. 채팅방 존재 여부 확인 후 신규/기존에 따라 처리
+    final chatDocSnapshot = await chatRoomRef.get();
+    final bool isNewRoom = !chatDocSnapshot.exists;
 
-    // [Task 28 Fix] 채팅방이 존재하지 않을 경우를 대비해 participants 필드 필수 저장
-    // merge: true이므로 기존 데이터가 있어도 안전함.
-    if (allParticipantIds != null && allParticipantIds.isNotEmpty) {
-      updateData['participants'] = allParticipantIds;
-    } else if (otherUserId != null) {
-      final parts = [myUid, otherUserId];
-      parts.sort(); // ID 정렬 규칙 준수
-      updateData['participants'] = parts;
-    }
+    if (isNewRoom) {
+      // 신규 채팅방 생성: participants, lastMessage, lastTimestamp 및 unreadCounts 초기화
+      final Map<String, dynamic> initialData = {
+        'lastMessage': text.trim(),
+        'lastTimestamp': messageData.timestamp,
+        'unreadCounts': <String, dynamic>{},
+      };
 
-    // 3. 그룹/1:1 채팅에 따라 unreadCounts 업데이트
-    if (allParticipantIds != null && allParticipantIds.isNotEmpty) {
-      for (var userId in allParticipantIds) {
-        if (userId != myUid) {
-          updateData['unreadCounts.$userId'] = FieldValue.increment(1);
-        }
+      List<String> participants = [];
+      if (allParticipantIds != null && allParticipantIds.isNotEmpty) {
+        participants = allParticipantIds;
+      } else if (otherUserId != null) {
+        participants = [myUid, otherUserId]..sort();
       }
-    } else if (otherUserId != null) {
-      updateData['unreadCounts.$otherUserId'] = FieldValue.increment(1);
+
+      initialData['participants'] = participants;
+
+      // 안읽음 수 초기 설정: 작성자는 0, 나머지는 1
+      for (var uid in participants) {
+        initialData['unreadCounts'][uid] = (uid == myUid) ? 0 : 1;
+      }
+
+      // 신규 생성은 set 사용
+      batch.set(chatRoomRef, initialData);
+    } else {
+      // 기존 채팅방 갱신: lastMessage/lastTimestamp 및 unreadCounts 증가
+      final updateData = <String, dynamic>{
+        'lastMessage': text.trim(),
+        'lastTimestamp': messageData.timestamp,
+      };
+
+      if (allParticipantIds != null && allParticipantIds.isNotEmpty) {
+        for (var userId in allParticipantIds) {
+          if (userId != myUid) {
+            updateData['unreadCounts.$userId'] = FieldValue.increment(1);
+          }
+        }
+      } else if (otherUserId != null) {
+        updateData['unreadCounts.$otherUserId'] = FieldValue.increment(1);
+      }
+
+      // 기존 문서 갱신은 merge 옵션으로 안전하게 적용
+      batch.set(chatRoomRef, updateData, SetOptions(merge: true));
     }
-    // [v2.1] 버그 수정: .update()는 문서가 없으면 실패함. .set(..., merge: true)로 변경하여
-    // '동네 친구'의 첫 메시지 전송 시 채팅방 문서를 생성하도록 함.
-    batch.set(chatRoomRef, updateData, SetOptions(merge: true));
 
     await batch.commit();
   }

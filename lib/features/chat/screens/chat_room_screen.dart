@@ -433,10 +433,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       if (image != null) {
         final File imageFile = File(image.path);
         // chat_service.dart의 sendImageMessage 호출
+        // 1:1 채팅에서는 otherUserId만 전달,
+        // 그룹 채팅에서는 participants를 함께 전달해
+        // unreadCounts가 모든 참여자에게 정확히 반영되도록 합니다.
         await _chatService.sendImageMessage(
           widget.chatId,
           imageFile,
           widget.otherUserId, // 1:1 채팅 기준
+          participants:
+              widget.isGroupChat ? (widget.participants ?? const []) : null,
         );
       }
     } catch (e) {

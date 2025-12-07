@@ -19,6 +19,7 @@ library;
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -158,15 +159,29 @@ class UserFriendList extends StatelessWidget {
                 trailing: PopupMenuButton<String>(
                   onSelected: (value) async {
                     if (value == 'chat') {
-                      // 채팅방 이동
-                      List<String> ids = [myUid, targetUser.uid];
-                      ids.sort();
-                      String chatRoomId = ids.join('_');
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => ChatRoomScreen(
-                              chatId: chatRoomId,
-                              otherUserId: targetUser.uid,
-                              otherUserName: targetUser.nickname)));
+                      // [Fix] 친구 채팅도 ChatService 표준 경로로 통일
+                      try {
+                        final chatService = ChatService();
+                        final chatRoomId =
+                            await chatService.createOrGetChatRoom(
+                          otherUserId: targetUser.uid,
+                        );
+
+                        if (!context.mounted) return;
+
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => ChatRoomScreen(
+                                  chatId: chatRoomId,
+                                  otherUserId: targetUser.uid,
+                                  otherUserName: targetUser.nickname,
+                                )));
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('common.error'
+                                  .tr(namedArgs: {'error': e.toString()}))));
+                        }
+                      }
                     } else if (value == 'delete') {
                       // 목록에서 삭제 (친구 끊기 또는 찜 해제)
                       final field =

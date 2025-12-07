@@ -1,0 +1,2091 @@
+{
+  "0Ux1pTBeNDe66VZ2XSmawB8f7km1_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "lastMessageTimestamp": "2025-08-06T03:40:58.658Z",
+    "participants": [
+      "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-11-06T08:22:58.988Z",
+    "lastMessage": "sore",
+    "unreadCounts": {
+      "0Ux1pTBeNDe66VZ2XSmawB8f7km1": 0,
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0
+    },
+    "__id": "0Ux1pTBeNDe66VZ2XSmawB8f7km1_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-08-06T03:40:58.680Z",
+    "__updateTime": "2025-11-06T12:31:19.496Z",
+    "messages": [
+      {
+        "senderId": "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+        "text": "sore",
+        "timestamp": "2025-11-06T08:22:58.988Z",
+        "readBy": [
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "3kniX7Pjluk9MPR854Ej",
+        "__createTime": "2025-11-06T08:22:59.212Z",
+        "__updateTime": "2025-11-06T12:31:19.677Z"
+      },
+      {
+        "senderId": "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+        "text": "salam",
+        "timestamp": "2025-08-17T10:56:09.205Z",
+        "readBy": [
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "GuGss277glIAusdL4pWd",
+        "__createTime": "2025-08-17T10:56:09.380Z",
+        "__updateTime": "2025-08-17T10:56:39.456Z"
+      },
+      {
+        "senderId": "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+        "text": "Pagi",
+        "timestamp": "2025-08-07T03:33:53.705Z",
+        "readBy": [
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "OYgkhhzroMkv0BCx3NvQ",
+        "__createTime": "2025-08-07T03:33:57.686Z",
+        "__updateTime": "2025-08-07T03:34:17.191Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "apa kabar and",
+        "timestamp": "2025-08-07T03:37:05.467Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1"
+        ],
+        "__id": "YrzcXqFyIthCrh82kpEV",
+        "__createTime": "2025-08-07T03:37:09.540Z",
+        "__updateTime": "2025-08-07T08:56:48.458Z"
+      },
+      {
+        "senderId": "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+        "text": "salam kenal dng and",
+        "timestamp": "2025-08-07T08:57:05.382Z",
+        "readBy": [
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "ZKbyMo1XbS4Dm7le5BEC",
+        "__createTime": "2025-08-07T08:57:09.695Z",
+        "__updateTime": "2025-08-08T00:22:31.915Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "sama",
+        "timestamp": "2025-08-10T15:10:24.380Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1"
+        ],
+        "__id": "gRMwp5Eoh7uDnwlqIb6A",
+        "__createTime": "2025-08-10T15:10:24.316Z",
+        "__updateTime": "2025-08-17T10:56:01.052Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "pagi",
+        "timestamp": "2025-09-10T03:46:24.395Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1"
+        ],
+        "__id": "qs4I7ktkt3iAkcmEfovP",
+        "__createTime": "2025-09-10T03:46:24.718Z",
+        "__updateTime": "2025-11-06T08:22:52.609Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "Selamat Pagi",
+        "timestamp": "2025-08-07T02:56:54.763Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1"
+        ],
+        "__id": "yFBstVHSqqLYjzNUEmb5",
+        "__createTime": "2025-08-07T02:56:58.715Z",
+        "__updateTime": "2025-08-07T03:33:09.844Z"
+      }
+    ]
+  },
+  "193N5P94KEYdWPRnEj0Z_0Ux1pTBeNDe66VZ2XSmawB8f7km1_19aMuRqXsYgdmWQW5VNVUHtZdEJ3": {
+    "productTitle": "camera canon 500d minus",
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0,
+      "0Ux1pTBeNDe66VZ2XSmawB8f7km1": 0
+    },
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/product_images%2F0Ux1pTBeNDe66VZ2XSmawB8f7km1%2F3d6e761a-a6e8-4535-973b-1b29c7f5e369.jpg?alt=media&token=0810c9bb-d737-4fed-a90d-4aa7d4b121f6",
+    "productId": "193N5P94KEYdWPRnEj0Z",
+    "contextType": null,
+    "lastMessage": "Percakapan dimulai.",
+    "participants": [
+      "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+    ],
+    "lastTimestamp": "2025-11-29T12:53:23.303Z",
+    "__id": "193N5P94KEYdWPRnEj0Z_0Ux1pTBeNDe66VZ2XSmawB8f7km1_19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+    "__createTime": "2025-11-29T12:53:23.322Z",
+    "__updateTime": "2025-11-29T12:53:23.322Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "text": "Percakapan dimulai.",
+        "type": "system",
+        "timestamp": "2025-11-29T12:53:23.303Z",
+        "__id": "ociHR4XTi3060jLHaB4m",
+        "__createTime": "2025-11-29T12:53:23.322Z",
+        "__updateTime": "2025-11-29T12:53:23.322Z"
+      }
+    ]
+  },
+  "193N5P94KEYdWPRnEj0Z_0Ux1pTBeNDe66VZ2XSmawB8f7km1_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "productTitle": "camera canon 500d minus",
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "0Ux1pTBeNDe66VZ2XSmawB8f7km1": 0
+    },
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/product_images%2F0Ux1pTBeNDe66VZ2XSmawB8f7km1%2F3d6e761a-a6e8-4535-973b-1b29c7f5e369.jpg?alt=media&token=0810c9bb-d737-4fed-a90d-4aa7d4b121f6",
+    "productId": "193N5P94KEYdWPRnEj0Z",
+    "contextType": null,
+    "lastMessage": "Percakapan dimulai.",
+    "participants": [
+      "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-11-26T08:49:25.575Z",
+    "__id": "193N5P94KEYdWPRnEj0Z_0Ux1pTBeNDe66VZ2XSmawB8f7km1_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-11-26T08:49:25.607Z",
+    "__updateTime": "2025-11-26T08:49:25.607Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "Percakapan dimulai.",
+        "type": "system",
+        "timestamp": "2025-11-26T08:49:25.575Z",
+        "__id": "bPeA93l9DH8Coch4F7Ca",
+        "__createTime": "2025-11-26T08:49:25.607Z",
+        "__updateTime": "2025-11-26T08:49:25.607Z"
+      }
+    ]
+  },
+  "19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastMessageTimestamp": "2025-08-05T03:51:23.043Z",
+    "lastTimestamp": "2025-09-10T03:46:08.282Z",
+    "lastMessage": "halo",
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0
+    },
+    "__id": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-08-05T02:12:06.740Z",
+    "__updateTime": "2025-11-06T05:06:59.782Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "halo",
+        "timestamp": "2025-08-05T03:51:34.715Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "75ENc59UZRylEKq9pmg5",
+        "__createTime": "2025-08-05T03:51:34.930Z",
+        "__updateTime": "2025-08-06T10:42:05.039Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "maaf krna ada teman",
+        "timestamp": "2025-08-21T12:09:04.650Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "8ZZ5p9ajLScUN6o8tLPd",
+        "__createTime": "2025-08-21T12:09:05.224Z",
+        "__updateTime": "2025-08-21T12:09:19.703Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "selamat Pagi",
+        "timestamp": "2025-08-18T03:27:33.993Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "Hg73yKXvKhMcCb8Up2EP",
+        "__createTime": "2025-08-18T03:27:34.063Z",
+        "__updateTime": "2025-08-21T12:08:51.764Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "Hi",
+        "timestamp": "2025-08-10T15:07:20.517Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "TBcdmCKWYm4ny7OGDgLe",
+        "__createTime": "2025-08-10T15:07:20.824Z",
+        "__updateTime": "2025-08-12T18:45:24.140Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "halo",
+        "timestamp": "2025-08-09T14:51:29.235Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "bRbFdjf1GK11weBJflZQ",
+        "__createTime": "2025-08-09T14:51:29.353Z",
+        "__updateTime": "2025-08-10T15:07:14.823Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "Kenapa km tidak baca",
+        "timestamp": "2025-08-21T12:08:08.206Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "dMO5owUjWlAFIaKodzIO",
+        "__createTime": "2025-08-21T12:08:08.784Z",
+        "__updateTime": "2025-08-21T12:08:51.764Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "halo",
+        "timestamp": "2025-09-10T03:46:08.282Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "iZo5R4Sw02FihX0NMhXy",
+        "__createTime": "2025-09-10T03:46:08.601Z",
+        "__updateTime": "2025-11-06T05:07:00.885Z"
+      }
+    ]
+  },
+  "2F4toylRRZPm1gyo7jVg1GiMPOS2_Hbj8goCkPWS2ZguoEHuhBVClyek1": {
+    "unreadCounts": {
+      "Hbj8goCkPWS2ZguoEHuhBVClyek1": 0,
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0
+    },
+    "unreadCounts.2F4toylRRZPm1gyo7jVg1GiMPOS2": 2,
+    "participants": [
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+      "Hbj8goCkPWS2ZguoEHuhBVClyek1"
+    ],
+    "lastTimestamp": "2025-12-07T05:06:06.247Z",
+    "unreadCounts.Hbj8goCkPWS2ZguoEHuhBVClyek1": 4,
+    "lastMessage": "halo",
+    "__id": "2F4toylRRZPm1gyo7jVg1GiMPOS2_Hbj8goCkPWS2ZguoEHuhBVClyek1",
+    "__createTime": "2025-12-06T15:20:27.016Z",
+    "__updateTime": "2025-12-07T05:06:06.586Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "halo",
+        "timestamp": "2025-12-07T05:06:06.247Z",
+        "__id": "1Mt84SBTgr4Uz0HC2tMv",
+        "__createTime": "2025-12-07T05:06:06.586Z",
+        "__updateTime": "2025-12-07T05:06:06.586Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "aku juga di karawaci U res Tower 1",
+        "timestamp": "2025-12-06T16:08:57.102Z",
+        "__id": "EgL5sGww41Ew6RJeRCL2",
+        "__createTime": "2025-12-06T16:08:57.249Z",
+        "__updateTime": "2025-12-06T16:08:57.249Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "malam, anda di man",
+        "timestamp": "2025-12-06T15:26:48.826Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "Hbj8goCkPWS2ZguoEHuhBVClyek1"
+        ],
+        "__id": "Fd1S8ROUwCHMEwBzRaJw",
+        "__createTime": "2025-12-06T15:26:48.931Z",
+        "__updateTime": "2025-12-06T15:27:39.983Z"
+      },
+      {
+        "senderId": "Hbj8goCkPWS2ZguoEHuhBVClyek1",
+        "text": "malam",
+        "timestamp": "2025-12-06T15:24:47.197Z",
+        "readBy": [
+          "Hbj8goCkPWS2ZguoEHuhBVClyek1",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "O2Ajlrn6uAKSBRpMLQEn",
+        "__createTime": "2025-12-06T15:24:47.307Z",
+        "__updateTime": "2025-12-06T15:26:32.527Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "Hi there! 👋",
+        "timestamp": "2025-12-06T15:20:26.827Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "Hbj8goCkPWS2ZguoEHuhBVClyek1"
+        ],
+        "__id": "pz6JzDqOW757Zoyn5PjV",
+        "__createTime": "2025-12-06T15:20:27.016Z",
+        "__updateTime": "2025-12-06T15:24:36.729Z"
+      },
+      {
+        "senderId": "Hbj8goCkPWS2ZguoEHuhBVClyek1",
+        "text": "di karawaci",
+        "timestamp": "2025-12-06T16:08:13.631Z",
+        "readBy": [
+          "Hbj8goCkPWS2ZguoEHuhBVClyek1",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "vF397F8P7I4GN1OQmZ6p",
+        "__createTime": "2025-12-06T16:08:13.792Z",
+        "__updateTime": "2025-12-06T16:08:38.072Z"
+      }
+    ]
+  },
+  "2F4toylRRZPm1gyo7jVg1GiMPOS2_VSBANO31DnhIpwpiVu9clw6IAvz2": {
+    "lastTimestamp": "2025-12-06T15:22:47.859Z",
+    "lastMessage": "Any favorite spots nearby?",
+    "unreadCounts.VSBANO31DnhIpwpiVu9clw6IAvz2": 1,
+    "__id": "2F4toylRRZPm1gyo7jVg1GiMPOS2_VSBANO31DnhIpwpiVu9clw6IAvz2",
+    "__createTime": "2025-12-06T15:22:47.978Z",
+    "__updateTime": "2025-12-06T15:22:47.978Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "Any favorite spots nearby?",
+        "timestamp": "2025-12-06T15:22:47.859Z",
+        "__id": "2hMtt4BsV1m0EpbuWKqV",
+        "__createTime": "2025-12-06T15:22:47.978Z",
+        "__updateTime": "2025-12-06T15:22:47.978Z"
+      }
+    ]
+  },
+  "2F4toylRRZPm1gyo7jVg1GiMPOS2_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": {
+    "lastMessageTimestamp": "2025-10-08T14:04:40.864Z",
+    "participants": [
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "unreadCounts": {
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": 0,
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0
+    },
+    "unreadCounts.nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": 3,
+    "lastTimestamp": "2025-12-06T07:19:20.889Z",
+    "lastMessage": "halo",
+    "__id": "2F4toylRRZPm1gyo7jVg1GiMPOS2_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+    "__createTime": "2025-10-08T14:04:40.899Z",
+    "__updateTime": "2025-12-06T07:19:34.487Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "Kok kasar",
+        "timestamp": "2025-10-30T10:21:20.072Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+        ],
+        "__id": "23NEH89mmvSQZVLjXomq",
+        "__createTime": "2025-10-30T10:21:20.641Z",
+        "__updateTime": "2025-11-02T13:01:37.526Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "baya bu",
+        "timestamp": "2025-11-26T10:10:36.273Z",
+        "__id": "KGOa5yBRZsf6XDLdpBc6",
+        "__createTime": "2025-11-26T10:10:36.886Z",
+        "__updateTime": "2025-11-26T10:10:36.886Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "syang",
+        "timestamp": "2025-10-08T14:05:02.175Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+        ],
+        "__id": "PDbhbkJzckBjR0OirUqW",
+        "__createTime": "2025-10-08T14:05:02.357Z",
+        "__updateTime": "2025-10-08T14:05:25.594Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "bayar",
+        "timestamp": "2025-11-26T10:11:40.906Z",
+        "__id": "U2M8HWpiXwk5gHhAi3GM",
+        "__createTime": "2025-11-26T10:11:41.417Z",
+        "__updateTime": "2025-11-26T10:11:41.417Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "halo",
+        "timestamp": "2025-12-06T07:19:20.889Z",
+        "__id": "ggI3KTsfmvOwcjbiH2f5",
+        "__createTime": "2025-12-06T07:19:34.487Z",
+        "__updateTime": "2025-12-06T07:19:34.487Z"
+      },
+      {
+        "senderId": "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+        "text": "DISINI TIDAK ADA IMOTICON YA",
+        "timestamp": "2025-11-02T13:02:51.117Z",
+        "readBy": [
+          "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "j6f818mc0m2eZjhij1qy",
+        "__createTime": "2025-11-02T13:02:51.126Z",
+        "__updateTime": "2025-11-06T10:29:13.219Z"
+      },
+      {
+        "senderId": "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+        "text": "HAHAHA",
+        "timestamp": "2025-11-02T13:02:03.250Z",
+        "readBy": [
+          "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "pErHAiTiJAQEoGm2Q7M3",
+        "__createTime": "2025-11-02T13:02:03.295Z",
+        "__updateTime": "2025-11-06T10:29:13.219Z"
+      },
+      {
+        "senderId": "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+        "text": "siapa?",
+        "timestamp": "2025-10-20T12:10:07.907Z",
+        "readBy": [
+          "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "zVBdlTwuhvPs1zIavQdt",
+        "__createTime": "2025-10-20T12:10:07.474Z",
+        "__updateTime": "2025-10-30T10:21:09.697Z"
+      }
+    ]
+  },
+  "2F4toylRRZPm1gyo7jVg1GiMPOS2_zY6nh068F7SBNT9r82g0EdZTBTG2": {
+    "participants": [
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+      "zY6nh068F7SBNT9r82g0EdZTBTG2"
+    ],
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "zY6nh068F7SBNT9r82g0EdZTBTG2": 0
+    },
+    "unreadCounts.2F4toylRRZPm1gyo7jVg1GiMPOS2": 3,
+    "unreadCounts.zY6nh068F7SBNT9r82g0EdZTBTG2": 5,
+    "lastTimestamp": "2025-12-07T10:16:56.556Z",
+    "lastMessage": "km sedang apain",
+    "__id": "2F4toylRRZPm1gyo7jVg1GiMPOS2_zY6nh068F7SBNT9r82g0EdZTBTG2",
+    "__createTime": "2025-12-07T03:05:30.712Z",
+    "__updateTime": "2025-12-07T10:16:57.200Z",
+    "messages": [
+      {
+        "senderId": "zY6nh068F7SBNT9r82g0EdZTBTG2",
+        "text": "makanan",
+        "timestamp": "2025-12-07T05:05:40.962Z",
+        "readBy": [
+          "zY6nh068F7SBNT9r82g0EdZTBTG2",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "3Ncq32gasAnf77tq1gAM",
+        "__createTime": "2025-12-07T05:05:41.434Z",
+        "__updateTime": "2025-12-07T10:16:35.446Z"
+      },
+      {
+        "senderId": "zY6nh068F7SBNT9r82g0EdZTBTG2",
+        "text": "taman sari",
+        "timestamp": "2025-12-07T04:37:36.053Z",
+        "readBy": [
+          "zY6nh068F7SBNT9r82g0EdZTBTG2",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "Bpa4yrehN1BiQpxAb1G2",
+        "__createTime": "2025-12-07T04:37:36.437Z",
+        "__updateTime": "2025-12-07T04:37:55.447Z"
+      },
+      {
+        "senderId": "zY6nh068F7SBNT9r82g0EdZTBTG2",
+        "text": "iya benar",
+        "timestamp": "2025-12-07T04:53:58.797Z",
+        "readBy": [
+          "zY6nh068F7SBNT9r82g0EdZTBTG2",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "FfGgIwZcybyZQYJ6TDdK",
+        "__createTime": "2025-12-07T04:53:59.149Z",
+        "__updateTime": "2025-12-07T04:54:16.330Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "Apakah ada tempat favorit di sekitar sini?",
+        "timestamp": "2025-12-07T03:05:30.551Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "zY6nh068F7SBNT9r82g0EdZTBTG2"
+        ],
+        "__id": "Hwndxk4fzc73AEyqPcKS",
+        "__createTime": "2025-12-07T03:05:30.712Z",
+        "__updateTime": "2025-12-07T03:26:50.984Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "km sedang apain",
+        "timestamp": "2025-12-07T10:16:56.556Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "zY6nh068F7SBNT9r82g0EdZTBTG2"
+        ],
+        "__id": "JfFQKtd9fUrgeflolnBE",
+        "__createTime": "2025-12-07T10:16:57.200Z",
+        "__updateTime": "2025-12-07T10:17:29.759Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "apain enak di sana",
+        "timestamp": "2025-12-07T04:54:38.342Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "zY6nh068F7SBNT9r82g0EdZTBTG2"
+        ],
+        "__id": "MB7KCD19Q07sCmA6yRRG",
+        "__createTime": "2025-12-07T04:54:38.657Z",
+        "__updateTime": "2025-12-07T05:05:35.030Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "itu depan mall karawaciya",
+        "timestamp": "2025-12-07T04:38:19.751Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "zY6nh068F7SBNT9r82g0EdZTBTG2"
+        ],
+        "__id": "MjktXgMeSOpMzWGcoLRM",
+        "__createTime": "2025-12-07T04:38:20.074Z",
+        "__updateTime": "2025-12-07T04:53:49.614Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "hi teman",
+        "timestamp": "2025-12-07T10:16:45.046Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "zY6nh068F7SBNT9r82g0EdZTBTG2"
+        ],
+        "__id": "U2hjdhR3xi3MeXqaa5Xu",
+        "__createTime": "2025-12-07T10:16:45.690Z",
+        "__updateTime": "2025-12-07T10:17:29.759Z"
+      }
+    ]
+  },
+  "3Hb4gYKhXYDO6LZoWAeY_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": {
+    "productTitle": "parfume",
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0,
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": 0
+    },
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/lost_and_found%2FnDPxZRZ6JKZOMaxwCvbY9qFxBCl1%2F65cefb47-fc48-4a24-9fe2-262dda169efb?alt=media&token=96f10b7b-93b3-4f8f-9032-362ccbf3b191",
+    "contextType": "lost",
+    "lostItemId": "3Hb4gYKhXYDO6LZoWAeY",
+    "lastMessage": "Percakapan dimulai.",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+    ],
+    "lastTimestamp": "2025-11-29T14:08:13.349Z",
+    "__id": "3Hb4gYKhXYDO6LZoWAeY_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+    "__createTime": "2025-11-29T14:08:13.377Z",
+    "__updateTime": "2025-11-29T14:08:13.377Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+        ],
+        "text": "Percakapan dimulai.",
+        "type": "system",
+        "timestamp": "2025-11-29T14:08:13.349Z",
+        "__id": "lw9mTYPdNwX3Jesw6yTn",
+        "__createTime": "2025-11-29T14:08:13.377Z",
+        "__updateTime": "2025-11-29T14:08:13.377Z"
+      }
+    ]
+  },
+  "3Hb4gYKhXYDO6LZoWAeY_2F4toylRRZPm1gyo7jVg1GiMPOS2_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": {
+    "productTitle": "parfume",
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": 0
+    },
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/lost_and_found%2FnDPxZRZ6JKZOMaxwCvbY9qFxBCl1%2F65cefb47-fc48-4a24-9fe2-262dda169efb?alt=media&token=96f10b7b-93b3-4f8f-9032-362ccbf3b191",
+    "contextType": "lost",
+    "lostItemId": "3Hb4gYKhXYDO6LZoWAeY",
+    "lastMessage": "Conversation started.",
+    "participants": [
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+    ],
+    "lastTimestamp": "2025-11-29T14:31:06.969Z",
+    "__id": "3Hb4gYKhXYDO6LZoWAeY_2F4toylRRZPm1gyo7jVg1GiMPOS2_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+    "__createTime": "2025-11-29T14:31:06.982Z",
+    "__updateTime": "2025-11-29T14:31:06.982Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+        ],
+        "text": "Conversation started.",
+        "type": "system",
+        "timestamp": "2025-11-29T14:31:06.969Z",
+        "__id": "GN0HU22CqiBVwfmC4DMj",
+        "__createTime": "2025-11-29T14:31:06.982Z",
+        "__updateTime": "2025-11-29T14:31:06.982Z"
+      }
+    ]
+  },
+  "6esCNqHWHEzWx7dcsoRn_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_19aMuRqXsYgdmWQW5VNVUHtZdEJ3": {
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0
+    },
+    "jobId": "6esCNqHWHEzWx7dcsoRn",
+    "contextType": null,
+    "jobTitle": "antar ke lipo segera",
+    "lastMessage": "Conversation started.",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+    ],
+    "lastTimestamp": "2025-11-29T12:21:39.726Z",
+    "__id": "6esCNqHWHEzWx7dcsoRn_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+    "__createTime": "2025-11-29T12:21:39.762Z",
+    "__updateTime": "2025-11-29T12:21:39.762Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "text": "Conversation started.",
+        "type": "system",
+        "timestamp": "2025-11-29T12:21:39.726Z",
+        "__id": "Oymfoe5KrN9Y0yUs0Df4",
+        "__createTime": "2025-11-29T12:21:39.762Z",
+        "__updateTime": "2025-11-29T12:21:39.762Z"
+      }
+    ]
+  },
+  "6esCNqHWHEzWx7dcsoRn_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0
+    },
+    "jobId": "6esCNqHWHEzWx7dcsoRn",
+    "contextType": null,
+    "jobTitle": "antar ke lipo segera",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "unreadCounts.19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 2,
+    "unreadCounts.2F4toylRRZPm1gyo7jVg1GiMPOS2": 3,
+    "lastTimestamp": "2025-12-07T10:16:11.356Z",
+    "lastMessage": "kamu sedang apain",
+    "__id": "6esCNqHWHEzWx7dcsoRn_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-11-26T09:08:35.819Z",
+    "__updateTime": "2025-12-07T10:16:11.995Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "Percakapan dimulai.",
+        "type": "system",
+        "timestamp": "2025-11-26T09:08:35.793Z",
+        "__id": "6aRw407WyPzBN7Sq2xAa",
+        "__createTime": "2025-11-26T09:08:35.819Z",
+        "__updateTime": "2025-11-26T09:08:35.819Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "text": "kamu sedang apain",
+        "timestamp": "2025-12-07T10:16:11.356Z",
+        "__id": "9wvd7NPLPKqctmxlqz5B",
+        "__createTime": "2025-12-07T10:16:11.995Z",
+        "__updateTime": "2025-12-07T10:16:11.995Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "halo",
+        "timestamp": "2025-12-07T05:06:24.475Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "Ggll0Pd0P1Ab41FloQOF",
+        "__createTime": "2025-12-07T05:06:24.796Z",
+        "__updateTime": "2025-12-07T05:07:00.503Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "halo. boss",
+        "timestamp": "2025-12-07T05:07:11.104Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "OZThJZzTzPOtdUWtRf7P",
+        "__createTime": "2025-12-07T05:07:11.423Z",
+        "__updateTime": "2025-12-07T05:07:23.993Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "apa in",
+        "timestamp": "2025-12-07T10:15:07.240Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "dnAZW7eo14SVW0Deynr4",
+        "__createTime": "2025-12-07T10:15:07.955Z",
+        "__updateTime": "2025-12-07T10:15:43.395Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "text": "sd kerja",
+        "timestamp": "2025-12-07T10:15:57.798Z",
+        "__id": "rIW0VPLo04vBkOQAu2cx",
+        "__createTime": "2025-12-07T10:15:58.458Z",
+        "__updateTime": "2025-12-07T10:15:58.458Z"
+      }
+    ]
+  },
+  "ACurdXWp3K7UqDcxA989_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "productTitle": "figure",
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/lost_and_found%2F2F4toylRRZPm1gyo7jVg1GiMPOS2%2F3db83ba0-2783-41cb-84f8-92aabd824b36?alt=media&token=eb9b7996-ba31-4053-99df-9428fd963092",
+    "lostItemId": "ACurdXWp3K7UqDcxA989",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0
+    },
+    "lastTimestamp": "2025-11-30T07:29:38.892Z",
+    "lastMessage": "도움을 주셔서 감사합니다! 신뢰 점수가 지급되었습니다.",
+    "unreadCounts.19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 1,
+    "__id": "ACurdXWp3K7UqDcxA989_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-08-15T08:30:41.511Z",
+    "__updateTime": "2025-11-30T07:29:49.639Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "pagi",
+        "timestamp": "2025-09-10T03:46:32.836Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "0wUlsceNxvkODs0zHoBL",
+        "__createTime": "2025-09-10T03:46:33.145Z",
+        "__updateTime": "2025-09-17T02:26:28.653Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "Saya baru ketemu barang yg anda Hilang",
+        "timestamp": "2025-08-15T08:31:10.749Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "NqiHdwFKcJRVR8FdPBaa",
+        "__createTime": "2025-08-15T08:31:11.271Z",
+        "__updateTime": "2025-08-15T08:33:46.706Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "도움을 주셔서 감사합니다! 신뢰 점수가 지급되었습니다.",
+        "timestamp": "2025-11-30T07:29:38.892Z",
+        "__id": "mvRdO7GbXp1HP8bCioLh",
+        "__createTime": "2025-11-30T07:29:49.639Z",
+        "__updateTime": "2025-11-30T07:29:49.639Z"
+      }
+    ]
+  },
+  "BdxJAXVC57x4SrAA83F1_2F4toylRRZPm1gyo7jVg1GiMPOS2_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": {
+    "productTitle": "Gudangnya rak piring kaca aluminium",
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": 0
+    },
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/product_images%2FnDPxZRZ6JKZOMaxwCvbY9qFxBCl1%2F23ab7dc6-5b29-40a6-9903-9527a5fb0cdc.jpg?alt=media&token=409729dd-4cb4-454f-8b92-5d2337f8ed5e",
+    "productId": "BdxJAXVC57x4SrAA83F1",
+    "contextType": null,
+    "lastMessage": "Percakapan dimulai.",
+    "participants": [
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+    ],
+    "lastTimestamp": "2025-11-26T09:09:07.729Z",
+    "__id": "BdxJAXVC57x4SrAA83F1_2F4toylRRZPm1gyo7jVg1GiMPOS2_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+    "__createTime": "2025-11-26T09:09:07.762Z",
+    "__updateTime": "2025-11-26T09:09:07.762Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+        ],
+        "text": "Percakapan dimulai.",
+        "type": "system",
+        "timestamp": "2025-11-26T09:09:07.729Z",
+        "__id": "OkMG4R2TNlK8bhqtF6Dl",
+        "__createTime": "2025-11-26T09:09:07.762Z",
+        "__updateTime": "2025-11-26T09:09:07.762Z"
+      }
+    ]
+  },
+  "HHFZNtWAFblNxN87G91y": {
+    "groupName": "Bowling Grup",
+    "contextType": "club",
+    "clubId": "HHFZNtWAFblNxN87G91y",
+    "clubTitle": "Bowling Grup",
+    "isGroupChat": true,
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+    ],
+    "clubImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/club_images%2F19aMuRqXsYgdmWQW5VNVUHtZdEJ3%2Fa9af2193-76e2-4ae9-aade-9f979bb662c9?alt=media&token=ed8a841b-dfc7-4f42-a812-a709288a9325",
+    "groupImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/club_images%2F19aMuRqXsYgdmWQW5VNVUHtZdEJ3%2Fa9af2193-76e2-4ae9-aade-9f979bb662c9?alt=media&token=ed8a841b-dfc7-4f42-a812-a709288a9325",
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0,
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0
+    },
+    "lastTimestamp": "2025-12-07T11:22:41.678Z",
+    "lastMessage": "commen mulai chat saja",
+    "unreadCounts.19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 2,
+    "__id": "HHFZNtWAFblNxN87G91y",
+    "__createTime": "2025-12-05T03:32:16.554Z",
+    "__updateTime": "2025-12-07T11:22:42.415Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "commen mulai chat saja",
+        "timestamp": "2025-12-07T11:22:41.678Z",
+        "__id": "Dx4MRh5tb9eVAOlplML5",
+        "__createTime": "2025-12-07T11:22:42.415Z",
+        "__updateTime": "2025-12-07T11:22:42.415Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "halo friend",
+        "timestamp": "2025-12-07T11:20:13.766Z",
+        "__id": "YVF5YGx2jvVVLv9mYAZe",
+        "__createTime": "2025-12-07T11:20:14.492Z",
+        "__updateTime": "2025-12-07T11:20:14.492Z"
+      }
+    ]
+  },
+  "Hp3eAOs3zDpW01DkU6py_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "jobId": "Hp3eAOs3zDpW01DkU6py",
+    "jobTitle": "serving kawan cari",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-08-17T04:53:54.561Z",
+    "lastMessage": "ok",
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0,
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0
+    },
+    "__id": "Hp3eAOs3zDpW01DkU6py_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-08-12T18:02:54.476Z",
+    "__updateTime": "2025-08-17T09:02:32.267Z",
+    "messages": [
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "halo, maish cari pegawei ga",
+        "timestamp": "2025-08-12T18:03:09.794Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "BfokPSTWhspQ9PMF6xfn",
+        "__createTime": "2025-08-12T18:03:11.174Z",
+        "__updateTime": "2025-08-12T18:03:41.213Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "kapan bisa kesini",
+        "timestamp": "2025-08-12T18:52:12.781Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "EWdioOvZVwTtz3HyxGT2",
+        "__createTime": "2025-08-12T18:52:12.730Z",
+        "__updateTime": "2025-08-13T10:38:31.703Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "iya maish",
+        "timestamp": "2025-08-12T18:03:45.625Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "ICqbnuZ9ZRrm8JvnrinZ",
+        "__createTime": "2025-08-12T18:03:47.018Z",
+        "__updateTime": "2025-08-13T10:38:31.703Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "ok",
+        "timestamp": "2025-08-17T04:53:54.561Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "aUB7Zq5kwZTuYKXJE3UL",
+        "__createTime": "2025-08-17T04:53:56.655Z",
+        "__updateTime": "2025-08-17T09:02:32.516Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "bsk bisa kah?",
+        "timestamp": "2025-08-13T10:38:45.284Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "iuGZavEkr2P5xumbVPOA",
+        "__createTime": "2025-08-13T10:38:45.656Z",
+        "__updateTime": "2025-08-13T10:39:41.437Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "bsk ok",
+        "timestamp": "2025-08-13T10:39:46.964Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "iwmS92FDurksjswp4vFH",
+        "__createTime": "2025-08-13T10:39:47.321Z",
+        "__updateTime": "2025-08-17T04:53:48.742Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "mau kerja",
+        "timestamp": "2025-08-12T18:50:31.497Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "jzq1KAkCbdFXwPZwLOBl",
+        "__createTime": "2025-08-12T18:50:32.976Z",
+        "__updateTime": "2025-08-13T10:38:31.703Z"
+      }
+    ]
+  },
+  "Hp3eAOs3zDpW01DkU6py_2F4toylRRZPm1gyo7jVg1GiMPOS2_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "jobId": "Hp3eAOs3zDpW01DkU6py",
+    "jobTitle": "serving kawan cari",
+    "participants": [
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-08-15T09:12:21.728Z",
+    "lastMessage": "halo",
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0
+    },
+    "__id": "Hp3eAOs3zDpW01DkU6py_2F4toylRRZPm1gyo7jVg1GiMPOS2_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-08-12T18:01:07.517Z",
+    "__updateTime": "2025-11-06T11:32:17.381Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "halo",
+        "timestamp": "2025-08-15T09:12:21.728Z",
+        "__id": "3xClfsMNu8zBmNda7pvb",
+        "__createTime": "2025-08-15T09:12:21.766Z",
+        "__updateTime": "2025-08-15T09:12:21.766Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "halo. masi cari pegawei",
+        "timestamp": "2025-08-12T18:01:29.495Z",
+        "__id": "sJBxTJuStucSBy0ccHHz",
+        "__createTime": "2025-08-12T18:01:30.910Z",
+        "__updateTime": "2025-08-12T18:01:30.910Z"
+      }
+    ]
+  },
+  "Ps6DQfMBOYK8ZHdJWQJm_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "shopImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/shop_images%2F2F4toylRRZPm1gyo7jVg1GiMPOS2%2Fa0881fe7-c908-4008-b529-2e1fc0a0959b?alt=media&token=e7779014-373e-4778-99aa-c9444ecad191",
+    "shopName": "Toko Cute",
+    "shopId": "Ps6DQfMBOYK8ZHdJWQJm",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-08-17T04:56:03.184Z",
+    "lastMessage": "baik. hair minggu buka toko ga",
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0,
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0
+    },
+    "__id": "Ps6DQfMBOYK8ZHdJWQJm_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-08-13T08:03:07.495Z",
+    "__updateTime": "2025-08-17T09:02:27.489Z",
+    "messages": [
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "hi",
+        "timestamp": "2025-08-13T08:03:13.144Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "5u96icYCmguyynDYNojH",
+        "__createTime": "2025-08-13T08:03:13.360Z",
+        "__updateTime": "2025-08-13T10:37:41.732Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "baik. hair minggu buka toko ga",
+        "timestamp": "2025-08-17T04:56:03.184Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "eGdaeIswlZylNMEx1hIs",
+        "__createTime": "2025-08-17T04:56:05.336Z",
+        "__updateTime": "2025-08-17T09:02:27.726Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "ada",
+        "timestamp": "2025-08-13T10:39:37.433Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "o9FpbhYLE1Tz9L6Fj0Af",
+        "__createTime": "2025-08-13T10:39:37.816Z",
+        "__updateTime": "2025-08-17T04:54:00.330Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "hi barang Adam Adam",
+        "timestamp": "2025-08-13T10:39:00.311Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "zokjXHE9nXThvBrYbXxb",
+        "__createTime": "2025-08-13T10:39:00.701Z",
+        "__updateTime": "2025-08-13T10:39:33.964Z"
+      }
+    ]
+  },
+  "UdRBNQEBax181iK8xaOC_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": {
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0,
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": 0
+    },
+    "jobId": "UdRBNQEBax181iK8xaOC",
+    "contextType": null,
+    "jobTitle": "pindahan rumah",
+    "lastMessage": "Conversation started.",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+    ],
+    "lastTimestamp": "2025-11-29T11:05:48.179Z",
+    "__id": "UdRBNQEBax181iK8xaOC_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+    "__createTime": "2025-11-29T11:05:48.193Z",
+    "__updateTime": "2025-11-29T11:05:48.193Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+        ],
+        "text": "Conversation started.",
+        "type": "system",
+        "timestamp": "2025-11-29T11:05:48.179Z",
+        "__id": "L9imYXAs5r7R9ohpn0cE",
+        "__createTime": "2025-11-29T11:05:48.193Z",
+        "__updateTime": "2025-11-29T11:05:48.193Z"
+      }
+    ]
+  },
+  "UdRBNQEBax181iK8xaOC_2F4toylRRZPm1gyo7jVg1GiMPOS2_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": {
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": 0
+    },
+    "jobId": "UdRBNQEBax181iK8xaOC",
+    "contextType": null,
+    "jobTitle": "pindahan rumah",
+    "lastMessage": "Percakapan dimulai.",
+    "participants": [
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+    ],
+    "lastTimestamp": "2025-11-29T04:36:39.149Z",
+    "__id": "UdRBNQEBax181iK8xaOC_2F4toylRRZPm1gyo7jVg1GiMPOS2_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+    "__createTime": "2025-11-29T04:36:39.183Z",
+    "__updateTime": "2025-11-29T04:36:39.183Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+        ],
+        "text": "Percakapan dimulai.",
+        "type": "system",
+        "timestamp": "2025-11-29T04:36:39.149Z",
+        "__id": "yFUTBFHgDyD9e34siVGf",
+        "__createTime": "2025-11-29T04:36:39.183Z",
+        "__updateTime": "2025-11-29T04:36:39.183Z"
+      }
+    ]
+  },
+  "UxL7i2HtdOrEv2NntfXU_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "productTitle": "dekat dari UPH",
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/room_listings%2F2F4toylRRZPm1gyo7jVg1GiMPOS2%2Faa6b6112-9ae3-4637-91a6-6abb98c338ff?alt=media&token=cfe3984e-f223-4c27-8db0-5e917a96c8b3",
+    "contextType": null,
+    "roomImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/room_listings%2F2F4toylRRZPm1gyo7jVg1GiMPOS2%2Faa6b6112-9ae3-4637-91a6-6abb98c338ff?alt=media&token=cfe3984e-f223-4c27-8db0-5e917a96c8b3",
+    "roomTitle": "dekat dari UPH",
+    "roomId": "UxL7i2HtdOrEv2NntfXU",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-09-10T03:45:52.667Z",
+    "lastMessage": "halo",
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0
+    },
+    "__id": "UxL7i2HtdOrEv2NntfXU_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-09-02T06:43:00.691Z",
+    "__updateTime": "2025-11-06T05:07:38.807Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "halo",
+        "timestamp": "2025-09-10T03:45:52.667Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "NKZrCQTgvGq1AMHjLYgy",
+        "__createTime": "2025-09-10T03:45:52.983Z",
+        "__updateTime": "2025-11-06T05:07:39.450Z"
+      }
+    ]
+  },
+  "djO6b2u3myPi2NfyjfHx_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "productTitle": "apple watch",
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0
+    },
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/lost_and_found%2F19aMuRqXsYgdmWQW5VNVUHtZdEJ3%2F9fe02561-7fef-4471-9a3b-06d7ed770480?alt=media&token=0eb19f18-dbfd-45f5-86cd-7cd74aa1c84c",
+    "contextType": "lost",
+    "lostItemId": "djO6b2u3myPi2NfyjfHx",
+    "lastMessage": "Conversation started.",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-11-29T14:41:53.594Z",
+    "__id": "djO6b2u3myPi2NfyjfHx_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-11-29T14:41:53.625Z",
+    "__updateTime": "2025-11-29T14:41:53.625Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "Conversation started.",
+        "type": "system",
+        "timestamp": "2025-11-29T14:41:53.594Z",
+        "__id": "D5vbqUmrIlDtCw5q1Hpz",
+        "__createTime": "2025-11-29T14:41:53.625Z",
+        "__updateTime": "2025-11-29T14:41:53.625Z"
+      }
+    ]
+  },
+  "g6XYSxt3f7esSgMLcEOX_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0
+    },
+    "jobId": "g6XYSxt3f7esSgMLcEOX",
+    "contextType": "talent",
+    "jobTitle": "web design tuk bisnis",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-11-29T12:31:24.333Z",
+    "lastMessage": "iya",
+    "unreadCounts.19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 1,
+    "__id": "g6XYSxt3f7esSgMLcEOX_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-11-29T11:05:22.852Z",
+    "__updateTime": "2025-11-29T12:31:32.567Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "iya",
+        "timestamp": "2025-11-29T12:31:24.333Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "Sgb0wYbjJ12HqQCM1A4Y",
+        "__createTime": "2025-11-29T12:31:32.567Z",
+        "__updateTime": "2025-11-29T12:33:35.751Z"
+      },
+      {
+        "senderId": "system",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "Conversation started.",
+        "type": "system",
+        "timestamp": "2025-11-29T11:05:22.838Z",
+        "__id": "focb1aVniBw7mWBUEgjY",
+        "__createTime": "2025-11-29T11:05:22.852Z",
+        "__updateTime": "2025-11-29T11:05:22.852Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "web design",
+        "timestamp": "2025-11-29T11:07:08.366Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "heRs5jAD8tA4b8x9Bv7O",
+        "__createTime": "2025-11-29T11:07:16.508Z",
+        "__updateTime": "2025-11-29T12:31:28.195Z"
+      }
+    ]
+  },
+  "hb027oFZssYfA5HdaWJg_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "productTitle": "kost dekat mall puri jakarta barat",
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0
+    },
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/room_listings%2F19aMuRqXsYgdmWQW5VNVUHtZdEJ3%2F65be1619-8bb7-40ee-ae09-3c02884c18de?alt=media&token=39238757-f4fb-477a-a494-ad18ee3b4ebd",
+    "contextType": null,
+    "roomImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/room_listings%2F19aMuRqXsYgdmWQW5VNVUHtZdEJ3%2F65be1619-8bb7-40ee-ae09-3c02884c18de?alt=media&token=39238757-f4fb-477a-a494-ad18ee3b4ebd",
+    "lastMessage": "Conversation started.",
+    "roomTitle": "kost dekat mall puri jakarta barat",
+    "roomId": "hb027oFZssYfA5HdaWJg",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-11-29T14:49:37.333Z",
+    "__id": "hb027oFZssYfA5HdaWJg_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-11-29T14:49:37.349Z",
+    "__updateTime": "2025-11-29T14:49:37.349Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "Conversation started.",
+        "type": "system",
+        "timestamp": "2025-11-29T14:49:37.333Z",
+        "__id": "IkV1BUPkAT0DUTCu7m3f",
+        "__createTime": "2025-11-29T14:49:37.349Z",
+        "__updateTime": "2025-11-29T14:49:37.349Z"
+      }
+    ]
+  },
+  "lR2UIYb740rNxi4P2gbk_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_19aMuRqXsYgdmWQW5VNVUHtZdEJ3": {
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0
+    },
+    "jobId": "lR2UIYb740rNxi4P2gbk",
+    "contextType": null,
+    "jobTitle": "sales digital marketing",
+    "lastMessage": "Percakapan dimulai.",
+    "jobImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/job_images%2F19aMuRqXsYgdmWQW5VNVUHtZdEJ3%2F5be105c6-486b-4abc-802f-be2f357f0a09?alt=media&token=bfda1572-d279-405c-a9b7-b4a97ade05b0",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+    ],
+    "lastTimestamp": "2025-11-29T13:55:07.592Z",
+    "__id": "lR2UIYb740rNxi4P2gbk_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+    "__createTime": "2025-11-29T13:55:07.604Z",
+    "__updateTime": "2025-11-29T13:55:07.604Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "text": "Percakapan dimulai.",
+        "type": "system",
+        "timestamp": "2025-11-29T13:55:07.592Z",
+        "__id": "7YhLdI2pegZtGUlRuCPw",
+        "__createTime": "2025-11-29T13:55:07.604Z",
+        "__updateTime": "2025-11-29T13:55:07.604Z"
+      }
+    ]
+  },
+  "product_11_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "productTitle": "Sneakers Adidas Second",
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/product_images%2F1752204367511?alt=media&token=bd5aacbd-19ac-422b-b52c-6198e49a56dd",
+    "productId": "product_11",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-11-06T05:06:31.647Z",
+    "lastMessage": "apa kabar ini colom text tidak ikut muncul di atas",
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0,
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0
+    },
+    "__id": "product_11_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-07-13T12:49:32.617Z",
+    "__updateTime": "2025-11-06T12:31:25.612Z",
+    "messages": [
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "baik",
+        "timestamp": "2025-08-10T15:07:28.930Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "387noJooQXn09LDXKxoG",
+        "__createTime": "2025-08-10T15:07:29.235Z",
+        "__updateTime": "2025-08-12T18:46:12.634Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "Halo sepatu itu ukuran berapa?",
+        "timestamp": "2025-07-13T12:49:55.901Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "BTc1AaHR2Q8okXBWkS7U",
+        "__createTime": "2025-07-13T12:49:56.006Z",
+        "__updateTime": "2025-07-13T12:50:22.908Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "halo",
+        "timestamp": "2025-09-17T04:04:53.190Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "MtUhLkRj434jfgp0c8xQ",
+        "__createTime": "2025-09-17T04:04:53.455Z",
+        "__updateTime": "2025-11-06T05:05:05.954Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "gak ada skretch",
+        "timestamp": "2025-07-13T12:53:35.011Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "PaqvatLGnLkhihQbrZI9",
+        "__createTime": "2025-07-13T12:53:35.104Z",
+        "__updateTime": "2025-07-13T12:53:59.264Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "pakai berapa lama?",
+        "timestamp": "2025-07-13T12:51:11.983Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "SG1Z0svJPJm9NNF12biy",
+        "__createTime": "2025-07-13T12:51:12.057Z",
+        "__updateTime": "2025-07-13T12:53:02.202Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "itu 265cm kak",
+        "timestamp": "2025-07-13T12:50:38.695Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "VH2uEYKP6lWrxvHtCHa1",
+        "__createTime": "2025-07-13T12:50:38.764Z",
+        "__updateTime": "2025-07-13T12:50:57.485Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "apa kabar ini colom text tidak ikut muncul di atas",
+        "timestamp": "2025-11-06T05:06:31.647Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "XN5x42AwI8qjaRBkKuNj",
+        "__createTime": "2025-11-06T05:06:31.869Z",
+        "__updateTime": "2025-11-06T12:31:26.205Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "iya",
+        "timestamp": "2025-09-17T04:00:34.354Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "fkSOpfLJza24w8vp8SsM",
+        "__createTime": "2025-09-17T04:00:34.389Z",
+        "__updateTime": "2025-09-17T04:04:49.061Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "ada bekas goresan?",
+        "timestamp": "2025-07-13T12:52:39.090Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "gvrBL8CP0JNynf6deRZK",
+        "__createTime": "2025-07-13T12:52:39.261Z",
+        "__updateTime": "2025-07-13T12:53:02.202Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "apa kabar",
+        "timestamp": "2025-08-10T11:19:39.865Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "ieX76BDWnsGi2q6oFx2v",
+        "__createTime": "2025-08-10T11:19:39.754Z",
+        "__updateTime": "2025-08-10T15:07:24.264Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "sedang pain",
+        "timestamp": "2025-09-10T04:08:08.760Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "jLAyWn3XPvI5MNylGQvF",
+        "__createTime": "2025-09-10T04:08:09.121Z",
+        "__updateTime": "2025-09-17T02:22:38.333Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "pagi",
+        "timestamp": "2025-09-10T03:46:41.674Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "njtUOOso6ZKzbaVCUU32",
+        "__createTime": "2025-09-10T03:46:41.996Z",
+        "__updateTime": "2025-09-17T02:22:38.333Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "3bulan jarang pake,",
+        "timestamp": "2025-07-13T12:53:13.830Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "wPjBeaOPC2PEdiRZbp5v",
+        "__createTime": "2025-07-13T12:53:13.923Z",
+        "__updateTime": "2025-07-13T12:53:59.264Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "hello",
+        "timestamp": "2025-11-06T05:05:42.518Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "xK0v7AEUYyPwUt3OJC6N",
+        "__createTime": "2025-11-06T05:05:42.717Z",
+        "__updateTime": "2025-11-06T12:31:26.205Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "halo",
+        "timestamp": "2025-09-17T02:22:44.914Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "y3FpG0cMxCDUzqTmDyRf",
+        "__createTime": "2025-09-17T02:22:44.989Z",
+        "__updateTime": "2025-09-17T02:23:39.438Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "hello",
+        "timestamp": "2025-09-17T02:23:47.297Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "zaHqOL0yI5BOnvxiUTYw",
+        "__createTime": "2025-09-17T02:23:47.451Z",
+        "__updateTime": "2025-09-17T02:25:46.967Z"
+      }
+    ]
+  },
+  "product_13_2F4toylRRZPm1gyo7jVg1GiMPOS2_WRIZrWRfP4QvmGgUQLYaO0duq372": {
+    "productTitle": "Headset Gaming RGB",
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/product_images%2F1752203896801?alt=media&token=64f2383d-067d-409e-9340-d4629d0b6bd0",
+    "productId": "product_13",
+    "participants": [
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+      "WRIZrWRfP4QvmGgUQLYaO0duq372"
+    ],
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "WRIZrWRfP4QvmGgUQLYaO0duq372": 0
+    },
+    "unreadCounts.2F4toylRRZPm1gyo7jVg1GiMPOS2": 2,
+    "lastTimestamp": "2025-11-07T13:35:16.095Z",
+    "lastMessage": "silakan",
+    "__id": "product_13_2F4toylRRZPm1gyo7jVg1GiMPOS2_WRIZrWRfP4QvmGgUQLYaO0duq372",
+    "__createTime": "2025-07-24T10:39:32.367Z",
+    "__updateTime": "2025-11-07T13:35:15.789Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "hi",
+        "timestamp": "2025-08-10T11:19:27.914Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "WRIZrWRfP4QvmGgUQLYaO0duq372"
+        ],
+        "__id": "3g6Wi7L0bUqQwgkJdBek",
+        "__createTime": "2025-08-10T11:19:27.823Z",
+        "__updateTime": "2025-11-07T13:34:52.916Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "hi apakar sy ada minat barang itu",
+        "timestamp": "2025-07-24T10:40:01.034Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "WRIZrWRfP4QvmGgUQLYaO0duq372"
+        ],
+        "__id": "4rup24XYHEDTSpJIoH2o",
+        "__createTime": "2025-07-24T10:40:01.152Z",
+        "__updateTime": "2025-11-07T13:34:52.916Z"
+      },
+      {
+        "senderId": "WRIZrWRfP4QvmGgUQLYaO0duq372",
+        "text": "hallo",
+        "timestamp": "2025-11-07T13:35:00.290Z",
+        "readBy": [
+          "WRIZrWRfP4QvmGgUQLYaO0duq372",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "Gjg3yRV4XBbO70tFaVe2",
+        "__createTime": "2025-11-07T13:34:59.973Z",
+        "__updateTime": "2025-11-23T07:48:16.213Z"
+      },
+      {
+        "senderId": "WRIZrWRfP4QvmGgUQLYaO0duq372",
+        "text": "silakan",
+        "timestamp": "2025-11-07T13:35:16.095Z",
+        "readBy": [
+          "WRIZrWRfP4QvmGgUQLYaO0duq372",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "SXpVPoZmLo6uUSRUvEX4",
+        "__createTime": "2025-11-07T13:35:15.789Z",
+        "__updateTime": "2025-11-23T07:48:16.213Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "Halooooo",
+        "timestamp": "2025-08-13T10:40:18.758Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "WRIZrWRfP4QvmGgUQLYaO0duq372"
+        ],
+        "__id": "XjCq92XlI9D2G1ZER99R",
+        "__createTime": "2025-08-13T10:40:19.134Z",
+        "__updateTime": "2025-11-07T13:34:52.916Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "hello",
+        "timestamp": "2025-08-13T01:13:01.476Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "WRIZrWRfP4QvmGgUQLYaO0duq372"
+        ],
+        "__id": "scmfHuoZOTvXz4YxlgKP",
+        "__createTime": "2025-08-13T01:13:01.403Z",
+        "__updateTime": "2025-11-07T13:34:52.916Z"
+      }
+    ]
+  },
+  "product_1_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "productTitle": "iPhone 13 Pro 256GB Second Mulus",
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/product_images%2F1752202511412?alt=media&token=a71bc932-8eab-4b56-999f-dabaf7313f84",
+    "productId": "product_1",
+    "contextType": null,
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-09-10T03:45:45.118Z",
+    "lastMessage": "halo",
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0
+    },
+    "__id": "product_1_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-08-31T01:28:51.630Z",
+    "__updateTime": "2025-11-06T05:08:19.136Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "halo",
+        "timestamp": "2025-09-10T03:45:45.118Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "5nEgDmzC6j0ZjZ6t6Y1u",
+        "__createTime": "2025-09-10T03:45:45.471Z",
+        "__updateTime": "2025-11-06T05:08:19.860Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "iya",
+        "timestamp": "2025-09-02T06:38:30.879Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "K9EFH0iNdXSYnw8Nw0YF",
+        "__createTime": "2025-09-02T06:38:31.169Z",
+        "__updateTime": "2025-09-04T07:40:29.681Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "yy",
+        "timestamp": "2025-09-04T07:40:36.593Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "LWWURawbcn6dXcHkSC2p",
+        "__createTime": "2025-09-04T07:40:36.280Z",
+        "__updateTime": "2025-11-06T05:08:19.860Z"
+      },
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "text": "halo",
+        "timestamp": "2025-08-31T01:28:59.599Z",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "__id": "b3bz3uCxuoYPoY9hSVf8",
+        "__createTime": "2025-08-31T01:28:59.720Z",
+        "__updateTime": "2025-09-02T06:38:24.694Z"
+      }
+    ]
+  },
+  "qMsuQjmUpbmH9ebR4VAo_2F4toylRRZPm1gyo7jVg1GiMPOS2_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0
+    },
+    "jobId": "qMsuQjmUpbmH9ebR4VAo",
+    "contextType": null,
+    "jobTitle": "Part time Kerja",
+    "lastMessage": "",
+    "participants": [
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-11-06T11:32:41.623Z",
+    "__id": "qMsuQjmUpbmH9ebR4VAo_2F4toylRRZPm1gyo7jVg1GiMPOS2_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-11-06T11:32:41.651Z",
+    "__updateTime": "2025-11-06T11:32:41.651Z"
+  },
+  "tB0suCqyplA9mWY9VbjQ": {
+    "groupName": "Bling Golf Club",
+    "clubImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/club_images%2F19aMuRqXsYgdmWQW5VNVUHtZdEJ3%2F8cba75f9-37a7-4bdc-aa0e-5b24ac23ff4a?alt=media&token=c0fd01a7-c112-45f7-a718-b773707a8d31",
+    "contextType": "club",
+    "clubId": "tB0suCqyplA9mWY9VbjQ",
+    "clubTitle": "Bling Golf Club",
+    "groupImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/club_images%2F19aMuRqXsYgdmWQW5VNVUHtZdEJ3%2F8cba75f9-37a7-4bdc-aa0e-5b24ac23ff4a?alt=media&token=c0fd01a7-c112-45f7-a718-b773707a8d31",
+    "isGroupChat": true,
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+    ],
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0,
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0
+    },
+    "lastTimestamp": "2025-12-07T11:19:52.534Z",
+    "lastMessage": "hi owner",
+    "unreadCounts.19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 1,
+    "__id": "tB0suCqyplA9mWY9VbjQ",
+    "__createTime": "2025-12-05T02:42:50.762Z",
+    "__updateTime": "2025-12-07T11:19:53.304Z",
+    "messages": [
+      {
+        "senderId": "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "hi owner",
+        "timestamp": "2025-12-07T11:19:52.534Z",
+        "__id": "2StpzC7fC41UDqiZXz2E",
+        "__createTime": "2025-12-07T11:19:53.304Z",
+        "__updateTime": "2025-12-07T11:19:53.304Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "hi",
+        "timestamp": "2025-12-05T02:42:58.084Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "iep5hJwUcKVmE0g991sm",
+        "__createTime": "2025-12-05T02:42:58.243Z",
+        "__updateTime": "2025-12-07T11:19:43.941Z"
+      }
+    ]
+  },
+  "vEuqPFjOOxKHyjdd2hsc_0Ux1pTBeNDe66VZ2XSmawB8f7km1_19aMuRqXsYgdmWQW5VNVUHtZdEJ3": {
+    "productTitle": "custom interior modern & elegan harga ramah untuk rumah impianmu",
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0,
+      "0Ux1pTBeNDe66VZ2XSmawB8f7km1": 0
+    },
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/product_images%2F0Ux1pTBeNDe66VZ2XSmawB8f7km1%2F2302c087-e253-43a9-9b37-673ed6190756.jpg?alt=media&token=b0ea7ed4-90e1-489b-97cf-483d560a28a5",
+    "productId": "vEuqPFjOOxKHyjdd2hsc",
+    "contextType": null,
+    "participants": [
+      "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+    ],
+    "lastTimestamp": "2025-11-29T13:56:56.388Z",
+    "lastMessage": "halo",
+    "unreadCounts.0Ux1pTBeNDe66VZ2XSmawB8f7km1": 1,
+    "__id": "vEuqPFjOOxKHyjdd2hsc_0Ux1pTBeNDe66VZ2XSmawB8f7km1_19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+    "__createTime": "2025-11-29T13:53:38.932Z",
+    "__updateTime": "2025-11-29T13:57:04.727Z",
+    "messages": [
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "text": "halo",
+        "timestamp": "2025-11-29T13:56:56.388Z",
+        "__id": "MXxHT9ZUe6Ah28K4g5qH",
+        "__createTime": "2025-11-29T13:57:04.727Z",
+        "__updateTime": "2025-11-29T13:57:04.727Z"
+      },
+      {
+        "senderId": "system",
+        "readBy": [
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "text": "Percakapan dimulai.",
+        "type": "system",
+        "timestamp": "2025-11-29T13:53:38.919Z",
+        "__id": "fp1XuNrE8ClmyxsaqS0Y",
+        "__createTime": "2025-11-29T13:53:38.932Z",
+        "__updateTime": "2025-11-29T13:53:38.932Z"
+      }
+    ]
+  },
+  "vG2qgn0rKEhlsKH205Yg_0Ux1pTBeNDe66VZ2XSmawB8f7km1_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "0Ux1pTBeNDe66VZ2XSmawB8f7km1": 0
+    },
+    "contextType": null,
+    "shopImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/shop_images%2F0Ux1pTBeNDe66VZ2XSmawB8f7km1%2F368c4802-1538-4be9-9b81-027e09b82608?alt=media&token=a9831b16-b61c-41f8-82f2-bac820736d30",
+    "lastMessage": "Conversation started.",
+    "shopName": "warung ahog alam sutra",
+    "shopId": "vG2qgn0rKEhlsKH205Yg",
+    "participants": [
+      "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+    ],
+    "lastTimestamp": "2025-11-29T14:42:57.162Z",
+    "__id": "vG2qgn0rKEhlsKH205Yg_0Ux1pTBeNDe66VZ2XSmawB8f7km1_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-11-29T14:42:57.181Z",
+    "__updateTime": "2025-11-29T14:42:57.181Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "0Ux1pTBeNDe66VZ2XSmawB8f7km1",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "Conversation started.",
+        "type": "system",
+        "timestamp": "2025-11-29T14:42:57.162Z",
+        "__id": "2FEL8sDMDijzPgN6sP5O",
+        "__createTime": "2025-11-29T14:42:57.181Z",
+        "__updateTime": "2025-11-29T14:42:57.181Z"
+      }
+    ]
+  },
+  "wq3EsrUb4yxQrzQ4ctqp_2F4toylRRZPm1gyo7jVg1GiMPOS2_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": {
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1": 0
+    },
+    "contextType": null,
+    "shopImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/shop_images%2FnDPxZRZ6JKZOMaxwCvbY9qFxBCl1%2Fea75fd93-c37d-4f03-91f5-cd972ff4c94f?alt=media&token=d224ae91-8cc5-430c-9588-e17ca1f6b952",
+    "lastMessage": "Conversation started.",
+    "shopName": "pizza hut",
+    "shopId": "wq3EsrUb4yxQrzQ4ctqp",
+    "participants": [
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+      "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+    ],
+    "lastTimestamp": "2025-11-29T14:49:15.384Z",
+    "__id": "wq3EsrUb4yxQrzQ4ctqp_2F4toylRRZPm1gyo7jVg1GiMPOS2_nDPxZRZ6JKZOMaxwCvbY9qFxBCl1",
+    "__createTime": "2025-11-29T14:49:15.396Z",
+    "__updateTime": "2025-11-29T14:49:15.396Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2",
+          "nDPxZRZ6JKZOMaxwCvbY9qFxBCl1"
+        ],
+        "text": "Conversation started.",
+        "type": "system",
+        "timestamp": "2025-11-29T14:49:15.384Z",
+        "__id": "3M5K2SVVaA4eQR8SD7Dg",
+        "__createTime": "2025-11-29T14:49:15.396Z",
+        "__updateTime": "2025-11-29T14:49:15.396Z"
+      }
+    ]
+  },
+  "xhlhH6zYMJedioshnrwv_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2": {
+    "unreadCounts": {
+      "2F4toylRRZPm1gyo7jVg1GiMPOS2": 0,
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 0
+    },
+    "talentId": "xhlhH6zYMJedioshnrwv",
+    "contextType": "talent",
+    "talentTitle": "Les Bahasa Korea",
+    "talentImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/talents%2F2F4toylRRZPm1gyo7jVg1GiMPOS2%2Fff38fb4a-9831-4ce5-a761-41db17633cd5.jpg?alt=media&token=79586cdc-6a7a-4c60-9aee-c3566dde835e",
+    "unreadCounts.2F4toylRRZPm1gyo7jVg1GiMPOS2": 1,
+    "lastTimestamp": "2025-11-29T16:28:03.756Z",
+    "lastMessage": "halo",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+    ],
+    "__id": "xhlhH6zYMJedioshnrwv_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_2F4toylRRZPm1gyo7jVg1GiMPOS2",
+    "__createTime": "2025-11-29T16:27:53.482Z",
+    "__updateTime": "2025-11-30T05:06:50.927Z",
+    "messages": [
+      {
+        "senderId": "system",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "Percakapan dimulai.",
+        "type": "system",
+        "timestamp": "2025-11-29T12:38:04.133Z",
+        "__id": "GS7CoEZQO6QsYEwWrsjw",
+        "__createTime": "2025-11-29T12:38:04.156Z",
+        "__updateTime": "2025-11-29T12:38:04.156Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "Halo",
+        "timestamp": "2025-11-29T12:38:02.755Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "LNtCh9hzkZOaYTEeFhpK",
+        "__createTime": "2025-11-29T12:38:11.003Z",
+        "__updateTime": "2025-11-29T16:28:35.941Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "What the Title Promblem",
+        "timestamp": "2025-11-29T12:47:47.914Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "UbgCo8eXtddtcz27Q5BH",
+        "__createTime": "2025-11-29T12:47:56.185Z",
+        "__updateTime": "2025-11-29T16:28:35.941Z"
+      },
+      {
+        "senderId": "system",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "text": "Conversation started.",
+        "type": "system",
+        "timestamp": "2025-11-29T16:27:53.469Z",
+        "__id": "lx1lm7HHfWw27ILaeDuo",
+        "__createTime": "2025-11-29T16:27:53.482Z",
+        "__updateTime": "2025-11-29T16:27:53.482Z"
+      },
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "text": "halo",
+        "timestamp": "2025-11-29T16:28:03.756Z",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+          "2F4toylRRZPm1gyo7jVg1GiMPOS2"
+        ],
+        "__id": "oQCWsnUVJIaJdCtN7r5W",
+        "__createTime": "2025-11-29T16:28:03.926Z",
+        "__updateTime": "2025-11-29T16:28:35.941Z"
+      }
+    ]
+  },
+  "xlDO57n6hhrpjOoaTdfz_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_19aMuRqXsYgdmWQW5VNVUHtZdEJ3": {
+    "productTitle": "Ruman indah dan Mewa",
+    "productImage": "https://firebasestorage.googleapis.com/v0/b/blingbling-app.firebasestorage.app/o/room_listings%2F19aMuRqXsYgdmWQW5VNVUHtZdEJ3%2Ff94486cf-f06d-4831-9005-ce22f3f95212?alt=media&token=b18249c3-42e0-4e9c-b840-03b3312e8a95",
+    "contextType": null,
+    "roomId": "xlDO57n6hhrpjOoaTdfz",
+    "participants": [
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+    ],
+    "unreadCounts": {
+      "19aMuRqXsYgdmWQW5VNVUHtZdEJ3": 1
+    },
+    "lastTimestamp": "2025-08-17T04:53:31.713Z",
+    "lastMessage": "halo",
+    "__id": "xlDO57n6hhrpjOoaTdfz_19aMuRqXsYgdmWQW5VNVUHtZdEJ3_19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+    "__createTime": "2025-08-17T04:53:27.323Z",
+    "__updateTime": "2025-08-17T04:53:33.840Z",
+    "messages": [
+      {
+        "senderId": "19aMuRqXsYgdmWQW5VNVUHtZdEJ3",
+        "readBy": [
+          "19aMuRqXsYgdmWQW5VNVUHtZdEJ3"
+        ],
+        "text": "halo",
+        "timestamp": "2025-08-17T04:53:31.713Z",
+        "__id": "n2kfYcjGh99eIF2LAqPP",
+        "__createTime": "2025-08-17T04:53:33.840Z",
+        "__updateTime": "2025-08-17T04:53:33.840Z"
+      }
+    ]
+  }
+}

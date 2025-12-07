@@ -309,15 +309,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   void _listenToUnreadChats(String myUid) {
     _unreadChatsSubscription?.cancel();
+    // Prefer querying unreadCounts.<uid> so we count chats that may store
+    // participants as Map or List. This focuses on actual unread values.
     final stream = FirebaseFirestore.instance
         .collection('chats')
-        .where('participants', arrayContains: myUid)
+        .where('unreadCounts.$myUid', isGreaterThan: 0)
         .snapshots();
+
     _unreadChatsSubscription = stream.listen((snapshot) {
       if (mounted) {
         int count = 0;
         for (var doc in snapshot.docs) {
-          count += (doc.data()['unreadCounts']?[myUid] ?? 0) as int;
+          try {
+            final dynamic value = (doc.data()['unreadCounts'] ?? {})[myUid];
+            final int v = (value is int)
+                ? value
+                : (int.tryParse(value?.toString() ?? '') ?? 0);
+            count += v;
+          } catch (_) {
+            // ignore malformed entries
+          }
         }
         setState(() => _totalUnreadCount = count);
       }

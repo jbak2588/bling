@@ -886,6 +886,8 @@
     "apply": "Terapkan",
     "verified": "Terverifikasi",
     "bookmark": "Bookmark",
+    "chat": "Obrolan",
+    "block": "Blokir",
     "viewMore": "Lihat lebih banyak",
     "sort": {
       "default": "Bawaan",
@@ -1259,6 +1261,7 @@
     "unblock": "Buka Blokir",
     "bookmark": "Favoritkan",
     "bookmarked": "Ditandai sebagai favorit",
+    "bookmarkeded": "Ditandai sebagai favorit",
     "unbookmarked": "Dihapus dari favorit"
   },
   "locationFilter": {

@@ -431,6 +431,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }
 
   Widget _buildTrailing(ChatRoomModel chatRoom) {
+    // defensive parsing of unread count (do this before building widgets)
+    final dynamic rawUnread = chatRoom.unreadCounts[_myUid];
+    final int unreadCount = (rawUnread is int)
+        ? rawUnread
+        : (int.tryParse(rawUnread?.toString() ?? '') ?? 0);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -438,8 +444,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         Text(DateFormat('MM/dd').format(chatRoom.lastTimestamp.toDate()),
             style: const TextStyle(color: Colors.grey, fontSize: 12)),
         const SizedBox(height: 4),
-        if ((chatRoom.unreadCounts[_myUid] ?? 0) > 0)
-          Badge(label: Text('${chatRoom.unreadCounts[_myUid]}')),
+        if (unreadCount > 0) Badge(label: Text('$unreadCount')),
       ],
     );
   }

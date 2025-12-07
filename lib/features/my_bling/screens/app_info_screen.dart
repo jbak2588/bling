@@ -65,29 +65,38 @@ class AppInfoScreen extends StatelessWidget {
     final content = ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        // 1. 앱 아이콘 및 버전
+        // 1. 앱 아이콘 및 버전 (로고 왼쪽, 텍스트 오른쪽)
         Center(
-          child: Column(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 80,
-                height: 80,
-                padding: const EdgeInsets.all(16), // SVG 패딩
+                width: 40,
+                height: 40,
+                padding: const EdgeInsets.all(4), // SVG 패딩
                 decoration: BoxDecoration(
                   color: theme.primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                // [Task 29] 메인 로고 SVG 사용 권장 (없으면 기존 아이콘 유지)
-                child: Icon(Icons.info_outline,
-                    size: 40, color: theme.primaryColor),
+                // [Task 29] 메인 로고: SVG
+                child: SvgPicture.asset(
+                  'assets/icons/ico_info.svg',
+                  fit: BoxFit.contain,
+                  semanticsLabel: 'Bling logo',
+                ),
               ),
-              const SizedBox(height: 16),
-              Text('appInfo.appName'.tr(),
-                  style: theme.textTheme.headlineSmall),
-              const SizedBox(height: 4),
-              Text('appInfo.version'.tr(),
-                  style:
-                      theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('appInfo.appName'.tr(),
+                      style: theme.textTheme.headlineSmall),
+                  Text('appInfo.version'.tr(),
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: Colors.grey)),
+                ],
+              ),
             ],
           ),
         ),
@@ -163,13 +172,13 @@ class AppInfoScreen extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
         backgroundColor: Colors.grey.shade50, // 펼쳤을 때 배경색
         collapsedBackgroundColor: Colors.white,
         leading: Container(
-          width: 40,
-          height: 40,
-          padding: const EdgeInsets.all(8),
+          width: 36,
+          height: 36,
+          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: theme.primaryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
@@ -187,7 +196,7 @@ class AppInfoScreen extends StatelessWidget {
         subtitle: Text(
           desc,
           style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-          maxLines: 1,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         children: [
@@ -210,7 +219,7 @@ class AppInfoScreen extends StatelessWidget {
                 Text(
                   guide,
                   style: TextStyle(
-                      fontSize: 13, color: Colors.grey[800], height: 1.6),
+                      fontSize: 12, color: Colors.grey[800], height: 1.6),
                 ),
               ],
             ),
