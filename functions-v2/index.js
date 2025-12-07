@@ -481,30 +481,12 @@ const CALL_OPTS = {
  * [V3 REFACTOR] initialproductanalysis를 위한 새 V3 단순 프롬프트
  */
 function buildV3InitialPrompt(data) {
-  const {locale, categoryName, subCategoryName, userDescription, confirmedProductName} = data;
+  const {locale} = data;
   const lc = (typeof locale === "string" && locale) || "id";
   const langName = lc === "ko" ? "Korean" : lc === "en" ? "English" : "Indonesian";
 
   return `
-[ROLE]
-You are an expert AI assistant for a second-hand marketplace.
-Your task is to perform two actions based on the user's initial product registration attempt.
-
-[USER INPUT DATA]
-- Category: "${categoryName || ""}" / "${subCategoryName || ""}"
-- User's Title: "${confirmedProductName || ""}"
-- User's Description: "${userDescription || ""}"
-- Language: You MUST respond in ${langName}.
-
-[TASK 1: Predict Item Name]
-Analyze the user input data and the provided images to predict the most accurate product name.
-If the images and text are unclear, set 'prediction' to null.
-
-[TASK 2: Suggest Additional Shots]
-Analyze the user input and images. Based on the category, suggest 3-5 additional photos that would
-help a buyer verify the item's condition and authenticity.
-These suggestions MUST be simple, actionable text strings in ${langName}.
-
+/* helper note removed from prompt: actual getKelKey is defined later in this file */
 Examples of good suggestions:
 - "배터리 성능 상태 화면을 보여주세요."
 - "시리얼 번호가 보이는 라벨을 가까이서 찍어주세요."
@@ -1686,22 +1668,22 @@ exports.onUserPushPrefsWrite = onDocumentUpdated(
 
 /**
  * [헬퍼 함수]
- * Post의 adminParts에서 Kelurahan 키를 생성합니다.
+ * Post의 locationParts에서 Kelurahan 키를 생성합니다.
  * 예: { prov: "DKI", kab: "Jakarta Barat", ... } -> "DKI|Jakarta Barat|Palmerah|Slipi"
- * @param {object} adminParts - 게시글의 adminParts
+ * @param {object} locationParts - 게시글의 locationParts
  * @return {string|null} - "prov|kab|kec|kel" 형식의 키
  */
-function getKelKey(adminParts) {
+function getKelKey(locationParts) {
   if (
-    !adminParts ||
-    !adminParts.prov ||
-    !adminParts.kab ||
-    !adminParts.kec ||
-    !adminParts.kel
+    !locationParts ||
+    !locationParts.prov ||
+    !locationParts.kab ||
+    !locationParts.kec ||
+    !locationParts.kel
   ) {
     return null;
   }
-  return `${adminParts.prov}|${adminParts.kab}|${adminParts.kec}|${adminParts.kel}`;
+  return `${locationParts.prov}|${locationParts.kab}|${locationParts.kec}|${locationParts.kel}`;
 }
 
 /**
@@ -1724,10 +1706,11 @@ exports.onLocalNewsPostCreate = onDocumentCreated(
         return;
       }
 
-      // 2. Kelurahan 키 추출
-      const kelKey = getKelKey(postData.adminParts);
+      // 2. Kelurahan 키 추출 (locationParts 만 사용)
+      const parts = postData.locationParts;
+      const kelKey = getKelKey(parts);
       if (!kelKey) {
-        logger.warn(`Post ${event.params.postId} has invalid adminParts.`);
+        logger.log(`Post ${event.params.postId} has no valid locationParts, skipping.`);
         return;
       }
 
@@ -1766,11 +1749,14 @@ exports.onLocalNewsPostCreate = onDocumentCreated(
                   ...currentFeatures,
                   hasGroupChat: shouldActivate, // ✅ 10건 도달 시 true
                 },
-                label: {
-                  en: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
-                  id: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
-                  ko: `${postData.adminParts.kel}, ${postData.adminParts.kec}`,
-                },
+                // label 생성: locationParts 만 사용
+                label: (() => {
+                  const lp = postData.locationParts || {};
+                  const kelName = lp.kel || "Unknown Kelurahan";
+                  const kecName = lp.kec || "Unknown Kec.";
+                  const labelText = `${kelName}, ${kecName}`;
+                  return {en: labelText, id: labelText, ko: labelText};
+                })(),
                 createdAt: FieldValue.serverTimestamp(), // (Upsert) 생성 시에만 적용
                 updatedAt: FieldValue.serverTimestamp(), // 항상 업데이트
               },
