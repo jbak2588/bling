@@ -181,12 +181,17 @@ class ChatService {
           'chat.system.roomCreated'.tr(); // "대화가 시작되었습니다."
       final now = FieldValue.serverTimestamp();
 
+      // [FIX] contextType이 null이면 기본값 'direct'를 사용하고
+      //       1:1 채팅임을 명시적으로 표시합니다.
+      final String finalContextType = contextType ?? 'direct';
+
       final chatRoomData = {
         'participants': participants,
         'lastMessage': initialMessageText, // 미리보기에도 표시
         'lastTimestamp': now,
         'unreadCounts': {myUid: 0, otherUserId: 0},
-        'contextType': contextType,
+        'contextType': finalContextType,
+        'isGroupChat': false,  // [FIX] 명시적으로 1:1 채팅임을 표시
         if (productId != null) 'productId': productId,
         if (productTitle != null) 'productTitle': productTitle,
         if (productImage != null) 'productImage': productImage,

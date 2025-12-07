@@ -165,6 +165,8 @@ class UserFriendList extends StatelessWidget {
                         final chatRoomId =
                             await chatService.createOrGetChatRoom(
                           otherUserId: targetUser.uid,
+                          // [권장] 친구 채팅임을 명시 (ChatService에서 contextType 파라미터 활용)
+                          contextType: 'friend',
                         );
 
                         if (!context.mounted) return;

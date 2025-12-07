@@ -61,7 +61,10 @@ class ClubRepository {
       'groupImage': club.imageUrl ?? '', // [수정] club.imageUrl 연동
       'participants': [club.ownerId], // 첫 참여자는 개설자
       'lastMessage': 'clubs.repository.chatCreated'.tr(),
-      'lastMessageTimestamp': FieldValue.serverTimestamp(),
+      // [FIX] 표준 스키마 준수: lastMessageTimestamp -> lastTimestamp
+      'lastTimestamp': FieldValue.serverTimestamp(),
+      // [FIX] 표준 스키마 준수: contextType 추가
+      'contextType': 'club',
       'unreadCounts': {club.ownerId: 0},
     };
     batch.set(chatRoomRef, chatRoomData);
@@ -177,7 +180,10 @@ class ClubRepository {
       'groupImage': newClub.imageUrl ?? '',
       'participants': allMemberIds,
       'lastMessage': 'clubs.repository.chatCreated'.tr(),
-      'lastMessageTimestamp': FieldValue.serverTimestamp(),
+      // [FIX] 표준 스키마 준수: lastMessageTimestamp -> lastTimestamp
+      'lastTimestamp': FieldValue.serverTimestamp(),
+      // [FIX] 표준 스키마 준수: contextType 추가
+      'contextType': 'club',
       'unreadCounts': unreadCounts,
     });
 
