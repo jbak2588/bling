@@ -2261,6 +2261,12 @@
       "inactiveBody": "To activate your neighborhood board, create a local news post first. Once neighbors join in, the board will open automatically.",
       "writePost": "Write Local News"
     },
+    "filter": {
+      "all": "All",
+      "news": "News",
+      "question": "Question",
+      "help": "Help"
+    },
     "defaultTitle": "defaultTitle",
     "chatActionLabel": "Chat with Neighbors",
     "boardHeader": "Community Board",

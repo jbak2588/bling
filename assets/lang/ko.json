@@ -2262,6 +2262,12 @@
       "inactiveBody": "동네 게시판을 활성화하려면 먼저 동네 소식을 한 번 작성해보세요. 이웃들의 참여가 생기면 게시판이 자동으로 열립니다.",
       "writePost": "동네 소식 쓰기"
     },
+    "filter": {
+      "all": "전체",
+      "news": "소식",
+      "question": "질문",
+      "help": "도움 요청"
+    },
     "defaultTitle": "우리 동네 게시판",
     "chatActionLabel": "이웃과 대화하기",
     "boardHeader": "우리 동네 소식통",
