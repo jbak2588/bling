@@ -123,6 +123,20 @@ class UserModel {
   final bool? neighborhoodVerified; // 동네 인증 여부
   final Timestamp? lastActiveAt; // 최근 활동 타임스탬프
 
+  // [작업 1] 친구 찾기 노출 가능 여부 검증 로직
+  // 1. 자기소개(bio)가 있어야 함 (최소 5자 이상 권장)
+  // 2. 관심사(interests)가 최소 1개 이상 있어야 함
+  // 3. 프로필 사진(photoUrl)이 있어야 함
+  // [작업 수행 2] 추가: 프로필 완성도 검증 로직
+  // 이 속성이 true인 유저만 '친구 찾기' 리스트에 노출됩니다.
+  bool get isProfileReadyForMatching {
+    if (isVisibleInList == false) return false; // 노출 설정 꺼둠
+    if (photoUrl == null || photoUrl!.isEmpty) return false; // 사진 없음
+    if (bio == null || bio!.trim().length < 2) return false; // 자기소개 너무 짧음
+    if (interests == null || interests!.isEmpty) return false; // 관심사 없음
+    return true;
+  }
+
   UserModel({
     required this.uid,
     required this.nickname,
@@ -291,6 +305,7 @@ class UserModel {
   Map<String, dynamic> toJson() {
     return {
       'uid': uid,
+
       'nickname': nickname,
       'email': email,
       'photoUrl': photoUrl,
