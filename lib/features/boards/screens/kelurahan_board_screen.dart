@@ -27,6 +27,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:bling_app/features/boards/models/board_model.dart';
+import 'package:bling_app/core/constants/app_categories.dart';
+import 'package:bling_app/features/local_news/models/post_category_model.dart';
 
 /// '하이브리드 방식...md' 기획안 4)의 '동네 게시판' 전용 피드 화면
 /// 사용자의 현재 Kelurahan을 기준으로 게시글을 필터링합니다.
@@ -43,8 +45,8 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
   late final String _kelurahanName;
   late final String _kelKey;
 
-  String _selectedFilter = 'All';
-  final List<String> _filters = ['All', 'news', 'question', 'help'];
+  // [FIX] 작업 19: 하드코딩 필터 제거하고 AppCategories 연동
+  String _selectedCategoryId = 'all';
 
   @override
   void initState() {
@@ -81,8 +83,10 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
 
     query = query.where('tags', isNull: false);
 
-    if (_selectedFilter != 'All') {
-      query = query.where('tags', arrayContains: _selectedFilter);
+    // 3. [FIX] 작업 19: 카테고리 ID로 필터링 (AppCategories와 일치)
+    // [FIX] 작업 20: DB 필드명 수정 ('categoryId' -> 'category')
+    if (_selectedCategoryId != 'all') {
+      query = query.where('category', isEqualTo: _selectedCategoryId);
     }
 
     return query.orderBy('createdAt', descending: true);
@@ -183,52 +187,83 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
                       ),
                     ],
                   ),
-                  // [FIX] 작업 18: 통계 정보 하단에 채팅 버튼 배치 (Column 사용)
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildInfoItem(
-                            Icons.people_alt_rounded,
-                            activeUsers.toString(),
-                            'Active Neighbors',
-                          ),
-                          Container(
-                            width: 1,
-                            height: 30,
-                            color: Colors.grey[200],
-                          ),
-                          _buildInfoItem(
-                            Icons.article_rounded,
-                            monthlyPosts.toString(),
-                            'Monthly Posts',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextButton.icon(
-                          style: TextButton.styleFrom(
-                            foregroundColor: theme.primaryColor,
-                            backgroundColor:
-                                theme.primaryColor.withValues(alpha: 0.1),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                          onPressed: _onChatPressed,
-                          icon: const Icon(Icons.chat_bubble_outline_rounded,
-                              size: 20),
-                          label: Text(
-                            'boards.chatActionLabel'.tr(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
+                  // [FIX] 작업 23: 3줄 -> 2줄 통합 (통계 | 채팅 | 통계)
+                  child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                    stream: _kelKey.isNotEmpty
+                        ? FirebaseFirestore.instance
+                            .collection('chats')
+                            .doc(_kelKey)
+                            .snapshots()
+                        : null,
+                    builder: (context, chatSnapshot) {
+                      String activeText = activeUsers.toString();
+                      // 채팅방이 존재하면 participants 길이를 전체 인원으로 표시
+                      if (chatSnapshot.hasData && chatSnapshot.data!.exists) {
+                        final chatData = chatSnapshot.data!.data();
+                        final List participants =
+                            chatData?['participants'] ?? [];
+                        if (participants.isNotEmpty) {
+                          activeText = '$activeUsers / ${participants.length}';
+                        }
+                      }
+
+                      return IntrinsicHeight(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // 색상: 선택된 카테고리일 때 테마 컬러로 통일
+                            // 1. 활동 이웃 통계
+                            _buildInfoItem(
+                              Icons.people_alt_rounded,
+                              activeText,
+                              'boards.metrics.activeNeighbors'.tr(),
+                              valueColor: _selectedCategoryId != 'all'
+                                  ? theme.primaryColor
+                                  : null,
+                              labelColor: _selectedCategoryId != 'all'
+                                  ? theme.primaryColor
+                                  : null,
+                            ),
+                            // 구분선
+                            VerticalDivider(
+                                width: 1,
+                                thickness: 1,
+                                color: Colors.grey[200],
+                                indent: 4,
+                                endIndent: 4),
+                            // 2. 채팅 버튼 (중앙 배치, 통계 스타일과 통일)
+                            _buildChatButtonItem(
+                              theme,
+                              valueColor: _selectedCategoryId != 'all'
+                                  ? theme.primaryColor
+                                  : null,
+                              labelColor: _selectedCategoryId != 'all'
+                                  ? theme.primaryColor
+                                  : null,
+                            ),
+                            // 구분선
+                            VerticalDivider(
+                                width: 1,
+                                thickness: 1,
+                                color: Colors.grey[200],
+                                indent: 4,
+                                endIndent: 4),
+                            // 3. 월간 포스트 통계
+                            _buildInfoItem(
+                              Icons.article_rounded,
+                              monthlyPosts.toString(),
+                              'boards.metrics.monthlyPosts'.tr(),
+                              valueColor: _selectedCategoryId != 'all'
+                                  ? theme.primaryColor
+                                  : null,
+                              labelColor: _selectedCategoryId != 'all'
+                                  ? theme.primaryColor
+                                  : null,
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 );
               },
@@ -244,29 +279,53 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
                 child: ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   scrollDirection: Axis.horizontal,
-                  itemCount: _filters.length,
+                  // [FIX] 작업 19: '전체' + AppCategories.postCategories 리스트 결합
+                  itemCount: 1 + AppCategories.postCategories.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 8),
                   itemBuilder: (context, index) {
-                    final filter = _filters[index];
-                    final isSelected = _selectedFilter == filter;
-
-                    String label = filter;
-                    if (filter == 'All') {
-                      label = 'boards.filter.all'.tr();
-                    } else if (filter == 'news') {
-                      label = 'boards.filter.news'.tr();
-                    } else if (filter == 'question') {
-                      label = 'boards.filter.question'.tr();
-                    } else if (filter == 'help') {
-                      label = 'boards.filter.help'.tr();
+                    // 0번 인덱스는 '전체(All)' 칩
+                    if (index == 0) {
+                      final isSelected = _selectedCategoryId == 'all';
+                      return ChoiceChip(
+                        label: Text('boards.filter.all'.tr()),
+                        selected: isSelected,
+                        onSelected: (bool selected) {
+                          if (selected) {
+                            setState(() => _selectedCategoryId = 'all');
+                          }
+                        },
+                        selectedColor:
+                            theme.primaryColor.withValues(alpha: 0.1),
+                        labelStyle: TextStyle(
+                          color: isSelected
+                              ? theme.primaryColor
+                              : Colors.grey[600],
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                        backgroundColor: Colors.white,
+                        side: BorderSide(
+                            color: isSelected
+                                ? theme.primaryColor
+                                : Colors.grey[300]!),
+                        showCheckmark: false,
+                      );
                     }
 
+                    // 나머지 인덱스는 AppCategories.postCategories 사용
+                    final PostCategoryModel category =
+                        AppCategories.postCategories[index - 1];
+                    final isSelected =
+                        _selectedCategoryId == category.categoryId;
+
                     return ChoiceChip(
-                      label: Text(label),
+                      // 이모지 + 카테고리명 (다국어)
+                      label: Text('${category.emoji} ${category.nameKey.tr()}'),
                       selected: isSelected,
-                      onSelected: (selected) {
+                      onSelected: (bool selected) {
                         if (selected) {
-                          setState(() => _selectedFilter = filter);
+                          setState(
+                              () => _selectedCategoryId = category.categoryId);
                         }
                       },
                       selectedColor: theme.primaryColor.withValues(alpha: 0.1),
@@ -278,9 +337,9 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
                       ),
                       backgroundColor: Colors.white,
                       side: BorderSide(
-                        color:
-                            isSelected ? theme.primaryColor : Colors.grey[300]!,
-                      ),
+                          color: isSelected
+                              ? theme.primaryColor
+                              : Colors.grey[300]!),
                       showCheckmark: false,
                     );
                   },
@@ -358,24 +417,76 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
     );
   }
 
-  Widget _buildInfoItem(IconData icon, String value, String label) {
+  Widget _buildInfoItem(IconData icon, String value, String label,
+      {Color? valueColor, Color? labelColor}) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Row(
           children: [
-            Icon(icon, size: 16, color: Colors.grey[600]),
+            Icon(icon, size: 16, color: valueColor ?? Colors.grey[600]),
             const SizedBox(width: 6),
             Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: valueColor ?? Colors.black87,
+              ),
             ),
           ],
         ),
         Text(
           label,
-          style: TextStyle(color: Colors.grey[500], fontSize: 11),
+          style: TextStyle(color: labelColor ?? Colors.grey[500], fontSize: 11),
         ),
       ],
+    );
+  }
+
+  // [Added] 작업 23: 통계 아이템과 유사한 스타일의 채팅 버튼 빌더
+  Widget _buildChatButtonItem(ThemeData theme,
+      {Color? valueColor, Color? labelColor}) {
+    // 스타일을 좌우 통계 아이템과 동일하게 맞추기 위해
+    // 아이콘 크기와 라벨 폰트 스타일을 `_buildInfoItem`과 동일한 계층으로 조정합니다.
+    return InkWell(
+      onTap: _onChatPressed,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 상단은 통계의 value 영역과 동일한 구성(아이콘 + 작은 여백)
+            Row(
+              children: [
+                Icon(Icons.chat_bubble_rounded,
+                    size: 16, color: valueColor ?? Colors.grey[600]),
+                const SizedBox(width: 6),
+                // 높이 일치를 위해 보이지 않는 값 텍스트(투명)로 동일한 폰트 사이즈/굵기 유지
+                Opacity(
+                  opacity: 0.0,
+                  child: Text(
+                    '0',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: valueColor ?? Colors.black87),
+                  ),
+                ),
+              ],
+            ),
+            // 하단 라벨은 통계 라벨과 동일한 스타일
+            Text(
+              'boards.chatActionLabel'.tr(),
+              style: TextStyle(
+                  color: labelColor ?? Colors.grey[500], fontSize: 11),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -2259,6 +2259,10 @@
       "inactiveBody": "Untuk mengaktifkan papan lingkungan, buat dulu satu postingan cerita lokal. Jika tetangga mulai ikut serta, papan akan terbuka otomatis.",
       "writePost": "Tulis Cerita Lokal"
     },
+    "metrics": {
+      "activeNeighbors": "Tetangga aktif",
+      "monthlyPosts": "Posting bulanan"
+    },
     "filter": {
       "all": "Semua",
       "news": "Berita",

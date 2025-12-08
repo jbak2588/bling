@@ -2262,6 +2262,10 @@
       "inactiveBody": "동네 게시판을 활성화하려면 먼저 동네 소식을 한 번 작성해보세요. 이웃들의 참여가 생기면 게시판이 자동으로 열립니다.",
       "writePost": "동네 소식 쓰기"
     },
+    "metrics": {
+      "activeNeighbors": "활동 중인 이웃",
+      "monthlyPosts": "월간 게시물"
+    },
     "filter": {
       "all": "전체",
       "news": "소식",
