@@ -138,78 +138,16 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
         slivers: [
           SliverAppBar(
             pinned: true,
-            expandedHeight: 140.0,
+            // [FIX] 작업 18: 헤더 높이 축소 및 타이틀 중앙 정렬 통합
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.white,
+            centerTitle: true,
             title: Text(
-              _kelurahanName,
+              '${'boards.boardHeader'.tr()} $_kelurahanName',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
-              ),
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 12.0),
-                child: TextButton.icon(
-                  style: TextButton.styleFrom(
-                    foregroundColor: theme.primaryColor,
-                    backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                  ),
-                  onPressed: _onChatPressed,
-                  icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
-                  label: Text(
-                    'boards.chatActionLabel'.tr(),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      theme.primaryColor.withValues(alpha: 0.05),
-                      Colors.white,
-                    ],
-                  ),
-                ),
-                child: Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.location_city_rounded,
-                          size: 32,
-                          color: theme.primaryColor.withValues(alpha: 0.5),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'boards.boardHeader'.tr(),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                fontSize: 16,
               ),
             ),
           ),
@@ -245,23 +183,50 @@ class _KelurahanBoardScreenState extends State<KelurahanBoardScreen> {
                       ),
                     ],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  // [FIX] 작업 18: 통계 정보 하단에 채팅 버튼 배치 (Column 사용)
+                  child: Column(
                     children: [
-                      _buildInfoItem(
-                        Icons.people_alt_rounded,
-                        activeUsers.toString(),
-                        'Active Neighbors',
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildInfoItem(
+                            Icons.people_alt_rounded,
+                            activeUsers.toString(),
+                            'Active Neighbors',
+                          ),
+                          Container(
+                            width: 1,
+                            height: 30,
+                            color: Colors.grey[200],
+                          ),
+                          _buildInfoItem(
+                            Icons.article_rounded,
+                            monthlyPosts.toString(),
+                            'Monthly Posts',
+                          ),
+                        ],
                       ),
-                      Container(
-                        width: 1,
-                        height: 30,
-                        color: Colors.grey[200],
-                      ),
-                      _buildInfoItem(
-                        Icons.article_rounded,
-                        monthlyPosts.toString(),
-                        'Monthly Posts',
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton.icon(
+                          style: TextButton.styleFrom(
+                            foregroundColor: theme.primaryColor,
+                            backgroundColor:
+                                theme.primaryColor.withValues(alpha: 0.1),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          onPressed: _onChatPressed,
+                          icon: const Icon(Icons.chat_bubble_outline_rounded,
+                              size: 20),
+                          label: Text(
+                            'boards.chatActionLabel'.tr(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                        ),
                       ),
                     ],
                   ),
