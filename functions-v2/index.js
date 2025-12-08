@@ -1726,11 +1726,13 @@ exports.onLocalNewsPostCreate = onDocumentCreated(
 
           let newPostCount = 1;
           let currentFeatures = {hasGroupChat: false};
+          let metrics = {};
+          let features = {};
 
           if (boardDoc.exists) {
             const data = boardDoc.data() || {};
-            const metrics = data.metrics || {};
-            const features = data.features || {};
+            metrics = data.metrics || {};
+            features = data.features || {};
             // NOTE: 테스트 단계에서는 30일 기준 없이 단순 누적 카운트만 사용합니다. (추후 롤링 카운트가 필요하면 스케줄러로 전환)
             newPostCount = (metrics.last30dPosts || 0) + 1;
             currentFeatures = features;
@@ -1744,6 +1746,8 @@ exports.onLocalNewsPostCreate = onDocumentCreated(
                 key: kelKey,
                 metrics: {
                   last30dPosts: newPostCount,
+                  // [FIX] 작업 26: last7dActiveUsers 필드 누락 수정 (기존 값 유지 또는 0 초기화)
+                  last7dActiveUsers: (metrics && metrics.last7dActiveUsers) || 0,
                 },
                 features: {
                   ...currentFeatures,
