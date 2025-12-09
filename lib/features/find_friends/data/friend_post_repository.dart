@@ -2,9 +2,11 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bling_app/features/find_friends/models/friend_post_model.dart';
+import 'package:bling_app/features/chat/data/chat_service.dart';
 
 class FriendPostRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ChatService _chatService = ChatService();
 
   // 게시글 목록 가져오기 (최신순)
   // 실제 서비스 시에는 GeoFlutterFire 등을 이용해 주변 게시글만 쿼리해야 합니다.
@@ -32,6 +34,17 @@ class FriendPostRepository {
     await _firestore.collection('friend_posts').add(post.toJson());
   }
 
+  // [작업 9] 게시글 수정
+  Future<void> updatePost(String postId, Map<String, dynamic> data) async {
+    await _firestore.collection('friend_posts').doc(postId).update(data);
+  }
+
+  // [작업 9] 게시글 삭제
+  Future<void> deletePost(String postId) async {
+    await _firestore.collection('friend_posts').doc(postId).delete();
+    // TODO: 연결된 채팅방이 있다면 닫거나 알림 처리 (정책 결정 필요)
+  }
+
   // (추후 구현) 게시글 삭제, 신고, 참여 요청 등
   // [New] 참여 요청 (Request Join)
   Future<void> requestToJoin(String postId, String userId) async {
@@ -49,79 +62,53 @@ class FriendPostRepository {
 
   // [New] 참여 승인 (Approve) -> DB 트랜잭션으로 대기자 -> 참여자로 이동
   // 승인 후에는 게시글 기반 그룹 채팅을 생성하거나 기존 채팅에 참여자를 추가합니다.
-  Future<void> acceptJoin(FriendPostModel post, String targetUserId) async {
+  // [작업 7] targetUserNickname 추가: 시스템 메시지용
+  Future<void> acceptJoin(FriendPostModel post, String targetUserId,
+      String targetUserNickname) async {
     final postRef = _firestore.collection('friend_posts').doc(post.id);
 
+    // 1. Transaction: Post 문서 상태 변경 (원자적 처리)
     await _firestore.runTransaction((transaction) async {
       final freshSnapshot = await transaction.get(postRef);
-      if (!freshSnapshot.exists) throw Exception('Post not found');
+      if (!freshSnapshot.exists) throw Exception("Post not found");
 
       final freshPost = FriendPostModel.fromFirestore(freshSnapshot);
 
       // 정원 초과 체크
       if (freshPost.currentParticipantIds.length >= freshPost.maxParticipants) {
-        throw Exception('full');
+        throw Exception("full"); // 정원 초과
       }
 
-      // 대기자에서 제거하고 참여자에 추가
+      // 대기 목록에서 제거 및 참여 목록에 추가
       transaction.update(postRef, {
         'waitingParticipantIds': FieldValue.arrayRemove([targetUserId]),
         'currentParticipantIds': FieldValue.arrayUnion([targetUserId]),
       });
     });
 
-    // 채팅방 생성/업데이트 (트랜잭션 바깥에서 처리)
-    // 모든 참여자 목록을 조합
-    final updatedMembers = List<String>.from(post.currentParticipantIds);
-    if (!updatedMembers.contains(targetUserId)) {
-      updatedMembers.add(targetUserId);
+    // [작업 6] 리뷰 반영: Race Condition 방지 및 로직 위임
+    // 2. 트랜잭션 완료 후 '최신' 문서 다시 조회 (Stale Data 방지)
+    final finalPostSnap = await postRef.get();
+    if (!finalPostSnap.exists) {
+      return; // 방어 코드
     }
-    if (!updatedMembers.contains(post.authorId)) {
-      updatedMembers.add(post.authorId);
+    final finalPost = FriendPostModel.fromFirestore(finalPostSnap);
+
+    // 3. 최신 참여자 목록 구성
+    List<String> allMembers = List.from(finalPost.currentParticipantIds);
+    if (!allMembers.contains(finalPost.authorId)) {
+      allMembers.add(finalPost.authorId);
     }
 
-    // 채팅방 ID: post_{postId}
-    final chatDocRef = _firestore.collection('chats').doc('post_${post.id}');
-    final chatDoc = await chatDocRef.get();
-
-    final now = FieldValue.serverTimestamp();
-
-    if (!chatDoc.exists) {
-      // 새 그룹 채팅방 생성
-      final participants = updatedMembers;
-      final unreadCounts = <String, int>{for (var uid in participants) uid: 0};
-
-      final chatData = {
-        'participants': participants,
-        'lastMessage': '${post.authorNickname}의 게시글 채팅',
-        'lastTimestamp': now,
-        'unreadCounts': unreadCounts,
-        'contextType': 'post',
-        'isGroupChat': true,
-        'roomId': post.id,
-        'roomTitle': post.content.length > 40
-            ? post.content.substring(0, 40)
-            : post.content,
-      };
-
-      final batch = _firestore.batch();
-      batch.set(chatDocRef, chatData);
-      final messageRef = chatDocRef.collection('messages').doc();
-      batch.set(messageRef, {
-        'senderId': 'system',
-        'text': '채팅이 생성되었습니다.',
-        'timestamp': now,
-        'readBy': participants,
-        'type': 'system',
-      });
-      await batch.commit();
-    } else {
-      // 기존 채팅방이 있으면 participants에 추가
-      await chatDocRef.update({
-        'participants': FieldValue.arrayUnion(updatedMembers),
-        for (var uid in updatedMembers) 'unreadCounts.$uid': 0,
-      });
-    }
+    // 4. ChatService에 채팅방 동기화 위임 (중복 로직 제거)
+    await _chatService.getOrCreatePostGroupChat(
+      postId: finalPost.id,
+      postTitle: finalPost.content.length > 20
+          ? '${finalPost.content.substring(0, 20)}...'
+          : finalPost.content,
+      participants: allMembers,
+      joinedUserNames: [targetUserNickname], // [작업 7] 닉네임 전달
+    );
   }
 
   // [New] 참여 거절 (Reject)

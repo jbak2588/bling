@@ -88,7 +88,7 @@
       "chat": "Obrolan",
       "myBling": "Bling Saya"
     },
-     "errors": {
+    "errors": {
       "loginRequired": "Diperlukan login.",
       "userNotFound": "Pengguna tidak ditemukan.",
       "unknown": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
@@ -1165,10 +1165,16 @@
   },
   "findFriend": {
     "title": "Cari Teman",
+    "segment": {
+      "profile": "Profil",
+      "posts": "Postingan"
+    },
     "tabs": {
       "friends": "Teman",
       "groups": "Grup",
-      "clubs": "Grup"
+      "clubs": "Grup",
+      "explore": "Jelajahi",
+      "myFriends": "Teman Saya"
     },
     "editTitle": "Ubah Profil FindFriend",
     "editProfileTitle": "Ubah Profil",
@@ -1198,7 +1204,57 @@
     "prompt_button": "Buat Profil Saya",
     "chatLimitReached": "Anda telah mencapai batas harian ({limit}) untuk memulai obrolan baru.",
     "chatChecking": "Memeriksa...",
-    "empty": "Tidak ada teman yang ditemukan di sekitar."
+    "empty": "Tidak ada teman yang ditemukan di sekitar.",
+    "searchNoResults": "Tidak ada hasil pencarian.",
+    "noMatches": "Tidak dapat menemukan tetangga yang sesuai dengan kriteria.",
+    "form": {
+      "title": "Membuat Profil Pencarian Teman"
+    },
+    "friendPost": {
+      "noPosts": "Belum ada postingan.",
+      "write": "Tulis",
+      "action": {
+        "enterChat": "Masuk obrolan",
+        "waitingCount": "Menunggu {}",
+        "participating": "Sedang ngobrol",
+        "waitingCancel": "Menunggu persetujuan (Batal)",
+        "full": "Penuh",
+        "requestJoin": "Minta bergabung",
+        "chat": "Ngobrol"
+      },
+      "manage": {
+        "title": "Kelola Permintaan Bergabung",
+        "empty": "Tidak ada permintaan yang menunggu."
+      },
+      "snackbar": {
+        "requestSent": "Permintaan dikirim. Silakan tunggu persetujuan.",
+        "approved": "{} disetujui.",
+        "full": "Grup sudah penuh."
+      },
+      "system": {
+        "joined": "{} telah bergabung."
+      },
+
+      "groupChatStarted": "Obrolan grup dimulai.",
+      "enterChatLabel": "Masuk obrolan",
+      "requestSent": "Permintaan dikirim. Silakan tunggu persetujuan.",
+      "manageRequestsTitle": "Kelola Permintaan Bergabung",
+      "noPendingRequests": "Tidak ada permintaan yang menunggu.",
+      "pendingCountBadge": "Menunggu {count}",
+      "chattingLabel": "Sedang ngobrol",
+      "waitingCancelLabel": "Menunggu persetujuan (Batal)",
+      "requestButtonLabel": "Minta bergabung",
+      "fullLabel": "Penuh",
+      "approvedSnackbar": "{nickname} disetujui.",
+      "memberJoinedSingle": "{nickname} telah bergabung.",
+      "memberJoinedMultiple": "{names} telah bergabung.",
+      "fullError": "Grup sudah penuh.",
+      "unknownLocation": "Tidak ada lokasi",
+      "noBio": "Tidak ada bio",
+      "searchHint": "Cari posting...",
+      "createPostNavigate": "Menuju membuat posting.",
+      "genericError": "Kesalahan: {error}"
+    }
   },
   "interests": {
     "title": "Minat",
@@ -1264,17 +1320,6 @@
     "bookmarkeded": "Ditandai sebagai favorit",
     "unbookmarked": "Dihapus dari favorit"
   },
-  "locationFilter": {
-    "title": "Filter Lokasi",
-    "provinsi": "Provinsi",
-    "kabupaten": "Kabupaten",
-    "kota": "Kota",
-    "kecamatan": "Kecamatan",
-    "kelurahan": "Kelurahan",
-    "apply": "Terapkan Filter",
-    "all": "Semua",
-    "reset": "Reset"
-  },
   "clubs": {
     "tabs": {
       "proposals": "Usulan Grup",
@@ -1322,6 +1367,10 @@
       "withdrawnMember": "Anggota keluar",
       "deleteTooltip": "Hapus postingan",
       "loadingUser": "Memuat info pengguna..."
+    },
+    "post": {
+      "loadingUser": "Muat informasi pengguna...",
+      "optionDelete": "Hapus"
     },
     "card": {
       "private": "Grup privat",
@@ -1426,11 +1475,6 @@
       }
     },
     "empty": "Tidak ada Grup untuk ditampilkan."
-  },
-  "findfriend": {
-    "form": {
-      "title": "Buat Profil Cari Teman"
-    }
   },
   "auctions": {
     "card": {

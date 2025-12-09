@@ -27,6 +27,8 @@ import 'package:bling_app/features/find_friends/widgets/friend_post_card.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 // import 'package:bling_app/features/location/screens/location_filter_screen.dart'; // [수정] 자체 필터 버튼 제거로 인해 미사용
 import 'package:bling_app/features/my_bling/widgets/user_friend_list.dart';
+// [작업 9] 작성 화면 import
+import 'package:bling_app/features/find_friends/screens/create_friend_post_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 
 class FindFriendsScreen extends StatefulWidget {
@@ -154,7 +156,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
               child: InlineSearchChip(
                 hintText: _exploreModeIndex == 0
                     ? 'main.search.hint.findFriends'.tr() // "이웃 검색..."
-                    : "게시글 검색...",
+                    : 'friendPost.searchHint'.tr(),
                 openNotifier: _chipOpenNotifier,
                 onSubmitted: (kw) =>
                     _searchKeywordNotifier.value = kw.trim().toLowerCase(),
@@ -180,8 +182,12 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
               unselectedLabelColor: Colors.grey,
               indicatorSize: TabBarIndicatorSize.tab,
               tabs: [
-                Tab(text: "탐색"), // localKey: findFriend.tabs.explore
-                Tab(text: "내 친구"), // localKey: findFriend.tabs.myFriends
+                Tab(
+                    text: 'findFriend.tabs.explore'
+                        .tr()), // localKey: findFriend.tabs.explore
+                Tab(
+                    text: 'findFriend.tabs.myFriends'
+                        .tr()), // localKey: findFriend.tabs.myFriends
               ],
             ),
           ),
@@ -207,10 +213,16 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
           _exploreModeIndex == 1 && _mainTabController.index == 0
               ? FloatingActionButton.extended(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("게시글 작성 화면 이동")));
+                    // [작업 9] 게시글 작성 화면으로 이동
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            CreateFriendPostScreen(userModel: userModel),
+                      ),
+                    );
                   },
-                  label: const Text("글쓰기"),
+                  label: Text('friendPost.write'.tr()),
                   icon: const Icon(Icons.edit),
                 )
               : null,
@@ -228,11 +240,15 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
           child: SizedBox(
             width: double.infinity,
             child: SegmentedButton<int>(
-              segments: const [
+              segments: [
                 ButtonSegment(
-                    value: 0, label: Text("이웃 프로필"), icon: Icon(Icons.people)),
+                    value: 0,
+                    label: Text('findFriend.segment.profile'.tr()),
+                    icon: const Icon(Icons.people)),
                 ButtonSegment(
-                    value: 1, label: Text("동네 토크"), icon: Icon(Icons.forum)),
+                    value: 1,
+                    label: Text('findFriend.segment.posts'.tr()),
+                    icon: const Icon(Icons.forum)),
               ],
               selected: {_exploreModeIndex},
               onSelectionChanged: (Set<int> newSelection) {
@@ -267,7 +283,9 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text("Error: ${snapshot.error}"));
+          return Center(
+              child: Text('friendPost.genericError'
+                  .tr(namedArgs: {'error': snapshot.error?.toString() ?? ''})));
         }
 
         var users = snapshot.data ?? [];
@@ -293,7 +311,9 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
               children: [
                 const Icon(Icons.search_off, size: 48, color: Colors.grey),
                 const SizedBox(height: 16),
-                Text(kw.isNotEmpty ? "검색 결과가 없습니다." : "조건에 맞는 이웃을 찾을 수 없습니다."),
+                Text(kw.isNotEmpty
+                    ? 'findFriend.searchNoResults'.tr()
+                    : 'findFriend.noMatches'.tr()),
               ],
             ),
           );
@@ -333,7 +353,9 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text("Error: ${snapshot.error}"));
+          return Center(
+              child: Text('friendPost.genericError'
+                  .tr(namedArgs: {'error': snapshot.error?.toString() ?? ''})));
         }
 
         var posts = snapshot.data ?? [];
@@ -354,7 +376,9 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
               children: [
                 const Icon(Icons.forum_outlined, size: 48, color: Colors.grey),
                 const SizedBox(height: 16),
-                Text(kw.isNotEmpty ? "검색 결과가 없습니다." : "아직 등록된 동네 토크가 없습니다."),
+                Text(kw.isNotEmpty
+                    ? 'findFriend.searchNoResults'.tr()
+                    : 'friendPost.noPosts'.tr()),
               ],
             ),
           );

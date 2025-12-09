@@ -266,6 +266,7 @@ class ChatService {
     required String postId,
     required String postTitle,
     required List<String> participants,
+    List<String>? joinedUserNames, // 새로 참여한 유저 닉네임 목록 (옵션)
   }) async {
     // postId를 기반으로 채팅방 ID 생성 (post_groupID)
     final String chatId = 'post_$postId';
@@ -303,11 +304,52 @@ class ChatService {
 
       await batch.commit();
     } else {
-      // 이미 존재하는 경우 참여자 목록 동기화 (새로 승인된 멤버 추가)
-      // participants 리스트를 최신화합니다.
-      await chatDocRef.update({
-        'participants': FieldValue.arrayUnion(participants),
-      });
+      // [작업 6] 기존 채팅방 업데이트 로직 강화
+      // 1. 현재 참여자 목록 확인하여 '새로운 멤버' 식별
+      final data = chatDoc.data() ?? {};
+      final List<dynamic> currentMembers = data['participants'] ?? [];
+      final Set<String> currentMemberSet =
+          currentMembers.map((e) => e.toString()).toSet();
+
+      final List<String> newMembers =
+          participants.where((p) => !currentMemberSet.contains(p)).toList();
+
+      if (newMembers.isNotEmpty) {
+        // 2. 신규 멤버 추가 및 해당 멤버의 unreadCounts 0으로 초기화
+        // Note: 기존 멤버의 unreadCounts는 건드리지 않음
+        final Map<String, dynamic> updateData = {
+          'participants': FieldValue.arrayUnion(newMembers),
+        };
+        for (var uid in newMembers) {
+          updateData['unreadCounts.$uid'] = 0;
+        }
+
+        // [작업 7] 시스템 메시지로 참여 알림 추가
+        if (joinedUserNames != null && joinedUserNames.isNotEmpty) {
+          final String sysMsg;
+          if (joinedUserNames.length == 1) {
+            sysMsg = 'friendPost.memberJoinedSingle'
+                .tr(namedArgs: {'nickname': joinedUserNames.first});
+          } else {
+            sysMsg = 'friendPost.memberJoinedMultiple'
+                .tr(namedArgs: {'names': joinedUserNames.join(', ')});
+          }
+          // 마지막 메시지 및 타임스탬프 업데이트
+          updateData['lastMessage'] = sysMsg;
+          updateData['lastTimestamp'] = FieldValue.serverTimestamp();
+
+          // 메시지 컬렉션에 시스템 메시지 추가
+          await chatDocRef.collection('messages').add({
+            'senderId': 'system',
+            'text': sysMsg,
+            'timestamp': FieldValue.serverTimestamp(),
+            'readBy': participants,
+            'type': 'system',
+          });
+        }
+
+        await chatDocRef.update(updateData);
+      }
     }
 
     return chatId;

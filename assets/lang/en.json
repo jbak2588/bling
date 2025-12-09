@@ -441,6 +441,7 @@
     "sentFriendRequests": "Sent Requests",
     "products": {
       "empty": "No products listed.",
+      "bookmarkeded": "Booked",
       "detailsTitle": "Product details",
       "editButton": "Edit product",
       "loadErrorWithMsg": "Failed to load products: {error}",
@@ -624,7 +625,7 @@
     "dateFormatLong": "MMM d"
   },
   "productCard": {
-    "currency": "$"
+    "currency": "Rp"
   },
   "localNewsFeed": {
     "setLocationPrompt": "Set your neighborhood to see local stories!",
@@ -1164,10 +1165,16 @@
   },
   "findFriend": {
     "title": "Find Friends",
+    "segment": {
+      "profile": "Profile",
+      "posts": "Posts"
+    },
     "tabs": {
       "friends": "Friends",
       "groups": "Groups",
-      "clubs": "Clubs"
+      "clubs": "Clubs",
+      "explore": "Explore",
+      "myFriends": "My Friends"
     },
     "editTitle": "Edit FindFriend Profile",
     "editProfileTitle": "Edit Profile",
@@ -1197,7 +1204,57 @@
     "prompt_button": "Create My Profile",
     "chatLimitReached": "You have reached your daily limit ({limit}) for starting new chats.",
     "chatChecking": "Checking...",
-    "empty": "There are no friends registered nearby."
+    "empty": "There are no friends registered nearby.",
+    "searchNoResults": "No results found.",
+    "noMatches": "No matching neighbors found.",
+    "form": {
+      "title": "Create Find Friends Profile"
+    },
+    "friendPost": {
+      "noPosts": "There are no neighbourhood talks registered yet.",
+      "write": "Write",
+      "action": {
+        "enterChat": "Enter chat",
+        "waitingCount": "Pending {}",
+        "participating": "Participating in chat",
+        "waitingCancel": "Pending approval (Cancel)",
+        "full": "Full",
+        "requestJoin": "Request to join the group",
+        "chat": "Chat"
+      },
+      "manage": {
+        "title": "Manage Join Requests",
+        "empty": "No pending requests."
+      },
+      "snackbar": {
+        "requestSent": "Request sent. Please wait for approval.",
+        "approved": "{} was approved.",
+        "full": "The group is full."
+      },
+      "system": {
+        "joined": "{} has joined."
+      },
+
+      "groupChatStarted": "Group chat started.",
+      "enterChatLabel": "Enter chat",
+      "requestSent": "Request sent. Please wait for approval.",
+      "manageRequestsTitle": "Manage Join Requests",
+      "noPendingRequests": "No pending requests.",
+      "pendingCountBadge": "Pending {count}",
+      "chattingLabel": "In chat",
+      "waitingCancelLabel": "Pending approval (Cancel)",
+      "requestButtonLabel": "Request to Join",
+      "fullLabel": "Full",
+      "approvedSnackbar": "{nickname} was approved.",
+      "memberJoinedSingle": "{nickname} has joined.",
+      "memberJoinedMultiple": "{names} have joined.",
+      "fullError": "The group is full.",
+      "unknownLocation": "No location",
+      "noBio": "No bio",
+      "searchHint": "Searching for posts...",
+      "createPostNavigate": "Proceed to post creation.",
+      "genericError": "Error: {error}"
+    }
   },
   "interests": {
     "title": "Interests",
@@ -1260,18 +1317,8 @@
     "unblock": "unblock",
     "bookmark": "Bookmark",
     "bookmarkeded": "Added to bookmarks",
+    "bookmarked": "Booked marks",
     "unbookmarked": "Removed from bookmarks"
-  },
-  "locationFilter": {
-    "title": "Location Filter",
-    "provinsi": "Provinsi",
-    "kabupaten": "Kabupaten",
-    "kota": "Kota",
-    "kecamatan": "Kecamatan",
-    "kelurahan": "Kelurahan",
-    "apply": "Apply Filter",
-    "all": "All",
-    "reset": "Reset"
   },
   "clubs": {
     "tabs": {
@@ -1428,11 +1475,6 @@
       }
     },
     "empty": "No clubs yet."
-  },
-  "findfriend": {
-    "form": {
-      "title": "Create Find Friends Profile"
-    }
   },
   "auctions": {
     "card": {
