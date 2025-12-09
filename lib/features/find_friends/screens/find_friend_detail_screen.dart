@@ -47,6 +47,7 @@ import 'package:cloud_functions/cloud_functions.dart'; // [v2.1] 스팸 방지 �
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart';
 import 'package:bling_app/core/constants/app_links.dart';
+import 'package:bling_app/core/utils/address_formatter.dart';
 // ChatService: 채팅방 생성/조회 일원화
 import 'package:bling_app/features/chat/data/chat_service.dart';
 // import 'package:bling_app/core/models/chat_room_model.dart';
@@ -79,23 +80,10 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
 
   // [Task 16] 위치 정보 프라이버시 보호 헬퍼 (카드와 동일 로직 적용)
   String _getSafeLocationText(UserModel user) {
-    if (user.locationParts != null) {
-      final parts = user.locationParts!;
-      final List<String> displayParts = [];
-
-      if (parts['kel'] != null) {
-        displayParts.add("Kel. ${parts['kel']}");
-      }
-      if (parts['kec'] != null) {
-        displayParts.add("Kec. ${parts['kec']}");
-      }
-      if (parts['kab'] != null) {
-        displayParts.add("${parts['kab']}"); // 상세에서는 Kab까지 표시
-      }
-
-      if (displayParts.isNotEmpty) return displayParts.join(', ');
-    }
-    return user.locationName ?? '';
+    final formatted = AddressFormatter.formatKelKabFromParts(
+        user.locationParts); // kel/kab only
+    if (formatted.isNotEmpty) return formatted;
+    return '';
   }
 
   @override

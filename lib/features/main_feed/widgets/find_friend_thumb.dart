@@ -3,6 +3,7 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:bling_app/core/utils/address_formatter.dart';
 
 /// [개편] 5단계: 메인 피드용 표준 썸네일 (Find Friend 전용)
 ///
@@ -100,9 +101,8 @@ class FindFriendThumb extends StatelessWidget {
     // [v2.1] 'age' 및 'ageRange' 필드 삭제됨.
     final interests = user.interests?.take(2).toList() ?? []; // 최대 2개만 표시
 
-    // 지역명 추출 (Kelurahan 우선, 없으면 Kecamatan)
-    final location =
-        user.locationParts?['kab'] ?? user.locationParts?['kota'] ?? '';
+    final location = AddressFormatter.formatKelKabFromParts(
+        user.locationParts); // kel/kab only
 
     // Return a flexible meta area (no fixed height). The parent Column
     // wraps this widget in Expanded so it will take remaining space and

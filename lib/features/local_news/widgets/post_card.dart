@@ -18,6 +18,7 @@ import 'package:bling_app/features/local_news/models/post_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/local_news/screens/local_news_detail_screen.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
+import 'package:bling_app/core/utils/address_formatter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -118,7 +119,7 @@ class _PostCardState extends State<PostCard>
                       ],
                     ),
                     Text(
-                      '${user.locationParts?['kel'] ?? user.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $timeAgo',
+                      '${AddressFormatter.formatKelKabFromParts(user.locationParts).isNotEmpty ? AddressFormatter.formatKelKabFromParts(user.locationParts) : 'postCard.locationNotSet'.tr()} • $timeAgo',
                       style:
                           TextStyle(color: Colors.grey.shade600, fontSize: 12),
                     ),
@@ -137,10 +138,11 @@ class _PostCardState extends State<PostCard>
   // ✅ _buildLocationInfo 함수 추가
   Widget _buildLocationInfo(BuildContext context, String? locationName) {
     // 요청: locationParts의 전체 주소 대신 kel만 표시
-    final kel = widget.post.locationParts != null
-        ? (widget.post.locationParts!['kel'] as String?)
-        : null;
-    final display = kel ?? locationName ?? 'postCard.locationNotSet'.tr();
+    final display =
+        AddressFormatter.formatKelKabFromParts(widget.post.locationParts);
+    final fallback = display.isNotEmpty
+        ? display
+        : (locationName ?? 'postCard.locationNotSet'.tr());
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -156,7 +158,7 @@ class _PostCardState extends State<PostCard>
           const SizedBox(width: 8),
           Flexible(
             child: Text(
-              display,
+              fallback,
               style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
               overflow: TextOverflow.ellipsis,
             ),

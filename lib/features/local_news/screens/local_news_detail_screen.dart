@@ -21,6 +21,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart'; // ✅ SharePlus import 확인
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:bling_app/core/constants/app_links.dart';
+import 'package:bling_app/core/utils/address_formatter.dart';
 // ❌ [태그 시스템] 기존 카테고리 import 제거
 // import '../../../core/constants/app_categories.dart';
 // ✅ [태그 시스템] 태그 사전 import 추가
@@ -254,9 +255,12 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                         ],
                       ),
                       Text(
-                        // 요청: 전체 주소 대신 kel만 표시
-                        user.locationParts?['kel'] ??
-                            'postCard.locationNotSet'.tr(),
+                        AddressFormatter.formatKelKabFromParts(
+                                    user.locationParts)
+                                .isNotEmpty
+                            ? AddressFormatter.formatKelKabFromParts(
+                                user.locationParts)
+                            : 'postCard.locationNotSet'.tr(),
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],

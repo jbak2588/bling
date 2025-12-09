@@ -31,6 +31,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../../core/models/user_model.dart';
+import 'package:bling_app/core/utils/address_formatter.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 
 /// Card displaying basic information for a FindFriend profile.
@@ -41,18 +42,10 @@ class FindFriendCard extends StatelessWidget {
   // [Task 16] 위치 정보 프라이버시 보호 헬퍼
   // locationParts를 사용하여 "Kel. OO, Kec. OO" 형태로 변환
   String _getSafeLocationText(UserModel user) {
-    if (user.locationParts != null) {
-      final parts = user.locationParts!;
-      final List<String> displayParts = [];
-
-      if (parts['kel'] != null) displayParts.add("Kel. ${parts['kel']}");
-      if (parts['kec'] != null) displayParts.add("Kec. ${parts['kec']}");
-      // Kab/Kota 정보는 너무 넓으므로 필요 시 추가, 여기서는 동네 중심
-
-      if (displayParts.isNotEmpty) return displayParts.join(', ');
-    }
-    // parts가 없으면 locationName을 쓰되, 너무 길면 잘라내거나 그대로 표시 (차선책)
-    return user.locationName ?? '';
+    final formatted = AddressFormatter.formatKelKabFromParts(
+        user.locationParts); // kel/kab only
+    if (formatted.isNotEmpty) return formatted;
+    return '';
   }
 
   @override

@@ -249,7 +249,7 @@ class FriendPostCard extends StatelessWidget {
                             fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                       Text(
-                        "${timeago.format(post.createdAt.toDate())} · ${AddressFormatter.toSingkatan(post.locationName ?? '') != '' ? AddressFormatter.toSingkatan(post.locationName ?? '') : 'friendPost.unknownLocation'.tr()}",
+                        "${timeago.format(post.createdAt.toDate())} · ${AddressFormatter.formatKelKabFromParts(post.locationParts).isNotEmpty ? AddressFormatter.formatKelKabFromParts(post.locationParts) : 'friendPost.unknownLocation'.tr()}",
                         style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       ),
                     ],
@@ -398,7 +398,7 @@ class FriendPostCard extends StatelessWidget {
 class _ManageMembersSheet extends StatelessWidget {
   final FriendPostModel post;
   final UserModel currentUser;
-  const _ManageMembersSheet({ required this.post, required this.currentUser});
+  const _ManageMembersSheet({required this.post, required this.currentUser});
 
   @override
   Widget build(BuildContext context) {

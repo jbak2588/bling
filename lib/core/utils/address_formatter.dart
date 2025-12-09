@@ -2,6 +2,21 @@
 
 /// 주소 표시와 관련된 공통 함수들을 관리합니다.
 class AddressFormatter {
+  /// locationParts 맵(kel, kab 등)에서 kel/kab만 약어로 조합합니다.
+  /// street/rt/rw는 포함하지 않아 개인정보를 보호합니다.
+  static String formatKelKabFromParts(Map<String, dynamic>? parts) {
+    if (parts == null) return '';
+
+    final kel = (parts['kel'] ?? '').toString().trim();
+    final kab = (parts['kab'] ?? parts['kota'] ?? '').toString().trim();
+
+    final display = <String>[];
+    if (kel.isNotEmpty) display.add('Kel. $kel');
+    if (kab.isNotEmpty) display.add('Kab. $kab');
+
+    return display.join(', ');
+  }
+
   /// 전체 주소 문자열을 받아, 'Kecamatan, Kabupaten' 형태의 약어로 변환합니다.
   /// 예: "Kelurahan Panunggangan Barat, Kecamatan Cibodas, Kabupaten Tangerang"
   /// -> "Kec. Cibodas, Kab. Tangerang"
