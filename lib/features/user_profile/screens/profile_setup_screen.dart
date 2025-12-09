@@ -1,18 +1,21 @@
-import 'dart:io';
+// [Diff/Full] lib/features/user_profile/screens/profile_setup_screen.dart
 
+import 'dart:io';
 import 'package:bling_app/core/models/user_model.dart';
-// import 'package:bling_app/core/utils/logging/logger.dart'; // [수정] Log 미사용 시 주석 처리 또는 삭제
-// import 'package:bling_app/core/utils/upload_helpers.dart'; // [수정] 로컬 구현으로 대체하므로 제거 가능
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart'; // [추가] 직접 업로드를 위해 추가
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p; // [추가] 확장자 추출용
+import 'package:path/path.dart' as p;
+import 'package:easy_localization/easy_localization.dart'; // i18n
 
 class ProfileSetupScreen extends StatefulWidget {
-  const ProfileSetupScreen({super.key});
+  final UserModel? userModel;
+  final bool isEditMode;
+
+  const ProfileSetupScreen(
+      {super.key, this.userModel, this.isEditMode = false});
 
   @override
   State<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
@@ -20,149 +23,125 @@ class ProfileSetupScreen extends StatefulWidget {
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nicknameController = TextEditingController();
 
-  bool _isLoading = true;
+  final TextEditingController _nicknameController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+
+  bool _isLoading = false;
   File? _selectedImageFile;
   String? _currentProfileImageUrl;
 
-  // 약관 동의 상태
-  bool _termsAgreed = false;
-  bool _privacyAgreed = false;
-  bool _marketingAgreed = false;
+  bool _isVisibleInList = false;
+  bool _isPhoneVerified = false;
 
-  // 개인정보 설정 상태
-  bool _isVisibleInList = true;
-
-  final List<String> _availableInterests = [
-    'electronics',
-    'fashion',
-    'home_decor',
-    'books',
-    'sports',
-    'beauty',
-    'toys',
-    'gaming',
-    'cooking',
-    'travel',
-    'music',
-    'art'
-  ];
   final List<String> _selectedInterests = [];
+  final List<String> _availableInterests = [
+    '운동',
+    '여행',
+    '맛집',
+    '독서',
+    '게임',
+    '음악',
+    '영화',
+    '공부',
+    '반려동물',
+    '카페'
+  ];
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-  }
-
-  Future<void> _loadUserData() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      if (doc.exists) {
-        // [수정 1] unused_local_variable 해결 (data 변수 제거)
-        // final data = doc.data()!;
-        final userModel = UserModel.fromFirestore(doc);
-
-        setState(() {
-          // [수정 2] dead_null_aware_expression 해결 (nickname은 String이므로 ?? '' 불필요)
-          _nicknameController.text = userModel.nickname;
-
-          if (userModel.interests != null) {
-            _selectedInterests.addAll(userModel.interests!);
-          }
-
-          // [수정 3] undefined_getter 해결 (profileImage -> photoUrl)
-          _currentProfileImageUrl = userModel.photoUrl;
-
-          // [수정 4] invalid_assignment 해결 (bool? -> bool 변환)
-          _isVisibleInList = userModel.isVisibleInList ?? true;
-
-          _termsAgreed = userModel.termsAgreed ?? false;
-          _privacyAgreed = userModel.privacyAgreed ?? false;
-          _marketingAgreed = userModel.marketingAgreed ?? false;
-        });
-      }
-    } catch (e) {
-      // [수정 5] Undefined name 'Log' 해결 -> debugPrint 사용
-      debugPrint('ProfileSetup: 데이터 로드 실패 - $e');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    if (widget.userModel != null) {
+      _loadUserData();
     }
   }
 
-  // [추가] 프로필 이미지 업로드 로직 (UploadHelpers 의존성 제거)
-  Future<String> _uploadProfileImage(File imageFile, String userId) async {
-    final ext = p.extension(imageFile.path);
-    final ref = FirebaseStorage.instance
-        .ref()
-        .child('user_profiles/$userId/profile$ext'); // 프로필 전용 경로
-    await ref.putFile(imageFile);
-    return await ref.getDownloadURL();
+  void _loadUserData() {
+    final user = widget.userModel!;
+    _nicknameController.text = user.nickname;
+    _bioController.text = user.bio ?? '';
+    _phoneController.text = user.phoneNumber ?? '';
+    _currentProfileImageUrl = user.photoUrl;
+    _isVisibleInList = user.isVisibleInList ?? false;
+    _isPhoneVerified =
+        (user.phoneNumber != null && user.phoneNumber!.isNotEmpty);
+    if (user.interests != null) {
+      _selectedInterests.addAll(user.interests!);
+    }
   }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImageFile = File(pickedFile.path);
-      });
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() => _selectedImageFile = File(picked.path));
     }
   }
 
-  Future<void> _completeSetup() async {
+  Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (!_termsAgreed || !_privacyAgreed) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('필수 약관에 동의해주세요.')),
-      );
-      return;
+    if (_isVisibleInList) {
+      if (_bioController.text.trim().length < 5) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("profile.error.bioShort".tr())));
+        return;
+      }
+      if (_selectedInterests.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("profile.error.interestEmpty".tr())));
+        return;
+      }
     }
 
     setState(() => _isLoading = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) throw Exception("profile.error.loginRequired".tr());
 
-      String? downloadUrl = _currentProfileImageUrl;
-
+      String? photoUrl = _currentProfileImageUrl;
       if (_selectedImageFile != null) {
-        // [수정 6] Undefined name 'UploadHelpers' 해결 -> 내부 메서드 사용
-        downloadUrl = await _uploadProfileImage(_selectedImageFile!, user.uid);
+        final ext = p.extension(_selectedImageFile!.path);
+        final ref =
+            FirebaseStorage.instance.ref().child('profile_images/$uid$ext');
+        await ref.putFile(_selectedImageFile!);
+        photoUrl = await ref.getDownloadURL();
       }
 
-      // Firestore 업데이트 (User Model 필드명과 일치시킴)
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({
+      final userData = {
+        'uid': uid,
         'nickname': _nicknameController.text.trim(),
-        'photoUrl': downloadUrl, // [중요] user_model.dart 필드명은 photoUrl
-        'interests': _selectedInterests,
+        'photoUrl': photoUrl,
+        'phoneNumber': _phoneController.text.trim().isEmpty
+            ? null
+            : _phoneController.text.trim(),
         'isVisibleInList': _isVisibleInList,
-        'termsAgreed': _termsAgreed,
-        'privacyAgreed': _privacyAgreed,
-        'marketingAgreed': _marketingAgreed,
+        'bio': _isVisibleInList ? _bioController.text.trim() : null,
+        'interests': _isVisibleInList ? _selectedInterests : [],
         'profileCompleted': true,
         'updatedAt': FieldValue.serverTimestamp(),
-      });
+        if (!widget.isEditMode) ...{
+          'createdAt': FieldValue.serverTimestamp(),
+          'trustScore': 0,
+          'email': FirebaseAuth.instance.currentUser?.email ?? '',
+        }
+      };
 
-      // 성공 시 AuthGate가 감지 (자동 이동)
-    } catch (e) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .set(userData, SetOptions(merge: true));
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('오류가 발생했습니다: $e')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("profile.setup.saved".tr())));
+        Navigator.pop(context);
       }
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Error: $e")));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -170,185 +149,204 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('프로필 완성하기'),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            onPressed: _isLoading ? null : _completeSetup,
-            icon: _isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.save),
-          )
-        ],
+        title: Text(widget.isEditMode
+            ? "profile.setup.editTitle".tr()
+            : "profile.setup.title".tr()),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ... (이미지 선택 위젯 기존 동일) ...
-                Center(
-                  child: GestureDetector(
-                    onTap: _pickImage,
-                    child: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.grey[200],
-                          backgroundImage: _selectedImageFile != null
-                              ? FileImage(_selectedImageFile!)
-                              : (_currentProfileImageUrl != null
-                                  ? NetworkImage(_currentProfileImageUrl!)
-                                  : null) as ImageProvider?,
-                          child: (_selectedImageFile == null &&
-                                  _currentProfileImageUrl == null)
-                              ? const Icon(Icons.person,
-                                  size: 50, color: Colors.grey)
-                              : null,
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF00A66C),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.camera_alt,
-                                color: Colors.white, size: 18),
-                          ),
-                        ),
-                      ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. 기본 정보
+              Center(
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.grey[200],
+                    backgroundImage: _selectedImageFile != null
+                        ? FileImage(_selectedImageFile!)
+                        : (_currentProfileImageUrl != null
+                            ? NetworkImage(_currentProfileImageUrl!)
+                            : null) as ImageProvider?,
+                    child: (_selectedImageFile == null &&
+                            _currentProfileImageUrl == null)
+                        ? const Icon(Icons.camera_alt,
+                            size: 40, color: Colors.grey)
+                        : null,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              TextFormField(
+                controller: _nicknameController,
+                decoration: InputDecoration(
+                    labelText: "profile.field.nickname".tr(),
+                    border: const OutlineInputBorder()),
+                validator: (val) => (val == null || val.length < 2)
+                    ? "profile.error.nicknameShort".tr()
+                    : null,
+              ),
+              const SizedBox(height: 24),
+
+              // 2. 신뢰 인증
+              const Divider(),
+              Text("profile.section.trust".tr(),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text("profile.desc.trust".tr(),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _phoneController,
+                      decoration: InputDecoration(
+                        labelText: "profile.field.phone".tr(),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.phone),
+                      ),
+                      enabled: !_isPhoneVerified,
                     ),
                   ),
-                ),
-                const SizedBox(height: 32),
-
-                // ... (닉네임 입력 필드 기존 동일) ...
-                Text('닉네임 (필수)',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _nicknameController,
-                  decoration: const InputDecoration(
-                    hintText: '닉네임 입력',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? '닉네임을 입력해주세요.'
-                      : null,
-                ),
-                const SizedBox(height: 24),
-
-                // ... (관심사 선택 기존 동일) ...
-                Text('관심사 (선택)',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 8.0,
-                  children: _availableInterests.map((interest) {
-                    final isSelected = _selectedInterests.contains(interest);
-                    return FilterChip(
-                      label: Text(interest),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          selected
-                              ? _selectedInterests.add(interest)
-                              : _selectedInterests.remove(interest);
-                        });
+                  const SizedBox(width: 8),
+                  if (!_isPhoneVerified)
+                    ElevatedButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text("profile.desc.smsTodo".tr())));
+                        setState(() => _isPhoneVerified = true); // 임시 인증 처리
                       },
-                      selectedColor:
-                          const Color(0xFF00A66C).withValues(alpha: 0.2),
-                      checkmarkColor: const Color(0xFF00A66C),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 24),
-
-                const Divider(),
-                Text('설정',
-                    style: GoogleFonts.inter(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
-                SwitchListTile(
-                  title: const Text('친구 찾기 리스트에 내 프로필 노출'),
-                  value: _isVisibleInList,
-                  // [수정 7] deprecated 'activeColor' -> 'activeColor' (최신 Flutter에서는 activeThumbColor 권장하나 호환성 위해 기존 속성 사용 또는 경고에 따라 수정)
-                  // 권장: deprecated된 `activeColor` 대신 `activeThumbColor` 사용
-                  activeThumbColor: const Color(0xFF00A66C),
-                  // 트랙 색상도 함께 지정하면 더 나은 대비를 제공합니다.
-                  activeTrackColor: const Color(0xFFBFEFDD),
-                  onChanged: (val) => setState(() => _isVisibleInList = val),
-                ),
-
-                const SizedBox(height: 24),
-
-                // ... (약관 동의 및 버튼 기존 동일) ...
-                const Divider(),
-                _buildCheckbox('이용약관 동의 (필수)', _termsAgreed,
-                    (val) => setState(() => _termsAgreed = val!)),
-                _buildCheckbox('개인정보 처리방침 동의 (필수)', _privacyAgreed,
-                    (val) => setState(() => _privacyAgreed = val!)),
-                _buildCheckbox('마케팅 정보 수신 동의 (선택)', _marketingAgreed,
-                    (val) => setState(() => _marketingAgreed = val!)),
-
-                const SizedBox(height: 88),
-              ],
-            ),
-          ),
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SizedBox(
-            height: 50,
-            child: FilledButton(
-              onPressed: _isLoading ? null : _completeSetup,
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
+                      child: Text("profile.field.verify".tr()),
                     )
-                  : const Text('시작하기',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
+                  else
+                    const Icon(Icons.check_circle, color: Colors.green),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // 3. 소셜 프로필
+              const Divider(),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text("profile.section.social".tr(),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text("profile.desc.social".tr()),
+                value: _isVisibleInList,
+                activeThumbColor: Theme.of(context).primaryColor,
+                onChanged: (val) {
+                  setState(() {
+                    _isVisibleInList = val;
+                  });
+                },
+              ),
+
+              if (_isVisibleInList) ...[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("profile.field.bio".tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _bioController,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          hintText: "profile.field.bioHint".tr(),
+                          border: const OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        validator: (val) {
+                          if (_isVisibleInList &&
+                              (val == null || val.length < 5)) {
+                            return "profile.error.bioShort".tr();
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Text("profile.field.interests".tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        children: _availableInterests.map((tag) {
+                          final isSelected = _selectedInterests.contains(tag);
+                          return FilterChip(
+                            label: Text(tag),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setState(() {
+                                if (selected) {
+                                  _selectedInterests.add(tag);
+                                } else {
+                                  _selectedInterests.remove(tag);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      if (_isVisibleInList && _selectedInterests.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text("profile.desc.socialPlaceholder".tr(),
+                              style: const TextStyle(
+                                  color: Colors.red, fontSize: 12)),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _saveProfile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          widget.isEditMode
+                              ? "profile.setup.save".tr()
+                              : "profile.setup.start".tr(),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // ... (_buildCheckbox 기존 동일) ...
-  Widget _buildCheckbox(
-      String label, bool value, ValueChanged<bool?> onChanged) {
-    return CheckboxListTile(
-      title: Text(label, style: const TextStyle(fontSize: 14)),
-      value: value,
-      onChanged: onChanged,
-      controlAffinity: ListTileControlAffinity.leading,
-      contentPadding: EdgeInsets.zero,
-      activeColor: const Color(0xFF00A66C),
-    );
+  @override
+  void dispose() {
+    _nicknameController.dispose();
+    _bioController.dispose();
+    _phoneController.dispose();
+    super.dispose();
   }
 }

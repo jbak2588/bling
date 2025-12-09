@@ -21,6 +21,52 @@
       "unknownError": "unknownError"
     }
   },
+  "profile": {
+    "setup": {
+      "title": "Profile Setup",
+      "editTitle": "Edit Profile",
+      "save": "Save",
+      "start": "Start",
+      "saved": "Profile saved."
+    },
+    "section": {
+      "basic": "Basic Info",
+      "trust": "Trust & Safety (Required)",
+      "social": "Find Friends & Social"
+    },
+    "field": {
+      "nickname": "Nickname",
+      "nicknameHint": "Enter nickname (min 2 chars)",
+      "phone": "Phone Number",
+      "bio": "Bio (Required)",
+      "bioHint": "Introduce yourself (hobbies, etc.)",
+      "interests": "Interests (Min 1)",
+      "verify": "Verify",
+      "verified": "Verified"
+    },
+    "desc": {
+      "trust": "Phone verification is required to use Marketplace, Auction, and Jobs.",
+      "social": "Show my profile in 'Find Friends' and chat with neighbors.",
+      "socialPlaceholder": "Select interests to begin.",
+      "smsTodo": "SMS verification feature to be implemented."
+    },
+    "error": {
+      "nicknameShort": "Nickname must be at least 2 characters.",
+      "bioShort": "Please enter at least 5 characters for bio.",
+      "interestEmpty": "Please select at least one interest.",
+      "loginRequired": "User not logged in."
+    },
+    "view": {
+      "title": "Profile",
+      "joined": "Joined {}",
+      "locationUnknown": "Location unknown",
+      "phoneVerified": "Phone Verified",
+      "phoneUnverified": "Phone Unverified",
+      "aboutMe": "About Me",
+      "interests": "Interests",
+      "noBio": "No introduction yet."
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "error": "Failed to retrieve notifications.",
@@ -1209,51 +1255,88 @@
     "noMatches": "No matching neighbors found.",
     "form": {
       "title": "Create Find Friends Profile"
+    }
+  },
+  "friendPost": {
+    "noPosts": "There are no neighbourhood talks registered yet.",
+    "write": "Write",
+    "action": {
+      "enterChat": "Enter chat",
+      "waitingCount": "Pending {}",
+      "participating": "Participating in chat",
+      "waitingCancel": "Pending approval (Cancel)",
+      "full": "Full",
+      "requestJoin": "Request to join the group",
+      "chat": "Chat",
+      "managePost": "Manage my post"
     },
-    "friendPost": {
-      "noPosts": "There are no neighbourhood talks registered yet.",
-      "write": "Write",
-      "action": {
-        "enterChat": "Enter chat",
-        "waitingCount": "Pending {}",
-        "participating": "Participating in chat",
-        "waitingCancel": "Pending approval (Cancel)",
-        "full": "Full",
-        "requestJoin": "Request to join the group",
-        "chat": "Chat"
+    "manage": {
+      "title": "Manage Join Requests",
+      "empty": "No pending requests."
+    },
+    "snackbar": {
+      "requestSent": "Request sent. Please wait for approval.",
+      "approved": "{} was approved.",
+      "full": "The group is full.",
+      "deleted": "Post has been deleted."
+    },
+    "system": {
+      "joined": "{} has joined."
+    },
+    "groupChatStarted": "Group chat started.",
+    "enterChatLabel": "Enter chat",
+    "requestSent": "Request sent. Please wait for approval.",
+    "manageRequestsTitle": "Manage Join Requests",
+    "noPendingRequests": "No pending requests.",
+    "pendingCountBadge": "Pending {count}",
+    "chattingLabel": "In chat",
+    "waitingCancelLabel": "Pending approval (Cancel)",
+    "requestButtonLabel": "Request to Join",
+    "fullLabel": "Full",
+    "approvedSnackbar": "{nickname} was approved.",
+    "memberJoinedSingle": "{nickname} has joined.",
+    "memberJoinedMultiple": "{names} have joined.",
+    "fullError": "The group is full.",
+    "unknownLocation": "No location",
+    "noBio": "No bio",
+    "searchHint": "Searching for posts...",
+    "createPostNavigate": "Proceed to post creation.",
+    "genericError": "Error: {error}",
+    "create": {
+      "title": {
+        "create": "Write neighbourhood talk",
+        "edit": "Edit post"
       },
-      "manage": {
-        "title": "Manage Join Requests",
-        "empty": "No pending requests."
+      "contentHint": "What would you like to talk about?\nEg: Anyone up for a run at Central Park at 7pm tonight?",
+      "tagLabel": "Tags (interests)",
+      "tagHint": "Enter tags (press Enter or comma)",
+      "groupChatTitle": "Group chat (chat with multiple people)",
+      "groupChatSubtitle": "Enable to set a maximum number of participants.",
+      "maxParticipants": "Max participants",
+      "button": {
+        "create": "Create",
+        "edit": "Save changes"
+      },
+      "error": {
+        "tagRequired": "Please enter at least 1 tag.",
+        "contentShort": "Please enter at least 5 characters."
       },
       "snackbar": {
-        "requestSent": "Request sent. Please wait for approval.",
-        "approved": "{} was approved.",
-        "full": "The group is full."
-      },
-      "system": {
-        "joined": "{} has joined."
-      },
-
-      "groupChatStarted": "Group chat started.",
-      "enterChatLabel": "Enter chat",
-      "requestSent": "Request sent. Please wait for approval.",
-      "manageRequestsTitle": "Manage Join Requests",
-      "noPendingRequests": "No pending requests.",
-      "pendingCountBadge": "Pending {count}",
-      "chattingLabel": "In chat",
-      "waitingCancelLabel": "Pending approval (Cancel)",
-      "requestButtonLabel": "Request to Join",
-      "fullLabel": "Full",
-      "approvedSnackbar": "{nickname} was approved.",
-      "memberJoinedSingle": "{nickname} has joined.",
-      "memberJoinedMultiple": "{names} have joined.",
-      "fullError": "The group is full.",
-      "unknownLocation": "No location",
-      "noBio": "No bio",
-      "searchHint": "Searching for posts...",
-      "createPostNavigate": "Proceed to post creation.",
-      "genericError": "Error: {error}"
+        "created": "Post created.",
+        "edited": "Post updated."
+      }
+    },
+    "menu": {
+      "edit": "Edit post",
+      "delete": "Delete post"
+    },
+    "dialog": {
+      "deleteConfirm": "Are you sure you want to delete this post?",
+      "deleteAction": "Delete",
+      "cancel": "Cancel"
+    },
+    "error": {
+      "userNotFound": "User not found."
     }
   },
   "interests": {

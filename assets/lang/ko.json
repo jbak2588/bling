@@ -21,6 +21,52 @@
       "unknownError": "알 수 없는 오류가 발생했습니다. 다시 시도해주세요."
     }
   },
+  "profile": {
+    "setup": {
+      "title": "프로필 설정",
+      "editTitle": "프로필 수정",
+      "save": "저장하기",
+      "start": "시작하기",
+      "saved": "프로필이 저장되었습니다."
+    },
+    "section": {
+      "basic": "기본 정보",
+      "trust": "🔒 신뢰 및 안전 (필수)",
+      "social": "👫 친구 찾기 및 모임 활동"
+    },
+    "field": {
+      "nickname": "닉네임",
+      "nicknameHint": "2자 이상 입력해주세요",
+      "phone": "전화번호",
+      "bio": "자기소개 (필수)",
+      "bioHint": "이웃에게 나를 소개해보세요 (취미, 성격 등)",
+      "interests": "관심사 (최소 1개)",
+      "verify": "인증",
+      "verified": "인증됨"
+    },
+    "desc": {
+      "trust": "중고거래, 경매, 구인구직을 이용하려면 전화번호 인증이 필요합니다.",
+      "social": "내 프로필을 '동네 친구' 리스트에 노출하고, 이웃과 대화를 나눕니다.",
+      "socialPlaceholder": "관심사를 선택해주세요.",
+      "smsTodo": "SMS 인증 기능 구현 필요"
+    },
+    "error": {
+      "nicknameShort": "2자 이상 입력해주세요.",
+      "bioShort": "친구 찾기를 이용하려면 자기소개를 5자 이상 입력해주세요.",
+      "interestEmpty": "관심사를 최소 1개 선택해주세요.",
+      "loginRequired": "로그인이 필요합니다."
+    },
+    "view": {
+      "title": "프로필",
+      "joined": "가입일 {}",
+      "locationUnknown": "위치 미설정",
+      "phoneVerified": "전화번호 인증됨",
+      "phoneUnverified": "전화번호 미인증",
+      "aboutMe": "자기소개",
+      "interests": "관심사",
+      "noBio": "자기소개가 없습니다."
+    }
+  },
   "notifications": {
     "title": "알림",
     "error": "알림을 불러오지 못했습니다.",
@@ -1204,55 +1250,93 @@
     "prompt_button": "내 프로필 만들기",
     "chatLimitReached": "오늘의 새 대화 한도({limit}회)에 도달했습니다.",
     "chatChecking": "확인 중...",
-    "empty": "주변에 등록된 친구가 없습니다."  ,
+    "empty": "주변에 등록된 친구가 없습니다.",
     "searchNoResults": "검색 결과가 없습니다.",
     "noMatches": "조건에 맞는 이웃을 찾을 수 없습니다.",
     "form": {
       "title": "친구찾기 프로필 만들기"
+    }
+  },
+  "friendPost": {
+    "noPosts": "아직 등록된 동네 토크가 없습니다.",
+    "write": "글쓰기",
+    "action": {
+      "enterChat": "채팅방 입장",
+      "waitingCount": "승인 대기 {}",
+      "participating": "대화 참여 중",
+      "waitingCancel": "승인 대기 중 (취소)",
+      "full": "모집 마감",
+      "requestJoin": "그룹 참여 요청",
+      "chat": "대화하기",
+      "managePost": "내 게시글 관리"
     },
-    "friendPost": {
-      "noPosts": "아직 등록된 동네 토크가 없습니다.",
-      "write": "글쓰기",
-      "action": {
-        "enterChat": "채팅방 입장",
-        "waitingCount": "승인 대기 {}",
-        "participating": "대화 참여 중",
-        "waitingCancel": "승인 대기 중 (취소)",
-        "full": "모집 마감",
-        "requestJoin": "그룹 참여 요청",
-        "chat": "대화하기"
+    "manage": {
+      "title": "참여 요청 관리",
+      "empty": "대기 중인 요청이 없습니다."
+    },
+    "snackbar": {
+      "requestSent": "참여 요청을 보냈습니다. 승인을 기다려주세요.",
+      "approved": "{}님의 참여를 승인했습니다.",
+      "full": "정원이 초과되었습니다.",
+      "deleted": "게시글이 삭제되었습니다."
+    },
+    "system": {
+      "joined": "{}님이 참여했습니다."
+    },
+    "groupChatStarted": "그룹 대화가 시작되었습니다.",
+    "enterChatLabel": "채팅방 입장",
+    "requestSent": "참여 요청을 보냈습니다. 승인을 기다려주세요.",
+    "manageRequestsTitle": "참여 요청 관리",
+    "noPendingRequests": "대기 중인 요청이 없습니다.",
+    "pendingCountBadge": "승인 대기 {count}",
+    "chattingLabel": "대화 참여 중",
+    "waitingCancelLabel": "승인 대기 중 (취소)",
+    "requestButtonLabel": "그룹 참여 요청",
+    "fullLabel": "모집 마감",
+    "approvedSnackbar": "{nickname}님의 참여를 승인했습니다.",
+    "memberJoinedSingle": "{nickname}님이 참여했습니다.",
+    "memberJoinedMultiple": "{names}님이 참여했습니다.",
+    "fullError": "정원이 초과되었습니다.",
+    "unknownLocation": "위치 정보 없음",
+    "noBio": "자기소개 없음",
+    "searchHint": "게시글 검색...",
+    "createPostNavigate": "게시글 작성으로 이동합니다.",
+    "genericError": "오류: {error}",
+    "create": {
+      "title": {
+        "create": "동네 토크 쓰기",
+        "edit": "게시글 수정"
       },
-      "manage": {
-        "title": "참여 요청 관리",
-        "empty": "대기 중인 요청이 없습니다."
+      "contentHint": "무슨 이야기를 나누고 싶으신가요?\n예: 오늘 저녁 7시 센트럴파크 러닝하실 분?",
+      "tagLabel": "태그 (관심사)",
+      "tagHint": "태그 입력 (엔터 또는 쉼표)",
+      "groupChatTitle": "그룹 채팅 (여러 명과 대화)",
+      "groupChatSubtitle": "활성화하면 최대 인원을 설정할 수 있습니다.",
+      "maxParticipants": "최대 참여 인원",
+      "button": {
+        "create": "등록하기",
+        "edit": "수정 완료"
+      },
+      "error": {
+        "tagRequired": "최소 1개의 태그를 입력해주세요.",
+        "contentShort": "최소 5자 이상 입력해주세요."
       },
       "snackbar": {
-        "requestSent": "참여 요청을 보냈습니다. 승인을 기다려주세요.",
-        "approved": "{}님의 참여를 승인했습니다.",
-        "full": "정원이 초과되었습니다."
-      },
-      "system": {
-        "joined": "{}님이 참여했습니다."
-      },
-      "groupChatStarted": "그룹 대화가 시작되었습니다.",
-      "enterChatLabel": "채팅방 입장",
-      "requestSent": "참여 요청을 보냈습니다. 승인을 기다려주세요.",
-      "manageRequestsTitle": "참여 요청 관리",
-      "noPendingRequests": "대기 중인 요청이 없습니다.",
-      "pendingCountBadge": "승인 대기 {count}",
-      "chattingLabel": "대화 참여 중",
-      "waitingCancelLabel": "승인 대기 중 (취소)",
-      "requestButtonLabel": "그룹 참여 요청",
-      "fullLabel": "모집 마감",
-      "approvedSnackbar": "{nickname}님의 참여를 승인했습니다.",
-      "memberJoinedSingle": "{nickname}님이 참여했습니다.",
-      "memberJoinedMultiple": "{names}님이 참여했습니다.",
-      "fullError": "정원이 초과되었습니다.",
-      "unknownLocation": "위치 정보 없음",
-      "noBio": "자기소개 없음",
-      "searchHint": "게시글 검색...",
-      "createPostNavigate": "게시글 작성으로 이동합니다.",
-      "genericError": "오류: {error}"
+        "created": "게시글이 등록되었습니다.",
+        "edited": "게시글이 수정되었습니다."
+      }
+    },
+    "menu": {
+      "edit": "게시글 수정",
+      "delete": "게시글 삭제"
+    },
+    "dialog": {
+      "deleteConfirm": "정말 이 게시글을 삭제하시겠습니까?",
+      "deleteAction": "삭제",
+      "cancel": "취소"
+    },
+    "error": {
+      "userNotFound": "사용자를 찾을 수 없습니다."
     }
   },
   "interests": {
@@ -1475,7 +1559,7 @@
     },
     "empty": "활동중인 동회회가 없습니다."
   },
-"auctions": {
+  "auctions": {
     "card": {
       "currentBid": "현재 입찰가",
       "endTime": "남은 시간",

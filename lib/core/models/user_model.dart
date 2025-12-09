@@ -193,6 +193,8 @@ class UserModel {
     this.deletionRequestedAt,
   });
 
+  // [작업 16] 빈 객체 생성자 제거: 더 이상 필요하지 않음 (currentUser 전달로 대체)
+
   // Compatibility: provide a common `title` getter for UI components.
   String get title => nickname;
 

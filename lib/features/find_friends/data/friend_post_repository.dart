@@ -1,6 +1,7 @@
 // lib/features/find_friends/data/friend_post_repository.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:bling_app/features/find_friends/models/friend_post_model.dart';
 import 'package:bling_app/features/chat/data/chat_service.dart';
 
@@ -39,10 +40,28 @@ class FriendPostRepository {
     await _firestore.collection('friend_posts').doc(postId).update(data);
   }
 
-  // [작업 9] 게시글 삭제
+  // [작업 9, 13, 14] 게시글 삭제
   Future<void> deletePost(String postId) async {
+    // 1. 게시글 문서 삭제
     await _firestore.collection('friend_posts').doc(postId).delete();
-    // TODO: 연결된 채팅방이 있다면 닫거나 알림 처리 (정책 결정 필요)
+    // [작업 14] 연결된 채팅방 참여자 초기화 (Admin 삭제 대기)
+    try {
+      final String chatId = 'post_$postId'; // 규칙: 'post_' + postId
+      final chatRef = _firestore.collection('chats').doc(chatId);
+
+      final chatDoc = await chatRef.get();
+      if (chatDoc.exists) {
+        // 채팅방을 직접 삭제하지 않고, 참여자를 비워
+        // 1) 사용자 목록에서 즉시 숨김 처리
+        // 2) 추후 Admin의 '참여자 0명 채팅방 정리' 로직에 의해 삭제되도록 유도
+        await chatRef.update({
+          'participants': [],
+          'lastMessage': '게시글이 삭제되어 종료된 대화입니다.', // (선택) 관리자 확인용 마커
+        });
+      }
+    } catch (e) {
+      debugPrint("Failed to clear chat participants: $e");
+    }
   }
 
   // (추후 구현) 게시글 삭제, 신고, 참여 요청 등

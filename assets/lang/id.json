@@ -21,6 +21,52 @@
       "unknownError": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
     }
   },
+  "profile": {
+    "setup": {
+      "title": "Pengaturan Profil",
+      "editTitle": "Edit Profil",
+      "save": "Simpan",
+      "start": "Mulai",
+      "saved": "Profil disimpan."
+    },
+    "section": {
+      "basic": "Info Dasar",
+      "trust": "Kepercayaan & Keamanan (Wajib)",
+      "social": "Cari Teman & Sosial"
+    },
+    "field": {
+      "nickname": "Nama Panggilan",
+      "nicknameHint": "Masukkan nama (min 2 karakter)",
+      "phone": "Nomor Telepon",
+      "bio": "Bio (Wajib)",
+      "bioHint": "Perkenalkan diri Anda (hobi, dll.)",
+      "interests": "Minat (Min 1)",
+      "verify": "Verifikasi",
+      "verified": "Terverifikasi"
+    },
+    "desc": {
+      "trust": "Verifikasi telepon diperlukan untuk menggunakan Marketplace, Lelang, dan Lowongan.",
+      "social": "Tampilkan profil saya di 'Cari Teman' dan mengobrol dengan tetangga.",
+      "socialPlaceholder": "Pilih minat untuk memulai.",
+      "smsTodo": "Fitur verifikasi SMS akan segera hadir."
+    },
+    "error": {
+      "nicknameShort": "Nama panggilan minimal 2 karakter.",
+      "bioShort": "Harap masukkan minimal 5 karakter untuk bio.",
+      "interestEmpty": "Harap pilih minimal satu minat.",
+      "loginRequired": "Pengguna belum login."
+    },
+    "view": {
+      "title": "Profil",
+      "joined": "Bergabung {}",
+      "locationUnknown": "Lokasi tidak diketahui",
+      "phoneVerified": "Telepon Terverifikasi",
+      "phoneUnverified": "Telepon Belum Diverifikasi",
+      "aboutMe": "Tentang Saya",
+      "interests": "Minat",
+      "noBio": "Belum ada pengenalan diri."
+    }
+  },
   "notifications": {
     "title": "Notifikasi",
     "error": "Gagal memuat notifikasi.",
@@ -1209,51 +1255,88 @@
     "noMatches": "Tidak dapat menemukan tetangga yang sesuai dengan kriteria.",
     "form": {
       "title": "Membuat Profil Pencarian Teman"
+    }
+  },
+  "friendPost": {
+    "noPosts": "Belum ada postingan.",
+    "write": "Tulis",
+    "action": {
+      "enterChat": "Masuk obrolan",
+      "waitingCount": "Menunggu {}",
+      "participating": "Sedang ngobrol",
+      "waitingCancel": "Menunggu persetujuan (Batal)",
+      "full": "Penuh",
+      "requestJoin": "Minta bergabung",
+      "chat": "Ngobrol",
+      "managePost": "Kelola posting saya"
     },
-    "friendPost": {
-      "noPosts": "Belum ada postingan.",
-      "write": "Tulis",
-      "action": {
-        "enterChat": "Masuk obrolan",
-        "waitingCount": "Menunggu {}",
-        "participating": "Sedang ngobrol",
-        "waitingCancel": "Menunggu persetujuan (Batal)",
-        "full": "Penuh",
-        "requestJoin": "Minta bergabung",
-        "chat": "Ngobrol"
+    "manage": {
+      "title": "Kelola Permintaan Bergabung",
+      "empty": "Tidak ada permintaan yang menunggu."
+    },
+    "snackbar": {
+      "requestSent": "Permintaan dikirim. Silakan tunggu persetujuan.",
+      "approved": "{} disetujui.",
+      "full": "Grup sudah penuh.",
+      "deleted": "Postingan telah dihapus."
+    },
+    "system": {
+      "joined": "{} telah bergabung."
+    },
+    "groupChatStarted": "Obrolan grup dimulai.",
+    "enterChatLabel": "Masuk obrolan",
+    "requestSent": "Permintaan dikirim. Silakan tunggu persetujuan.",
+    "manageRequestsTitle": "Kelola Permintaan Bergabung",
+    "noPendingRequests": "Tidak ada permintaan yang menunggu.",
+    "pendingCountBadge": "Menunggu {count}",
+    "chattingLabel": "Sedang ngobrol",
+    "waitingCancelLabel": "Menunggu persetujuan (Batal)",
+    "requestButtonLabel": "Minta bergabung",
+    "fullLabel": "Penuh",
+    "approvedSnackbar": "{nickname} disetujui.",
+    "memberJoinedSingle": "{nickname} telah bergabung.",
+    "memberJoinedMultiple": "{names} telah bergabung.",
+    "fullError": "Grup sudah penuh.",
+    "unknownLocation": "Tidak ada lokasi",
+    "noBio": "Tidak ada bio",
+    "searchHint": "Cari posting...",
+    "createPostNavigate": "Menuju membuat posting.",
+    "genericError": "Kesalahan: {error}",
+    "create": {
+      "title": {
+        "create": "Tulis obrolan lingkungan",
+        "edit": "Sunting posting"
       },
-      "manage": {
-        "title": "Kelola Permintaan Bergabung",
-        "empty": "Tidak ada permintaan yang menunggu."
+      "contentHint": "Topik apa yang ingin Anda bicarakan?\nContoh: Ada yang mau lari di Central Park jam 7 malam ini?",
+      "tagLabel": "Tag (minat)",
+      "tagHint": "Masukkan tag (Enter atau koma)",
+      "groupChatTitle": "Obrolan grup (mengobrol dengan beberapa orang)",
+      "groupChatSubtitle": "Aktifkan untuk mengatur jumlah maksimum peserta.",
+      "maxParticipants": "Maks peserta",
+      "button": {
+        "create": "Buat",
+        "edit": "Simpan perubahan"
+      },
+      "error": {
+        "tagRequired": "Harap masukkan minimal 1 tag.",
+        "contentShort": "Harap masukkan minimal 5 karakter."
       },
       "snackbar": {
-        "requestSent": "Permintaan dikirim. Silakan tunggu persetujuan.",
-        "approved": "{} disetujui.",
-        "full": "Grup sudah penuh."
-      },
-      "system": {
-        "joined": "{} telah bergabung."
-      },
-
-      "groupChatStarted": "Obrolan grup dimulai.",
-      "enterChatLabel": "Masuk obrolan",
-      "requestSent": "Permintaan dikirim. Silakan tunggu persetujuan.",
-      "manageRequestsTitle": "Kelola Permintaan Bergabung",
-      "noPendingRequests": "Tidak ada permintaan yang menunggu.",
-      "pendingCountBadge": "Menunggu {count}",
-      "chattingLabel": "Sedang ngobrol",
-      "waitingCancelLabel": "Menunggu persetujuan (Batal)",
-      "requestButtonLabel": "Minta bergabung",
-      "fullLabel": "Penuh",
-      "approvedSnackbar": "{nickname} disetujui.",
-      "memberJoinedSingle": "{nickname} telah bergabung.",
-      "memberJoinedMultiple": "{names} telah bergabung.",
-      "fullError": "Grup sudah penuh.",
-      "unknownLocation": "Tidak ada lokasi",
-      "noBio": "Tidak ada bio",
-      "searchHint": "Cari posting...",
-      "createPostNavigate": "Menuju membuat posting.",
-      "genericError": "Kesalahan: {error}"
+        "created": "Postingan telah dibuat.",
+        "edited": "Postingan telah diperbarui."
+      }
+    },
+    "menu": {
+      "edit": "Sunting posting",
+      "delete": "Hapus posting"
+    },
+    "dialog": {
+      "deleteConfirm": "Apakah Anda yakin ingin menghapus postingan ini?",
+      "deleteAction": "Hapus",
+      "cancel": "Batal"
+    },
+    "error": {
+      "userNotFound": "Pengguna tidak ditemukan."
     }
   },
   "interests": {

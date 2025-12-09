@@ -103,7 +103,8 @@ class FriendPostCard extends StatelessWidget {
       context: context,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (ctx) => _ManageMembersSheet(post: post),
+      builder: (ctx) =>
+          _ManageMembersSheet(post: post, currentUser: currentUser),
     );
   }
 
@@ -149,21 +150,24 @@ class FriendPostCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('게시글 삭제'),
-        content: const Text('정말 이 게시글을 삭제하시겠습니까?'),
+        title: Text('friendPost.menu.delete'.tr()),
+        content: Text('friendPost.dialog.deleteConfirm'.tr()),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('취소')),
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('friendPost.dialog.cancel'.tr())),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
               await FriendPostRepository().deletePost(post.id);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("게시글이 삭제되었습니다.")));
+                  SnackBar(content: Text('friendPost.snackbar.deleted'.tr())),
+                );
               }
             },
-            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+            child: Text('friendPost.dialog.deleteAction'.tr(),
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -313,7 +317,7 @@ class FriendPostCard extends StatelessWidget {
                           child: OutlinedButton(
                             // [작업 9] 관리 메뉴 연결
                             onPressed: () => _showPostOptions(context),
-                            child: const Text("내 게시글 관리"),
+                            child: Text("friendPost.action.managePost".tr()),
                           ),
                         ),
                         if (post.isMultiChat &&
@@ -393,7 +397,8 @@ class FriendPostCard extends StatelessWidget {
 // [내부 위젯] 멤버 관리 시트 (작성자용)
 class _ManageMembersSheet extends StatelessWidget {
   final FriendPostModel post;
-  const _ManageMembersSheet({required this.post});
+  final UserModel currentUser;
+  const _ManageMembersSheet({ required this.post, required this.currentUser});
 
   @override
   Widget build(BuildContext context) {
@@ -442,11 +447,8 @@ class _ManageMembersSheet extends StatelessWidget {
                           MaterialPageRoute(
                               builder: (_) => FindFriendDetailScreen(
                                   user: user,
-                                  currentUserModel: UserModel(
-                                      uid: '',
-                                      nickname: '',
-                                      email: '',
-                                      createdAt: Timestamp.now()))),
+                                  // 부모에서 전달된 currentUser 사용
+                                  currentUserModel: currentUser)),
                         ),
                         child: CircleAvatar(
                           backgroundImage: (user.photoUrl != null)
@@ -508,7 +510,17 @@ class _ManageMembersSheet extends StatelessWidget {
                       ),
                       // 프로필 상세 보기 연결
                       onTap: () {
-                        // TODO: Navigator.push(FindFriendDetailScreen...)
+                        // [작업 15] 텍스트 영역 클릭 시에도 프로필 이동 적용
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FindFriendDetailScreen(
+                              user: user,
+                              // 부모에서 전달된 currentUser 사용
+                              currentUserModel: currentUser,
+                            ),
+                          ),
+                        );
                       },
                     );
                   },

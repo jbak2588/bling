@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart'; // 다국어 필수
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/find_friends/models/friend_post_model.dart';
 import 'package:bling_app/features/find_friends/data/friend_post_repository.dart';
@@ -54,7 +54,9 @@ class _CreateFriendPostScreenState extends State<CreateFriendPostScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_tags.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('최소 1개의 태그를 입력해주세요.')), // i18n 필요
+        SnackBar(
+            content:
+                Text('friendPost.create.error.tagRequired'.tr())), // [작업 12]
       );
       return;
     }
@@ -98,8 +100,9 @@ class _CreateFriendPostScreenState extends State<CreateFriendPostScreen> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  widget.post != null ? "게시글이 수정되었습니다." : "게시글이 등록되었습니다.")),
+              content: Text(widget.post != null
+                  ? "friendPost.create.snackbar.edited".tr()
+                  : "friendPost.create.snackbar.created".tr())), // [작업 12]
         );
       }
     } catch (e) {
@@ -118,7 +121,9 @@ class _CreateFriendPostScreenState extends State<CreateFriendPostScreen> {
 
     return Scaffold(
       appBar: GrabAppBarShell(
-        title: Text(isEdit ? "게시글 수정" : "동네 토크 쓰기"), // i18n 권장
+        title: Text(isEdit
+            ? "friendPost.create.title.edit".tr()
+            : "friendPost.create.title.create".tr()), // [작업 12]
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -133,8 +138,7 @@ class _CreateFriendPostScreenState extends State<CreateFriendPostScreen> {
                 maxLines: 5,
                 maxLength: 300,
                 decoration: InputDecoration(
-                  hintText:
-                      "무슨 이야기를 나누고 싶으신가요?\n예: 오늘 저녁 7시 센트럴파크 러닝하실 분?", // i18n 권장
+                  hintText: "friendPost.create.contentHint".tr(), // [작업 12]
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                   filled: true,
@@ -142,7 +146,8 @@ class _CreateFriendPostScreenState extends State<CreateFriendPostScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.trim().length < 5) {
-                    return "최소 5자 이상 입력해주세요.";
+                    return "friendPost.create.error.contentShort"
+                        .tr(); // [작업 12]
                   }
                   return null;
                 },
@@ -150,12 +155,13 @@ class _CreateFriendPostScreenState extends State<CreateFriendPostScreen> {
               const SizedBox(height: 20),
 
               // 2. 태그 입력
-              const Text("태그 (관심사)",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text("friendPost.create.tagLabel".tr(),
+                  style:
+                      const TextStyle(fontWeight: FontWeight.bold)), // [작업 12]
               const SizedBox(height: 8),
               CustomTagInputField(
                 initialTags: _tags,
-                hintText: "태그 입력 (엔터 또는 쉼표)",
+                hintText: "friendPost.create.tagHint".tr(), // [작업 12]
                 onTagsChanged: (tags) {
                   setState(() => _tags = tags);
                 },
@@ -174,9 +180,11 @@ class _CreateFriendPostScreenState extends State<CreateFriendPostScreen> {
                   children: [
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text("그룹 채팅 (여러 명과 대화)",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: const Text("활성화하면 최대 인원을 설정할 수 있습니다."),
+                      title: Text("friendPost.create.groupChatTitle".tr(),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold)), // [작업 12]
+                      subtitle: Text("friendPost.create.groupChatSubtitle"
+                          .tr()), // [작업 12]
                       value: _isMultiChat,
                       onChanged: (val) {
                         setState(() {
@@ -191,7 +199,8 @@ class _CreateFriendPostScreenState extends State<CreateFriendPostScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("최대 참여 인원"),
+                          Text("friendPost.create.maxParticipants"
+                              .tr()), // [작업 12]
                           Text("${_maxParticipants.toInt()}명",
                               style: TextStyle(
                                   color: Theme.of(context).primaryColor,
@@ -231,7 +240,11 @@ class _CreateFriendPostScreenState extends State<CreateFriendPostScreen> {
                           height: 24,
                           child: CircularProgressIndicator(
                               color: Colors.white, strokeWidth: 2))
-                      : Text(isEdit ? "수정 완료" : "등록하기",
+                      : Text(
+                          isEdit
+                              ? "friendPost.create.button.edit".tr()
+                              : "friendPost.create.button.create"
+                                  .tr(), // [작업 12]
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
