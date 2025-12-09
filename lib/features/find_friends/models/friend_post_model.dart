@@ -27,6 +27,8 @@ class FriendPostModel {
   final bool isMultiChat; // true: 그룹 채팅(여러 명), false: 1:1 채팅
   final int maxParticipants; // 최대 참여 인원 (멀티 채팅인 경우)
   final List<String> currentParticipantIds; // 현재 참여 확정된 인원
+  // [New] 승인 대기 중인 유저 ID 목록
+  final List<String> waitingParticipantIds;
 
   FriendPostModel({
     required this.id,
@@ -42,6 +44,7 @@ class FriendPostModel {
     this.isMultiChat = false,
     this.maxParticipants = 2,
     this.currentParticipantIds = const [],
+    this.waitingParticipantIds = const [],
   });
 
   factory FriendPostModel.fromFirestore(DocumentSnapshot doc) {
@@ -61,6 +64,9 @@ class FriendPostModel {
       maxParticipants: data['maxParticipants'] ?? 2,
       currentParticipantIds:
           List<String>.from(data['currentParticipantIds'] ?? []),
+      // [New] Firestore에서 로드
+      waitingParticipantIds:
+          List<String>.from(data['waitingParticipantIds'] ?? []),
     );
   }
 
@@ -78,6 +84,8 @@ class FriendPostModel {
       'isMultiChat': isMultiChat,
       'maxParticipants': maxParticipants,
       'currentParticipantIds': currentParticipantIds,
+      // [New] Firestore에 저장
+      'waitingParticipantIds': waitingParticipantIds,
     };
   }
 }

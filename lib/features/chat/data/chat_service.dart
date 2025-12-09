@@ -261,6 +261,58 @@ class ChatService {
     return chatId;
   }
 
+// [작업 5] 동네 토크(게시글) 전용 그룹 채팅방 생성/가져오기
+  Future<String> getOrCreatePostGroupChat({
+    required String postId,
+    required String postTitle,
+    required List<String> participants,
+  }) async {
+    // postId를 기반으로 채팅방 ID 생성 (post_groupID)
+    final String chatId = 'post_$postId';
+    final chatDocRef = _firestore.collection('chats').doc(chatId);
+    final chatDoc = await chatDocRef.get();
+
+    if (!chatDoc.exists) {
+      // 채팅방 신규 생성
+      final now = FieldValue.serverTimestamp();
+      final initialMessage =
+          'friendPost.groupChatStarted'.tr(); // "그룹 대화가 시작되었습니다."
+
+      final chatRoomData = {
+        'participants': participants,
+        'lastMessage': initialMessage,
+        'lastTimestamp': now,
+        'unreadCounts': {for (var uid in participants) uid: 0},
+        'contextType': 'friend_post', // 컨텍스트 명시
+        'isGroupChat': true, // 그룹 채팅
+        'roomTitle': postTitle, // 게시글 내용을 방 제목으로 사용 (짧게)
+        'postId': postId,
+      };
+
+      final batch = _firestore.batch();
+      batch.set(chatDocRef, chatRoomData);
+
+      final messageRef = chatDocRef.collection('messages').doc();
+      batch.set(messageRef, {
+        'senderId': 'system',
+        'text': initialMessage,
+        'timestamp': now,
+        'readBy': participants,
+        'type': 'system',
+      });
+
+      await batch.commit();
+    } else {
+      // 이미 존재하는 경우 참여자 목록 동기화 (새로 승인된 멤버 추가)
+      // participants 리스트를 최신화합니다.
+      await chatDocRef.update({
+        'participants': FieldValue.arrayUnion(participants),
+      });
+    }
+
+    return chatId;
+  }
+
   // V V V --- [추가] 채팅방 컨텍스트 정보(제목, 이미지 등) 업데이트 함수 (Self-healing) --- V V V
   Future<void> updateChatContextInfo(
       String chatId, Map<String, dynamic> data) async {
