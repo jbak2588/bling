@@ -48,6 +48,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/features/user_profile/screens/profile_setup_screen.dart';
 import 'package:bling_app/core/constants/app_links.dart';
 import 'package:bling_app/core/utils/address_formatter.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 // ChatService: 채팅방 생성/조회 일원화
 import 'package:bling_app/features/chat/data/chat_service.dart';
 // import 'package:bling_app/core/models/chat_room_model.dart';
@@ -77,6 +78,8 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
   late UserModel currentUser;
   bool _isStartingChat = false; // [v2.1] 스팸 방지 로딩 상태
   bool _isBookmarked = false; // [Task 18] 관심 이웃 상태
+  late final PageController _imagePageController;
+  int _currentImageIndex = 0;
 
   // [Task 16] 위치 정보 프라이버시 보호 헬퍼 (카드와 동일 로직 적용)
   String _getSafeLocationText(UserModel user) {
@@ -93,6 +96,96 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
     currentUser = widget.currentUserModel;
     // [Task 18] 초기 즐겨찾기 상태 확인
     _isBookmarked = currentUser.bookmarkedUserIds?.contains(user.uid) ?? false;
+    _imagePageController = PageController();
+  }
+
+  // [Added] 표시할 이미지 리스트 생성 (메인 + 추가 사진)
+  List<String> _getProfileImages() {
+    final List<String> images = [];
+
+    // 1. 메인 프로필 사진 (우선 표시)
+    if (user.photoUrl != null && user.photoUrl!.isNotEmpty) {
+      images.add(user.photoUrl!);
+    }
+
+    // 2. 친구 찾기용 추가 사진 (중복 제외)
+    if (user.findfriendProfileImages != null &&
+        user.findfriendProfileImages!.isNotEmpty) {
+      for (var url in user.findfriendProfileImages!) {
+        if (!images.contains(url)) {
+          images.add(url);
+        }
+      }
+    }
+    return images;
+  }
+
+  // 상품 상세 패턴과 동일하게, 상세 화면에서는 직접 PageView + 갤러리 진입을 처리합니다.
+  Widget _buildProfileImageHeader(List<String> imageUrls) {
+    if (imageUrls.isEmpty) {
+      return Container(
+        height: 350,
+        color: Colors.grey[300],
+        child: Icon(Icons.person, size: 150, color: Colors.grey[600]),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ImageGalleryScreen(
+              imageUrls: imageUrls,
+              initialIndex: _currentImageIndex,
+            ),
+          ),
+        );
+      },
+      child: SizedBox(
+        height: 350,
+        width: double.infinity,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            PageView.builder(
+              controller: _imagePageController,
+              itemCount: imageUrls.length,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentImageIndex = index;
+                });
+              },
+              itemBuilder: (context, index) => Image.network(
+                imageUrls[index],
+                fit: BoxFit.cover,
+              ),
+            ),
+            if (imageUrls.length > 1)
+              Positioned(
+                bottom: 12,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${_currentImageIndex + 1} / ${imageUrls.length}',
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _imagePageController.dispose();
+    super.dispose();
   }
 
   // [Task 18] 관심 이웃 토글 로직
@@ -140,28 +233,12 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
     bool isBlockedByMe = currentUser.blockedUsers?.contains(user.uid) ?? false;
     bool amIBlocked = user.blockedUsers?.contains(currentUser.uid) ?? false;
 
+    // [New] 이미지 리스트 준비
+    final imageUrls = _getProfileImages();
+
     final content = ListView(
       children: [
-        Hero(
-          tag: 'profile-image-${user.uid}',
-          child: Container(
-            height: 300,
-            decoration: BoxDecoration(
-              image: (user.photoUrl != null && user.photoUrl!.isNotEmpty)
-                  ? DecorationImage(
-                      image: NetworkImage(user.photoUrl!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-              color: (user.photoUrl == null || user.photoUrl!.isEmpty)
-                  ? Colors.grey[300]
-                  : null,
-            ),
-            child: (user.photoUrl == null || user.photoUrl!.isEmpty)
-                ? Icon(Icons.person, size: 150, color: Colors.grey[600])
-                : null,
-          ),
-        ),
+        _buildProfileImageHeader(imageUrls),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -318,26 +395,7 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
       ),
       body: ListView(
         children: [
-          Hero(
-            tag: 'profile-image-${user.uid}',
-            child: Container(
-              height: 300,
-              decoration: BoxDecoration(
-                image: (user.photoUrl != null && user.photoUrl!.isNotEmpty)
-                    ? DecorationImage(
-                        image: NetworkImage(user.photoUrl!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-                color: (user.photoUrl == null || user.photoUrl!.isEmpty)
-                    ? Colors.grey[300]
-                    : null,
-              ),
-              child: (user.photoUrl == null || user.photoUrl!.isEmpty)
-                  ? Icon(Icons.person, size: 150, color: Colors.grey[600])
-                  : null,
-            ),
-          ),
+          _buildProfileImageHeader(imageUrls),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(

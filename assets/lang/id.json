@@ -32,6 +32,7 @@
     "section": {
       "basic": "Info Dasar",
       "trust": "Kepercayaan & Keamanan (Wajib)",
+      "locationTrust": "Lokasi & Verifikasi",
       "social": "Cari Teman & Sosial"
     },
     "field": {
@@ -113,8 +114,7 @@
     "agreement": {
       "terms": "Setuju Syarat dan Ketentuan",
       "privacy": "Setuju Kebijakan Privasi",
-      "marketing": "Setuju menerima informasi pemasaran"
-    ,
+      "marketing": "Setuju menerima informasi pemasaran",
       "requiredNotice": "Silakan setuju Syarat dan Ketentuan serta Kebijakan Privasi.",
       "label": {
         "required": " (wajib)",
@@ -946,7 +946,7 @@
     "reset": "Reset",
     "apply": "Terapkan",
     "verified": "Terverifikasi",
-    "bookmark": "Bookmark",
+    "photos": "Foto",
     "chat": "Obrolan",
     "block": "Blokir",
     "viewMore": "Lihat lebih banyak",
@@ -2180,7 +2180,7 @@
       "findFriends": {
         "title": "Cari Teman",
         "desc": "Temukan tetangga dengan minat yang sama",
-        "guide": "1. Telusuri profil berdasarkan minat dan tingkat kepercayaan.\n2. Mulai chat instan (Batas: 5 chat baru/hari).\n3. Gunakan tombol 'Bintang' untuk menandai tetangga yang Anda suka."
+        "guide": "1. Jelajahi profil di [Jelajah] atau temukan topik di 'Obrolan Warga'.\n2. Tandai tetangga dengan 'Bintang(★)'. Tambahkan tetangga berbintang sebagai teman untuk mengobrol tanpa batas harian.\n3. Gabung ke 'Obrolan Warga' atau tulis postingan untuk memulai obrolan grup."
       },
       "clubs": {
         "title": "Komunitas",

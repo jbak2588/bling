@@ -31,93 +31,211 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../../core/models/user_model.dart';
-import 'package:bling_app/core/utils/address_formatter.dart';
+// address_formatter not used in this card after refactor
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 
 /// Card displaying basic information for a FindFriend profile.
 class FindFriendCard extends StatelessWidget {
   final UserModel user;
-  const FindFriendCard({super.key, required this.user});
+  final UserModel currentUser;
 
-  // [Task 16] 위치 정보 프라이버시 보호 헬퍼
-  // locationParts를 사용하여 "Kel. OO, Kec. OO" 형태로 변환
-  String _getSafeLocationText(UserModel user) {
-    final formatted = AddressFormatter.formatKelKabFromParts(
-        user.locationParts); // kel/kab only
-    if (formatted.isNotEmpty) return formatted;
-    return '';
+  const FindFriendCard({
+    super.key,
+    required this.user,
+    required this.currentUser,
+  });
+
+  // [Added] 관심사 키 -> 이모지 매핑 테이블
+  static const Map<String, String> _interestEmojiMap = {
+    'drawing': '🎨',
+    'sports': '🏃',
+    'movie': '🎬',
+    'study': '📖',
+    'pet': '🐾',
+    'cafe': '☕',
+    'coffee': '☕',
+    'instrument': '🎸',
+    'photography': '📷',
+    'writing': '✍️',
+    'crafting': '🧶',
+    'gardening': '🌿',
+    'soccer': '⚽',
+    'hiking': '🥾',
+    'camping': '⛺',
+    'running': '🏃',
+    'biking': '🚴',
+    'golf': '⛳',
+    'workout': '🏋️',
+    'foodie': '🍽️',
+    'cooking': '🍳',
+    'baking': '🥐',
+    'wine': '🍷',
+    'tea': '🍵',
+    'music': '🎵',
+    'concerts': '🎤',
+    'gaming': '🎮',
+    'reading': '📚',
+    'investing': '📈',
+    'language': '🗣️',
+    'coding': '💻',
+    'travel': '✈️',
+    'volunteering': '🤝',
+    'minimalism': '🧘',
+  };
+
+  // [Added] 관심사 리스트를 이모지 문자열로 변환하는 헬퍼
+  String _getInterestEmojis(List<String> interests) {
+    return interests
+        .map((key) => _interestEmojiMap[key])
+        .where((emoji) => emoji != null)
+        .join(' ');
+  }
+
+  // ProductCard 패턴처럼, 메인 + 추가 프로필 이미지를 합쳐 미리보기 리스트를 만듭니다.
+  List<String> _getProfileImages(UserModel user) {
+    final List<String> images = [];
+
+    if (user.photoUrl != null && user.photoUrl!.isNotEmpty) {
+      images.add(user.photoUrl!);
+    }
+
+    if (user.findfriendProfileImages != null &&
+        user.findfriendProfileImages!.isNotEmpty) {
+      for (final url in user.findfriendProfileImages!) {
+        if (!images.contains(url)) {
+          images.add(url);
+        }
+      }
+    }
+
+    // 리스트/피드 부하를 줄이기 위해 최대 4장까지만 사용
+    return images.take(4).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Hero(
-              tag: 'profile-image-${user.uid}',
-              child: CircleAvatar(
-                radius: 30,
-                backgroundImage:
-                    user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
-                child: user.photoUrl == null ? const Icon(Icons.person) : null,
-              ),
+    final profileImages = _getProfileImages(user);
+
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => FindFriendDetailScreen(
+              user: user,
+              currentUserModel: currentUser,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // [v2.1] 닉네임과 신뢰 뱃지를 Row로 묶음
-                  Row(
-                    children: [
-                      Flexible(
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              if (profileImages.isNotEmpty)
+                SizedBox(
+                  width: 90,
+                  height: 90,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: ImageCarouselCard(
+                      imageUrls: profileImages,
+                      storageId: 'findfriend_${user.uid}',
+                      width: 90,
+                      height: 90,
+                    ),
+                  ),
+                )
+              else
+                CircleAvatar(
+                  radius: 30,
+                  backgroundImage: user.photoUrl != null
+                      ? NetworkImage(user.photoUrl!)
+                      : null,
+                  child:
+                      user.photoUrl == null ? const Icon(Icons.person) : null,
+                ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // [v2.1] 닉네임과 신뢰 뱃지를 Row로 묶음
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            user.nickname,
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        TrustLevelBadge(
+                          trustLevelLabel: user.trustLevelLabel,
+                          showText: true, // [작업 27] 뱃지 텍스트 표시
+                        ),
+                      ],
+                    ),
+
+                    // [B. Bio 추가] 자기소개 (1줄 제한)
+                    if (user.bio != null && user.bio!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
                         child: Text(
-                          user.nickname,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          overflow: TextOverflow.ellipsis,
+                          user.bio!,
                           maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[800],
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      TrustLevelBadge(
-                        trustLevelLabel: user.trustLevelLabel,
-                        showText: true, // [작업 27] 뱃지 텍스트 표시
-                      ),
-                    ],
-                  ),
-                  // [v2.1] 'age' 대신 'interests' 표시
-                  if (user.interests != null && user.interests!.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: Wrap(
-                        spacing: 4.0,
-                        runSpacing: 4.0,
-                        children: user.interests!
-                            .take(3) // 최대 3개만 표시
-                            .map((interest) => Chip(
-                                  label: Text(interest,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelSmall),
-                                  padding: EdgeInsets.zero,
-                                  visualDensity: VisualDensity.compact,
-                                ))
-                            .toList(),
-                      ),
+
+                    const SizedBox(height: 6),
+
+                    // [C. 주소 + 관심사 이모지]
+                    Row(
+                      children: [
+                        // 주소: Kel. 단위만 표시
+                        if (user.locationParts != null &&
+                            user.locationParts!['kel'] != null)
+                          Text(
+                            "Kel. ${user.locationParts!['kel']}",
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500),
+                          ),
+
+                        if ((user.locationParts?['kel'] != null) &&
+                            (user.interests?.isNotEmpty ?? false))
+                          const SizedBox(width: 8),
+
+                        // 관심사 이모지
+                        if (user.interests != null &&
+                            user.interests!.isNotEmpty)
+                          Expanded(
+                            child: Text(
+                              _getInterestEmojis(user.interests!),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                      ],
                     ),
-                  // [Task 16] 안전한 위치 표기 적용
-                  if (user.locationName != null || user.locationParts != null)
-                    Text(_getSafeLocationText(user),
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.grey)),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

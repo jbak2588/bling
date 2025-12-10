@@ -96,7 +96,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         if (mounted) {
           // 회원가입 성공 -> AuthGate가 감지하여 화면 전환 (또는 이메일 인증 화면으로 이동)
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('auth.signup.success'.tr())));
+              SnackBar(content: Text('auth.verification.success'.tr())));
           Navigator.pop(context);
         }
       }
@@ -175,7 +175,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('auth.signup.title'.tr())),
+      appBar: AppBar(title: Text('signup.title'.tr())),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -188,7 +188,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextFormField(
                   controller: _nicknameController,
                   decoration: InputDecoration(
-                    labelText: 'auth.signup.fields.nickname'.tr(),
+                    labelText: 'signup.nicknameHint'.tr(),
                     prefixIcon: const Icon(Icons.person_outline),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -199,7 +199,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'auth.signup.fields.email'.tr(),
+                    labelText: 'signup.emailHint'.tr(),
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -210,7 +210,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   controller: _passwordController,
                   obscureText: !_passwordVisible,
                   decoration: InputDecoration(
-                      labelText: 'auth.signup.fields.password'.tr(),
+                      labelText: 'signup.passwordHint'.tr(),
                       prefixIcon: const Icon(Icons.lock_outline),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -226,7 +226,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   controller: _confirmPasswordController,
                   obscureText: !_confirmPasswordVisible,
                   decoration: InputDecoration(
-                      labelText: 'auth.signup.fields.confirmPassword'.tr(),
+                      labelText: 'signup.passwordConfirmHint'.tr(),
                       prefixIcon: const Icon(Icons.lock_outline),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12)),

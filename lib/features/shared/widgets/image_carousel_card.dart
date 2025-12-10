@@ -61,6 +61,7 @@ library;
 // lib/features/shared/widgets/image_carousel_card.dart
 
 import 'package:flutter/material.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 
 class ImageCarouselCard extends StatefulWidget {
   final List<String> imageUrls;
@@ -107,9 +108,12 @@ class _ImageCarouselCardState extends State<ImageCarouselCard> {
         height: widget.height,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: _buildZoomableImage(
-            imageUrls.isNotEmpty ? imageUrls.first : 'https://via.placeholder.com/100',
-          ),
+          child: _buildImageItem(
+              imageUrls.isNotEmpty
+                  ? imageUrls.first
+                  : 'https://via.placeholder.com/100',
+              0,
+              context),
         ),
       );
     }
@@ -130,7 +134,7 @@ class _ImageCarouselCardState extends State<ImageCarouselCard> {
             itemBuilder: (context, index) {
               return ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: _buildZoomableImage(imageUrls[index]),
+                child: _buildImageItem(imageUrls[index], index, context),
               );
             },
           ),
@@ -154,19 +158,35 @@ class _ImageCarouselCardState extends State<ImageCarouselCard> {
     );
   }
 
-  // [v2.2] 핀치 줌 지원 위젯 분리
-  Widget _buildZoomableImage(String url) {
-    return InteractiveViewer(
-      minScale: 1.0,
-      maxScale: 4.0, // 최대 4배 줌
-      child: Image.network(
-        url,
-        width: widget.width,
-        height: widget.height,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stack) =>
-            Container(color: Colors.grey.shade100, child: const Icon(Icons.broken_image)),
-      ),
+  // [v2.2] InteractiveViewer 기반 핀치-줌은 PageView와 제스처 충돌을 일으켜
+  // 목록 뷰에서 불안정한 동작을 유발합니다. 따라서 캐러셀에서는 간단한 이미지
+  // 뷰(탭 시 전체화면 갤러리로 이동)를 제공하고, 확대/상세보기는
+  // `ImageGalleryScreen`에 위임합니다.
+  Widget _buildImageItem(String url, int index, BuildContext context) {
+    final imageWidget = Image.network(
+      url,
+      width: widget.width,
+      height: widget.height,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stack) => Container(
+          color: Colors.grey.shade100, child: const Icon(Icons.broken_image)),
+    );
+
+    // Avoid nesting Hero widgets: if an ancestor Hero exists, do not wrap.
+    final wrappedImage = context.findAncestorWidgetOfExactType<Hero>() == null
+        ? Hero(tag: url, child: imageWidget)
+        : imageWidget;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => ImageGalleryScreen(
+            imageUrls: widget.imageUrls,
+            initialIndex: index,
+          ),
+        ));
+      },
+      child: wrappedImage,
     );
   }
 }

@@ -24,7 +24,6 @@ import 'package:bling_app/features/find_friends/data/friend_post_repository.dart
 import 'package:bling_app/features/find_friends/models/friend_post_model.dart';
 import 'package:bling_app/features/find_friends/widgets/findfriend_card.dart';
 import 'package:bling_app/features/find_friends/widgets/friend_post_card.dart';
-import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 // import 'package:bling_app/features/location/screens/location_filter_screen.dart'; // [수정] 자체 필터 버튼 제거로 인해 미사용
 import 'package:bling_app/features/my_bling/widgets/user_friend_list.dart';
 // [작업 9] 작성 화면 import
@@ -323,20 +322,9 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
           itemCount: users.length,
           itemBuilder: (context, index) {
             final user = users[index];
-            return InkWell(
-              onTap: () {
-                // [Embedded Logic] 상세 화면 이동은 Navigator Push 사용
-                // (MainNavigationScreen.dart에서 embedded 처리 로직은 Thumbnail 클릭 시 작동함)
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => FindFriendDetailScreen(
-                      user: user,
-                      currentUserModel: currentUser,
-                    ),
-                  ),
-                );
-              },
-              child: FindFriendCard(user: user),
+            return FindFriendCard(
+              user: user,
+              currentUser: currentUser,
             );
           },
         );

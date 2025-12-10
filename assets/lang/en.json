@@ -32,6 +32,7 @@
     "section": {
       "basic": "Basic Info",
       "trust": "Trust & Safety (Required)",
+      "locationTrust": "Location & Verification",
       "social": "Find Friends & Social"
     },
     "field": {
@@ -42,7 +43,8 @@
       "bioHint": "Introduce yourself (hobbies, etc.)",
       "interests": "Interests (Min 1)",
       "verify": "Verify",
-      "verified": "Verified"
+      "verified": "Verified",
+      "photos": "Photos"
     },
     "desc": {
       "trust": "Phone verification is required to use Marketplace, Auction, and Jobs.",
@@ -113,8 +115,7 @@
     "agreement": {
       "terms": "Agree to Terms of Service",
       "privacy": "Agree to Privacy Policy",
-      "marketing": "Agree to receive marketing communications"
-    ,
+      "marketing": "Agree to receive marketing communications",
       "requiredNotice": "Please agree to the Terms of Service and Privacy Policy.",
       "label": {
         "required": " (required)",
@@ -2180,7 +2181,7 @@
       "findFriends": {
         "title": "Find Friends",
         "desc": "Connect with nearby people who share your interests",
-        "guide": "1. Browse profiles based on interests and trust level.\n2. Start a chat instantly (Limit: 5 new chats/day).\n3. Use the 'Star' button to bookmark neighbors you like."
+        "guide": "1. Browse profiles in [Explore] or find topics in 'Dongne Talk'.\n2. Bookmark neighbors with 'Star(★)'. Add starred neighbors as friends to chat without daily limits.\n3. Join a 'Dongne Talk' or write a post to start a group chat."
       },
       "clubs": {
         "title": "Clubs",

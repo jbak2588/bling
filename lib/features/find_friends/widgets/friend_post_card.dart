@@ -15,6 +15,8 @@ import 'package:bling_app/features/find_friends/screens/create_friend_post_scree
 import 'package:bling_app/core/utils/address_formatter.dart';
 // [작업 10] 상세화면
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
+// [이미지] 친구 찾기 카드 내 프로필 미리보기 캐러셀
+import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 
 class FriendPostCard extends StatelessWidget {
   final FriendPostModel post;
@@ -277,6 +279,18 @@ class FriendPostCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
+            // 프로필 이미지 미리보기 (작성자 사진이 있는 경우에만)
+            if (post.authorPhotoUrl != null &&
+                post.authorPhotoUrl!.isNotEmpty) ...[
+              ImageCarouselCard(
+                imageUrls: [post.authorPhotoUrl!],
+                storageId: 'friend_post_${post.id}_author',
+                height: 160,
+                width: double.infinity,
+              ),
+              const SizedBox(height: 12),
+            ],
+
             // 본문
             Text(
               post.content,
