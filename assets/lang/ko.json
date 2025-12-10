@@ -114,7 +114,13 @@
       "terms": "이용약관 동의",
       "privacy": "개인정보 처리방침 동의",
       "marketing": "마케팅 정보 수신 동의"
-    },
+    ,
+      "requiredNotice": "이용약관 및 개인정보 처리방침에 동의해주세요.",
+      "label": {
+        "required": " (필수)",
+        "optional": " (선택)"
+      }
+    }
   },
   "main": {
     "appBar": {

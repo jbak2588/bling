@@ -53,8 +53,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     // 2. 약관 동의 검증
     if (!_agreedToTerms || !_agreedToPrivacy) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('이용약관 및 개인정보 처리방침에 동의해주세요.'))); // TODO: i18n
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('signup.agreement.requiredNotice'.tr())));
       return;
     }
 
@@ -147,7 +147,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 children: [
                   TextSpan(text: title),
                   TextSpan(
-                    text: isRequired ? ' (필수)' : ' (선택)',
+                    text: isRequired
+                        ? 'signup.agreement.label.required'.tr()
+                        : 'signup.agreement.label.optional'.tr(),
                     style: TextStyle(
                       color: isRequired
                           ? Theme.of(context).primaryColor

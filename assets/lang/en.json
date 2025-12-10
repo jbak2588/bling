@@ -114,7 +114,13 @@
       "terms": "Agree to Terms of Service",
       "privacy": "Agree to Privacy Policy",
       "marketing": "Agree to receive marketing communications"
-    },
+    ,
+      "requiredNotice": "Please agree to the Terms of Service and Privacy Policy.",
+      "label": {
+        "required": " (required)",
+        "optional": " (optional)"
+      }
+    }
   },
   "main": {
     "appBar": {

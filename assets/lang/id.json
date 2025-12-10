@@ -114,7 +114,13 @@
       "terms": "Setuju Syarat dan Ketentuan",
       "privacy": "Setuju Kebijakan Privasi",
       "marketing": "Setuju menerima informasi pemasaran"
-    },
+    ,
+      "requiredNotice": "Silakan setuju Syarat dan Ketentuan serta Kebijakan Privasi.",
+      "label": {
+        "required": " (wajib)",
+        "optional": " (opsional)"
+      }
+    }
   },
   "main": {
     "appBar": {
