@@ -51,6 +51,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   final List<String> _selectedInterests = [];
 
+  // [New] 마케팅 동의 상태 변수
+  bool _marketingAgreed = false;
   // [I18n] 다국어 키로 변경 (값은 키, 화면 표시는 tr())
   final List<String> _availableInterestKeys = [
     'sports',
@@ -107,6 +109,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       _allowFriendRequests =
           user.privacySettings?['allowFriendRequests'] ?? true;
 
+      // [New] 마케팅 동의 로드
+      _marketingAgreed = user.marketingAgreed ?? false;
       if (user.interests != null) {
         _selectedInterests.addAll(user.interests!);
       }
@@ -236,6 +240,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           'allowFriendRequests': _allowFriendRequests,
         },
 
+        // [New] 마케팅 동의 정보 업데이트
+        'marketingAgreed': _marketingAgreed,
+
         'profileCompleted': true,
         'updatedAt': FieldValue.serverTimestamp(),
 
@@ -315,6 +322,16 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+
+              // [New] 2.5 알림 및 마케팅 설정
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text('profile.marketing.title'.tr()),
+                subtitle: Text('profile.marketing.subtitle'.tr()),
+                value: _marketingAgreed,
+                activeThumbColor: Theme.of(context).primaryColor,
+                onChanged: (val) => setState(() => _marketingAgreed = val),
+              ),
               TextFormField(
                 controller: _nicknameController,
                 decoration: InputDecoration(
