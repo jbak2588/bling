@@ -2119,10 +2119,10 @@ exports.confirmAccountDeletion = onCall(CALL_OPTS, async (request) => {
     const db = getFirestore();
 
     // 2. Firebase Storage 파일 삭제
-    // (사용자별 폴더 패턴을 알고 있어야 함: user_profiles, job_images, product_images 등)
+    // (사용자별 폴더 패턴을 알고 있어야 함: profile_images, job_images, product_images 등)
     const bucket = admin.storage().bucket();
     const foldersToDelete = [
-      `user_profiles/${targetUid}/`,
+      `profile_images/${targetUid}/`,
       `job_images/${targetUid}/`,
       `product_images/${targetUid}/`,
       // 필요 시 다른 경로 추가
