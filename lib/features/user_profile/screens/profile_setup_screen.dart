@@ -40,6 +40,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   File? _selectedImageFile;
   String? _currentProfileImageUrl;
 
+  // [Fix] 불러온 사용자 데이터를 저장할 변수 추가 (UI 표시 및 저장 시 사용)
+  UserModel? _cachedUserModel;
+
   // 소셜용 추가 사진 (최대 10장)
   List<String> _currentSocialImageUrls = [];
   final List<File> _newSocialImageFiles = [];
@@ -73,7 +76,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     // 데이터 로드: 전달받은 모델이 있으면 사용, 없으면(수정 모드인데 null인 경우) fetch 시도
     if (widget.userModel != null) {
       _loadUserData(widget.userModel!);
-    } else if (widget.isEditMode) {
+    } else {
+      // [Fix] 수정 모드가 아니더라도(초기 가입), 이전 단계(위치 설정) 데이터를 불러오기 위해 fetch 실행
       _fetchUserData();
     }
   }
@@ -91,6 +95,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   void _loadUserData(UserModel user) {
     setState(() {
+      _cachedUserModel = user; // [Fix] 최신 데이터 캐싱
       _nicknameController.text = user.nickname;
       _bioController.text = user.bio ?? '';
       _phoneController.text = user.phoneNumber ?? '';
@@ -210,8 +215,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       }
 
       // 위치 정보 업데이트 (기존 정보 유지하며 RT/RW 수정)
-      Map<String, dynamic> locationParts =
-          widget.userModel?.locationParts ?? {};
+      // [Fix] 위젯 파라미터가 없으면 캐시된(fetch된) 모델의 위치 정보를 사용해야 함
+      Map<String, dynamic> locationParts = _cachedUserModel?.locationParts ??
+          widget.userModel?.locationParts ??
+          {};
       if (_rtController.text.isNotEmpty) {
         locationParts['rt'] = _rtController.text.trim();
       }
@@ -321,17 +328,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
 
-              // [New] 2.5 알림 및 마케팅 설정
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text('profile.marketing.title'.tr()),
-                subtitle: Text('profile.marketing.subtitle'.tr()),
-                value: _marketingAgreed,
-                activeThumbColor: Theme.of(context).primaryColor,
-                onChanged: (val) => setState(() => _marketingAgreed = val),
-              ),
               TextFormField(
                 controller: _nicknameController,
                 decoration: InputDecoration(
@@ -355,7 +352,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   const Icon(Icons.location_on, size: 16, color: Colors.grey),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(widget.userModel?.locationName ??
+                    // [Fix] fetch된 데이터(_cachedUserModel)가 있으면 그것을 우선 표시
+                    child: Text(_cachedUserModel?.locationName ??
+                        widget.userModel?.locationName ??
                         "profileEdit.locationNotSet".tr()),
                   ),
                   TextButton(
@@ -565,12 +564,25 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               SwitchListTile(
                 title: Text('profileEdit.privacy.showLocation'.tr()),
                 value: _showLocationOnMap,
+                activeThumbColor: Theme.of(context).primaryColor,
                 onChanged: (val) => setState(() => _showLocationOnMap = val),
               ),
               SwitchListTile(
                 title: Text('profileEdit.privacy.allowRequests'.tr()),
                 value: _allowFriendRequests,
+                activeThumbColor: Theme.of(context).primaryColor,
                 onChanged: (val) => setState(() => _allowFriendRequests = val),
+              ),
+              // const SizedBox(height: 24),
+
+              // [New] 2.5 알림 및 마케팅 설정
+              SwitchListTile(
+                // contentPadding: EdgeInsets.zero,
+                title: Text('profile.marketing.title'.tr()),
+                subtitle: Text('profile.marketing.subtitle'.tr()),
+                value: _marketingAgreed,
+                activeThumbColor: Theme.of(context).primaryColor,
+                onChanged: (val) => setState(() => _marketingAgreed = val),
               ),
 
               const SizedBox(height: 24),
