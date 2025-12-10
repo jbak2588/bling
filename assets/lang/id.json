@@ -65,6 +65,10 @@
       "aboutMe": "Tentang Saya",
       "interests": "Minat",
       "noBio": "Belum ada pengenalan diri."
+    },
+    "marketing": {
+      "title": "Persetujuan informasi pemasaran",
+      "subtitle": "Terima kabar tentang acara dan promo diskon."
     }
   },
   "notifications": {

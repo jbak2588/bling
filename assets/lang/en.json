@@ -65,6 +65,10 @@
       "aboutMe": "About Me",
       "interests": "Interests",
       "noBio": "No introduction yet."
+    },
+    "marketing": {
+      "title": "Marketing communications",
+      "subtitle": "Receive news about events and promotions."
     }
   },
   "notifications": {

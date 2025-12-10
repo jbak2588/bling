@@ -65,6 +65,10 @@
       "aboutMe": "자기소개",
       "interests": "관심사",
       "noBio": "자기소개가 없습니다."
+    },
+    "marketing": {
+      "title": "마케팅 정보 수신 동의",
+      "subtitle": "이벤트 및 할인 혜택 소식을 받습니다."
     }
   },
   "notifications": {
