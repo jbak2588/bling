@@ -1351,7 +1351,11 @@
     "category_lifestyle": "🌴 라이프스타일",
     "items": {
       "drawing": "그림 그리기",
-      "instrument": "악기 연주",
+      "sports": "운동",
+      "movie": "영화",
+      "study": "공부",
+      "pet": "반려동물",
+      "cafe": "카페",
       "photography": "사진 찍기",
       "writing": "글쓰기",
       "crafting": "공예",

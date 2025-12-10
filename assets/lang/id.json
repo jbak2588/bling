@@ -1351,6 +1351,11 @@
     "category_lifestyle": "🌴 Gaya Hidup",
     "items": {
       "drawing": "Menggambar",
+      "sports": "Olahraga",
+      "movie": "Film",
+      "study": "Belajar",
+      "pet": "Hewan Peliharaan",
+      "cafe": "Kafe",
       "instrument": "Bermain alat musik",
       "photography": "Fotografi",
       "writing": "Menulis",

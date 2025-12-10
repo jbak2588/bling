@@ -58,7 +58,7 @@
 // ============================================================================
 library;
 
-
+// lib/features/shared/widgets/image_carousel_card.dart
 
 import 'package:flutter/material.dart';
 
@@ -66,13 +66,12 @@ class ImageCarouselCard extends StatefulWidget {
   final List<String> imageUrls;
   final double? width;
   final double height;
-   // ✅ 1. 카드마다 고유 상태를 가지도록 식별자 파라미터를 추가합니다. (예: post.id)
   final String storageId;
 
   const ImageCarouselCard({
     super.key,
     required this.imageUrls,
-      required this.storageId, // <-- 추가
+    required this.storageId,
     this.width = double.infinity,
     this.height = 180.0,
   });
@@ -88,7 +87,6 @@ class _ImageCarouselCardState extends State<ImageCarouselCard> {
   @override
   void initState() {
     super.initState();
-    // ✅ 2. keepPage: false를 추가하여, 페이지 위치를 기억하는 기능을 비활성화합니다.
     _pageController = PageController(initialPage: 0, keepPage: false);
     _currentPage = 0;
   }
@@ -104,18 +102,13 @@ class _ImageCarouselCardState extends State<ImageCarouselCard> {
     final imageUrls = widget.imageUrls;
 
     if (imageUrls.length <= 1) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          imageUrls.isNotEmpty ? imageUrls.first : 'https://via.placeholder.com/100',
-          width: widget.width,
-          height: widget.height,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stack) => Container(
-            width: widget.width,
-            height: widget.height,
-            color: Colors.grey.shade100,
-            child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey.shade700),
+      return SizedBox(
+        width: widget.width,
+        height: widget.height,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: _buildZoomableImage(
+            imageUrls.isNotEmpty ? imageUrls.first : 'https://via.placeholder.com/100',
           ),
         ),
       );
@@ -137,14 +130,7 @@ class _ImageCarouselCardState extends State<ImageCarouselCard> {
             itemBuilder: (context, index) {
               return ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrls[index],
-                  width: widget.width,
-                  height: widget.height,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stack) =>
-                      Container(color: Colors.grey.shade100),
-                ),
+                child: _buildZoomableImage(imageUrls[index]),
               );
             },
           ),
@@ -164,6 +150,22 @@ class _ImageCarouselCardState extends State<ImageCarouselCard> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // [v2.2] 핀치 줌 지원 위젯 분리
+  Widget _buildZoomableImage(String url) {
+    return InteractiveViewer(
+      minScale: 1.0,
+      maxScale: 4.0, // 최대 4배 줌
+      child: Image.network(
+        url,
+        width: widget.width,
+        height: widget.height,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stack) =>
+            Container(color: Colors.grey.shade100, child: const Icon(Icons.broken_image)),
       ),
     );
   }

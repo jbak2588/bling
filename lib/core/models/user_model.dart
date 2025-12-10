@@ -38,102 +38,84 @@
 library;
 // 아래부터 실제 코드
 
+// lib/core/models/user_model.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-// ✅ [푸시 스키마] 1. 별도 파일로 분리된 PushPrefsModel을 import 합니다.
 import 'push_prefs_model.dart';
 
 class UserModel {
-  final String uid; // 유저 고유 ID (Firestore 문서 ID)
-  final String nickname; // 유저 닉네임
-  final String email; // 이메일 주소
-  final String? photoUrl; // 대표 프로필 사진 URL
-  final String? bio; // 자기소개
-  final String trustLevel; // 사용자 신뢰등급 (unverified, verified 등)
-  final String? locationName; // 간략 주소명 (예: "Tangerang, Banten")
-  final Map<String, dynamic>? locationParts; // 주소 분리 (prov, kab, kec, kel)
+  final String uid;
+  final String nickname;
+  final String email;
+  final String? photoUrl; // 기본 아바타 (채팅/댓글용)
+  final String? bio;
+  final String trustLevel;
+  final String? locationName;
+  final Map<String, dynamic>? locationParts;
+  final GeoPoint? geoPoint;
+  final List<String>? interests;
 
-//  final String? rt;
-//   final String? rw;
-
-  final GeoPoint? geoPoint; // 좌표 (지도 표시 및 거리 계산용)
-  final List<String>? interests; // 관심사 리스트 (hobby 등)
-
-  final Map<String, dynamic>? privacySettings; // 공개 범위 설정
-  final List<String>? postIds; // 작성한 피드 ID 목록
-  final List<String>? productIds; // 등록한 마켓 상품 ID 목록
+  final Map<String, dynamic>? privacySettings;
+  final List<String>? postIds;
+  final List<String>? productIds;
   final List<String>? jobIds;
-  final List<String>? bookmarkedPostIds; // 북마크한 피드 ID 목록
-  final List<String>? bookmarkedProductIds; // 북마크한 마켓 상품 ID 목록
-
-  // [Task 21] 누락된 북마크 필드 추가
-  final List<String>? bookmarkedRoomIds; // [신규] 북마크한 부동산 ID 목록
-  final List<String>? bookmarkedUserIds; // [신규] 관심 이웃(찜한 유저) ID 목록
-
-  // V V V --- [추가] 동호회 게시글 좋아요 목록 --- V V V
+  final List<String>? bookmarkedPostIds;
+  final List<String>? bookmarkedProductIds;
+  final List<String>? bookmarkedRoomIds;
+  final List<String>? bookmarkedUserIds;
   final List<String>? bookmarkedClubPostIds;
   final List<String>? likedPomIds;
-  // ^ ^ ^ --- 여기까지 추가 --- ^ ^ ^
 
-  // --- Trust System Fields ---
-  final int trustScore; // 신뢰 점수 (0-500, 기본 0)
-  final String? phoneNumber; // 전화번호 (인증 시 높은 신뢰 점수 획득)
+  final int trustScore;
+
+  // [PhoneAuth] 추후 실제 문자 인증 연동 시, 이 필드는 인증 서버의 결과로만 업데이트되어야 합니다.
+  // 마켓플레이스 판매, 옥션 입찰/생성, 프리랜서 등록 시 이 필드가 null이 아닌지 확인해야 합니다.
+  final String? phoneNumber;
+
   final int feedThanksReceived;
   final int marketThanksReceived;
   final int thanksReceived;
   final int reportCount;
 
-  // ✅ [푸시 스키마] 2. 기획안 3) 푸시 알림 구독 설정 필드 추가
   final PushPrefsModel? pushPrefs;
-
-  // [V3 NOTIFICATION] Task 79/82: 알림 수신을 위한 FCM 기기 토큰 목록
   final List<String>? fcmTokens;
 
-  final bool isBanned; // 차단 여부 (true 시 계정 제한)
-  final List<String>? blockedUsers; // 차단 유저 목록 (uid 리스트)
-  final bool profileCompleted; // 기본 프로필 완성 여부
-  // [v2.2] 약관 동의 필드 추가 (필수/선택)
-  final bool? termsAgreed; // 이용약관 (필수)
-  final bool? privacyAgreed; // 개인정보 처리방침 (필수)
-  final bool? marketingAgreed; // 마케팅 수신 동의 (선택)
-  final Timestamp createdAt; // 가입 시각 (Firestore Timestamp)
+  final bool isBanned;
+  final List<String>? blockedUsers;
+  final bool profileCompleted;
+  final bool? termsAgreed;
+  final bool? privacyAgreed;
+  final bool? marketingAgreed;
+  final Timestamp createdAt;
 
-  // ✅ [작업 14] 계정 탈퇴 요청 플래그
   final bool isDeletionRequested;
   final Timestamp? deletionRequestedAt;
 
-  // [친구찾기/데이팅]
-  // [관리자/운영]
-  final bool isAdmin; // [추가]
-  // [추가] 검색용 역색인 (닉네임 + 관심사)
+  final bool isAdmin;
   final List<String> searchIndex;
-  // [v2.1] 데이팅 관련 필드 삭제
-  // final bool isDatingProfile; // 친구찾기 기능 활성화 여부 (ON/OFF)
-  // final int? age; // 실제 나이
-  // final String? ageRange; // 허용 나이대 범위
-  // final String? gender; // 성별
-  // final List<String>? findfriendProfileImages; // 친구찾기용 추가 이미지
-  final bool? isVisibleInList; // 내 프로필 노출 여부
-  final List<String>? likesGiven; // 내가 좋아요 누른 유저 ID
-  final List<String>? likesReceived; // 나를 좋아요한 유저 ID
-  final List<Map<String, dynamic>>? friendRequests; // 친구 요청 상태
-  final List<String>? friends; // 수락된 친구 ID
-  final int likeCount; // 받은 좋아요 수
-  final List<String>? rejectedUsers;
-  final List<String>? clubs; // [추가] 가입한 동호회 목록
-  final bool? neighborhoodVerified; // 동네 인증 여부
-  final Timestamp? lastActiveAt; // 최근 활동 타임스탬프
 
-  // [작업 1] 친구 찾기 노출 가능 여부 검증 로직
-  // 1. 자기소개(bio)가 있어야 함 (최소 5자 이상 권장)
-  // 2. 관심사(interests)가 최소 1개 이상 있어야 함
-  // 3. 프로필 사진(photoUrl)이 있어야 함
-  // [작업 수행 2] 추가: 프로필 완성도 검증 로직
-  // 이 속성이 true인 유저만 '친구 찾기' 리스트에 노출됩니다.
+  // [v2.2 개선] 친구 찾기 전용 프로필 이미지 리스트 (최대 10장)
+  // 기본 photoUrl과 별도로, 매칭 화면에서 슬라이더로 보여질 고화질/다양한 사진들입니다.
+  final List<String>? findfriendProfileImages;
+
+  final bool? isVisibleInList;
+  final List<String>? likesGiven;
+  final List<String>? likesReceived;
+  final List<Map<String, dynamic>>? friendRequests;
+  final List<String>? friends;
+  final int likeCount;
+  final List<String>? rejectedUsers;
+  final List<String>? clubs;
+  final bool? neighborhoodVerified;
+  final Timestamp? lastActiveAt;
+
   bool get isProfileReadyForMatching {
-    if (isVisibleInList == false) return false; // 노출 설정 꺼둠
-    if (photoUrl == null || photoUrl!.isEmpty) return false; // 사진 없음
-    if (bio == null || bio!.trim().length < 2) return false; // 자기소개 너무 짧음
-    if (interests == null || interests!.isEmpty) return false; // 관심사 없음
+    if (isVisibleInList == false) return false;
+    if (photoUrl == null || photoUrl!.isEmpty) return false;
+    // [v2.2] 친구 찾기 이미지가 1장 이상 등록되어야 하는지 정책 결정 필요.
+    // 현재는 기본 photoUrl만 있어도 통과시키되, findfriendProfileImages가 있으면 우선 노출 권장.
+    if (bio == null || bio!.trim().length < 2) return false;
+    if (interests == null || interests!.isEmpty) return false;
     return true;
   }
 
@@ -154,21 +136,18 @@ class UserModel {
     this.jobIds,
     this.bookmarkedPostIds,
     this.bookmarkedProductIds,
-    this.bookmarkedRoomIds, // [Task 21]
-    this.bookmarkedUserIds, // [Task 21]
-    this.bookmarkedClubPostIds, // [추가]
-    // this.rt,
-    // this.rw,
-    this.likedPomIds, // [추가]
+    this.bookmarkedRoomIds,
+    this.bookmarkedUserIds,
+    this.bookmarkedClubPostIds,
+    this.likedPomIds,
     this.trustScore = 0,
     this.phoneNumber,
     this.feedThanksReceived = 0,
     this.marketThanksReceived = 0,
     this.thanksReceived = 0,
     this.reportCount = 0,
-    this.pushPrefs, // ✅ [푸시 스키마] 3. 생성자에 추가
-    this.fcmTokens, // [V3 NOTIFICATION]
-
+    this.pushPrefs,
+    this.fcmTokens,
     this.isAdmin = false,
     this.isBanned = false,
     this.blockedUsers,
@@ -186,16 +165,13 @@ class UserModel {
     this.friends,
     this.likeCount = 0,
     this.rejectedUsers,
-    this.clubs, // [추가]
+    this.clubs,
     this.searchIndex = const [],
-    // ✅ [작업 14] 생성자 추가
     this.isDeletionRequested = false,
     this.deletionRequestedAt,
+    this.findfriendProfileImages, // [v2.2] 생성자 추가
   });
 
-  // [작업 16] 빈 객체 생성자 제거: 더 이상 필요하지 않음 (currentUser 전달로 대체)
-
-  // Compatibility: provide a common `title` getter for UI components.
   String get title => nickname;
 
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -211,9 +187,6 @@ class UserModel {
       locationParts: data['locationParts'] != null
           ? Map<String, dynamic>.from(data['locationParts'])
           : null,
-      // rt: data['rt'],
-      // rw: data['rw'],
-
       geoPoint: data['geoPoint'],
       interests: data['interests'] != null
           ? List<String>.from(data['interests'])
@@ -235,36 +208,29 @@ class UserModel {
           : null,
       bookmarkedRoomIds: data['bookmarkedRoomIds'] != null
           ? List<String>.from(data['bookmarkedRoomIds'])
-          : null, // [Task 21]
+          : null,
       bookmarkedUserIds: data['bookmarkedUserIds'] != null
           ? List<String>.from(data['bookmarkedUserIds'])
-          : null, // [Task 21]
+          : null,
       bookmarkedClubPostIds: data['bookmarkedClubPostIds'] != null
           ? List<String>.from(data['bookmarkedClubPostIds'])
-          : null, // [추가]
+          : null,
       likedPomIds: data['likedPomIds'] != null
           ? List<String>.from(data['likedPomIds'])
-          : null, // [추가]
+          : null,
       trustScore: data['trustScore'] ?? 0,
       phoneNumber: data['phoneNumber'],
       feedThanksReceived: data['feedThanksReceived'] ?? 0,
       marketThanksReceived: data['marketThanksReceived'] ?? 0,
       thanksReceived: data['thanksReceived'] ?? 0,
       reportCount: data['reportCount'] ?? 0,
-
-      // ✅ [푸시 스키마] 4. Firestore에서 'pushPrefs' 맵을 읽어 PushPrefsModel 객체로 변환
       pushPrefs: data['pushPrefs'] != null && data['pushPrefs'] is Map
           ? PushPrefsModel.fromMap(Map<String, dynamic>.from(data['pushPrefs']))
           : null,
-
-      // [V3 NOTIFICATION]
       fcmTokens: data['fcmTokens'] != null
           ? List<String>.from(data['fcmTokens'])
           : null,
-
-      // ✅ Firestore 문서에서 isAdmin 필드를 읽어옵니다.
       isAdmin: data['isAdmin'] ?? false,
-
       isBanned: data['isBanned'] ?? false,
       blockedUsers: data['blockedUsers'] != null
           ? List<String>.from(data['blockedUsers'])
@@ -292,22 +258,23 @@ class UserModel {
       rejectedUsers: data['rejectedUsers'] != null
           ? List<String>.from(data['rejectedUsers'])
           : null,
-      clubs: data['clubs'] != null
-          ? List<String>.from(data['clubs'])
-          : null, // [추가]
+      clubs: data['clubs'] != null ? List<String>.from(data['clubs']) : null,
       searchIndex: data['searchIndex'] != null
           ? List<String>.from(data['searchIndex'])
           : [],
-      // ✅ [작업 14] 필드 로드
       isDeletionRequested: data['isDeletionRequested'] ?? false,
       deletionRequestedAt: data['deletionRequestedAt'],
+
+      // [v2.2] 필드 복원
+      findfriendProfileImages: data['findfriendProfileImages'] != null
+          ? List<String>.from(data['findfriendProfileImages'])
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'uid': uid,
-
       'nickname': nickname,
       'email': email,
       'photoUrl': photoUrl,
@@ -320,31 +287,22 @@ class UserModel {
       'privacySettings': privacySettings,
       'postIds': postIds,
       'productIds': productIds,
-      'jobIds': jobIds, // [추가]
+      'jobIds': jobIds,
       'bookmarkedPostIds': bookmarkedPostIds,
       'bookmarkedProductIds': bookmarkedProductIds,
-      'bookmarkedRoomIds': bookmarkedRoomIds, // [Task 21]
-      'bookmarkedUserIds': bookmarkedUserIds, // [Task 21]
-      'bookmarkedClubPostIds': bookmarkedClubPostIds, // [추가]
-      // 'rt': rt,
-      // 'rw': rw,
-      'likedPomIds': likedPomIds, // [추가]
+      'bookmarkedRoomIds': bookmarkedRoomIds,
+      'bookmarkedUserIds': bookmarkedUserIds,
+      'bookmarkedClubPostIds': bookmarkedClubPostIds,
+      'likedPomIds': likedPomIds,
       'trustScore': trustScore,
       'phoneNumber': phoneNumber,
       'feedThanksReceived': feedThanksReceived,
       'marketThanksReceived': marketThanksReceived,
       'thanksReceived': thanksReceived,
       'reportCount': reportCount,
-
-      // ✅ [푸시 스키마] 5. PushPrefsModel 객체를 맵으로 변환하여 저장
       'pushPrefs': pushPrefs?.toMap(),
-
-      // [V3 NOTIFICATION]
       'fcmTokens': fcmTokens,
-
-      // ✅ toJson 맵에 isAdmin 필드를 추가합니다.
       'isAdmin': isAdmin,
-
       'isBanned': isBanned,
       'blockedUsers': blockedUsers,
       'profileCompleted': profileCompleted,
@@ -352,11 +310,6 @@ class UserModel {
       'privacyAgreed': privacyAgreed,
       'marketingAgreed': marketingAgreed,
       'createdAt': createdAt,
-      'isDatingProfile': null, // [v2.1] null로 덮어쓰기
-      'age': null, // [v2.1] null로 덮어쓰기
-      'ageRange': null, // [v2.1] null로 덮어쓰기
-      'gender': null, // [v2.1] null로 덮어쓰기
-      'findfriend_profileImages': null, // [v2.1] null로 덮어쓰기
       'isVisibleInList': isVisibleInList,
       'likesGiven': likesGiven,
       'likesReceived': likesReceived,
@@ -366,16 +319,23 @@ class UserModel {
       'rejectedUsers': rejectedUsers,
       'neighborhoodVerified': neighborhoodVerified,
       'lastActiveAt': lastActiveAt,
-      'clubs': clubs, // [추가]
+      'clubs': clubs,
       'searchIndex': searchIndex,
-      // ✅ [작업 14] 필드 저장
       'isDeletionRequested': isDeletionRequested,
       'deletionRequestedAt': deletionRequestedAt,
+
+      // [v2.2] 필드 저장
+      'findfriendProfileImages': findfriendProfileImages,
+
+      // Deprecated Fields (Cleaning)
+      'isDatingProfile': null,
+      'age': null,
+      'ageRange': null,
+      'gender': null,
+      'findfriend_profileImages':
+          null, // Use findfriendProfileImages instead if legacy exists
     };
   }
 
-  /// Compatibility getter for the newer UI API that expects a string label
-  /// property named `trustLevelLabel`. This maps existing `trustLevel` to
-  /// the label used by widgets without requiring a schema migration.
   String get trustLevelLabel => trustLevel;
 }

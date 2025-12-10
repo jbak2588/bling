@@ -1351,6 +1351,11 @@
     "category_lifestyle": "🌴 Lifestyle",
     "items": {
       "drawing": "Drawing",
+      "sports": "Sports",
+      "movie": "Movies",
+      "study": "Study",
+      "pet": "Pets",
+      "cafe": "Cafe",
       "instrument": "Playing instruments",
       "photography": "Photography",
       "writing": "Writing",
