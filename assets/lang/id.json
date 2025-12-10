@@ -109,7 +109,12 @@
       "title": "Kebijakan Pendaftaran",
       "description": "Bling mengumpulkan informasi minimum untuk komunitas yang aman. Semua informasi disimpan dengan aman dan tidak akan diungkapkan tanpa persetujuan.",
       "agree": "Saya setuju dengan ketentuan dan ingin melanjutkan."
-    }
+    },
+    "agreement": {
+      "terms": "Setuju Syarat dan Ketentuan",
+      "privacy": "Setuju Kebijakan Privasi",
+      "marketing": "Setuju menerima informasi pemasaran"
+    },
   },
   "main": {
     "appBar": {

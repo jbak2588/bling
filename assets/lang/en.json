@@ -109,7 +109,12 @@
       "title": "Registration Policy",
       "description": "Bling collects minimal information for a safe community. All information is stored securely and will not be disclosed without consent.",
       "agree": "I agree to the terms and wish to continue."
-    }
+    },
+    "agreement": {
+      "terms": "Agree to Terms of Service",
+      "privacy": "Agree to Privacy Policy",
+      "marketing": "Agree to receive marketing communications"
+    },
   },
   "main": {
     "appBar": {

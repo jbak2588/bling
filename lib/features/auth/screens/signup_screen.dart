@@ -1,4 +1,4 @@
-// lib/features/auth/presentation/screens/signup_screen.dart
+// lib/features/auth/screens/signup_screen.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 // ignore: unused_import
-import '../../../core/models/user_model.dart'; // UserModel import
+import '../../../core/models/user_model.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -25,6 +25,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
 
+  // [New] 약관 동의 상태 변수
+  bool _agreedToTerms = false;
+  bool _agreedToPrivacy = false;
+  bool _agreedToMarketing = false;
+
   @override
   void dispose() {
     _nicknameController.dispose();
@@ -37,6 +42,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> _signUp() async {
     if (_isLoading) return;
 
+    // 1. 입력값 검증
     if (_nicknameController.text.trim().isEmpty ||
         _emailController.text.trim().isEmpty ||
         _passwordController.text.isEmpty) {
@@ -44,217 +50,240 @@ class _SignUpScreenState extends State<SignUpScreen> {
           SnackBar(content: Text('auth.signup.fail.required'.tr())));
       return;
     }
-    if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth.signup.fail.password_mismatch'.tr())));
+
+    // 2. 약관 동의 검증
+    if (!_agreedToTerms || !_agreedToPrivacy) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('이용약관 및 개인정보 처리방침에 동의해주세요.'))); // TODO: i18n
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final credential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      // [수정] 회원가입 성공 시 이메일 인증 메일 발송 (예외 처리 강화)
-      if (credential.user != null && !credential.user!.emailVerified) {
-        try {
-          await credential.user!.sendEmailVerification();
-        } catch (e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text('auth.verification.fail_send'
-                      .tr(namedArgs: {'error': e.toString()}))),
-            );
-          }
-          // 이메일 발송 실패는 가입 실패로 간주하지 않고 진행
-        }
-        // ▼▼▼▼▼ UserModel을 사용하여 기본 필드가 포함된 사용자 문서 생성 ▼▼▼▼▼
-        final newUser = UserModel(
-          uid: credential.user!.uid,
-          nickname: _nicknameController.text.trim(),
-          email: _emailController.text.trim(),
-          createdAt: Timestamp.now(),
-          // 나머지 모든 필드는 모델에 정의된 기본값(null, false, 0, [])으로 자동 설정됩니다.
-        );
-
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(credential.user!.uid)
-            .set(newUser.toJson());
-      }
-
-      if (mounted) {
-        // [수정] 성공 메시지에 이메일 확인 안내 추가
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('auth.signup.success_email_sent'
-                  .tr(namedArgs: {'email': _emailController.text.trim()}))),
-        );
-        Navigator.of(context).pop();
-      }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'auth.signup.fail.default'.tr();
-      if (e.code == 'weak-password') {
-        errorMessage = 'auth.signup.fail.weak_password'.tr();
-      } else if (e.code == 'email-already-in-use') {
-        errorMessage = 'auth.signup.fail.email_in_use'.tr();
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'auth.signup.fail.invalid_email'.tr();
-      }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(errorMessage)));
-    } catch (e) {
+    if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth.signup.fail.unknown'.tr())));
+          SnackBar(content: Text('auth.signup.fail.passwordMismatch'.tr())));
+      return;
     }
 
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+    setState(() => _isLoading = true);
+
+    try {
+      // 3. Firebase Auth 계정 생성
+      final userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+              email: _emailController.text.trim(),
+              password: _passwordController.text);
+
+      final user = userCredential.user;
+      if (user != null) {
+        // [New] 4. Firestore에 초기 사용자 정보 및 약관 동의 내역 저장
+        // profile_setup_screen에서 나머지 정보를 채우겠지만, 약관 동의 시점 기록을 위해 여기서 미리 생성
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'uid': user.uid,
+          'email': user.email,
+          'nickname': _nicknameController.text.trim(),
+          'createdAt': FieldValue.serverTimestamp(),
+          'termsAgreed': true, // 필수
+          'privacyAgreed': true, // 필수
+          'marketingAgreed': _agreedToMarketing, // 선택
+          'profileCompleted': false, // 아직 프로필 설정 전
+          'trustScore': 0,
+          'trustLevel': 'normal',
+        });
+
+        // 5. 이메일 인증 발송
+        await user.sendEmailVerification();
+
+        if (mounted) {
+          // 회원가입 성공 -> AuthGate가 감지하여 화면 전환 (또는 이메일 인증 화면으로 이동)
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('auth.signup.success'.tr())));
+          Navigator.pop(context);
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      String message = 'auth.signup.fail.generic'.tr();
+      if (e.code == 'weak-password') {
+        message = 'auth.signup.fail.weakPassword'.tr();
+      } else if (e.code == 'email-already-in-use') {
+        message = 'auth.signup.fail.emailInUse'.tr();
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F6F1),
-      appBar: AppBar(
-        title: Text('signup.title'.tr()),
-        titleTextStyle: GoogleFonts.inter(
-            fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.black87,
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    // ignore: deprecated_member_use
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+  // [New] 약관 동의 체크박스 위젯
+  Widget _buildAgreementRow({
+    required String title,
+    required bool value,
+    required ValueChanged<bool?> onChanged,
+    bool isRequired = true,
+  }) {
+    return Row(
+      children: [
+        Checkbox(
+          value: value,
+          onChanged: onChanged,
+          activeColor: Theme.of(context).primaryColor,
+          visualDensity: VisualDensity.compact,
+        ),
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              // TODO: 약관 상세 보기 바텀시트 or 페이지 이동
+            },
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(color: Colors.black87, fontSize: 14),
                 children: [
-                  const Icon(
-                    Icons.person_add_alt_1_rounded,
-                    size: 48,
-                    color: Color(0xFF4DD0E1),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'signup.title'.tr(),
-                    style: GoogleFonts.inter(
+                  TextSpan(text: title),
+                  TextSpan(
+                    text: isRequired ? ' (필수)' : ' (선택)',
+                    style: TextStyle(
+                      color: isRequired
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey,
                       fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                      color: const Color(0xFF424242),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  // ▼▼▼▼▼ 누락되었던 부제(subtitle) 키 적용 ▼▼▼▼▼
-                  Text(
-                    'signup.subtitle'.tr(),
-                    // ▼▼▼▼▼ Inter 폰트로 변경 ▼▼▼▼▼
-                    style: GoogleFonts.inter(
-                      color: Colors.grey[700],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 28),
-                  TextField(
-                      controller: _nicknameController,
-                      decoration: InputDecoration(
-                          labelText: 'signup.nicknameHint'.tr(),
-                          prefixIcon: const Icon(Icons.face_outlined))),
-                  const SizedBox(height: 18),
-                  TextField(
-                      controller: _emailController,
-                      decoration: InputDecoration(
-                          labelText: 'signup.emailHint'.tr(),
-                          prefixIcon: const Icon(Icons.mail_outline)),
-                      keyboardType: TextInputType.emailAddress),
-                  const SizedBox(height: 18),
-                  TextField(
-                      controller: _passwordController,
-                      obscureText: !_passwordVisible,
-                      decoration: InputDecoration(
-                          labelText: 'signup.passwordHint'.tr(),
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                              icon: Icon(_passwordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off),
-                              onPressed: () => setState(() =>
-                                  _passwordVisible = !_passwordVisible)))),
-                  const SizedBox(height: 18),
-                  TextField(
-                      controller: _confirmPasswordController,
-                      obscureText: !_confirmPasswordVisible,
-                      decoration: InputDecoration(
-                          labelText: 'signup.passwordConfirmHint'.tr(),
-                          prefixIcon: const Icon(Icons.lock_reset_outlined),
-                          suffixIcon: IconButton(
-                              icon: Icon(_confirmPasswordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off),
-                              onPressed: () => setState(() =>
-                                  _confirmPasswordVisible =
-                                      !_confirmPasswordVisible)))),
-                  const SizedBox(height: 18),
-
-                  const SizedBox(height: 88),
                 ],
               ),
             ),
           ),
         ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-          child: SizedBox(
-            height: 50,
-            child: FilledButton(
-              onPressed: _isLoading ? null : _signUp,
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.teal.shade400,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 3))
-                  : Text(
-                      'signup.buttons.signup'.tr(),
-                      style: GoogleFonts.inter(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+        IconButton(
+          icon: const Icon(Icons.chevron_right, color: Colors.grey),
+          onPressed: () {
+            // TODO: 약관 상세 보기 구현
+          },
+        )
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('auth.signup.title'.tr())),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ... [기존 입력 필드들: 닉네임, 이메일, 패스워드 등] ...
+                TextFormField(
+                  controller: _nicknameController,
+                  decoration: InputDecoration(
+                    labelText: 'auth.signup.fields.nickname'.tr(),
+                    prefixIcon: const Icon(Icons.person_outline),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'auth.signup.fields.email'.tr(),
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: !_passwordVisible,
+                  decoration: InputDecoration(
+                      labelText: 'auth.signup.fields.password'.tr(),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      suffixIcon: IconButton(
+                          icon: Icon(_passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                          onPressed: () => setState(
+                              () => _passwordVisible = !_passwordVisible))),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: !_confirmPasswordVisible,
+                  decoration: InputDecoration(
+                      labelText: 'auth.signup.fields.confirmPassword'.tr(),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      suffixIcon: IconButton(
+                          icon: Icon(_confirmPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                          onPressed: () => setState(() =>
+                              _confirmPasswordVisible =
+                                  !_confirmPasswordVisible))),
+                ),
+                const SizedBox(height: 24),
+
+                // [New] 약관 동의 섹션
+                const Divider(),
+                _buildAgreementRow(
+                  title: 'signup.agreement.terms'.tr(),
+                  value: _agreedToTerms,
+                  isRequired: true,
+                  onChanged: (v) => setState(() => _agreedToTerms = v!),
+                ),
+                _buildAgreementRow(
+                  title: 'signup.agreement.privacy'.tr(),
+                  value: _agreedToPrivacy,
+                  isRequired: true,
+                  onChanged: (v) => setState(() => _agreedToPrivacy = v!),
+                ),
+                _buildAgreementRow(
+                  title: 'signup.agreement.marketing'.tr(),
+                  value: _agreedToMarketing,
+                  isRequired: false,
+                  onChanged: (v) => setState(() => _agreedToMarketing = v!),
+                ),
+                const SizedBox(height: 24),
+
+                SizedBox(
+                  height: 50,
+                  child: FilledButton(
+                    onPressed: _isLoading ? null : _signUp,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.teal.shade400,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 3))
+                        : Text(
+                            'signup.buttons.signup'.tr(),
+                            style: GoogleFonts.inter(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
