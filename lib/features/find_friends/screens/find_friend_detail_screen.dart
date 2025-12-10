@@ -45,7 +45,7 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:cloud_functions/cloud_functions.dart'; // [v2.1] 스팸 방지 함수 호출
 import 'package:share_plus/share_plus.dart';
-import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart';
+import 'package:bling_app/features/user_profile/screens/profile_setup_screen.dart';
 import 'package:bling_app/core/constants/app_links.dart';
 import 'package:bling_app/core/utils/address_formatter.dart';
 // ChatService: 채팅방 생성/조회 일원화
@@ -235,8 +235,11 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
           if (currentUser.uid == user.uid)
             IconButton(
               icon: const Icon(Icons.edit),
-              onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ProfileEditScreen())),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => ProfileSetupScreen(
+                        userModel: user,
+                        isEditMode: true,
+                      ))),
             )
           else ...[
             // 비소유자에게는 차단/신고 아이콘을 직접 노출

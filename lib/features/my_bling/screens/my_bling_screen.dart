@@ -13,7 +13,7 @@
  * - '친구 요청' 및 '보낸 요청' 메뉴 삭제 (기능 폐기)
  */
 
-import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart';
+import 'package:bling_app/features/user_profile/screens/profile_setup_screen.dart';
 import 'package:bling_app/features/my_bling/screens/settings_screen.dart'; // ✅ 설정 화면 import 확인
 import 'package:bling_app/features/my_bling/widgets/user_bookmark_list.dart';
 import 'package:bling_app/features/my_bling/widgets/user_friend_list.dart';
@@ -176,7 +176,10 @@ class _MyBlingScreenState extends State<MyBlingScreen>
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ProfileEditScreen(),
+                            builder: (context) => ProfileSetupScreen(
+                              userModel: widget.userModel,
+                              isEditMode: true,
+                            ),
                           ),
                         );
                       },

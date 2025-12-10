@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'package:bling_app/core/models/user_model.dart';
+import 'package:bling_app/features/location/screens/neighborhood_prompt_screen.dart'; // 위치 설정 연동
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -24,9 +25,14 @@ class ProfileSetupScreen extends StatefulWidget {
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  // 기본 정보 컨트롤러
   final TextEditingController _nicknameController = TextEditingController();
-  final TextEditingController _bioController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _rtController = TextEditingController(); // RT 추가
+  final TextEditingController _rwController = TextEditingController(); // RW 추가
+
+  // 소셜 정보 컨트롤러
+  final TextEditingController _bioController = TextEditingController();
 
   bool _isLoading = false;
 
@@ -34,76 +40,101 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   File? _selectedImageFile;
   String? _currentProfileImageUrl;
 
-  // [추가] 친구 찾기용 추가 사진 (최대 10장)
+  // 소셜용 추가 사진 (최대 10장)
   List<String> _currentSocialImageUrls = [];
-  List<File> _newSocialImageFiles = [];
+  final List<File> _newSocialImageFiles = [];
 
   bool _isVisibleInList = false;
   bool _isPhoneVerified = false;
+  bool _showLocationOnMap = true; // 프라이버시 설정
+  bool _allowFriendRequests = true; // 프라이버시 설정
 
   final List<String> _selectedInterests = [];
-  final List<String> _availableInterests = [
-    '운동',
-    '여행',
-    '맛집',
-    '독서',
-    '게임',
-    '음악',
-    '영화',
-    '공부',
-    '반려동물',
-    '카페'
+
+  // [I18n] 다국어 키로 변경 (값은 키, 화면 표시는 tr())
+  final List<String> _availableInterestKeys = [
+    'sports',
+    'travel',
+    'foodie',
+    'reading',
+    'gaming',
+    'music',
+    'movie',
+    'study',
+    'pet',
+    'cafe'
   ];
 
   @override
   void initState() {
     super.initState();
+    // 데이터 로드: 전달받은 모델이 있으면 사용, 없으면(수정 모드인데 null인 경우) fetch 시도
     if (widget.userModel != null) {
-      _loadUserData();
+      _loadUserData(widget.userModel!);
+    } else if (widget.isEditMode) {
+      _fetchUserData();
     }
   }
 
-  void _loadUserData() {
-    final user = widget.userModel!;
-    _nicknameController.text = user.nickname;
-    _bioController.text = user.bio ?? '';
-    _phoneController.text = user.phoneNumber ?? '';
-    _currentProfileImageUrl = user.photoUrl;
-
-    // [추가] 소셜 이미지 로드
-    if (user.findfriendProfileImages != null) {
-      _currentSocialImageUrls = List.from(user.findfriendProfileImages!);
+  Future<void> _fetchUserData() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      final doc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (doc.exists) {
+        _loadUserData(UserModel.fromFirestore(doc));
+      }
     }
+  }
 
-    _isVisibleInList = user.isVisibleInList ?? false;
-    _isPhoneVerified =
-        (user.phoneNumber != null && user.phoneNumber!.isNotEmpty);
-    if (user.interests != null) {
-      _selectedInterests.addAll(user.interests!);
-    }
+  void _loadUserData(UserModel user) {
+    setState(() {
+      _nicknameController.text = user.nickname;
+      _bioController.text = user.bio ?? '';
+      _phoneController.text = user.phoneNumber ?? '';
+      _rtController.text = user.locationParts?['rt'] ?? '';
+      _rwController.text = user.locationParts?['rw'] ?? '';
+
+      _currentProfileImageUrl = user.photoUrl;
+      if (user.findfriendProfileImages != null) {
+        _currentSocialImageUrls = List.from(user.findfriendProfileImages!);
+      }
+
+      _isVisibleInList = user.isVisibleInList ?? false;
+      _isPhoneVerified =
+          (user.phoneNumber != null && user.phoneNumber!.isNotEmpty);
+      _showLocationOnMap = user.privacySettings?['showLocationOnMap'] ?? true;
+      _allowFriendRequests =
+          user.privacySettings?['allowFriendRequests'] ?? true;
+
+      if (user.interests != null) {
+        _selectedInterests.addAll(user.interests!);
+      }
+    });
   }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
+    final picked =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
     if (picked != null) {
       setState(() => _selectedImageFile = File(picked.path));
     }
   }
 
-  // [추가] 소셜용 다중 이미지 선택
   Future<void> _pickSocialImages() async {
     final picker = ImagePicker();
     final int currentCount =
         _currentSocialImageUrls.length + _newSocialImageFiles.length;
 
     if (currentCount >= 10) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("최대 10장까지만 등록 가능합니다.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("profile.error.maxImages".tr(args: ['10']))));
       return;
     }
 
-    final List<XFile> pickedList = await picker.pickMultiImage();
+    final List<XFile> pickedList =
+        await picker.pickMultiImage(imageQuality: 80);
     if (pickedList.isNotEmpty) {
       setState(() {
         int spaceLeft = 10 - currentCount;
@@ -148,25 +179,23 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       final uid = FirebaseAuth.instance.currentUser?.uid;
       if (uid == null) throw Exception("profile.error.loginRequired".tr());
 
-      // 1. 메인 프로필 사진 업로드 (규칙 준수: userId 폴더 사용)
+      // [Storage 룰 통일] 1. 메인 프로필: profile_images/{uid}/main_avatar.{ext}
       String? photoUrl = _currentProfileImageUrl;
       if (_selectedImageFile != null) {
         final ext = p.extension(_selectedImageFile!.path);
-        // [Fix] 경로 수정: /{feature}/{userId}/{fileName}
         final ref = FirebaseStorage.instance
             .ref()
-            .child('profile_images/$uid/main_profile$ext');
+            .child('profile_images/$uid/main_avatar$ext'); // 고정 이름 사용 권장
         await ref.putFile(_selectedImageFile!);
         photoUrl = await ref.getDownloadURL();
       }
 
-      // 2. [추가] 소셜 이미지 업로드
+      // [Storage 룰 통일] 2. 소셜 이미지: profile_images/{uid}/social/{timestamp}.{ext}
       List<String> finalSocialUrls = List.from(_currentSocialImageUrls);
       if (_newSocialImageFiles.isNotEmpty) {
         for (var file in _newSocialImageFiles) {
           final String fileName =
               "${DateTime.now().millisecondsSinceEpoch}_${p.basename(file.path)}";
-          // [Fix] 경로 수정: /{feature}/{userId}/{fileName}
           final ref = FirebaseStorage.instance
               .ref()
               .child('profile_images/$uid/social/$fileName');
@@ -176,6 +205,16 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         }
       }
 
+      // 위치 정보 업데이트 (기존 정보 유지하며 RT/RW 수정)
+      Map<String, dynamic> locationParts =
+          widget.userModel?.locationParts ?? {};
+      if (_rtController.text.isNotEmpty) {
+        locationParts['rt'] = _rtController.text.trim();
+      }
+      if (_rwController.text.isNotEmpty) {
+        locationParts['rw'] = _rwController.text.trim();
+      }
+
       final userData = {
         'uid': uid,
         'nickname': _nicknameController.text.trim(),
@@ -183,13 +222,24 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         'phoneNumber': _phoneController.text.trim().isEmpty
             ? null
             : _phoneController.text.trim(),
+        'locationParts': locationParts, // RT/RW 업데이트 반영
+
+        // Social Fields
         'isVisibleInList': _isVisibleInList,
         'bio': _isVisibleInList ? _bioController.text.trim() : null,
         'interests': _isVisibleInList ? _selectedInterests : [],
-        // [추가] DB 필드 저장
         'findfriendProfileImages': finalSocialUrls,
+
+        // Privacy
+        'privacySettings': {
+          'showLocationOnMap': _showLocationOnMap,
+          'allowFriendRequests': _allowFriendRequests,
+        },
+
         'profileCompleted': true,
         'updatedAt': FieldValue.serverTimestamp(),
+
+        // Initial Fields
         if (!widget.isEditMode) ...{
           'createdAt': FieldValue.serverTimestamp(),
           'trustScore': 0,
@@ -205,7 +255,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text("profile.setup.saved".tr())));
-        Navigator.pop(context);
+        // 성공 시 true 반환 (화면 갱신용)
+        Navigator.pop(context, true);
       }
     } catch (e) {
       ScaffoldMessenger.of(context)
@@ -220,8 +271,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isEditMode
-            ? "profile.setup.editTitle".tr()
-            : "profile.setup.title".tr()),
+            ? "profile.setup.editTitle".tr() // "프로필 수정"
+            : "profile.setup.title".tr()), // "프로필 설정"
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -230,23 +281,36 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ... [기존 메인 사진 및 닉네임, 전화번호 UI 유지] ...
+              // 1. 메인 프로필 섹션
               Center(
                 child: GestureDetector(
                   onTap: _pickImage,
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey[200],
-                    backgroundImage: _selectedImageFile != null
-                        ? FileImage(_selectedImageFile!)
-                        : (_currentProfileImageUrl != null
-                            ? NetworkImage(_currentProfileImageUrl!)
-                            : null) as ImageProvider?,
-                    child: (_selectedImageFile == null &&
-                            _currentProfileImageUrl == null)
-                        ? const Icon(Icons.camera_alt,
-                            size: 40, color: Colors.grey)
-                        : null,
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage: _selectedImageFile != null
+                            ? FileImage(_selectedImageFile!)
+                            : (_currentProfileImageUrl != null
+                                ? NetworkImage(_currentProfileImageUrl!)
+                                : null) as ImageProvider?,
+                        child: (_selectedImageFile == null &&
+                                _currentProfileImageUrl == null)
+                            ? const Icon(Icons.camera_alt,
+                                size: 40, color: Colors.grey)
+                            : null,
+                      ),
+                      const Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.edit, size: 16),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -260,12 +324,60 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     ? "profile.error.nicknameShort".tr()
                     : null,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+
+              // 2. 위치 및 인증 섹션
               const Divider(),
-              Text("profile.section.trust".tr(),
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold)),
+              Text("profile.section.locationTrust".tr(),
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
+
+              // 위치 정보 (동네 인증된 곳)
+              Row(
+                children: [
+                  const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(widget.userModel?.locationName ??
+                        "profileEdit.locationNotSet".tr()),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => const NeighborhoodPromptScreen()),
+                      );
+                      _fetchUserData(); // 위치 변경 후 데이터 갱신
+                    },
+                    child: Text("profileEdit.changeLocation".tr()),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // RT/RW 입력
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _rtController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                          labelText: "RT", border: OutlineInputBorder()),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _rwController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                          labelText: "RW", border: OutlineInputBorder()),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // 전화번호 인증
               Row(
                 children: [
                   Expanded(
@@ -276,13 +388,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.phone),
                       ),
-                      enabled: !_isPhoneVerified,
+                      enabled: !_isPhoneVerified, // 인증 완료 시 수정 불가
                     ),
                   ),
                   const SizedBox(width: 8),
                   if (!_isPhoneVerified)
                     ElevatedButton(
                       onPressed: () {
+                        // [추후 연동] Phone Auth Logic
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text("profile.desc.smsTodo".tr())));
                         setState(() => _isPhoneVerified = true);
@@ -295,8 +408,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               ),
               const SizedBox(height: 24),
 
-              // 3. 소셜 프로필 설정 (여기에 다중 이미지 피커 추가)
-              const Divider(),
+              // 3. 소셜 프로필 설정
+              const Divider(thickness: 4),
+              const SizedBox(height: 8),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text("profile.section.social".tr(),
@@ -305,9 +419,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 value: _isVisibleInList,
                 activeThumbColor: Theme.of(context).primaryColor,
                 onChanged: (val) {
-                  setState(() {
-                    _isVisibleInList = val;
-                  });
+                  setState(() => _isVisibleInList = val);
                 },
               ),
 
@@ -322,16 +434,24 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // [추가] 사진 10장 업로드 UI
-                      Text("추가 사진 (최대 10장)",
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      // 사진 10장 업로드
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("profile.field.photos".tr(),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(
+                              "${_currentSocialImageUrls.length + _newSocialImageFiles.length} / 10",
+                              style: const TextStyle(color: Colors.grey)),
+                        ],
+                      ),
                       const SizedBox(height: 8),
                       SizedBox(
                         height: 100,
                         child: ListView(
                           scrollDirection: Axis.horizontal,
                           children: [
-                            // 추가 버튼
                             if ((_currentSocialImageUrls.length +
                                     _newSocialImageFiles.length) <
                                 10)
@@ -349,71 +469,25 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                                       color: Colors.grey),
                                 ),
                               ),
-                            // 기존 이미지들
                             ..._currentSocialImageUrls
                                 .asMap()
                                 .entries
                                 .map((entry) {
-                              return Stack(
-                                children: [
-                                  Container(
-                                    width: 80,
-                                    height: 100,
-                                    margin: const EdgeInsets.only(right: 8),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(entry.value,
-                                          fit: BoxFit.cover),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 0,
-                                    right: 8,
-                                    child: GestureDetector(
-                                      onTap: () => _removeSocialImage(entry.key,
-                                          isNew: false),
-                                      child: const CircleAvatar(
-                                          radius: 10,
-                                          backgroundColor: Colors.red,
-                                          child: Icon(Icons.close,
-                                              size: 12, color: Colors.white)),
-                                    ),
-                                  )
-                                ],
-                              );
+                              return _buildImageThumb(
+                                  entry.value,
+                                  () => _removeSocialImage(entry.key,
+                                      isNew: false),
+                                  isFile: false);
                             }),
-                            // 새 이미지들
                             ..._newSocialImageFiles
                                 .asMap()
                                 .entries
                                 .map((entry) {
-                              return Stack(
-                                children: [
-                                  Container(
-                                    width: 80,
-                                    height: 100,
-                                    margin: const EdgeInsets.only(right: 8),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.file(entry.value,
-                                          fit: BoxFit.cover),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 0,
-                                    right: 8,
-                                    child: GestureDetector(
-                                      onTap: () => _removeSocialImage(entry.key,
-                                          isNew: true),
-                                      child: const CircleAvatar(
-                                          radius: 10,
-                                          backgroundColor: Colors.red,
-                                          child: Icon(Icons.close,
-                                              size: 12, color: Colors.white)),
-                                    ),
-                                  )
-                                ],
-                              );
+                              return _buildImageThumb(
+                                  entry.value,
+                                  () => _removeSocialImage(entry.key,
+                                      isNew: true),
+                                  isFile: true);
                             }),
                           ],
                         ),
@@ -440,24 +514,23 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           return null;
                         },
                       ),
-                      // ... [기존 관심사 UI 유지] ...
                       const SizedBox(height: 16),
-                      Text("profile.field.interests".tr(),
+                      Text("interests.title".tr(),
                           style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
-                        children: _availableInterests.map((tag) {
-                          final isSelected = _selectedInterests.contains(tag);
+                        children: _availableInterestKeys.map((key) {
+                          final isSelected = _selectedInterests.contains(key);
                           return FilterChip(
-                            label: Text(tag),
+                            label: Text("interests.items.$key".tr()), // i18n 적용
                             selected: isSelected,
                             onSelected: (selected) {
                               setState(() {
                                 if (selected) {
-                                  _selectedInterests.add(tag);
+                                  _selectedInterests.add(key);
                                 } else {
-                                  _selectedInterests.remove(tag);
+                                  _selectedInterests.remove(key);
                                 }
                               });
                             },
@@ -470,6 +543,20 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               ],
 
               const SizedBox(height: 40),
+              // 프라이버시 설정
+              const Divider(),
+              SwitchListTile(
+                title: Text('profileEdit.privacy.showLocation'.tr()),
+                value: _showLocationOnMap,
+                onChanged: (val) => setState(() => _showLocationOnMap = val),
+              ),
+              SwitchListTile(
+                title: Text('profileEdit.privacy.allowRequests'.tr()),
+                value: _allowFriendRequests,
+                onChanged: (val) => setState(() => _allowFriendRequests = val),
+              ),
+
+              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -497,11 +584,43 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
+  Widget _buildImageThumb(dynamic source, VoidCallback onDelete,
+      {required bool isFile}) {
+    return Stack(
+      children: [
+        Container(
+          width: 80,
+          height: 100,
+          margin: const EdgeInsets.only(right: 8),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: isFile
+                ? Image.file(source as File, fit: BoxFit.cover)
+                : Image.network(source as String, fit: BoxFit.cover),
+          ),
+        ),
+        Positioned(
+          top: 0,
+          right: 8,
+          child: GestureDetector(
+            onTap: onDelete,
+            child: const CircleAvatar(
+                radius: 10,
+                backgroundColor: Colors.red,
+                child: Icon(Icons.close, size: 12, color: Colors.white)),
+          ),
+        )
+      ],
+    );
+  }
+
   @override
   void dispose() {
     _nicknameController.dispose();
     _bioController.dispose();
     _phoneController.dispose();
+    _rtController.dispose();
+    _rwController.dispose();
     super.dispose();
   }
 }

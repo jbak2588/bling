@@ -86,7 +86,7 @@ import 'package:bling_app/features/admin/screens/deletion_requests_screen.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/core/models/user_model.dart';
 
-import 'package:bling_app/features/my_bling/screens/profile_edit_screen.dart';
+import 'package:bling_app/features/user_profile/screens/profile_setup_screen.dart';
 import 'package:bling_app/features/location/screens/location_filter_screen.dart';
 import 'package:bling_app/features/chat/screens/chat_list_screen.dart';
 import 'package:bling_app/features/my_bling/screens/my_bling_screen.dart';
@@ -589,7 +589,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         target = const ProductRegistrationScreen();
         break;
       case AppSection.findFriends:
-        target = const ProfileEditScreen(); // [v2.1] ProfileEditScreen으로 변경
+        target = ProfileSetupScreen(userModel: userModel, isEditMode: true);
         break;
       case AppSection.clubs:
         target = CreateClubScreen(userModel: userModel);
@@ -696,8 +696,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   '$_iconsPath/ico_friend_3d_deep.svg', // 7. findFriends
                   'main.tabs.findFriends'.tr(),
                   'myBling.editProfile'.tr(), // [v2.1] 툴팁 변경
-                  builder: () =>
-                      const ProfileEditScreen()), // [v2.1] ProfileEditScreen으로 변경
+                  builder: () => ProfileSetupScreen(
+                      userModel: userModel, isEditMode: true)),
               // 8) 부동산
               _sheetItem(
                   '$_iconsPath/ico_real_estate.svg', // 8. realEstate
@@ -1620,7 +1620,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const ProfileEditScreen()));
+                        builder: (_) => ProfileSetupScreen(
+                            userModel: userModel, isEditMode: true)));
                   },
                 ),
 
