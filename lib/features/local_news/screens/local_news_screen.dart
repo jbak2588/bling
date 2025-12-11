@@ -52,6 +52,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'package:bling_app/features/shared/widgets/shared_map_browser.dart'; // [추가] 공용 지도 위젯
+import 'dart:math' as math;
 
 // ✅ [롤백] 카테고리 상수 import 복구
 import '../../../core/constants/app_categories.dart';
@@ -317,6 +318,51 @@ class _FeedListView extends StatefulWidget {
 // ✅ 2. with AutomaticKeepAliveClientMixin을 추가합니다.
 class _FeedListViewState extends State<_FeedListView>
     with AutomaticKeepAliveClientMixin {
+  Map<String, String?>? _buildLocationFilter(LocationProvider provider) {
+    if (provider.mode == LocationSearchMode.administrative) {
+      return provider.adminFilter;
+    }
+    if (provider.mode == LocationSearchMode.nearby) {
+      final userKab = provider.user?.locationParts?['kab'];
+      if (userKab != null && userKab.isNotEmpty) {
+        return {'kab': userKab};
+      }
+      final userProv = provider.user?.locationParts?['prov'];
+      if (userProv != null && userProv.isNotEmpty) {
+        return {'prov': userProv};
+      }
+    }
+    return null; // national
+  }
+
+  double _haversineKm(GeoPoint a, GeoPoint b) {
+    const double p = 0.017453292519943295; // pi/180
+    final double c1 = math.cos((b.latitude - a.latitude) * p);
+    final double c2 = math.cos(a.latitude * p) * math.cos(b.latitude * p);
+    final double term =
+        0.5 - c1 / 2 + c2 * (1 - math.cos((b.longitude - a.longitude) * p)) / 2;
+    return 12742 * math.asin(math.sqrt(term));
+  }
+
+  List<PostModel> _applyNearbyRadius(
+    List<PostModel> posts,
+    GeoPoint? userPoint,
+    double radiusKm,
+  ) {
+    if (userPoint == null) return posts;
+    final filtered = <MapEntry<PostModel, double>>[];
+    for (final post in posts) {
+      final geo = post.geoPoint;
+      if (geo == null) continue;
+      final d = _haversineKm(userPoint, geo);
+      if (d <= radiusKm) {
+        filtered.add(MapEntry(post, d));
+      }
+    }
+    filtered.sort((a, b) => a.value.compareTo(b.value));
+    return filtered.map((e) => e.key).toList();
+  }
+
   // ✅ 3. wantKeepAlive를 true로 설정하여 탭이 전환되어도 이 목록의 상태를 유지시킵니다.
   @override
   bool get wantKeepAlive => true;
@@ -357,39 +403,39 @@ class _FeedListViewState extends State<_FeedListView>
   }
 
   // 기존 _buildQuery와 _applyLocationFilter 함수를 State 안으로 이동
-  Query<Map<String, dynamic>> _buildQuery() {
-    // Provider 우선: 사용자가 설정한 필터(activeQueryFilter)를 먼저 사용
-    final locationProvider = context.watch<LocationProvider>();
-    final active = locationProvider.activeQueryFilter;
-
+  Query<Map<String, dynamic>> _buildQuery(
+      Map<String, String?>? locationFilter, LocationProvider provider) {
     Query<Map<String, dynamic>> query =
         FirebaseFirestore.instance.collection('posts');
 
-    if (active != null) {
-      // active.key 예: 'locationParts.kec', active.value 예: 'NamaKec'
+    if (provider.mode == LocationSearchMode.administrative &&
+        provider.activeQueryFilter != null) {
+      final active = provider.activeQueryFilter!;
       query = query.where(active.key, isEqualTo: active.value);
-    } else if (widget.locationFilter != null) {
-      final filter = widget.locationFilter!;
-      if (filter['kel'] != null) {
-        query = query.where('locationParts.kel', isEqualTo: filter['kel']);
-      } else if (filter['kec'] != null) {
-        query = query.where('locationParts.kec', isEqualTo: filter['kec']);
-      } else if (filter['kab'] != null) {
-        query = query.where('locationParts.kab', isEqualTo: filter['kab']);
-      } else if (filter['kota'] != null) {
-        query = query.where('locationParts.kota', isEqualTo: filter['kota']);
-      } else if (filter['prov'] != null) {
-        query = query.where('locationParts.prov', isEqualTo: filter['prov']);
+    } else if (locationFilter != null) {
+      if (locationFilter['kel'] != null) {
+        query =
+            query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+      } else if (locationFilter['kec'] != null) {
+        query =
+            query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+      } else if (locationFilter['kab'] != null) {
+        query =
+            query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+      } else if (locationFilter['kota'] != null) {
+        query = query.where('locationParts.kota',
+            isEqualTo: locationFilter['kota']);
+      } else if (locationFilter['prov'] != null) {
+        query = query.where('locationParts.prov',
+            isEqualTo: locationFilter['prov']);
       }
     } else {
-      // 기존 폴백: 전달된 userModel의 prov 사용
       final userProv = widget.userModel?.locationParts?['prov'];
       if (userProv != null && userProv.isNotEmpty) {
         query = query.where('locationParts.prov', isEqualTo: userProv);
       }
     }
 
-    // ✅ [롤백] 카테고리 기반 필터링 복구
     if (widget.categoryId != 'all') {
       query = query.where('category', isEqualTo: widget.categoryId);
     }
@@ -405,8 +451,8 @@ class _FeedListViewState extends State<_FeedListView>
   }
 
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _applyLocationFilter(
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
-    final filter = widget.locationFilter;
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs,
+      Map<String, String?>? filter) {
     if (filter == null) return allDocs;
     String? key;
     if (filter['kel'] != null) {
@@ -439,7 +485,12 @@ class _FeedListViewState extends State<_FeedListView>
     super.build(context);
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: _buildQuery().snapshots(),
+      stream: (() {
+        final provider = context.watch<LocationProvider>();
+        final locationFilter =
+            _buildLocationFilter(provider) ?? widget.locationFilter;
+        return _buildQuery(locationFilter, provider).snapshots();
+      })(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -449,9 +500,23 @@ class _FeedListViewState extends State<_FeedListView>
               child: Text('localNewsFeed.error'
                   .tr(namedArgs: {'error': snapshot.error.toString()})));
         }
+        final provider = context.watch<LocationProvider>();
+        final bool isNearbyMode = provider.mode == LocationSearchMode.nearby;
+        final GeoPoint? userPoint =
+            provider.user?.geoPoint ?? widget.userModel?.geoPoint;
+        final double radiusKm = provider.radiusKm;
+        final locationFilter =
+            _buildLocationFilter(provider) ?? widget.locationFilter;
+
         final allDocs = snapshot.data?.docs ?? [];
-        final postsDocs = _applyLocationFilter(allDocs);
-        if (postsDocs.isEmpty) {
+        final postsDocs = _applyLocationFilter(allDocs, locationFilter);
+        var posts = postsDocs.map(PostModel.fromFirestore).toList();
+
+        if (isNearbyMode) {
+          posts = _applyNearbyRadius(posts, userPoint, radiusKm);
+        }
+
+        if (posts.isEmpty) {
           final isNational = context.watch<LocationProvider>().mode ==
               LocationSearchMode.national;
           if (!isNational) {
@@ -505,9 +570,9 @@ class _FeedListViewState extends State<_FeedListView>
         }
         return ListView.builder(
           padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-          itemCount: postsDocs.length,
+          itemCount: posts.length,
           itemBuilder: (context, index) {
-            final post = PostModel.fromFirestore(postsDocs[index]);
+            final post = posts[index];
             return PostCard(key: ValueKey(post.id), post: post);
           },
         );
@@ -536,6 +601,51 @@ class _FeedMapViewState extends State<_FeedMapView> {
   VoidCallback? _kwListener;
   ValueListenable<String>? _currentKeywordListenable;
   // (카테고리 아이콘 맵은 현재 사용되지 않음)
+
+  Map<String, String?>? _buildLocationFilter(LocationProvider provider) {
+    if (provider.mode == LocationSearchMode.administrative) {
+      return provider.adminFilter;
+    }
+    if (provider.mode == LocationSearchMode.nearby) {
+      final userKab = provider.user?.locationParts?['kab'];
+      if (userKab != null && userKab.isNotEmpty) {
+        return {'kab': userKab};
+      }
+      final userProv = provider.user?.locationParts?['prov'];
+      if (userProv != null && userProv.isNotEmpty) {
+        return {'prov': userProv};
+      }
+    }
+    return null; // national
+  }
+
+  double _haversineKm(GeoPoint a, GeoPoint b) {
+    const double p = 0.017453292519943295; // pi/180
+    final double c1 = math.cos((b.latitude - a.latitude) * p);
+    final double c2 = math.cos(a.latitude * p) * math.cos(b.latitude * p);
+    final double term =
+        0.5 - c1 / 2 + c2 * (1 - math.cos((b.longitude - a.longitude) * p)) / 2;
+    return 12742 * math.asin(math.sqrt(term));
+  }
+
+  List<PostModel> _applyNearbyRadius(
+    List<PostModel> posts,
+    GeoPoint? userPoint,
+    double radiusKm,
+  ) {
+    if (userPoint == null) return posts;
+    final filtered = <MapEntry<PostModel, double>>[];
+    for (final post in posts) {
+      final geo = post.geoPoint;
+      if (geo == null) continue;
+      final d = _haversineKm(userPoint, geo);
+      if (d <= radiusKm) {
+        filtered.add(MapEntry(post, d));
+      }
+    }
+    filtered.sort((a, b) => a.value.compareTo(b.value));
+    return filtered.map((e) => e.key).toList();
+  }
 
   @override
   void initState() {
@@ -567,6 +677,14 @@ class _FeedMapViewState extends State<_FeedMapView> {
   }
 
   Future<CameraPosition> _getInitialCameraPosition() async {
+    final locationProvider = context.read<LocationProvider>();
+    final userPoint =
+        locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
+    if (userPoint != null) {
+      return CameraPosition(
+          target: LatLng(userPoint.latitude, userPoint.longitude), zoom: 14);
+    }
+
     final snapshot = await _buildInitialCameraQuery().limit(1).get();
     LatLng target;
     if (snapshot.docs.isNotEmpty &&
@@ -584,34 +702,39 @@ class _FeedMapViewState extends State<_FeedMapView> {
   }
 
   Query<Map<String, dynamic>> _buildInitialCameraQuery() {
-    // Provider 우선 적용
     final locationProvider = context.watch<LocationProvider>();
-    final active = locationProvider.activeQueryFilter;
+    final locationFilter =
+        _buildLocationFilter(locationProvider) ?? widget.locationFilter;
 
     Query<Map<String, dynamic>> query =
         FirebaseFirestore.instance.collection('posts');
 
-    if (active != null) {
+    if (locationProvider.mode == LocationSearchMode.administrative &&
+        locationProvider.activeQueryFilter != null) {
+      final active = locationProvider.activeQueryFilter!;
       query = query.where(active.key, isEqualTo: active.value);
-    } else if (widget.locationFilter != null) {
-      final filter = widget.locationFilter!;
-      if (filter['kel'] != null) {
-        query = query.where('locationParts.kel', isEqualTo: filter['kel']);
-      } else if (filter['kec'] != null) {
-        query = query.where('locationParts.kec', isEqualTo: filter['kec']);
-      } else if (filter['kab'] != null) {
-        query = query.where('locationParts.kab', isEqualTo: filter['kab']);
-      } else if (filter['kota'] != null) {
-        query = query.where('locationParts.kota', isEqualTo: filter['kota']);
-      } else if (filter['prov'] != null) {
-        query = query.where('locationParts.prov', isEqualTo: filter['prov']);
+    } else if (locationFilter != null) {
+      if (locationFilter['kel'] != null) {
+        query =
+            query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+      } else if (locationFilter['kec'] != null) {
+        query =
+            query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+      } else if (locationFilter['kab'] != null) {
+        query =
+            query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+      } else if (locationFilter['kota'] != null) {
+        query = query.where('locationParts.kota',
+            isEqualTo: locationFilter['kota']);
+      } else if (locationFilter['prov'] != null) {
+        query = query.where('locationParts.prov',
+            isEqualTo: locationFilter['prov']);
       }
     } else if (widget.userModel?.locationParts?['prov'] != null) {
       query = query.where('locationParts.prov',
           isEqualTo: widget.userModel!.locationParts!['prov']);
     }
 
-    // ✅ [롤백] 카테고리 기반 필터링 복구
     if (widget.categoryId != 'all') {
       query = query.where('category', isEqualTo: widget.categoryId);
     }
@@ -624,21 +747,39 @@ class _FeedMapViewState extends State<_FeedMapView> {
   }
 
   Query<Map<String, dynamic>> _buildAllMarkersQuery() {
-    // Provider 우선 적용
     final locationProvider = context.watch<LocationProvider>();
-    final active = locationProvider.activeQueryFilter;
+    final locationFilter =
+        _buildLocationFilter(locationProvider) ?? widget.locationFilter;
 
     Query<Map<String, dynamic>> query =
         FirebaseFirestore.instance.collection('posts');
 
-    if (active != null) {
+    if (locationProvider.mode == LocationSearchMode.administrative &&
+        locationProvider.activeQueryFilter != null) {
+      final active = locationProvider.activeQueryFilter!;
       query = query.where(active.key, isEqualTo: active.value);
+    } else if (locationFilter != null) {
+      if (locationFilter['kel'] != null) {
+        query =
+            query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+      } else if (locationFilter['kec'] != null) {
+        query =
+            query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+      } else if (locationFilter['kab'] != null) {
+        query =
+            query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+      } else if (locationFilter['kota'] != null) {
+        query = query.where('locationParts.kota',
+            isEqualTo: locationFilter['kota']);
+      } else if (locationFilter['prov'] != null) {
+        query = query.where('locationParts.prov',
+            isEqualTo: locationFilter['prov']);
+      }
     } else if (widget.userModel?.locationParts?['prov'] != null) {
       query = query.where('locationParts.prov',
           isEqualTo: widget.userModel!.locationParts!['prov']);
     }
 
-    // ✅ [롤백] 카테고리 기반 필터링 복구
     if (widget.categoryId != 'all') {
       query = query.where('category', isEqualTo: widget.categoryId);
     }
@@ -685,16 +826,26 @@ class _FeedMapViewState extends State<_FeedMapView> {
 
         // [수정] GoogleMap 직접 사용 -> SharedMapBrowser 사용으로 변경
         // 이로써 핀치 줌, 제스처, 줌 버튼 숨김 등의 공통 기능이 자동 적용됨
+        final locationProvider = context.watch<LocationProvider>();
+        final bool isNearbyMode =
+            locationProvider.mode == LocationSearchMode.nearby;
+        final GeoPoint? userPoint =
+            locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
+        final double radiusKm = locationProvider.radiusKm;
+
         return SharedMapBrowser<PostModel>(
-          dataStream: _buildAllMarkersQuery().snapshots().map((snapshot) =>
-              snapshot.docs
+          dataStream: _buildAllMarkersQuery()
+              .snapshots()
+              .map((snapshot) => snapshot.docs
                   .map((doc) => PostModel.fromFirestore(doc))
-                  .toList()),
+                  .toList())
+              .map((posts) => isNearbyMode
+                  ? _applyNearbyRadius(posts, userPoint, radiusKm)
+                  : posts),
           initialCameraPosition: cameraSnapshot.data ??
               const CameraPosition(target: LatLng(-6.2088, 106.8456), zoom: 11),
           locationExtractor: (post) => post.geoPoint,
           idExtractor: (post) => post.id,
-          // [추가] 핀 제목(툴팁) 설정: 안전한 레거시 제목 추출기 사용
           titleExtractor: (post) => legacyExtractTitle(post),
           thumbnailUrlExtractor: (post) =>
               (post.mediaUrl != null && post.mediaUrl!.isNotEmpty)
@@ -702,7 +853,6 @@ class _FeedMapViewState extends State<_FeedMapView> {
                   : null,
           categoryIconExtractor: (post) =>
               _emojiWidgetForCategory(post.category),
-          // 마커 클릭 시 바텀시트에 뜰 카드 (PostCard 재사용)
           cardBuilder: (context, post) =>
               PostCard(key: ValueKey(post.id), post: post),
         );

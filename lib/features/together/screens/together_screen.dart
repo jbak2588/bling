@@ -1,8 +1,11 @@
 import 'package:bling_app/core/models/user_model.dart';
+import 'dart:math' as math;
+
 import 'package:bling_app/features/together/data/together_repository.dart';
 import 'package:bling_app/features/together/models/together_post_model.dart';
 import 'package:bling_app/features/together/widgets/together_card.dart';
 import 'package:bling_app/features/together/screens/together_detail_screen.dart'; // ✅ 추가
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart'; // ✅ 추가
 import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
@@ -23,6 +26,48 @@ class TogetherScreen extends StatefulWidget {
 
 class _TogetherScreenState extends State<TogetherScreen> {
   bool _isMapMode = false;
+
+  Map<String, String?>? _buildLocationFilter(LocationProvider provider) {
+    if (provider.mode == LocationSearchMode.administrative) {
+      return provider.adminFilter;
+    }
+    if (provider.mode == LocationSearchMode.nearby) {
+      final kab = provider.user?.locationParts?['kab'];
+      if (kab != null && kab.isNotEmpty) {
+        return {'kab': kab};
+      }
+    }
+    return null; // national 모드
+  }
+
+  double? _distanceKm(GeoPoint? a, GeoPoint? b) {
+    if (a == null || b == null) return null;
+    const double p = 0.017453292519943295; // pi/180
+    final double c1 = math.cos((b.latitude - a.latitude) * p);
+    final double c2 = math.cos(a.latitude * p) * math.cos(b.latitude * p);
+    final double aTerm =
+        0.5 - c1 / 2 + c2 * (1 - math.cos((b.longitude - a.longitude) * p)) / 2;
+    return 12742 * math.asin(math.sqrt(aTerm));
+  }
+
+  List<TogetherPostModel> _applyNearbyRadius(
+    List<TogetherPostModel> posts,
+    GeoPoint? userPoint,
+    double radiusKm,
+  ) {
+    if (userPoint == null) return posts;
+
+    final filtered = <MapEntry<TogetherPostModel, double>>[];
+    for (final post in posts) {
+      final d = _distanceKm(userPoint, post.geoPoint);
+      if (d != null && d <= radiusKm) {
+        filtered.add(MapEntry(post, d));
+      }
+    }
+
+    filtered.sort((a, b) => a.value.compareTo(b.value));
+    return filtered.map((e) => e.key).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +94,18 @@ class _TogetherScreenState extends State<TogetherScreen> {
       return const LatLng(-6.200000, 106.816666);
     })();
 
-    // TODO: locationFilter를 Repository 쿼리에 반영하려면 Repository 수정 필요 (현재는 전체 조회)
-    // repository.fetchActivePosts(locationFilter: locationFilter);
+    final bool isNearbyMode =
+        locationProvider.mode == LocationSearchMode.nearby;
+    final GeoPoint? userPoint =
+        locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
+    final double radiusKm = locationProvider.radiusKm;
+    final locationFilter = _buildLocationFilter(locationProvider);
+
+    final Stream<List<TogetherPostModel>> baseStream = repository
+        .fetchActivePosts(locationFilter: locationFilter)
+        .map((posts) => isNearbyMode
+            ? _applyNearbyRadius(posts, userPoint, radiusKm)
+            : posts);
 
     return PopScope(
       canPop: !_isMapMode,
@@ -73,7 +128,7 @@ class _TogetherScreenState extends State<TogetherScreen> {
                   // - cardBuilder: `TogetherCard(post)` (내부 onTap에서 상세 화면으로 이동).
                   // - thumbnailUrlExtractor: post.imageUrl (nullable).
                   SharedMapBrowser<TogetherPostModel>(
-                    dataStream: repository.fetchActivePosts(),
+                    dataStream: baseStream,
                     initialCameraPosition: CameraPosition(
                       target: initialMapCenter,
                       zoom: 14,
@@ -152,7 +207,7 @@ class _TogetherScreenState extends State<TogetherScreen> {
                 ],
               )
             : StreamBuilder<List<TogetherPostModel>>(
-                stream: repository.fetchActivePosts(),
+                stream: baseStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

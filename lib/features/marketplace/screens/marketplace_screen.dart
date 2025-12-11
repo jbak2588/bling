@@ -52,6 +52,7 @@ import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
 
 import '../models/product_model.dart';
 import '../widgets/product_card.dart';
+import 'product_registration_screen.dart';
 
 class MarketplaceScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -526,76 +527,11 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                               // Apply status rules on the document list
                               final filteredDocs = _applyStatusRules(
                                   filtered.map((e) => e.key).toList());
-
                               if (filteredDocs.isEmpty) {
-                                final isNational = locationProvider.mode ==
-                                    LocationSearchMode.national;
-                                if (!isNational) {
-                                  return Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(24.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(Icons.search_off,
-                                              size: 64,
-                                              color: Colors.grey[300]),
-                                          const SizedBox(height: 12),
-                                          Text('marketplace.empty'.tr(),
-                                              textAlign: TextAlign.center,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                              'search.empty.checkSpelling'.tr(),
-                                              textAlign: TextAlign.center,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodySmall
-                                                  ?.copyWith(
-                                                      color: Colors.grey)),
-                                          const SizedBox(height: 16),
-                                          OutlinedButton.icon(
-                                            icon:
-                                                const Icon(Icons.map_outlined),
-                                            label: Text(
-                                                'search.empty.expandToNational'
-                                                    .tr()),
-                                            style: OutlinedButton.styleFrom(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 12.0,
-                                                      horizontal: 16.0),
-                                            ),
-                                            onPressed: () => context
-                                                .read<LocationProvider>()
-                                                .setMode(LocationSearchMode
-                                                    .national),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                return Center(
-                                    child: Padding(
-                                  padding: const EdgeInsets.all(24.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.search_off,
-                                          size: 64, color: Colors.grey[300]),
-                                      const SizedBox(height: 12),
-                                      Text('marketplace.empty'.tr(),
-                                          textAlign: TextAlign.center,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium),
-                                    ],
-                                  ),
-                                ));
+                                return _buildEmptyView(
+                                    context,
+                                    locationProvider.mode ==
+                                        LocationSearchMode.national);
                               }
 
                               // Render the filtered & sorted entries using the
@@ -637,6 +573,14 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                         } // end if (nearby)
 
                         // Non-nearby: render full list (preserve original behavior)
+                        // [Fix] 일반 모드에서도 데이터가 없으면 안내 화면 표시
+                        if (allDocs.isEmpty) {
+                          return _buildEmptyView(
+                              context,
+                              locationProvider.mode ==
+                                  LocationSearchMode.national);
+                        }
+
                         return ListView.separated(
                           // NestedScrollView 내부 리스트는 padding top 0 권장
                           padding: EdgeInsets.zero,
@@ -689,6 +633,60 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
           ), // Expanded
         ],
       ), // Column
+    );
+  }
+
+  // [Added] 데이터 없음 화면 (공통)
+  Widget _buildEmptyView(BuildContext context, bool isNational) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.shopping_bag_outlined,
+                size: 64, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(
+              isNational
+                  ? "등록된 상품이 없습니다."
+                  : "해당 지역에 아직 등록된 Pre-loved 상품이 없어요.\n검색 지역을 늘리거나 첫 상품을 등록해보세요!",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: Colors.grey, fontSize: 16, height: 1.5),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (!isNational)
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.map_outlined),
+                    label: Text(
+                        'search.empty.expandToNational'.tr()), // "전국으로 넓히기"
+                    onPressed: () => context
+                        .read<LocationProvider>()
+                        .setMode(LocationSearchMode.national),
+                  ),
+                if (!isNational) const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text("상품 등록하기"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const ProductRegistrationScreen()),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 

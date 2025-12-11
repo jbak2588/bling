@@ -42,7 +42,6 @@ import 'package:bling_app/features/local_stores/data/shop_repository.dart';
 import 'package:bling_app/features/local_stores/widgets/shop_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart'; // [추가]
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/core/constants/app_categories.dart';
 import 'package:provider/provider.dart';
@@ -52,6 +51,7 @@ import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
+import 'dart:math' as math;
 
 class LocalStoresScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -79,9 +79,27 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
   bool _showSearchBar = false;
   bool _isMapMode = false; // [추가] 지도 모드 상태
 
+  Map<String, String?>? _buildLocationFilter(LocationProvider provider) {
+    if (provider.mode == LocationSearchMode.administrative) {
+      return provider.adminFilter;
+    }
+    if (provider.mode == LocationSearchMode.nearby) {
+      final userKab = provider.user?.locationParts?['kab'];
+      if (userKab != null && userKab.isNotEmpty) {
+        return {'kab': userKab};
+      }
+      final userProv = provider.user?.locationParts?['prov'];
+      if (userProv != null && userProv.isNotEmpty) {
+        return {'prov': userProv};
+      }
+    }
+    return null; // national
+  }
+
   List<ShopModel> _applyLocationFilter(
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs) {
-    final filter = widget.locationFilter;
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> allDocs,
+    Map<String, String?>? filter,
+  ) {
     if (filter == null) {
       return allDocs.map((doc) => ShopModel.fromFirestore(doc)).toList();
     }
@@ -165,21 +183,53 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
   String _sortOption = 'default'; // 'default', 'distance', 'popular'
 
   // [추가] 거리 계산 함수
-  double _calculateDistance(GeoPoint? shopPoint) {
-    final userPoint = widget.userModel?.geoPoint;
+  double _calculateDistance(GeoPoint? shopPoint, GeoPoint? userPoint) {
     if (userPoint == null || shopPoint == null) return double.maxFinite;
-    return Geolocator.distanceBetween(
-      userPoint.latitude,
-      userPoint.longitude,
-      shopPoint.latitude,
-      shopPoint.longitude,
-    );
+    return _haversineKm(userPoint, shopPoint) * 1000; // meters
+  }
+
+  double _haversineKm(GeoPoint a, GeoPoint b) {
+    const double p = 0.017453292519943295; // pi/180
+    final double c1 = math.cos((b.latitude - a.latitude) * p);
+    final double c2 = math.cos(a.latitude * p) * math.cos(b.latitude * p);
+    final double term =
+        0.5 - c1 / 2 + c2 * (1 - math.cos((b.longitude - a.longitude) * p)) / 2;
+    return 12742 * math.asin(math.sqrt(term));
+  }
+
+  List<ShopModel> _applyNearbyRadius(
+    List<ShopModel> shops,
+    GeoPoint? userPoint,
+    double radiusKm,
+  ) {
+    if (userPoint == null) return shops;
+    final filtered = <MapEntry<ShopModel, double>>[];
+    for (final shop in shops) {
+      final geo = shop.shopLocation?.geoPoint ?? shop.geoPoint;
+      if (geo == null) continue;
+      final d = _haversineKm(userPoint, geo);
+      if (d <= radiusKm) {
+        filtered.add(MapEntry(shop, d));
+      }
+    }
+    filtered.sort((a, b) => a.value.compareTo(b.value));
+    return filtered.map((e) => e.key).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final ShopRepository shopRepository = ShopRepository();
-    final userProvince = widget.userModel?.locationParts?['prov'];
+    final locationProvider = context.watch<LocationProvider>();
+    final bool isNearbyMode =
+        locationProvider.mode == LocationSearchMode.nearby;
+    final GeoPoint? userPoint =
+        locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
+    final double radiusKm = locationProvider.radiusKm;
+    final Map<String, String?>? locationFilter =
+        _buildLocationFilter(locationProvider) ?? widget.locationFilter;
+
+    final userProvince = locationProvider.user?.locationParts?['prov'] ??
+        widget.userModel?.locationParts?['prov'];
 
     if (userProvince == null) {
       return Center(
@@ -298,15 +348,20 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                 SharedMapBrowser<ShopModel>(
                     dataStream: shopRepository
                         .fetchShops(
-                            locationFilter: widget.locationFilter,
+                            locationFilter: locationFilter,
                             searchToken: searchToken)
-                        .map((snapshot) => snapshot.docs
-                            .map((doc) => ShopModel.fromFirestore(doc))
-                            // 간단한 필터링 (카테고리 등)은 스트림 내부나 여기서 처리 필요
-                            .where((s) =>
-                                _selectedCategory == 'all' ||
-                                s.category == _selectedCategory)
-                            .toList()),
+                        .map((snapshot) {
+                      var shops = snapshot.docs
+                          .map((doc) => ShopModel.fromFirestore(doc))
+                          .where((s) =>
+                              _selectedCategory == 'all' ||
+                              s.category == _selectedCategory)
+                          .toList();
+                      if (isNearbyMode) {
+                        shops = _applyNearbyRadius(shops, userPoint, radiusKm);
+                      }
+                      return shops;
+                    }),
                     locationExtractor: (shop) =>
                         shop.shopLocation?.geoPoint ?? shop.geoPoint,
                     titleExtractor: (shop) => legacyExtractTitle(shop),
@@ -327,16 +382,17 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                         return null;
                       }
                     },
-                    initialCameraPosition: widget.userModel?.geoPoint != null
+                    initialCameraPosition: userPoint != null
                         ? CameraPosition(
-                            target: LatLng(widget.userModel!.geoPoint!.latitude,
-                                widget.userModel!.geoPoint!.longitude),
+                            target:
+                                LatLng(userPoint.latitude, userPoint.longitude),
                             zoom: 14)
-                        : null,
+                        : const CameraPosition(
+                            target: LatLng(-6.200000, 106.816666), zoom: 12),
                   )
                 : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: shopRepository.fetchShops(
-                        locationFilter: widget.locationFilter,
+                        locationFilter: locationFilter,
                         searchToken: searchToken),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -350,7 +406,11 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                       }
 
                       final allDocs = snapshot.data?.docs ?? [];
-                      var shops = _applyLocationFilter(allDocs);
+                      var shops = _applyLocationFilter(allDocs, locationFilter);
+
+                      if (isNearbyMode) {
+                        shops = _applyNearbyRadius(shops, userPoint, radiusKm);
+                      }
 
                       // [추가] 카테고리 필터 적용
                       if (_selectedCategory != 'all') {
@@ -366,8 +426,9 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
                       // [수정] 정렬 로직
                       // [추가] 거리순 정렬
                       if (_sortOption == 'distance') {
-                        shops.sort((a, b) => _calculateDistance(a.geoPoint)
-                            .compareTo(_calculateDistance(b.geoPoint)));
+                        shops.sort((a, b) =>
+                            _calculateDistance(a.geoPoint, userPoint).compareTo(
+                                _calculateDistance(b.geoPoint, userPoint)));
                       } else if (_sortOption == 'popular') {
                         // (개선) 인기순 정렬 (예: 리뷰수 * 별점 + 조회수)
                         shops.sort((a, b) {

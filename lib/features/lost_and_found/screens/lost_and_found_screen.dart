@@ -58,6 +58,43 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
   bool _showSearchBar = false;
   bool _isMapMode = false;
 
+  Map<String, String?>? _buildLocationFilter(LocationProvider provider) {
+    if (provider.mode == LocationSearchMode.administrative) {
+      return provider.adminFilter;
+    }
+    if (provider.mode == LocationSearchMode.nearby) {
+      final userKab = provider.user?.locationParts?['kab'];
+      if (userKab != null && userKab.isNotEmpty) {
+        return {'kab': userKab};
+      }
+      final userProv = provider.user?.locationParts?['prov'];
+      if (userProv != null && userProv.isNotEmpty) {
+        return {'prov': userProv};
+      }
+    }
+    return null; // national
+  }
+
+  List<LostItemModel> _applyNearbyRadius(
+    List<LostItemModel> items,
+    GeoPoint? userPoint,
+    double radiusKm,
+  ) {
+    if (userPoint == null) return items;
+    final filtered = <MapEntry<LostItemModel, double>>[];
+    for (final item in items) {
+      final geo = item.geoPoint;
+      if (geo == null) continue;
+      final d = _calculateDistance(
+          userPoint.latitude, userPoint.longitude, geo.latitude, geo.longitude);
+      if (d <= radiusKm) {
+        filtered.add(MapEntry(item, d));
+      }
+    }
+    filtered.sort((a, b) => a.value.compareTo(b.value));
+    return filtered.map((e) => e.key).toList();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -120,6 +157,12 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
 
     // ✅ LocationProvider 구독
     final locationProvider = context.watch<LocationProvider>();
+    final bool isNearbyMode =
+        locationProvider.mode == LocationSearchMode.nearby;
+    final GeoPoint? userPoint = locationProvider.user?.geoPoint;
+    final double radiusKm = locationProvider.radiusKm;
+    final Map<String, String?>? locationFilter =
+        _buildLocationFilter(locationProvider);
     final repository = LostAndFoundRepository();
 
     return PopScope(
@@ -209,11 +252,15 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                       // - cardBuilder: `LostItemCard(item)`.
                       // - thumbnailUrlExtractor: item.imageUrls.first 등.
                       return SharedMapBrowser<LostItemModel>(
-                        dataStream: repository.fetchItems(
-                          locationFilter: null,
-                          // tab-aware filter
-                          itemType: _tabFilters[_tabController.index],
-                        ),
+                        dataStream: repository
+                            .fetchItems(
+                              locationFilter: locationFilter,
+                              // tab-aware filter
+                              itemType: _tabFilters[_tabController.index],
+                            )
+                            .map((items) => isNearbyMode
+                                ? _applyNearbyRadius(items, userPoint, radiusKm)
+                                : items),
                         initialCameraPosition: CameraPosition(
                           target: initialMapCenter,
                           zoom: 14,
@@ -249,21 +296,32 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
 
                         // ✅ 1. 위치 필터 적용 (Provider 기준)
                         if (locationProvider.mode ==
-                            LocationSearchMode.administrative) {
+                                LocationSearchMode.administrative &&
+                            locationProvider.activeQueryFilter != null) {
                           final filterEntry =
-                              locationProvider.activeQueryFilter;
-                          if (filterEntry != null) {
-                            query = query.where(filterEntry.key,
-                                isEqualTo: filterEntry.value);
-                          }
-                        } else if (locationProvider.mode ==
-                            LocationSearchMode.nearby) {
-                          // 거리 검색 최적화: 같은 Kab(시/군) 내에서만 1차 필터링
-                          final userKab =
-                              locationProvider.user?.locationParts?['kab'];
-                          if (userKab != null && userKab.isNotEmpty) {
+                              locationProvider.activeQueryFilter!;
+                          query = query.where(filterEntry.key,
+                              isEqualTo: filterEntry.value);
+                        } else if (locationFilter != null) {
+                          if (locationFilter['kel']?.isNotEmpty ?? false) {
+                            query = query.where('locationParts.kel',
+                                isEqualTo: locationFilter['kel']);
+                          } else if (locationFilter['kec']?.isNotEmpty ??
+                              false) {
+                            query = query.where('locationParts.kec',
+                                isEqualTo: locationFilter['kec']);
+                          } else if (locationFilter['kab']?.isNotEmpty ??
+                              false) {
                             query = query.where('locationParts.kab',
-                                isEqualTo: userKab);
+                                isEqualTo: locationFilter['kab']);
+                          } else if (locationFilter['kota']?.isNotEmpty ??
+                              false) {
+                            query = query.where('locationParts.kota',
+                                isEqualTo: locationFilter['kota']);
+                          } else if (locationFilter['prov']?.isNotEmpty ??
+                              false) {
+                            query = query.where('locationParts.prov',
+                                isEqualTo: locationFilter['prov']);
                           }
                         }
 
@@ -302,43 +360,10 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen>
                         List<LostItemModel> data;
 
                         // ✅ 2. 거리순 정렬 및 필터링 (Nearby 모드일 때)
-                        if (locationProvider.mode ==
-                                LocationSearchMode.nearby &&
-                            locationProvider.user?.geoPoint != null) {
-                          final userGeo = locationProvider.user!.geoPoint!;
-                          final radiusKm = locationProvider.radiusKm;
-
-                          docs = docs.where((doc) {
-                            final pGeo = (doc.data()['geoPoint'] as GeoPoint?);
-                            if (pGeo == null) return false;
-                            final dist = _calculateDistance(
-                                userGeo.latitude,
-                                userGeo.longitude,
-                                pGeo.latitude,
-                                pGeo.longitude);
-                            return dist <= radiusKm;
-                          }).toList();
-
-                          docs.sort((a, b) {
-                            final geoA = (a.data()['geoPoint'] as GeoPoint);
-                            final geoB = (b.data()['geoPoint'] as GeoPoint);
-                            final distA = _calculateDistance(
-                                userGeo.latitude,
-                                userGeo.longitude,
-                                geoA.latitude,
-                                geoA.longitude);
-                            final distB = _calculateDistance(
-                                userGeo.latitude,
-                                userGeo.longitude,
-                                geoB.latitude,
-                                geoB.longitude);
-                            return distA.compareTo(distB);
-                          });
-
-                          // Map to models after applying distance filtering/sorting
+                        if (isNearbyMode && userPoint != null) {
                           data = docs.map(LostItemModel.fromFirestore).toList();
+                          data = _applyNearbyRadius(data, userPoint, radiusKm);
                         } else {
-                          // Non-nearby modes: map (server already ordered by createdAt)
                           data = docs.map(LostItemModel.fromFirestore).toList();
                         }
                         if (data.isEmpty) {

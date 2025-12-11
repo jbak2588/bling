@@ -30,7 +30,10 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'package:bling_app/core/constants/app_categories.dart';
+import 'dart:math' as math;
+
 import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// [수정] 'rumah123' 모델에 따라 타입별 상세 필터를 제공하는 화면입니다.
 /// 실제 매물 목록을 보여주고 상세 필터링하는 화면입니다.
@@ -72,6 +75,51 @@ class _RoomListScreenState extends State<RoomListScreen> {
   late double _categoryMaxPrice;
   late double _categoryMaxArea;
   late double _categoryMaxLandArea;
+
+  Map<String, String?>? _buildLocationFilter(LocationProvider provider) {
+    if (provider.mode == LocationSearchMode.administrative) {
+      return provider.adminFilter;
+    }
+    if (provider.mode == LocationSearchMode.nearby) {
+      final userKab = provider.user?.locationParts?['kab'];
+      if (userKab != null && userKab.isNotEmpty) {
+        return {'kab': userKab};
+      }
+      final userProv = provider.user?.locationParts?['prov'];
+      if (userProv != null && userProv.isNotEmpty) {
+        return {'prov': userProv};
+      }
+    }
+    return null; // national 모드
+  }
+
+  double _haversineKm(GeoPoint a, GeoPoint b) {
+    const double p = 0.017453292519943295; // pi/180
+    final double c1 = math.cos((b.latitude - a.latitude) * p);
+    final double c2 = math.cos(a.latitude * p) * math.cos(b.latitude * p);
+    final double term =
+        0.5 - c1 / 2 + c2 * (1 - math.cos((b.longitude - a.longitude) * p)) / 2;
+    return 12742 * math.asin(math.sqrt(term));
+  }
+
+  List<RoomListingModel> _applyNearbyRadius(
+    List<RoomListingModel> rooms,
+    GeoPoint? userPoint,
+    double radiusKm,
+  ) {
+    if (userPoint == null) return rooms;
+    final filtered = <MapEntry<RoomListingModel, double>>[];
+    for (final room in rooms) {
+      final geo = room.geoPoint;
+      if (geo == null) continue;
+      final d = _haversineKm(userPoint, geo);
+      if (d <= radiusKm) {
+        filtered.add(MapEntry(room, d));
+      }
+    }
+    filtered.sort((a, b) => a.value.compareTo(b.value));
+    return filtered.map((e) => e.key).toList();
+  }
 
   @override
   void initState() {
@@ -299,6 +347,15 @@ class _RoomListScreenState extends State<RoomListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final locationProvider = context.watch<LocationProvider>();
+    final bool isNearbyMode =
+        locationProvider.mode == LocationSearchMode.nearby;
+    final GeoPoint? userPoint =
+        locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
+    final double radiusKm = locationProvider.radiusKm;
+    final Map<String, String?>? locationFilter =
+        _buildLocationFilter(locationProvider) ?? widget.locationFilter;
+
     return Scaffold(
       appBar: AppBar(
         // 'Kos', 'Apartment' 등 카테고리 이름 표시 (AppCategories 사용)
@@ -368,10 +425,14 @@ class _RoomListScreenState extends State<RoomListScreen> {
                 // - categoryIconExtractor: 실거래 카테고리 이모지 반환(예외 처리 포함).
                 // - initialCameraPosition: widget.userModel?.geoPoint 를 사용하여 초기 포커스 지정.
                 SharedMapBrowser<RoomListingModel>(
-                    dataStream: _repository.getRoomsStream(
-                      locationFilter: widget.locationFilter,
-                      filters: _activeFilters,
-                    ),
+                    dataStream: _repository
+                        .getRoomsStream(
+                          locationFilter: locationFilter,
+                          filters: _activeFilters,
+                        )
+                        .map((rooms) => isNearbyMode
+                            ? _applyNearbyRadius(rooms, userPoint, radiusKm)
+                            : rooms),
                     locationExtractor: (room) => room.geoPoint,
                     idExtractor: (room) => room.id,
                     titleExtractor: (room) => legacyExtractTitle(room),
@@ -391,18 +452,22 @@ class _RoomListScreenState extends State<RoomListScreen> {
                         return null;
                       }
                     },
-                    initialCameraPosition: widget.userModel?.geoPoint != null
-                        ? CameraPosition(
-                            target: LatLng(widget.userModel!.geoPoint!.latitude,
-                                widget.userModel!.geoPoint!.longitude),
-                            zoom: 14)
-                        : null,
+                    initialCameraPosition: CameraPosition(
+                      target: userPoint != null
+                          ? LatLng(userPoint.latitude, userPoint.longitude)
+                          : const LatLng(-6.200000, 106.816666),
+                      zoom: 14,
+                    ),
                   )
                 : StreamBuilder<List<RoomListingModel>>(
-                    stream: _repository.fetchRooms(
-                      locationFilter: widget.locationFilter,
-                      filters: _activeFilters,
-                    ),
+                    stream: _repository
+                        .fetchRooms(
+                          locationFilter: locationFilter,
+                          filters: _activeFilters,
+                        )
+                        .map((rooms) => isNearbyMode
+                            ? _applyNearbyRadius(rooms, userPoint, radiusKm)
+                            : rooms),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -712,12 +777,13 @@ class _RoomListScreenState extends State<RoomListScreen> {
               style: Theme.of(context).textTheme.titleMedium),
           Wrap(
             spacing: 8.0,
-            children: [1, 2, 3, 4].map((count) {
+            children: [1, 2, 3, 4].map((bathroomCountValue) {
               return ChoiceChip(
-                label: Text(count == 4 ? '4+' : '$count'),
-                selected: tempFilters.bathroomCount == count,
-                onSelected: (selected) => setModalState(
-                    () => tempFilters.bathroomCount = selected ? count : null),
+                label: Text(
+                    bathroomCountValue == 4 ? '4+' : '$bathroomCountValue'),
+                selected: tempFilters.bathroomCount == bathroomCountValue,
+                onSelected: (selected) => setModalState(() => tempFilters
+                    .bathroomCount = selected ? bathroomCountValue : null),
               );
             }).toList(),
           ),

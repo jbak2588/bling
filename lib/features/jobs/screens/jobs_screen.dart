@@ -57,6 +57,7 @@ import 'package:bling_app/features/location/providers/location_provider.dart';
 // import 'package:bling_app/features/jobs/constants/job_categories.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:bling_app/features/shared/helpers/legacy_title_extractor.dart';
+import 'dart:math' as math;
 
 class JobsScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -94,8 +95,53 @@ class _JobsScreenState extends State<JobsScreen>
   bool _showSearchBar = false;
   bool _isMapMode = false;
 
-  List<JobModel> _applyLocationFilter(List<JobModel> allJobs) {
-    final filter = widget.locationFilter;
+  Map<String, String?>? _buildLocationFilter(LocationProvider provider) {
+    if (provider.mode == LocationSearchMode.administrative) {
+      return provider.adminFilter;
+    }
+    if (provider.mode == LocationSearchMode.nearby) {
+      final userKab = provider.user?.locationParts?['kab'];
+      if (userKab != null && userKab.isNotEmpty) {
+        return {'kab': userKab};
+      }
+      final userProv = provider.user?.locationParts?['prov'];
+      if (userProv != null && userProv.isNotEmpty) {
+        return {'prov': userProv};
+      }
+    }
+    return null; // national
+  }
+
+  double _haversineKm(GeoPoint a, GeoPoint b) {
+    const double p = 0.017453292519943295; // pi/180
+    final double c1 = math.cos((b.latitude - a.latitude) * p);
+    final double c2 = math.cos(a.latitude * p) * math.cos(b.latitude * p);
+    final double term =
+        0.5 - c1 / 2 + c2 * (1 - math.cos((b.longitude - a.longitude) * p)) / 2;
+    return 12742 * math.asin(math.sqrt(term));
+  }
+
+  List<JobModel> _applyNearbyRadius(
+    List<JobModel> jobs,
+    GeoPoint? userPoint,
+    double radiusKm,
+  ) {
+    if (userPoint == null) return jobs;
+    final filtered = <MapEntry<JobModel, double>>[];
+    for (final job in jobs) {
+      final geo = job.geoPoint;
+      if (geo == null) continue;
+      final d = _haversineKm(userPoint, geo);
+      if (d <= radiusKm) {
+        filtered.add(MapEntry(job, d));
+      }
+    }
+    filtered.sort((a, b) => a.value.compareTo(b.value));
+    return filtered.map((e) => e.key).toList();
+  }
+
+  List<JobModel> _applyLocationFilter(
+      List<JobModel> allJobs, Map<String, String?>? filter) {
     if (filter == null) return allJobs;
 
     String? key;
@@ -121,9 +167,18 @@ class _JobsScreenState extends State<JobsScreen>
 
   // [리팩토링] 기존 StreamBuilder를 메서드로 분리
   Widget _buildJobFeed(JobRepository repo) {
+    final locationProvider = context.watch<LocationProvider>();
+    final bool isNearbyMode =
+        locationProvider.mode == LocationSearchMode.nearby;
+    final GeoPoint? userPoint =
+        locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
+    final double radiusKm = locationProvider.radiusKm;
+    final Map<String, String?>? locationFilter =
+        _buildLocationFilter(locationProvider) ?? widget.locationFilter;
+
     return StreamBuilder<List<JobModel>>(
       stream: repo.fetchJobs(
-        locationFilter: widget.locationFilter,
+        locationFilter: locationFilter,
         searchToken: _searchKeywordNotifier.value.isNotEmpty
             ? _searchKeywordNotifier.value.trim().split(' ').first
             : null,
@@ -137,7 +192,11 @@ class _JobsScreenState extends State<JobsScreen>
         }
 
         final allJobs = snapshot.data ?? [];
-        var filteredJobs = _applyLocationFilter(allJobs);
+        var filteredJobs = _applyLocationFilter(allJobs, locationFilter);
+
+        if (isNearbyMode) {
+          filteredJobs = _applyNearbyRadius(filteredJobs, userPoint, radiusKm);
+        }
 
         if (filteredJobs.isEmpty) {
           final isNational = context.watch<LocationProvider>().mode ==
@@ -206,6 +265,12 @@ class _JobsScreenState extends State<JobsScreen>
   // [수정] 통합 대시보드: 전문가(가로) + 구인(세로)
   Widget _buildAllFeed(Map<String, String?>? locationFilter) {
     final JobRepository jobRepo = JobRepository();
+    final locationProvider = context.watch<LocationProvider>();
+    final bool isNearbyMode =
+        locationProvider.mode == LocationSearchMode.nearby;
+    final GeoPoint? userPoint =
+        locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
+    final double radiusKm = locationProvider.radiusKm;
 
     return SingleChildScrollView(
       child: Column(
@@ -302,7 +367,10 @@ class _JobsScreenState extends State<JobsScreen>
                 );
               }
 
-              final jobs = snapshot.data!.take(10).toList();
+              var jobs = snapshot.data!.take(10).toList();
+              if (isNearbyMode) {
+                jobs = _applyNearbyRadius(jobs, userPoint, radiusKm);
+              }
 
               return ListView.builder(
                 shrinkWrap: true,
@@ -377,7 +445,9 @@ class _JobsScreenState extends State<JobsScreen>
   @override
   Widget build(BuildContext context) {
     final JobRepository jobRepository = JobRepository();
-    final userProvince = widget.userModel?.locationParts?['prov'];
+    final locationProvider = context.watch<LocationProvider>();
+    final userProvince = locationProvider.user?.locationParts?['prov'] ??
+        widget.userModel?.locationParts?['prov'];
 
     if (userProvince == null) {
       return Center(
@@ -460,7 +530,8 @@ class _JobsScreenState extends State<JobsScreen>
                     controller: _tabController,
                     children: [
                       // Tab 0: 통합 대시보드 (전문가/구인 통합)
-                      _buildAllFeed(widget.locationFilter),
+                      _buildAllFeed(_buildLocationFilter(locationProvider) ??
+                          widget.locationFilter),
 
                       // Tab 1: 구인 피드 (기존 로직 유지)
                       _buildJobFeed(jobRepository),
@@ -530,6 +601,13 @@ class _JobsScreenState extends State<JobsScreen>
   // Build a tab-aware map view: show Jobs or Talents depending on active tab.
   Widget _buildTabAwareMap(JobRepository jobRepository) {
     final locationProvider = context.watch<LocationProvider>();
+    final bool isNearbyMode =
+        locationProvider.mode == LocationSearchMode.nearby;
+    final GeoPoint? userPoint =
+        locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
+    final double radiusKm = locationProvider.radiusKm;
+    final Map<String, String?>? locationFilter =
+        _buildLocationFilter(locationProvider) ?? widget.locationFilter;
 
     // 초기 지도 중심 좌표 결정: LocationProvider 우선순위 사용
     final LatLng initialMapCenter = (() {
@@ -591,11 +669,15 @@ class _JobsScreenState extends State<JobsScreen>
     }
 
     // Default: Jobs (tabs 0 and 1)
-    final Stream<List<JobModel>> jobStream = jobRepository.fetchJobs(
-      locationFilter: null,
-      jobType: null,
-      searchToken: null,
-    );
+    final Stream<List<JobModel>> jobStream = jobRepository
+        .fetchJobs(
+          locationFilter: locationFilter,
+          jobType: null,
+          searchToken: null,
+        )
+        .map((jobs) => isNearbyMode
+            ? _applyNearbyRadius(jobs, userPoint, radiusKm)
+            : jobs);
 
     // SharedMapBrowser 사용 주석 (Jobs 기본 탭):
     // - dataStream: `jobRepository.fetchJobs(...)` -> 위치 필터/타입/검색어 전달.

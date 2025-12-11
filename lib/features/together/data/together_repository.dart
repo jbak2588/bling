@@ -29,11 +29,35 @@ class TogetherRepository {
 
   /// 2. [Read] 유효한 모임 목록 불러오기 (실시간 스트림)
   /// 조건: 모임 시간이 현재보다 미래이고, 상태가 'open'인 것만 조회
-  Stream<List<TogetherPostModel>> fetchActivePosts() {
+  /// [추가] locationFilter를 지원해 LocationProvider 설정을 반영합니다.
+  Stream<List<TogetherPostModel>> fetchActivePosts({
+    Map<String, String?>? locationFilter,
+  }) {
     final now = Timestamp.now();
-    return _postsCollection
+    Query<Map<String, dynamic>> query = _postsCollection
         .where('meetTime', isGreaterThan: now) // 시간이 지나지 않은 모임
-        .where('status', isEqualTo: 'open') // 모집 중인 모임
+        .where('status', isEqualTo: 'open'); // 모집 중인 모임
+
+    if (locationFilter != null) {
+      if (locationFilter['kel'] != null && locationFilter['kel']!.isNotEmpty) {
+        query =
+            query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+      } else if (locationFilter['kec'] != null &&
+          locationFilter['kec']!.isNotEmpty) {
+        query =
+            query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+      } else if (locationFilter['kab'] != null &&
+          locationFilter['kab']!.isNotEmpty) {
+        query =
+            query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+      } else if (locationFilter['prov'] != null &&
+          locationFilter['prov']!.isNotEmpty) {
+        query = query.where('locationParts.prov',
+            isEqualTo: locationFilter['prov']);
+      }
+    }
+
+    return query
         .orderBy('meetTime', descending: false) // 임박한 순서대로 정렬
         .snapshots()
         .map((snapshot) {

@@ -19,6 +19,7 @@ import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:math' as math;
 
 class AuctionScreen extends StatefulWidget {
   final UserModel? userModel;
@@ -44,6 +45,51 @@ class _AuctionScreenState extends State<AuctionScreen> {
   bool _showSearchBar = false;
   bool _isMapView = false;
   String _selectedCategoryId = 'all';
+
+  Map<String, String?>? _buildLocationFilter(LocationProvider provider) {
+    if (provider.mode == LocationSearchMode.administrative) {
+      return provider.adminFilter;
+    }
+    if (provider.mode == LocationSearchMode.nearby) {
+      final userKab = provider.user?.locationParts?['kab'];
+      if (userKab != null && userKab.isNotEmpty) {
+        return {'kab': userKab};
+      }
+      final userProv = provider.user?.locationParts?['prov'];
+      if (userProv != null && userProv.isNotEmpty) {
+        return {'prov': userProv};
+      }
+    }
+    return null; // national
+  }
+
+  double _haversineKm(GeoPoint a, GeoPoint b) {
+    const double p = 0.017453292519943295; // pi/180
+    final double c1 = math.cos((b.latitude - a.latitude) * p);
+    final double c2 = math.cos(a.latitude * p) * math.cos(b.latitude * p);
+    final double term =
+        0.5 - c1 / 2 + c2 * (1 - math.cos((b.longitude - a.longitude) * p)) / 2;
+    return 12742 * math.asin(math.sqrt(term));
+  }
+
+  List<AuctionModel> _applyNearbyRadius(
+    List<AuctionModel> auctions,
+    GeoPoint? userPoint,
+    double radiusKm,
+  ) {
+    if (userPoint == null) return auctions;
+    final filtered = <MapEntry<AuctionModel, double>>[];
+    for (final a in auctions) {
+      final geo = a.geoPoint;
+      if (geo == null) continue;
+      final d = _haversineKm(userPoint, geo);
+      if (d <= radiusKm) {
+        filtered.add(MapEntry(a, d));
+      }
+    }
+    filtered.sort((a, b) => a.value.compareTo(b.value));
+    return filtered.map((e) => e.key).toList();
+  }
 
   @override
   void initState() {
@@ -83,19 +129,27 @@ class _AuctionScreenState extends State<AuctionScreen> {
     }
   }
 
-  Query<Map<String, dynamic>> _buildAuctionQuery(LocationProvider provider) {
+  Query<Map<String, dynamic>> _buildAuctionQuery(
+      Map<String, String?>? locationFilter) {
     Query<Map<String, dynamic>> query =
         FirebaseFirestore.instance.collection('auctions');
 
-    if (provider.mode == LocationSearchMode.administrative) {
-      final filterEntry = provider.activeQueryFilter;
-      if (filterEntry != null) {
-        query = query.where(filterEntry.key, isEqualTo: filterEntry.value);
-      }
-    } else if (provider.mode == LocationSearchMode.nearby) {
-      final userKab = provider.user?.locationParts?['kab'];
-      if (userKab != null) {
-        query = query.where('locationParts.kab', isEqualTo: userKab);
+    if (locationFilter != null) {
+      if (locationFilter['kel']?.isNotEmpty ?? false) {
+        query =
+            query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+      } else if (locationFilter['kec']?.isNotEmpty ?? false) {
+        query =
+            query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+      } else if (locationFilter['kab']?.isNotEmpty ?? false) {
+        query =
+            query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+      } else if (locationFilter['kota']?.isNotEmpty ?? false) {
+        query = query.where('locationParts.kota',
+            isEqualTo: locationFilter['kota']);
+      } else if (locationFilter['prov']?.isNotEmpty ?? false) {
+        query = query.where('locationParts.prov',
+            isEqualTo: locationFilter['prov']);
       }
     }
 
@@ -112,22 +166,21 @@ class _AuctionScreenState extends State<AuctionScreen> {
   @override
   Widget build(BuildContext context) {
     final locationProvider = context.watch<LocationProvider>();
+    final bool isNearbyMode =
+        locationProvider.mode == LocationSearchMode.nearby;
+    final GeoPoint? userPoint =
+        locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
+    final double radiusKm = locationProvider.radiusKm;
+    final Map<String, String?>? locationFilter =
+        _buildLocationFilter(locationProvider) ??
+            (widget.userModel?.locationParts
+                ?.map((key, value) => MapEntry(key, value?.toString())));
 
     // 초기 지도 중심 좌표 결정: LocationProvider 우선순위 사용
     final LatLng initialMapCenter = (() {
       try {
-        if (locationProvider.mode == LocationSearchMode.nearby &&
-            locationProvider.user?.geoPoint != null) {
-          final gp = locationProvider.user!.geoPoint!;
-          return LatLng(gp.latitude, gp.longitude);
-        }
-        if (locationProvider.user?.geoPoint != null) {
-          final gp = locationProvider.user!.geoPoint!;
-          return LatLng(gp.latitude, gp.longitude);
-        }
-        if (widget.userModel?.geoPoint != null) {
-          final gp = widget.userModel!.geoPoint!;
-          return LatLng(gp.latitude, gp.longitude);
+        if (userPoint != null) {
+          return LatLng(userPoint.latitude, userPoint.longitude);
         }
       } catch (_) {}
       return const LatLng(-6.200000, 106.816666);
@@ -172,58 +225,19 @@ class _AuctionScreenState extends State<AuctionScreen> {
               ],
             ),
             Expanded(
-              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                // [수정] 지도 모드일 땐 쿼리 로직 분기
-                stream: _isMapView
-                    ? FirebaseFirestore.instance
-                        .collection('auctions')
-                        .orderBy('endAt')
-                        .snapshots() // 지도: 전체 보기 (필터 무시)
-                    : _buildAuctionQuery(locationProvider)
-                        .snapshots(), // 리스트: 필터 적용
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(
-                        child: Text('auctions.errors.fetchFailed'.tr()));
-                  }
-                  final docs = snapshot.data?.docs ?? [];
-                  final auctions =
-                      docs.map((d) => AuctionModel.fromFirestore(d)).toList();
-
-                  if (auctions.isEmpty) {
-                    return Center(child: Text('auctions.empty'.tr()));
-                  }
-
-                  var filtered = auctions;
-                  final kw = _searchKeywordNotifier.value;
-                  if (kw.isNotEmpty) {
-                    filtered = filtered
-                        .where((a) =>
-                            ('${a.title} ${a.description} ${a.tags.join(' ')}')
-                                .toLowerCase()
-                                .contains(kw))
-                        .toList();
-                  }
-
-                  if (_isMapView) {
-                    // [수정] StreamBuilder 데이터를 그대로 재사용하거나, Repository 호출 시 null 필터 전달
-                    // 위에서 이미 스트림을 분기했으므로, 여기서는 단순히 데이터를 넘겨주는 방식보다는
-                    // SharedMapBrowser의 dataStream 인터페이스에 맞춰 Repository를 호출하는 것이 깔끔함.
-                    // SharedMapBrowser 사용 주석 (Auction 지도뷰):
-                    // - dataStream: `_repository.fetchAuctions(locationFilter: null, categoryId: null)` -> 전체 경매 스트림을 넘깁니다.
-                    // - initialCameraPosition: `initialMapCenter` 사용.
-                    // - locationExtractor: `a.geoPoint`.
-                    // - idExtractor: `a.id`.
-                    // - titleExtractor: `legacyExtractTitle(a)` -> AuctionModel.title 사용 권장.
-                    // - cardBuilder: `AuctionCard(auction)`.
-                    // - thumbnailUrlExtractor: a.images.first 등의 이미지 필드 사용.
-                    return SharedMapBrowser<AuctionModel>(
-                      dataStream: _repository.fetchAuctions(
-                          locationFilter: null, // [중요] 전체 매물 지도 표시를 위해 null 전달
-                          categoryId: null), // [중요] 카테고리 무시하고 전체 표시
+              child: _isMapView
+                  ? SharedMapBrowser<AuctionModel>(
+                      dataStream: _repository
+                          .fetchAuctions(
+                            locationFilter: locationFilter,
+                            categoryId: _selectedCategoryId == 'all'
+                                ? null
+                                : _selectedCategoryId,
+                          )
+                          .map((auctions) => isNearbyMode
+                              ? _applyNearbyRadius(
+                                  auctions, userPoint, radiusKm)
+                              : auctions),
                       initialCameraPosition: CameraPosition(
                         target: initialMapCenter,
                         zoom: 14,
@@ -248,17 +262,52 @@ class _AuctionScreenState extends State<AuctionScreen> {
                           return null;
                         }
                       },
-                    );
-                  }
+                    )
+                  : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      stream: _buildAuctionQuery(locationFilter).snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('auctions.errors.fetchFailed'.tr()));
+                        }
+                        final docs = snapshot.data?.docs ?? [];
+                        var auctions = docs
+                            .map((d) => AuctionModel.fromFirestore(d))
+                            .toList();
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 80),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) => AuctionCard(
-                        auction: filtered[index], userModel: widget.userModel),
-                  );
-                },
-              ),
+                        if (isNearbyMode) {
+                          auctions =
+                              _applyNearbyRadius(auctions, userPoint, radiusKm);
+                        }
+
+                        if (auctions.isEmpty) {
+                          return Center(child: Text('auctions.empty'.tr()));
+                        }
+
+                        final kw = _searchKeywordNotifier.value;
+                        if (kw.isNotEmpty) {
+                          auctions = auctions
+                              .where((a) =>
+                                  ('${a.title} ${a.description} ${a.tags.join(' ')}')
+                                      .toLowerCase()
+                                      .contains(kw))
+                              .toList();
+                        }
+
+                        return ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 80),
+                          itemCount: auctions.length,
+                          itemBuilder: (context, index) => AuctionCard(
+                              auction: auctions[index],
+                              userModel: widget.userModel),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
