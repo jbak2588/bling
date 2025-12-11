@@ -173,8 +173,12 @@ class _JobsScreenState extends State<JobsScreen>
     final GeoPoint? userPoint =
         locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
     final double radiusKm = locationProvider.radiusKm;
+
+    // [Fix] 전국 모드이면 필터를 강제로 null로 설정 (전체 조회)
     final Map<String, String?>? locationFilter =
-        _buildLocationFilter(locationProvider) ?? widget.locationFilter;
+        (locationProvider.mode == LocationSearchMode.national)
+            ? null
+            : (_buildLocationFilter(locationProvider) ?? widget.locationFilter);
 
     return StreamBuilder<List<JobModel>>(
       stream: repo.fetchJobs(

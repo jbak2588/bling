@@ -171,10 +171,14 @@ class _AuctionScreenState extends State<AuctionScreen> {
     final GeoPoint? userPoint =
         locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
     final double radiusKm = locationProvider.radiusKm;
+
+    // [Fix] 전국 모드 시 사용자 위치 폴백 방지 (null 유지)
     final Map<String, String?>? locationFilter =
-        _buildLocationFilter(locationProvider) ??
-            (widget.userModel?.locationParts
-                ?.map((key, value) => MapEntry(key, value?.toString())));
+        (locationProvider.mode == LocationSearchMode.national)
+            ? null
+            : (_buildLocationFilter(locationProvider) ??
+                (widget.userModel?.locationParts
+                    ?.map((key, value) => MapEntry(key, value?.toString()))));
 
     // 초기 지도 중심 좌표 결정: LocationProvider 우선순위 사용
     final LatLng initialMapCenter = (() {
@@ -286,7 +290,62 @@ class _AuctionScreenState extends State<AuctionScreen> {
                         }
 
                         if (auctions.isEmpty) {
-                          return Center(child: Text('auctions.empty'.tr()));
+                          final isNational =
+                              context.watch<LocationProvider>().mode ==
+                                  LocationSearchMode.national;
+                          if (!isNational) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.search_off,
+                                        size: 64, color: Colors.grey[300]),
+                                    const SizedBox(height: 12),
+                                    Text('auctions.empty'.tr(),
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium),
+                                    const SizedBox(height: 8),
+                                    Text('search.empty.checkSpelling'.tr(),
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(color: Colors.grey)),
+                                    const SizedBox(height: 16),
+                                    OutlinedButton.icon(
+                                      icon: const Icon(Icons.map_outlined),
+                                      label: Text(
+                                          'search.empty.expandToNational'.tr()),
+                                      onPressed: () => context
+                                          .read<LocationProvider>()
+                                          .setMode(LocationSearchMode.national),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          return Center(
+                              child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.search_off,
+                                    size: 64, color: Colors.grey[300]),
+                                const SizedBox(height: 12),
+                                Text('auctions.empty'.tr(),
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium),
+                              ],
+                            ),
+                          ));
                         }
 
                         final kw = _searchKeywordNotifier.value;

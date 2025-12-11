@@ -540,8 +540,17 @@ class _ClubsScreenState extends State<ClubsScreen> {
 
   // 전체 클럽 목록 (스폰서 우선 정렬)
   Widget _buildAllActiveClubsList() {
+    // [Fix] LocationProvider 연동
+    final locationProvider = context.watch<LocationProvider>();
+    final Map<String, String?>? dynamicFilter =
+        (locationProvider.mode == LocationSearchMode.national)
+            ? null
+            : (locationProvider.mode == LocationSearchMode.administrative
+                ? locationProvider.adminFilter
+                : widget.locationFilter); // Nearby or fallback
+
     return StreamBuilder<List<ClubModel>>(
-      stream: _repository.fetchClubs(locationFilter: widget.locationFilter),
+      stream: _repository.fetchClubs(locationFilter: dynamicFilter),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

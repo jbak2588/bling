@@ -225,13 +225,19 @@ class _LocalStoresScreenState extends State<LocalStoresScreen> {
     final GeoPoint? userPoint =
         locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
     final double radiusKm = locationProvider.radiusKm;
+
+    // [Fix] 전국 모드 시 필터 제거
     final Map<String, String?>? locationFilter =
-        _buildLocationFilter(locationProvider) ?? widget.locationFilter;
+        (locationProvider.mode == LocationSearchMode.national)
+            ? null
+            : (_buildLocationFilter(locationProvider) ?? widget.locationFilter);
 
     final userProvince = locationProvider.user?.locationParts?['prov'] ??
         widget.userModel?.locationParts?['prov'];
 
-    if (userProvince == null) {
+    // [Fix] 전국 모드에서는 내 위치가 없어도 조회 가능해야 함
+    if (userProvince == null &&
+        locationProvider.mode != LocationSearchMode.national) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
