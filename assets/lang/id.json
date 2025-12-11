@@ -230,6 +230,11 @@
     "error": "Terjadi kesalahan: {error}",
     "empty": "Belum ada produk yang terdaftar.\nTekan tombol + untuk menambahkan produk pertama!",
     "distance": "{value} km",
+    "empty_view": {
+      "national": "Belum ada produk.",
+      "local": "Belum ada barang preloved yang terdaftar di area ini.\nPerluas area pencarian Anda atau daftarkan produk pertama!",
+      "register": "Daftar produk"
+    },
     "registration": {
       "title": "Postingan Baru",
       "done": "Simpan",

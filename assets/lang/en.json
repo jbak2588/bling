@@ -231,6 +231,11 @@
   "error": "An error occurred: {error}",
   "empty": "No products yet.\nTap the + button to add your first one!",
   "distance": "{value} km",
+  "empty_view": {
+    "national": "No products.",
+    "local": "No preloved items registered in this area yet.\nExpand your search area or add the first product!",
+    "register": "Add product"
+  },
     "registration": {
       "title": "New Post",
       "done": "Save",

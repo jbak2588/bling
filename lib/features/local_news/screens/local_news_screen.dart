@@ -429,7 +429,8 @@ class _FeedListViewState extends State<_FeedListView>
         query = query.where('locationParts.prov',
             isEqualTo: locationFilter['prov']);
       }
-    } else {
+    } else if (provider.mode != LocationSearchMode.national) {
+      // [Fix] 전국 모드가 아닐 때만 사용자 거주지 필터 적용
       final userProv = widget.userModel?.locationParts?['prov'];
       if (userProv != null && userProv.isNotEmpty) {
         query = query.where('locationParts.prov', isEqualTo: userProv);
@@ -487,8 +488,9 @@ class _FeedListViewState extends State<_FeedListView>
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: (() {
         final provider = context.watch<LocationProvider>();
-        final locationFilter =
-            _buildLocationFilter(provider) ?? widget.locationFilter;
+        final locationFilter = provider.mode == LocationSearchMode.national
+            ? null
+            : (_buildLocationFilter(provider) ?? widget.locationFilter);
         return _buildQuery(locationFilter, provider).snapshots();
       })(),
       builder: (context, snapshot) {
@@ -505,8 +507,9 @@ class _FeedListViewState extends State<_FeedListView>
         final GeoPoint? userPoint =
             provider.user?.geoPoint ?? widget.userModel?.geoPoint;
         final double radiusKm = provider.radiusKm;
-        final locationFilter =
-            _buildLocationFilter(provider) ?? widget.locationFilter;
+        final locationFilter = provider.mode == LocationSearchMode.national
+            ? null
+            : (_buildLocationFilter(provider) ?? widget.locationFilter);
 
         final allDocs = snapshot.data?.docs ?? [];
         final postsDocs = _applyLocationFilter(allDocs, locationFilter);
@@ -703,8 +706,9 @@ class _FeedMapViewState extends State<_FeedMapView> {
 
   Query<Map<String, dynamic>> _buildInitialCameraQuery() {
     final locationProvider = context.watch<LocationProvider>();
-    final locationFilter =
-        _buildLocationFilter(locationProvider) ?? widget.locationFilter;
+    final locationFilter = locationProvider.mode == LocationSearchMode.national
+        ? null
+        : (_buildLocationFilter(locationProvider) ?? widget.locationFilter);
 
     Query<Map<String, dynamic>> query =
         FirebaseFirestore.instance.collection('posts');
@@ -730,7 +734,8 @@ class _FeedMapViewState extends State<_FeedMapView> {
         query = query.where('locationParts.prov',
             isEqualTo: locationFilter['prov']);
       }
-    } else if (widget.userModel?.locationParts?['prov'] != null) {
+    } else if (locationProvider.mode != LocationSearchMode.national &&
+        widget.userModel?.locationParts?['prov'] != null) {
       query = query.where('locationParts.prov',
           isEqualTo: widget.userModel!.locationParts!['prov']);
     }
@@ -748,8 +753,9 @@ class _FeedMapViewState extends State<_FeedMapView> {
 
   Query<Map<String, dynamic>> _buildAllMarkersQuery() {
     final locationProvider = context.watch<LocationProvider>();
-    final locationFilter =
-        _buildLocationFilter(locationProvider) ?? widget.locationFilter;
+    final locationFilter = locationProvider.mode == LocationSearchMode.national
+        ? null
+        : (_buildLocationFilter(locationProvider) ?? widget.locationFilter);
 
     Query<Map<String, dynamic>> query =
         FirebaseFirestore.instance.collection('posts');
@@ -775,7 +781,8 @@ class _FeedMapViewState extends State<_FeedMapView> {
         query = query.where('locationParts.prov',
             isEqualTo: locationFilter['prov']);
       }
-    } else if (widget.userModel?.locationParts?['prov'] != null) {
+    } else if (locationProvider.mode != LocationSearchMode.national &&
+        widget.userModel?.locationParts?['prov'] != null) {
       query = query.where('locationParts.prov',
           isEqualTo: widget.userModel!.locationParts!['prov']);
     }
@@ -832,7 +839,8 @@ class _FeedMapViewState extends State<_FeedMapView> {
         final GeoPoint? userPoint =
             locationProvider.user?.geoPoint ?? widget.userModel?.geoPoint;
         final double radiusKm = locationProvider.radiusKm;
-
+        // When in national mode, pass null so _buildAllMarkersQuery won't apply
+        // widget.locationFilter fallback.
         return SharedMapBrowser<PostModel>(
           dataStream: _buildAllMarkersQuery()
               .snapshots()

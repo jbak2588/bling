@@ -129,7 +129,7 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
           } catch (_) {}
         });
 
-        if (kDebugMode && _markers.length != _lastMarkerCount) {
+        if (_markers.length != _lastMarkerCount) {
           _lastMarkerCount = _markers.length;
           if (_markers.isNotEmpty) {
             WidgetsBinding.instance.addPostFrameCallback((_) async {

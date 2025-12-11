@@ -649,29 +649,29 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
             const SizedBox(height: 16),
             Text(
               isNational
-                  ? "등록된 상품이 없습니다."
-                  : "해당 지역에 아직 등록된 Pre-loved 상품이 없어요.\n검색 지역을 늘리거나 첫 상품을 등록해보세요!",
+                  ? 'marketplace.empty_view.national'.tr()
+                  : 'marketplace.empty_view.local'.tr(),
               textAlign: TextAlign.center,
               style: const TextStyle(
                   color: Colors.grey, fontSize: 16, height: 1.5),
             ),
             const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12,
+              runSpacing: 8,
               children: [
                 if (!isNational)
                   OutlinedButton.icon(
                     icon: const Icon(Icons.map_outlined),
-                    label: Text(
-                        'search.empty.expandToNational'.tr()), // "전국으로 넓히기"
+                    label: Text('search.empty.expandToNational'.tr()),
                     onPressed: () => context
                         .read<LocationProvider>()
                         .setMode(LocationSearchMode.national),
                   ),
-                if (!isNational) const SizedBox(width: 12),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.add),
-                  label: const Text("상품 등록하기"),
+                  label: Text('marketplace.empty_view.register'.tr()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
                     foregroundColor: Colors.white,

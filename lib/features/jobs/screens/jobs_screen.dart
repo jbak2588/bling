@@ -474,31 +474,6 @@ class _JobsScreenState extends State<JobsScreen>
                 _searchKeywordNotifier.value = '';
               },
             ),
-          // [추가] 상단 바로가기 그리드 (미니 홈 스타일)
-          // Padding(
-          //   padding:
-          //       const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          //   child: Row(
-          //     children: [
-          //       _buildLauncherCard(
-          //         context,
-          //         icon: Icons.work_outline,
-          //         color: Colors.blueAccent,
-          //         title: 'jobs.selectType.regular.title'.tr(), // "일자리 찾기"
-          //         onTap: () => _tabController.animateTo(1), // 구인 탭으로 이동
-          //       ),
-          //       const SizedBox(width: 12),
-          //       _buildLauncherCard(
-          //         context,
-          //         icon: Icons.verified_user_outlined,
-          //         color: const Color(0xFF00B14F),
-          //         title: 'jobs.selectType.talent.title'.tr(), // "전문가 찾기"
-          //         onTap: () => _tabController.animateTo(2), // 재능 탭으로 이동
-          //       ),
-          //     ],
-          //   ),
-          // ),
-
           Row(
             children: [
               Expanded(
