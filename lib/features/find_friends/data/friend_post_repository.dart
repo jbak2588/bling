@@ -17,10 +17,22 @@ class FriendPostRepository {
         .collection('friend_posts')
         .orderBy('createdAt', descending: true);
 
-    // 간단한 위치 필터링 (동 단위)
-    if (locationFilter != null && locationFilter['kel'] != null) {
-      query =
-          query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+    // Marketplace-style administrative filter: prefer most-specific part provided.
+    // 우선순위: kel -> kec -> kab -> prov
+    if (locationFilter != null) {
+      if (locationFilter['kel'] != null) {
+        query =
+            query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+      } else if (locationFilter['kec'] != null) {
+        query =
+            query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+      } else if (locationFilter['kab'] != null) {
+        query =
+            query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
+      } else if (locationFilter['prov'] != null) {
+        query = query.where('locationParts.prov',
+            isEqualTo: locationFilter['prov']);
+      }
     }
 
     return query.snapshots().map((snapshot) {

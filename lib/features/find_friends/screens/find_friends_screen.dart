@@ -16,7 +16,9 @@ library;
 // lib/features/find_friends/screens/find_friends_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'dart:math' as math;
 
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
@@ -24,23 +26,20 @@ import 'package:bling_app/features/find_friends/data/friend_post_repository.dart
 import 'package:bling_app/features/find_friends/models/friend_post_model.dart';
 import 'package:bling_app/features/find_friends/widgets/findfriend_card.dart';
 import 'package:bling_app/features/find_friends/widgets/friend_post_card.dart';
-// import 'package:bling_app/features/location/screens/location_filter_screen.dart'; // [수정] 자체 필터 버튼 제거로 인해 미사용
-import 'package:bling_app/features/my_bling/widgets/user_friend_list.dart';
-// [작업 9] 작성 화면 import
+import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 import 'package:bling_app/features/find_friends/screens/create_friend_post_screen.dart';
 import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 
 class FindFriendsScreen extends StatefulWidget {
   final UserModel? userModel;
-  final Map<String, String?>? activeLocationFilter;
-  // [복원] 검색 관련 파라미터 (MainNavigation과의 연결 고리)
+  // Provider 사용으로 locationFilter 파라미터 제거
   final bool autoFocusSearch;
   final ValueNotifier<bool>? searchNotifier;
 
   const FindFriendsScreen({
     super.key,
     this.userModel,
-    this.activeLocationFilter,
     this.autoFocusSearch = false,
     this.searchNotifier,
   });
@@ -57,9 +56,8 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
 
   // 상태 변수
   late TabController _mainTabController;
-  Map<String, String?>? _currentLocationFilter;
 
-  // 탐색 탭 내부 모드 (0: 이웃 프로필, 1: 동네 토크)
+  // 탐색 탭 내부 모드 (0: Profiles, 1: Posts)
   int _exploreModeIndex = 0;
 
   // [복원] 검색 관련 상태
@@ -90,17 +88,11 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
   @override
   void didUpdateWidget(covariant FindFriendsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // MainNavigationScreen에서 필터가 변경되면 여기서 업데이트됨
-    if (oldWidget.activeLocationFilter != widget.activeLocationFilter) {
-      _currentLocationFilter = widget.activeLocationFilter == null
-          ? null
-          : Map.from(widget.activeLocationFilter!);
-      setState(() {});
-    }
+    // LocationProvider로 필터 관리를 이전했으므로 didUpdateWidget에서 별도처리 없음
   }
 
   void _loadData() {
-    _currentLocationFilter = widget.activeLocationFilter;
+    // locationProvider로 대체됨
   }
 
   // [복원] 외부(앱바)에서 검색 아이콘 클릭 시 호출됨
@@ -199,8 +191,8 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
                 // 탭 1: 둘러보기 (프로필 + 게시판)
                 _buildExploreTab(userModel),
 
-                // 탭 2: 내 친구
-                const UserFriendList(),
+                // 탭 2: 내 친구 (간단 플레이스홀더 — 실제 리스트는 별도 위젯으로 대체 예정)
+                const Center(child: Text("My Friends List (Coming Soon)")),
               ],
             ),
           ),
@@ -229,7 +221,12 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
   }
 
   Widget _buildExploreTab(UserModel currentUser) {
-    final filter = _currentLocationFilter ?? {};
+    final locationProvider = Provider.of<LocationProvider>(context);
+    final bool isNearbyMode =
+        locationProvider.mode == LocationSearchMode.nearby;
+    final Map<String, String?>? adminFilter =
+        isNearbyMode ? null : locationProvider.adminFilter;
+    final double radiusKm = locationProvider.radiusKm;
 
     return Column(
       children: [
@@ -263,15 +260,29 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
         // 콘텐츠 영역
         Expanded(
           child: _exploreModeIndex == 0
-              ? _buildProfileList(currentUser, filter)
-              : _buildPostList(currentUser, filter),
+              ? _buildProfileList(
+                  currentUser, adminFilter, isNearbyMode, radiusKm)
+              : _buildPostList(
+                  currentUser, adminFilter, isNearbyMode, radiusKm),
         ),
       ],
     );
   }
 
-  // 1-A. 이웃 프로필 리스트 (검색 필터 적용)
-  Widget _buildProfileList(UserModel currentUser, Map<String, String?> filter) {
+  // 1-A. 이웃 프로필 리스트 (LocationProvider 연동)
+  // 거리 계산 헬퍼 (Haversine formula) - Marketplace와 동일
+  double _calculateDistance(
+      double lat1, double lon1, double lat2, double lon2) {
+    var p = 0.017453292519943295;
+    var c = math.cos;
+    var a = 0.5 -
+        c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+    return 12742 * math.asin(math.sqrt(a));
+  }
+
+  Widget _buildProfileList(UserModel currentUser, Map<String, String?>? filter,
+      bool isNearbyMode, double radiusKm) {
     return StreamBuilder<List<UserModel>>(
       stream: _userRepository.getFindFriendListStream(
         locationFilter: filter,
@@ -282,17 +293,44 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(
-              child: Text('friendPost.genericError'
-                  .tr(namedArgs: {'error': snapshot.error?.toString() ?? ''})));
+          return Center(child: Text('Error: ${snapshot.error}'));
         }
 
         var users = snapshot.data ?? [];
 
-        // 1. 프로필 완성도 필터
+        // 1. 프로필 완성도 필터 (기본)
         users = users.where((user) => user.isProfileReadyForMatching).toList();
 
-        // 2. [복원] 검색어 필터
+        // 2. 거리 필터 (Nearby 모드일 때만)
+        if (isNearbyMode && currentUser.geoPoint != null) {
+          users = users.where((user) {
+            if (user.geoPoint == null) return false;
+            final dist = _calculateDistance(
+              currentUser.geoPoint!.latitude,
+              currentUser.geoPoint!.longitude,
+              user.geoPoint!.latitude,
+              user.geoPoint!.longitude,
+            );
+            return dist <= radiusKm;
+          }).toList();
+
+          // 거리순 정렬
+          users.sort((a, b) {
+            final distA = _calculateDistance(
+                currentUser.geoPoint!.latitude,
+                currentUser.geoPoint!.longitude,
+                a.geoPoint!.latitude,
+                a.geoPoint!.longitude);
+            final distB = _calculateDistance(
+                currentUser.geoPoint!.latitude,
+                currentUser.geoPoint!.longitude,
+                b.geoPoint!.latitude,
+                b.geoPoint!.longitude);
+            return distA.compareTo(distB);
+          });
+        }
+
+        // 3. 키워드 검색
         final kw = _searchKeywordNotifier.value;
         if (kw.isNotEmpty) {
           users = users.where((u) {
@@ -304,27 +342,20 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
         }
 
         if (users.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.search_off, size: 48, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(kw.isNotEmpty
-                    ? 'findFriend.searchNoResults'.tr()
-                    : 'findFriend.noMatches'.tr()),
-              ],
-            ),
-          );
+          return _buildEmptyView(kw.isNotEmpty
+              ? 'findFriend.searchNoResults'.tr()
+              : 'findFriend.noMatches'.tr());
         }
 
         return ListView.builder(
           itemCount: users.length,
           itemBuilder: (context, index) {
             final user = users[index];
-            return FindFriendCard(
-              user: user,
-              currentUser: currentUser,
+            return InkWell(
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => FindFriendDetailScreen(
+                      user: user, currentUserModel: currentUser))),
+              child: FindFriendCard(user: user, currentUser: currentUser),
             );
           },
         );
@@ -332,8 +363,9 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
     );
   }
 
-  // 1-B. 동네 토크 리스트 (검색 필터 적용)
-  Widget _buildPostList(UserModel currentUser, Map<String, String?> filter) {
+  // 1-B. 동네 토크 리스트 (LocationProvider 연동)
+  Widget _buildPostList(UserModel currentUser, Map<String, String?>? filter,
+      bool isNearbyMode, double radiusKm) {
     return StreamBuilder<List<FriendPostModel>>(
       stream: _postRepository.getPostsStream(locationFilter: filter),
       builder: (context, snapshot) {
@@ -341,14 +373,20 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(
-              child: Text('friendPost.genericError'
-                  .tr(namedArgs: {'error': snapshot.error?.toString() ?? ''})));
+          return Center(child: Text('Error: ${snapshot.error}'));
         }
 
         var posts = snapshot.data ?? [];
 
-        // [복원] 검색어 필터
+        if (isNearbyMode) {
+          final myKel = currentUser.locationParts?['kel'];
+          if (myKel != null) {
+            posts =
+                posts.where((p) => p.locationParts?['kel'] == myKel).toList();
+          }
+        }
+
+        // 키워드 검색
         final kw = _searchKeywordNotifier.value;
         if (kw.isNotEmpty) {
           posts = posts.where((p) {
@@ -358,18 +396,9 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
         }
 
         if (posts.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.forum_outlined, size: 48, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(kw.isNotEmpty
-                    ? 'findFriend.searchNoResults'.tr()
-                    : 'friendPost.noPosts'.tr()),
-              ],
-            ),
-          );
+          return _buildEmptyView(kw.isNotEmpty
+              ? 'findFriend.searchNoResults'.tr()
+              : 'friendPost.noPosts'.tr());
         }
 
         return ListView.builder(
@@ -379,6 +408,19 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
           },
         );
       },
+    );
+  }
+
+  Widget _buildEmptyView(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.search_off, size: 48, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(message, style: const TextStyle(color: Colors.grey)),
+        ],
+      ),
     );
   }
 }

@@ -50,34 +50,32 @@ class FindFriendRepository {
   /// [v2.1] Removed 'isDatingProfile' filter.
   /// TODO: Implement v2.1 sorting (trustLevel, interests)
   Stream<List<UserModel>> getFindFriendListStream({
-    required Map<String, String?> locationFilter,
+    Map<String, String?>? locationFilter,
     // [v2.1] 클라이언트 측 정렬을 위해 현재 유저 정보 추가
     required UserModel currentUser,
     // [v2.1] isDatingProfile 파라미터 삭제
     // required bool isDatingProfile,
   }) {
     Query query = _users
-        // [v2.1] isDatingProfile 필터 삭제
-        .where('isVisibleInList', isEqualTo: true);
+        // [v2.2] 노출 조건: 리스트 노출 허용 및 프로필 완성된 사용자만
+        .where('isVisibleInList', isEqualTo: true)
+        .where('profileCompleted', isEqualTo: true);
 
-    // Apply location filters dynamically
-    // (이 로직은 v2.1과 호환되므로 유지)
-    if (locationFilter['prov'] != null) {
-      query =
-          query.where('locationParts.prov', isEqualTo: locationFilter['prov']);
-
-      if (locationFilter['kab'] != null) {
+    // Marketplace-style administrative filter: prefer the most-specific part provided.
+    // Priority: kel -> kec -> kab -> prov
+    if (locationFilter != null) {
+      if (locationFilter['kel'] != null) {
+        query =
+            query.where('locationParts.kel', isEqualTo: locationFilter['kel']);
+      } else if (locationFilter['kec'] != null) {
+        query =
+            query.where('locationParts.kec', isEqualTo: locationFilter['kec']);
+      } else if (locationFilter['kab'] != null) {
         query =
             query.where('locationParts.kab', isEqualTo: locationFilter['kab']);
-
-        if (locationFilter['kec'] != null) {
-          query = query.where('locationParts.kec',
-              isEqualTo: locationFilter['kec']);
-        }
-        if (locationFilter['kel'] != null) {
-          query = query.where('locationParts.kel',
-              isEqualTo: locationFilter['kel']);
-        }
+      } else if (locationFilter['prov'] != null) {
+        query = query.where('locationParts.prov',
+            isEqualTo: locationFilter['prov']);
       }
     }
 
