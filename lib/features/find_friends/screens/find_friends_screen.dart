@@ -19,6 +19,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart' show compute;
+
+import '../../shared/utils/distance_isolate.dart';
 
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/find_friends/data/find_friend_repository.dart';
@@ -222,10 +225,20 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
 
   Widget _buildExploreTab(UserModel currentUser) {
     final locationProvider = Provider.of<LocationProvider>(context);
+
+    // [Fix] 필터 로직 정교화: 전국(national), 내주변(nearby), 행정구역(administrative) 분기
     final bool isNearbyMode =
         locationProvider.mode == LocationSearchMode.nearby;
-    final Map<String, String?>? adminFilter =
-        isNearbyMode ? null : locationProvider.adminFilter;
+    final bool isNationalMode =
+        locationProvider.mode == LocationSearchMode.national;
+
+    // 쿼리에 전달할 필터 결정:
+    // 1. 전국(national) 모드 -> null (전체 조회)
+    // 2. 내 주변(nearby) 모드 -> null (전체 조회 후 클라이언트 거리 필터링)
+    // 3. 행정구역(administrative) 모드 -> adminFilter 값 전달
+    final Map<String, String?>? queryFilter =
+        (isNationalMode || isNearbyMode) ? null : locationProvider.adminFilter;
+
     final double radiusKm = locationProvider.radiusKm;
 
     return Column(
@@ -261,9 +274,9 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
         Expanded(
           child: _exploreModeIndex == 0
               ? _buildProfileList(
-                  currentUser, adminFilter, isNearbyMode, radiusKm)
+                  currentUser, queryFilter, isNearbyMode, radiusKm)
               : _buildPostList(
-                  currentUser, adminFilter, isNearbyMode, radiusKm),
+                  currentUser, queryFilter, isNearbyMode, radiusKm),
         ),
       ],
     );
@@ -303,31 +316,81 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
 
         // 2. 거리 필터 (Nearby 모드일 때만)
         if (isNearbyMode && currentUser.geoPoint != null) {
-          users = users.where((user) {
-            if (user.geoPoint == null) return false;
-            final dist = _calculateDistance(
-              currentUser.geoPoint!.latitude,
-              currentUser.geoPoint!.longitude,
-              user.geoPoint!.latitude,
-              user.geoPoint!.longitude,
-            );
-            return dist <= radiusKm;
+          // Prepare points preserving order for isolate
+          final points = users.map((u) {
+            final gp = u.geoPoint;
+            if (gp == null) return null;
+            return {'lat': gp.latitude, 'lng': gp.longitude};
           }).toList();
 
-          // 거리순 정렬
-          users.sort((a, b) {
-            final distA = _calculateDistance(
-                currentUser.geoPoint!.latitude,
-                currentUser.geoPoint!.longitude,
-                a.geoPoint!.latitude,
-                a.geoPoint!.longitude);
-            final distB = _calculateDistance(
-                currentUser.geoPoint!.latitude,
-                currentUser.geoPoint!.longitude,
-                b.geoPoint!.latitude,
-                b.geoPoint!.longitude);
-            return distA.compareTo(distB);
+          final futureDistances = compute(computeDistancesIsolate, {
+            'userLat': currentUser.geoPoint!.latitude,
+            'userLng': currentUser.geoPoint!.longitude,
+            'points': points,
           });
+
+          return FutureBuilder<List<double?>>(
+            future: futureDistances,
+            builder: (context, distSnap) {
+              if (distSnap.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final distances =
+                  distSnap.data ?? List<double?>.filled(points.length, null);
+
+              // Pair users with distances and filter/sort by distance
+              final zipped = <MapEntry<UserModel, double?>>[];
+              for (var i = 0; i < users.length; i++) {
+                zipped.add(MapEntry(users[i], distances[i]));
+              }
+
+              var filteredPairs = zipped.where((e) {
+                final d = e.value;
+                return d != null && d <= radiusKm;
+              }).toList();
+
+              filteredPairs.sort((a, b) => a.value!.compareTo(b.value!));
+
+              // 3. 키워드 검색 (거리 필터 후 적용 — 기존 동작 유지)
+              final kw = _searchKeywordNotifier.value;
+              if (kw.isNotEmpty) {
+                filteredPairs = filteredPairs.where((pair) {
+                  final u = pair.key;
+                  final text =
+                      '${u.nickname} ${u.bio ?? ''} ${(u.interests ?? []).join(' ')}'
+                          .toLowerCase();
+                  return text.contains(kw);
+                }).toList();
+              }
+
+              if (filteredPairs.isEmpty) {
+                return _buildEmptyView(kw.isNotEmpty
+                    ? 'findFriend.searchNoResults'.tr()
+                    : 'findFriend.noMatches'.tr());
+              }
+
+              return ListView.builder(
+                itemCount: filteredPairs.length,
+                itemBuilder: (context, index) {
+                  final pair = filteredPairs[index];
+                  final user = pair.key;
+                  final distance = pair.value;
+
+                  return InkWell(
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => FindFriendDetailScreen(
+                            user: user, currentUserModel: currentUser))),
+                    child: FindFriendCard(
+                      user: user,
+                      currentUser: currentUser,
+                      distanceKm: distance,
+                    ),
+                  );
+                },
+              );
+            },
+          );
         }
 
         // 3. 키워드 검색
@@ -351,11 +414,27 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
           itemCount: users.length,
           itemBuilder: (context, index) {
             final user = users[index];
+
+            // [Added] 거리 계산
+            double? distance;
+            if (currentUser.geoPoint != null && user.geoPoint != null) {
+              distance = _calculateDistance(
+                currentUser.geoPoint!.latitude,
+                currentUser.geoPoint!.longitude,
+                user.geoPoint!.latitude,
+                user.geoPoint!.longitude,
+              );
+            }
+
             return InkWell(
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => FindFriendDetailScreen(
                       user: user, currentUserModel: currentUser))),
-              child: FindFriendCard(user: user, currentUser: currentUser),
+              child: FindFriendCard(
+                user: user,
+                currentUser: currentUser,
+                distanceKm: distance, // [Added] 거리 전달 (km)
+              ),
             );
           },
         );
@@ -366,8 +445,19 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
   // 1-B. 동네 토크 리스트 (LocationProvider 연동)
   Widget _buildPostList(UserModel currentUser, Map<String, String?>? filter,
       bool isNearbyMode, double radiusKm) {
+    // 게시글은 GeoPoint가 없는 경우가 있어 nearby 모드에서는
+    // 사용자의 Kel 기준으로 effectiveFilter를 만들고 쿼리에 전달합니다.
+    Map<String, String?>? effectiveFilter = filter;
+    if (isNearbyMode) {
+      final myKel = currentUser.locationParts?['kel'];
+      if (myKel != null) {
+        effectiveFilter = {'kel': myKel};
+      }
+    }
+
     return StreamBuilder<List<FriendPostModel>>(
-      stream: _postRepository.getPostsStream(locationFilter: filter),
+      // effectiveFilter를 전달하여 repository 레벨에서 필터링하도록 함
+      stream: _postRepository.getPostsStream(locationFilter: effectiveFilter),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -378,13 +468,7 @@ class _FindFriendsScreenState extends State<FindFriendsScreen>
 
         var posts = snapshot.data ?? [];
 
-        if (isNearbyMode) {
-          final myKel = currentUser.locationParts?['kel'];
-          if (myKel != null) {
-            posts =
-                posts.where((p) => p.locationParts?['kel'] == myKel).toList();
-          }
-        }
+        // 필터는 이미 repository 레벨에서 적용되었으므로 추가 클라이언트 필터는 불필요함
 
         // 키워드 검색
         final kw = _searchKeywordNotifier.value;

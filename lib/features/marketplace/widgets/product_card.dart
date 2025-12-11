@@ -57,7 +57,8 @@ import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dar
 // ✅ 1. StatelessWidget을 StatefulWidget으로 변경합니다.
 class ProductCard extends StatefulWidget {
   final ProductModel product;
-  const ProductCard({super.key, required this.product});
+  final double? distanceKm; // optional distance to display (km)
+  const ProductCard({super.key, required this.product, this.distanceKm});
 
   @override
   State<ProductCard> createState() => _ProductCardState();
@@ -222,7 +223,18 @@ class _ProductCardState extends State<ProductCard>
                             ),
                             const SizedBox(height: 4.0),
                             Text(
-                              '${product.locationParts?['kel'] ?? product.locationParts?['kec'] ?? 'postCard.locationNotSet'.tr()} • $registeredAt',
+                              // Build location / distance / time parts
+                              <String>[
+                                product.locationParts?['kel'] ??
+                                    product.locationParts?['kec'] ??
+                                    'postCard.locationNotSet'.tr(),
+                                if (widget.distanceKm != null)
+                                  'marketplace.distance'.tr(namedArgs: {
+                                    'value':
+                                        widget.distanceKm!.toStringAsFixed(1)
+                                  }),
+                                registeredAt,
+                              ].where((s) => s.isNotEmpty).join(' • '),
                               style: TextStyle(
                                   fontSize: 12.0, color: Colors.grey[600]),
                             ),

@@ -43,6 +43,8 @@ import 'package:bling_app/features/shared/widgets/inline_search_chip.dart';
 import 'package:bling_app/features/location/providers/location_provider.dart'; // ✅ Provider
 import 'package:provider/provider.dart'; // ✅ Provider
 import 'dart:math' as math; // 거리 계산용
+import 'package:flutter/foundation.dart' show compute;
+import '../../shared/utils/distance_isolate.dart';
 import 'package:bling_app/features/shared/widgets/shared_map_browser.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:bling_app/core/constants/app_categories.dart';
@@ -222,10 +224,27 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
       Query<Map<String, dynamic>> query =
           FirebaseFirestore.instance.collection('products');
 
-      // 거리 검색일 때는 DB 부하를 낮추기 위해 Kab(혹은 prov) 레벨에서 1차 필터
-      final userKab = locationProvider.user?.locationParts?['kab'];
-      if (userKab != null && userKab.isNotEmpty) {
-        query = query.where('locationParts.kab', isEqualTo: userKab);
+      // [Fix] LocationProvider 모드에 따른 동적 필터링 적용
+      if (locationProvider.mode == LocationSearchMode.administrative) {
+        // 1. 행정구역 모드: 선택된 필터(adminFilter) 적용
+        final filter = locationProvider.adminFilter;
+        if (filter['kel'] != null) {
+          query = query.where('locationParts.kel', isEqualTo: filter['kel']);
+        } else if (filter['kec'] != null) {
+          query = query.where('locationParts.kec', isEqualTo: filter['kec']);
+        } else if (filter['kab'] != null) {
+          query = query.where('locationParts.kab', isEqualTo: filter['kab']);
+        } else if (filter['prov'] != null) {
+          query = query.where('locationParts.prov', isEqualTo: filter['prov']);
+        }
+      } else if (locationProvider.mode == LocationSearchMode.nearby) {
+        // 2. 내 주변 모드: DB 부하 방지를 위해 Province(도) 단위로 1차 필터링 (선택 사항)
+        // 전국을 다 가져와서 거리 계산하기엔 데이터가 많을 수 있음.
+        final userProv = locationProvider.user?.locationParts?['prov'];
+        if (userProv != null) {
+          query = query.where('locationParts.prov', isEqualTo: userProv);
+        }
+        // 3. 전국 모드: 필터 없음 (전체 조회)
       }
 
       // 2. 상태 필터
@@ -372,25 +391,46 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       locationExtractor: (product) => product.geoPoint,
                       idExtractor: (product) => product.id,
                       titleExtractor: (product) => legacyExtractTitle(product),
-                      cardBuilder: (context, product) => Container(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 12.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color.fromRGBO(0, 0, 0, 0.08),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: ProductCard(
-                          key: ValueKey(product.id),
-                          product: product,
-                        ),
-                      ),
+                      cardBuilder: (context, product) {
+                        // Compute optional distance from current user/provider
+                        double? distanceKm;
+                        try {
+                          final userGp = locationProvider.user?.geoPoint ??
+                              widget.userModel?.geoPoint;
+                          final prodGp = product.geoPoint;
+                          if (userGp != null && prodGp != null) {
+                            distanceKm = _calculateDistance(
+                              userGp.latitude,
+                              userGp.longitude,
+                              prodGp.latitude,
+                              prodGp.longitude,
+                            );
+                          }
+                        } catch (_) {
+                          distanceKm = null;
+                        }
+
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 12.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color.fromRGBO(0, 0, 0, 0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: ProductCard(
+                            key: ValueKey(product.id),
+                            product: product,
+                            distanceKm: distanceKm,
+                          ),
+                        );
+                      },
                       thumbnailUrlExtractor: (product) =>
                           (product.imageUrls.isNotEmpty)
                               ? product.imageUrls.first
@@ -434,107 +474,169 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
                         var allDocs = snapshot.data?.docs ?? [];
 
-                        // ✅ [거리순 정렬 로직 추가]
+                        // ✅ [거리순 정렬 로직 — isolate 기반]
                         if (locationProvider.mode ==
                                 LocationSearchMode.nearby &&
                             locationProvider.user?.geoPoint != null) {
                           final userGeo = locationProvider.user!.geoPoint!;
                           final radiusKm = locationProvider.radiusKm;
 
-                          // 1. 거리 필터링 & 정렬을 위해 리스트 변환
-                          allDocs = allDocs.where((doc) {
-                            final pGeo = (doc.data()['geoPoint'] as GeoPoint?);
-                            if (pGeo == null) return false;
-                            final dist = _calculateDistance(
-                                userGeo.latitude,
-                                userGeo.longitude,
-                                pGeo.latitude,
-                                pGeo.longitude);
-                            return dist <= radiusKm;
+                          // Prepare points for isolate: preserve original order
+                          final points = allDocs.map((doc) {
+                            final gp = (doc.data()['geoPoint'] as GeoPoint?);
+                            if (gp == null) return null;
+                            return {'lat': gp.latitude, 'lng': gp.longitude};
                           }).toList();
 
-                          // 2. 거리순 정렬
-                          allDocs.sort((a, b) {
-                            final geoA = (a.data()['geoPoint'] as GeoPoint);
-                            final geoB = (b.data()['geoPoint'] as GeoPoint);
-                            final distA = _calculateDistance(
-                                userGeo.latitude,
-                                userGeo.longitude,
-                                geoA.latitude,
-                                geoA.longitude);
-                            final distB = _calculateDistance(
-                                userGeo.latitude,
-                                userGeo.longitude,
-                                geoB.latitude,
-                                geoB.longitude);
-                            return distA.compareTo(distB);
+                          final futureDistances =
+                              compute(computeDistancesIsolate, {
+                            'userLat': userGeo.latitude,
+                            'userLng': userGeo.longitude,
+                            'points': points,
                           });
-                        }
 
-                        allDocs = _applyStatusRules(allDocs);
+                          return FutureBuilder<List<double?>>(
+                            future: futureDistances,
+                            builder: (context, distSnap) {
+                              if (distSnap.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              }
+                              final distances = distSnap.data ??
+                                  List<double?>.filled(points.length, null);
 
-                        if (allDocs.isEmpty) {
-                          final isNational = locationProvider.mode ==
-                              LocationSearchMode.national;
-                          if (!isNational) {
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(24.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.search_off,
-                                        size: 64, color: Colors.grey[300]),
-                                    const SizedBox(height: 12),
-                                    Text('marketplace.empty'.tr(),
-                                        textAlign: TextAlign.center,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium),
-                                    const SizedBox(height: 8),
-                                    Text('search.empty.checkSpelling'.tr(),
-                                        textAlign: TextAlign.center,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(color: Colors.grey)),
-                                    const SizedBox(height: 16),
-                                    OutlinedButton.icon(
-                                      icon: const Icon(Icons.map_outlined),
-                                      label: Text(
-                                          'search.empty.expandToNational'.tr()),
-                                      style: OutlinedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 12.0, horizontal: 16.0),
+                              // Pair docs with distances and filter/sort
+                              final zipped = <MapEntry<
+                                  QueryDocumentSnapshot<Map<String, dynamic>>,
+                                  double?>>[];
+                              for (var i = 0; i < allDocs.length; i++) {
+                                zipped.add(MapEntry(allDocs[i], distances[i]));
+                              }
+
+                              var filtered = zipped.where((e) {
+                                final d = e.value;
+                                return d != null && d <= radiusKm;
+                              }).toList();
+
+                              filtered
+                                  .sort((a, b) => a.value!.compareTo(b.value!));
+
+                              // Keep the filtered paired entries (doc + distance)
+                              // Apply status rules on the document list
+                              final filteredDocs = _applyStatusRules(
+                                  filtered.map((e) => e.key).toList());
+
+                              if (filteredDocs.isEmpty) {
+                                final isNational = locationProvider.mode ==
+                                    LocationSearchMode.national;
+                                if (!isNational) {
+                                  return Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(24.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.search_off,
+                                              size: 64,
+                                              color: Colors.grey[300]),
+                                          const SizedBox(height: 12),
+                                          Text('marketplace.empty'.tr(),
+                                              textAlign: TextAlign.center,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                              'search.empty.checkSpelling'.tr(),
+                                              textAlign: TextAlign.center,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                      color: Colors.grey)),
+                                          const SizedBox(height: 16),
+                                          OutlinedButton.icon(
+                                            icon:
+                                                const Icon(Icons.map_outlined),
+                                            label: Text(
+                                                'search.empty.expandToNational'
+                                                    .tr()),
+                                            style: OutlinedButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 12.0,
+                                                      horizontal: 16.0),
+                                            ),
+                                            onPressed: () => context
+                                                .read<LocationProvider>()
+                                                .setMode(LocationSearchMode
+                                                    .national),
+                                          ),
+                                        ],
                                       ),
-                                      onPressed: () => context
-                                          .read<LocationProvider>()
-                                          .setMode(LocationSearchMode.national),
                                     ),
-                                  ],
+                                  );
+                                }
+
+                                return Center(
+                                    child: Padding(
+                                  padding: const EdgeInsets.all(24.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.search_off,
+                                          size: 64, color: Colors.grey[300]),
+                                      const SizedBox(height: 12),
+                                      Text('marketplace.empty'.tr(),
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium),
+                                    ],
+                                  ),
+                                ));
+                              }
+
+                              // Render the filtered & sorted entries using the
+                              // already computed distances (from `filtered`).
+                              return ListView.separated(
+                                // NestedScrollView 내부 리스트는 padding top 0 권장
+                                padding: EdgeInsets.zero,
+                                itemCount: filtered.length,
+                                separatorBuilder: (context, index) =>
+                                    const Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                  indent: 16,
+                                  endIndent: 16,
+                                  color: Color(0xFFEEEEEE),
                                 ),
-                              ),
-                            );
-                          }
+                                itemBuilder: (context, index) {
+                                  final pair = filtered[index];
+                                  final product =
+                                      ProductModel.fromFirestore(pair.key);
+                                  final distanceKm = pair.value;
 
-                          return Center(
-                              child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.search_off,
-                                    size: 64, color: Colors.grey[300]),
-                                const SizedBox(height: 12),
-                                Text('marketplace.empty'.tr(),
-                                    textAlign: TextAlign.center,
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium),
-                              ],
-                            ),
-                          ));
-                        }
+                                  return Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(16.0)),
+                                    ),
+                                    child: ProductCard(
+                                      key: ValueKey(product.id),
+                                      product: product,
+                                      distanceKm: distanceKm,
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        } // end if (nearby)
 
+                        // Non-nearby: render full list (preserve original behavior)
                         return ListView.separated(
                           // NestedScrollView 내부 리스트는 padding top 0 권장
                           padding: EdgeInsets.zero,
@@ -549,6 +651,24 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                           itemBuilder: (context, index) {
                             final product =
                                 ProductModel.fromFirestore(allDocs[index]);
+                            // Compute optional distance for list item
+                            double? distanceKm;
+                            try {
+                              final userGp = locationProvider.user?.geoPoint ??
+                                  widget.userModel?.geoPoint;
+                              final prodGp = product.geoPoint;
+                              if (userGp != null && prodGp != null) {
+                                distanceKm = _calculateDistance(
+                                  userGp.latitude,
+                                  userGp.longitude,
+                                  prodGp.latitude,
+                                  prodGp.longitude,
+                                );
+                              }
+                            } catch (_) {
+                              distanceKm = null;
+                            }
+
                             return Container(
                               decoration: const BoxDecoration(
                                 color: Colors.white,
@@ -558,6 +678,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                               child: ProductCard(
                                 key: ValueKey(product.id),
                                 product: product,
+                                distanceKm: distanceKm,
                               ),
                             );
                           },

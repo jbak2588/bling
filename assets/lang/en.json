@@ -228,8 +228,9 @@
     "runDataFix": "Run Data Fix"
   },
   "marketplace": {
-    "error": "An error occurred: {error}",
-    "empty": "No products yet.\nTap the + button to add your first one!",
+  "error": "An error occurred: {error}",
+  "empty": "No products yet.\nTap the + button to add your first one!",
+  "distance": "{value} km",
     "registration": {
       "title": "New Post",
       "done": "Save",
@@ -644,6 +645,26 @@
     "shortLabelLabel": "Short label",
     "shortLabelHint": "Optional short label for this place",
     "updatingAddress": "Updating address..."
+    ,
+    "neighborhoodPrompt": {
+      "title": "Set Your Neighborhood",
+      "subtitle": "Verify your neighborhood to use all Bling features.",
+      "gpsWaiting": "Waiting for GPS signal...",
+      "geocoding": "Converting address to coordinates...",
+      "saving": "Saving neighborhood information...",
+      "manualSaving": "Saving selected neighborhood...",
+      "saved": "Neighborhood saved successfully.",
+      "error": "Error: {error}",
+      "saveFailed": "Save failed: {error}",
+      "selectAtLeastCity": "Please select at least the city/district level.",
+      "currentLocationButton": "Use current location",
+      "manualSelectButton": "Select neighborhood manually",
+      "processing": "Processing..."
+      ,
+      "noLocation": "Couldn't get location.",
+      "addressNotFound": "Address not found.",
+      "userNotAuthenticated": "User not authenticated. Please sign in again."
+      }
   },
   "profileEdit": {
     "title": "Profile Settings",
@@ -1245,6 +1266,7 @@
     "bioLabel": "Bio",
     "bioHint": "Introduce yourself to others.",
     "bioValidator": "Please enter your bio.",
+    "distance": "{value} km",
     "ageLabel": "Age",
     "ageHint": "Enter your age.",
     "genderLabel": "Gender",

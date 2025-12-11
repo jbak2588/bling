@@ -229,6 +229,7 @@
   "marketplace": {
     "error": "Terjadi kesalahan: {error}",
     "empty": "Belum ada produk yang terdaftar.\nTekan tombol + untuk menambahkan produk pertama!",
+    "distance": "{value} km",
     "registration": {
       "title": "Postingan Baru",
       "done": "Simpan",
@@ -643,6 +644,26 @@
     "shortLabelLabel": "Label singkat",
     "shortLabelHint": "Label singkat opsional untuk tempat ini",
     "updatingAddress": "Memperbarui alamat..."
+    ,
+    "neighborhoodPrompt": {
+      "title": "Atur Lingkungan Anda",
+      "subtitle": "Verifikasi lingkungan Anda untuk menggunakan semua fitur Bling.",
+      "gpsWaiting": "Menunggu sinyal GPS...",
+      "geocoding": "Mengonversi alamat ke koordinat...",
+      "saving": "Menyimpan informasi lingkungan...",
+      "manualSaving": "Menyimpan lingkungan yang dipilih...",
+      "saved": "Lingkungan berhasil disimpan.",
+      "error": "Kesalahan: {error}",
+      "saveFailed": "Gagal menyimpan: {error}",
+      "selectAtLeastCity": "Silakan pilih setidaknya tingkat kota/kabupaten.",
+      "currentLocationButton": "Gunakan lokasi saat ini",
+      "manualSelectButton": "Pilih lingkungan secara manual",
+      "processing": "Memproses..."
+      ,
+      "noLocation": "Tidak dapat mengambil lokasi.",
+      "addressNotFound": "Alamat tidak ditemukan.",
+      "userNotAuthenticated": "Pengguna belum terautentikasi. Silakan masuk lagi."
+      }
   },
   "profileEdit": {
     "title": "Pengaturan Profil",
@@ -1244,6 +1265,7 @@
     "bioLabel": "Bio",
     "bioHint": "Perkenalkan dirimu kepada orang lain.",
     "bioValidator": "Harap isi bio Anda.",
+    "distance": "{value} km",
     "ageLabel": "Umur",
     "ageHint": "Masukkan umur Anda.",
     "genderLabel": "Jenis Kelamin",
@@ -1577,7 +1599,7 @@
         "error": "Terjadi kesalahan: {error}"
       }
     },
-    "empty": "Tidak ada Grup untuk ditampilkan."
+    "empty": "Belum ada produk.\nKetuk tombol + untuk menambahkan yang pertama!"
   },
   "auctions": {
     "card": {

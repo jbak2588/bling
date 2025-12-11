@@ -66,6 +66,14 @@ class LocationProvider extends ChangeNotifier {
     String? kec,
     String? kel,
   }) {
+    // [Optimization] 변경 사항이 없으면 notifyListeners() 호출 방지
+    if (_mode == LocationSearchMode.administrative &&
+        _adminFilter['prov'] == prov &&
+        _adminFilter['kab'] == kab &&
+        _adminFilter['kec'] == kec &&
+        _adminFilter['kel'] == kel) {
+      return;
+    }
     _mode = LocationSearchMode.administrative;
     _adminFilter = {
       'prov': prov,

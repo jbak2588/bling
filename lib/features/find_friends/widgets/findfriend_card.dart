@@ -35,16 +35,19 @@ import '../../../core/models/user_model.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Card displaying basic information for a FindFriend profile.
 class FindFriendCard extends StatelessWidget {
   final UserModel user;
   final UserModel currentUser;
+  final double? distanceKm;
 
   const FindFriendCard({
     super.key,
     required this.user,
     required this.currentUser,
+    this.distanceKm,
   });
 
   // [Added] 관심사 키 -> 이모지 매핑 테이블
@@ -217,6 +220,23 @@ class FindFriendCard extends StatelessWidget {
                         if ((user.locationParts?['kel'] != null) &&
                             (user.interests?.isNotEmpty ?? false))
                           const SizedBox(width: 8),
+
+                        // [Added] 거리 표시 (주소가 있을 때만 점 찍고 표시)
+                        if (distanceKm != null) ...[
+                          if (user.locationParts?['kel'] != null)
+                            Text(" • ",
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.grey[400])),
+                          Text(
+                            'findFriend.distance'.tr(namedArgs: {
+                              'value': distanceKm!.toStringAsFixed(1)
+                            }),
+                            style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.teal,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
 
                         // 관심사 이모지
                         if (user.interests != null &&
