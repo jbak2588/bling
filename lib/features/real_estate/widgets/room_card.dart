@@ -33,6 +33,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/real_estate/screens/room_detail_screen.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math' as math;
+import 'package:provider/provider.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // ✅ StatelessWidget을 StatefulWidget으로 변경
 class RoomCard extends StatefulWidget {
@@ -52,6 +56,70 @@ class _RoomCardState extends State<RoomCard>
   final RoomRepository _repository = RoomRepository();
   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
+  // [신규] 거리 계산 헬퍼 (Haversine 공식 적용)
+  String? _calculateDistance(GeoPoint? userLoc, GeoPoint? itemLoc) {
+    if (userLoc == null || itemLoc == null) return null;
+    const double p = 0.017453292519943295;
+    final double c1 = math.cos((itemLoc.latitude - userLoc.latitude) * p);
+    final double c2 =
+        math.cos(userLoc.latitude * p) * math.cos(itemLoc.latitude * p);
+    final double term = 0.5 -
+        c1 / 2 +
+        c2 * (1 - math.cos((itemLoc.longitude - userLoc.longitude) * p)) / 2;
+    final double km = 12742 * math.asin(math.sqrt(term));
+
+    return km < 1 ? '${(km * 1000).round()}m' : '${km.toStringAsFixed(1)}km';
+  }
+
+  // [신규] 주소 포맷팅 (Indonesia 제거)
+  String _formatAddress(String? address) {
+    if (address == null) return 'realEstate.locationUnknown'.tr();
+    return address
+        .replaceAll(RegExp(r',?\s*Indonesia', caseSensitive: false), '')
+        .trim();
+  }
+
+  // [신규] 필터 상태에 따른 동적 주소 표시 로직 (개인정보 보호 & 계층화)
+  String _getDynamicAddress(BuildContext context, RoomListingModel room) {
+    final provider = context.watch<LocationProvider>();
+    final filter = provider.adminFilter;
+    final parts = room.locationParts;
+
+    if (parts == null) return 'realEstate.locationUnknown'.tr();
+
+    final kel = parts['kel'];
+    final kec = parts['kec'];
+    final kab = parts['kab']; // 보통 'Kota ...' 또는 'Kab. ...' 포함
+    final prov = parts['prov'];
+
+    final List<String> displayParts = [];
+
+    // 필터 깊이 판단
+    bool hasProv = filter['prov'] != null;
+    bool hasKab = filter['kab'] != null;
+    bool hasKec = filter['kec'] != null;
+
+    if (kel != null && kel.isNotEmpty) displayParts.add('Kel. $kel');
+
+    // Prov + Kab + Kec 선택됨 -> Kel 만 표시 (위에서 추가함)
+    // 그 외의 경우 상위 주소 추가
+    if (!(hasProv && hasKab && hasKec)) {
+      if (kec != null && kec.isNotEmpty) displayParts.add('Kec. $kec');
+      if (!hasKab && !hasKec) {
+        // Prov만 선택 or 전국 -> Kab 표시
+        if (kab != null && kab.isNotEmpty) displayParts.add(kab);
+      }
+      if (!hasProv && !hasKab && !hasKec) {
+        // 전국 -> Prov 표시
+        if (prov != null && prov.isNotEmpty) displayParts.add(prov);
+      }
+    }
+
+    return displayParts.isEmpty
+        ? _formatAddress(room.locationName) // fallback
+        : displayParts.join(', ');
+  }
+
   @override
   bool get wantKeepAlive => true; // ✅ 상태 유지
 
@@ -59,6 +127,13 @@ class _RoomCardState extends State<RoomCard>
   Widget build(BuildContext context) {
     super.build(context); // ✅ KeepAlive를 위해 호출
     final room = widget.room; // ✅ room 참조 방식 변경
+    // Provider로 사용자 위치 가져오기
+    final GeoPoint? userPoint =
+        context.select<LocationProvider, GeoPoint?>((p) => p.user?.geoPoint);
+    final distance = _calculateDistance(userPoint, room.geoPoint);
+
+    // [수정] 동적 주소 생성
+    final displayAddress = _getDynamicAddress(context, room);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -90,6 +165,8 @@ class _RoomCardState extends State<RoomCard>
                     storageId: room.id,
                     imageUrls: room.imageUrls,
                     height: 200,
+                    // [수정] 리스트에서는 이미지 탭 시에도 상세 화면으로 이동 (갤러리 X)
+                    onImageTap: () => _goToDetail(context),
                   ),
                   Positioned(
                     top: 8,
@@ -199,11 +276,25 @@ class _RoomCardState extends State<RoomCard>
                           size: 14, color: Colors.grey[600]),
                       const SizedBox(width: 4),
                       Expanded(
-                        child: Text(
-                          room.locationName ??
-                              'realEstate.locationUnknown'.tr(),
-                          style:
-                              TextStyle(fontSize: 13, color: Colors.grey[700]),
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: displayAddress, // [수정] 동적 주소 적용
+                                style: TextStyle(
+                                    fontSize: 13, color: Colors.grey[700]),
+                              ),
+                              if (distance != null)
+                                TextSpan(
+                                  text: ' ($distance)',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Theme.of(context).primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                            ],
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -229,6 +320,17 @@ class _RoomCardState extends State<RoomCard>
         child: Text(label,
             style: const TextStyle(color: Colors.white, fontSize: 12)),
       ),
+    );
+  }
+
+  void _goToDetail(BuildContext context) {
+    final detail = RoomDetailScreen(room: widget.room);
+    if (widget.onIconTap != null) {
+      widget.onIconTap!(detail, 'main.tabs.realEstate');
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => detail),
     );
   }
 

@@ -178,6 +178,16 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         imageUrls.add(await ref.getDownloadURL());
       }
 
+      // [수정] 가격 파싱 로직 보완 (숫자 이외 문자 제거 후 정수 파싱)
+      final rawPrice = _priceController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final int price = int.tryParse(rawPrice) ?? 0;
+
+      if (price <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('realEstate.error.invalidPrice'.tr())));
+        return;
+      }
+
       final newListing = RoomListingModel(
         id: '',
         userId: user.uid,
@@ -191,7 +201,7 @@ class _CreateRoomListingScreenState extends State<CreateRoomListingScreen> {
         // 이미 위에서 freshUserModel을 조회했음
         geoPoint: freshUserModel?.geoPoint ?? widget.userModel.geoPoint,
         propertyLocation: _propertyLocation,
-        price: int.tryParse(_priceController.text) ?? 0,
+        price: price,
         // [수정] '작업 27': 'sale'일 경우 'priceUnit'을 기본값('monthly')으로 강제
         priceUnit: _selectedListingType == 'rent' ? _priceUnit : 'monthly',
         imageUrls: imageUrls,

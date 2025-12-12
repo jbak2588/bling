@@ -59,6 +59,11 @@ import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
 import 'package:bling_app/core/constants/app_categories.dart';
+// [추가]
+import 'dart:math' as math;
+import 'package:provider/provider.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Helper: open external map for a given lat/lng
 Future<void> _openMap(double lat, double lng) async {
@@ -83,6 +88,27 @@ class RoomDetailScreen extends StatefulWidget {
 class _RoomDetailScreenState extends State<RoomDetailScreen> {
   final RoomRepository _repository = RoomRepository();
   final ChatService _chatService = ChatService();
+  // [신규] 거리 계산 로직 (Haversine 공식)
+  String? _calculateDistance(GeoPoint? userLoc, GeoPoint? itemLoc) {
+    if (userLoc == null || itemLoc == null) return null;
+    const double p = 0.017453292519943295;
+    final double c1 = math.cos((itemLoc.latitude - userLoc.latitude) * p);
+    final double c2 =
+        math.cos(userLoc.latitude * p) * math.cos(itemLoc.latitude * p);
+    final double term = 0.5 -
+        c1 / 2 +
+        c2 * (1 - math.cos((itemLoc.longitude - userLoc.longitude) * p)) / 2;
+    final double km = 12742 * math.asin(math.sqrt(term));
+    return km < 1 ? '${(km * 1000).round()}m' : '${km.toStringAsFixed(1)}km';
+  }
+
+  // [신규] 주소 텍스트 정리
+  String _formatAddress(String? address) {
+    if (address == null) return '';
+    return address
+        .replaceAll(RegExp(r',?\s*Indonesia', caseSensitive: false), '')
+        .trim();
+  }
   // int _currentImageIndex = 0;
 
   void _startChat(BuildContext context, String ownerId) async {
@@ -179,6 +205,10 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
     final NumberFormat currencyFormat =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
+    // [추가] 사용자 위치 가져오기
+    final GeoPoint? userPoint =
+        context.select<LocationProvider, GeoPoint?>((p) => p.user?.geoPoint);
+
     return StreamBuilder<RoomListingModel>(
       stream: _repository
           .getRoomStream(widget.room.id), // Repository에 getRoomStream 필요
@@ -229,12 +259,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                   const SizedBox(height: 8),
                   // [추가] Gap 1: '직방' 스타일 핵심 정보
                   Text(
-                    '${AppCategories.realEstateCategories
-                            .firstWhere((c) => c.categoryId == room.type,
-                                orElse: () =>
-                                    AppCategories.realEstateCategories.first)
-                            .nameKey
-                            .tr()} · ${'realEstate.form.listingTypes.${room.listingType}'.tr()}',
+                    '${AppCategories.realEstateCategories.firstWhere((c) => c.categoryId == room.type, orElse: () => AppCategories.realEstateCategories.first).nameKey.tr()} · ${'realEstate.form.listingTypes.${room.listingType}'.tr()}',
                     style: TextStyle(
                         fontSize: 15,
                         color: Theme.of(context).primaryColor,
@@ -266,9 +291,64 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                   ClickableTagList(tags: room.tags),
                   if (locationGeo != null) ...[
                     const Divider(height: 32),
-                    Text('realEstate.detail.location'.tr(),
-                        style: Theme.of(context).textTheme.titleLarge),
-                    const SizedBox(height: 12),
+                    // 거리 계산 및 주소 포맷
+                    Builder(builder: (ctx) {
+                      final distance =
+                          _calculateDistance(userPoint, locationGeo);
+                      final displayAddress = _formatAddress(room.locationName);
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('realEstate.detail.location'.tr(),
+                                  style: Theme.of(ctx).textTheme.titleLarge),
+                              if (distance != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(ctx)
+                                        .primaryColor
+                                        .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    distance,
+                                    style: TextStyle(
+                                      color: Theme.of(ctx).primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          // 텍스트 주소 표시
+                          if (displayAddress.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.place,
+                                      size: 16, color: Colors.grey[600]),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      displayAddress,
+                                      style: TextStyle(
+                                          color: Colors.grey[800],
+                                          fontSize: 14),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      );
+                    }),
                     GestureDetector(
                       onTap: () =>
                           _openMap(locationGeo.latitude, locationGeo.longitude),
@@ -413,13 +493,7 @@ class _RoomDetailScreenState extends State<RoomDetailScreen> {
                     const SizedBox(height: 8),
                     // [추가] Gap 1: '직방' 스타일 핵심 정보
                     Text(
-                      '${AppCategories.realEstateCategories
-                              .firstWhere((c) => c.categoryId == room.type,
-                                  orElse: () =>
-                                      AppCategories.realEstateCategories.first)
-                              .nameKey
-                              .tr()} · ${'realEstate.form.listingTypes.${room.listingType}'
-                              .tr()}',
+                      '${AppCategories.realEstateCategories.firstWhere((c) => c.categoryId == room.type, orElse: () => AppCategories.realEstateCategories.first).nameKey.tr()} · ${'realEstate.form.listingTypes.${room.listingType}'.tr()}',
                       style: TextStyle(
                           fontSize: 15,
                           color: Theme.of(context).primaryColor,

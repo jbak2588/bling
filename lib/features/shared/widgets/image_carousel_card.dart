@@ -68,6 +68,8 @@ class ImageCarouselCard extends StatefulWidget {
   final double? width;
   final double height;
   final String storageId;
+  // [신규] 이미지 탭 동작을 외부에서 제어하기 위한 콜백 (null일 경우 기본 갤러리 이동)
+  final VoidCallback? onImageTap;
 
   const ImageCarouselCard({
     super.key,
@@ -75,6 +77,7 @@ class ImageCarouselCard extends StatefulWidget {
     required this.storageId,
     this.width = double.infinity,
     this.height = 180.0,
+    this.onImageTap,
   });
 
   @override
@@ -178,14 +181,16 @@ class _ImageCarouselCardState extends State<ImageCarouselCard> {
         : imageWidget;
 
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => ImageGalleryScreen(
-            imageUrls: widget.imageUrls,
-            initialIndex: index,
-          ),
-        ));
-      },
+      // [수정] 외부 콜백이 있으면 실행, 없으면 기본 갤러리 로직 실행
+      onTap: widget.onImageTap ??
+          () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => ImageGalleryScreen(
+                imageUrls: widget.imageUrls,
+                initialIndex: index,
+              ),
+            ));
+          },
       child: wrappedImage,
     );
   }

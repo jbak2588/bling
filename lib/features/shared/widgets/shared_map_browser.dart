@@ -195,6 +195,8 @@ class _SharedMapBrowserState<T> extends State<SharedMapBrowser<T>> {
                   // causing overlay tooltips to never be shown.
                   WidgetsBinding.instance.addPostFrameCallback((_) async {
                     try {
+                      // [수정] 맵 재진입 시 렌더링 지연으로 인한 툴팁 누락 방지를 위해 딜레이 추가
+                      await Future.delayed(const Duration(milliseconds: 350));
                       await _updateMarkerScreenPositions();
                     } catch (_) {}
                   });

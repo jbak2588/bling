@@ -185,8 +185,7 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
     }
     if (_propertyLocation == null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('realEstate.form.propertyLocationRequired'
-              .tr()))); 
+          content: Text('realEstate.form.propertyLocationRequired'.tr())));
       return;
     }
 
@@ -209,13 +208,26 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
 
       // V V V --- [핵심 수정] RoomListingModel에 실제로 존재하는 필드만 사용하여 객체를 생성합니다 --- V V V
 
+      // [수정] 가격 파싱 보완 (숫자 이외 문자 제거 후 정수 파싱)
+      final rawPrice = _priceController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final int price = int.tryParse(rawPrice) ?? 0;
+
+      if (price <= 0) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('realEstate.error.invalidPrice'.tr())),
+          );
+        }
+        return;
+      }
+
       final updatedListing = RoomListingModel(
         id: widget.room.id,
         userId: widget.room.userId,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         type: _type,
-        price: int.tryParse(_priceController.text) ?? 0,
+        price: price,
         // [수정] '작업 27': 'sale'일 경우 'priceUnit'을 기본값('monthly')으로 강제
         priceUnit: _selectedListingType == 'rent' ? _priceUnit : 'monthly',
         imageUrls: imageUrls,
@@ -455,10 +467,8 @@ class _EditRoomListingScreenState extends State<EditRoomListingScreen> {
                 AddressMapPicker(
                   initialValue: _propertyLocation,
                   userGeoPoint: widget.room.geoPoint,
-                  labelText: 'realEstate.form.propertyLocationLabel'
-                      .tr(), 
-                  hintText: 'realEstate.form.propertyLocationHint'
-                      .tr(), 
+                  labelText: 'realEstate.form.propertyLocationLabel'.tr(),
+                  hintText: 'realEstate.form.propertyLocationHint'.tr(),
                   onChanged: (loc) {
                     setState(() => _propertyLocation = loc);
                   },
