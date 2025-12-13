@@ -1673,6 +1673,7 @@
       "titleRequired": "Silakan masukkan judul.",
       "descriptionRequired": "Silakan masukkan deskripsi.",
       "startPriceRequired": "Silakan masukkan harga awal.",
+      "startPriceInvalid": "Masukkan harga awal yang valid.",
       "categoryRequired": "Harap pilih kategori."
     },
     "delete": {

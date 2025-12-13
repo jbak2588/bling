@@ -1674,6 +1674,7 @@
       "titleRequired": "Please enter a title.",
       "descriptionRequired": "Please enter a description.",
       "startPriceRequired": "Please enter a start price.",
+      "startPriceInvalid": "Please enter a valid start price.",
       "categoryRequired": "Please select a category."
     },
     "delete": {

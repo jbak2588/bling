@@ -27,6 +27,8 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
+  // [신규] 가격 수정을 위한 컨트롤러 추가
+  late final TextEditingController _startPriceController;
 
   List<dynamic> _images = []; // 기존 URL(String)과 새로운 파일(XFile)을 모두 담기 위함
   bool _isSaving = false;
@@ -43,6 +45,11 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
     _titleController = TextEditingController(text: widget.auction.title);
     _descriptionController =
         TextEditingController(text: widget.auction.description);
+    // [신규] 기존 시작가로 초기화 (0원인 경우 빈 문자열 처리 가능)
+    _startPriceController = TextEditingController(
+        text: widget.auction.startPrice > 0
+            ? widget.auction.startPrice.toString()
+            : '');
     _images = List.from(widget.auction.images);
     _selectedCategory = widget.auction.category; // ✅ 초기 카테고리
     _tags = List<String>.from(widget.auction.tags);
@@ -52,13 +59,14 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _startPriceController.dispose(); // [신규] dispose 추가
     super.dispose();
   }
 
   Future<void> _pickImages() async {
     if (_images.length >= 10) return;
     final pickedFiles = await _picker.pickMultiImage(
-        imageQuality: 70, limit: 10 - _images.length);
+        limit: 10 - _images.length); // [수정] imageQuality 제거
     if (pickedFiles.isNotEmpty) {
       setState(() => _images.addAll(pickedFiles));
     }
@@ -107,13 +115,18 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
         }
       }
 
+      // [신규] 가격 파싱 로직 적용 (숫자만 추출)
+      final rawPrice =
+          _startPriceController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final int startPrice = int.tryParse(rawPrice) ?? 0;
+
       final updatedAuction = AuctionModel(
         id: widget.auction.id,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         images: imageUrls,
-        // 수정되지 않는 필드들은 기존 값을 그대로 사용
-        startPrice: widget.auction.startPrice,
+        // [수정] 수정된 시작가 적용
+        startPrice: startPrice,
         currentBid: widget.auction.currentBid,
         bidHistory: widget.auction.bidHistory,
         // Prefer fresh user profile for location info, fallback to existing auction data
@@ -248,6 +261,25 @@ class _EditAuctionScreenState extends State<EditAuctionScreen> {
                   onChanged: (value) {
                     setState(() => _selectedCategory = value);
                   },
+                ),
+                const SizedBox(height: 16),
+                // [신규] 시작가 입력 필드 추가
+                TextFormField(
+                  controller: _startPriceController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'auctions.create.form.startPrice'.tr(),
+                    border: const OutlineInputBorder(),
+                    prefixText: 'Rp ',
+                  ),
+                  validator: (value) {
+                    final raw = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                    if (raw.isEmpty) return null; // optional
+                    final v = int.tryParse(raw) ?? 0;
+                    if (v <= 0) return 'auctions.form.startPriceInvalid'.tr();
+                    return null;
+                  },
+                  // 시작가는 선택 사항이거나 0일 수 있으므로 필수 체크는 상황에 맞게 (여기선 생략 가능하나 원본 로직 유지)
                 ),
                 const SizedBox(height: 16),
 

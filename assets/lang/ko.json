@@ -1673,6 +1673,7 @@
       "titleRequired": "제목을 입력해주세요.",
       "descriptionRequired": "설명을 입력해주세요.",
       "startPriceRequired": "시작가를 입력해주세요.",
+      "startPriceInvalid": "시작가는 0보다 큰 숫자여야 합니다.",
       "categoryRequired": "카테고리를 선택해주세요."
     },
     "delete": {

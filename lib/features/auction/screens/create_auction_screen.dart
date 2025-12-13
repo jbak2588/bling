@@ -55,7 +55,7 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
     setState(() => _isPickingImages = true);
     try {
       final pickedFiles = await _picker.pickMultiImage(
-          imageQuality: 70, limit: 10 - _images.length);
+          limit: 10 - _images.length); // [수정] imageQuality 제거 (다중 선택 버그 방지)
       if (pickedFiles.isNotEmpty && mounted) {
         setState(() => _images.addAll(pickedFiles));
       }
@@ -108,7 +108,19 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
       final endAt = Timestamp.fromMillisecondsSinceEpoch(
           now.millisecondsSinceEpoch +
               Duration(days: _durationInDays).inMilliseconds);
-      final startPrice = int.tryParse(_startPriceController.text) ?? 0;
+      // [수정] 가격 파싱 로직 보완 (숫자만 추출)
+      final rawPrice =
+          _startPriceController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final startPrice = int.tryParse(rawPrice) ?? 0;
+
+      if (startPrice <= 0) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('auctions.form.startPriceInvalid'.tr()),
+              backgroundColor: Colors.red));
+        }
+        return;
+      }
 
       final newAuction = AuctionModel(
         id: '',
@@ -260,9 +272,12 @@ class _CreateAuctionScreenState extends State<CreateAuctionScreen> {
                       border: const OutlineInputBorder(),
                       prefixText: 'Rp '),
                   keyboardType: TextInputType.number,
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'auctions.form.startPriceRequired'.tr()
-                      : null,
+                  validator: (value) {
+                    final raw = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                    final v = int.tryParse(raw) ?? 0;
+                    if (v <= 0) return 'auctions.form.startPriceInvalid'.tr();
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 // ✅ [탐색 기능] 4. 카테고리 선택 드롭다운 추가

@@ -17,7 +17,6 @@ import 'package:bling_app/features/local_news/widgets/comment_input_field.dart';
 import 'package:bling_app/features/local_news/widgets/comment_list_view.dart';
 
 // ✅ [하이퍼로컬] 1. 거리 계산 헬퍼 import
-import 'package:bling_app/core/utils/location_helper.dart';
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
 // ✅ [신뢰] 1. AI 검증 배지 import
 import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart';
@@ -25,6 +24,9 @@ import 'package:bling_app/features/shared/widgets/clickable_tag_list.dart';
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
+import 'package:provider/provider.dart';
+import 'dart:math' as math;
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
@@ -48,10 +50,63 @@ class AuctionDetailScreen extends StatefulWidget {
 
 class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
   final AuctionRepository _repository = AuctionRepository();
-  final _bidAmountController = TextEditingController();
+  final TextEditingController _bidAmountController = TextEditingController();
   // int _currentImageIndex = 0; // [추가] 현재 보이는 이미지 인덱스
 
   bool _isBidding = false; // [추가] 입찰 중 상태
+
+  // [신규] 거리 계산 헬퍼
+  String? _calculateDistance(GeoPoint? userLoc, GeoPoint? itemLoc) {
+    if (userLoc == null || itemLoc == null) return null;
+    const double p = 0.017453292519943295;
+    final double c1 = math.cos((itemLoc.latitude - userLoc.latitude) * p);
+    final double c2 =
+        math.cos(userLoc.latitude * p) * math.cos(itemLoc.latitude * p);
+    final double term = 0.5 -
+        c1 / 2 +
+        c2 * (1 - math.cos((itemLoc.longitude - userLoc.longitude) * p)) / 2;
+    final double km = 12742 * math.asin(math.sqrt(term));
+    return km < 1 ? '${(km * 1000).round()}m' : '${km.toStringAsFixed(1)}km';
+  }
+
+  // [신규] 동적 주소 표시 로직
+  String _getDynamicAddress(BuildContext context, AuctionModel auction) {
+    final provider = context.watch<LocationProvider>();
+    final filter = provider.adminFilter;
+    final parts = auction.locationParts;
+
+    if (parts == null) {
+      return auction.location
+          .replaceAll(RegExp(r',?\s*Indonesia', caseSensitive: false), '')
+          .trim();
+    }
+
+    final kel = parts['kel'];
+    final kec = parts['kec'];
+    final kab = parts['kab'];
+    final prov = parts['prov'];
+    final List<String> displayParts = [];
+
+    bool hasProv = filter['prov'] != null;
+    bool hasKab = filter['kab'] != null;
+    bool hasKec = filter['kec'] != null;
+
+    if (kel != null && kel.isNotEmpty) {
+      displayParts.add('Kel. $kel');
+    }
+    if (!(hasProv && hasKab && hasKec)) {
+      if (kec != null && kec.isNotEmpty) {
+        displayParts.add('Kec. $kec');
+      }
+      if (!hasKab && !hasKec && kab != null) {
+        displayParts.add(kab);
+      }
+      if (!hasProv && !hasKab && !hasKec && prov != null) {
+        displayParts.add(prov);
+      }
+    }
+    return displayParts.isEmpty ? auction.location : displayParts.join(', ');
+  }
 
   // ✅ [커뮤니티] 2. Q&A (댓글/답글) 상태 변수 추가
   String? _activeReplyCommentId;
@@ -175,6 +230,8 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
     final NumberFormat currencyFormat =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final userPoint =
+        context.select<LocationProvider, GeoPoint?>((p) => p.user?.geoPoint);
 
     // [수정] StreamBuilder를 Scaffold 바깥으로 이동하여 AppBar에서도 실시간 데이터를 사용
     return StreamBuilder<AuctionModel>(
@@ -186,9 +243,9 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
         }
         final auction = snapshot.data!;
         final isOwner = auction.ownerId == currentUserId;
-        // ✅ [하이퍼로컬] 3. 거리 계산 (auction을 받은 이후 계산)
-        final String? distance =
-            formatDistanceBetween(widget.userModel?.geoPoint, auction.geoPoint);
+
+        final distance = _calculateDistance(userPoint, auction.geoPoint);
+        final displayAddress = _getDynamicAddress(context, auction);
 
         // Build the body content so we can return only the body when embedded
         final Widget bodyContent = CustomScrollView(
@@ -204,23 +261,21 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          GestureDetector(
-                            onTap: () {
+                          ImageCarouselCard(
+                            storageId: auction.id,
+                            imageUrls: auction.images,
+                            height: 300,
+                            // [수정] 탭 시 갤러리 줌인 화면으로 이동
+                            onImageTap: () {
                               if (widget.embedded && widget.onClose != null) {
                                 widget.onClose!();
                               }
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => ImageGalleryScreen(
-                                      imageUrls: auction.images),
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => ImageGalleryScreen(
+                                  imageUrls: auction.images,
                                 ),
-                              );
+                              ));
                             },
-                            child: ImageCarouselCard(
-                              storageId: auction.id,
-                              imageUrls: auction.images,
-                              height: 250,
-                            ),
                           ),
                           if (auction.endAt.toDate().isBefore(DateTime.now()))
                             Positioned.fill(
@@ -269,7 +324,9 @@ class _AuctionDetailScreenState extends State<AuctionDetailScreen> {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                auction.location,
+                                distance != null
+                                    ? '$displayAddress ($distance)'
+                                    : displayAddress,
                                 style: TextStyle(
                                     color: Colors.grey[700], fontSize: 16),
                                 maxLines: 1,
