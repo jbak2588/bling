@@ -24,15 +24,19 @@ import 'package:photo_view/photo_view_gallery.dart';
 class ImageGalleryScreen extends StatelessWidget {
   final List<String> imageUrls;
   final int initialIndex;
+  final String? heroTagPrefix;
 
   const ImageGalleryScreen({
     super.key,
     required this.imageUrls,
     this.initialIndex = 0,
+    this.heroTagPrefix,
   });
 
   @override
   Widget build(BuildContext context) {
+    final hasDuplicateUrls = imageUrls.toSet().length != imageUrls.length;
+
     return Scaffold(
       // ✅ 키보드가 올라올 때 레이아웃이 자동으로 조정되도록 명시합니다.
       resizeToAvoidBottomInset: true,
@@ -46,11 +50,17 @@ class ImageGalleryScreen extends StatelessWidget {
         itemCount: imageUrls.length,
         pageController: PageController(initialPage: initialIndex),
         builder: (context, index) {
+          final tag = heroTagPrefix != null
+              ? 'img:$heroTagPrefix:$index'
+              : (hasDuplicateUrls
+                  ? '${imageUrls[index]}:$index'
+                  : imageUrls[index]);
+
           return PhotoViewGalleryPageOptions(
             imageProvider: NetworkImage(imageUrls[index]),
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 2,
-            heroAttributes: PhotoViewHeroAttributes(tag: imageUrls[index]),
+            heroAttributes: PhotoViewHeroAttributes(tag: tag),
           );
         },
         scrollPhysics: const BouncingScrollPhysics(),

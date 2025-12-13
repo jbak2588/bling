@@ -306,6 +306,13 @@ class _AiCaseDetailScreenState extends State<AiCaseDetailScreen>
     if (urls.isEmpty) {
       return Center(child: Text("$title 없음"));
     }
+
+    // Hero tags must be unique within the entire subtree.
+    // TabBarView keeps multiple tab children in the widget tree, so using the
+    // raw URL as the tag can easily collide across tabs or when URLs repeat.
+    final heroTagPrefix =
+        'ai_case:${widget.aiCase.productId}:${title.hashCode}';
+
     return Column(
       children: [
         Padding(
@@ -327,7 +334,7 @@ class _AiCaseDetailScreenState extends State<AiCaseDetailScreen>
               return GestureDetector(
                 onTap: () => _showFullImage(context, urls[index]),
                 child: Hero(
-                  tag: urls[index],
+                  tag: '$heroTagPrefix:$index',
                   child: Image.network(urls[index], fit: BoxFit.cover),
                 ),
               );

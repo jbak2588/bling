@@ -129,8 +129,7 @@
         "realEstate": "부동산 매물, 지역, 가격 검색",
         "auction": "경매 물품명, 브랜드 검색"
       }
-    },
-    "myTown": "우리 동네"
+    }
   },
   "chat": {
     "system": {
@@ -147,23 +146,7 @@
       "title": "나의 신뢰 인증 현황",
       "breakdownButton": "상세보기",
       "breakdownModalTitle": "신뢰 점수 산정 기준",
-      "breakdownClose": "확인",
-      "kelurahanAuth": "동네 인증 (Kelurahan)",
-      "rtRwAuth": "상세 주소 인증 (RT/RW)",
-      "phoneAuth": "전화번호 인증",
-      "profileComplete": "프로필 완성",
-      "feedThanks": "피드 감사",
-      "reports": "신고",
-      "marketThanks": "마켓 감사",
-      "breakdown": {
-        "kelurahanAuth": "+50",
-        "rtRwAuth": "+50",
-        "phoneAuth": "+100",
-        "profileComplete": "+50",
-        "feedThanks": "+10 per",
-        "marketThanks": "+20 per",
-        "reports": "-50 per"
-      }
+      "breakdownClose": "확인"
     }
   },
   "marketplace": {
@@ -330,44 +313,10 @@
       "starred": "관심 이웃"
     },
     "products": {
-      "loadErrorWithMsg": "상품을 불러오는 중 오류가 발생했습니다: {error}",
-      "empty": "등록한 상품이 없습니다.",
-      "bookmarkeded": "찜되었습니다",
-      "detailsTitle": "상품 상세 정보",
-      "editButton": "상품 수정",
-      "deleteConfirm": "이 상품을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-      "deleteSuccess": "상품이 삭제되었습니다.",
-      "deleteFail": "상품 삭제에 실패했습니다: {error}"
+      "loadErrorWithMsg": "상품을 불러오는 중 오류가 발생했습니다: {error}"
     },
     "bookmarks": {
-      "empty": "저장한 즐겨찾기가 없습니다.",
-      "products": "중고거래",
-      "posts": "동네생활",
-      "rooms": "부동산"
-    },
-    "title": "나의 Bling",
-    "settings": "설정",
-    "posts": "게시물",
-    "followers": "팔로워",
-    "neighbors": "이웃",
-    "friends": "친구",
-    "stats": {
-      "posts": "게시물",
-      "followers": "팔로워",
-      "neighbors": "이웃",
-      "friends": "친구"
-    },
-    "friendRequests": "받은 친구 요청",
-    "sentFriendRequests": "보낸 친구 요청",
-    "postList": {
-      "empty": "작성한 게시물이 없습니다.",
-      "writeButton": "글쓰기"
-    },
-    "friendList": {
-      "noFriends": "친구가 없습니다. 친구를 추가해보세요.",
-      "empty": "친구가 없습니다.",
-      "starredEmpty": "관심 이웃이 없습니다.",
-      "loadError": "친구 목록을 불러오지 못했습니다."
+      "empty": "저장한 즐겨찾기가 없습니다."
     }
   },
   "settings": {
@@ -730,39 +679,26 @@
   "jobs": {
     "setLocationPrompt": "구인글을 보려면 먼저 내 동네를 설정해주세요!",
     "screen": {
-      "empty": "게시글이 없습니다.",
-      "createTooltip": "새 구인글 등록"
+      "empty": "게시글이 없습니다."
     },
     "tabs": {
       "all": "전체",
       "regular": "정규직",
-      "talents": "전문가 찾기",
-      "quickGig": "단순알바"
+      "talents": "전문가 찾기"
     },
     "quickGig": {
       "locationLabel": "위치",
       "locationHint": "주소 검색 또는 지도에서 선택",
       "locationDescriptionHint": "선택 사항: 약속 장소/상세 설명"
     },
-    "regular": {
-      "workLocationLabel": "근무 위치",
-      "workLocationHint": "주소 검색 또는 지도에서 선택"
-    },
     "selectType": {
       "title": "구인(구직) 유형 선택",
       "subtitle": "어떤 게시글을 등록하시겠습니까?",
       "regular": {
-        "title": "정규직/알바",
-        "desc": "가게 직원이나 장기 아르바이트를 구합니다."
+        "title": "정규직/알바"
       },
       "talent": {
-        "title": "전문가(프리랜서) 등록",
-        "desc": "내 기술과 재능을 이웃에게 판매합니다.",
-        "badge": "NEW"
-      },
-      "quick": {
-        "title": "급한 도움/심부름",
-        "desc": "짐 옮기기, 줄서기 등 일회성 도움이 필요합니다."
+        "title": "전문가(프리랜서) 등록"
       }
     },
     "talent": {
@@ -854,20 +790,7 @@
       "submitAction": "구인 등록",
       "save": "저장",
       "editTitle": "구인글 수정",
-      "updateAction": "구인글 수정하기",
-      "titleHint": "공고 제목",
-      "descriptionPositionHint": "업무 내용을 입력",
-      "categoryHint": "직종 카테고리",
-      "categorySelectHint": "직종을 선택하세요",
-      "submit": "구인 등록",
-      "salaryLabel": "급여 (IDR)",
-      "salaryHint": "급여 금액을 입력하세요",
-      "salaryValidator": "유효한 급여를 입력해주세요.",
-      "workPeriodLabel": "근무 기간",
-      "workPeriodHint": "근무 기간 선택",
-      "propertyLocationLabel": "매물 위치",
-      "propertyLocationHint": "주소 검색 또는 지도에서 선택",
-      "propertyLocationRequired": "매물 위치를 선택하세요"
+      "updateAction": "구인글 수정하기"
     },
     "categories": {
       "restaurant": "식당",
@@ -921,12 +844,10 @@
       "locationTitle": "위치",
       "authorTitle": "작성자",
       "apply": "지원하기",
-      "chatError": "채팅을 시작할 수 없습니다: {error}",
-      "noAuthor": "작성자 정보 없음"
+      "chatError": "채팅을 시작할 수 없습니다: {error}"
     },
     "card": {
-      "noLocation": "위치 정보 없음",
-      "minutesAgo": "몇 분 전"
+      "noLocation": "위치 정보 없음"
     }
   },
   "findFriend": {
@@ -1300,17 +1221,6 @@
       "shopLocationHint": "지도에서 위치를 선택하거나 검색하세요",
       "shopLocationError": "상점 위치를 선택해 주세요."
     },
-    "categories": {
-      "food": "음식점",
-      "cafe": "카페",
-      "massage": "마사지",
-      "beauty": "미용",
-      "nail": "네일",
-      "auto": "자동차",
-      "kids": "키즈",
-      "hospital": "병원",
-      "etc": "기타"
-    },
     "detail": {
       "description": "상점 소개",
       "products": "대표 상품/서비스",
@@ -1384,8 +1294,6 @@
       "title": "새 매물 등록",
       "submit": "등록",
       "locationRequired": "위치 정보가 필요합니다",
-      "propertyLocationLabel": "매물 위치",
-      "propertyLocationHint": "주소 검색 또는 지도에서 선택",
       "imageRequired": "사진을 1장 이상 첨부해주세요.",
       "success": "매물이 등록되었습니다.",
       "fail": "등록에 실패했습니다: {error}",
@@ -1581,9 +1489,7 @@
     },
     "info": {
       "anytime": "즉시 입주",
-      "verifiedPublisher": "인증된 게시자",
-      "bed": "침실",
-      "bath": "욕실"
+      "verifiedPublisher": "인증된 게시자"
     },
     "detail": {
       "deleteTitle": "매물 삭제",
@@ -1604,13 +1510,7 @@
       "fail": "수정에 실패했습니다: {error}"
     },
     "disclaimer": "블링은 온라인 광고/게시판 플랫폼으로, 거래 당사자가 아닙니다. 게시된 매물의 진위, 권리관계, 가격 및 조건에 대한 책임은 게시자에게 있으며, 사용자는 거래 전 관련 사실을 게시자 및 관계기관을 통해 직접 확인해야 합니다.",
-    "disclaimerTitle": "거래 책임 고지",
-    "create": "매물 등록",
-    "viewMapHint": "지도에서 모든 매물을 확인하세요",
-    "priceUnit": {
-      "monthly": "월",
-      "yearly": "년"
-    }
+    "disclaimerTitle": "거래 책임 고지"
   },
   "lostAndFound": {
     "empty": "아직 등록된 분실/습득물이 없습니다.",

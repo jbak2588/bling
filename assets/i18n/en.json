@@ -129,8 +129,7 @@
         "realEstate": "Search properties, area, price",
         "auction": "Search auction items, brands"
       }
-    },
-    "myTown": "My Town"
+    }
   },
   "chat": {
     "system": {
@@ -147,23 +146,7 @@
       "title": "My Trust Verification Status",
       "breakdownButton": "Details",
       "breakdownModalTitle": "Trust Score Breakdown",
-      "breakdownClose": "OK",
-      "kelurahanAuth": "Neighborhood Verification (Kelurahan)",
-      "rtRwAuth": "Detailed Address Verification (RT/RW)",
-      "phoneAuth": "Phone Verification",
-      "profileComplete": "Profile Complete",
-      "feedThanks": "Feed Thanks",
-      "marketThanks": "Market Thanks",
-      "reports": "Reports",
-      "breakdown": {
-        "kelurahanAuth": "+50",
-        "rtRwAuth": "+50",
-        "phoneAuth": "+100",
-        "profileComplete": "+50",
-        "feedThanks": "+10 per",
-        "marketThanks": "+20 per",
-        "reports": "-50 per"
-      }
+      "breakdownClose": "OK"
     }
   },
   "marketplace": {
@@ -330,44 +313,10 @@
       "starred": "Starred"
     },
     "products": {
-      "loadErrorWithMsg": "Failed to load products: {error}",
-      "empty": "No products listed.",
-      "bookmarkeded": "Booked",
-      "detailsTitle": "Product details",
-      "editButton": "Edit product",
-      "deleteConfirm": "Are you sure you want to delete this product? This action cannot be undone.",
-      "deleteSuccess": "Product deleted.",
-      "deleteFail": "Failed to delete product: {error}"
+      "loadErrorWithMsg": "Failed to load products: {error}"
     },
     "bookmarks": {
-      "empty": "No bookmarks yet.",
-      "products": "Products",
-      "posts": "Posts",
-      "rooms": "Real Estate"
-    },
-    "title": "My Bling",
-    "settings": "Settings",
-    "posts": "Posts",
-    "followers": "Followers",
-    "neighbors": "Neighbors",
-    "friends": "Friends",
-    "stats": {
-      "posts": "Posts",
-      "followers": "Followers",
-      "neighbors": "Neighbors",
-      "friends": "Friends"
-    },
-    "friendRequests": "Received Friend Requests",
-    "sentFriendRequests": "Sent Requests",
-    "postList": {
-      "empty": "No posts yet.",
-      "writeButton": "Write"
-    },
-    "friendList": {
-      "noFriends": "You have no friends yet. Try adding some.",
-      "empty": "You have no friends yet.",
-      "starredEmpty": "No starred neighbors yet.",
-      "loadError": "Failed to load friends."
+      "empty": "No bookmarks yet."
     }
   },
   "settings": {
@@ -730,39 +679,26 @@
   "jobs": {
     "setLocationPrompt": "Set your neighborhood to see job posts around you!",
     "screen": {
-      "empty": "There are no job posts yet.",
-      "createTooltip": "Create new job post"
+      "empty": "There are no job posts yet."
     },
     "tabs": {
       "all": "All",
       "regular": "Regular / Part-time",
-      "talents": "Find Experts",
-      "quickGig": "Quick Gig"
+      "talents": "Find Experts"
     },
     "quickGig": {
       "locationLabel": "Location",
       "locationHint": "Search address or pick on map",
       "locationDescriptionHint": "Extra details / meeting point (optional)"
     },
-    "regular": {
-      "workLocationLabel": "Work location",
-      "workLocationHint": "Search address or pick on map"
-    },
     "selectType": {
       "title": "Choose job post type",
       "subtitle": "What kind of post would you like to create?",
       "regular": {
-        "title": "Regular / part-time job",
-        "desc": "Hire staff for your shop or long-term part-time positions."
+        "title": "Regular / part-time job"
       },
       "talent": {
-        "title": "Register as a freelancer",
-        "desc": "Offer your skills and talents to neighbors nearby.",
-        "badge": "NEW"
-      },
-      "quick": {
-        "title": "Urgent help / one-time gig",
-        "desc": "Need one-time help like carrying boxes, waiting in line, and more."
+        "title": "Register as a freelancer"
       }
     },
     "talent": {
@@ -854,20 +790,7 @@
       "submitAction": "Post Job",
       "save": "Save",
       "editTitle": "Edit Job",
-      "updateAction": "Update Job",
-      "titleHint": "Job title",
-      "descriptionPositionHint": "Describe the position",
-      "categoryHint": "Category",
-      "categorySelectHint": "Select a category",
-      "submit": "Post Job",
-      "salaryLabel": "Salary (IDR)",
-      "salaryHint": "Enter the salary amount",
-      "salaryValidator": "Please enter a valid salary.",
-      "workPeriodLabel": "Work Period",
-      "workPeriodHint": "Select work period",
-      "propertyLocationLabel": "Property location",
-      "propertyLocationHint": "Search address or pick on map",
-      "propertyLocationRequired": "Property location is required"
+      "updateAction": "Update Job"
     },
     "categories": {
       "restaurant": "Restaurant",
@@ -921,12 +844,10 @@
       "locationTitle": "Location",
       "authorTitle": "Author",
       "apply": "Apply",
-      "chatError": "Could not start chat: {error}",
-      "noAuthor": "No author info"
+      "chatError": "Could not start chat: {error}"
     },
     "card": {
-      "noLocation": "No location info",
-      "minutesAgo": "minutes ago"
+      "noLocation": "No location info"
     }
   },
   "findFriend": {
@@ -1301,17 +1222,6 @@
       "shopLocationHint": "Search or pick the place on the map",
       "shopLocationError": "Please select the shop location."
     },
-    "categories": {
-      "food": "Food",
-      "cafe": "Cafe",
-      "massage": "Massage",
-      "beauty": "Beauty",
-      "nail": "Nail",
-      "auto": "Auto",
-      "kids": "Kids",
-      "hospital": "Hospital",
-      "etc": "Etc"
-    },
     "detail": {
       "description": "Store Description",
       "products": "Products/Services",
@@ -1385,8 +1295,6 @@
       "title": "Register Listing",
       "submit": "Register",
       "locationRequired": "Location is required",
-      "propertyLocationLabel": "Property location",
-      "propertyLocationHint": "Search address or pick on map",
       "imageRequired": "Please attach at least one photo.",
       "success": "Listing created.",
       "fail": "Failed to create listing: {error}",
@@ -1582,9 +1490,7 @@
     },
     "info": {
       "anytime": "Anytime",
-      "verifiedPublisher": "Verified publisher",
-      "bed": "Bed",
-      "bath": "Bath"
+      "verifiedPublisher": "Verified publisher"
     },
     "detail": {
       "deleteTitle": "Delete listing",
@@ -1605,13 +1511,7 @@
       "fail": "Failed to update listing: {error}"
     },
     "disclaimer": "Bling is an online advertising/board platform and is not a real estate broker or agent. The truthfulness of listings, ownership/title status, price, and terms are the sole responsibility of the poster. Users must conduct their own checks and verify all information directly with the poster and relevant authorities before proceeding.",
-    "disclaimerTitle": "Transaction Notice",
-    "create": "Add listing",
-    "viewMapHint": "View all listings on the map",
-    "priceUnit": {
-      "monthly": "month",
-      "yearly": "year"
-    }
+    "disclaimerTitle": "Transaction Notice"
   },
   "lostAndFound": {
     "empty": "No lost/found items yet.",

@@ -29,11 +29,8 @@ library;
 // 아래부터 실제 코드
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../core/models/user_model.dart';
-import 'package:bling_app/core/utils/address_formatter.dart';
-import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
@@ -119,6 +116,25 @@ class FindFriendCard extends StatelessWidget {
     return images.take(4).toList();
   }
 
+  // [Privacy] FindFriend 카드에서는 Kel/Kec만 표시합니다.
+  String _getKelKecAddress(UserModel user) {
+    final parts = user.locationParts;
+    if (parts == null) return '';
+
+    final kel = parts['kel'];
+    final kec = parts['kec'];
+    final List<String> displayParts = [];
+
+    if (kel != null && kel.toString().trim().isNotEmpty) {
+      displayParts.add('Kel. ${kel.toString().trim()}');
+    }
+    if (kec != null && kec.toString().trim().isNotEmpty) {
+      displayParts.add('Kec. ${kec.toString().trim()}');
+    }
+
+    return displayParts.join(', ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileImages = _getProfileImages(user);
@@ -134,12 +150,8 @@ class FindFriendCard extends StatelessWidget {
       );
     }
 
-    final adminFilter = context.watch<LocationProvider>().adminFilter;
-    final displayAddress = AddressFormatter.dynamicAdministrativeAddress(
-      locationParts: user.locationParts,
-      adminFilter: adminFilter,
-      fallbackFullAddress: user.locationName,
-    );
+    final displayAddress = _getKelKecAddress(user);
+    final hasInterests = user.interests != null && user.interests!.isNotEmpty;
 
     return InkWell(
       onTap: goToDetail,
@@ -221,24 +233,29 @@ class FindFriendCard extends StatelessWidget {
                       children: [
                         // 주소: adminFilter 기반 동적 주소(Privacy)
                         if (displayAddress.isNotEmpty)
-                          Text(
-                            displayAddress,
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              displayAddress,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500),
+                            ),
                           ),
-
-                        if (displayAddress.isNotEmpty &&
-                            (user.interests?.isNotEmpty ?? false))
-                          const SizedBox(width: 8),
 
                         // [Added] 거리 표시 (주소가 있을 때만 점 찍고 표시)
                         if (distanceKm != null) ...[
                           if (displayAddress.isNotEmpty)
-                            Text(" • ",
-                                style: TextStyle(
-                                    fontSize: 12, color: Colors.grey[400])),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 6.0),
+                              child: Text("•",
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey[400])),
+                            ),
                           Text(
                             'findFriend.distance'.tr(namedArgs: {
                               'value': distanceKm!.toStringAsFixed(1)
@@ -251,16 +268,19 @@ class FindFriendCard extends StatelessWidget {
                         ],
 
                         // 관심사 이모지
-                        if (user.interests != null &&
-                            user.interests!.isNotEmpty)
+                        if (hasInterests) ...[
+                          const SizedBox(width: 8),
                           Expanded(
+                            flex: 3,
                             child: Text(
                               _getInterestEmojis(user.interests!),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.end,
                               style: const TextStyle(fontSize: 14),
                             ),
                           ),
+                        ],
                       ],
                     ),
                   ],

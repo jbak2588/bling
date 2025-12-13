@@ -128,8 +128,7 @@
         "realEstate": "Cari properti, area, harga",
         "auction": "Cari barang lelang, merek"
       }
-    },
-    "myTown": "Kota Saya"
+    }
   },
   "chat": {
     "system": {
@@ -146,23 +145,7 @@
       "title": "Status Verifikasi Kepercayaan Saya",
       "breakdownButton": "Detail",
       "breakdownModalTitle": "Rincian Skor Kepercayaan",
-      "breakdownClose": "OK",
-      "kelurahanAuth": "Verifikasi Kelurahan",
-      "rtRwAuth": "Verifikasi Alamat Detail (RT/RW)",
-      "phoneAuth": "Verifikasi Nomor Telepon",
-      "profileComplete": "Profil Lengkap",
-      "feedThanks": "Feed Thanks",
-      "marketThanks": " Market Thanks",
-      "reports": "Reports",
-      "breakdown": {
-        "kelurahanAuth": "+50",
-        "rtRwAuth": "+50",
-        "phoneAuth": "+100",
-        "profileComplete": "+50",
-        "feedThanks": "+10 per",
-        "marketThanks": "+20 per",
-        "reports": "-50 per"
-      }
+      "breakdownClose": "OK"
     }
   },
   "marketplace": {
@@ -329,44 +312,10 @@
       "starred": "Favorit"
     },
     "products": {
-      "loadErrorWithMsg": "Gagal memuat produk: {error}",
-      "empty": "Belum ada produk yang terdaftar.",
-      "bookmarkeded": "Ditandai sebagai favorit",
-      "detailsTitle": "Rincian produk",
-      "editButton": "Sunting produk",
-      "deleteConfirm": "Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.",
-      "deleteSuccess": "Produk telah dihapus.",
-      "deleteFail": "Gagal menghapus produk: {error}"
+      "loadErrorWithMsg": "Gagal memuat produk: {error}"
     },
     "bookmarks": {
-      "empty": "Belum ada markah.",
-      "products": "Produk",
-      "posts": "Postingan",
-      "rooms": "Properti"
-    },
-    "title": "Bling Saya",
-    "settings": "Pengaturan",
-    "posts": "Postingan",
-    "followers": "Pengikut",
-    "neighbors": "Tetangga",
-    "friends": "Teman",
-    "stats": {
-      "posts": "Postingan",
-      "followers": "Pengikut",
-      "neighbors": "Tetangga",
-      "friends": "Teman"
-    },
-    "friendRequests": "Permintaan Pertemanan",
-    "sentFriendRequests": "Permintaan Terkirim",
-    "postList": {
-      "empty": "Belum ada postingan.",
-      "writeButton": "Tulis"
-    },
-    "friendList": {
-      "noFriends": "Anda belum memiliki teman. Coba tambahkan beberapa.",
-      "empty": "Anda belum memiliki teman.",
-      "starredEmpty": "Belum ada favorit.",
-      "loadError": "Gagal memuat daftar teman."
+      "empty": "Belum ada markah."
     }
   },
   "settings": {
@@ -729,39 +678,26 @@
   "jobs": {
     "setLocationPrompt": "Silakan atur lokasi Anda untuk melihat lowongan!",
     "screen": {
-      "empty": "Belum ada lowongan kerja.",
-      "createTooltip": "Posting Lowongan Baru"
+      "empty": "Belum ada lowongan kerja."
     },
     "tabs": {
       "all": "Semua",
       "regular": "Paruh/Penuh Waktu",
-      "talents": "Cari ahli",
-      "quickGig": "Bantua Cepat"
+      "talents": "Cari ahli"
     },
     "quickGig": {
       "locationLabel": "Lokasi",
       "locationHint": "Cari alamat atau pilih di peta",
       "locationDescriptionHint": "Opsional: tambahkan detail untuk titik pertemuan"
     },
-    "regular": {
-      "workLocationLabel": "Lokasi kerja",
-      "workLocationHint": "Cari alamat atau pilih di peta"
-    },
     "selectType": {
       "title": "Pilih jenis iklan kerja",
       "subtitle": "Jenis postingan apa yang Anda inginkan?",
       "regular": {
-        "title": "Loker",
-        "desc": "Kerja reguler seperti kafe, restoran, kantor"
+        "title": "Loker"
       },
       "talent": {
-        "title": "Jual Layanan",
-        "desc": "Jual skill dan keahlianmu kepada tetangga di sekitar.",
-        "badge": "BARU"
-      },
-      "quick": {
-        "title": "Bantuan cepat/Kerja harian",
-        "desc": "Kurir motor, bantu pindahan, bersih-bersih, dll."
+        "title": "Jual Layanan"
       }
     },
     "talent": {
@@ -853,20 +789,7 @@
       "submitAction": "Posting Pekerjaan",
       "save": "Simpan",
       "editTitle": "Edit Lowongan",
-      "updateAction": "Perbarui Lowongan",
-      "titleHint": "Judul pekerjaan",
-      "descriptionPositionHint": "Deskripsikan posisi",
-      "categoryHint": "Kategori",
-      "categorySelectHint": "Pilih kategori",
-      "submit": "Posting Lowongan",
-      "salaryLabel": "Gaji (IDR)",
-      "salaryHint": "Masukkan nominal gaji",
-      "salaryValidator": "Masukkan gaji yang valid.",
-      "workPeriodLabel": "Periode Kerja",
-      "workPeriodHint": "Pilih periode kerja",
-      "propertyLocationLabel": "Lokasi properti",
-      "propertyLocationHint": "Cari alamat atau pilih di peta",
-      "propertyLocationRequired": "Harap pilih lokasi properti."
+      "updateAction": "Perbarui Lowongan"
     },
     "categories": {
       "restaurant": "Restoran",
@@ -920,12 +843,10 @@
       "locationTitle": "Lokasi",
       "authorTitle": "Penulis",
       "apply": "Lamar",
-      "chatError": "Tidak dapat memulai chat: {error}",
-      "noAuthor": "Tidak ada info penulis"
+      "chatError": "Tidak dapat memulai chat: {error}"
     },
     "card": {
-      "noLocation": "Tidak ada info lokasi",
-      "minutesAgo": "beberapa menit lalu"
+      "noLocation": "Tidak ada info lokasi"
     }
   },
   "findFriend": {
@@ -1300,17 +1221,6 @@
       "shopLocationHint": "Cari atau pilih lokasi pada peta",
       "shopLocationError": "Silakan pilih lokasi toko."
     },
-    "categories": {
-      "food": "Makanan",
-      "cafe": "Kafe",
-      "massage": "Pijat",
-      "beauty": "Kecantikan",
-      "nail": "Salon Kuku",
-      "auto": "Otomotif",
-      "kids": "Anak",
-      "hospital": "Rumah Sakit",
-      "etc": "Lainnya"
-    },
     "detail": {
       "description": "Deskripsi Toko",
       "products": "Produk/Layanan",
@@ -1384,8 +1294,6 @@
       "title": "Daftarkan Listing",
       "submit": "Daftar",
       "locationRequired": "Lokasi wajib diisi",
-      "propertyLocationLabel": "Lokasi properti",
-      "propertyLocationHint": "Cari alamat atau pilih di peta",
       "imageRequired": "Harap lampirkan minimal satu foto.",
       "success": "Listing berhasil dibuat.",
       "fail": "Gagal membuat listing: {error}",
@@ -1581,9 +1489,7 @@
     },
     "info": {
       "anytime": "Kapan saja",
-      "verifiedPublisher": "Pengiklan terverifikasi",
-      "bed": "KT",
-      "bath": "KM"
+      "verifiedPublisher": "Pengiklan terverifikasi"
     },
     "detail": {
       "deleteTitle": "Hapus listing",
@@ -1604,13 +1510,7 @@
       "fail": "Gagal memperbarui listing: {error}"
     },
     "disclaimer": "Bling adalah platform iklan/board online dan bukan pihak dalam transaksi. Kebenaran data, status hukum, harga, dan ketentuan pada listing merupakan tanggung jawab pengunggah. Pengguna wajib melakukan pemeriksaan dan verifikasi langsung dengan pengunggah serta pihak terkait sebelum bertransaksi.",
-    "disclaimerTitle": "Pemberitahuan Transaksi",
-    "create": "Tambah listing",
-    "viewMapHint": "Lihat semua listing di peta",
-    "priceUnit": {
-      "monthly": "bulan",
-      "yearly": "tahun"
-    }
+    "disclaimerTitle": "Pemberitahuan Transaksi"
   },
   "lostAndFound": {
     "empty": "Belum ada barang hilang/temuan.",

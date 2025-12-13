@@ -175,9 +175,14 @@ class _ImageCarouselCardState extends State<ImageCarouselCard> {
           color: Colors.grey.shade100, child: const Icon(Icons.broken_image)),
     );
 
+    // Hero tags must be unique within a route subtree.
+    // Using the raw URL as tag can crash when the same URL appears multiple
+    // times on-screen (e.g., duplicated items or duplicated URLs).
+    final heroTag = 'img:${widget.storageId}:$index';
+
     // Avoid nesting Hero widgets: if an ancestor Hero exists, do not wrap.
     final wrappedImage = context.findAncestorWidgetOfExactType<Hero>() == null
-        ? Hero(tag: url, child: imageWidget)
+        ? Hero(tag: heroTag, child: imageWidget)
         : imageWidget;
 
     return GestureDetector(
@@ -188,6 +193,7 @@ class _ImageCarouselCardState extends State<ImageCarouselCard> {
               builder: (_) => ImageGalleryScreen(
                 imageUrls: widget.imageUrls,
                 initialIndex: index,
+                heroTagPrefix: widget.storageId,
               ),
             ));
           },

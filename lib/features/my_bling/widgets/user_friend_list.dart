@@ -41,7 +41,7 @@ class UserFriendList extends StatelessWidget {
           FirebaseFirestore.instance.collection('users').doc(myUid).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Center(child: Text('myBling.friends.loadError'.tr()));
+          return Center(child: Text('myBling.friendList.loadError'.tr()));
         }
         final user = UserModel.fromFirestore(
             snapshot.data! as DocumentSnapshot<Map<String, dynamic>>);
@@ -97,8 +97,8 @@ class UserFriendList extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               isStarredTab
-                  ? 'myBling.friends.starredEmpty'.tr() // "찜한 이웃이 없습니다."
-                  : 'myBling.friends.empty'.tr(),
+                  ? 'myBling.friendList.starredEmpty'.tr()
+                  : 'myBling.friendList.empty'.tr(),
               style: const TextStyle(color: Colors.grey),
             ),
           ],

@@ -1,5 +1,6 @@
 {
   "login": {
+    "title": "Masuk",
     "subtitle": "Ayo, Beli Ringan",
     "emailHint": "Alamat Email",
     "passwordHint": "Kata Sandi",
@@ -9,6 +10,7 @@
       "apple": "Lanjutkan dengan Apple"
     },
     "links": {
+      "findPassword": "Lupa kata sandi?",
       "askForAccount": "Belum punya akun?",
       "signUp": "Daftar"
     },
@@ -28,19 +30,25 @@
       "saved": "Profil disimpan."
     },
     "section": {
+      "basic": "Info Dasar",
       "trust": "Kepercayaan & Keamanan (Wajib)",
       "locationTrust": "Lokasi & Verifikasi",
       "social": "Cari Teman & Sosial"
     },
     "field": {
       "nickname": "Nama Panggilan",
+      "nicknameHint": "Masukkan nama (min 2 karakter)",
       "phone": "Nomor Telepon",
       "bio": "Bio (Wajib)",
       "bioHint": "Perkenalkan diri Anda (hobi, dll.)",
-      "verify": "Verifikasi"
+      "interests": "Minat (Min 1)",
+      "verify": "Verifikasi",
+      "verified": "Terverifikasi"
     },
     "desc": {
+      "trust": "Verifikasi telepon diperlukan untuk menggunakan Marketplace, Lelang, dan Lowongan.",
       "social": "Tampilkan profil saya di 'Cari Teman' dan mengobrol dengan tetangga.",
+      "socialPlaceholder": "Pilih minat untuk memulai.",
       "smsTodo": "Fitur verifikasi SMS akan segera hadir."
     },
     "error": {
@@ -67,7 +75,9 @@
   "notifications": {
     "title": "Notifikasi",
     "error": "Gagal memuat notifikasi.",
-    "empty": "Belum ada notifikasi."
+    "empty": "Belum ada notifikasi.",
+    "seller_pending_title": "Produk sedang ditinjau",
+    "seller_pending_body": "Daftar Anda '{title}' telah diajukan untuk peninjauan admin."
   },
   "signup": {
     "title": "Daftar",
@@ -75,8 +85,31 @@
     "passwordHint": "Kata Sandi (minimal 6 karakter)",
     "passwordConfirmHint": "Konfirmasi Kata Sandi",
     "nicknameHint": "Nama Panggilan (Wajib)",
+    "subtitle": "Ayo mulai dengan Bling! Silakan masukkan informasi Anda.",
+    "locationHint": "Lokasi Anda (untuk layanan lokal)",
+    "locationNotice": "Lokasi Anda digunakan untuk menampilkan postingan lingkungan dan tidak diungkapkan kepada orang lain.",
     "buttons": {
-      "signup": "Daftar"
+      "signup": "Daftar",
+      "checkDuplicate": "Cek"
+    },
+    "links": {
+      "askForLogin": "Sudah punya akun?",
+      "login": "Masuk"
+    },
+    "alerts": {
+      "passwordMismatch": "Kata sandi tidak cocok.",
+      "passwordTooShort": "Kata sandi harus minimal 6 karakter.",
+      "emailInUse": "Email ini sudah digunakan.",
+      "nicknameInUse": "Nama panggilan ini sudah digunakan.",
+      "nicknameAvailable": "Nama panggilan ini tersedia.",
+      "nicknameNotChecked": "Silakan periksa duplikasi nama panggilan.",
+      "signupSuccessLoginNotice": "Pendaftaran berhasil! Silakan masuk untuk melanjutkan.",
+      "unknownError": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
+    },
+    "policy": {
+      "title": "Kebijakan Pendaftaran",
+      "description": "Bling mengumpulkan informasi minimum untuk komunitas yang aman. Semua informasi disimpan dengan aman dan tidak akan diungkapkan tanpa persetujuan.",
+      "agree": "Saya setuju dengan ketentuan dan ingin melanjutkan."
     },
     "agreement": {
       "terms": "Setuju Syarat dan Ketentuan",
@@ -90,7 +123,13 @@
     }
   },
   "main": {
+    "appBar": {
+      "locationNotSet": "Atur Lokasi",
+      "locationError": "Kesalahan Lokasi",
+      "locationLoading": "Memuat..."
+    },
     "tabs": {
+      "newFeed": "Berita Baru",
       "localNews": "Cerita Lokal",
       "together": "Ayo Bareng",
       "marketplace": "Preloved",
@@ -115,9 +154,16 @@
       "userNotFound": "Pengguna tidak ditemukan.",
       "unknown": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi."
     },
+    "myTown": "Kota Saya",
+    "mapView": {
+      "showMap": "Tampilkan peta",
+      "showList": "Tampilkan daftar"
+    },
     "search": {
       "placeholder": "Halaman Pencarian",
+      "chipPlaceholder": "Cari tetangga, berita, Preloved, pekerjaan…",
       "hint": {
+        "globalSheet": "Cari di {}",
         "localNews": "Cari judul berita, konten, tag",
         "jobs": "Cari pekerjaan, perusahaan, 'Help Me'",
         "lostAndFound": "Cari barang hilang atau ditemukan",
@@ -126,27 +172,38 @@
         "findFriends": "Cari nama panggilan profil, minat",
         "clubs": "Cari klub, minat, lokasi",
         "realEstate": "Cari properti, area, harga",
-        "auction": "Cari barang lelang, merek"
+        "auction": "Cari barang lelang, merek",
+        "pom": "Cari POM, tag, pengguna"
       }
-    },
-    "myTown": "Kota Saya"
+    }
   },
   "chat": {
     "system": {
       "roomCreated": "Percakapan dimulai.",
+      "userJoined": "{nickname} telah bergabung ke obrolan.",
       "chatRestored": "Ruang obrolan dibuat dan dipulihkan.",
       "chatInfoSynced": "Nama ruang obrolan dan gambar sampul telah diperbarui.",
       "syncFailed": "Sinkronisasi gagal: {error}"
     }
   },
+  "category": {
+    "PnPa5ZjI9FYQiAGP6I7m": "Perangkat Digital",
+    "4hx6hyOYodriXgPiR5bl": "Perlengkapan Rumah",
+    "OkjaREVlnybYXdJKZvF7": "Fashion",
+    "lhxeaWRmfmd2gElvHy8y": "Kecantikan & Perawatan",
+    "wyYkvRznDcngqzuJvOIJ": "Edisi Terbatas & Mewah",
+    "IJ9rF047d2rRnFFkdLyw": "Hobi & Rekreasi",
+    "6WtvHv9Mm2M49KIVRdZT": "Bayi & Anak",
+    "5B68mEyct8tpIr9Eyc8j": "Motor",
+    "BnGbVd3W9P3ztu0HBJix": "Barang Lainnya"
+  },
   "drawer": {
     "editProfile": "Ubah Profil",
+    "bookmarks": "Markah",
+    "uploadSampleData": "Unggah Data Sampel",
     "logout": "Keluar",
     "trustDashboard": {
       "title": "Status Verifikasi Kepercayaan Saya",
-      "breakdownButton": "Detail",
-      "breakdownModalTitle": "Rincian Skor Kepercayaan",
-      "breakdownClose": "OK",
       "kelurahanAuth": "Verifikasi Kelurahan",
       "rtRwAuth": "Verifikasi Alamat Detail (RT/RW)",
       "phoneAuth": "Verifikasi Nomor Telepon",
@@ -154,6 +211,9 @@
       "feedThanks": "Feed Thanks",
       "marketThanks": " Market Thanks",
       "reports": "Reports",
+      "breakdownButton": "Detail",
+      "breakdownModalTitle": "Rincian Skor Kepercayaan",
+      "breakdownClose": "OK",
       "breakdown": {
         "kelurahanAuth": "+50",
         "rtRwAuth": "+50",
@@ -163,10 +223,12 @@
         "marketThanks": "+20 per",
         "reports": "-50 per"
       }
-    }
+    },
+    "runDataFix": "Jalankan Perbaikan Data"
   },
   "marketplace": {
     "error": "Terjadi kesalahan: {error}",
+    "empty": "Belum ada produk yang terdaftar.\nTekan tombol + untuk menambahkan produk pertama!",
     "distance": "{value} km",
     "empty_view": {
       "national": "Belum ada produk.",
@@ -183,15 +245,18 @@
       "addressDetailHint": "Detail lokasi pertemuan",
       "descriptionHint": "Deskripsi Lengkap",
       "success": "Produk berhasil didaftarkan!",
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "fail": "Gagal mendaftarkan produk: {error}"
     },
     "edit": {
       "title": "Edit Produk",
+      "done": "Edit Selesai",
       "titleHint": "Ubah Nama Produk",
       "addressHint": "Ubah Lokasi",
       "priceHint": "Ubah Harga (Rp)",
       "negotiable": "Ubah Tawaran Harga",
       "descriptionHint": "Ubah Deskripsi Lengkap",
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "success": "Produk berhasil diedit!",
       "fail": "Gagal memperbarui produk: {error}",
       "resetLocation": "Atur ulang lokasi",
@@ -201,7 +266,23 @@
     "detail": {
       "makeOffer": "Tawarkan harga",
       "fixedPrice": "Harga tetap",
+      "description": "Deskripsi Produk",
+      "sellerInfo": "Informasi Penjual",
       "chat": "Chat",
+      "favorite": "Favorit",
+      "unfavorite": "Batal Favorit",
+      "share": "Share",
+      "edit": "Eidt",
+      "delete": "Hapus",
+      "category": "Kategori",
+      "categoryError": "Kategori: -",
+      "categoryNone": "Tidak ada kategori",
+      "views": "Dilihat",
+      "likes": "Suka",
+      "chats": "Chat",
+      "noSeller": "Info penjual tidak tersedia",
+      "noLocation": "Info lokasi tidak tersedia",
+      "seller": "Penjual",
       "dealLocation": "Lokasi transaksi"
     },
     "dialog": {
@@ -219,6 +300,7 @@
       "noCategory": "Silakan pilih kategori.",
       "loginRequired": "Diperlukan login.",
       "userNotFound": "Pengguna tidak ditemukan.",
+      "unknown": "Terjadi kesalahan yang tidak diketahui. Silakan coba lagi.",
       "aiReserved": "Produk ini dikunci oleh Reservasi Aman AI. Pembeli harus menyelesaikan atau membatalkan pengambilan sebelum status dapat diubah."
     },
     "condition": {
@@ -242,8 +324,18 @@
     },
     "takeover": {
       "button": "Ambil & Verifikasi di Lokasi",
+      "title": "Verifikasi AI di Lokasi",
+      "guide": {
+        "title": "Verifikasi kesamaan AI di lokasi",
+        "subtitle": "Periksa apakah laporan AI asli cocok dengan barang nyata. Ambil minimal 3 foto yang menampilkan fitur utama barang."
+      },
+      "photoTitle": "Ambil foto di lokasi",
       "camera": "Kamera",
       "gallery": "Galeri",
+      "buttonVerify": "Mulai verifikasi kesamaan AI",
+      "errors": {
+        "noPhoto": "Butuh minimal 1 foto lokasi untuk verifikasi."
+      },
       "dialog": {
         "matchTitle": "Verifikasi AI Berhasil",
         "noMatchTitle": "Verifikasi AI Gagal",
@@ -251,9 +343,18 @@
         "cancelDeal": "Batalkan transaksi (minta pengembalian)",
         "failTitle": "Gagal verifikasi AI",
         "retry": "Coba lagi"
+      },
+      "success": {
+        "finalized": "Transaksi berhasil diselesaikan.",
+        "cancelled": "Transaksi dibatalkan. Deposit akan dikembalikan."
+      },
+      "checklistTitle": "Daftar Periksa Verifikasi di Lokasi",
+      "ai": {
+        "reactivated": "Verifikasi AI telah diaktifkan kembali."
       }
     },
     "aiBadge": "AI Terverifikasi",
+    "setLocationPrompt": "Setel lingkungan Anda terlebih dahulu untuk melihat barang marketplace!",
     "ai": {
       "cancel_limit": "Verifikasi AI hanya dapat dibatalkan sekali per produk. Meminta ulang verifikasi AI dapat dikenakan biaya.",
       "reactivated": "Verifikasi AI telah diaktifkan kembali.",
@@ -271,13 +372,19 @@
     },
     "common": {
       "error": "Terjadi kesalahan: {error}",
+      "more": "Lainnya",
       "add_photo": "Add Photo",
       "take_photo": "Ambil Foto",
+      "pick_gallery": "Pilih dari Galeri",
       "pick_gallery_multi": "Pilih beberapa dari galeri",
+      "pick_from_initial": "Pilih dari foto yang ada",
       "skip": "Skip",
       "added_photos": "{count} foto ditambahkan",
       "add_more": "Tambah lagi",
-      "skipped": "Dilewati"
+      "added_photo": "Photo added: {}",
+      "skipped": "Dilewati",
+      "verified_from_initial": "Terverifikasi dari foto ke-{}",
+      "retake": "Ambil ulang"
     },
     "cta": {
       "title": "🤖 Tingkatkan kepercayaan dengan verifikasi AI (opsional)",
@@ -285,12 +392,50 @@
       "start_button": "Mulai verifikasi AI",
       "missing_required_fields": "Silakan masukkan nama produk, kategori, dan minimal satu gambar."
     },
+    "category_selection": {
+      "title": "Pilih Kategori Verifikasi AI",
+      "error": "Gagal memuat kategori.",
+      "no_categories": "Tidak ada kategori yang tersedia untuk verifikasi."
+    },
+    "gallery_upload": {
+      "title": "Unggah Foto",
+      "instruction": "Mari analisis barang {category} Anda.",
+      "min_photo_guide": "Pilih minimal {0} foto dari galeri Anda agar AI dapat mengenali barang tersebut.",
+      "min_photo_error": "Diperlukan minimal {0} foto.",
+      "next_button": "Langkah Berikutnya"
+    },
+    "prediction": {
+      "title": "Konfirmasi Produk",
+      "guide": "AI telah mengenali produk Anda sebagai:",
+      "edit_label": "Sunting jika tidak sesuai",
+      "edit_button": "Mengubah nama produk secara langsung",
+      "save_button": "Perbaikan selesai",
+      "no_name": "nama produk tidak cari",
+      "loading": "AI sedang menganalisis produk...\nHarap tunggu.",
+      "uploading": "Mengunggah gambar dengan aman...",
+      "analyzing": "Menganalisis gambar yang diunggah...",
+      "error": "Gagal mengenali produk. Silakan coba lagi.",
+      "auth_error": "Analisis tidak dapat dimulai karena otentikasi pengguna tidak ada. Silakan coba lagi.",
+      "question": "Apakah ini produk yang benar?",
+      "confirm_button": "Ya, benar",
+      "reject_button": "Bukan, ini berbeda (Kembali)",
+      "analysis_error": "Terjadi kesalahan saat analisis.",
+      "retry_button": "Coba Lagi",
+      "back_button": "Kembali"
+    },
     "guided_camera": {
+      "title": "Ambil untuk detail produk",
+      "guide": "Untuk memperkaya informasi detail produk, silakan tambahkan foto yang disarankan untuk item di bawah.",
+      "location_mismatch_error": "Lokasi foto tidak cocok dengan lokasi Anda saat ini. Harap ambil foto di lokasi barang.",
+      "location_permission_error": "Izin lokasi telah ditolak. Silakan izinkan izin di pengaturan.",
+      "no_location_data_error": "Informasi lokasi tidak dapat ditemukan pada foto. Silakan aktifkan tag lokasi di pengaturan kamera.",
       "next_button": "Minta Analisis Akhir"
     },
     "final_report": {
       "title": "Tinjauan Iklan oleh AI",
+      "guide": "Ini adalah draf iklan penjualan yang dibuat oleh AI. Periksa dan ubah isinya sebelum dipublikasikan.",
       "loading": "AI sedang menulis iklan penjualan terakhir...",
+      "error": "Gagal membuat laporan. Silakan coba lagi.",
       "success": "Laporan akhir berhasil dibuat.",
       "success_pending": "Terdaftar. Akan dipublikasikan setelah ditinjau admin.",
       "pending_title": "Diajukan untuk ditinjau",
@@ -299,23 +444,48 @@
       "suggested_price": "Harga yang disarankan oleh AI ({})",
       "summary": "Ringkasan verifikasi",
       "buyer_notes": "Catatan untuk pembeli (AI)",
+      "key_specs": "Spesifikasi utama",
+      "specs": "Spesifikasi utama",
       "condition": "Pemeriksaan kondisi",
+      "included_items": "Item yang termasuk (dipisahkan dengan koma)",
       "final_description": "Deskripsi akhir",
+      "included_items_label": "Barang-barang yang termasuk",
       "notes": "Catatan untuk pembeli",
       "notes_placeholder": "Semua foto yang direkomendasikan telah disediakan. AI tidak menemukan hal penting yang perlu diberitahukan kepada pembeli.",
+      "buyer_notes_label": "Catatan pembeli",
+      "skipped_items": "Item bukti yang dilewati",
       "fail": "Pembuatan laporan gagal."
     },
     "evidence": {
+      "all_shots_required": "Semua bidikan diperlukan untuk informasi detail produk.",
       "title": "Kumpulkan untuk detail produk",
       "initial_images_title": "Daftar gambar yang digunakan AI untuk analisis awal",
-      "suggestion_title": "Item pelengkapan yang disarankan AI"
+      "suggestion_title": "Item pelengkapan yang disarankan AI",
+      "pick_initial_title": "Pilih foto untuk bukti ini",
+      "submit_button": "Kirim untuk verifikasi"
+    },
+    "error": {
+      "report_generation": "Kesalahan pembuatan laporan: {0}"
     },
     "errors": {
       "incomplete_report": "Analisis AI Gagal: AI tidak menghasilkan item laporan yang diperlukan (spesifikasi, kondisi, ringkasan). Silakan coba lagi nanti."
     }
   },
+  "registration_flow": {
+    "title": "Pilih Jenis Barang untuk Dijual",
+    "new_item_title": "Jual Barang Baru",
+    "new_item_desc": "Daftarkan barang baru yang belum pernah dipakai dengan cepat.",
+    "used_item_title": "Jual Barang Bekas (Verifikasi AI)",
+    "used_item_desc": "Biarkan AI menganalisis barang Anda untuk membangun kepercayaan dan membantu penjualan."
+  },
   "myBling": {
+    "title": "Bling Saya",
     "editProfile": "Ubah Profil",
+    "settings": "Pengaturan",
+    "posts": "Postingan",
+    "followers": "Pengikut",
+    "neighbors": "Tetangga",
+    "friends": "Teman",
     "tickets": "Tiket Saya",
     "tabs": {
       "posts": "Postingan Saya",
@@ -328,28 +498,6 @@
       "myFriends": "Teman",
       "starred": "Favorit"
     },
-    "products": {
-      "loadErrorWithMsg": "Gagal memuat produk: {error}",
-      "empty": "Belum ada produk yang terdaftar.",
-      "bookmarkeded": "Ditandai sebagai favorit",
-      "detailsTitle": "Rincian produk",
-      "editButton": "Sunting produk",
-      "deleteConfirm": "Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.",
-      "deleteSuccess": "Produk telah dihapus.",
-      "deleteFail": "Gagal menghapus produk: {error}"
-    },
-    "bookmarks": {
-      "empty": "Belum ada markah.",
-      "products": "Produk",
-      "posts": "Postingan",
-      "rooms": "Properti"
-    },
-    "title": "Bling Saya",
-    "settings": "Pengaturan",
-    "posts": "Postingan",
-    "followers": "Pengikut",
-    "neighbors": "Tetangga",
-    "friends": "Teman",
     "stats": {
       "posts": "Postingan",
       "followers": "Pengikut",
@@ -358,16 +506,35 @@
     },
     "friendRequests": "Permintaan Pertemanan",
     "sentFriendRequests": "Permintaan Terkirim",
+    "products": {
+      "empty": "Belum ada produk yang terdaftar.",
+      "bookmarkeded": "Ditandai sebagai favorit",
+      "detailsTitle": "Rincian produk",
+      "editButton": "Sunting produk",
+      "loadErrorWithMsg": "Gagal memuat produk: {error}",
+      "deleteConfirm": "Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.",
+      "deleteSuccess": "Produk telah dihapus.",
+      "deleteFail": "Gagal menghapus produk: {error}"
+    },
+    "bookmarks": {
+      "empty": "Belum ada markah."
+    },
     "postList": {
       "empty": "Belum ada postingan.",
       "writeButton": "Tulis"
     },
     "friendList": {
-      "noFriends": "Anda belum memiliki teman. Coba tambahkan beberapa.",
-      "empty": "Anda belum memiliki teman.",
-      "starredEmpty": "Belum ada favorit.",
-      "loadError": "Gagal memuat daftar teman."
+      "noFriends": "Anda belum memiliki teman. Coba tambahkan beberapa."
     }
+  },
+  "profileView": {
+    "title": "Profil",
+    "tabs": {
+      "posts": "Postingan",
+      "interests": "Minat"
+    },
+    "noPosts": "Belum ada postingan.",
+    "noInterests": "Belum ada minat."
   },
   "settings": {
     "title": "Pengaturan",
@@ -394,6 +561,7 @@
       "tagsDescription": "Hanya terima notifikasi untuk topik berita lokal yang dipilih."
     },
     "language": "Bahasa",
+    "languageSelect": "Pilih Bahasa",
     "info": "Info & Dukungan",
     "appInfo": "Info Aplikasi",
     "logout": {
@@ -408,8 +576,31 @@
       "requested": "Permintaan penghapusan Anda telah diterima. Data akan dihapus setelah disetujui oleh admin."
     }
   },
+  "friendRequests": {
+    "title": "Permintaan Pertemanan",
+    "noRequests": "Tidak ada permintaan pertemanan yang diterima.",
+    "acceptSuccess": "Permintaan pertemanan diterima.",
+    "rejectSuccess": "Permintaan pertemanan ditolak.",
+    "error": "Terjadi kesalahan: {error}",
+    "tooltip": {
+      "accept": "Terima",
+      "reject": "Tolak"
+    },
+    "defaultChatMessage": "Sekarang kalian berteman! Mulai percakapan."
+  },
+  "sentFriendRequests": {
+    "title": "Permintaan Pertemanan Terkirim",
+    "noRequests": "Tidak ada permintaan pertemanan yang dikirim.",
+    "statusLabel": "Status: {status}",
+    "status": {
+      "pending": "Menunggu",
+      "accepted": "Diterima",
+      "rejected": "Ditolak"
+    }
+  },
   "blockedUsers": {
     "title": "Pengguna Diblokir",
+    "noBlockedUsers": "Anda belum memblokir siapa pun.",
     "unblock": "Buka Blokir",
     "unblockDialog": {
       "title": "Buka blokir {nickname}?",
@@ -417,35 +608,90 @@
     },
     "unblockSuccess": "{nickname} telah dibuka blokir.",
     "unblockFailure": "Gagal membuka blokir: {error}",
+    "unknownUser": "Pengguna tidak dikenal",
     "empty": "Tidak ada pengguna yang diblokir."
   },
+  "rejectedUsers": {
+    "title": "Kelola Pengguna yang Ditolak",
+    "noRejectedUsers": "Tidak ada permintaan pertemanan yang Anda tolak.",
+    "unreject": "Batalkan Penolakan",
+    "unrejectDialog": {
+      "title": "Batalkan penolakan untuk {nickname}?",
+      "content": "Jika penolakan dibatalkan, Anda mungkin akan muncul kembali di daftar cari teman mereka."
+    },
+    "unrejectSuccess": "Penolakan terhadap {nickname} telah dibatalkan.",
+    "unrejectFailure": "Gagal membatalkan penolakan: {error}",
+    "unknownUser": "Pengguna tidak dikenal"
+  },
+  "prompt": {
+    "title": "Selamat datang di Bling!",
+    "subtitle": "Untuk melihat berita dan barang menarik di sekitar Anda, silakan atur lingkungan Anda terlebih dahulu.",
+    "button": "Atur Lingkungan Saya"
+  },
   "location": {
+    "title": "Atur Lingkungan",
     "searchHint": "Cari berdasarkan lingkungan, cth., Serpong",
+    "gpsButton": "Cari dengan lokasi saat ini",
+    "success": "Lingkungan telah diatur.",
+    "error": "Gagal mengatur lingkungan: {error}",
+    "empty": "Silakan masukkan nama lingkungan.",
     "permissionDenied": "Izin lokasi diperlukan untuk menemukan lingkungan Anda.",
+    "rtLabel": "RT",
+    "rwLabel": "RW",
+    "rtHint": "cth. 003",
+    "rwHint": "cth. 007",
+    "rtRequired": "Silakan masukkan RT.",
+    "rwRequired": "Silakan masukkan RW.",
+    "rtRwInfo": "RT/RW Anda tidak akan dipublikasikan. Data ini membantu meningkatkan kepercayaan dan fitur lokal.",
+    "saveThisLocation": "Simpan lokasi ini",
+    "manualSelect": "Pilih secara manual",
+    "refreshFromGps": "Perbarui dari GPS",
     "shortLabelLabel": "Label singkat",
     "shortLabelHint": "Label singkat opsional untuk tempat ini",
-    "updatingAddress": "Memperbarui alamat...",
+    "updatingAddress": "Memperbarui alamat..."
+    ,
     "neighborhoodPrompt": {
       "title": "Atur Lingkungan Anda",
       "subtitle": "Verifikasi lingkungan Anda untuk menggunakan semua fitur Bling.",
+      "gpsWaiting": "Menunggu sinyal GPS...",
+      "geocoding": "Mengonversi alamat ke koordinat...",
+      "saving": "Menyimpan informasi lingkungan...",
+      "manualSaving": "Menyimpan lingkungan yang dipilih...",
       "saved": "Lingkungan berhasil disimpan.",
       "error": "Kesalahan: {error}",
       "saveFailed": "Gagal menyimpan: {error}",
       "selectAtLeastCity": "Silakan pilih setidaknya tingkat kota/kabupaten.",
       "currentLocationButton": "Gunakan lokasi saat ini",
       "manualSelectButton": "Pilih lingkungan secara manual",
-      "processing": "Memproses...",
+      "processing": "Memproses..."
+      ,
       "noLocation": "Tidak dapat mengambil lokasi.",
       "addressNotFound": "Alamat tidak ditemukan.",
       "userNotAuthenticated": "Pengguna belum terautentikasi. Silakan masuk lagi."
-    }
+      }
   },
   "profileEdit": {
+    "title": "Pengaturan Profil",
+    "nicknameHint": "Nama Panggilan",
+    "phoneHint": "Nomor Telepon",
+    "bioHint": "Bio (Perkenalan Diri)",
+    "locationTitle": "Lokasi",
     "changeLocation": "Ubah",
     "locationNotSet": "Belum diatur",
+    "interests": {
+      "title": "Minat",
+      "hint": "Gunakan koma dan Enter untuk menambahkan beberapa sekaligus"
+    },
     "privacy": {
+      "title": "Pengaturan Privasi",
       "showLocation": "Tampilkan lokasi saya di peta",
       "allowRequests": "Izinkan permintaan pertemanan"
+    },
+    "saveButton": "Simpan Perubahan",
+    "successMessage": "Profil berhasil diperbarui.",
+    "errors": {
+      "noUser": "Pengguna belum login.",
+      "updateFailed": "Gagal memperbarui profil: {error}"
     }
   },
   "mainFeed": {
@@ -465,6 +711,9 @@
     "dateFormat": "dd/MM/yy",
     "dateFormatLong": "d MMM"
   },
+  "productCard": {
+    "currency": "Rp"
+  },
   "localNewsFeed": {
     "setLocationPrompt": "Silakan atur lingkungan Anda terlebih dahulu untuk melihat cerita lokal!",
     "allCategory": "Semua",
@@ -472,7 +721,11 @@
     "error": "Terjadi kesalahan."
   },
   "together": {
+    "title": "Ayo Bareng",
+    "sectionTitle": "Ayo Bareng / Together",
+    "newFlyer": "Flyer Baru",
     "emptyList": "Belum ada acara aktif.\nJadilah host pertama!",
+    "createFirst": "Buat Acara Pertama",
     "createTitle": "Buat Flyer",
     "create": {
       "subtitle": "Cari tetangga untuk bergabung"
@@ -489,12 +742,14 @@
     "labelWhen": "KAPAN",
     "labelWhere": "DIMANA",
     "labelWhat": "ACARA",
+    "statusHost": "Anda Host-nya",
     "statusJoined": "Bergabung (Cek Tiket)",
     "btnJoin": "Ikutan (Join)",
     "participants": "Peserta: {current} / {max}",
     "maxParticipants": "Jumlah peserta: {count} orang",
     "loginRequired": "Perlu login.",
     "joinSuccess": "Berhasil! Cek tiket QR Anda.",
+    "joinConfirm": "Apakah Anda ingin bergabung? Tiket QR akan diterbitkan.",
     "joinFail": "Gagal bergabung: {error}",
     "createFail": "Gagal membuat flyer: {error}",
     "updateFail": "Gagal memperbarui flyer: {error}",
@@ -505,12 +760,17 @@
     "descHint": "Jelaskan acara secara rinci (waktu, agenda, persyaratan).",
     "imageOptional": "Gambar (opsional)",
     "tapToAddPhoto": "Ketuk untuk menambahkan foto",
+    "searchHint": "Cari alamat atau nama tempat",
     "selectedLocation": "Lokasi terpilih",
+    "locationFetchError": "Tidak dapat mengambil lokasi: {error}",
+    "setCurrentLocation": "Atur lokasi saat ini",
+    "whereHint": "contoh: Taman Kota, dekat air mancur",
     "mapHint": "Geser peta untuk menempatkan pin",
     "viewMapHint": "Lihat acara di peta",
     "noTickets": "Anda belum bergabung dengan acara apa pun.",
     "qrPopup": {
-      "instruction": "Tunjukkan kode QR ini kepada penyelenggara untuk memverifikasi tiket Anda."
+      "instruction": "Tunjukkan kode QR ini kepada penyelenggara untuk memverifikasi tiket Anda.",
+      "tap": "KETUK"
     },
     "scanBtn": "Pindai QR (verifikasi peserta)",
     "ticketScan": {
@@ -591,51 +851,103 @@
     "title": "Buat Postingan Baru",
     "form": {
       "categoryLabel": "Kategori",
+      "titleLabel": "Judul",
+      "contentLabel": "Masukkan konten",
+      "tagsLabel": "Tag",
+      "tagsHint": "(Pilih 1-3 tag)",
       "recommendedTags": "Tag yang Direkomendasikan",
       "photoSectionTitle": "Tambah foto (opsional, maks 5)"
     },
     "labels": {
       "title": "Judul",
       "body": "Konten",
+      "tags": "Tag",
+      "guidedTitle": "Info Tambahan (Opsional)",
+      "eventLocation": "Lokasi Kejadian/Peristiwa",
       "eventInfo": "Info acara",
       "eventAddress": "Alamat acara"
     },
     "hints": {
       "body": "Bagikan kabar lingkungan atau ajukan pertanyaan...",
+      "tagSelection": "(Pilih 1-3 tag)",
+      "eventLocation": "mis., Jl. Sudirman 123",
       "eventAddress": "mis., Jl. Sudirman 123",
       "eventDate": "Pilih tanggal"
     },
     "validation": {
       "bodyRequired": "Harap masukkan konten.",
+      "tagRequired": "Pilih minimal 1 tag.",
+      "tagMaxLimit": "Maksimal 3 tag.",
+      "imageMaxLimit": "Maksimal 5 gambar dapat dilampirkan.",
       "titleRequired": "Harap masukkan judul."
     },
     "buttons": {
+      "addImage": "Tambah Gambar",
       "submit": "Simpan"
+    },
+    "alerts": {
+      "contentRequired": "Harap masukkan konten.",
+      "categoryRequired": "Harap pilih kategori.",
+      "success": "Postingan berhasil dibuat.",
+      "failure": "Gagal mengunggah: {error}",
+      "loginRequired": "Anda harus masuk untuk membuat postingan.",
+      "userNotFound": "Informasi pengguna tidak ditemukan."
     },
     "success": "Postingan berhasil dibuat.",
     "fail": "Gagal membuat postingan: {error}"
   },
   "localNewsEdit": {
+    "appBarTitle": "Ubah Postingan",
     "title": "Sunting Postingan",
     "buttons": {
+      "submit": "Perbarui",
       "save": "Simpan"
+    },
+    "alerts": {
+      "success": "Postingan berhasil diperbarui.",
+      "failure": "Gagal memperbarui: {error}"
     },
     "success": "Postingan berhasil diperbarui."
   },
   "tag_input": {
+    "hint": "Gunakan koma (,) atau Enter untuk menambahkan tag.",
+    "suggestedLabel": "Tag yang Direkomendasikan",
+    "maxReached": "Tag dapat didaftarkan hingga maksimal {max} buah.",
     "fromTitleSuffix": "(judul)",
     "addHint": "Tambah tag...",
     "help": "Gunakan koma (,) atau Enter untuk menambahkan tag."
   },
   "localNewsDetail": {
-    "appBarTitle": "Postingan"
+    "appBarTitle": "Postingan",
+    "menu": {
+      "edit": "Ubah",
+      "report": "Lapor",
+      "share": "Bagikan"
+    },
+    "stats": {
+      "views": "Dilihat",
+      "comments": "Komentar",
+      "likes": "Suka",
+      "thanks": "Terima Kasih"
+    },
+    "buttons": {
+      "comment": "Tambahkan komentar"
+    }
   },
   "commentInputField": {
-    "hintText": "Masukkan komentar..."
+    "secretCommentLabel": "Rahasia",
+    "hintText": "Masukkan komentar...",
+    "replyHintText": "Membalas {nickname}...",
+    "button": {
+      "send": "Kirim"
+    }
   },
   "commentListView": {
     "empty": "Belum ada komentar. Jadilah yang pertama berkomentar!",
     "reply": "Balas",
+    "delete": "Hapus",
+    "deleteTitle": "Hapus",
+    "deleted": "[Komentar ini telah dihapus]",
     "secret": "Ini adalah komentar rahasia yang hanya dapat dilihat oleh penulis dan pemilik postingan."
   },
   "common": {
@@ -645,6 +957,7 @@
     "close": "Tutup",
     "confirm": "Konfirmasi",
     "delete": "Hapus",
+    "done": "Selesai",
     "save": "Simpan",
     "clear": "Hapus",
     "report": "Laporkan",
@@ -652,13 +965,16 @@
     "more": "Lainnya",
     "viewAll": "Lihat semua",
     "all": "Semua",
+    "viewList": "Lihat daftar",
     "new": "Baru",
+    "updated": "Diperbarui",
     "comments": "Komentar",
     "sponsored": "Sponsor",
     "filter": "Filter",
     "reset": "Reset",
     "apply": "Terapkan",
     "verified": "Terverifikasi",
+    "photos": "Foto",
     "chat": "Obrolan",
     "block": "Blokir",
     "viewMore": "Lihat lebih banyak",
@@ -684,7 +1000,9 @@
     "pause": "Jeda",
     "resume": "Lanjutkan",
     "cancel": "Batal",
-    "retry": "Coba lagi"
+    "retry": "Coba lagi",
+    "uploading": "Mengunggah...",
+    "failed": "Unggah gagal"
   },
   "reportDialog": {
     "title": "Laporkan Postingan",
@@ -699,6 +1017,13 @@
   "replyDelete": {
     "fail": "Gagal menghapus balasan: {error}"
   },
+  "reportReasons": {
+    "spam": "Spam atau menyesatkan",
+    "abuse": "Pelecehan atau ujaran kebencian",
+    "inappropriate": "Konten seksual tidak pantas",
+    "illegal": "Konten ilegal",
+    "etc": "Lainnya"
+  },
   "deleteConfirm": {
     "title": "Hapus Komentar",
     "content": "Apakah Anda yakin ingin menghapus komentar ini?",
@@ -706,9 +1031,13 @@
   },
   "replyInputField": {
     "hintText": "Masukkan balasan",
+    "button": {
+      "send": "Kirim"
+    },
     "failure": "Gagal menambahkan balasan: {error}"
   },
   "chat_list": {
+    "appBarTitle": "Obrolan",
     "leave_confirm": "Keluar dari ruang obrolan ini? Riwayat percakapan mungkin hilang.",
     "empty": "Belum ada percakapan."
   },
@@ -734,18 +1063,14 @@
     },
     "tabs": {
       "all": "Semua",
+      "quickGig": "Bantua Cepat",
       "regular": "Paruh/Penuh Waktu",
-      "talents": "Cari ahli",
-      "quickGig": "Bantua Cepat"
+      "talents": "Cari ahli"
     },
     "quickGig": {
       "locationLabel": "Lokasi",
       "locationHint": "Cari alamat atau pilih di peta",
       "locationDescriptionHint": "Opsional: tambahkan detail untuk titik pertemuan"
-    },
-    "regular": {
-      "workLocationLabel": "Lokasi kerja",
-      "workLocationHint": "Cari alamat atau pilih di peta"
     },
     "selectType": {
       "title": "Pilih jenis iklan kerja",
@@ -754,14 +1079,14 @@
         "title": "Loker",
         "desc": "Kerja reguler seperti kafe, restoran, kantor"
       },
+      "quick": {
+        "title": "Bantuan cepat/Kerja harian",
+        "desc": "Kurir motor, bantu pindahan, bersih-bersih, dll."
+      },
       "talent": {
         "title": "Jual Layanan",
         "desc": "Jual skill dan keahlianmu kepada tetangga di sekitar.",
         "badge": "BARU"
-      },
-      "quick": {
-        "title": "Bantuan cepat/Kerja harian",
-        "desc": "Kurir motor, bantu pindahan, bersih-bersih, dll."
       }
     },
     "talent": {
@@ -817,8 +1142,13 @@
     },
     "form": {
       "title": "Posting Lowongan",
+      "titleHint": "Judul pekerjaan",
+      "descriptionPositionHint": "Deskripsikan posisi",
+      "categoryHint": "Kategori",
+      "categorySelectHint": "Pilih kategori",
       "categoryValidator": "Silakan pilih kategori.",
       "locationHint": "Lokasi",
+      "submit": "Posting Lowongan",
       "titleLabel": "Judul",
       "titleValidator": "Silakan masukkan judul.",
       "titleRegular": "Posting Lowongan Paruh/Penuh Waktu",
@@ -828,10 +1158,15 @@
       "saveError": "Gagal menyimpan lowongan: {error}",
       "categoryLabel": "Kategori",
       "titleHintQuickGig": "mis., Antar dokumen dengan motor (SEGERA)",
+      "salaryLabel": "Gaji (IDR)",
+      "salaryHint": "Masukkan nominal gaji",
+      "salaryValidator": "Masukkan gaji yang valid.",
       "totalPayLabel": "Total Bayaran (IDR)",
       "totalPayHint": "Masukkan total nominal yang ditawarkan",
       "totalPayValidator": "Masukkan nominal yang valid.",
       "negotiable": "Bisa nego",
+      "workPeriodLabel": "Periode Kerja",
+      "workPeriodHint": "Pilih periode kerja",
       "locationLabel": "Lokasi/Tempat Kerja",
       "locationValidator": "Masukkan lokasi.",
       "imageLabel": "Gambar (Opsional, maks 10)",
@@ -846,6 +1181,9 @@
       "workHoursHint": "contoh: Sen-Jum, 09:00-18:00",
       "imageSectionTitle": "Lampirkan Foto (opsional, maks 5)",
       "descriptionLabel": "Deskripsi",
+      "propertyLocationLabel": "Lokasi properti",
+      "propertyLocationHint": "Cari alamat atau pilih di peta",
+      "propertyLocationRequired": "Harap pilih lokasi properti.",
       "descriptionHint": "contoh: Paruh waktu 3 hari seminggu pukul 5-10 sore. Gaji bisa nego.",
       "descriptionValidator": "Harap isi deskripsi.",
       "submitSuccess": "Lowongan berhasil dipasang.",
@@ -853,20 +1191,7 @@
       "submitAction": "Posting Pekerjaan",
       "save": "Simpan",
       "editTitle": "Edit Lowongan",
-      "updateAction": "Perbarui Lowongan",
-      "titleHint": "Judul pekerjaan",
-      "descriptionPositionHint": "Deskripsikan posisi",
-      "categoryHint": "Kategori",
-      "categorySelectHint": "Pilih kategori",
-      "submit": "Posting Lowongan",
-      "salaryLabel": "Gaji (IDR)",
-      "salaryHint": "Masukkan nominal gaji",
-      "salaryValidator": "Masukkan gaji yang valid.",
-      "workPeriodLabel": "Periode Kerja",
-      "workPeriodHint": "Pilih periode kerja",
-      "propertyLocationLabel": "Lokasi properti",
-      "propertyLocationHint": "Cari alamat atau pilih di peta",
-      "propertyLocationRequired": "Harap pilih lokasi properti."
+      "updateAction": "Perbarui Lowongan"
     },
     "categories": {
       "restaurant": "Restoran",
@@ -920,8 +1245,8 @@
       "locationTitle": "Lokasi",
       "authorTitle": "Penulis",
       "apply": "Lamar",
-      "chatError": "Tidak dapat memulai chat: {error}",
-      "noAuthor": "Tidak ada info penulis"
+      "noAuthor": "Tidak ada info penulis",
+      "chatError": "Tidak dapat memulai chat: {error}"
     },
     "card": {
       "noLocation": "Tidak ada info lokasi",
@@ -929,40 +1254,90 @@
     }
   },
   "findFriend": {
+    "title": "Cari Teman",
     "segment": {
       "profile": "Profil",
       "posts": "Postingan"
     },
     "tabs": {
+      "friends": "Teman",
+      "groups": "Grup",
+      "clubs": "Grup",
       "explore": "Jelajahi",
       "myFriends": "Teman Saya"
     },
+    "editTitle": "Ubah Profil FindFriend",
+    "editProfileTitle": "Ubah Profil",
+    "save": "Simpan",
+    "profileImagesLabel": "Foto Profil (Maks 6)",
     "bioLabel": "Bio",
+    "bioHint": "Perkenalkan dirimu kepada orang lain.",
+    "bioValidator": "Harap isi bio Anda.",
     "distance": "{value} km",
+    "ageLabel": "Umur",
+    "ageHint": "Masukkan umur Anda.",
+    "genderLabel": "Jenis Kelamin",
+    "genderMale": "Pria",
+    "genderFemale": "Wanita",
+    "genderHint": "Pilih jenis kelamin Anda",
+    "interestsLabel": "Minat",
+    "preferredAgeLabel": "Preferensi Umur Teman",
+    "preferredAgeUnit": "thn",
+    "preferredGenderLabel": "Preferensi Jenis Kelamin Teman",
+    "preferredGenderAll": "Semua",
+    "showProfileLabel": "Tampilkan profil saya di daftar",
+    "showProfileSubtitle": "Jika dimatikan, orang lain tidak dapat menemukan Anda.",
+    "saveSuccess": "Profil berhasil disimpan!",
+    "saveFailed": "Gagal menyimpan profil:",
+    "loginRequired": "Diperlukan login.",
+    "noFriendsFound": "Tidak ada teman yang ditemukan di sekitar.",
+    "prompt_title": "Untuk bertemu teman baru,\nsilakan buat profil Anda terlebih dahulu!",
+    "prompt_button": "Buat Profil Saya",
     "chatLimitReached": "Anda telah mencapai batas harian ({limit}) untuk memulai obrolan baru.",
     "chatChecking": "Memeriksa...",
+    "empty": "Tidak ada teman yang ditemukan di sekitar.",
     "searchNoResults": "Tidak ada hasil pencarian.",
-    "noMatches": "Tidak dapat menemukan tetangga yang sesuai dengan kriteria."
+    "noMatches": "Tidak dapat menemukan tetangga yang sesuai dengan kriteria.",
+    "form": {
+      "title": "Membuat Profil Pencarian Teman"
+    }
   },
   "friendPost": {
     "noPosts": "Belum ada postingan.",
     "write": "Tulis",
     "action": {
+      "enterChat": "Masuk obrolan",
       "waitingCount": "Menunggu {}",
+      "participating": "Sedang ngobrol",
       "waitingCancel": "Menunggu persetujuan (Batal)",
       "full": "Penuh",
       "requestJoin": "Minta bergabung",
+      "chat": "Ngobrol",
       "managePost": "Kelola posting saya"
     },
+    "manage": {
+      "title": "Kelola Permintaan Bergabung",
+      "empty": "Tidak ada permintaan yang menunggu."
+    },
     "snackbar": {
+      "requestSent": "Permintaan dikirim. Silakan tunggu persetujuan.",
+      "approved": "{} disetujui.",
+      "full": "Grup sudah penuh.",
       "deleted": "Postingan telah dihapus."
+    },
+    "system": {
+      "joined": "{} telah bergabung."
     },
     "groupChatStarted": "Obrolan grup dimulai.",
     "enterChatLabel": "Masuk obrolan",
     "requestSent": "Permintaan dikirim. Silakan tunggu persetujuan.",
     "manageRequestsTitle": "Kelola Permintaan Bergabung",
     "noPendingRequests": "Tidak ada permintaan yang menunggu.",
+    "pendingCountBadge": "Menunggu {count}",
     "chattingLabel": "Sedang ngobrol",
+    "waitingCancelLabel": "Menunggu persetujuan (Batal)",
+    "requestButtonLabel": "Minta bergabung",
+    "fullLabel": "Penuh",
     "approvedSnackbar": "{nickname} disetujui.",
     "memberJoinedSingle": "{nickname} telah bergabung.",
     "memberJoinedMultiple": "{names} telah bergabung.",
@@ -970,6 +1345,7 @@
     "unknownLocation": "Tidak ada lokasi",
     "noBio": "Tidak ada bio",
     "searchHint": "Cari posting...",
+    "createPostNavigate": "Menuju membuat posting.",
     "genericError": "Kesalahan: {error}",
     "create": {
       "title": {
@@ -996,16 +1372,28 @@
       }
     },
     "menu": {
+      "edit": "Sunting posting",
       "delete": "Hapus posting"
     },
     "dialog": {
       "deleteConfirm": "Apakah Anda yakin ingin menghapus postingan ini?",
       "deleteAction": "Hapus",
       "cancel": "Batal"
+    },
+    "error": {
+      "userNotFound": "Pengguna tidak ditemukan."
     }
   },
   "interests": {
     "title": "Minat",
+    "limit_info": "Anda dapat memilih hingga 10.",
+    "limit_reached": "Anda hanya dapat memilih hingga 10 minat.",
+    "category_creative": "🎨 Kreatif",
+    "category_sports": "🏃 Olahraga & Aktivitas",
+    "category_food_drink": "🍸 Makanan & Minuman",
+    "category_entertainment": "🍿 Hiburan",
+    "category_growth": "📚 Pengembangan Diri",
+    "category_lifestyle": "🌴 Gaya Hidup",
     "items": {
       "drawing": "Menggambar",
       "sports": "Olahraga",
@@ -1044,16 +1432,24 @@
       "volunteering": "Kegiatan sosial",
       "minimalism": "Minimalisme",
       "$interestKey": "$interestKey"
-    }
+    },
+    "$categoryKey": "$categoryKey"
   },
   "friendDetail": {
+    "request": "Kirim Permintaan",
+    "requestSent": "Terkirim",
+    "alreadyFriends": "Sudah Berteman",
+    "requestFailed": "Permintaan gagal:",
     "chatError": "Gagal memulai obrolan.",
     "startChat": "Mulai Obrolan",
     "block": "Blokir",
+    "report": "Laporkan",
+    "loginRequired": "Diperlukan login.",
     "unblocked": "Dibuka Blokir",
     "blocked": "Diblokir",
     "unblock": "Buka Blokir",
     "bookmark": "Favoritkan",
+    "bookmarked": "Ditandai sebagai favorit",
     "bookmarkeded": "Ditandai sebagai favorit",
     "unbookmarked": "Dihapus dari favorit"
   },
@@ -1063,6 +1459,23 @@
       "activeClubs": "Grup Aktif",
       "myClubs": "Grup Saya",
       "exploreClubs": "Jelajahi Semua Grup"
+    },
+    "sections": {
+      "active": "Klub resmi",
+      "proposals": "Usulan Grup"
+    },
+    "categories": {
+      "sports": "Olahraga",
+      "hobbies": "Hobi",
+      "social": "Sosial",
+      "study": "Belajar",
+      "reading": "Membaca",
+      "culture": "Budaya",
+      "travel": "Perjalanan",
+      "volunteer": "Sukarelawan",
+      "pets": "Hewan Peliharaan",
+      "food": "Makanan",
+      "etc": "Lainnya"
     },
     "screen": {
       "error": "Kesalahan: {error}",
@@ -1080,7 +1493,13 @@
       "kickFail": "Gagal menghapus anggota: {error}"
     },
     "postCard": {
-      "withdrawnMember": "Anggota keluar"
+      "deleteTitle": "Hapus Postingan",
+      "deleteContent": "Apakah Anda yakin ingin menghapus postingan ini? Tindakan ini tidak dapat dibatalkan.",
+      "deleteSuccess": "Postingan dihapus.",
+      "deleteFail": "Gagal menghapus postingan: {error}",
+      "withdrawnMember": "Anggota keluar",
+      "deleteTooltip": "Hapus postingan",
+      "loadingUser": "Memuat info pengguna..."
     },
     "post": {
       "loadingUser": "Muat informasi pengguna...",
@@ -1135,11 +1554,16 @@
     },
     "createClub": {
       "selectAtLeastOneInterest": "Pilih setidaknya satu minat.",
+      "success": "Grup berhasil dibuat!",
+      "fail": "Gagal membuat Grup: {error}",
+      "title": "Buat Grup",
       "categoryLabel": "Kategori",
       "nameLabel": "Nama Grup",
       "nameError": "Silakan masukkan nama Grup.",
       "descriptionLabel": "Deskripsi Grup",
       "descriptionError": "Silakan masukkan deskripsi Grup.",
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
+      "maxInterests": "Anda dapat memilih hingga 3 minat.",
       "privateClub": "Grup Privat",
       "privateDescription": "Hanya bisa bergabung lewat undangan.",
       "locationLabel": "Lokasi Grup"
@@ -1150,6 +1574,7 @@
     },
     "editClub": {
       "title": "Edit Informasi Grup",
+      "save": "Simpan",
       "success": "Informasi Grup diperbarui.",
       "fail": "Gagal memperbarui Grup: {error}"
     },
@@ -1162,9 +1587,11 @@
     "proposal": {
       "createTitle": "Ajukan Grup",
       "editTitle": "Sunting Usulan",
+      "imageError": "Silakan pilih gambar sampul.",
       "createSuccess": "Usulan Grup Anda berhasil dibuat.",
       "createFail": "Gagal membuat usulan: {error}",
       "createAction": "Buat proposal",
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "targetMembers": "Target anggota",
       "targetMembersCount": "Total {count} orang",
       "empty": "Belum ada usulan Grup.",
@@ -1179,7 +1606,8 @@
         "loginRequired": "Silakan masuk untuk bergabung.",
         "error": "Terjadi kesalahan: {error}"
       }
-    }
+    },
+    "empty": "Belum ada produk.\nKetuk tombol + untuk menambahkan yang pertama!"
   },
   "auctions": {
     "card": {
@@ -1200,7 +1628,12 @@
       "alreadyEnded": "Lelang ini sudah berakhir."
     },
     "empty": "Tidak ada lelang.",
+    "filter": {
+      "tooltip": "Filter",
+      "clearTooltip": "Hapus filter"
+    },
     "create": {
+      "tooltip": "Buat Lelang",
       "title": "Buat Lelang",
       "registrationType": "Jenis Pendaftaran",
       "type": {
@@ -1223,23 +1656,28 @@
         "startPrice": "Harga awal",
         "category": "Kategori",
         "categoryHint": "Pilih kategori",
+        "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
         "duration": "Durasi",
         "durationOption": "{days} hari",
         "location": "Lokasi"
       }
     },
     "edit": {
+      "tooltip": "Ubah lelang",
       "title": "Ubah Lelang",
+      "save": "Simpan",
       "success": "Informasi lelang diperbarui.",
       "fail": "Gagal memperbarui lelang: {error}"
     },
     "form": {
       "titleRequired": "Silakan masukkan judul.",
       "descriptionRequired": "Silakan masukkan deskripsi.",
+      "startPriceRequired": "Silakan masukkan harga awal.",
       "startPriceInvalid": "Masukkan harga awal yang valid.",
       "categoryRequired": "Harap pilih kategori."
     },
     "delete": {
+      "tooltip": "Hapus lelang",
       "confirmTitle": "Hapus lelang",
       "confirmContent": "Apakah Anda yakin ingin menghapus lelang ini?",
       "success": "Lelang dihapus.",
@@ -1280,7 +1718,8 @@
       "title": "Ubah Informasi Toko",
       "save": "Simpan",
       "success": "Informasi toko diperbarui.",
-      "fail": "Gagal memperbarui toko: {error}"
+      "fail": "Gagal memperbarui toko: {error}",
+      "tooltip": "Ubah informasi toko"
     },
     "form": {
       "nameLabel": "Nama Toko",
@@ -1301,21 +1740,26 @@
       "shopLocationError": "Silakan pilih lokasi toko."
     },
     "categories": {
-      "food": "Makanan",
+      "all": "Semua",
+      "food": "Restoran",
       "cafe": "Kafe",
       "massage": "Pijat",
       "beauty": "Kecantikan",
-      "nail": "Salon Kuku",
-      "auto": "Otomotif",
-      "kids": "Anak",
-      "hospital": "Rumah Sakit",
-      "etc": "Lainnya"
+      "nail": "Perawatan Kuku",
+      "auto": "Otomotif/Bengkel",
+      "kids": "Produk & Layanan Anak",
+      "hospital": "Rumah Sakit/Klinik",
+      "etc": "Lainnya",
+      "$category": "$category"
     },
     "detail": {
       "description": "Deskripsi Toko",
       "products": "Produk/Layanan",
       "deleteTitle": "Hapus Toko",
       "deleteContent": "Apakah Anda yakin ingin menghapus toko ini? Tindakan ini tidak dapat dibatalkan.",
+      "deleteTooltip": "Hapus toko",
+      "delete": "Hapus",
+      "cancel": "Batal",
       "deleteSuccess": "Toko telah dihapus.",
       "deleteFail": "Gagal menghapus toko: {error}",
       "inquire": "Hubungi",
@@ -1329,6 +1773,7 @@
     "noLocation": "Tidak ada info lokasi"
   },
   "pom": {
+    "title": "POM",
     "search": {
       "hint": "Cari POM, tag, pengguna"
     },
@@ -1343,9 +1788,15 @@
     "likesCount": "{} suka",
     "report": "Laporkan {}",
     "block": "Blokir {}",
+    "emptyPopular": "Belum ada POM populer.",
+    "emptyMine": "Anda belum mengunggah POM.",
+    "emptyHintPopular": "Coba tab Semua untuk melihat POM terbaru.",
+    "emptyCtaMine": "Ketuk + untuk mengunggah POM pertamamu.",
     "share": "Bagikan",
+    "empty": "Belum ada POM yang diunggah.",
     "errors": {
-      "fetchFailed": "Terjadi kesalahan: {error}"
+      "fetchFailed": "Terjadi kesalahan: {error}",
+      "videoSource": "Tidak dapat memutar video ini. Sumber tidak tersedia atau diblokir."
     },
     "comments": {
       "title": "Komentar",
@@ -1360,6 +1811,7 @@
       "title": "Unggah POM Baru",
       "photo": "Foto",
       "video": "Video",
+      "titleImage": "Unggah Foto",
       "submit": "Unggah",
       "success": "POM berhasil diunggah.",
       "fail": "Gagal mengunggah POM: {error}",
@@ -1375,17 +1827,20 @@
   "realEstate": {
     "empty": "Belum ada listing.",
     "error": "Terjadi kesalahan: {error}",
+    "create": "Tambah listing",
     "locationUnknown": "Tidak ada info lokasi",
+    "viewMapHint": "Lihat semua listing di peta",
     "priceUnits": {
       "monthly": "bulan",
       "yearly": "tahun"
+    },
+    "priceUnit": {
+      "monthly": "bulan"
     },
     "form": {
       "title": "Daftarkan Listing",
       "submit": "Daftar",
       "locationRequired": "Lokasi wajib diisi",
-      "propertyLocationLabel": "Lokasi properti",
-      "propertyLocationHint": "Cari alamat atau pilih di peta",
       "imageRequired": "Harap lampirkan minimal satu foto.",
       "success": "Listing berhasil dibuat.",
       "fail": "Gagal membuat listing: {error}",
@@ -1580,10 +2035,10 @@
       }
     },
     "info": {
-      "anytime": "Kapan saja",
-      "verifiedPublisher": "Pengiklan terverifikasi",
       "bed": "KT",
-      "bath": "KM"
+      "bath": "KM",
+      "anytime": "Kapan saja",
+      "verifiedPublisher": "Pengiklan terverifikasi"
     },
     "detail": {
       "deleteTitle": "Hapus listing",
@@ -1603,19 +2058,15 @@
       "success": "Listing diperbarui.",
       "fail": "Gagal memperbarui listing: {error}"
     },
-    "disclaimer": "Bling adalah platform iklan/board online dan bukan pihak dalam transaksi. Kebenaran data, status hukum, harga, dan ketentuan pada listing merupakan tanggung jawab pengunggah. Pengguna wajib melakukan pemeriksaan dan verifikasi langsung dengan pengunggah serta pihak terkait sebelum bertransaksi.",
-    "disclaimerTitle": "Pemberitahuan Transaksi",
-    "create": "Tambah listing",
-    "viewMapHint": "Lihat semua listing di peta",
-    "priceUnit": {
-      "monthly": "bulan",
-      "yearly": "tahun"
-    }
+    "disclaimer": "Bling adalah platform iklan/board online dan bukan pihak dalam transaksi. Kebenaran data, status hukum, harga, dan ketentuan pada listing merupakan tanggung jawab pengunggah. Pengguna wajib melakukan pemeriksaan dan verifikasi langsung dengan pengunggah serta pihak terkait sebelum bertransaksi."
+    ,
+    "disclaimerTitle": "Pemberitahuan Transaksi"
   },
   "lostAndFound": {
     "empty": "Belum ada barang hilang/temuan.",
     "emptyLocation": "Tidak ada barang yang ditemukan di area yang dipilih. Coba lihat semua area untuk melihat postingan lainnya.",
     "error": "Terjadi kesalahan: {error}",
+    "create": "Tambah barang hilang/temuan",
     "lost": "Hilang",
     "found": "Ditemukan",
     "tabs": {
@@ -1638,6 +2089,10 @@
         "lost": "Saya kehilangan",
         "found": "Saya menemukan"
       },
+      "lostPlaceLabel": "Tempat hilang",
+      "lostPlaceHint": "Cari alamat atau pilih di peta",
+      "foundPlaceLabel": "Tempat ditemukan",
+      "foundPlaceHint": "Cari alamat atau pilih di peta",
       "lostPlaceError": "Silakan pilih tempat barang hilang.",
       "photoSectionTitle": "Tambah foto (maks 5)",
       "imageRequired": "Harap lampirkan minimal satu foto.",
@@ -1653,15 +2108,18 @@
       "bountyAmountMax": "Jumlah maksimal adalah 100,000,000.",
       "success": "Berhasil didaftarkan.",
       "fail": "Gagal mendaftarkan barang: {error}",
+      "tagsHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter.",
       "placeLabel": "Tempat hilang atau ditemukan",
       "placeHint": "Cari alamat atau pilih di peta"
     },
     "edit": {
       "title": "Ubah Barang Hilang/Temuan",
+      "save": "Simpan",
       "success": "Berhasil diperbarui.",
       "fail": "Gagal memperbarui: {error}"
     },
     "resolve": {
+      "whoHelped": "Siapa yang membantu Anda?",
       "whoHelpedLost": "Pilih orang yang membantu dari daftar chat jika ada.",
       "whoReturnedFound": "Kepada siapa Anda mengembalikan barang ini? Pilih orang yang mengembalikan.",
       "noCandidates": "Tidak ada tetangga dengan riwayat obrolan.",
@@ -1671,12 +2129,17 @@
       "reviewHint": "Cth: Terima kasih sudah mengantar walau hujan!",
       "reviewHintFound": "Contoh: Terima kasih telah mengembalikan barang ini kepada pemilik.",
       "systemMessage": "Terima kasih — poin kepercayaan telah diberikan!",
-      "success": "Ditandai sebagai selesai."
+      "success": "Ditandai sebagai selesai.",
+      "confirmTitle": "Tandai Selesai?",
+      "confirmBody": "Anda dapat memberi ulasan jika ada tetangga yang membantu.",
+      "badgeLost": "Sudah ditemukan!",
+      "badgeFound": "Sudah dikembalikan!"
     },
     "detail": {
       "title": "Barang Hilang/Temuan",
       "location": "Lokasi",
       "reviewTitle": "Ulasan Terima Kasih",
+      "reviewBy": "Dibantu oleh {name}",
       "helpedBy": "Dibantu oleh {name}",
       "bounty": "Bounty",
       "registrant": "Pendaftar",
@@ -1689,7 +2152,18 @@
       "cancel": "Batal",
       "deleteSuccess": "Postingan dihapus.",
       "deleteFail": "Gagal menghapus postingan: {error}",
+      "editTooltip": "Ubah",
+      "deleteTooltip": "Hapus",
+      "noUser": "Info pengguna tidak ada",
       "chatError": "Tidak dapat memulai chat: {error}"
+    }
+  },
+  "community": {
+    "title": "Halaman Komunitas"
+  },
+  "shared": {
+    "tagInput": {
+      "defaultHint": "Anda dapat mendaftarkan tag dengan koma (,) atau Enter."
     }
   },
   "linkPreview": {
@@ -1702,6 +2176,7 @@
     "version": "Versi 2.1.0 (Field Test Build)",
     "serviceIntroTitle": "Tentang Layanan",
     "serviceIntroBody": "Bling adalah super app hiper-lokal yang menghubungkan lingkungan Anda dengan lebih dekat dan dapat dipercaya. Berita, jual-beli, pertemuan, dan acara instan — semua kebutuhan kehidupan lokal terintegrasi di satu tempat.",
+    "keyFeaturesTitle": "Fitur Utama",
     "manualTitle": "Manual Pengguna & Panduan",
     "manualIntro": "Ketuk setiap fitur di bawah untuk mempelajari cara menggunakannya.",
     "features": {
@@ -1763,7 +2238,14 @@
     },
     "developmentTitle": "Pengembangan & Operasi",
     "developmentBody": "Didukung oleh Flutter & Firebase",
+    "developerLabel": "Developer",
     "developerNames": "Developer : Jae Hyun Park(CTO)"
+  },
+  "address_neighborhood": "Lingkungan",
+  "address_detail_hint": "Alamat detail",
+  "localNewsTagResult": {
+    "error": "Terjadi kesalahan saat mencari: {error}",
+    "empty": "Tidak ada postingan dengan tag '#{tag}'."
   },
   "admin": {
     "screen": {
@@ -1785,6 +2267,7 @@
       "itemInfo": "Detail Produk Asli",
       "rejectTitle": "Masukkan alasan penolakan",
       "rejectReasonHint": "Alasan penolakan",
+      "rejectReasonRequired": "Alasan wajib diisi",
       "aiReport": "Laporan Analisis AI (V3)",
       "labels": {
         "userId": "ID Pengguna",
@@ -1806,6 +2289,12 @@
       "email": "Email",
       "requestedAt": "Diajukan pada",
       "approve": "Setujui Penghapusan"
+    },
+    "reports": {
+      "title": "Manajemen Laporan",
+      "empty": "Tidak ada laporan yang menunggu.",
+      "error": "Gagal memuat laporan.",
+      "createdAt": "Dibuat pada"
     },
     "reportList": {
       "title": "Manajemen Laporan",
@@ -1852,6 +2341,98 @@
       "fail": "Gagal: {error}"
     }
   },
+  "tags": {
+    "local_news": {
+      "kelurahan_notice": {
+        "name": "Pengumuman Kelurahan",
+        "desc": "Pengumuman dari kantor kelurahan."
+      },
+      "kecamatan_notice": {
+        "name": "Pengumuman Kecamatan",
+        "desc": "Pengumuman dari kantor kecamatan."
+      },
+      "public_campaign": {
+        "name": "Kampanye publik",
+        "desc": "Informasi publik dan program pemerintah."
+      },
+      "siskamling": {
+        "name": "Siskamling",
+        "desc": "Kegiatan ronda/keamanan lingkungan."
+      },
+      "power_outage": {
+        "name": "Pemadaman listrik",
+        "desc": "Informasi mati lampu di sekitar Anda."
+      },
+      "water_outage": {
+        "name": "Gangguan air",
+        "desc": "Informasi gangguan/pemutusan pasokan air."
+      },
+      "waste_collection": {
+        "name": "Pengangkutan sampah",
+        "desc": "Jadwal atau pemberitahuan pengangkutan sampah."
+      },
+      "road_works": {
+        "name": "Perbaikan jalan",
+        "desc": "Informasi pekerjaan/perbaikan jalan."
+      },
+      "public_facility": {
+        "name": "Fasilitas umum",
+        "desc": "Informasi taman, lapangan, dan fasilitas umum."
+      },
+      "weather_warning": {
+        "name": "Peringatan cuaca",
+        "desc": "Peringatan cuaca buruk di sekitar Anda."
+      },
+      "flood_alert": {
+        "name": "Peringatan banjir",
+        "desc": "Peringatan dan lokasi terdampak banjir."
+      },
+      "air_quality": {
+        "name": "Kualitas udara",
+        "desc": "Informasi polusi udara dan AQI."
+      },
+      "disease_alert": {
+        "name": "Peringatan penyakit",
+        "desc": "Peringatan penyakit menular dan info kesehatan."
+      },
+      "school_notice": {
+        "name": "Pengumuman sekolah",
+        "desc": "Pengumuman dari sekolah sekitar."
+      },
+      "posyandu": {
+        "name": "Posyandu",
+        "desc": "Kegiatan posyandu (kesehatan ibu & anak)."
+      },
+      "health_campaign": {
+        "name": "Kampanye kesehatan",
+        "desc": "Kampanye kesehatan dan panduan publik."
+      },
+      "traffic_control": {
+        "name": "Pengaturan lalu lintas",
+        "desc": "Pengalihan arus/penutupan dan info rekayasa lalin."
+      },
+      "public_transport": {
+        "name": "Transportasi umum",
+        "desc": "Info bus, KRL, MRT, LRT, dan lainnya."
+      },
+      "parking_policy": {
+        "name": "Kebijakan parkir",
+        "desc": "Informasi dan perubahan kebijakan parkir."
+      },
+      "community_event": {
+        "name": "Acara warga",
+        "desc": "Festival, lomba, dan kegiatan warga."
+      },
+      "worship_event": {
+        "name": "Acara ibadah",
+        "desc": "Kegiatan di masjid, gereja, vihara, pura, dll."
+      },
+      "incident_report": {
+        "name": "Laporan insiden",
+        "desc": "Laporan insiden dan kecelakaan di lingkungan."
+      }
+    }
+  },
   "boards": {
     "popup": {
       "inactiveTitle": "Papan lingkungan belum aktif",
@@ -1863,11 +2444,16 @@
       "monthlyPosts": "Posting bulanan"
     },
     "filter": {
-      "all": "Semua"
+      "all": "Semua",
+      "news": "Berita",
+      "question": "Pertanyaan",
+      "help": "Bantuan"
     },
     "defaultTitle": "Papan Komunitas",
     "chatActionLabel": "Ngobrol Warga",
     "boardHeader": "Papan Komunitas",
+    "chatRoomComingSoon": "Fitur ruang obrolan segera hadir!",
+    "chatRoomTitle": "Ruang Obrolan Komunitas",
     "emptyFeed": "Belum ada cerita lokal di papan ini.",
     "chatRoomCreated": "Ruang obrolan komunitas telah dibuat."
   },
@@ -1878,10 +2464,58 @@
       "expandToNational": "Cari Secara Nasional",
       "checkSpelling": "Periksa ejaan atau coba kata kunci lain."
     },
+    "prompt": "Masukkan kata kunci",
     "sheet": {
+      "localNews": "Cari Cerita Lokal",
+      "localNewsDesc": "Cari berdasarkan judul, isi, tag",
+      "jobs": "Cari Lowongan",
+      "jobsDesc": "Cari berdasarkan posisi, perusahaan, tag",
+      "lostAndFound": "Cari Hilang & Temu",
+      "lostAndFoundDesc": "Cari berdasarkan nama barang, lokasi",
+      "marketplace": "Cari Preloved",
+      "marketplaceDesc": "Cari berdasarkan nama barang, kategori, tag",
+      "localStores": "Cari Toko Lokal",
+      "localStoresDesc": "Cari berdasarkan nama toko, jenis usaha, kata kunci",
+      "clubs": "Cari Grup",
+      "clubsDesc": "Cari berdasarkan nama grup, minat",
+      "findFriends": "Cari Teman",
+      "findFriendsDesc": "Cari berdasarkan nama panggilan, minat",
+      "realEstate": "Cari Properti",
+      "realEstateDesc": "Cari berdasarkan judul listing, area, tag",
+      "auction": "Cari Lelang",
+      "auctionDesc": "Cari berdasarkan nama barang, tag",
+      "pom": "Cari POM",
+      "pomDesc": "Cari berdasarkan judul, tagar",
       "comingSoon": "Segera hadir"
     },
-    "results": "Hasil"
+    "results": "Hasil",
+    "locationfilter": {
+      "title": "Filter Lokasi",
+      "reset": "Atur Ulang",
+      "apply": "Terapkan",
+      "provinsi": "Provinsi",
+      "kabupaten": "Kabupaten",
+      "kota": "Kota",
+      "kecamatan": "Kecamatan",
+      "kelurahan": "Kelurahan",
+      "tab": {
+        "admin": "Pilih Area",
+        "nearby": "Di Sekitar",
+        "national": "Nasional"
+      },
+      "nearby": {
+        "radius": "Cari dalam radius {km}km",
+        "desc": "Sesuaikan jangkauan untuk menemukan item di sekitarmu."
+      },
+      "national": {
+        "title": "Pencarian Nasional",
+        "desc": "Cari semua item dan posting tanpa batasan lokasi."
+      },
+      "hint": {
+        "selectParent": "Silakan pilih wilayah induk terlebih dahulu",
+        "all": "Semua Wilayah"
+      }
+    }
   },
   "locationfilter": {
     "title": "Filter Lokasi",
@@ -1889,6 +2523,7 @@
     "apply": "Terapkan",
     "provinsi": "Provinsi",
     "kabupaten": "Kabupaten",
+    "kota": "Kota",
     "kecamatan": "Kecamatan",
     "kelurahan": "Kelurahan",
     "tab": {
@@ -1909,6 +2544,19 @@
       "all": "Semua Wilayah"
     }
   },
+  "language": {
+    "id": "Bahasa Indonesia",
+    "ko": "Korean",
+    "en": "English"
+  },
+  "location_setting_error": "Kesalahan pengaturan lokasi: {error}",
+  "signup_fail_required": "Pendaftaran gagal: Kolom wajib tidak terisi",
+  "signup_fail_password_mismatch": "Pendaftaran gagal: Kata sandi tidak cocok",
+  "signup_fail_default": "Pendaftaran gagal: Informasi dasar tidak lengkap",
+  "signup_fail_weak_password": "Gagal mendaftar: Kata sandi lemah",
+  "signup_fail_email_in_use": "Gagal masuk: Saat menggunakan email yang sudah terdaftar",
+  "signup_fail_invalid_email": "Gagal mendaftar: Email tidak valid",
+  "signup_fail_unknown": "Gagal mendaftar: Kesalahan tak terduga",
   "category_empty": "Kategori kosong",
   "user": {
     "notLoggedIn": "Pengguna tidak masuk."
@@ -1945,12 +2593,25 @@
       "sent_desc": "Kami telah mengirim tautan ke {email}.\nSilakan klik tautan untuk menyelesaikan verifikasi.",
       "resend": "Kirim Ulang Email",
       "logout": "Keluar",
+      "check": "Cek Verifikasi",
       "success": "Verifikasi email selesai.",
       "fail_send": "Gagal mengirim email: {error}"
     },
     "signup": {
+      "success_email_sent": "Pendaftaran berhasil! Kami mengirim tautan verifikasi ke {email}.",
       "fail": {
-        "required": "Harap isi kolom yang diperlukan."
+        "required": "Harap isi kolom yang diperlukan.",
+        "password_mismatch": "Kata sandi tidak cocok.",
+        "default": "Pendaftaran gagal. Silakan coba lagi.",
+        "weak_password": "Kata sandi terlalu lemah.",
+        "email_in_use": "Email ini sudah digunakan.",
+        "invalid_email": "Alamat email tidak valid.",
+        "unknown": "Terjadi kesalahan yang tidak diketahui."
+      }
+    },
+    "home": {
+      "menu": {
+        "together": "Ayo Bareng"
       }
     }
   },
