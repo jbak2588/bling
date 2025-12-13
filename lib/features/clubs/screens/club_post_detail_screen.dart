@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
 
@@ -168,23 +169,32 @@ class _ClubPostDetailScreenState extends State<ClubPostDetailScreen> {
                       const SizedBox(height: 16),
                       if (widget.post.imageUrls != null &&
                           widget.post.imageUrls!.isNotEmpty)
-                        ...widget.post.imageUrls!.map((url) => Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  if (widget.embedded &&
-                                      widget.onClose != null) {
-                                    widget.onClose!();
-                                  }
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (_) => Image.network(url)));
-                                },
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(url),
-                                ),
+                        ...widget.post.imageUrls!.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final url = entry.value;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                if (widget.embedded && widget.onClose != null) {
+                                  widget.onClose!();
+                                }
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => ImageGalleryScreen(
+                                      imageUrls: widget.post.imageUrls!,
+                                      initialIndex: index,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(url),
                               ),
-                            )),
+                            ),
+                          );
+                        }),
                       if (eventLocation != null) ...[
                         const SizedBox(height: 16),
                         Text(

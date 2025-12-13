@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 import 'package:bling_app/features/jobs/models/talent_model.dart';
 import 'package:bling_app/features/jobs/data/talent_repository.dart';
@@ -10,6 +11,9 @@ import 'package:bling_app/features/chat/data/chat_service.dart'; // [추가]
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart'; // [추가]
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
+import 'package:bling_app/core/utils/address_formatter.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 
 class TalentDetailScreen extends StatefulWidget {
   // [수정] StatelessWidget -> StatefulWidget (로딩 상태 관리)
@@ -29,6 +33,13 @@ class _TalentDetailScreenState extends State<TalentDetailScreen> {
     final user = FirebaseAuth.instance.currentUser;
     final isOwner = user != null && user.uid == widget.talent.userId;
     final repo = TalentRepository();
+
+    final adminFilter = context.watch<LocationProvider>().adminFilter;
+    final displayAddress = AddressFormatter.dynamicAdministrativeAddress(
+      locationParts: widget.talent.locationParts,
+      adminFilter: adminFilter,
+      fallbackFullAddress: widget.talent.locationName,
+    );
 
     // [유지] 삭제 로직 (widget.talent로 접근)
     void deletePost() async {
@@ -154,10 +165,22 @@ class _TalentDetailScreenState extends State<TalentDetailScreen> {
           children: [
             // [유지] 이미지 슬라이더
             if (widget.talent.portfolioUrls.isNotEmpty)
-              SizedBox(
-                height: 250,
-                child: Image.network(widget.talent.portfolioUrls.first,
-                    fit: BoxFit.cover, width: double.infinity),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ImageGalleryScreen(
+                        imageUrls: widget.talent.portfolioUrls,
+                        initialIndex: 0,
+                      ),
+                    ),
+                  );
+                },
+                child: SizedBox(
+                  height: 250,
+                  child: Image.network(widget.talent.portfolioUrls.first,
+                      fit: BoxFit.cover, width: double.infinity),
+                ),
               ),
 
             Padding(
@@ -192,8 +215,10 @@ class _TalentDetailScreenState extends State<TalentDetailScreen> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          widget.talent.locationName ??
-                              'jobs.talent.detail.locationUnknown'.tr(),
+                          displayAddress.isNotEmpty
+                              ? displayAddress
+                              : (widget.talent.locationName ??
+                                  'jobs.talent.detail.locationUnknown'.tr()),
                           style: const TextStyle(color: Colors.grey),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

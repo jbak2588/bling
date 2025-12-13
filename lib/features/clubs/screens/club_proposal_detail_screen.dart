@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:bling_app/features/shared/widgets/author_profile_tile.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/core/constants/app_links.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart'; // [추가]
@@ -173,10 +174,25 @@ class _ClubProposalDetailScreenState extends State<ClubProposalDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (_proposal.imageUrl.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(_proposal.imageUrl,
-                    width: double.infinity, height: 200, fit: BoxFit.cover),
+              GestureDetector(
+                onTap: () {
+                  if (widget.embedded && widget.onClose != null) {
+                    widget.onClose!();
+                  }
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ImageGalleryScreen(
+                        imageUrls: [_proposal.imageUrl],
+                        initialIndex: 0,
+                      ),
+                    ),
+                  );
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(_proposal.imageUrl,
+                      width: double.infinity, height: 200, fit: BoxFit.cover),
+                ),
               ),
             const SizedBox(height: 12),
             // [추가] 비공개 제안 배지

@@ -22,6 +22,8 @@ import 'package:share_plus/share_plus.dart'; // ✅ SharePlus import 확인
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:bling_app/core/constants/app_links.dart';
 import 'package:bling_app/core/utils/address_formatter.dart';
+import 'package:provider/provider.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 // ❌ [태그 시스템] 기존 카테고리 import 제거
 // import '../../../core/constants/app_categories.dart';
 // ✅ [태그 시스템] 태그 사전 import 추가
@@ -255,12 +257,19 @@ class _LocalNewsDetailScreenState extends State<LocalNewsDetailScreen> {
                         ],
                       ),
                       Text(
-                        AddressFormatter.formatKelKabFromParts(
-                                    user.locationParts)
-                                .isNotEmpty
-                            ? AddressFormatter.formatKelKabFromParts(
-                                user.locationParts)
-                            : 'postCard.locationNotSet'.tr(),
+                        (() {
+                          final adminFilter =
+                              context.watch<LocationProvider>().adminFilter;
+                          final display =
+                              AddressFormatter.dynamicAdministrativeAddress(
+                            locationParts: user.locationParts,
+                            adminFilter: adminFilter,
+                            fallbackFullAddress: user.locationName,
+                          );
+                          return display.isNotEmpty
+                              ? display
+                              : 'postCard.locationNotSet'.tr();
+                        })(),
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],

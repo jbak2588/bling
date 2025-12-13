@@ -46,6 +46,10 @@ import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:bling_app/core/utils/address_formatter.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 
 // ✅ [수정] UserModel과 최종 ProductModel을 모두 import합니다.
 import '../../../core/models/user_model.dart';
@@ -139,12 +143,21 @@ class _ProductCardState extends State<ProductCard>
     final product = widget.product;
     final String registeredAt = _formatTimestamp(context, product.createdAt);
 
+    void goToDetail() {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => ProductDetailScreen(product: product),
+      ));
+    }
+
+    final adminFilter = context.watch<LocationProvider>().adminFilter;
+    final displayAddress = AddressFormatter.dynamicAdministrativeAddress(
+      locationParts: product.locationParts,
+      adminFilter: adminFilter,
+      fallbackFullAddress: product.locationName,
+    );
+
     return InkWell(
-      onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => ProductDetailScreen(product: product),
-        ));
-      },
+      onTap: goToDetail,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -194,6 +207,8 @@ class _ProductCardState extends State<ProductCard>
                             storageId: product.id,
                             width: 100,
                             height: 100,
+                            // 리스트(카드)에서는 이미지 탭 시 갤러리 대신 상세로 이동
+                            onImageTap: goToDetail,
                           ),
                         ),
                       const SizedBox(width: 16.0),
@@ -225,9 +240,9 @@ class _ProductCardState extends State<ProductCard>
                             Text(
                               // Build location / distance / time parts
                               <String>[
-                                product.locationParts?['kel'] ??
-                                    product.locationParts?['kec'] ??
-                                    'postCard.locationNotSet'.tr(),
+                                displayAddress.isNotEmpty
+                                    ? displayAddress
+                                    : 'postCard.locationNotSet'.tr(),
                                 if (widget.distanceKm != null)
                                   'marketplace.distance'.tr(namedArgs: {
                                     'value':

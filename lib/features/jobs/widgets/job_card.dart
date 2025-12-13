@@ -33,8 +33,11 @@ import 'package:bling_app/features/jobs/models/job_model.dart';
 import 'package:bling_app/features/jobs/screens/job_detail_screen.dart'; // [추가]
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 // [추가] 숫자 포맷을 위해
 import 'package:bling_app/features/jobs/constants/job_categories.dart';
+import 'package:bling_app/core/utils/address_formatter.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 
 class JobCard extends StatelessWidget {
   final JobModel job;
@@ -44,6 +47,13 @@ class JobCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final NumberFormat currencyFormat =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+    final adminFilter = context.watch<LocationProvider>().adminFilter;
+    final displayAddress = AddressFormatter.dynamicAdministrativeAddress(
+      locationParts: job.locationParts,
+      adminFilter: adminFilter,
+      fallbackFullAddress: job.locationName,
+    );
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -92,7 +102,9 @@ class JobCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      job.locationName ?? 'jobs.card.noLocation'.tr(),
+                      displayAddress.isNotEmpty
+                          ? displayAddress
+                          : (job.locationName ?? 'jobs.card.noLocation'.tr()),
                       style: TextStyle(color: Colors.grey[700], fontSize: 13),
                     ),
                     const SizedBox(height: 6),

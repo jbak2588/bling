@@ -1053,7 +1053,8 @@
     "linkHidden": "링크 숨김 (안전 모드)",
     "contactHidden": "연락처 숨김 (안전 모드)",
     "mediaBlocked": "안전을 위해 24시간 동안 미디어 전송이 제한됩니다.",
-    "imageMessage": "사진"
+    "imageMessage": "사진",
+    "imageSendFailed": "이미지 전송 실패: {error}"
   },
   "jobs": {
     "setLocationPrompt": "구인글을 보려면 먼저 내 동네를 설정해주세요!",
@@ -2057,6 +2058,8 @@
       "fail": "수정에 실패했습니다: {error}"
     },
     "disclaimer": "블링은 온라인 광고/게시판 플랫폼으로, 거래 당사자가 아닙니다. 게시된 매물의 진위, 권리관계, 가격 및 조건에 대한 책임은 게시자에게 있으며, 사용자는 거래 전 관련 사실을 게시자 및 관계기관을 통해 직접 확인해야 합니다."
+    ,
+    "disclaimerTitle": "거래 책임 고지"
   },
   "lostAndFound": {
     "empty": "아직 등록된 분실/습득물이 없습니다.",

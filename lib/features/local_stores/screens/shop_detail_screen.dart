@@ -53,14 +53,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
+import 'package:provider/provider.dart';
 import 'package:bling_app/features/shared/widgets/app_bar_icon.dart';
 import 'package:bling_app/core/constants/app_links.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:bling_app/features/shared/widgets/mini_map_view.dart';
+import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
+import 'package:bling_app/core/utils/address_formatter.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 
 class ShopDetailScreen extends StatefulWidget {
   final ShopModel shop;
@@ -229,12 +231,14 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         GestureDetector(
           onTap: () {
             if (widget.embedded && widget.onClose != null) widget.onClose!();
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => FullScreenImageViewer(
-                imageUrls: images,
-                initialIndex: _currentImageIndex,
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ImageGalleryScreen(
+                  imageUrls: images,
+                  initialIndex: _currentImageIndex,
+                ),
               ),
-            ));
+            );
           },
           child: Container(
             height: 250,
@@ -311,6 +315,13 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         final shop = snapshot.data!;
         final isOwner = shop.ownerId == _currentUserId;
 
+        final adminFilter = context.watch<LocationProvider>().adminFilter;
+        final displayAddress = AddressFormatter.dynamicAdministrativeAddress(
+          locationParts: shop.locationParts,
+          adminFilter: adminFilter,
+          fallbackFullAddress: shop.locationName,
+        );
+
         final content = ListView(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 100.0),
           children: [
@@ -340,8 +351,13 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  _buildInfoRow(context, Icons.location_on_outlined,
-                      shop.locationName ?? 'localStores.noLocation'.tr()),
+                  _buildInfoRow(
+                    context,
+                    Icons.location_on_outlined,
+                    displayAddress.isNotEmpty
+                        ? displayAddress
+                        : (shop.locationName ?? 'localStores.noLocation'.tr()),
+                  ),
                   const SizedBox(height: 4),
                   _buildInfoRow(
                       context, Icons.watch_later_outlined, shop.openHours),
@@ -842,66 +858,3 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
     );
   }
 }
-
-// V V V --- [이식] 전체 화면 이미지 뷰어 (핀치 앤 줌 기능 포함) --- V V V
-class FullScreenImageViewer extends StatefulWidget {
-  final List<String> imageUrls;
-  final int initialIndex;
-
-  const FullScreenImageViewer({
-    super.key,
-    required this.imageUrls,
-    this.initialIndex = 0,
-  });
-
-  @override
-  State<FullScreenImageViewer> createState() => _FullScreenImageViewerState();
-}
-
-class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
-  late final PageController _pageController;
-  late int _currentIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: _currentIndex);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        title: Text('${_currentIndex + 1} / ${widget.imageUrls.length}'),
-        centerTitle: true,
-      ),
-      body: PhotoViewGallery.builder(
-        pageController: _pageController,
-        itemCount: widget.imageUrls.length,
-        builder: (context, index) {
-          return PhotoViewGalleryPageOptions(
-            imageProvider: NetworkImage(widget.imageUrls[index]),
-            minScale: PhotoViewComputedScale.contained,
-            maxScale: PhotoViewComputedScale.covered * 2,
-          );
-        },
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
-    );
-  }
-}
-// ^ ^ ^ --- 여기까지 이식 --- ^ ^ ^

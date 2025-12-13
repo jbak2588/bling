@@ -9,10 +9,12 @@ import 'package:bling_app/features/chat/data/chat_service.dart';
 import 'package:bling_app/features/chat/screens/chat_room_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // FutureBuilder용
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 // [작업 9] import 추가
 import 'package:bling_app/features/find_friends/screens/create_friend_post_screen.dart';
 // [작업 10] 주소 포맷터 추가
 import 'package:bling_app/core/utils/address_formatter.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 // [작업 10] 상세화면
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
 // [이미지] 친구 찾기 카드 내 프로필 미리보기 캐러셀
@@ -213,6 +215,13 @@ class FriendPostCard extends StatelessWidget {
     final bool isFull =
         post.currentParticipantIds.length >= post.maxParticipants;
 
+    final adminFilter = context.watch<LocationProvider>().adminFilter;
+    final displayAddress = AddressFormatter.dynamicAdministrativeAddress(
+      locationParts: post.locationParts,
+      adminFilter: adminFilter,
+      fallbackFullAddress: null,
+    );
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
@@ -251,7 +260,7 @@ class FriendPostCard extends StatelessWidget {
                             fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                       Text(
-                        "${timeago.format(post.createdAt.toDate())} · ${AddressFormatter.formatKelKabFromParts(post.locationParts).isNotEmpty ? AddressFormatter.formatKelKabFromParts(post.locationParts) : 'friendPost.unknownLocation'.tr()}",
+                        "${timeago.format(post.createdAt.toDate())} · ${displayAddress.isNotEmpty ? displayAddress : 'friendPost.unknownLocation'.tr()}",
                         style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       ),
                     ],
@@ -287,6 +296,8 @@ class FriendPostCard extends StatelessWidget {
                 storageId: 'friend_post_${post.id}_author',
                 height: 160,
                 width: double.infinity,
+                // 리스트(카드)에서는 이미지 탭 시 갤러리 대신 상세(프로필)로 이동
+                onImageTap: () => _navigateToProfile(context, post.authorId),
               ),
               const SizedBox(height: 12),
             ],

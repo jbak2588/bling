@@ -1053,7 +1053,8 @@
     "linkHidden": "Protection mode: link hidden",
     "contactHidden": "Protection mode: contact hidden",
     "mediaBlocked": "For safety, media sending is restricted for 24 hours.",
-    "imageMessage": "Image"
+    "imageMessage": "Image",
+    "imageSendFailed": "Failed to send image: {error}"
   },
   "jobs": {
     "setLocationPrompt": "Set your neighborhood to see job posts around you!",
@@ -2058,6 +2059,8 @@
       "fail": "Failed to update listing: {error}"
     },
     "disclaimer": "Bling is an online advertising/board platform and is not a real estate broker or agent. The truthfulness of listings, ownership/title status, price, and terms are the sole responsibility of the poster. Users must conduct their own checks and verify all information directly with the poster and relevant authorities before proceeding."
+    ,
+    "disclaimerTitle": "Transaction Notice"
   },
   "lostAndFound": {
     "empty": "No lost/found items yet.",

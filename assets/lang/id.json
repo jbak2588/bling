@@ -1052,7 +1052,8 @@
     "linkHidden": "Mode aman: tautan disembunyikan",
     "contactHidden": "Mode aman: kontak disembunyikan",
     "mediaBlocked": "Untuk keamanan, pengiriman media dibatasi selama 24 jam.",
-    "imageMessage": "Foto"
+    "imageMessage": "Foto",
+    "imageSendFailed": "Gagal mengirim gambar: {error}"
   },
   "jobs": {
     "setLocationPrompt": "Silakan atur lokasi Anda untuk melihat lowongan!",
@@ -2057,6 +2058,8 @@
       "fail": "Gagal memperbarui listing: {error}"
     },
     "disclaimer": "Bling adalah platform iklan/board online dan bukan pihak dalam transaksi. Kebenaran data, status hukum, harga, dan ketentuan pada listing merupakan tanggung jawab pengunggah. Pengguna wajib melakukan pemeriksaan dan verifikasi langsung dengan pengunggah serta pihak terkait sebelum bertransaksi."
+    ,
+    "disclaimerTitle": "Pemberitahuan Transaksi"
   },
   "lostAndFound": {
     "empty": "Belum ada barang hilang/temuan.",

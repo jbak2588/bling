@@ -26,8 +26,11 @@ import 'package:bling_app/features/lost_and_found/models/lost_item_model.dart';
 import 'package:bling_app/features/lost_and_found/screens/lost_item_detail_screen.dart'; // [추가]
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+import 'package:bling_app/core/utils/address_formatter.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 // ✅ [작업 44] 현상금 포맷을 위해 추가
 
 // ✅ StatelessWidget을 StatefulWidget으로 변경
@@ -58,6 +61,19 @@ class _LostItemCardState extends State<LostItemCard>
     final bool isLost = item.type == 'lost';
     final Color typeColor = isLost ? Colors.redAccent : Colors.green;
 
+    void goToDetail() {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => LostItemDetailScreen(item: item)),
+      );
+    }
+
+    final adminFilter = context.watch<LocationProvider>().adminFilter;
+    final displayAddress = AddressFormatter.dynamicAdministrativeAddress(
+      locationParts: item.locationParts,
+      adminFilter: adminFilter,
+      fallbackFullAddress: item.locationDescription,
+    );
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
@@ -71,12 +87,7 @@ class _LostItemCardState extends State<LostItemCard>
       child: Stack(
         children: [
           InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (_) => LostItemDetailScreen(item: item)),
-              );
-            },
+            onTap: goToDetail,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -97,6 +108,8 @@ class _LostItemCardState extends State<LostItemCard>
                                 storageId: item.id,
                                 width: 80,
                                 height: 80,
+                                // 리스트(카드)에서는 이미지 탭 시 갤러리 대신 상세로 이동
+                                onImageTap: goToDetail,
                               ),
                               // 오버레이: 해결된 게시물인 경우 이미지 위에 반투명 레이어와 텍스트 표시
                               if (item.isResolved)
@@ -181,7 +194,9 @@ class _LostItemCardState extends State<LostItemCard>
                             const SizedBox(height: 4),
                             Text(
                               'lostAndFound.card.location'.tr(namedArgs: {
-                                'location': item.locationDescription
+                                'location': displayAddress.isNotEmpty
+                                    ? displayAddress
+                                    : item.locationDescription
                               }),
                               style: TextStyle(color: Colors.grey[700]),
                               maxLines: 2,

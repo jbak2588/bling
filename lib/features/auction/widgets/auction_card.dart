@@ -15,7 +15,7 @@
 ///   - 실시간 입찰/채팅, 경매 상태 시각화, 신뢰등급/AI 검수 표시 강화, KPI/Analytics 이벤트 로깅, 광고/추천글 연계
 library;
 
-import 'dart:async';
+import 'dart:math' as math;
 import 'package:bling_app/features/auction/models/auction_model.dart';
 import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/auction/screens/auction_detail_screen.dart';
@@ -24,64 +24,72 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 // ✅ [하이퍼로컬] 1. 거리 계산 헬퍼와 UserModel import
-import 'package:bling_app/core/utils/location_helper.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
+import 'package:provider/provider.dart';
 // ✅ [신뢰] 1. AI 검증 배지 import
 import 'package:bling_app/features/marketplace/widgets/ai_verification_badge.dart';
 
 // [수정] StatelessWidget -> StatefulWidget으로 변경하여 Timer를 관리
-class AuctionCard extends StatefulWidget {
+class AuctionCard extends StatelessWidget {
   final AuctionModel auction;
-  final UserModel? userModel; // ✅ [하이퍼로컬] 2. userModel 추가
-  const AuctionCard(
-      {super.key,
-      required this.auction,
-      this.userModel}); // ✅ [하이퍼로컬] 2. 생성자 수정
+  final UserModel? userModel;
 
-  @override
-  State<AuctionCard> createState() => _AuctionCardState();
-}
+  const AuctionCard({super.key, required this.auction, this.userModel});
 
-class _AuctionCardState extends State<AuctionCard>
-    with AutomaticKeepAliveClientMixin {
-  // ✅ KeepAlive 추가
-  Timer? _timer;
-  Duration _timeLeft = Duration.zero;
-
-  @override
-  bool get wantKeepAlive => true; // ✅ 상태 유지
-
-  @override
-  void initState() {
-    super.initState();
-    _updateTimeLeft();
-    // 1초마다 남은 시간을 다시 계산하여 UI를 업데이트합니다.
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      _updateTimeLeft();
-    });
+  // [신규] 거리 계산 헬퍼
+  String? _calculateDistance(GeoPoint? userLoc, GeoPoint? itemLoc) {
+    if (userLoc == null || itemLoc == null) return null;
+    const double p = 0.017453292519943295;
+    final double a = 0.5 -
+        math.cos((itemLoc.latitude - userLoc.latitude) * p) / 2 +
+        math.cos(userLoc.latitude * p) *
+            math.cos(itemLoc.latitude * p) *
+            (1 - math.cos((itemLoc.longitude - userLoc.longitude) * p)) /
+            2;
+    final double km = 12742 * math.asin(math.sqrt(a));
+    return km < 1 ? '${(km * 1000).round()}m' : '${km.toStringAsFixed(1)}km';
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel(); // 위젯이 화면에서 사라질 때 타이머를 반드시 취소합니다.
-    super.dispose();
-  }
+  // [신규] 동적 주소 표시 로직 (Privacy)
+  String _getDynamicAddress(BuildContext context, AuctionModel auction) {
+    final provider = context.watch<LocationProvider>();
+    final filter = provider.adminFilter;
+    final parts = auction.locationParts;
 
-  void _updateTimeLeft() {
-    if (!mounted) return;
-    final now = DateTime.now();
-    final endTime = widget.auction.endAt.toDate();
-    final timeLeft = endTime.difference(now);
-    setState(() {
-      _timeLeft = timeLeft.isNegative ? Duration.zero : timeLeft;
-    });
-  }
-
-  // [추가] Duration을 "1일 2:30:15 남음" 형태의 문자열로 변환하는 함수
-  String _formatDuration(Duration d) {
-    if (d.inSeconds <= 0) {
-      return 'auctions.card.ended'.tr();
+    if (parts == null) {
+      return auction.location
+          .replaceAll(RegExp(r',?\s*Indonesia', caseSensitive: false), '')
+          .trim();
     }
+
+    final kel = parts['kel'];
+    final kec = parts['kec'];
+    final kab = parts['kab'];
+    final prov = parts['prov'];
+    final List<String> displayParts = [];
+
+    final bool hasProv = filter['prov'] != null;
+    final bool hasKab = filter['kab'] != null;
+    final bool hasKec = filter['kec'] != null;
+
+    if (kel != null && kel.isNotEmpty) displayParts.add('Kel. $kel');
+
+    if (!(hasProv && hasKab && hasKec)) {
+      if (kec != null && kec.isNotEmpty) displayParts.add('Kec. $kec');
+      if (!hasKab && !hasKec) {
+        if (kab != null && kab.isNotEmpty) displayParts.add(kab);
+      }
+      if (!hasProv && !hasKab && !hasKec) {
+        if (prov != null && prov.isNotEmpty) displayParts.add(prov);
+      }
+    }
+    return displayParts.isEmpty ? auction.location : displayParts.join(', ');
+  }
+
+  // Duration formatter (one-off, not live-updating)
+  String _formatDuration(Duration d) {
+    if (d.inSeconds <= 0) return 'auctions.card.ended'.tr();
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final days = d.inDays;
     final hours = twoDigits(d.inHours.remainder(24));
@@ -104,15 +112,25 @@ class _AuctionCardState extends State<AuctionCard>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // ✅ KeepAlive를 위해 추가
     final NumberFormat currencyFormat =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
-    // ✅ [하이퍼로컬] 3. 거리 계산
-    final String? distance = formatDistanceBetween(
-        widget.userModel?.geoPoint, widget.auction.geoPoint);
+    // [신규] 거리 및 주소 계산
+    final userPoint =
+        context.select<LocationProvider, GeoPoint?>((p) => p.user?.geoPoint);
+    final distance = _calculateDistance(userPoint, auction.geoPoint);
+    final displayAddress = _getDynamicAddress(context, auction);
 
-    final bool isEnded = _timeLeft.inSeconds <= 0;
+    final now = DateTime.now();
+    final Duration timeLeft = auction.endAt.toDate().difference(now);
+    final bool isEnded = timeLeft.inSeconds <= 0;
+
+    void goToDetail() {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+            builder: (_) => AuctionDetailScreen(auction: auction)),
+      );
+    }
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -121,26 +139,20 @@ class _AuctionCardState extends State<AuctionCard>
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              // ✅ [하이퍼로컬] 4. 상세 화면으로 userModel 전달
-              builder: (_) => AuctionDetailScreen(
-                  auction: widget.auction, userModel: widget.userModel),
-            ),
-          );
-        },
+        onTap: goToDetail,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Stack(
               children: [
                 // ✅ 기존 Image.network를 공용 ImageCarouselCard로 교체
-                if (widget.auction.images.isNotEmpty)
+                if (auction.images.isNotEmpty)
                   ImageCarouselCard(
-                    storageId: widget.auction.id,
-                    imageUrls: widget.auction.images,
+                    storageId: auction.id,
+                    imageUrls: auction.images,
                     height: 200,
+                    // 리스트(카드)에서는 이미지 탭 시 갤러리 대신 상세로 이동
+                    onImageTap: goToDetail,
                   )
                 else
                   Container(
@@ -171,12 +183,12 @@ class _AuctionCardState extends State<AuctionCard>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ✅ [신뢰] 2. AI 검증 배지 표시 (isAiVerified가 true일 때)
-                  if (widget.auction.isAiVerified) ...[
+                  if (auction.isAiVerified) ...[
                     const AiVerificationBadge(),
                     const SizedBox(height: 8),
                   ],
                   Text(
-                    widget.auction.title,
+                    auction.title,
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.bold),
                     maxLines: 1,
@@ -192,7 +204,9 @@ class _AuctionCardState extends State<AuctionCard>
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          widget.auction.location,
+                          displayAddress.isNotEmpty
+                              ? displayAddress
+                              : auction.location,
                           style: TextStyle(color: Colors.grey[700]),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -218,19 +232,19 @@ class _AuctionCardState extends State<AuctionCard>
                   if (isEnded) ...[
                     // --- 경매 종료 시 ---
                     _buildInfoRow('auctions.card.winningBid'.tr(),
-                        currencyFormat.format(widget.auction.currentBid),
+                        currencyFormat.format(auction.currentBid),
                         isPrice: true),
                     const SizedBox(height: 4),
-                    _buildWinnerInfo(widget.auction),
+                    _buildWinnerInfo(auction),
                   ] else ...[
                     // --- 경매 진행 중 ---
                     _buildInfoRow('auctions.card.currentBid'.tr(),
-                        currencyFormat.format(widget.auction.currentBid),
+                        currencyFormat.format(auction.currentBid),
                         isPrice: true),
                     const SizedBox(height: 4),
                     _buildInfoRow(
                       'auctions.card.endTime'.tr(),
-                      _formatDuration(_timeLeft), // 실시간 타이머 표시
+                      _formatDuration(timeLeft), // 실시간 타이머 표시
                       isTime: true,
                     ),
                   ]

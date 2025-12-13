@@ -24,11 +24,14 @@ import 'package:bling_app/core/models/user_model.dart';
 import 'package:bling_app/features/local_stores/screens/shop_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
 // [추가] 거리 계산을 위해 geolocator 임포트
 import 'package:geolocator/geolocator.dart';
 // [추가] GeoPoint 타입 사용을 위해 cloud_firestore 임포트
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bling_app/features/local_news/screens/tag_search_result_screen.dart';
+import 'package:bling_app/core/utils/address_formatter.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 
 class ShopCard extends StatelessWidget {
   final ShopModel shop;
@@ -58,6 +61,13 @@ class ShopCard extends StatelessWidget {
         distanceText = '${(distanceInMeters / 1000).toStringAsFixed(1)}km';
       }
     }
+
+    final adminFilter = context.watch<LocationProvider>().adminFilter;
+    final displayAddress = AddressFormatter.dynamicAdministrativeAddress(
+      locationParts: shop.locationParts,
+      adminFilter: adminFilter,
+      fallbackFullAddress: shop.locationName,
+    );
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -189,11 +199,13 @@ class ShopCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      shop.shopAddress ??
-                          shop.shopLocation?.shortLabel ??
-                          shop.shopLocation?.mainAddress ??
-                          shop.locationName ??
-                          'localStores.noLocation'.tr(),
+                      displayAddress.isNotEmpty
+                          ? displayAddress
+                          : (shop.shopAddress ??
+                              shop.shopLocation?.shortLabel ??
+                              shop.shopLocation?.mainAddress ??
+                              shop.locationName ??
+                              'localStores.noLocation'.tr()),
                       overflow: TextOverflow.ellipsis, // 긴 주소는 ... 처리
                       maxLines: 1,
                     ),

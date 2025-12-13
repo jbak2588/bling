@@ -449,8 +449,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         );
       }
     } catch (e) {
-      // 오류 무시 또는 로깅
       debugPrint('Image pick/send failed: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'chatRoom.imageSendFailed'.tr(namedArgs: {'error': e.toString()}),
+          ),
+        ),
+      );
     }
   }
 
@@ -606,13 +613,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     },
                   ),
                 ),
-                // ❌ 기존에 있던 메시지 입력창(Padding 위젯)을 여기서 삭제합니다.
+                // [수정] 입력창을 Body 내부로 이동하여 키보드 등장 시 자연스럽게 올라오도록 변경
+                SafeArea(
+                  top: false,
+                  child: _buildMessageInputField(),
+                ),
               ],
             ),
-      // ✅ bottomNavigationBar에 메시지 입력창을 배치합니다.
-      bottomNavigationBar: SafeArea(
-        child: _buildMessageInputField(),
-      ),
     );
   }
 

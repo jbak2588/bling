@@ -49,6 +49,8 @@ import 'package:bling_app/features/user_profile/screens/profile_setup_screen.dar
 import 'package:bling_app/core/constants/app_links.dart';
 import 'package:bling_app/core/utils/address_formatter.dart';
 import 'package:bling_app/features/shared/screens/image_gallery_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 // ChatService: 채팅방 생성/조회 일원화
 import 'package:bling_app/features/chat/data/chat_service.dart';
 // import 'package:bling_app/core/models/chat_room_model.dart';
@@ -83,10 +85,13 @@ class _FindFriendDetailScreenState extends State<FindFriendDetailScreen> {
 
   // [Task 16] 위치 정보 프라이버시 보호 헬퍼 (카드와 동일 로직 적용)
   String _getSafeLocationText(UserModel user) {
-    final formatted = AddressFormatter.formatKelKabFromParts(
-        user.locationParts); // kel/kab only
-    if (formatted.isNotEmpty) return formatted;
-    return '';
+    final adminFilter = context.watch<LocationProvider>().adminFilter;
+    final formatted = AddressFormatter.dynamicAdministrativeAddress(
+      locationParts: user.locationParts,
+      adminFilter: adminFilter,
+      fallbackFullAddress: user.locationName,
+    );
+    return formatted;
   }
 
   @override

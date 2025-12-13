@@ -60,7 +60,6 @@ import 'package:flutter/foundation.dart';
 import 'dart:io';
 // import 'dart:async';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:uuid/uuid.dart';
 // [Fix] StreamZip 제거 (단순화)
 // import 'package:async/async.dart';
 
@@ -633,10 +632,14 @@ class ChatService {
     if (myUid == null) return;
 
     // 1. 이미지를 Storage에 업로드
-    final String fileName = Uuid().v4();
+    final String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+
+    // [수정] 보안 규칙(match /{feature}/{userId}/...) 준수를 위해 경로 변경
+    // chat_images/{myUid}/{chatId}/{fileName}.jpg
     final Reference storageRef = _storage
         .ref()
         .child('chat_images')
+        .child(myUid)
         .child(chatId)
         .child('$fileName.jpg');
 

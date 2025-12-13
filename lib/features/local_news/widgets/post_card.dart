@@ -23,6 +23,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 
 // ✅ 새로 만든 프로필 스크린 import
 import 'package:bling_app/features/user_profile/screens/user_profile_screen.dart';
@@ -137,9 +139,12 @@ class _PostCardState extends State<PostCard>
 
   // ✅ _buildLocationInfo 함수 추가
   Widget _buildLocationInfo(BuildContext context, String? locationName) {
-    // 요청: locationParts의 전체 주소 대신 kel만 표시
-    final display =
-        AddressFormatter.formatKelKabFromParts(widget.post.locationParts);
+    final adminFilter = context.watch<LocationProvider>().adminFilter;
+    final display = AddressFormatter.dynamicAdministrativeAddress(
+      locationParts: widget.post.locationParts,
+      adminFilter: adminFilter,
+      fallbackFullAddress: locationName,
+    );
     final fallback = display.isNotEmpty
         ? display
         : (locationName ?? 'postCard.locationNotSet'.tr());
@@ -295,11 +300,9 @@ class _PostCardState extends State<PostCard>
         side: BorderSide(color: Colors.grey.shade200),
       ),
       child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => LocalNewsDetailScreen(post: post),
-          ));
-        },
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => LocalNewsDetailScreen(post: post)),
+        ),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -315,6 +318,11 @@ class _PostCardState extends State<PostCard>
                 ImageCarouselCard(
                   imageUrls: post.mediaUrl!,
                   storageId: post.id, // 캐러셀 고유키
+                  // 리스트(카드)에서는 이미지 탭 시 갤러리 대신 상세로 이동
+                  onImageTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (_) => LocalNewsDetailScreen(post: post)),
+                  ),
                 ),
               ],
               if (hasLocation) ...[

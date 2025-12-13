@@ -135,6 +135,7 @@ class AppInfoScreen extends StatelessWidget {
             'appInfo.features.$key.title'.tr(),
             'appInfo.features.$key.desc'.tr(),
             'appInfo.features.$key.guide'.tr(), // 상세 가이드 텍스트
+            key,
           );
         }),
 
@@ -160,7 +161,7 @@ class AppInfoScreen extends StatelessWidget {
 
   // [Task 29] 확장형 매뉴얼 아이템 빌더
   Widget _buildFeatureManualItem(BuildContext context, String svgPath,
-      String title, String desc, String guide) {
+      String title, String desc, String guide, String featureKey) {
     final theme = Theme.of(context);
 
     return Card(
@@ -221,6 +222,45 @@ class AppInfoScreen extends StatelessWidget {
                   style: TextStyle(
                       fontSize: 12, color: Colors.grey[800], height: 1.6),
                 ),
+                // [신규] 부동산 섹션인 경우 면책 조항(Disclaimer) 표시
+                if (featureKey == 'realEstate') ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.orange.shade200),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.info_outline_rounded,
+                                size: 16, color: Colors.orange.shade800),
+                            const SizedBox(width: 8),
+                            Text(
+                              'realEstate.disclaimerTitle'.tr(),
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade900),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'realEstate.disclaimer'.tr(),
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.orange.shade900,
+                              height: 1.4),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

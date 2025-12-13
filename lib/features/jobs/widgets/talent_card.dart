@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:bling_app/features/jobs/constants/job_categories.dart';
+import 'package:provider/provider.dart';
+import 'package:bling_app/core/utils/address_formatter.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 
 import 'package:bling_app/features/jobs/models/talent_model.dart';
 import 'package:bling_app/features/jobs/screens/talent_detail_screen.dart';
@@ -15,6 +18,13 @@ class TalentCard extends StatelessWidget {
     // [수정] JobCard와 동일한 포맷터 사용 (없으면 기본값 사용)
     final currencyFormat =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+    final adminFilter = context.watch<LocationProvider>().adminFilter;
+    final displayAddress = AddressFormatter.dynamicAdministrativeAddress(
+      locationParts: talent.locationParts,
+      adminFilter: adminFilter,
+      fallbackFullAddress: talent.locationName,
+    );
 
     // [대안] Card 위젯 사용하되 margin 제거 및 하단 구분선 추가
     return Card(
@@ -100,7 +110,10 @@ class TalentCard extends StatelessWidget {
                         const SizedBox(width: 2),
                         Expanded(
                           child: Text(
-                            talent.locationName ?? 'location.unknown'.tr(),
+                            displayAddress.isNotEmpty
+                                ? displayAddress
+                                : (talent.locationName ??
+                                    'location.unknown'.tr()),
                             style: const TextStyle(
                                 fontSize: 12, color: Colors.grey),
                             overflow: TextOverflow.ellipsis,

@@ -29,9 +29,11 @@ library;
 // 아래부터 실제 코드
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/models/user_model.dart';
-// address_formatter not used in this card after refactor
+import 'package:bling_app/core/utils/address_formatter.dart';
+import 'package:bling_app/features/location/providers/location_provider.dart';
 import 'package:bling_app/features/shared/widgets/trust_level_badge.dart';
 import 'package:bling_app/features/shared/widgets/image_carousel_card.dart';
 import 'package:bling_app/features/find_friends/screens/find_friend_detail_screen.dart';
@@ -121,17 +123,26 @@ class FindFriendCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final profileImages = _getProfileImages(user);
 
-    return InkWell(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => FindFriendDetailScreen(
-              user: user,
-              currentUserModel: currentUser,
-            ),
+    void goToDetail() {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => FindFriendDetailScreen(
+            user: user,
+            currentUserModel: currentUser,
           ),
-        );
-      },
+        ),
+      );
+    }
+
+    final adminFilter = context.watch<LocationProvider>().adminFilter;
+    final displayAddress = AddressFormatter.dynamicAdministrativeAddress(
+      locationParts: user.locationParts,
+      adminFilter: adminFilter,
+      fallbackFullAddress: user.locationName,
+    );
+
+    return InkWell(
+      onTap: goToDetail,
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Padding(
@@ -149,6 +160,8 @@ class FindFriendCard extends StatelessWidget {
                       storageId: 'findfriend_${user.uid}',
                       width: 90,
                       height: 90,
+                      // 리스트(카드)에서는 이미지 탭 시 갤러리 대신 상세로 이동
+                      onImageTap: goToDetail,
                     ),
                   ),
                 )
@@ -206,24 +219,23 @@ class FindFriendCard extends StatelessWidget {
                     // [C. 주소 + 관심사 이모지]
                     Row(
                       children: [
-                        // 주소: Kel. 단위만 표시
-                        if (user.locationParts != null &&
-                            user.locationParts!['kel'] != null)
+                        // 주소: adminFilter 기반 동적 주소(Privacy)
+                        if (displayAddress.isNotEmpty)
                           Text(
-                            "Kel. ${user.locationParts!['kel']}",
+                            displayAddress,
                             style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey[600],
                                 fontWeight: FontWeight.w500),
                           ),
 
-                        if ((user.locationParts?['kel'] != null) &&
+                        if (displayAddress.isNotEmpty &&
                             (user.interests?.isNotEmpty ?? false))
                           const SizedBox(width: 8),
 
                         // [Added] 거리 표시 (주소가 있을 때만 점 찍고 표시)
                         if (distanceKm != null) ...[
-                          if (user.locationParts?['kel'] != null)
+                          if (displayAddress.isNotEmpty)
                             Text(" • ",
                                 style: TextStyle(
                                     fontSize: 12, color: Colors.grey[400])),
